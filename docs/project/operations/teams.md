@@ -84,33 +84,29 @@ second.
 flowchart TB
     person(["Person"])
 
-    subgraph phone["the phone - the loop lives here"]
+    subgraph phone["on the phone"]
         clients["1 Clients"]
-        tasks["3 Tasks"]
         notes["9 Notifications"]
+        tasks["3 Tasks"]
+        recipes["5 Recipes (installed)"]
         decision["13 Decision"]
         family["4 Family"]
-        recipes["5 Recipes (installed)"]
         execution["2 Execution"]
         target["the target app"]
     end
 
-    subgraph net["the network - the only outside calls"]
-        model["model provider"]
-        registry["7 Delivery registry"]
-    end
+    model["model provider - the only call out"]
 
     person -->|asks| clients
     clients -->|request| tasks
     notes -->|something worth doing| tasks
-    tasks -->|what is next| decision
+    tasks -->|goal and progress| decision
     recipes -->|the step for this app| decision
     decision -->|is this allowed?| family
     family -->|yes, perform| execution
     decision -->|perform and check| execution
     execution -->|drives| target
-    decision -.->|one question| model
-    registry -.->|signed package| recipes
+    decision -.->|prompt and screen out, one action back| model
 ```
 
 Reading it: a task arrives either from the person through the client or from a
@@ -119,12 +115,12 @@ step that needs a yes goes through family first and runs only on a yes; a step
 that needs no yes runs straight through. A no leaves the task waiting and tells
 the person.
 
-The two bands are the deployment boundaries. Everything inside the phone band
-runs on the device: there is no HOPA server in this path. The network band has
-exactly two calls, both dotted: one model question from decision, and one signed
-package from delivery when recipes are installed. 5 is the brick Target-app
-knowledge; what sits on the phone is its installed copy, and the target app is
-another app on the same device.
+The dotted arrow is the only thing that leaves the device: decision sends the
+goal, the current screen and the recipes it is choosing between to the model, and
+gets one action back. There is no HOPA server in this path. Recipes arrive by
+install, which is the next picture. 5 is the brick Target-app knowledge; what
+sits on the phone is its installed copy, and the target app is another app on the
+same device.
 
 #### Where each box runs
 
@@ -150,6 +146,42 @@ Two clarifications this table makes:
 - **The model is the only network dependency.** The key is held by the client
   (Android Keystore, Windows DPAPI); no key ships in the repository or in the
   APK.
+
+#### What an action carries, and how execution knows the app
+
+A recipe step is data, and it names its own target, so nothing has to guess.
+
+| Field | Example | Why it is there |
+|---|---|---|
+| app | `com.example.bank` | execution opens or finds exactly this app |
+| screen | "Payments" | checked before acting, so a wrong screen stops the step |
+| control | selector, text "Internet" | found again at run time; a moved button fails loudly |
+| action | tap | tap, type, swipe, back, share |
+| check | the paid screen shows the amount | the postcondition that decides pass or fail |
+| timeout | 10 seconds | when to call it failed |
+
+Decision returns the step plus one sentence of why. Execution reads the app id
+from the step, brings that app to the front, performs the action through the
+accessibility API, waits for the check, and reports pass or fail with a
+screenshot and the node tree. The task (3) stores the goal and how far it got,
+never a selector, so fixing a recipe does not rewrite anybody's tasks.
+
+#### What decision does inside
+
+- **In:** the goal and progress from the task, the current screen, the last few
+  steps and what they returned, the household rules, and the recipes installed on
+  the device.
+- **The model question:** "given this screen, this goal and these candidate
+  steps, which one comes next?" The answer is one action, not a plan.
+- **The gate:** read quietly, ask before a sensitive action, always ask before a
+  payment.
+- **Out, four possibilities only:** perform this step, ask a person, wait, or
+  stop and say why.
+
+LAIX is the current implementation of that contract - its policies (when to ask,
+when to retry, when to escalate) and its decision record. The Python harness runs
+off-device on journals during the pilot; the shipped form is the Kotlin port in
+`packages/decision`, because Android and Windows have to agree.
 
 `services/bridge` and `services/relay` are not in this path: they exist so a
 phone and a PC can drive each other and share chat. `services/backend` is planned
@@ -525,6 +557,9 @@ to ask, and is the one to use when a pull request is stuck.
   (Michael + Sefi). The product path is the Kotlin port in `packages/decision`,
   so behaviour matches on Android and Windows; a Python runtime beside the loop
   would add a second behaviour to keep in step.
+- **Where it runs:** the decision contract and policies ship inside the client
+  (Kotlin port). The Python harness stays in research: it reads journals
+  off-device and is not a dependency of the APK or the MSI.
 - If LAIX is also a product of its own, it needs a named owner; otherwise it
   dissolves into HOPA.
 
