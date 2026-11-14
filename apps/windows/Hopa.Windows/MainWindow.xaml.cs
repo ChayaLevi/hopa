@@ -27,6 +27,9 @@ public partial class MainWindow : Window
     private readonly VoiceClient voice = new();
     private SpeechSynthesizer? speech;
     private System.Windows.Forms.NotifyIcon? tray;
+
+    [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
     private System.Windows.Forms.ToolStripItem? trayStop;
     private string lastAnswer = "";
     private SidecarClient? client;
@@ -62,9 +65,12 @@ public partial class MainWindow : Window
         StateChanged += (_, _) => MaximizeButton.Content = WindowState == WindowState.Maximized
             ? "\u2750"
             : "\u25A1";
-        ConversationList.ItemsSource = conversations;
+        var grouped = new System.Windows.Data.CollectionViewSource { Source = conversations };
+        grouped.GroupDescriptions.Add(new System.Windows.Data.PropertyGroupDescription("GroupLabel"));
+        ConversationList.ItemsSource = grouped.View;
         MessagesList.ItemsSource = messages;
         SetupTray();
+        SourceInitialized += (_, _) => RoundCorners();
         Loaded += (_, _) => RestoreWindowState();
         Closing += (_, _) => SaveWindowState();
         Closed += (_, _) =>
@@ -75,6 +81,14 @@ public partial class MainWindow : Window
             device.Dispose();
         };
         Loaded += async (_, _) => await ConnectAsync();
+    }
+
+    /// <summary>Win11 draws the rounded frame; Win10 ignores the attribute.</summary>
+    private void RoundCorners()
+    {
+        var handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        var round = 2;
+        DwmSetWindowAttribute(handle, 33, ref round, sizeof(int));
     }
 
     private void SetupTray()
@@ -214,6 +228,24 @@ public partial class MainWindow : Window
     }
 
     public void SaveShot(string path) => WindowShot.Save(this, path);
+
+    /// <summary>A real screen grab of the window, frame and shadow included.</summary>
+    public void FrameShot(string path)
+    {
+        Activate();
+        Thread.Sleep(700);
+        var png = device.CaptureWindow();
+        if (png == null)
+        {
+            File.WriteAllText(path + ".error", "no frame");
+        }
+        else
+        {
+            File.WriteAllBytes(path, png);
+        }
+
+        Application.Current.Shutdown();
+    }
 
     /// <summary>W6: a chat with real content, a long answer, an attachment and an error line.</summary>
     public void ShotChat(string directory)
@@ -962,6 +994,7 @@ public partial class MainWindow : Window
             lastAnswer = answer;
             CopyButton.IsEnabled = answer.Length > 0;
             SpeakButton.IsEnabled = answer.Length > 0;
+            AnswerActions.Visibility = Visibility.Visible;
             if (!IsActive)
             {
                 var preview = answer.Length > 140 ? answer[..140] + "..." : answer;
@@ -978,6 +1011,7 @@ public partial class MainWindow : Window
             if (steps is { Count: > 0 })
             {
                 Log($"chain: {(chainOk ? "ok" : "failed")}");
+                RailTitle.Text = "LAST RUN";
                 RailStatus.Text = chainOk ? "Succeeded" : "Failed";
                 RailFacts.Text = $"{steps.Count} steps";
                 RailDot.Fill = new SolidColorBrush(chainOk
@@ -987,6 +1021,7 @@ public partial class MainWindow : Window
             }
             else
             {
+                RailTitle.Text = "THIS ANSWER";
                 RailStatus.Text = "Answered";
                 RailFacts.Text = "no local record";
                 RailDot.Fill = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x5B));
@@ -1050,8 +1085,10 @@ public partial class MainWindow : Window
         var settings = new SettingsStore().Load();
         var live = settings.BridgeUrl.Length > 0;
         RailBridge.Text = live
-            ? "Bridge configured · every action asks first."
-            : "No bridge · this conversation only";
+            ? "Bridge connected · every action asks first."
+            : "No bridge · HOPA sees only this conversation.";
+        NoBridgeHint.Visibility = live ? Visibility.Collapsed : Visibility.Visible;
+        SubtitleText.Text = live ? "HOPA · Running on this laptop" : "Running on this laptop";
         RailBridgeDot.Fill = new SolidColorBrush(live
             ? Color.FromRgb(0x2E, 0x7D, 0x5B)
             : Color.FromRgb(0xB2, 0x6A, 0x00));
@@ -1089,6 +1126,12 @@ public partial class MainWindow : Window
             conversations.Insert(0, created);
         }
     }
+
+    private void Composer_TextChanged(object sender, TextChangedEventArgs e) =>
+        ComposerPlaceholder.Visibility = Composer.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    private void NoBridge_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
+        Settings_Click(this, new RoutedEventArgs());
 
     private void UpdateSearchPlaceholder() =>
         SearchPlaceholder.Visibility = SearchBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;

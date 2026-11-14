@@ -100,6 +100,13 @@ run with system scaling.
 - High contrast: detected (`SystemParameters.HighContrast`), but the palette is
   fixed, so high contrast does **not** yet change the look.
 
+## Window chrome
+
+A real screen grab (`--shot-frame`) shows the rounded frame, the hidden
+scrollbars and the Segoe UI Variable type. The dotted focus rectangle is gone
+system-wide (`SystemParameters.FocusVisualStyleKey` is overridden with an empty
+template) and buttons/rows draw the `#E8703A` ring instead.
+
 ## What closing W6 means
 
 1. One type scale and one radius scale, taken from the Harmony code.

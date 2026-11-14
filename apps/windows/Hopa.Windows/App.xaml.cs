@@ -84,6 +84,12 @@ public partial class App : Application
             return;
         }
 
+        if (args.Length >= 2 && args[0] == "--shot-frame")
+        {
+            window.Dispatcher.BeginInvoke(new Action(() => window.FrameShot(args[1])));
+            return;
+        }
+
         if (args.Length >= 2 && args[0] == "--w4-check")
         {
             window.Dispatcher.BeginInvoke(new Action(() => window.W4Check(args[1])));

@@ -3,6 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
+        <!-- W7: one ring, never the Windows dotted rectangle. -->
+        <Style x:Key="{x:Static SystemParameters.FocusVisualStyleKey}">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- W6: one hover, focus, pressed and disabled treatment for every button,
              in the Harmony tint rather than the Windows theme. -->
         <Style TargetType="Button">

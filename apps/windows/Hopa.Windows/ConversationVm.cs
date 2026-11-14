@@ -18,7 +18,42 @@ public sealed class ConversationVm : INotifyPropertyChanged
 
     public int MessageCount { get; set; }
 
-    public long UpdatedAt { get; set; }
+    private long updatedAt;
+
+    public long UpdatedAt
+    {
+        get => updatedAt;
+        set
+        {
+            if (updatedAt == value)
+            {
+                return;
+            }
+
+            updatedAt = value;
+            Raise(nameof(GroupLabel));
+        }
+    }
+
+    /// <summary>Today / Previous 7 days / Older, like the laptop sidebar.</summary>
+    public string GroupLabel
+    {
+        get
+        {
+            if (updatedAt <= 0)
+            {
+                return "Older";
+            }
+
+            var when = DateTimeOffset.FromUnixTimeMilliseconds(updatedAt).LocalDateTime;
+            if (when.Date == DateTime.Today)
+            {
+                return "Today";
+            }
+
+            return when >= DateTime.Today.AddDays(-7) ? "Previous 7 days" : "Older";
+        }
+    }
 
     public string Title
     {
