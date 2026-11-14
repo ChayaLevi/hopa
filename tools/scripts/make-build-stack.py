@@ -64,8 +64,8 @@ def main() -> None:
         f'<text x="{LEFT}" y="30" font-size="20" font-weight="600" fill="{INK}">'
         "How HOPA gets built: one ability at a time</text>",
         f'<text x="{LEFT}" y="54" font-size="12" fill="{MUTED}">'
-        "Each step is one team, one written agreement and one demonstration. "
-        "It stands on the step below.</text>",
+        "Each step is one owning team (sometimes with a partner), one written agreement "
+        "and one demonstration. It is added once the steps it depends on are stable.</text>",
     ]
 
     top = TOP + 46
@@ -96,7 +96,7 @@ def main() -> None:
         )
         out.append(
             f'<text x="{RIGHT - 18}" y="{y + LAYER_H / 2 + 4}" font-size="11" fill="{MUTED}" '
-            f'text-anchor="end">{"starting point" if number == "0" else "one team"}</text>'
+            f'text-anchor="end">{"starting point" if number == "0" else "owner team"}</text>'
         )
 
     # The build arrow on the left.
@@ -118,8 +118,8 @@ def main() -> None:
 
     out.append(
         f'<text x="{LEFT}" y="{height - 22}" font-size="11" fill="{MUTED}">'
-        "Every arrow between two layers is one written agreement between two teams. "
-        "A step starts when the agreement below it is stable.</text>"
+        "Every line between two layers is one written agreement between two teams. "
+        "A step starts when the agreements it depends on are stable.</text>"
     )
     out.append("</svg>")
 
@@ -130,4 +130,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
 
