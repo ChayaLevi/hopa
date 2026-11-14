@@ -72,25 +72,27 @@ parallelism; the next section shows how they merge when there are fewer people.
                  | what and when      | who  | who may approve    |
                  +---------+----------+      +--------------------+
                            | "how is it done?"
-                 +---------v------------------+
-                 | 5. TARGET-APP KNOWLEDGE    |
-                 +---+--------------------+---+
-        +------------v--+      +--v-------------+
-        | 6. FACTORY     |      | 7. DELIVERY    |
-        +---------------+      +----------------+
-                           | "perform this step"
-                 +---------v----------+
-                 | 2. EXECUTION       |
-                 +---------+----------+
-                           | verify
-                 +---------v----------+
-                 | 8. FARM            |
-                 +--------------------+
+                           v
+   +-------------+   +----------------------------+   +--------------+
+   | 6. FACTORY  |-->| 5. TARGET-APP KNOWLEDGE    |-->| 7. DELIVERY  |
+   +-------------+   +--------------+-------------+   +--------------+
+                                   |
+                                   | "perform this step"
+                         +---------v----------+
+                         | 2. EXECUTION       |
+                         +---------+----------+
+                                   | verify
+                         +---------v----------+
+                         | 8. FARM            |
+                         +--------------------+
 
- 9. NOTIFICATIONS ---> create tasks (3)
-10. PRODUCT LAB  <--- reads the journals of every team
-11. PLATFORM     ---  under everything: carries messages
-12. ARCHITECTURE ---  above everything: contracts and releases
+  Reading the arrows:
+    the request runs top to bottom
+    the knowledge loop runs left to right: factory -> knowledge -> delivery
+  9. NOTIFICATIONS ---> create tasks (3)
+ 10. PRODUCT LAB  <--- reads the journals of every team
+ 11. PLATFORM     ---  under everything: carries messages
+ 12. ARCHITECTURE ---  above everything: contracts and releases
 ```
 
 ### Three things that look alike
