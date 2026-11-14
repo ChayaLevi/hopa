@@ -33,27 +33,27 @@
 <text x="395" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="395" dy="0">Tasks</tspan>
 </text>
-<rect x="460" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="525" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="525" dy="0">router</tspan>
-<tspan x="525" dy="16">goal to apps</tspan>
+<rect x="500" y="180" width="110" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="555" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="555" dy="0">router</tspan>
+<tspan x="555" dy="16">goal to apps</tspan>
 </text>
-<rect x="630" y="180" width="140" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="700" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="700" dy="0">Decision</tspan>
-<tspan x="700" dy="16">rules: LAIX</tspan>
+<rect x="650" y="180" width="140" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="720" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="720" dy="0">Decision</tspan>
+<tspan x="720" dy="16">rules: LAIX</tspan>
 </text>
-<rect x="810" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="875" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="875" dy="0">Family rules</tspan>
+<rect x="830" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="895" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="895" dy="0">Family rules</tspan>
 </text>
-<rect x="970" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="1035" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="1035" dy="0">Execution</tspan>
+<rect x="990" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1055" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="1055" dy="0">Execution</tspan>
 </text>
-<rect x="1120" y="180" width="120" height="48" rx="6" fill="#FFFFFF" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="5 4"/>
-<text x="1180" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="1180" dy="0">target app</tspan>
+<rect x="1140" y="180" width="100" height="48" rx="6" fill="#FFFFFF" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="1190" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="1190" dy="0">target app</tspan>
 </text>
 <rect x="340" y="100" width="140" height="38" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="410" y="124" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -63,10 +63,10 @@
 <text x="710" y="121" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="710" dy="0">model provider (network)</tspan>
 </text>
-<rect x="450" y="280" width="150" height="48" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="525" y="301" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="525" dy="0">catalogue (installed)</tspan>
-<tspan x="525" dy="16">ids, aliases, cases</tspan>
+<rect x="480" y="280" width="140" height="48" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="550" y="301" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="550" dy="0">catalogue (installed)</tspan>
+<tspan x="550" dy="16">ids, aliases, cases</tspan>
 </text>
 <rect x="630" y="280" width="160" height="48" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="710" y="309" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -80,29 +80,35 @@
 <tspan x="309" dy="0">create task</tspan>
 </text>
 </g>
-<path d="M460,204 L478,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M460,204 L498,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="429.9" y="155" width="78.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="469" y="167" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="469" dy="0">goal, state</tspan>
+<rect x="439.9" y="155" width="78.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="479" y="167" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="479" dy="0">goal, state</tspan>
 </text>
 </g>
-<path d="M590,204 L628,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<path d="M770,204 L808,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M610,204 L648,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="765.4" y="183" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="789" y="195" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="789" dy="0">Action</tspan>
+<rect x="611.6" y="177" width="34.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="629" y="189" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="629" dy="0">apps</tspan>
 </text>
 </g>
-<path d="M940,204 L968,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M790,204 L828,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="933.5" y="183" width="41.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="954" y="195" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="954" dy="0">allow</tspan>
+<rect x="785.4" y="183" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="809" y="195" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="809" dy="0">Action</tspan>
 </text>
 </g>
-<path d="M1100,204 L1118,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M960,204 L988,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<g>
+<rect x="953.5" y="183" width="41.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="974" y="195" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="974" dy="0">allow</tspan>
+</text>
+</g>
+<path d="M1120,204 L1138,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <path d="M410,138 L410,178" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="389.5" y="147" width="41.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
@@ -110,18 +116,18 @@
 <tspan x="410" dy="0">event</tspan>
 </text>
 </g>
-<path d="M665,178 L665,136" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
-<path d="M705,136 L705,178" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
+<path d="M690,178 L690,136" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
+<path d="M730,136 L730,178" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
 <g>
-<rect x="603.4" y="146" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="627" y="158" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="627" dy="0">prompt</tspan>
+<rect x="644.4" y="146" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="668" y="158" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="668" dy="0">prompt</tspan>
 </text>
 </g>
 <g>
-<rect x="726.0" y="146" width="72.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="762" y="158" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="762" dy="0">one action</tspan>
+<rect x="750.0" y="146" width="72.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="786" y="158" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="786" dy="0">one action</tspan>
 </text>
 </g>
 <g>
@@ -130,11 +136,11 @@
 <tspan x="700" dy="0">only if no recipe step fits</tspan>
 </text>
 </g>
-<path d="M525,280 L525,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M550,280 L550,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="470.4" y="241" width="109.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="525" y="253" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="525" dy="0">which apps match</tspan>
+<rect x="495.4" y="241" width="109.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="550" y="253" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="550" dy="0">which apps match</tspan>
 </text>
 </g>
 <path d="M700,280 L700,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
@@ -200,7 +206,7 @@
 </text>
 </g>
 <path d="M115,602 L115,620 L315,620 L315,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
-<path d="M190,560 L205,560 L205,398 L525,398 L525,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M190,560 L205,560 L205,398 L550,398 L550,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="230.6" y="381" width="158.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="310" y="393" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
