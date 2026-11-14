@@ -212,15 +212,15 @@ arrow([(1080, 228), (1100, 228), (1100, 670), (430, 670), (430, 690)])
 label(1100, 600, "journals")
 
 rows = [
-    (712, ["rank failures by app version"], "failure list", "weekly",
+    (712, ["list what broke, per app version"], "the failure list", "weekly",
      "to Target-app knowledge"),
-    (772, ["score HOPA-Bench"], "score per release", "every release",
-     "to the release cut"),
-    (832, ["read pilot numbers"], "time, steps, repeats, waits", "monthly",
-     "to priorities"),
+    (772, ["run the 20-task test set"], "tasks passed", "every release",
+     "to the next release: ship or block"),
+    (832, ["read the pilot homes' runs"], "minutes per task, steps, repeats", "monthly",
+     "to the next plan"),
     (892, ["one research question", "e.g. recipes that survive updates"],
      "method + dataset + report", "about 6 months",
-     "to knowledge: produce, or park"),
+     "to Target-app knowledge: use or shelve"),
 ]
 for y, left, artifact, cadence, consumer in rows:
     box(60, y, 300, 48, left, "algorithms")

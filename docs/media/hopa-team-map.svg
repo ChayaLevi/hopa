@@ -272,13 +272,13 @@
 </g>
 <rect x="60" y="712" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="741" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="210" dy="0">rank failures by app version</tspan>
+<tspan x="210" dy="0">list what broke, per app version</tspan>
 </text>
 <path d="M360,736 L620,736" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="447.8" y="722" width="84.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<rect x="435.4" y="722" width="109.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="490" y="734" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="490" dy="0">failure list</tspan>
+<tspan x="490" dy="0">the failure list</tspan>
 </text>
 </g>
 <text x="490" y="749" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
@@ -289,37 +289,37 @@
 </text>
 <rect x="60" y="772" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="801" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="210" dy="0">score HOPA-Bench</tspan>
+<tspan x="210" dy="0">run the 20-task test set</tspan>
 </text>
 <path d="M360,796 L620,796" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="432.3" y="782" width="115.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<rect x="447.8" y="782" width="84.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="490" y="794" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="490" dy="0">score per release</tspan>
+<tspan x="490" dy="0">tasks passed</tspan>
 </text>
 </g>
 <text x="490" y="809" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="490" dy="0">every release</tspan>
 </text>
 <text x="634" y="800" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="634" dy="0">to the release cut</tspan>
+<tspan x="634" dy="0">to the next release: ship or block</tspan>
 </text>
 <rect x="60" y="832" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="861" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="210" dy="0">read pilot numbers</tspan>
+<tspan x="210" dy="0">read the pilot homes' runs</tspan>
 </text>
 <path d="M360,856 L620,856" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="401.3" y="842" width="177.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<rect x="385.8" y="842" width="208.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="490" y="854" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="490" dy="0">time, steps, repeats, waits</tspan>
+<tspan x="490" dy="0">minutes per task, steps, repeats</tspan>
 </text>
 </g>
 <text x="490" y="869" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="490" dy="0">monthly</tspan>
 </text>
 <text x="634" y="860" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="634" dy="0">to priorities</tspan>
+<tspan x="634" dy="0">to the next plan</tspan>
 </text>
 <rect x="60" y="892" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="913" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -337,7 +337,7 @@
 <tspan x="490" dy="0">about 6 months</tspan>
 </text>
 <text x="634" y="920" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="634" dy="0">to knowledge: produce, or park</tspan>
+<tspan x="634" dy="0">to Target-app knowledge: use or shelve</tspan>
 </text>
 <rect x="24" y="982" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="40" y="1010" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
