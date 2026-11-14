@@ -273,13 +273,36 @@ household can revoke an app at any time; a redaction failure counts as a leak.
 
 ### Four bricks that need a plain sentence
 
-**7 Delivery. Signed package of what?** Of recipes: for one target app, the
-steps, the selectors, the check that proves the step worked, and the app build it
-was tested against - in one file with a signature. The phone refuses an unsigned
-or expired package. The work is the format, the signature check in the client,
-the registry, canary rollout to a few devices, and rollback in one command.
-Three to four weeks for the first version. Without 7, a recipe stays in the
-factory and nothing reaches a phone safely.
+**7 Delivery. Delivering what, to whom?** Recipes, to phones. Not the APK: app
+builds go through CI and the release job. This brick moves the instructions for
+one target app from the factory to the devices that hold that app.
+
+A package is one file per target app, containing:
+
+| Part | Contents |
+|---|---|
+| app identity | package id and the app versions it was built and tested against |
+| recipes | for each intent: the steps, selectors, actions, checks and timeouts |
+| policy hints | which steps count as sensitive, and which as payment |
+| contract version | the schema the client must understand, so an old client refuses instead of misreading |
+| metadata | author, date, minimum client version, expiry |
+| signature | a hash of everything above, signed with the recipe key; the client ships only the public half |
+
+The **registry** is the index of those packages: which versions exist for each
+app, which one is in canary, which is rolled back. A client asks by app id and
+its app version, receives a manifest, checks the signature, the contract version,
+the app version range and the expiry, and only then writes the recipes into its
+local store. An unsigned, expired or mismatched package is refused where it
+arrives, not at the first tap.
+
+The work is the format, the signature check in the client, the registry, canary
+to a few devices, and rollback in one command. Three to four weeks for the first
+version.
+
+Today nothing is delivered this way: recipes are compiled into each client from
+`contracts/catalog` at build time (ADR-0018), which is why an app update
+currently needs a new build. 7 starts the day a recipe has to change without one.
+Without 7, a recipe stays in the factory and costs a release to reach a phone.
 
 **8 Farm. Is it just logging for the lab?** No. It answers one question the other
 bricks cannot: *does this recipe still work on version X of the app?* It owns the
