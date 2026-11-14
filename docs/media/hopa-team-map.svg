@@ -1,9 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1010" viewBox="0 0 1280 1010" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1100" viewBox="0 0 1280 1100" font-family="Segoe UI, Arial, sans-serif">
 <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8C8579"/></marker><marker id="tail" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M10,0 L0,5 L10,10 z" fill="#8C8579"/></marker></defs>
-<rect x="0" y="0" width="1280" height="1010" rx="0" fill="#F7F4EE" stroke="none" stroke-width="1.2"/>
-<rect x="24" y="16" width="1232" height="30" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
+<rect x="0" y="0" width="1280" height="1100" rx="0" fill="#F7F4EE" stroke="none" stroke-width="1.2"/>
+<rect x="24" y="8" width="1232" height="44" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="40" y="36" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="40" dy="0">12 Architecture and contracts - contracts, CI, release cut, signing - applies to every box below</tspan>
+<tspan x="40" dy="0">12 Architecture and contracts -</tspan>
+</text>
+<rect x="320" y="16" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="470" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="470" dy="0">review every contract change</tspan>
+</text>
+<rect x="638" y="16" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="788" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="788" dy="0">keep both CI pipelines green</tspan>
+</text>
+<rect x="956" y="16" width="296" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1104" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="1104" dy="0">cut and sign each release</tspan>
 </text>
 <rect x="24" y="60" width="1232" height="330" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
 <text x="40" y="82" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
@@ -75,7 +87,6 @@
 <tspan x="469" dy="0">goal, state</tspan>
 </text>
 </g>
-<path d="M610,204 L628,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <path d="M770,204 L808,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="765.4" y="183" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
@@ -101,15 +112,21 @@
 <path d="M695,136 L695,178" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
 <path d="M725,178 L725,136" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
 <g>
-<rect x="639.4" y="139" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="663" y="151" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="663" dy="0">prompt</tspan>
+<rect x="636.4" y="139" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="660" y="151" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="660" dy="0">prompt</tspan>
 </text>
 </g>
 <g>
 <rect x="742.2" y="159" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="772" y="171" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="772" dy="0">Decision</tspan>
+</text>
+</g>
+<g>
+<rect x="611.3" y="75" width="177.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="700" y="87" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="700" dy="0">only if no recipe step fits</tspan>
 </text>
 </g>
 <path d="M420,280 L420,246 L545,246 L545,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
@@ -121,8 +138,8 @@
 </g>
 <path d="M700,280 L700,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="679.5" y="239" width="41.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="700" y="251" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<rect x="679.5" y="241" width="41.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="700" y="253" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="700" dy="0">steps</tspan>
 </text>
 </g>
@@ -140,10 +157,6 @@
 <tspan x="480" dy="0">ask, answer</tspan>
 </text>
 </g>
-<rect x="24" y="822" width="1232" height="28" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="40" y="841" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="40" dy="0">11 Platform and services - pairing, tunnel and protocol between devices; the model call does not use it</tspan>
-</text>
 <rect x="24" y="404" width="1232" height="232" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
 <text x="40" y="426" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
 <tspan x="40" dy="0">BUILD AND DELIVERY - days - no person involved</tspan>
@@ -206,61 +219,101 @@
 <tspan x="856" dy="0">installs, signature checked</tspan>
 </text>
 </g>
-<rect x="24" y="662" width="1232" height="148" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
-<text x="40" y="684" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
+<rect x="24" y="646" width="1232" height="254" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="40" y="668" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
 <tspan x="40" dy="0">LEARNING - weeks - read in batches, change plans</tspan>
 </text>
-<rect x="540" y="700" width="150" height="60" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="615" y="735" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="615" dy="0">10 Product lab</tspan>
+<text x="40" y="686" font-size="13" fill="#1C1B18" font-weight="600" text-anchor="start">
+<tspan x="40" dy="0">10 Product lab</tspan>
 </text>
-<text x="720" y="722" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="720" dy="0">bench score -&gt; release cut: ships a release or blocks it</tspan>
+<rect x="40" y="696" width="690" height="188" rx="10" fill="#FBF7EE" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="150" y="706" width="300" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="300" y="733" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="300" dy="0">ingest run records</tspan>
 </text>
-<text x="720" y="744" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="720" dy="0">pilot numbers -&gt; priorities: what the next weeks are spent on</tspan>
+<rect x="60" y="776" width="190" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="155" y="803" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="155" dy="0">rank failures</tspan>
 </text>
-<path d="M605,540 L605,698" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<rect x="310" y="776" width="190" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="405" y="803" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="405" dy="0">read pilot numbers</tspan>
+</text>
+<rect x="520" y="776" width="190" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="615" y="803" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="615" dy="0">score HOPA-Bench</tspan>
+</text>
+<path d="M200,750 L155,774" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M320,750 L405,774" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M440,750 L615,774" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M605,540 L605,690 L390,690 L390,704" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="590.2" y="609" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="620" y="621" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="620" dy="0">journals</tspan>
 </text>
 </g>
-<path d="M1080,228 L1100,228 L1100,680 L692,680 L692,698" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M1080,228 L1100,228 L1100,690 L350,690 L350,704" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="1070.2" y="609" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="1100" y="621" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<rect x="1070.2" y="589" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="1100" y="601" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="1100" dy="0">journals</tspan>
 </text>
 </g>
-<path d="M540,730 L300,730 L300,508 L318,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<g transform="rotate(-90 288 610)">
-<rect x="245.8" y="599" width="84.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="288" y="611" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="288" dy="0">failure list</tspan>
+<path d="M60,798 L34,798 L34,460 L340,460 L340,474" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<g>
+<rect x="137.8" y="439" width="84.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="180" y="451" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="180" dy="0">failure list</tspan>
 </text>
 </g>
-<text x="24" y="878" font-size="12" fill="#6B665C">Box colour is the owning team</text>
-<rect x="24" y="892" width="16" height="16" rx="3" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="48" y="904" font-size="12" fill="#1C1B18">Clients</text>
-<rect x="24" y="920" width="16" height="16" rx="3" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="48" y="932" font-size="12" fill="#1C1B18">Platform and services</text>
-<rect x="452" y="892" width="16" height="16" rx="3" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="476" y="904" font-size="12" fill="#1C1B18">Target-app knowledge</text>
-<rect x="452" y="920" width="16" height="16" rx="3" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="476" y="932" font-size="12" fill="#1C1B18">Algorithms and measurement</text>
-<rect x="880" y="892" width="16" height="16" rx="3" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="904" y="904" font-size="12" fill="#1C1B18">Integration and quality</text>
-<rect x="880" y="920" width="16" height="16" rx="3" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="904" y="932" font-size="12" fill="#1C1B18">Architecture and contracts</text>
-<text x="24" y="960" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
+<path d="M710,798 L760,798" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<text x="768" y="795" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<tspan x="768" dy="0">release cut</tspan>
+</text>
+<text x="768" y="813" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
+<tspan x="768" dy="0">ships or blocks a release</tspan>
+</text>
+<path d="M405,820 L405,846 L760,846" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<text x="768" y="843" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<tspan x="768" dy="0">priorities</tspan>
+</text>
+<text x="768" y="861" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
+<tspan x="768" dy="0">what the next weeks are spent on</tspan>
+</text>
+<rect x="24" y="912" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="40" y="940" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<tspan x="40" dy="0">11 Platform and services -</tspan>
+</text>
+<rect x="320" y="920" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="470" y="939" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="470" dy="0">pair a phone with a PC</tspan>
+</text>
+<rect x="638" y="920" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="788" y="939" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="788" dy="0">tunnel, token rotation</tspan>
+</text>
+<rect x="956" y="920" width="296" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1104" y="939" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="1104" dy="0">wire protocol between devices</tspan>
+</text>
+<text x="24" y="994" font-size="12" fill="#6B665C">Box colour is the owning team</text>
+<rect x="24" y="1008" width="16" height="16" rx="3" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="48" y="1020" font-size="12" fill="#1C1B18">Clients</text>
+<rect x="24" y="1036" width="16" height="16" rx="3" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="48" y="1048" font-size="12" fill="#1C1B18">Platform and services</text>
+<rect x="452" y="1008" width="16" height="16" rx="3" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="476" y="1020" font-size="12" fill="#1C1B18">Target-app knowledge</text>
+<rect x="452" y="1036" width="16" height="16" rx="3" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="476" y="1048" font-size="12" fill="#1C1B18">Algorithms and measurement</text>
+<rect x="880" y="1008" width="16" height="16" rx="3" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="904" y="1020" font-size="12" fill="#1C1B18">Integration and quality</text>
+<rect x="880" y="1036" width="16" height="16" rx="3" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="904" y="1048" font-size="12" fill="#1C1B18">Architecture and contracts</text>
+<text x="24" y="1074" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
 <tspan x="24" dy="0">13 Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider.</tspan>
 </text>
-<text x="24" y="982" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="24" dy="0">Dashed arrow: feedback, a network call, or a question to the person. Every other arrow is an artifact handed over.</tspan>
-</text>
-<text x="24" y="1004" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="24" dy="0">White boxes are not bricks: the person, the model provider and the app HOPA operates.</tspan>
+<text x="24" y="1096" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
+<tspan x="24" dy="0">A step covered by a recipe runs without a model call; the call is the fallback for everything else.</tspan>
 </text>
 </svg>
