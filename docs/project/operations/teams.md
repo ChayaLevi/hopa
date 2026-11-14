@@ -309,13 +309,36 @@ lab study.
 The numbers come from run records in `packages/data`: no screen content, no
 message text.
 
+Two outputs leave the flow instead of feeding it:
+
+- **The bench score goes to the release cut** - the version that ships, with its
+  number, notes and signature. 12 owns the cut; a score that dropped blocks it
+  until someone explains why.
+- **Pilot numbers go to priorities** - the order of the next weeks' work for
+  knowledge and the farm, that is, which target apps and which failures are
+  picked up first.
+
+Neither is drawn as a box on the map, because both are decisions people take,
+not components that run.
+
 It is not QA: QA runs the release, the lab measures it. It is not product: it
 proposes what to fix first, and the owning team decides.
 
-**The two layers.** 11 Platform and 12 Architecture are not phases on any
-clock, so they are the strips above and below the bands on the map: platform
-carries every arrow that leaves a device, architecture sets the contracts, CI,
-release and signing rules every box follows.
+#### What 11 and 12 actually do
+
+**11 Platform and services** builds and runs the transport: pairing a phone with
+a PC, the tunnel, the wire protocol, token rotation. It is a strip rather than a
+box on the request path because a phone-only request never touches it; it is
+used when a second device is involved - a PC driving the phone, chat syncing, a
+task resuming elsewhere. Folders: `services/bridge`, `services/relay`,
+`services/wire`, `services/backend` when the hosted mode starts.
+
+**12 Architecture and contracts** ships no feature. Its week is: keep both
+client pipelines green, review and merge every contract change, cut and sign a
+release, check signing keys and manifest permissions, and sit in a seam review
+whenever two teams change a contract at once. Folders: `contracts/`,
+`.github/workflows`, the release checklist. A shared role with a veto, because
+the alternative is two teams editing the same contract in parallel.
 
 ### Notifications from target apps
 
@@ -382,9 +405,11 @@ Without 7, a recipe stays in the factory and costs a release to reach a phone.
 
 **8 Farm** answers what no other brick can: does this recipe still work on
 version X of the app? It owns the device matrix (emulator, Windows machine, one
-real phone), the go/no-go that delivery waits for, and the failure list that
-becomes next week's work. Journals also feed the lab, which is a side effect
-rather than the job. Six to eight weeks, then continuous.
+real phone) and the pass that delivery waits for, and it produces the failure
+list that becomes next week's work. Delivery never receives a failed version:
+there is no "no" message to 7, because a version that fails simply stays on the
+knowledge side and its failures go back to 5. Journals also feed the lab, which
+is a side effect rather than the job. Six to eight weeks, then continuous.
 
 **12 Architecture** has no place in the request path because it is not a step.
 It is the layer every box follows: shared contracts, CI, the release cut, signing

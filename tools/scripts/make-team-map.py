@@ -118,7 +118,7 @@ text(100, 209, ["Person"], size=13)
 box(160, 180, 130, 48, ["1 Clients"], "clients")
 box(330, 180, 130, 48, ["3 Tasks"], "platform")
 box(480, 180, 130, 48, ["router", "goal to apps"], "clients")
-box(630, 180, 140, 48, ["13 Decision", "policy: LAIX"], "algorithms")
+box(630, 180, 140, 48, ["13 Decision", "rules: LAIX"], "algorithms")
 box(810, 180, 130, 48, ["4 Family rules"], "clients")
 box(970, 180, 130, 48, ["2 Execution"], "clients")
 box(1120, 180, 120, 48, ["target app"], "external", dashed=True)
@@ -143,11 +143,13 @@ arrow([(1100, 204), (1118, 204)])
 arrow([(410, 138), (410, 178)])
 label(410, 158, "event")
 
-arrow([(705, 136), (705, 178)], dashed=True, tail=True)
-label(775, 158, "prompt / Decision")
+arrow([(695, 136), (695, 178)], dashed=True)
+arrow([(725, 178), (725, 136)], dashed=True)
+label(663, 150, "prompt")
+label(772, 170, "Decision")
 
-arrow([(545, 280), (545, 246), (545, 230)])
-label(600, 256, "apps, aliases, cases")
+arrow([(420, 280), (420, 246), (545, 246), (545, 230)])
+label(480, 252, "apps, aliases, cases")
 arrow([(700, 280), (700, 230)])
 label(700, 250, "steps")
 
@@ -159,7 +161,7 @@ label(480, 352, "ask, answer")
 
 # 11 Platform: a bracket under every band, because every cross-device arrow uses it.
 rect(24, 822, 1232, 28, TEAM["platform"][0])
-text(40, 841, ["11 Platform and services - every arrow that leaves a device travels over this layer"],
+text(40, 841, ["11 Platform and services - pairing, tunnel and protocol between devices; the model call does not use it"],
      size=12, anchor="start")
 
 # --- Band B: the build ------------------------------------------------------
@@ -177,7 +179,7 @@ label(494, 498, "version to test")
 arrow([(560, 540), (560, 570), (400, 570), (400, 540)], dashed=True)
 label(480, 580, "failures")
 arrow([(670, 508), (758, 508)])
-label(714, 498, "go or no-go")
+label(714, 498, "pass")
 arrow([(385, 478), (385, 452), (825, 452), (825, 476)])
 label(600, 442, "package")
 
@@ -188,17 +190,14 @@ label(856, 296, "installs, signature checked")
 band(24, 662, 1232, 148, "LEARNING - weeks - read in batches, change plans")
 
 box(540, 700, 150, 60, ["10 Product lab"], "algorithms")
-box(900, 700, 130, 60, ["release cut"], "external")
-box(1060, 700, 140, 60, ["priorities"], "external")
+text(720, 722, ["bench score -> release cut: ships a release or blocks it"], size=12, colour=MUTED, anchor="start")
+text(720, 744, ["pilot numbers -> priorities: what the next weeks are spent on"], size=12, colour=MUTED, anchor="start")
 
 arrow([(605, 540), (605, 698)])
 label(620, 620, "journals")
 arrow([(1080, 228), (1100, 228), (1100, 680), (692, 680), (692, 698)])
 label(1100, 620, "journals")
-arrow([(690, 715), (898, 715)])
-label(795, 705, "bench score")
-arrow([(615, 760), (615, 790), (1130, 790), (1130, 762)])
-label(860, 784, "pilot numbers")
+
 arrow([(540, 730), (300, 730), (300, 508), (318, 508)])
 label(288, 610, "failure list", rotate=-90)
 
@@ -222,7 +221,7 @@ text(24, 960, ["13 Decision holds the LAIX policy and its record. The client, no
      size=12, colour=MUTED, anchor="start")
 text(24, 982, ["Dashed arrow: feedback, a network call, or a question to the person. Every other arrow is an artifact handed over."],
      size=12, colour=MUTED, anchor="start")
-text(24, 1004, ["White boxes are not bricks: the person, the model provider, the app HOPA operates, and the two planning decisions the lab feeds."],
+text(24, 1004, ["White boxes are not bricks: the person, the model provider and the app HOPA operates."],
      size=12, colour=MUTED, anchor="start")
 
 add("</svg>")
