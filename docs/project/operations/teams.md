@@ -78,49 +78,49 @@ Numbers match the brick table above. The same brick can appear in more than one
 picture: 1 Clients renders the screen in the first, and installs packages in the
 second.
 
-**Same clock: the request.** A person asks; seconds later something happened.
+**Same clock: the request.** The loop repeats until the task closes.
 
 ```mermaid
 flowchart TB
     person(["Person"])
+    observe["observe - 2 Execution"]
+    decide["decide - 13 Decision"]
+    gate["gate - 4 Family rules"]
+    act["act - 2 Execution"]
+    verify["verify - 2 Execution"]
 
-    subgraph phone["on the phone"]
-        clients["1 Clients"]
-        notes["9 Notifications"]
-        tasks["3 Tasks"]
-        recipes["5 Recipes (installed)"]
-        decision["13 Decision"]
-        family["4 Family"]
-        execution["2 Execution"]
-        target["the target app"]
-    end
+    person -->|goal| client["1 Clients"]
+    client -->|Task| task["3 Tasks"]
+    task -->|goal, history| decide
+    observe -->|Observation| decide
+    decide -->|Action| gate
+    gate -->|allow| act
+    act -->|executed| verify
+    verify -->|next Observation| observe
+    decide -->|done| close["close - 3 Tasks"]
+    gate -->|ask| user["1 Clients shows the question"]
+    user -->|answer| decide
 
-    model["model provider - the only call out"]
-
-    person -->|asks| clients
-    clients -->|request| tasks
-    notes -->|something worth doing| tasks
-    tasks -->|goal and progress| decision
-    recipes -->|the step for this app| decision
-    decision -->|is this allowed?| family
-    family -->|yes, perform| execution
-    decision -->|perform and check| execution
-    execution -->|drives| target
-    decision -.->|prompt and screen out, one action back| model
+    model["model provider"]
+    decide -->|prompt| model
+    model -->|Decision| decide
 ```
 
-Reading it: a task arrives either from the person through the client or from a
-notification. Decision picks one step from what knowledge knows about the app. A
-step that needs a yes goes through family first and runs only on a yes; a step
-that needs no yes runs straight through. A no leaves the task waiting and tells
-the person.
+One iteration, in order:
 
-The dotted arrow is the only thing that leaves the device: decision sends the
-goal, the current screen and the recipes it is choosing between to the model, and
-gets one action back. There is no HOPA server in this path. Recipes arrive by
-install, which is the next picture. 5 is the brick Target-app knowledge; what
-sits on the phone is its installed copy, and the target app is another app on the
-same device.
+| # | Stage | Runs in | Takes | Produces |
+|---|---|---|---|---|
+| 0 | intake: a person or a notification | 1 Clients, 9 Notifications | the goal text | a task in 3 |
+| 1 | observe | 2 Execution | the current screen | `Observation`: nodes, refs, hash |
+| 2 | decide | 13 Decision | goal, history, observation, catalogue, recipes, policy | `Decision` |
+| 3 | gate | 4 Family rules | the action kind and the member | allow, ask, deny |
+| 4 | act | 2 Execution | one `Action` | executed, or failed |
+| 5 | verify | 2 Execution | the step's check | a new `Observation`, pass or fail |
+| 6 | close | 3 Tasks | `done: true` | a closed task and a run record |
+
+Steps 1-5 repeat; one request is normally three to ten iterations. Deny leaves
+the task waiting; ask goes to the person through the client; `ui.wait` is a
+single iteration that only looks again.
 
 #### Where each box runs
 
@@ -147,41 +147,80 @@ Two clarifications this table makes:
   (Android Keystore, Windows DPAPI); no key ships in the repository or in the
   APK.
 
-#### What an action carries, and how execution knows the app
+#### How a task finds its app
 
-A recipe step is data, and it names its own target, so nothing has to guess.
+A task stores the goal and the progress, never an app id:
 
-| Field | Example | Why it is there |
+```
+Task { goal: "pay the internet bill", state: running, step: 3 of 6 }
+```
+
+The app is resolved at decision time, on the phone, from data already there:
+
+| Input | Where | What it contributes |
 |---|---|---|
-| app | `com.example.bank` | execution opens or finds exactly this app |
-| screen | "Payments" | checked before acting, so a wrong screen stops the step |
-| control | selector, text "Internet" | found again at run time; a moved button fails loudly |
-| action | tap | tap, type, swipe, back, share |
-| check | the paid screen shows the amount | the postcondition that decides pass or fail |
-| timeout | 10 seconds | when to call it failed |
+| catalogue | `contracts/catalog/catalog.v1.json` | app ids, names, aliases, purposes, actions, per-platform launch details |
+| routing cases | `contracts/fixtures/routing.json` | lexical cases that pin "internet bill" to the right app |
+| recipes | installed package (brick 5) | candidate steps and the app each step targets |
+| the chosen action | `Action` | `ui.launch` and `ui.stop` require `app`; the executor refuses without it |
 
-Decision returns the step plus one sentence of why. Execution reads the app id
-from the step, brings that app to the front, performs the action through the
-accessibility API, waits for the check, and reports pass or fail with a
-screenshot and the node tree. The task (3) stores the goal and how far it got,
-never a selector, so fixing a recipe does not rewrite anybody's tasks.
+So the goal stays a sentence, the router proposes candidate apps, decision picks
+one, and the action names the package. Execution then launches exactly that
+package. Nothing is guessed in the UI layer and no network call is needed to
+identify an app.
 
-#### What decision does inside
+#### How execution is told what to do
 
-- **In:** the goal and progress from the task, the current screen, the last few
-  steps and what they returned, the household rules, and the recipes installed on
-  the device.
-- **The model question:** "given this screen, this goal and these candidate
-  steps, which one comes next?" The answer is one action, not a plan.
-- **The gate:** read quietly, ask before a sensitive action, always ask before a
-  payment.
-- **Out, four possibilities only:** perform this step, ask a person, wait, or
-  stop and say why.
+Decision emits an `Action` (`contracts/schemas/action.schema.json`):
 
-LAIX is the current implementation of that contract - its policies (when to ask,
-when to retry, when to escalate) and its decision record. The Python harness runs
-off-device on journals during the pilot; the shipped form is the Kotlin port in
-`packages/decision`, because Android and Windows have to agree.
+| Field | Required for | Meaning |
+|---|---|---|
+| `kind` | always | `ui.tap`, `ui.type`, `ui.launch`, `ui.swipe`, `web.navigate`, `system.share`, `payment.pay`, and the rest of the enum |
+| `timeoutMs` | always | when to give up on this action |
+| `ref` | `ui.tap`, `ui.doubleTap`, `ui.longPress` | node reference from the last observation; `x`/`y` is the alternative |
+| `text` | `ui.type`, `system.share`, `system.call`, `system.sendMessage`, `system.delete`, `sandbox.run` | the text to enter or send |
+| `app` | `ui.launch`, `ui.stop` | package id to start or stop |
+| `url` | `web.navigate` | destination |
+
+The executor rejects an unknown `kind`, a missing required field and a tap
+without `ref` or `x`/`y`. It reports an `Observation` plus pass or fail for the
+step, so the next iteration sees the real screen, not an assumption.
+
+#### What decision is
+
+It is one model turn plus one policy check. Inputs:
+
+| Input | Source | Notes |
+|---|---|---|
+| goal and progress | 3 Tasks | the sentence and the step count |
+| observation | 2 Execution | visible nodes with refs, hash, capped by `contracts/observation/limits.v1.json` |
+| history | the loop | last actions and their results |
+| candidates | catalogue + brick 5 recipes | what it may choose from |
+| policy | `contracts/policy/approval.v1.json` | which kinds are interactive, sensitive, payment |
+
+One model call per iteration: the client sends the rules, the goal, the
+observation digest and the candidates. The reply must validate against
+`contracts/schemas/decision.schema.json`; anything else is rejected as a failed
+iteration.
+
+| `Decision` field | Meaning |
+|---|---|
+| `action` | exactly one `Action`, or `null` |
+| `say` | the sentence shown to the person |
+| `done` | the task is complete |
+| `needUser` | stop the loop and ask; `say` and `options` are shown |
+| `options` | the buttons offered when `needUser` is true |
+| `sessionId`, `version` | correlation with the run record |
+
+One `Action` per turn is the contract: no plans, no multi-step scripts. Payment
+is classified from the action kind and the screen words in the policy file, never
+from a model flag, so a model cannot promote its own action to a payment. The
+gate turns that classification into allow, ask or deny.
+
+LAIX is the current implementation of this contract: its policy rules (when to
+ask, when to retry, when to escalate) and its decision record. The Python harness
+runs off-device on journals during the pilot; the shipped form is the Kotlin port
+in `packages/decision`, because Android and Windows have to agree.
 
 `services/bridge` and `services/relay` are not in this path: they exist so a
 phone and a PC can drive each other and share chat. `services/backend` is planned
@@ -271,11 +310,11 @@ screen that lists the apps the household allowed.
 Rules: the raw text never leaves the phone, only the classified event does; the
 household can revoke an app at any time; a redaction failure counts as a leak.
 
-### Four bricks that need a plain sentence
+### Details for four bricks
 
-**7 Delivery. Delivering what, to whom?** Recipes, to phones. Not the APK: app
-builds go through CI and the release job. This brick moves the instructions for
-one target app from the factory to the devices that hold that app.
+**7 Delivery** moves recipes to phones. Not the APK: app builds go through CI
+and the release job. This brick moves the instructions for one target app from
+the factory to the devices that hold that app.
 
 A package is one file per target app, containing:
 
@@ -304,22 +343,19 @@ Today nothing is delivered this way: recipes are compiled into each client from
 currently needs a new build. 7 starts the day a recipe has to change without one.
 Without 7, a recipe stays in the factory and costs a release to reach a phone.
 
-**8 Farm. Is it just logging for the lab?** No. It answers one question the other
-bricks cannot: *does this recipe still work on version X of the app?* It owns the
-device matrix (emulator, Windows machine, one real phone), the go/no-go that
-delivery waits for, and the failure list that becomes next week's work. Its
-journals also feed the lab, but that is a side effect, not the job. Six to eight
-weeks, then continuous.
+**8 Farm** answers what no other brick can: does this recipe still work on
+version X of the app? It owns the device matrix (emulator, Windows machine, one
+real phone), the go/no-go that delivery waits for, and the failure list that
+becomes next week's work. Journals also feed the lab, which is a side effect
+rather than the job. Six to eight weeks, then continuous.
 
-**12 Architecture. Why is it on top?** Because it is not a step: it has no place
-in the request path, which is why it was wrong to draw it beside the person. It
-is the layer every box follows - shared contracts, CI, the release cut, signing
+**12 Architecture** has no place in the request path because it is not a step.
+It is the layer every box follows: shared contracts, CI, the release cut, signing
 keys, the security review. Half to one person, continuously, not a project.
 
-**13 Decision. Where is LAIX?** In 13. It is the step that chooses what to do
-next, and LAIX is its current implementation. It is the only brick that reads
-both the household rules and the known recipes at the same time, which is why it
-sits between the task and the execution.
+**13 Decision** chooses what to do next; LAIX is its current implementation. It
+is the only brick that reads the household rules and the known recipes at the
+same time, which is why it sits between the task and the execution.
 
 ### Things that look alike
 
