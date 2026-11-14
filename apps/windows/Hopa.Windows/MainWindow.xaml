@@ -48,8 +48,12 @@
                 <Border x:Name="Bubble" Grid.Column="1" Background="{Binding Fill}"
                         CornerRadius="14" Padding="14,10" MaxWidth="620"
                         HorizontalAlignment="{Binding Align}">
-                    <TextBlock Text="{Binding Text}" Foreground="{Binding Ink}" FontSize="13.5"
-                               LineHeight="21" TextWrapping="Wrap" />
+                    <StackPanel>
+                        <TextBlock Text="{Binding Text}" Foreground="{Binding Ink}" FontSize="13.5"
+                                   LineHeight="21" TextWrapping="Wrap" />
+                        <TextBlock x:Name="Meta" Text="HOPA on this laptop" FontSize="9.5"
+                                   Foreground="#9A9488" Margin="0,6,0,0" Visibility="Collapsed" />
+                    </StackPanel>
                 </Border>
             </Grid>
             <DataTemplate.Triggers>
@@ -59,6 +63,7 @@
                     <Setter TargetName="Bubble" Property="Padding" Value="0" />
                     <Setter TargetName="Bubble" Property="HorizontalAlignment" Value="Left" />
                     <Setter TargetName="Bubble" Property="MaxWidth" Value="760" />
+                    <Setter TargetName="Meta" Property="Visibility" Value="Visible" />
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
@@ -272,11 +277,12 @@
                         BorderThickness="1" Padding="20,3,8,3">
                     <Grid>
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Grid>
+                        <Grid Grid.Column="1">
                             <TextBox x:Name="Composer" BorderThickness="0" Background="Transparent"
                                      FontSize="13.5" TextWrapping="Wrap" MinHeight="38"
                                      VerticalContentAlignment="Center" KeyDown="Composer_KeyDown"
@@ -285,12 +291,16 @@
                             <TextBlock x:Name="ComposerPlaceholder" Text="Ask HOPA…" IsHitTestVisible="False"
                                        VerticalAlignment="Center" FontSize="13.5" Foreground="#9A9488" />
                         </Grid>
-                        <Button x:Name="MicButton" Grid.Column="1" Content="&#xE720;"
+                        <TextBlock x:Name="TargetChip" Grid.Column="0" Text="Laptop" FontSize="10"
+                                   Foreground="#9A9488" Background="#F1ECE3" Padding="8,5" Margin="0,0,10,0"
+                                   VerticalAlignment="Center" Cursor="Hand" Visibility="Collapsed"
+                                   MouseLeftButtonUp="TargetChip_Click" />
+                        <Button x:Name="MicButton" Grid.Column="2" Content="&#xE720;"
                                 Width="44" Height="44" Margin="0,0,6,0" Background="#F1ECE3"
                                 BorderThickness="0" Foreground="#6B665C" FontSize="14"
                                 FontFamily="Segoe MDL2 Assets"
                                 Click="Mic_Click" AutomationProperties.Name="Dictate a message" />
-                        <Button x:Name="SendButton" Grid.Column="2" Content="&#x2191;"
+                        <Button x:Name="SendButton" Grid.Column="3" Content="&#x2191;"
                                 Width="44" Height="44" Background="#0A59F7" Foreground="#FFFFFF"
                                 BorderThickness="0" FontSize="18" Click="Send_Click"
                                 AutomationProperties.Name="Send message" />
@@ -328,8 +338,24 @@
                         <ItemsControl x:Name="RailSteps">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding}" FontSize="11.5" Foreground="#6B665C"
-                                               TextWrapping="Wrap" Margin="0,4,0,0" />
+                                    <Grid Margin="0,6,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="18" Height="18" CornerRadius="9"
+                                                Background="{Binding Dot}" VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding Number}" FontSize="9.5"
+                                                       Foreground="#FFFFFF" HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                            <TextBlock Text="{Binding Verb}" FontSize="11.5"
+                                                       Foreground="#1C1B18" />
+                                            <TextBlock Text="{Binding Detail}" FontSize="10"
+                                                       Foreground="#9A9488" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

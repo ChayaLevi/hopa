@@ -272,12 +272,17 @@ public partial class MainWindow : Window
         RailStatus.Text = "Succeeded";
         RailFacts.Text = "4 steps · 6.2 s";
         RailDot.Fill = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x5B));
+        RailTitle.Text = "LAST RUN";
         RailSteps.ItemsSource = new[]
         {
-            "1  Open app · Calculator",
-            "2  Type · 42.00",
-            "3  Tap · Confirm",
-            "4  Verified · receipt sent",
+            new RailStepVm { Number = "1", Verb = "Open app", Detail = "Calculator, brought to the front",
+                Dot = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x5B)) },
+            new RailStepVm { Number = "2", Verb = "Type", Detail = "42.00 into the amount field",
+                Dot = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x5B)) },
+            new RailStepVm { Number = "3", Verb = "Tap", Detail = "Confirm, payment, approved by the family",
+                Dot = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x5B)) },
+            new RailStepVm { Number = "4", Verb = "Verified", Detail = "receipt sent; the paid screen matched",
+                Dot = new SolidColorBrush(Color.FromRgb(0x7B, 0x61, 0x3A)) },
         };
         WindowShot.Save(this, Path.Combine(directory, "windows-w6-chat.png"));
         Application.Current.Shutdown();
@@ -1017,7 +1022,10 @@ public partial class MainWindow : Window
                 RailDot.Fill = new SolidColorBrush(chainOk
                     ? Color.FromRgb(0x2E, 0x7D, 0x5B)
                     : Color.FromRgb(0xC0, 0x39, 0x2B));
-                RailSteps.ItemsSource = StepLines(steps).ToList();
+                RailSteps.ItemsSource = steps
+                    .OfType<JsonObject>()
+                    .Select(step => ToRailStep(step))
+                    .ToList();
             }
             else
             {
@@ -1088,6 +1096,12 @@ public partial class MainWindow : Window
             ? "Bridge connected · every action asks first."
             : "No bridge · HOPA sees only this conversation.";
         NoBridgeHint.Visibility = live ? Visibility.Collapsed : Visibility.Visible;
+        var useBridge = new SettingsStore().Load().UseBridge;
+        TargetChip.Visibility = live ? Visibility.Visible : Visibility.Collapsed;
+        TargetChip.Text = useBridge ? "Phone" : "Laptop";
+        TargetChip.Foreground = useBridge
+            ? new SolidColorBrush(Color.FromRgb(0x0A, 0x59, 0xF7))
+            : new SolidColorBrush(Color.FromRgb(0x6B, 0x66, 0x5C));
         SubtitleText.Text = live ? "HOPA · Running on this laptop" : "Running on this laptop";
         RailBridgeDot.Fill = new SolidColorBrush(live
             ? Color.FromRgb(0x2E, 0x7D, 0x5B)
@@ -1129,6 +1143,16 @@ public partial class MainWindow : Window
 
     private void Composer_TextChanged(object sender, TextChangedEventArgs e) =>
         ComposerPlaceholder.Visibility = Composer.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    private async void TargetChip_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        var store = new SettingsStore();
+        var settings = store.Load();
+        settings.UseBridge = !settings.UseBridge;
+        store.Save(settings);
+        UpdateRailBridge();
+        await ApplySettingsAsync();
+    }
 
     private void NoBridge_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
         Settings_Click(this, new RoutedEventArgs());
@@ -1615,6 +1639,41 @@ public partial class MainWindow : Window
         }
 
         new StepsWindow(lines) { Owner = this }.ShowDialog();
+    }
+
+    private static RailStepVm ToRailStep(JsonObject step)
+    {
+        var number = step["step"]?.GetValue<int>() ?? 0;
+        var kind = step["action"]?["kind"]?.GetValue<string>() ?? "?";
+        var executed = step["executed"]?.GetValue<bool>() == true;
+        var verified = step["verified"]?.GetValue<bool>() == true;
+        var approved = step["approved"]?.GetValue<bool?>();
+        var error = step["error"]?.GetValue<string>() ?? "";
+        var detail = error.Length > 0
+            ? error
+            : approved == false ? "refused by the gate"
+            : verified ? "verified" : executed ? "ran, not verified" : "did not run";
+        var verb = kind switch
+        {
+            "ui.launch" => "Open app",
+            "ui.tap" => "Tap",
+            "ui.doubleTap" => "Double-tap",
+            "ui.longPress" => "Long-press",
+            "ui.type" => "Type",
+            "ui.back" => "Back",
+            "ui.home" => "Home",
+            "ui.swipe" or "ui.scroll" => "Swipe",
+            _ => kind,
+        };
+        return new RailStepVm
+        {
+            Number = number > 0 ? number.ToString() : "•",
+            Verb = verb,
+            Detail = detail,
+            Dot = new SolidColorBrush(verified
+                ? Color.FromRgb(0x2E, 0x7D, 0x5B)
+                : error.Length > 0 ? Color.FromRgb(0xC0, 0x39, 0x2B) : Color.FromRgb(0xB2, 0x6A, 0x00)),
+        };
     }
 
     private static IEnumerable<string> StepLines(JsonArray? steps)
