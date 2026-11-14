@@ -132,12 +132,60 @@ The first run exposed two dangerous shortcuts, both fixed:
    "could not bring it forward" if the foreground handle is still something
    else.
 
+## Close-out: observation rules, patterns, timeouts, DPI
+
+Live transcript (`Hopa.Windows.exe --w3-check out/w3-check.txt`, 2026-11-14):
+
+```
+blind type: refused: type needs a ref on Windows; blind typing would hit whatever window is focused
+launch: launched notepad (foreground=notepad)
+observe: app=Notepad nodes=45 density=1.5 truncated=false
+hash stable across two observations: True (sha256:f73468a5...573ec5)
+tap: clicked 1910,563
+type: set e3 to 14 chars
+readback: 'HOPA w3 213749'
+screenshot: 35821 bytes
+launch calc: launched calc (foreground=applicationframehost)
+calc observe: app=ApplicationFrameHost nodes=54
+calc tap: invoked e5
+```
+
+What it proves, line by line:
+
+| Line | Proves |
+|---|---|
+| `density=1.5` | the process is per-monitor DPI aware; coordinates are physical pixels (150% here) |
+| `hash stable ... True` | two observations of the same screen give the same hash, so a verify step can compare them |
+| `tap: clicked` | Notepad's document control offers no Invoke/Toggle/SelectionItem, so the mouse fallback ran |
+| `calc tap: invoked e5` | where a pattern exists, the pattern is used: no coordinates involved |
+| `type: set e3` | text goes through `ValuePattern`, not keystrokes |
+
+### Observation rules (unit-tested)
+
+`apps/windows/Hopa.Windows.Tests` covers the rules that make an observation
+reproducible: per-node text cap (200 chars, marked with `...`), 40 text lines,
+4000-character budget, a `sha256:` hash over app + screen + lines, and the
+password rule (the name never enters the text).
+
+### Failure taxonomy
+
+| Situation | What HOPA says | Where |
+|---|---|---|
+| Lock screen or logon desktop | "the screen is '<process>' (locked or secure); HOPA cannot see or touch it" | `RefuseSecureSurface` |
+| Elevated window, HOPA normal | names the app, says Windows blocks the boundary, links `docs/guides/windows/uiaccess.md` | `RefuseElevatedBoundary` |
+| Pattern offered but fails | falls back to the mouse on the same ref, reports the click | `TryPattern` |
+| UIA provider does not answer | `TimeoutException` after 1500 ms (properties 700 ms), no freeze | `Call` |
+| Stale or missing ref | "stale ref e7; observe again" | `PointFor` |
+| Type without a ref | "type needs a ref on Windows; blind typing would hit whatever window is focused" | `Type` |
+| Launch, no window in 8 s | "launched <app>, but no window appeared" | `Launch` |
+| Packaged app | foreground process reads `ApplicationFrameHost`; the handle is what matters | `FindWindowFor` |
+
 ## Remaining live checks
 
-- Password-field redaction: the code marks `IsPassword` and the producer drops
-  it, but no password field was exercised.
-- Elevated windows and `uiAccess`: no certificate, so HOPA refuses elevated
-  windows rather than acting in them.
-- Per-monitor DPI: not exercised on a second monitor.
-- Per-call UIA timeouts: not implemented yet; a hung control would stall the
-  call until the sidecar's 20 s device timeout.
+- Password-field redaction: the rule is unit-tested; no real password field was
+  exercised end to end.
+- Elevated windows: the refusal is implemented and documented; the signed
+  `uiAccess` helper is blocked on the certificate and not shipped.
+- Per-monitor DPI: proven on the primary monitor at 150%; moving the window to a
+  second monitor with a different scale is still manual.
+- A hung UIA provider is handled in code but was not fault-injected in a live run.

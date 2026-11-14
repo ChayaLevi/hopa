@@ -13,6 +13,10 @@
     <Product>HOPA</Product>
     <Company>HOPA</Company>
     <AssemblyTitle>HOPA for Windows</AssemblyTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WPF reads DPI awareness from the manifest; the WinForms analyzer asks for
+         ApplicationHighDpiMode instead, which WPF does not use. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
