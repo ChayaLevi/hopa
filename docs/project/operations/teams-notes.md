@@ -18,7 +18,9 @@ section directly; engineers can use the glossary and the edges table in
 | **Execution** | Doing one step on the phone and checking that it actually worked. |
 | **Task** | The record of what a person asked for: who asked, when, who approves, done or not. |
 | **Family approval** | The rule about who must confirm an action before it happens. |
-| **App knowledge (a "recipe")** | Step-by-step instructions for one app, plus how to tell the step worked. |
+| **Target app** | A third-party app HOPA acts in (a bank, a messenger). Never our own client. |
+| **Family** | The household that uses HOPA: an adult, often an older parent, sometimes a child. |
+| **Target-app knowledge (a "recipe")** | Step-by-step instructions for one target app, plus how to tell the step worked. |
 | **Knowledge factory** | How instructions are produced: models propose, humans review. |
 | **Knowledge delivery** | Shipping signed instruction versions, switching them on gradually, rolling back. |
 | **Verification farm** | Many phones and emulators that re-check instructions, especially after app updates. |
@@ -36,16 +38,16 @@ steps.
 ```
 Mum: "Pay the internet"
 
-1. CLIENT APPS       records the request and shows "understood"
-2. TASKS             it is Mum's request, she confirms payments herself,
-                     so it runs on her phone
-3. FAMILY            the rule says: her own payments need her confirmation
-4. APP KNOWLEDGE     the steps: open the bank, Payments, Internet,
-                     amount, confirm
-5. EXECUTION         performs one step at a time and verifies the screen
-6. TASKS             each step closes; the task moves to done
-7. PRODUCT LAB       records: succeeded, 5 steps, 40 seconds,
-                     confirmation took 6 seconds
+1. OUR CLIENTS            records the request and shows "understood"
+2. TASKS                  it is Mum's request, she confirms payments herself,
+                          so it runs on her phone
+3. FAMILY                 the rule says: her own payments need her confirmation
+4. TARGET-APP KNOWLEDGE   the steps: open the bank, Payments, Internet,
+                          amount, confirm
+5. EXECUTION              performs one step at a time and verifies the screen
+6. TASKS                  each step closes; the task moves to done
+7. PRODUCT LAB            records: succeeded, 5 steps, 40 seconds,
+                          confirmation took 6 seconds
 ```
 
 ## The simple version (four teams) and why it changed
@@ -53,7 +55,7 @@ Mum: "Pay the internet"
 The first sketch had four teams:
 
 ```
-Client apps - Tasks and family space - App knowledge and test farm - Research
+Our clients - Tasks and family space - Target-app knowledge and test farm - Research
 ```
 
 Two problems surfaced while walking through it:
@@ -79,7 +81,7 @@ mandate.
 | Execution and verification | A step runs on the phone and is proven to have worked |
 | Tasks and notifications | A request is never lost; a notification can become a task |
 | Family and approvals | The family decides who may do what, without HOPA deciding for them |
-| App knowledge | A new app is supported in days, not months, and survives updates |
+| Target-app knowledge | A new target app is supported in days, not months, and survives updates |
 | Product lab | We know what to fix first and can prove the effect with numbers |
 | Platform and integrations | Devices and services find each other and stay connected |
 | Architecture and security (shared) | One set of rules and a green build for everyone |
@@ -87,8 +89,8 @@ mandate.
 ### Slide-ready line
 
 ```
-Client apps · Tasks and notifications · Family and approvals ·
-App knowledge · Product lab
+Our clients · Tasks and notifications · Family and approvals ·
+Target-app knowledge · Product lab
 ```
 
 Execution, farm, platform and architecture are enablers shown underneath.
@@ -109,7 +111,7 @@ About 12 full-time equivalents:
 | Execution and verification | 2 developers + 1 test engineer |
 | Tasks and notifications | 2 developers + 0.5 product |
 | Family and approvals | 2 developers |
-| App knowledge | 2 developers |
+| Target-app knowledge | 2 developers |
 | Product lab | 1 researcher + 0.5 analyst |
 | Platform and integrations | 1 backend developer |
 | Architecture and security | 1 engineer (or 0.5 + 0.5 reviewer) |
@@ -184,7 +186,7 @@ The son may help remotely until she turns it off.
 | Question | Recommendation | Consequence if deferred |
 |---|---|---|
 | Is the task service a new `services/tasks`, or part of the bridge? | Separate service; the bridge stays transport | The task contract cannot be written cleanly |
-| Which app gets the first recipe? | A system app first (hermetic), a ride-hailing app for the cross-device demo | The knowledge team picks the wrong harness |
+| Which target app gets the first recipe? | A system app first (hermetic), a ride-hailing app for the cross-device demo | The knowledge team picks the wrong harness |
 | Is the family local-first or account-based? | Local-first profiles with optional sync | Data model and privacy work move in the wrong direction |
 | Where does the Product lab start? | R1 (recipes that survive updates); consider 60/40 with R3 because the approval interface exists | The lab spends a quarter on data plumbing |
 | Where does the test farm run? | Start on the existing CI runners, move when flakiness appears | Premature hardware spend |

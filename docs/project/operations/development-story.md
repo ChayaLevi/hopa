@@ -7,6 +7,10 @@ time. Plain language, with a folder name wherever it helps an engineer.
 one ability, has one owning team (sometimes with a partner), and ends with
 something you can watch.
 
+Who uses it: a household - an adult, often an older parent, sometimes a child.
+Our own software is a **client**; a third-party app HOPA acts in is a **target
+app**.
+
 The document builds the product from the ground up. Each step is added once the
 steps it depends on are stable, and the whole picture appears at the end.
 
@@ -48,7 +52,7 @@ to follow the story.
 | Memory team | "We make sure a request is never lost and can continue anywhere." |
 | Judgement team | "We decide what to do next, with a reason." |
 | Family team | "We decide who is asked, how often, and what was promised." |
-| Know-how team | "We know how each app works, and we keep it working after updates." |
+| Know-how team | "We know how each target app works, and keep it working after updates." |
 | Connection team | "We connect devices and keep them connected safely." |
 | Numbers team | "We tell everyone what to fix first, with numbers." |
 
@@ -65,15 +69,15 @@ The steps below climb this ladder. Read the ladder as a map, not as a summary:
 each rung is explained in its own step.
 
 ```
-8  It proves it works          Numbers team
-7  It works across devices     Connection team
-6  It knows how apps work      Know-how team
-5  It decides and asks         Judgement team + Family team
-4  It remembers                Memory team
-3  It stops and asks           App team + Rulebook team
-2  It can do things            Hands team
-1  It answers                  App team + Rulebook team
-0  It runs on two devices      what we have today
+8  It proves it works              Numbers team
+7  It works across devices         Connection team
+6  It knows how target apps work   Know-how team
+5  It decides and asks             Judgement team + Family team
+4  It remembers                    Memory team
+3  It stops and asks               App team + Rulebook team
+2  It can do things                Hands team
+1  It answers                      App team + Rulebook team
+0  It runs on two devices          what we have today
 ```
 
 ---
@@ -104,7 +108,7 @@ every later team will use.
 **Team:** Hands team.
 
 **What they build:** the part that touches a device - taps a button, types text,
-opens an app - and checks afterwards that it really happened. It works on the
+opens a target app - and checks afterwards that it really happened. It works on the
 phone and on the computer, and says plainly when it cannot (a locked screen, a
 window the system protects).
 
@@ -206,14 +210,14 @@ fixed rule; the to-do list carries the promises.
 they say no; a promise made on Monday changes Tuesday's decision; a child's
 request waits for a parent; HOPA does not nag five times.
 
-## Step 6 - It knows how apps work
+## Step 6 - It knows how target apps work
 
 **Team:** Know-how team.
 
-**What they build:** a library of step-by-step instructions per app ("open the
+**What they build:** a library of step-by-step instructions per target app ("open the
 bank, go to Payments, choose Internet, enter the amount, confirm") with the check
 that says it worked. Instructions are written once, reviewed, signed and shipped
-to all devices. When an app updates and a step breaks, the team's rack of test
+to all devices. When a target app updates and a step breaks, the team's rack of test
 phones catches it and the previous working version is put back.
 
 **How it joins:** the hands part follows the instructions; the to-do list asks
@@ -223,7 +227,7 @@ for the right one.
 
 ```
   +--------------------------------------+
-  | 6  It knows how apps work            |  Know-how team  (new)
+  | 6  It knows how target apps work      |  Know-how team  (new)
   +------------------+-------------------+
                      | plugs into
   +------------------v-------------------+
@@ -231,7 +235,7 @@ for the right one.
   +--------------------------------------+
 ```
 
-**What you can see:** a new app is supported in a day. An update breaks a step;
+**What you can see:** a new target app is supported in a day. An update to it breaks a step;
 the test rack notices and the old version returns before anyone complains.
 
 ## Step 7 - It works across devices
@@ -339,7 +343,8 @@ Only six words from the "Lives in" lines; everything else is spelled out above.
 | **service** | a part that runs on a computer or server, never on the phone |
 | **bridge** | the link that lets the computer (or the cloud) reach the phone |
 | **contract** | the written agreement between two teams: what is handed over and how it is checked |
-| **recipe** | step-by-step instructions for one app, with the check that says it worked |
+| **target app** | a third-party app HOPA acts in (a bank, a messenger); never our own client |
+| **recipe** | step-by-step instructions for one target app, with the check that says it worked |
 | **gate** | the safety rules a step must pass before anything happens |
 
 ## The one slide
@@ -349,7 +354,7 @@ We build HOPA one ability at a time.
 Each ability: one owning team, one written agreement, one demonstration.
 
 answers -> does things -> stops and asks -> remembers ->
-decides and asks -> knows apps -> connects -> proves
+decides and asks -> knows target apps -> connects -> proves
 
 Each step is added once the agreements it depends on are stable.
 ```

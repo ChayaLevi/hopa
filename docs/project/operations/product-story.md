@@ -13,6 +13,14 @@ asks before anything irreversible, shows what it did, and gets better at it.
 
 Everything below is one trip through that sentence.
 
+Three words before we start:
+
+- **client** - our own software on the phone or the computer.
+- **target app** - a third-party app HOPA acts in: a bank, a messenger, a school
+  app.
+- **family** - the household that uses HOPA: an adult, often an older parent,
+  sometimes a child. The family is why approvals exist at all.
+
 ## The cast
 
 | Team | Enters when... |
@@ -23,7 +31,7 @@ Everything below is one trip through that sentence.
 | Family and approvals | someone other than the asker must say yes |
 | Decision layer (future; see LAIX below) | a step needs an explicit "act / ask / wait / verify" |
 | Execution and verification | something must happen on a real device |
-| App knowledge | a step needs to know how one app works |
+| Target-app knowledge | a step needs to know how one target app works |
 | Knowledge factory and delivery | that knowledge must be produced, signed and shipped |
 | Verification farm | knowledge or a device path must be re-checked |
 | Product lab | someone must decide what to fix and prove the effect |
@@ -78,7 +86,7 @@ needed, whether it is reversible, and what the undo would be.
 
 Hand-off: "act on this step, under these conditions".
 
-## Act 3 - the step (Execution + App knowledge)
+## Act 3 - the step (Execution + Target-app knowledge)
 
 **Execution** performs one step on one device and proves it:
 
@@ -86,7 +94,7 @@ Hand-off: "act on this step, under these conditions".
 - on the PC through UI Automation;
 - always with before/after evidence.
 
-**App knowledge** tells execution how: which control, which intent, which
+**Target-app knowledge** tells execution how: which control, which intent, which
 postcondition. Knowledge is a signed, versioned recipe - step by step, with the
 check that says it worked.
 
@@ -145,8 +153,8 @@ from a better place, and every act has one owner who can show their part.
 | The request needs a decision | Tasks | Decision layer | situation, options, commitments |
 | The decision is "ask" | Decision layer | Family | who approves, attention left |
 | The decision is "act" | Decision layer | Execution | one step |
-| A step needs know-how | Execution | App knowledge | "how do I do X in app Y?" |
-| Knowledge is missing | App knowledge | Factory | a knowledge request |
+| A step needs know-how | Execution | Target-app knowledge | "how do I do X in target app Y?" |
+| Knowledge is missing | Target-app knowledge | Factory | a knowledge request |
 | A recipe is ready | Factory | Delivery | signed candidate |
 | Delivery ships | Delivery | All clients | version + pinned apps |
 | A step runs | Execution | Product lab | journal entry |
@@ -157,7 +165,7 @@ from a better place, and every act has one owner who can show their part.
 
 ```
 Weeks 1-2   Architecture: the decision, task and recipe contracts
-Week 3      Clients finish their gates; Tasks skeleton; Knowledge one app
+Week 3      Clients finish their gates; Tasks skeleton; Knowledge for one target app
 Weeks 3-12  One request travels the whole story; weekly demo per act
 Week 12     End-to-end check: person -> decision -> step -> proof
 Week 24     Keep, park or expand each act
