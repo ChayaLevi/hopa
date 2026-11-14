@@ -51,7 +51,7 @@
             <Button x:Name="CancelButton" Content="Cancel" Width="96" Height="34"
                     Margin="0,0,8,0" IsCancel="True" />
             <Button x:Name="SaveButton" Content="Save" Width="96" Height="34"
-                    Background="#E8703A" Foreground="#FFFFFF" BorderThickness="0"
+                    Background="#0A59F7" Foreground="#FFFFFF" BorderThickness="0"
                     Click="Save_Click" />
         </StackPanel>
     </Grid>

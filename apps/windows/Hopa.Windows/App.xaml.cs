@@ -66,6 +66,18 @@ public partial class App : Application
             return;
         }
 
+        if (args.Length >= 2 && args[0] == "--shot-chat")
+        {
+            window.Dispatcher.BeginInvoke(new Action(() => window.ShotChat(args[1])));
+            return;
+        }
+
+        if (args.Length >= 2 && args[0] == "--keyboard-check")
+        {
+            window.Dispatcher.BeginInvoke(new Action(() => window.KeyboardCheck(args[1])));
+            return;
+        }
+
         if (args.Length >= 2 && args[0] == "--shot-components")
         {
             window.Dispatcher.BeginInvoke(new Action(() => window.ShotComponents(args[1])));

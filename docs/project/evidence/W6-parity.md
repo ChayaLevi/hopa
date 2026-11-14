@@ -6,27 +6,31 @@ The Windows screenshot is `docs/media/windows-w4.png`.
 
 ## Tokens
 
+Reference values are in `W6-harmony-spec.md`. Windows values are the ones in
+`MainWindow.xaml` and `App.xaml` after the port.
+
 | Token | Harmony | Windows | Same? |
 |---|---|---|---|
-| page background | `#F7F4EE` | `#F7F4EE` | yes |
-| rail background | `#F3EFE7` | `#F3EFE7` | yes |
-| accent | `#E8703A` | `#E8703A` | yes |
-| ink | `#1C1B18` | `#1C1B18` | yes |
-| muted | `#9A9488` | `#9A9488` | yes |
-| secondary ink | `#6B665C` | `#6B665C` | yes |
-| message radius | 9 / 10 | 10 | yes |
-| small radius | 4 / 6 / 8 | 9 / 10 | close |
-| type scale | 9, 9.5, 10.5, 11.5, 12.5, 15 | 9, 9.5, 10.5, 11.5, 12.5, 15 | yes |
-| spacing rhythm | 4-based | 4-based with 14/16 paddings | close, not equal |
+| bg | `#F7F4EE` | `#F7F4EE` | yes |
+| surface | `#FFFFFF` | `#FFFFFF` | yes |
+| surface_alt | `#F3EFE7` | `#F3EFE7` | yes |
+| surface_muted | `#F1ECE3` | `#F1ECE3` | yes |
+| text_primary | `#1C1B18` | `#1C1B18` | yes |
+| text_secondary | `#6B665C` | `#6B665C` | yes |
+| text_hint | `#9A9488` | `#9A9488` | yes |
+| primary (actions) | `#0A59F7` | `#0A59F7` | yes |
+| primary_soft | `#E8F0FF` | `#E8F0FF` (rail steps) | yes |
+| accent (brand) | `#E8703A` | `#E8703A` | yes |
+| divider | `#E9E4DA` | `#E9E4DA` | yes |
+| user bubble radius | 14 | 14 | yes |
+| pill radius | 24 | 24 | yes |
+| rail card radius | 14 | 14 | yes |
+| type scale used | 9 · 9.5 · 10.5 · 11.5 · 12.5 · 13.5 · 15 | same | yes |
 
-Tokens changed on 2026-11-14 to close this table:
-
-- every `FontSize` moved onto the Harmony scale;
-- message radius 16 -> 10, composer 18 -> 10, attachment 12 -> 9;
-- a real bug the table found: `Send` and `Save` were `#0A59F7` (Windows blue),
-  not the accent `#E8703A`. Fixed.
-
-The screenshot `docs/media/windows-w4.png` is the result.
+One correction to the earlier reading: the blue `#0A59F7` is Harmony's **primary
+action** colour, not a Windows default that slipped in. The accent orange is the
+brand mark only. The first port had this backwards and is now fixed: Send, Allow
+and Save are blue; the mascot and pin markers stay orange.
 
 ## Components
 
@@ -69,9 +73,23 @@ Screenshots so far (all rendered by the app itself, not captured by hand):
 | `docs/media/windows-w6-approval.png` | approval sheet with amount, merchant, consequence |
 | `docs/media/windows-w6-steps.png` | run details, one line per step |
 
-Still missing from the inventory: bubbles with real content, the attachment bar,
-the error state and long text. They need a turn, not a render, which is why they
-are not ticked yet.
+Also rendered: `docs/media/windows-w6-chat.png` — bubbles with real content, a
+long answer, the attachment bar and an error line. With it the inventory is
+complete: rail, row, bubbles, composer, attachment, approval, settings, empty
+state, error state and long text all appear in one of the four shots.
+
+Keyboard order, recorded by `--keyboard-check`:
+
+```
+tab order (visual tree): New chat -> Search conversations -> Show archived
+conversations -> Settings -> Conversations -> window buttons -> composer ->
+Dictate a message -> Send message
+focusable stops: 14
+focus ring: #E8703A, 1.5 px, from the shared Button and ListBoxItem templates
+```
+
+Not done: high contrast still does not change the palette, and 200% has not been
+run with system scaling.
 
 ## Keyboard and scaling
 

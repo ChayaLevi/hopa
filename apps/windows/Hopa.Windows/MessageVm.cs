@@ -16,7 +16,7 @@ public sealed class MessageVm
 
     public Brush Fill => IsUser
         ? new SolidColorBrush(Color.FromRgb(0x0A, 0x59, 0xF7))
-        : new SolidColorBrush(Colors.White);
+        : new SolidColorBrush(Colors.Transparent);
 
     public Brush Ink => IsUser
         ? new SolidColorBrush(Colors.White)

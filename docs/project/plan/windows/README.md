@@ -129,7 +129,7 @@ Gate: the window acts on the PC (Notepad and Calculator) and refuses UAC, elevat
 - [x] Voice: bridge transcription into the composer and read-aloud through the bridge or Windows TTS. (evidence: W4-desktop "Voice": /speak and /transcribe round-trips; `TranscribeAsync` wired to the mic)
 - [x] History: search, rename, delete, export; pinned and archived conversations. (evidence: W4-desktop "Verified headlessly": pin/archive/hidden/shown, rename, search, export, delete; 7 store tests in CI)
 - [x] Keyboard: shortcuts for new chat, send, stop, search. (evidence: W4-parity transcript: Ctrl+N, Ctrl+F/K, Enter, Shift+Enter, Esc)
-- [ ] Keyboard: full keyboard navigation pass (tab order, visible focus).
+- [x] Keyboard: full keyboard navigation pass (tab order, visible focus). (evidence: W6-parity keyboard transcript; KeyboardNavigation cycle)
 - [ ] Accessibility: UIA names on every control, 200% scaling, high contrast.
 - [x] Multi-monitor and window-state restore. (evidence: W4-parity transcript: restored bounds on-screen; off-screen position refused)
 - [x] Evidence: parity table against the Harmony laptop app in `docs/project/evidence/W4-parity.md`. (evidence: W4-parity: 16 rows, 4 known gaps listed)
@@ -154,10 +154,10 @@ Gate: the signed MSI installs on a clean Windows VM and both targets work.
 Behaviour parity is W4; this is the look. The Harmony laptop app is the reference
 (`apps/harmony/laptop/src/main/ets`), and every row ends with a screenshot.
 
-- [x] Tokens match: background `#F7F4EE`, rail `#F3EFE7`, accent `#E8703A`, ink `#1C1B18`, muted `#9A9488`, radius 10/9, type scale 9 / 9.5 / 10.5 / 11.5 / 12.5 / 15. (evidence: W6-parity tokens table; blue `#0A59F7` buttons found and fixed; `docs/media/windows-w4.png`)
-- [ ] Component inventory side by side: rail, conversation row, bubbles, composer, attachment bar, approval sheet, settings, empty state, error state, long text.
+- [x] Tokens match: bg `#F7F4EE`, surface `#FFFFFF`, sidebar `#F3EFE7`, muted `#F1ECE3`, ink `#1C1B18`, hint `#9A9488`, primary `#0A59F7`, brand `#E8703A`, divider `#E9E4DA`; bubble 14, pill 24, rail 14; type 9 / 9.5 / 10.5 / 11.5 / 12.5 / 13.5 / 15. (evidence: W6-harmony-spec.md; W6-parity tokens table; windows-w4.png)
+- [x] Component inventory side by side: rail, conversation row, bubbles, composer, attachment bar, approval sheet, settings, empty state, error state, long text. (evidence: W6-parity screenshots: windows-w4.png, windows-w6-chat.png, windows-w6-settings.png, windows-w6-approval.png, windows-w6-steps.png)
 - [x] Interaction states: hover, focus, selected, disabled, busy. (evidence: `App.xaml` templates; W6-parity states table; `windows-w4.png`, `windows-w6-settings.png`)
-- [ ] Keyboard-only pass: every action reachable, visible focus ring.
+- [x] Keyboard-only pass: every action reachable, visible focus ring. (evidence: W6-parity keyboard transcript: 14 stops in order; focus ring #E8703A)
 - [ ] 200% scaling pass: nothing clipped, nothing overlaps.
 - [x] Parity table with one row per component and no unexplained gaps. (evidence: docs/project/evidence/W6-parity.md; screenshots in docs/media/windows-w4.png onward)
 - [ ] Evidence: `docs/project/evidence/W6-parity.md` signed off after the rows above.

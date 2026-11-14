@@ -30,7 +30,7 @@
             <Button x:Name="DenyButton" Content="Deny" Width="96" Height="34" Margin="0,0,8,0"
                     Click="Deny_Click" />
             <Button x:Name="AllowButton" Content="Allow" Width="96" Height="34"
-                    Background="#E8703A" Foreground="#FFFFFF" BorderThickness="0"
+                    Background="#0A59F7" Foreground="#FFFFFF" BorderThickness="0"
                     Click="Allow_Click" />
         </StackPanel>
     </Grid>

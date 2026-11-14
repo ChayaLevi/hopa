@@ -215,6 +215,81 @@ public partial class MainWindow : Window
 
     public void SaveShot(string path) => WindowShot.Save(this, path);
 
+    /// <summary>W6: a chat with real content, a long answer, an attachment and an error line.</summary>
+    public void ShotChat(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        EmptyState.Visibility = Visibility.Collapsed;
+        messages.Clear();
+        messages.Add(new MessageVm { Role = "user", Text = "Pay the internet bill, then email me the receipt." });
+        messages.Add(new MessageVm
+        {
+            Role = "assistant",
+            Text = "Done. CityNet was paid 42.00 from the household account, the payment screen " +
+                   "confirmed it, and the receipt went to your inbox. The bank app is still open " +
+                   "on the payments screen if you want to check the reference number yourself.",
+        });
+        messages.Add(new MessageVm { Role = "user", Text = "Thanks, and remind me on the 3rd." });
+        pendingAttachment = null;
+        PendingAttachmentName.Text = "bill-2026-11.pdf";
+        PendingAttachmentDetail.Text = "48 KB \u00B7 application/pdf";
+        PendingAttachmentBar.Visibility = Visibility.Visible;
+        StatusText.Text = "";
+        ErrorText.Text = "The bridge is not running; the last step was not verified.";
+        ErrorText.Visibility = Visibility.Visible;
+        RailStatus.Text = "Succeeded";
+        RailFacts.Text = "4 steps · 6.2 s";
+        RailDot.Fill = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x5B));
+        RailSteps.ItemsSource = new[]
+        {
+            "1  Open app · Calculator",
+            "2  Type · 42.00",
+            "3  Tap · Confirm",
+            "4  Verified · receipt sent",
+        };
+        WindowShot.Save(this, Path.Combine(directory, "windows-w6-chat.png"));
+        Application.Current.Shutdown();
+    }
+
+    /// <summary>W6: the controls Tab can reach, in visual-tree order, with their names.</summary>
+    public void KeyboardCheck(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        var stops = new List<string>();
+        CollectStops(this, stops);
+        var lines = new List<string>
+        {
+            "tab order (visual tree): " + string.Join(" -> ", stops),
+            $"focusable stops: {stops.Count}",
+            "focus ring: #E8703A, 1.5 px, from the shared Button and ListBoxItem templates",
+        };
+        File.WriteAllLines(Path.Combine(directory, "keyboard-check.txt"), lines);
+        Application.Current.Shutdown();
+    }
+
+    private static void CollectStops(DependencyObject root, List<string> stops)
+    {
+        if (root is System.Windows.FrameworkElement element && element.Focusable && element.IsVisible && element.IsEnabled)
+        {
+            var name = System.Windows.Automation.AutomationProperties.GetName(element);
+            var fallback = element switch
+            {
+                System.Windows.Controls.TextBox box => $"text field '{box.Text}'",
+                System.Windows.Controls.CheckBox check => $"check '{check.Content}'",
+                System.Windows.Controls.Primitives.ButtonBase button => $"button '{button.Content}'",
+                System.Windows.Controls.ListBox => "conversation list",
+                _ => element.GetType().Name,
+            };
+            stops.Add(name.Length > 0 ? name : fallback);
+        }
+
+        var children = System.Windows.Media.VisualTreeHelper.GetChildrenCount(root);
+        for (var index = 0; index < children; index++)
+        {
+            CollectStops(System.Windows.Media.VisualTreeHelper.GetChild(root, index), stops);
+        }
+    }
+
     /// <summary>W6: the windows that only appear mid-turn, rendered for the parity table.</summary>
     public void ShotComponents(string directory)
     {
@@ -760,11 +835,14 @@ public partial class MainWindow : Window
             };
             client = started;
             StatusText.Text = "Ready";
+            UpdateRailBridge();
             await RefreshAsync();
             await ApplySettingsAsync();
         }
         catch (Exception error)
         {
+            ErrorText.Text = error.Message;
+            ErrorText.Visibility = Visibility.Visible;
             StatusText.Text = error.Message;
             Log($"error: {error.Message}");
         }
@@ -857,7 +935,7 @@ public partial class MainWindow : Window
 
         running = true;
         SendButton.IsEnabled = true;
-        SendButton.Content = "Stop";
+        SendButton.Content = "\u25A0";
         if (tray != null)
         {
             tray.Text = "HOPA (working)";
@@ -869,6 +947,7 @@ public partial class MainWindow : Window
         }
 
         StatusText.Text = "Working...";
+        ErrorText.Visibility = Visibility.Collapsed;
         messages.Add(new MessageVm { Role = "user", Text = body });
         EmptyState.Visibility = Visibility.Collapsed;
         ScrollToEnd();
@@ -877,6 +956,7 @@ public partial class MainWindow : Window
             var (answer, conversationId, title, steps, chainOk) =
                 await client.StartTurnAsync(body, currentId, attachment);
             currentId = conversationId;
+            MarkSelected(conversationId);
             messages.Add(new MessageVm { Role = "assistant", Text = answer });
             Log($"HOPA: {answer}");
             lastAnswer = answer;
@@ -898,6 +978,18 @@ public partial class MainWindow : Window
             if (steps is { Count: > 0 })
             {
                 Log($"chain: {(chainOk ? "ok" : "failed")}");
+                RailStatus.Text = chainOk ? "Succeeded" : "Failed";
+                RailFacts.Text = $"{steps.Count} steps";
+                RailDot.Fill = new SolidColorBrush(chainOk
+                    ? Color.FromRgb(0x2E, 0x7D, 0x5B)
+                    : Color.FromRgb(0xC0, 0x39, 0x2B));
+                RailSteps.ItemsSource = StepLines(steps).ToList();
+            }
+            else
+            {
+                RailStatus.Text = "Answered";
+                RailFacts.Text = "no local record";
+                RailDot.Fill = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x5B));
             }
 
             TitleText.Text = title;
@@ -914,7 +1006,7 @@ public partial class MainWindow : Window
         {
             running = false;
             SendButton.IsEnabled = true;
-            SendButton.Content = "Send";
+            SendButton.Content = "\u2191";
             if (tray != null)
             {
                 tray.Text = "HOPA";
@@ -951,6 +1043,26 @@ public partial class MainWindow : Window
 
         Composer.Text = "";
         await SendAsync(goal);
+    }
+
+    private void UpdateRailBridge()
+    {
+        var settings = new SettingsStore().Load();
+        var live = settings.BridgeUrl.Length > 0;
+        RailBridge.Text = live
+            ? "Bridge configured · every action asks first."
+            : "No bridge · this conversation only";
+        RailBridgeDot.Fill = new SolidColorBrush(live
+            ? Color.FromRgb(0x2E, 0x7D, 0x5B)
+            : Color.FromRgb(0xB2, 0x6A, 0x00));
+    }
+
+    private void MarkSelected(string? id)
+    {
+        foreach (var item in allConversations)
+        {
+            item.Selected = item.Id == id;
+        }
     }
 
     private void UpsertConversation(string id, string title)
@@ -1390,6 +1502,7 @@ public partial class MainWindow : Window
         SearchBox.Clear();
         ApplyFilter();
         currentId = null;
+        MarkSelected(vm.Id);
         await SelectAsync(vm.Id);
     }
 

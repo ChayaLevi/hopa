@@ -82,6 +82,28 @@ public sealed class ConversationVm : INotifyPropertyChanged
         }
     }
 
+    public System.Windows.Media.Brush TitleInk => Selected
+        ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1C, 0x1B, 0x18))
+        : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x6B, 0x66, 0x5C));
+
+    private bool selected;
+
+    public bool Selected
+    {
+        get => selected;
+        set
+        {
+            if (selected == value)
+            {
+                return;
+            }
+
+            selected = value;
+            Raise(nameof(Selected));
+            Raise(nameof(TitleInk));
+        }
+    }
+
     public string PinLabel => pinned ? "PIN" : "";
 
     public string ArchivedLabel => archived ? "archived" : "";

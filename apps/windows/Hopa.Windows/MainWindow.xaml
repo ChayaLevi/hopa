@@ -12,67 +12,96 @@
         KeyboardNavigation.ControlTabNavigation="Cycle"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
+        <!-- W6: the Harmony laptop conversation. A user turn is a blue bubble;
+             an answer is mark + text, no bubble. -->
         <DataTemplate x:Key="MessageTemplate">
-            <Border Background="{Binding Fill}" CornerRadius="10" Padding="14,10" Margin="16,4"
-                    MaxWidth="640" HorizontalAlignment="{Binding Align}">
-                <TextBlock Text="{Binding Text}" Foreground="{Binding Ink}" FontSize="12.5"
-                           TextWrapping="Wrap" />
-            </Border>
+            <Grid Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image x:Name="Mark" Source="Assets/mascot.png" Width="22" Height="22"
+                       Margin="0,1,12,0" VerticalAlignment="Top" Visibility="Collapsed" />
+                <Border x:Name="Bubble" Grid.Column="1" Background="{Binding Fill}"
+                        CornerRadius="14" Padding="14,10" MaxWidth="620"
+                        HorizontalAlignment="{Binding Align}">
+                    <TextBlock Text="{Binding Text}" Foreground="{Binding Ink}" FontSize="13.5"
+                               LineHeight="21" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsUser}" Value="False">
+                    <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="Bubble" Property="Background" Value="Transparent" />
+                    <Setter TargetName="Bubble" Property="Padding" Value="0" />
+                    <Setter TargetName="Bubble" Property="HorizontalAlignment" Value="Left" />
+                    <Setter TargetName="Bubble" Property="MaxWidth" Value="760" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
         </DataTemplate>
+
         <DataTemplate x:Key="ConversationTemplate">
-            <StackPanel Margin="8,7">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Title}" FontSize="12.5" TextTrimming="CharacterEllipsis"
-                               Foreground="#1C1B18" />
+            <Grid Height="30" Margin="0,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Title}" FontSize="12.5" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" Foreground="{Binding TitleInk}" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="{Binding PinLabel}" FontSize="9" FontWeight="SemiBold"
-                               Foreground="#E8703A" Margin="6,2,0,0" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding UpdatedLabel}" FontSize="10.5" Foreground="#9A9488" />
-                    <TextBlock Text="{Binding ArchivedLabel}" FontSize="9.5" Foreground="#9A9488"
+                               Foreground="#E8703A" Margin="6,0,0,0" />
+                    <TextBlock Text="{Binding UpdatedLabel}" FontSize="9.5" Foreground="#9A9488"
                                Margin="8,0,0,0" />
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </DataTemplate>
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260" />
+            <ColumnDefinition Width="212" />
             <ColumnDefinition Width="1" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
+        <!-- Sidebar: 212, surface_alt, the Harmony geometry. -->
         <Border Background="#F3EFE7">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Top" Margin="18,18,18,10">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="10" Height="10" Fill="#E8703A" VerticalAlignment="Center" />
-                        <TextBlock Text="HOPA" FontSize="15" FontWeight="SemiBold" Margin="8,0,0,0"
-                                   Foreground="#1C1B18" />
-                    </StackPanel>
-                    <Button Content="+ New chat" Margin="0,12,0,0" Height="34"
-                            Background="#FFFFFF" BorderBrush="#E9E4DA" Click="NewChat_Click"
+                <StackPanel DockPanel.Dock="Top" Margin="12,14,12,8">
+                    <Button Content="+ New chat" Height="30" HorizontalContentAlignment="Left"
+                            Padding="10,0" Background="Transparent" BorderThickness="0"
+                            Foreground="#6B665C" FontSize="12.5" Click="NewChat_Click"
                             AutomationProperties.Name="New chat" />
-                    <Grid Margin="0,10,0,0">
-                        <TextBox x:Name="SearchBox" Height="30"
-                                 VerticalContentAlignment="Center" Padding="8,0"
+                    <Grid Margin="0,6,0,0">
+                        <TextBox x:Name="SearchBox" Height="34" VerticalContentAlignment="Center"
+                                 Padding="8,0,52,0" FontSize="12" BorderThickness="1"
+                                 BorderBrush="#E9E4DA" Background="#F1ECE3"
                                  AutomationProperties.Name="Search conversations"
                                  TextChanged="SearchBox_TextChanged" />
                         <TextBlock x:Name="SearchPlaceholder" Text="Search" IsHitTestVisible="False"
-                                   Margin="12,0,0,0" VerticalAlignment="Center"
-                                   FontSize="11.5" Foreground="#9A9488" />
+                                   Margin="10,0,0,0" VerticalAlignment="Center"
+                                   FontSize="12" Foreground="#9A9488" />
+                        <TextBlock Text="Ctrl K" IsHitTestVisible="False" HorizontalAlignment="Right"
+                                   VerticalAlignment="Center" Margin="0,0,9,0" FontSize="9.5"
+                                   Foreground="#9A9488" Opacity="0.45" />
                     </Grid>
-                    <CheckBox x:Name="ShowArchivedBox" Content="Show archived" Margin="0,8,0,0"
-                              FontSize="10.5" Foreground="#6B665C" Click="ShowArchived_Click"
+                    <CheckBox x:Name="ShowArchivedBox" Content="Show archived" Margin="2,8,0,0"
+                              FontSize="9.5" Foreground="#6B665C" Click="ShowArchived_Click"
                               AutomationProperties.Name="Show archived conversations" />
                 </StackPanel>
-                <Button DockPanel.Dock="Bottom" x:Name="SettingsButton" Content="Settings"
-                        Margin="12,8,12,12" Height="32" Background="Transparent"
-                        BorderThickness="0" Foreground="#6B665C" Click="Settings_Click"
-                        AutomationProperties.Name="Settings" />
+
+                <Border DockPanel.Dock="Bottom" BorderBrush="#E9E4DA" BorderThickness="0,1,0,0"
+                        Padding="12,10">
+                    <Button x:Name="SettingsButton" Content="Settings" Height="28"
+                            HorizontalContentAlignment="Left" Padding="8,0" Background="Transparent"
+                            BorderThickness="0" Foreground="#6B665C" FontSize="12"
+                            Click="Settings_Click" AutomationProperties.Name="Settings" />
+                </Border>
+
                 <ListBox x:Name="ConversationList" BorderThickness="0" Background="Transparent"
-                         ItemTemplate="{StaticResource ConversationTemplate}"
+                         ItemTemplate="{StaticResource ConversationTemplate}" Margin="12,0,12,8"
                          SelectionChanged="ConversationList_SelectionChanged"
                          AutomationProperties.Name="Conversations">
                     <ListBox.ContextMenu>
@@ -92,67 +121,85 @@
 
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="52" />
+                <RowDefinition Height="56" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
+            <!-- Header: 56, 22 gutter, mark 26, title 15, quiet actions. -->
             <Border Grid.Row="0" Background="#F7F4EE" BorderBrush="#E9E4DA" BorderThickness="0,0,0,1">
-                <Grid Margin="18,0">
+                <Grid Margin="22,0">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="TitleText" Text="New chat" VerticalAlignment="Center"
-                               FontSize="15" FontWeight="SemiBold" Foreground="#1C1B18"
-                               AutomationProperties.Name="Conversation title" />
-                    <TextBlock x:Name="StatusText" Grid.Column="1" Text="" VerticalAlignment="Center"
-                               Margin="12,0" FontSize="10.5" Foreground="#9A9488" />
-                    <Button x:Name="CopyButton" Grid.Column="2" Content="Copy" Width="46" Height="26"
-                            Margin="0,0,6,0" Background="Transparent" BorderThickness="0"
-                            Foreground="#6B665C" IsEnabled="False" Click="Copy_Click"
+                    <Image Source="Assets/mascot.png" Width="26" Height="26" Margin="0,0,12,0"
+                           VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock x:Name="TitleText" Text="New chat" FontSize="15"
+                                   FontWeight="Medium" Foreground="#1C1B18"
+                                   AutomationProperties.Name="Conversation title" />
+                        <TextBlock x:Name="SubtitleText" Text="This laptop · the key stays here"
+                                   FontSize="10" Foreground="#9A9488" />
+                    </StackPanel>
+                    <TextBlock x:Name="StatusText" Grid.Column="2" Text="" VerticalAlignment="Center"
+                               Margin="16,0" FontSize="10" Foreground="#9A9488"
+                               TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
+                    <Button x:Name="CopyButton" Grid.Column="3" Content="Copy" Height="26"
+                            Padding="8,0" Background="Transparent" BorderThickness="0"
+                            Foreground="#9A9488" FontSize="9.5" IsEnabled="False" Click="Copy_Click"
                             AutomationProperties.Name="Copy the last answer" />
-                    <Button x:Name="SpeakButton" Grid.Column="3" Content="Speak" Width="50" Height="26"
-                            Margin="0,0,6,0" Background="Transparent" BorderThickness="0"
-                            Foreground="#6B665C" IsEnabled="False" Click="Speak_Click"
+                    <Button x:Name="SpeakButton" Grid.Column="4" Content="Speak" Height="26"
+                            Padding="8,0" Background="Transparent" BorderThickness="0"
+                            Foreground="#9A9488" FontSize="9.5" IsEnabled="False" Click="Speak_Click"
                             AutomationProperties.Name="Read the last answer aloud" />
-                    <Button x:Name="DetailsButton" Grid.Column="4" Content="Run" Width="44" Height="26"
-                            Margin="0,0,8,0" Background="Transparent" BorderThickness="0"
-                            Foreground="#6B665C" IsEnabled="False" Click="Details_Click"
+                    <Button x:Name="DetailsButton" Grid.Column="5" Content="Run" Height="26"
+                            Padding="8,0" Background="Transparent" BorderThickness="0"
+                            Foreground="#9A9488" FontSize="9.5" IsEnabled="False" Click="Details_Click"
                             AutomationProperties.Name="Run details" />
-                    <StackPanel x:Name="WindowButtons" Grid.Column="5" Orientation="Horizontal"
+                    <StackPanel x:Name="WindowButtons" Grid.Column="6" Orientation="Horizontal"
                                 VerticalAlignment="Center">
-                        <Button x:Name="MinimizeButton" Content="&#x2013;" Width="34" Height="28"
+                        <Button x:Name="MinimizeButton" Content="&#x2013;" Width="30" Height="28"
                                 Background="Transparent" BorderThickness="0" Foreground="#6B665C"
-                                Click="Minimize_Click" />
-                        <Button x:Name="MaximizeButton" Content="&#x25A1;" Width="34" Height="28"
+                                Click="Minimize_Click" AutomationProperties.Name="Minimize" />
+                        <Button x:Name="MaximizeButton" Content="&#x25A1;" Width="30" Height="28"
                                 Background="Transparent" BorderThickness="0" Foreground="#6B665C"
-                                Click="Maximize_Click" />
-                        <Button x:Name="CloseButton" Content="&#x2715;" Width="34" Height="28"
+                                Click="Maximize_Click" AutomationProperties.Name="Maximize" />
+                        <Button x:Name="CloseButton" Content="&#x2715;" Width="30" Height="28"
                                 Background="Transparent" BorderThickness="0" Foreground="#6B665C"
-                                Click="Close_Click" />
+                                Click="Close_Click" AutomationProperties.Name="Close" />
                     </StackPanel>
                 </Grid>
             </Border>
 
+            <!-- Conversation: 22 gutter, like the Harmony list. -->
             <Grid Grid.Row="1">
-                <ScrollViewer x:Name="MessagesScroll" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer x:Name="MessagesScroll" VerticalScrollBarVisibility="Auto"
+                              Padding="22,0,22,10">
                     <ItemsControl x:Name="MessagesList" ItemTemplate="{StaticResource MessageTemplate}" />
                 </ScrollViewer>
                 <StackPanel x:Name="EmptyState" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Image Source="Assets/mascot.png" Width="132" Height="132" />
-                    <TextBlock Text="Ask me something." FontSize="15" Foreground="#9A9488"
-                               HorizontalAlignment="Center" Margin="0,12,0,0" />
+                    <Image Source="Assets/mascot.png" Width="108" Height="108" />
+                    <TextBlock Text="Ask HOPA anything on this laptop."
+                               FontSize="15" Foreground="#1C1B18" HorizontalAlignment="Center"
+                               Margin="0,16,0,0" />
+                    <TextBlock Text="Payments always ask first."
+                               FontSize="12.5" Foreground="#9A9488" HorizontalAlignment="Center"
+                               Margin="0,6,0,0" />
                 </StackPanel>
             </Grid>
 
-            <Border x:Name="PendingAttachmentBar" Grid.Row="2" Margin="16,8,16,0"
-                    Background="#F3EFE7" CornerRadius="9" Padding="10,8" Visibility="Collapsed">
+            <TextBlock x:Name="ErrorText" Grid.Row="2" Text="" Margin="22,0,22,4" FontSize="10.5"
+                       Foreground="#C0392B" TextWrapping="Wrap" Visibility="Collapsed" />
+            <Border x:Name="PendingAttachmentBar" Grid.Row="3" Margin="22,8,22,0"
+                    Background="#F1ECE3" CornerRadius="9" Padding="10,8" Visibility="Collapsed">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -163,34 +210,78 @@
                                    Foreground="#1C1B18" TextTrimming="CharacterEllipsis" />
                         <TextBlock x:Name="PendingAttachmentDetail" FontSize="9.5" Foreground="#9A9488" />
                     </StackPanel>
-                    <Button Grid.Column="1" Content="Remove" Width="66" Height="26"
+                    <Button Grid.Column="1" Content="Remove" Height="24" Padding="8,0"
                             Background="Transparent" BorderThickness="0" Foreground="#6B665C"
-                            Click="RemoveAttachment_Click"
+                            FontSize="9.5" Click="RemoveAttachment_Click"
                             AutomationProperties.Name="Remove attachment" />
                 </Grid>
             </Border>
 
-            <Border Grid.Row="3" Margin="16,8,16,16" Background="#FFFFFF" CornerRadius="10"
-                    BorderBrush="#E9E4DA" BorderThickness="1" Padding="8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="Composer" BorderThickness="0" Background="Transparent"
-                             FontSize="12.5" TextWrapping="Wrap" MinHeight="38"
-                             VerticalContentAlignment="Center" KeyDown="Composer_KeyDown"
-                             AutomationProperties.Name="Message" />
-                    <Button x:Name="MicButton" Grid.Column="1" Content="Mic" Width="56" Height="38"
-                            Margin="0,0,6,0" Background="Transparent" BorderThickness="0"
-                            Foreground="#6B665C" Click="Mic_Click"
-                            AutomationProperties.Name="Dictate a message" />
-                    <Button x:Name="SendButton" Grid.Column="2" Content="Send" Width="84" Height="38"
-                            Background="#E8703A" Foreground="#FFFFFF" BorderThickness="0"
-                            Click="Send_Click" AutomationProperties.Name="Send message" />
-                </Grid>
-            </Border>
+            <!-- Composer: a 24-radius pill with one 44 circle at the end. -->
+            <Grid Grid.Row="4" Margin="22,8,22,18">
+                <Border Background="#FFFFFF" CornerRadius="24" BorderBrush="#E9E4DA"
+                        BorderThickness="1" Padding="20,3,8,3">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="Composer" BorderThickness="0" Background="Transparent"
+                                 FontSize="13.5" TextWrapping="Wrap" MinHeight="38"
+                                 VerticalContentAlignment="Center" KeyDown="Composer_KeyDown"
+                                 AutomationProperties.Name="Message" />
+                        <Button x:Name="MicButton" Grid.Column="1" Content="&#xE720;"
+                                Width="44" Height="44" Margin="0,0,6,0" Background="#F1ECE3"
+                                BorderThickness="0" Foreground="#6B665C" FontSize="14"
+                                FontFamily="Segoe MDL2 Assets"
+                                Click="Mic_Click" AutomationProperties.Name="Dictate a message" />
+                        <Button x:Name="SendButton" Grid.Column="2" Content="&#x2191;"
+                                Width="44" Height="44" Background="#0A59F7" Foreground="#FFFFFF"
+                                BorderThickness="0" FontSize="18" Click="Send_Click"
+                                AutomationProperties.Name="Send message" />
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
+
+        <!-- Right rail: the run behind the answer, 258 like the Harmony shell. -->
+        <Border Grid.Column="3" Width="258" Background="Transparent" Padding="10,68,10,12">
+            <Border Background="#FFFFFF" CornerRadius="14" BorderBrush="#E9E4DA" BorderThickness="1"
+                    Padding="14,12,14,10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="THIS ANSWER" FontSize="9" FontWeight="Bold"
+                               Foreground="#9A9488" />
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Ellipse x:Name="RailDot" Width="7" Height="7" Fill="#9A9488"
+                                 VerticalAlignment="Center" />
+                        <TextBlock x:Name="RailStatus" Text="Nothing ran yet" FontSize="15"
+                                   FontWeight="Medium" Foreground="#1C1B18" Margin="7,0,0,0" />
+                    </StackPanel>
+                    <TextBlock x:Name="RailFacts" DockPanel.Dock="Top" Text="" FontSize="10.5"
+                               Foreground="#9A9488" Margin="0,3,0,0" />
+                    <Border DockPanel.Dock="Bottom" BorderBrush="#E9E4DA" BorderThickness="0,1,0,0"
+                            Padding="0,10,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="RailBridgeDot" Width="6" Height="6" Fill="#B26A00"
+                                     VerticalAlignment="Top" Margin="0,4,0,0" />
+                            <TextBlock x:Name="RailBridge" Text="No bridge · this conversation only"
+                                       FontSize="10" Foreground="#9A9488" Margin="6,0,0,0"
+                                       TextWrapping="Wrap" Width="196" />
+                        </StackPanel>
+                    </Border>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                        <ItemsControl x:Name="RailSteps">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" FontSize="11.5" Foreground="#6B665C"
+                                               TextWrapping="Wrap" Margin="0,4,0,0" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Border>
     </Grid>
 </Window>
