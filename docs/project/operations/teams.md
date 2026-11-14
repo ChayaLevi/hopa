@@ -65,11 +65,20 @@ the step that runs now.
 
 ### How the bricks connect
 
-Two pictures instead of one. The first follows a single request from the person
-to the step that runs. The second follows a single recipe from production to the
-phone. Numbers match the brick table above.
+The bricks run on three different clocks, and mixing them in one picture is what
+made the first draft unreadable:
 
-**One request.**
+| Picture | Clock | Starts because | Ends when |
+|---|---|---|---|
+| The request | seconds | a person asks, or a notification arrives | the step ran and was checked |
+| The recipe pipeline | days | an app was updated, or a new app is supported | a signed package is on the phone |
+| The learning loop | weeks | journals accumulate | a finding changes a team plan or a release |
+
+Numbers match the brick table above. The same brick can appear in more than one
+picture: 1 Clients renders the screen in the first, and installs packages in the
+second.
+
+**Same clock: the request.** A person asks; seconds later something happened.
 
 ```mermaid
 flowchart TB
@@ -97,6 +106,59 @@ notification. Decision picks one step from what knowledge knows about the app. A
 step that needs a yes goes through family first and runs only on a yes; a step
 that needs no yes runs straight through. A no leaves the task waiting and tells
 the person. Every arrow above travels over platform (11).
+
+**Slower clock: the recipe pipeline.** No person is involved. An app update or a
+new target app starts it.
+
+```mermaid
+flowchart LR
+    factory["6 Factory"] -->|new recipe| knowledge["5 Target-app knowledge"]
+    knowledge -->|version to test| farm["8 Farm"]
+    farm -->|failures| knowledge
+    farm -->|go or no-go| delivery["7 Delivery"]
+    delivery -->|signed package| clients["1 Clients"]
+```
+
+Reading it: the factory proposes a recipe; knowledge owns it; the farm runs it on
+the device matrix and sends failures back; only a version that passes goes to
+delivery, which puts a signed package on the phone. This is the whole loop that
+keeps a recipe true when an app changes.
+
+**Slowest clock: the learning loop.** Journeys from real runs and from the farm
+are read later, in batches, to decide what to do next week.
+
+```mermaid
+flowchart LR
+    execution["2 Execution"] -->|journals| lab["10 Product lab"]
+    farm["8 Farm"] -->|journals| lab
+    lab -->|failure list| teams["team plans"]
+    lab -->|HOPA-Bench score| release["release"]
+    lab -->|pilot numbers| priorities["priorities"]
+```
+
+Reading it: the lab is not a stage in the recipe pipeline; it sits beside it,
+reads what the runs produced, and publishes findings that other teams act on. It
+does not gate a release and it does not write features.
+
+#### What the Product lab produces
+
+It is research plus measurement, and both have named outputs.
+
+| Output | Form | Used by | How often |
+|---|---|---|---|
+| Failure list | the steps that failed, with app version and log, ranked | every team's weekly plan | weekly |
+| HOPA-Bench score | one number per release, plus the tasks that failed | the release cut | every release |
+| Pilot numbers | time saved, steps used, retries, repeats within 7 days | priorities, the family pilot | monthly |
+| A research result | a method, a dataset and a report (R1), or a study (R3) | engineering, which then productionises or parks it | per thrust, about six months |
+
+It is not QA: QA runs the release, the lab measures it. It is not product: it
+proposes what to fix first, and the owning team decides.
+
+**The two bands.** 11 Platform and 12 Architecture are not phases on any clock,
+so they are not drawn as boxes. Platform carries every arrow between the boxes;
+architecture sets the contracts, CI, release and signing rules that every box
+follows. They wrap all three pictures, which is why the earlier single diagram
+put them above and below everything.
 
 ### Notifications from target apps
 
@@ -127,29 +189,6 @@ screen that lists the apps the household allowed.
 
 Rules: the raw text never leaves the phone, only the classified event does; the
 household can revoke an app at any time; a redaction failure counts as a leak.
-
-**One recipe, from production to the phone.**
-
-```mermaid
-flowchart LR
-    factory["6 Factory"] -->|new recipe| knowledge["5 Knowledge"]
-    knowledge -->|version to test| farm["8 Farm"]
-    farm -->|failures| knowledge
-    farm -->|go or no-go| delivery["7 Delivery"]
-    delivery -->|signed package| clients["1 Clients"]
-    farm -->|journals| lab["10 Product lab"]
-```
-
-Reading it: the factory proposes a recipe; knowledge owns it; the farm runs it on
-the device matrix and sends failures back; only a version that passes goes to
-delivery, which puts a signed package on the phone. The lab reads the numbers
-afterwards.
-
-**The two bands.** 11 Platform and 12 Architecture are not steps in either
-picture, so they are not drawn as boxes. Platform carries every arrow between
-the boxes; architecture sets the contracts, CI, release and signing rules that
-every box follows. They wrap both pictures, which is why the earlier single
-diagram put them above and below everything.
 
 ### Four bricks that need a plain sentence
 
