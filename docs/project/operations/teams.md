@@ -240,6 +240,84 @@ Rules that keep parallelism from turning into noise:
 About 12 full-time equivalents at seven teams. At five teams the same work fits
 in about 9: Tasks and family merge, and the two shared roles stay shared.
 
+## People and ownership (2026-11)
+
+Eight people today, so the shape is **six teams**; the seven-team table above is
+the shape when the two open hires land. Nothing moves when that happens: Tasks
+has its own service already, and the farm is a folder.
+
+| Team | Lead | Second | Owns |
+|---|---|---|---|
+| **Clients** | Michael | Chaya | `apps/android`, `apps/windows`, `apps/harmony` (frozen), `packages/` |
+| **Platform and services** | Amir | Batya | `services/backend`, `bridge`, `relay`, `wire`, `brain` (service), pairing and tokens |
+| **Apps and knowledge** | Nizzan | Shira | app analysis, `contracts/recipes`, `services/mapping`, factory and delivery |
+| **Algorithms and measurement** | Sefi | - | LAIX algorithms, decision policies, `services/evals`, benchmarks, metrics |
+| **Integration, release and quality** | Yoni | - | CI, releases, integration tests, the verification farm, security, the gaps |
+| **Architecture and contracts** (shared role) | Michael + Amir + Yoni | - | `contracts/`, shared rules, seam reviews, release veto |
+
+Why six and not seven: the **Tasks** brick lives inside Platform until the hire
+(Amir + Batya), and the **farm** lives inside Integration (Yoni). Both are
+already separate folders and contracts, so splitting them later is a staffing
+change, not a refactor.
+
+### Folder and service owners
+
+| Path | Owner |
+|---|---|
+| `apps/android`, `apps/windows`, `apps/harmony` | Michael (Chaya) |
+| `packages/core`, `packages/data`, `packages/capabilities` | Michael |
+| `packages/decision` (new, from LAIX) | Sefi (algorithms) + Michael (contract and Kotlin port) |
+| `services/backend`, `bridge`, `relay`, `wire` | Amir (Batya) |
+| `services/brain` | Amir owns the service; knowledge and prompts arrive from Nizzan |
+| `services/tasks` (new) | Amir (Batya) |
+| `contracts/tasks` | Amir + Yoni |
+| `contracts/recipes`, `services/mapping` (new) | Nizzan (Shira) |
+| `services/evals` | Sefi |
+| `services/tools`, CI, releases | Yoni |
+| `contracts/*` (other than tasks and recipes) | Michael + Amir review |
+
+### Where the seconds go
+
+- **Batya -> Amir.** Backend is her strength and Amir carries four services; the
+  second is needed on day one.
+- **Shira -> Nizzan.** Recommended: app analysis is the newest and least known
+  area, while the clients already have Michael and a working process. If Shira
+  is stronger in UI, she and Chaya swap.
+- **Chaya -> Michael**, with one day a week with Yoni on the farm and CI. Two
+  clients plus visual parity is more than one person, and she covers peaks.
+
+### LAIX
+
+- **Product and algorithms:** Sefi (new versions, policies, benchmarks). Michael
+  wrote LAIX and keeps the contract and compatibility.
+- **Inside HOPA:** a pilot in Algorithms first, on HOPA's own journals (two to
+  three weeks), then a decision on a Kotlin port in `packages/decision`
+  (Michael + Sefi). A Python runtime beside the loop is not the product path:
+  behaviour must match on Android and Windows.
+- If LAIX is also a product of its own, it needs a named owner; otherwise it
+  dissolves into HOPA.
+
+### Load check (honest)
+
+| Person | Risk | Mitigation |
+|---|---|---|
+| Michael | clients + LAIX + architecture is too much | Chaya in clients; LAIX algorithms to Sefi; contracts reviewed with Amir |
+| Amir | four services plus tasks | Batya; Yoni takes CI and release |
+| Nizzan | a new area with no second | Shira; one system app as the first case |
+| Sefi | "algorithms everywhere" is too broad | scope: decisions, LAIX, benchmarks, metrics |
+| Yoni | "everything unowned" is vague | charter: integration, release, quality, farm, security |
+| - | no product or designer | reserve 0.5 product and 0.5 design, or parity and priorities drift |
+
+### First 90 days
+
+| Who | Finishes |
+|---|---|
+| Michael + Chaya | the Windows gates (W3-W5) and the Android gates; Windows visual parity (W6) |
+| Amir + Batya | `contracts/tasks` and the `services/tasks` skeleton; token rotation; bridge and relay |
+| Nizzan + Shira | the first system app: analysis -> `contracts/recipes` -> one recipe end to end |
+| Sefi | the LAIX pilot on HOPA episodes; the decision contract and benchmark; metrics from journals |
+| Yoni | Windows and Android CI jobs, the farm on the runners, the release checklist, security |
+
 ## Launch waves
 
 ```

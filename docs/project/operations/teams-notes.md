@@ -168,6 +168,7 @@ The son may help remotely until she turns it off.
 | 2026-11-14 | One owner per folder; shared contracts belong to Architecture | Prevents two teams editing the same thing |
 | 2026-11-14 | The Product lab is not QA | Its mandate is decisions and numbers, not test reports |
 | 2026-11-14 | Four teams is too coarse; five is the floor | At four, tasks and family blur again |
+| 2026-11-14 | Eight people run six teams; the seven-team shape waits for two hires | Tasks sits in Platform and the farm in Integration until then |
 
 ## Alternatives still on the table
 
@@ -187,7 +188,7 @@ The son may help remotely until she turns it off.
 | Is the family local-first or account-based? | Local-first profiles with optional sync | Data model and privacy work move in the wrong direction |
 | Where does the Product lab start? | R1 (recipes that survive updates); consider 60/40 with R3 because the approval interface exists | The lab spends a quarter on data plumbing |
 | Where does the test farm run? | Start on the existing CI runners, move when flakiness appears | Premature hardware spend |
-| When does Windows get a team? | After the Android gates close | Two half-built clients |
+| When does Windows get a team? | It stays with Clients (Michael + Chaya) until both client gates close; then a Windows-only lead can split off | Two half-built clients |
 
 ## Where the conversation stopped
 
