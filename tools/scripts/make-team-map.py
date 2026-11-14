@@ -10,7 +10,7 @@ from __future__ import annotations
 import html
 from pathlib import Path
 
-W, H = 1280, 1170
+W, H = 1280, 1210
 
 INK = "#1C1B18"
 MUTED = "#6B665C"
@@ -161,7 +161,7 @@ label(772, 170, "Decision")
 label(700, 86, "only if no recipe step fits")
 
 arrow([(545, 280), (545, 230)])
-label(466, 254, "apps, aliases, cases")
+label(545, 252, "apps, aliases, cases")
 arrow([(700, 280), (700, 230)])
 label(700, 252, "steps")
 
@@ -202,10 +202,10 @@ arrow([(970, 508), (1000, 508), (1000, 304), (792, 304)])
 label(900, 296, "installs, signature checked")
 
 # --- Band C: the learning loop ---------------------------------------------
-band(24, 646, 1232, 324, "LEARNING - weeks - read in batches, change plans")
+band(24, 646, 1232, 354, "LEARNING - weeks - read in batches, change plans")
 text(40, 684, ["Product lab - what it produces, and who gets it"],
      size=13, weight="600", anchor="start")
-rect(40, 692, 900, 262, "#FBF7EE", dash="4 4", radius=10)
+rect(40, 692, 900, 292, "#FBF7EE", dash="4 4", radius=10)
 
 arrow([(705, 538), (705, 670), (470, 670), (470, 690)])
 label(620, 640, "journals")
@@ -219,9 +219,9 @@ rows = [
      "to the next release: ship or block"),
     (832, ["read the pilot homes' runs"], "minutes per task, steps, repeats", "monthly",
      "to the next plan"),
-    (892, ["one research question", "e.g. recipes that survive updates"],
-     "method + dataset + report", "about 6 months",
-     "to Target-app knowledge: use or shelve"),
+    (892, ["a problem we cannot fix by hand", "e.g. recipes break after app updates"],
+     "a study: method, data, report", "about 6 months",
+     "to Target-app knowledge: adopt or drop"),
 ]
 for y, left, artifact, cadence, consumer in rows:
     box(60, y, 300, 48, left, "algorithms")
@@ -230,13 +230,15 @@ for y, left, artifact, cadence, consumer in rows:
     label(490, centre - 3, artifact)
     text(490, centre + 13, [cadence], size=11, colour=MUTED)
     text(634, centre + 4, [consumer], size=13, anchor="start")
+text(60, 962, ["One researcher owns the bottom row: a problem the failure list cannot explain,"], size=11, colour=MUTED, anchor="start")
+text(60, 978, ["answered with a study and a method, then adopted into recipes or dropped."], size=11, colour=MUTED, anchor="start")
 
 # 11 Platform: what the transport layer actually does.
-rail(982, TEAM["platform"][0], "Platform and services -",
+rail(1012, TEAM["platform"][0], "Platform and services -",
      ["pair the devices once", "keep the link encrypted", "renew access codes", "message format both sides use"])
 
 # --- Legend -----------------------------------------------------------------
-add(f'<text x="24" y="1056" font-size="12" fill="{MUTED}">Box colour is the owning team</text>')
+add(f'<text x="24" y="1096" font-size="12" fill="{MUTED}">Box colour is the owning team</text>')
 short = {
     "clients": "Clients",
     "platform": "Platform and services",
@@ -245,15 +247,15 @@ short = {
     "integration": "Integration and quality",
     "shared": "Architecture and contracts",
 }
-columns = [(24, 1070), (24, 1098), (452, 1070), (452, 1098), (880, 1070), (880, 1098)]
+columns = [(24, 1110), (24, 1138), (452, 1110), (452, 1138), (880, 1110), (880, 1138)]
 order = ["clients", "platform", "knowledge", "algorithms", "integration", "shared"]
 for key, (x, y) in zip(order, columns):
     rect(x, y, 16, 16, TEAM[key][0], radius=3)
     add(f'<text x="{x + 24}" y="{y + 12}" font-size="12" fill="{INK}">{esc(short[key])}</text>')
 
-text(24, 1136, ["Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider."],
+text(24, 1176, ["Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider."],
      size=12, colour=MUTED, anchor="start")
-text(24, 1156, ["A step covered by a recipe runs without a model call; the call is the fallback for everything else."],
+text(24, 1196, ["A step covered by a recipe runs without a model call; the call is the fallback for everything else."],
      size=12, colour=MUTED, anchor="start")
 
 add("</svg>")

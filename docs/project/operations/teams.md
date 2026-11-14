@@ -293,6 +293,12 @@ One researcher owns the research job, one analyst owns the measurement job. The
 research half may produce a negative result; the measurement half may not be
 late.
 
+The first question on the list is concrete: **why do recipes break when a target
+app updates, and could a way of naming a control survive the change?** The
+deliverable is a method (how a control is named), a dataset (the same app before
+and after an update) and a report with the measured survival rate. It either
+changes how recipes are written, or it is parked with the reason.
+
 **What a pilot is.** Five to ten households using a release on their own phones
 for four to six weeks, with journals on and consent recorded. Not a demo, not a
 lab study.

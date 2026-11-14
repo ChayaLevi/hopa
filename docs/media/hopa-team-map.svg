@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1170" viewBox="0 0 1280 1170" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1210" viewBox="0 0 1280 1210" font-family="Segoe UI, Arial, sans-serif">
 <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8C8579"/></marker><marker id="tail" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M10,0 L0,5 L10,10 z" fill="#8C8579"/></marker></defs>
-<rect x="0" y="0" width="1280" height="1170" rx="0" fill="#F7F4EE" stroke="none" stroke-width="1.2"/>
+<rect x="0" y="0" width="1280" height="1210" rx="0" fill="#F7F4EE" stroke="none" stroke-width="1.2"/>
 <rect x="24" y="8" width="1232" height="44" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="40" y="36" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
 <tspan x="40" dy="0">Architecture and contracts -</tspan>
@@ -131,9 +131,9 @@
 </g>
 <path d="M545,280 L545,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="399.0" y="243" width="134.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="466" y="255" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="466" dy="0">apps, aliases, cases</tspan>
+<rect x="478.0" y="241" width="134.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="545" y="253" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="545" dy="0">apps, aliases, cases</tspan>
 </text>
 </g>
 <path d="M700,280 L700,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
@@ -248,14 +248,14 @@
 <tspan x="900" dy="0">installs, signature checked</tspan>
 </text>
 </g>
-<rect x="24" y="646" width="1232" height="324" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
+<rect x="24" y="646" width="1232" height="354" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
 <text x="40" y="668" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
 <tspan x="40" dy="0">LEARNING - weeks - read in batches, change plans</tspan>
 </text>
 <text x="40" y="684" font-size="13" fill="#1C1B18" font-weight="600" text-anchor="start">
 <tspan x="40" dy="0">Product lab - what it produces, and who gets it</tspan>
 </text>
-<rect x="40" y="692" width="900" height="262" rx="10" fill="#FBF7EE" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="40" y="692" width="900" height="292" rx="10" fill="#FBF7EE" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="4 4"/>
 <path d="M705,538 L705,670 L470,670 L470,690" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="590.2" y="629" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
@@ -323,59 +323,65 @@
 </text>
 <rect x="60" y="892" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="913" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="210" dy="0">one research question</tspan>
-<tspan x="210" dy="16">e.g. recipes that survive updates</tspan>
+<tspan x="210" dy="0">a problem we cannot fix by hand</tspan>
+<tspan x="210" dy="16">e.g. recipes break after app updates</tspan>
 </text>
 <path d="M360,916 L620,916" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="407.5" y="902" width="165.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<rect x="395.1" y="902" width="189.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="490" y="914" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="490" dy="0">method + dataset + report</tspan>
+<tspan x="490" dy="0">a study: method, data, report</tspan>
 </text>
 </g>
 <text x="490" y="929" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="490" dy="0">about 6 months</tspan>
 </text>
 <text x="634" y="920" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="634" dy="0">to Target-app knowledge: use or shelve</tspan>
+<tspan x="634" dy="0">to Target-app knowledge: adopt or drop</tspan>
 </text>
-<rect x="24" y="982" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="40" y="1010" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<text x="60" y="962" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
+<tspan x="60" dy="0">One researcher owns the bottom row: a problem the failure list cannot explain,</tspan>
+</text>
+<text x="60" y="978" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
+<tspan x="60" dy="0">answered with a study and a method, then adopted into recipes or dropped.</tspan>
+</text>
+<rect x="24" y="1012" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="40" y="1040" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
 <tspan x="40" dy="0">Platform and services -</tspan>
 </text>
-<rect x="320" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="428" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<rect x="320" y="1020" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="428" y="1039" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="428" dy="0">pair the devices once</tspan>
 </text>
-<rect x="551" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="660" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<rect x="551" y="1020" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="660" y="1039" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="660" dy="0">keep the link encrypted</tspan>
 </text>
-<rect x="783" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="891" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<rect x="783" y="1020" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="891" y="1039" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="891" dy="0">renew access codes</tspan>
 </text>
-<rect x="1014" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="1123" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<rect x="1014" y="1020" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1123" y="1039" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="1123" dy="0">message format both sides use</tspan>
 </text>
-<text x="24" y="1056" font-size="12" fill="#6B665C">Box colour is the owning team</text>
-<rect x="24" y="1070" width="16" height="16" rx="3" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="48" y="1082" font-size="12" fill="#1C1B18">Clients</text>
-<rect x="24" y="1098" width="16" height="16" rx="3" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="48" y="1110" font-size="12" fill="#1C1B18">Platform and services</text>
-<rect x="452" y="1070" width="16" height="16" rx="3" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="476" y="1082" font-size="12" fill="#1C1B18">Target-app knowledge</text>
-<rect x="452" y="1098" width="16" height="16" rx="3" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="476" y="1110" font-size="12" fill="#1C1B18">Algorithms and measurement</text>
-<rect x="880" y="1070" width="16" height="16" rx="3" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="904" y="1082" font-size="12" fill="#1C1B18">Integration and quality</text>
-<rect x="880" y="1098" width="16" height="16" rx="3" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="904" y="1110" font-size="12" fill="#1C1B18">Architecture and contracts</text>
-<text x="24" y="1136" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
+<text x="24" y="1096" font-size="12" fill="#6B665C">Box colour is the owning team</text>
+<rect x="24" y="1110" width="16" height="16" rx="3" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="48" y="1122" font-size="12" fill="#1C1B18">Clients</text>
+<rect x="24" y="1138" width="16" height="16" rx="3" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="48" y="1150" font-size="12" fill="#1C1B18">Platform and services</text>
+<rect x="452" y="1110" width="16" height="16" rx="3" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="476" y="1122" font-size="12" fill="#1C1B18">Target-app knowledge</text>
+<rect x="452" y="1138" width="16" height="16" rx="3" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="476" y="1150" font-size="12" fill="#1C1B18">Algorithms and measurement</text>
+<rect x="880" y="1110" width="16" height="16" rx="3" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="904" y="1122" font-size="12" fill="#1C1B18">Integration and quality</text>
+<rect x="880" y="1138" width="16" height="16" rx="3" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="904" y="1150" font-size="12" fill="#1C1B18">Architecture and contracts</text>
+<text x="24" y="1176" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
 <tspan x="24" dy="0">Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider.</tspan>
 </text>
-<text x="24" y="1156" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
+<text x="24" y="1196" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
 <tspan x="24" dy="0">A step covered by a recipe runs without a model call; the call is the fallback for everything else.</tspan>
 </text>
 </svg>
