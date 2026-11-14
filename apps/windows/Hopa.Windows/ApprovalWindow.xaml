@@ -14,15 +14,15 @@
         </Grid.RowDefinitions>
 
         <StackPanel>
-            <TextBlock x:Name="TitleLabel" FontSize="20" FontWeight="SemiBold" Foreground="#1C1B18" />
-            <TextBlock x:Name="BodyLabel" FontSize="13" Foreground="#6B665C" TextWrapping="Wrap"
+            <TextBlock x:Name="TitleLabel" FontSize="15" FontWeight="SemiBold" Foreground="#1C1B18" />
+            <TextBlock x:Name="BodyLabel" FontSize="12.5" Foreground="#6B665C" TextWrapping="Wrap"
                        Margin="0,8,0,0" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="0,16,0,0">
-            <TextBlock x:Name="AmountLabel" FontSize="14" Foreground="#1C1B18" Margin="0,0,0,6" />
-            <TextBlock x:Name="MerchantLabel" FontSize="13" Foreground="#6B665C" Margin="0,0,0,6" />
-            <TextBlock x:Name="ConsequenceLabel" FontSize="12" Foreground="#B26A00"
+            <TextBlock x:Name="AmountLabel" FontSize="12.5" Foreground="#1C1B18" Margin="0,0,0,6" />
+            <TextBlock x:Name="MerchantLabel" FontSize="12.5" Foreground="#6B665C" Margin="0,0,0,6" />
+            <TextBlock x:Name="ConsequenceLabel" FontSize="11.5" Foreground="#B26A00"
                        TextWrapping="Wrap" />
         </StackPanel>
 
@@ -30,7 +30,7 @@
             <Button x:Name="DenyButton" Content="Deny" Width="96" Height="34" Margin="0,0,8,0"
                     Click="Deny_Click" />
             <Button x:Name="AllowButton" Content="Allow" Width="96" Height="34"
-                    Background="#0A59F7" Foreground="#FFFFFF" BorderThickness="0"
+                    Background="#E8703A" Foreground="#FFFFFF" BorderThickness="0"
                     Click="Allow_Click" />
         </StackPanel>
     </Grid>

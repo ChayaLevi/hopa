@@ -11,23 +11,23 @@
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <DataTemplate x:Key="MessageTemplate">
-            <Border Background="{Binding Fill}" CornerRadius="16" Padding="14,10" Margin="16,4"
+            <Border Background="{Binding Fill}" CornerRadius="10" Padding="14,10" Margin="16,4"
                     MaxWidth="640" HorizontalAlignment="{Binding Align}">
-                <TextBlock Text="{Binding Text}" Foreground="{Binding Ink}" FontSize="14"
+                <TextBlock Text="{Binding Text}" Foreground="{Binding Ink}" FontSize="12.5"
                            TextWrapping="Wrap" />
             </Border>
         </DataTemplate>
         <DataTemplate x:Key="ConversationTemplate">
             <StackPanel Margin="8,7">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Title}" FontSize="14" TextTrimming="CharacterEllipsis"
+                    <TextBlock Text="{Binding Title}" FontSize="12.5" TextTrimming="CharacterEllipsis"
                                Foreground="#1C1B18" />
                     <TextBlock Text="{Binding PinLabel}" FontSize="9" FontWeight="SemiBold"
                                Foreground="#E8703A" Margin="6,2,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding UpdatedLabel}" FontSize="11" Foreground="#9A9488" />
-                    <TextBlock Text="{Binding ArchivedLabel}" FontSize="10" Foreground="#9A9488"
+                    <TextBlock Text="{Binding UpdatedLabel}" FontSize="10.5" Foreground="#9A9488" />
+                    <TextBlock Text="{Binding ArchivedLabel}" FontSize="9.5" Foreground="#9A9488"
                                Margin="8,0,0,0" />
                 </StackPanel>
             </StackPanel>
@@ -46,18 +46,23 @@
                 <StackPanel DockPanel.Dock="Top" Margin="18,18,18,10">
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="10" Height="10" Fill="#E8703A" VerticalAlignment="Center" />
-                        <TextBlock Text="HOPA" FontSize="18" FontWeight="SemiBold" Margin="8,0,0,0"
+                        <TextBlock Text="HOPA" FontSize="15" FontWeight="SemiBold" Margin="8,0,0,0"
                                    Foreground="#1C1B18" />
                     </StackPanel>
                     <Button Content="+ New chat" Margin="0,12,0,0" Height="34"
                             Background="#FFFFFF" BorderBrush="#E9E4DA" Click="NewChat_Click"
                             AutomationProperties.Name="New chat" />
-                    <TextBox x:Name="SearchBox" Margin="0,10,0,0" Height="30"
-                             VerticalContentAlignment="Center"
-                             AutomationProperties.Name="Search conversations"
-                             TextChanged="SearchBox_TextChanged" />
+                    <Grid Margin="0,10,0,0">
+                        <TextBox x:Name="SearchBox" Height="30"
+                                 VerticalContentAlignment="Center" Padding="8,0"
+                                 AutomationProperties.Name="Search conversations"
+                                 TextChanged="SearchBox_TextChanged" />
+                        <TextBlock x:Name="SearchPlaceholder" Text="Search" IsHitTestVisible="False"
+                                   Margin="12,0,0,0" VerticalAlignment="Center"
+                                   FontSize="11.5" Foreground="#9A9488" />
+                    </Grid>
                     <CheckBox x:Name="ShowArchivedBox" Content="Show archived" Margin="0,8,0,0"
-                              FontSize="11" Foreground="#6B665C" Click="ShowArchived_Click"
+                              FontSize="10.5" Foreground="#6B665C" Click="ShowArchived_Click"
                               AutomationProperties.Name="Show archived conversations" />
                 </StackPanel>
                 <Button DockPanel.Dock="Bottom" x:Name="SettingsButton" Content="Settings"
@@ -105,7 +110,7 @@
                                FontSize="15" FontWeight="SemiBold" Foreground="#1C1B18"
                                AutomationProperties.Name="Conversation title" />
                     <TextBlock x:Name="StatusText" Grid.Column="1" Text="" VerticalAlignment="Center"
-                               Margin="12,0" FontSize="11" Foreground="#9A9488" />
+                               Margin="12,0" FontSize="10.5" Foreground="#9A9488" />
                     <Button x:Name="CopyButton" Grid.Column="2" Content="Copy" Width="46" Height="26"
                             Margin="0,0,6,0" Background="Transparent" BorderThickness="0"
                             Foreground="#6B665C" IsEnabled="False" Click="Copy_Click"
@@ -145,16 +150,16 @@
             </Grid>
 
             <Border x:Name="PendingAttachmentBar" Grid.Row="2" Margin="16,8,16,0"
-                    Background="#F3EFE7" CornerRadius="12" Padding="10,8" Visibility="Collapsed">
+                    Background="#F3EFE7" CornerRadius="9" Padding="10,8" Visibility="Collapsed">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock x:Name="PendingAttachmentName" FontSize="12"
+                        <TextBlock x:Name="PendingAttachmentName" FontSize="11.5"
                                    Foreground="#1C1B18" TextTrimming="CharacterEllipsis" />
-                        <TextBlock x:Name="PendingAttachmentDetail" FontSize="10" Foreground="#9A9488" />
+                        <TextBlock x:Name="PendingAttachmentDetail" FontSize="9.5" Foreground="#9A9488" />
                     </StackPanel>
                     <Button Grid.Column="1" Content="Remove" Width="66" Height="26"
                             Background="Transparent" BorderThickness="0" Foreground="#6B665C"
@@ -163,7 +168,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="3" Margin="16,8,16,16" Background="#FFFFFF" CornerRadius="18"
+            <Border Grid.Row="3" Margin="16,8,16,16" Background="#FFFFFF" CornerRadius="10"
                     BorderBrush="#E9E4DA" BorderThickness="1" Padding="8">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -172,7 +177,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="Composer" BorderThickness="0" Background="Transparent"
-                             FontSize="14" TextWrapping="Wrap" MinHeight="38"
+                             FontSize="12.5" TextWrapping="Wrap" MinHeight="38"
                              VerticalContentAlignment="Center" KeyDown="Composer_KeyDown"
                              AutomationProperties.Name="Message" />
                     <Button x:Name="MicButton" Grid.Column="1" Content="Mic" Width="56" Height="38"
@@ -180,7 +185,7 @@
                             Foreground="#6B665C" Click="Mic_Click"
                             AutomationProperties.Name="Dictate a message" />
                     <Button x:Name="SendButton" Grid.Column="2" Content="Send" Width="84" Height="38"
-                            Background="#0A59F7" Foreground="#FFFFFF" BorderThickness="0"
+                            Background="#E8703A" Foreground="#FFFFFF" BorderThickness="0"
                             Click="Send_Click" AutomationProperties.Name="Send message" />
                 </Grid>
             </Border>

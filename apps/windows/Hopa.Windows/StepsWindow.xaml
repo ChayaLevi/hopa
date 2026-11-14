@@ -10,8 +10,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock Text="Run details" FontSize="18" FontWeight="SemiBold" Foreground="#1C1B18" />
+        <TextBlock Text="Run details" FontSize="15" FontWeight="SemiBold" Foreground="#1C1B18" />
         <ListBox x:Name="StepsList" Grid.Row="1" Margin="0,12,0,0" BorderThickness="0"
-                 Background="#FFFFFF" FontFamily="Consolas" FontSize="12" />
+                 Background="#FFFFFF" FontFamily="Consolas" FontSize="11.5" />
     </Grid>
 </Window>

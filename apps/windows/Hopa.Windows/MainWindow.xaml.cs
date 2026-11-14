@@ -924,7 +924,14 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilter();
+    private void UpdateSearchPlaceholder() =>
+        SearchPlaceholder.Visibility = SearchBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        UpdateSearchPlaceholder();
+        ApplyFilter();
+    }
 
     private async void Window_Drop(object sender, DragEventArgs e)
     {

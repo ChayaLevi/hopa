@@ -14,12 +14,19 @@ The Windows screenshot is `docs/media/windows-w4.png`.
 | ink | `#1C1B18` | `#1C1B18` | yes |
 | muted | `#9A9488` | `#9A9488` | yes |
 | secondary ink | `#6B665C` | `#6B665C` | yes |
-| message radius | 9 / 10 | 16 | **no** |
-| small radius | 4 / 6 / 8 | 10 / 12 | **no** |
-| type scale | 9, 9.5, 10.5, 11.5, 12.5, 15 | 9, 10, 11, 14, 15, 18 | **no** |
+| message radius | 9 / 10 | 10 | yes |
+| small radius | 4 / 6 / 8 | 9 / 10 | close |
+| type scale | 9, 9.5, 10.5, 11.5, 12.5, 15 | 9, 9.5, 10.5, 11.5, 12.5, 15 | yes |
 | spacing rhythm | 4-based | 4-based with 14/16 paddings | close, not equal |
 
-Colour is identical; shape and type are not. That is the W6 work.
+Tokens changed on 2026-11-14 to close this table:
+
+- every `FontSize` moved onto the Harmony scale;
+- message radius 16 -> 10, composer 18 -> 10, attachment 12 -> 9;
+- a real bug the table found: `Send` and `Save` were `#0A59F7` (Windows blue),
+  not the accent `#E8703A`. Fixed.
+
+The screenshot `docs/media/windows-w4.png` is the result.
 
 ## Components
 
@@ -32,7 +39,7 @@ Colour is identical; shape and type are not. That is the W6 work.
 | attachment bar above the composer | yes | yes | same 4 MiB cap |
 | approval sheet | yes | yes | Windows is a separate window |
 | settings window | yes | yes | provider, key, bridge, tone |
-| empty state | yes | yes | "Ask me something." |
+| empty state | yes | yes | "Ask me something."; search now has a placeholder |
 | error state | inline text | status line under the composer | Windows is quieter |
 | long text | wraps | wraps | screenshot needed at 200% |
 
