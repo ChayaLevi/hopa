@@ -83,29 +83,78 @@ second.
 ```mermaid
 flowchart TB
     person(["Person"])
-    clients["1 Clients"]
-    tasks["3 Tasks"]
-    notes["9 Notifications"]
-    decision["13 Decision (LAIX)"]
-    family["4 Family"]
-    knowledge["5 Target-app knowledge"]
-    execution["2 Execution"]
+
+    subgraph phone["the phone - the loop lives here"]
+        clients["1 Clients"]
+        tasks["3 Tasks"]
+        notes["9 Notifications"]
+        decision["13 Decision"]
+        family["4 Family"]
+        recipes["5 Recipes (installed)"]
+        execution["2 Execution"]
+        target["the target app"]
+    end
+
+    subgraph net["the network - the only outside calls"]
+        model["model provider"]
+        registry["7 Delivery registry"]
+    end
 
     person -->|asks| clients
     clients -->|request| tasks
     notes -->|something worth doing| tasks
     tasks -->|what is next| decision
-    knowledge -->|the step for this app| decision
+    recipes -->|the step for this app| decision
     decision -->|is this allowed?| family
     family -->|yes, perform| execution
     decision -->|perform and check| execution
+    execution -->|drives| target
+    decision -.->|one question| model
+    registry -.->|signed package| recipes
 ```
 
 Reading it: a task arrives either from the person through the client or from a
 notification. Decision picks one step from what knowledge knows about the app. A
 step that needs a yes goes through family first and runs only on a yes; a step
 that needs no yes runs straight through. A no leaves the task waiting and tells
-the person. Every arrow above travels over platform (11).
+the person.
+
+The two bands are the deployment boundaries. Everything inside the phone band
+runs on the device: there is no HOPA server in this path. The network band has
+exactly two calls, both dotted: one model question from decision, and one signed
+package from delivery when recipes are installed. 5 is the brick Target-app
+knowledge; what sits on the phone is its installed copy, and the target app is
+another app on the same device.
+
+#### Where each box runs
+
+The request path needs **no HOPA server**. The loop, the task, the rules and the
+action all live on the device; the only thing fetched is the model's answer.
+
+| Box | Runs on | Needs | With the network off |
+|---|---|---|---|
+| 1 Clients | the phone (Android), later the PC (Windows) | nothing else | yes: chat, history, settings, records |
+| 3 Tasks | the phone's database | nothing else | yes; `services/tasks` is only for resuming on another device |
+| 13 Decision | inside the client | a model: a provider over HTTPS, or any OpenAI-compatible server on the LAN | no; Tier 0 (ADR-0019) runs only the fixed commands that need no model |
+| 4 Family | the phone | nothing else | yes: profiles are local, there is no account |
+| 5 Target-app knowledge | the factory, off the phone; a signed copy is installed on the phone | a package from 7 | the installed copy: yes |
+| 2 Execution | the phone (accessibility, system APIs); the PC (UIA) | the target app, running on the same device | yes |
+| 9 Notifications | the phone | notification access, granted by the person | yes |
+| 7 Delivery | a registry off the phone | network | only while installing; the installed package stays |
+| 6, 8, 10 | never on the phone: build and research machines | CI | not applicable |
+
+Two clarifications this table makes:
+
+- **The target app is not "somewhere else".** It is another app on the same
+  phone, which is why execution can tap it and read its screen.
+- **The model is the only network dependency.** The key is held by the client
+  (Android Keystore, Windows DPAPI); no key ships in the repository or in the
+  APK.
+
+`services/bridge` and `services/relay` are not in this path: they exist so a
+phone and a PC can drive each other and share chat. `services/backend` is planned
+for a hosted mode where the loop runs on our side; the device keeps the loop
+until that exists.
 
 **Slower clock: the recipe pipeline.** No person is involved. An app update or a
 new target app starts it.
