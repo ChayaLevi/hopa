@@ -72,7 +72,8 @@ box is the team that owns it; every arrow carries the artifact named on it.
 
 The source is `tools/scripts/make-team-map.py`; rerun
 `py -3 tools/scripts/make-team-map.py` after changing a brick, a team or an
-arrow. The SVG is committed, so the page renders without a build step.
+arrow. The SVG is committed, so the page renders without a build step. A 2x PNG
+for slides sits beside it: `docs/media/hopa-team-map.png`.
 
 | Band | Clock | Starts because | Ends when |
 |---|---|---|---|
