@@ -76,6 +76,7 @@ flowchart TB
     person(["Person"])
     clients["1 Clients"]
     tasks["3 Tasks"]
+    notes["9 Notifications"]
     decision["13 Decision (LAIX)"]
     family["4 Family"]
     knowledge["5 Target-app knowledge"]
@@ -83,17 +84,49 @@ flowchart TB
 
     person -->|asks| clients
     clients -->|request| tasks
+    notes -->|something worth doing| tasks
     tasks -->|what is next| decision
     knowledge -->|the step for this app| decision
-    decision -->|needs a yes| family
-    family -->|yes or no| decision
+    decision -->|is this allowed?| family
+    family -->|yes, perform| execution
     decision -->|perform and check| execution
 ```
 
-Reading it: the task records what the person wants; decision picks one step from
-what knowledge knows about the app; family answers whether this member may take
-it; execution performs the step and checks the result. A notification (9) enters
-at the task, and every arrow above travels over platform (11).
+Reading it: a task arrives either from the person through the client or from a
+notification. Decision picks one step from what knowledge knows about the app. A
+step that needs a yes goes through family first and runs only on a yes; a step
+that needs no yes runs straight through. A no leaves the task waiting and tells
+the person. Every arrow above travels over platform (11).
+
+### Notifications from target apps
+
+A bank, a messenger or a school app posts a notification. That is the cheapest
+place to catch a real task, and the only one that arrives without the person
+opening HOPA.
+
+What happens to one, once brick 9 is built:
+
+1. The target app posts it; the phone shows it in the notification stream.
+2. The client reads that stream, only for apps the household allowed and only
+   with the system permission the person granted. On Android that is
+   notification access, and the client has none of it today.
+3. 9 turns it into an event: app, sender, what it asks, amount, deadline,
+   urgency. Names, amounts and message text are classified on the phone; the raw
+   text stays on the phone.
+4. Decision 13 asks: task, reminder, or nothing? Noise is dropped, and the drop
+   is remembered.
+5. A kept event becomes a task in 3; the family rules in 4 decide whether acting
+   on it needs a yes.
+6. The person's confirm, dismiss or snooze feeds back into the filter in 9.
+
+Today: not built. The Android client shows its own notifications (a run in
+progress, a test from settings) and the bridge reads the screen, but nothing
+reads the notifications of other apps yet. Two to three weeks: a listener
+service, a parser for the first two apps, the on-device redaction, and a settings
+screen that lists the apps the household allowed.
+
+Rules: the raw text never leaves the phone, only the classified event does; the
+household can revoke an app at any time; a redaction failure counts as a leak.
 
 **One recipe, from production to the phone.**
 
@@ -118,7 +151,7 @@ the boxes; architecture sets the contracts, CI, release and signing rules that
 every box follows. They wrap both pictures, which is why the earlier single
 diagram put them above and below everything.
 
-### The bricks people asked about
+### Four bricks that need a plain sentence
 
 **7 Delivery. Signed package of what?** Of recipes: for one target app, the
 steps, the selectors, the check that proves the step worked, and the app build it
@@ -281,6 +314,7 @@ split later.
 | From -> To | Artifact | Meaning |
 |---|---|---|
 | Client -> Tasks | Request | "This is what the person asked" |
+| Notification (9) -> Tasks | Event | "This notification is worth a task" |
 | Tasks -> Decision | Task state | "This is what to do next" |
 | Decision -> Knowledge | Recipe lookup | "Which step performs this?" |
 | Knowledge -> Decision | Step | "These are the controls and the check" |
