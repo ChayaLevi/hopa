@@ -10,7 +10,7 @@ from __future__ import annotations
 import html
 from pathlib import Path
 
-W, H = 1280, 1000
+W, H = 1280, 1010
 
 INK = "#1C1B18"
 MUTED = "#6B665C"
@@ -62,7 +62,7 @@ def box(x: int, y: int, w: int, h: int, label: list[str], team: str,
         dashed: bool = False) -> None:
     fill = TEAM[team][0] if team in TEAM else PAPER
     rect(x, y, w, h, fill, dash="5 4" if dashed else None)
-    first = y + h // 2 - (len(label) - 1) * 7 + 5
+    first = y + h // 2 - (len(label) - 1) * 8 + 5
     text(x + w // 2, first, label)
 
 
@@ -80,7 +80,7 @@ def arrow(points: list[tuple[int, int]], dashed: bool = False,
 def label(x: int, y: int, value: str, rotate: int = 0) -> None:
     width = len(value) * 6.2 + 10
     transform = f' transform="rotate({rotate} {x} {y})"' if rotate else ""
-    add(f'<g{transform}>')
+    add(f"<g{transform}>")
     add(f'<rect x="{x - width / 2:.1f}" y="{y - 11}" width="{width:.1f}" height="16" '
         f'rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>')
     text(int(x), y + 1, [value], size=11, colour=MUTED)
@@ -110,51 +110,52 @@ text(40, 36, ["12 Architecture and contracts - contracts, CI, release cut, signi
      size=13, anchor="start")
 
 # --- Band A: the device -----------------------------------------------------
-band(24, 60, 1232, 322, "ON THE DEVICE - seconds - the loop repeats until the task closes")
+band(24, 60, 1232, 330, "ON THE DEVICE - seconds - the loop repeats until the task closes")
 
-box(160, 176, 130, 48, ["1 Clients"], "clients")
-box(330, 176, 130, 48, ["3 Tasks"], "platform")
-box(500, 176, 140, 48, ["13 Decision"], "algorithms")
-box(680, 176, 130, 48, ["4 Family rules"], "clients")
-box(850, 176, 130, 48, ["2 Execution"], "clients")
-box(1020, 176, 130, 48, ["target app"], "external", dashed=True)
+add(f'<ellipse cx="100" cy="204" rx="42" ry="24" fill="{PAPER}" stroke="{BORDER}" stroke-width="1.2"/>')
+text(100, 209, ["Person"], size=13)
+
+box(160, 180, 130, 48, ["1 Clients"], "clients")
+box(330, 180, 130, 48, ["3 Tasks"], "platform")
+box(480, 180, 130, 48, ["router", "goal to apps"], "clients")
+box(630, 180, 140, 48, ["13 Decision", "policy: LAIX"], "algorithms")
+box(810, 180, 130, 48, ["4 Family rules"], "clients")
+box(970, 180, 130, 48, ["2 Execution"], "clients")
+box(1120, 180, 120, 48, ["target app"], "external", dashed=True)
 
 box(340, 100, 140, 38, ["9 Notifications"], "platform")
-box(560, 84, 180, 40, ["model provider (network)"], "external", dashed=True)
-box(500, 276, 160, 48, ["5 recipes (installed)"], "knowledge")
-box(300, 276, 170, 48, ["catalogue", "apps, aliases, launch"], "shared")
-arrow([(470, 288), (492, 288), (492, 234), (498, 230)])
-label(430, 264, "candidates")
+box(620, 96, 180, 40, ["model provider (network)"], "external", dashed=True)
+box(330, 280, 170, 48, ["catalogue + routing", "ids, aliases, cases"], "shared")
+box(630, 280, 160, 48, ["5 recipes (installed)"], "knowledge")
 
-# Person
-add(f'<ellipse cx="100" cy="200" rx="42" ry="24" fill="{PAPER}" stroke="{BORDER}" stroke-width="1.2"/>')
-text(100, 205, ["Person"], size=13)
+arrow([(142, 204), (158, 204)])
+arrow([(290, 204), (328, 204)])
+label(309, 170, "create task")
+arrow([(460, 204), (478, 204)])
+label(469, 166, "goal, state")
+arrow([(610, 204), (628, 204)])
+arrow([(770, 204), (808, 204)])
+label(789, 194, "Action")
+arrow([(940, 204), (968, 204)])
+label(954, 194, "allow")
+arrow([(1100, 204), (1118, 204)])
 
-arrow([(142, 200), (158, 200)])
-arrow([(290, 200), (328, 200)])
-label(309, 190, "Task")
-arrow([(460, 200), (498, 200)])
-label(479, 190, "goal")
-arrow([(640, 200), (678, 200)])
-label(659, 190, "Action")
-arrow([(810, 200), (848, 200)])
-label(829, 190, "allow")
-arrow([(980, 200), (1018, 200)])
-
-arrow([(410, 138), (410, 174)])
+arrow([(410, 138), (410, 178)])
 label(410, 158, "event")
 
-arrow([(600, 128), (600, 174)], dashed=True, tail=True)
-label(668, 152, "prompt / Decision")
+arrow([(705, 136), (705, 178)], dashed=True, tail=True)
+label(775, 158, "prompt / Decision")
 
-arrow([(560, 276), (560, 226)])
-label(560, 252, "candidate steps")
+arrow([(545, 280), (545, 246), (545, 230)])
+label(600, 256, "apps, aliases, cases")
+arrow([(700, 280), (700, 230)])
+label(700, 250, "steps")
 
-arrow([(915, 224), (915, 250), (630, 250), (630, 226)])
-label(770, 240, "next Observation")
+arrow([(1040, 228), (1040, 264), (735, 264), (735, 230)])
+label(885, 258, "Observation + record")
 
-arrow([(745, 226), (745, 340), (225, 340), (225, 226)], dashed=True, tail=True)
-label(480, 336, "ask, answer")
+arrow([(880, 228), (880, 356), (225, 356), (225, 230)], dashed=True, tail=True)
+label(480, 352, "ask, answer")
 
 # 11 Platform: a bracket under every band, because every cross-device arrow uses it.
 rect(24, 822, 1232, 28, TEAM["platform"][0])
@@ -162,38 +163,43 @@ text(40, 841, ["11 Platform and services - every arrow that leaves a device trav
      size=12, anchor="start")
 
 # --- Band B: the build ------------------------------------------------------
-band(24, 396, 1232, 232, "BUILD AND DELIVERY - days - no person involved")
+band(24, 404, 1232, 232, "BUILD AND DELIVERY - days - no person involved")
 
-box(120, 470, 130, 60, ["6 Factory"], "knowledge")
-box(320, 470, 130, 60, ["5 Knowledge"], "knowledge")
-box(540, 470, 130, 60, ["8 Farm"], "integration")
-box(760, 470, 130, 60, ["7 Delivery"], "knowledge")
+box(120, 478, 130, 60, ["6 Factory"], "knowledge")
+box(320, 478, 130, 60, ["5 Knowledge"], "knowledge")
+box(540, 478, 130, 60, ["8 Farm"], "integration")
+box(760, 478, 130, 60, ["7 Delivery"], "knowledge")
 
-arrow([(250, 500), (318, 500)])
-label(284, 490, "new recipe")
-arrow([(450, 500), (538, 500)])
-label(494, 490, "version to test")
-arrow([(560, 532), (560, 562), (400, 562), (400, 532)], dashed=True)
-label(480, 572, "failures")
-arrow([(670, 500), (758, 500)])
-label(714, 490, "go or no-go")
-arrow([(385, 470), (385, 444), (825, 444), (825, 468)])
-label(600, 434, "package")
+arrow([(250, 508), (318, 508)])
+label(284, 498, "new recipe")
+arrow([(450, 508), (538, 508)])
+label(494, 498, "version to test")
+arrow([(560, 540), (560, 570), (400, 570), (400, 540)], dashed=True)
+label(480, 580, "failures")
+arrow([(670, 508), (758, 508)])
+label(714, 498, "go or no-go")
+arrow([(385, 478), (385, 452), (825, 452), (825, 476)])
+label(600, 442, "package")
 
-arrow([(890, 500), (920, 500), (920, 300), (662, 300)])
-label(790, 290, "installs, signature checked")
+arrow([(890, 508), (920, 508), (920, 304), (792, 304)])
+label(856, 296, "installs, signature checked")
 
 # --- Band C: the learning loop ---------------------------------------------
-band(24, 646, 1232, 160, "LEARNING - weeks - read in batches, change plans")
+band(24, 662, 1232, 148, "LEARNING - weeks - read in batches, change plans")
 
 box(540, 700, 150, 60, ["10 Product lab"], "algorithms")
-text(615, 786, ["failure list, bench score, pilot numbers"], size=11, colour=MUTED)
+box(900, 700, 130, 60, ["release cut"], "external")
+box(1060, 700, 140, 60, ["priorities"], "external")
 
-arrow([(605, 532), (605, 698)])
-label(620, 600, "journals")
-arrow([(900, 226), (900, 234), (1100, 234), (1100, 730), (692, 730)])
-label(1100, 600, "journals")
-arrow([(540, 730), (300, 730), (300, 500), (318, 500)])
+arrow([(605, 540), (605, 698)])
+label(620, 620, "journals")
+arrow([(1080, 228), (1100, 228), (1100, 680), (692, 680), (692, 698)])
+label(1100, 620, "journals")
+arrow([(690, 715), (898, 715)])
+label(795, 705, "bench score")
+arrow([(615, 760), (615, 790), (1130, 790), (1130, 762)])
+label(860, 784, "pilot numbers")
+arrow([(540, 730), (300, 730), (300, 508), (318, 508)])
 label(288, 610, "failure list", rotate=-90)
 
 # --- Legend -----------------------------------------------------------------
@@ -212,9 +218,11 @@ for key, (x, y) in zip(order, columns):
     rect(x, y, 16, 16, TEAM[key][0], radius=3)
     add(f'<text x="{x + 24}" y="{y + 12}" font-size="12" fill="{INK}">{esc(short[key])}</text>')
 
-text(24, 960, ["Dashed arrow: feedback or a network call. Every other arrow is an artifact handed over."],
+text(24, 960, ["13 Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider."],
      size=12, colour=MUTED, anchor="start")
-text(24, 982, ["White boxes are outside HOPA: the person, the model provider and the app HOPA operates."],
+text(24, 982, ["Dashed arrow: feedback, a network call, or a question to the person. Every other arrow is an artifact handed over."],
+     size=12, colour=MUTED, anchor="start")
+text(24, 1004, ["White boxes are not bricks: the person, the model provider, the app HOPA operates, and the two planning decisions the lab feeds."],
      size=12, colour=MUTED, anchor="start")
 
 add("</svg>")

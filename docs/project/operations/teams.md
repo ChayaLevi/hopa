@@ -110,6 +110,18 @@ the task waiting; ask goes to the person through the client; `ui.wait` is a
 single iteration that only looks again. Every action passes the gate: the gate
 returns allow at once for a kind the policy does not mark sensitive or payment.
 
+**What a task holds, and what decision reads.** A task record is
+`{goal, state, runId}`:
+
+- `goal` is the request as the person made it, plus the intent and the
+  constraints taken at intake (amount, recipient, date). It does not become a
+  plan; it stays the target state.
+- `state` is one of running, waiting for approval, done, failed.
+- the step history is **not** in the task. It is the append-only `RunRecord`
+  chain for that `runId` (`contracts/schemas/run-record.schema.json`), written by
+  2 Execution after each action and read back by the next decision. That chain
+  is also what makes a run auditable afterwards.
+
 #### Where each box runs
 
 The request path needs **no HOPA server**. The loop, the task, the rules and the
@@ -140,7 +152,7 @@ Two clarifications this table makes:
 A task stores the goal and the progress, never an app id:
 
 ```
-Task { goal: "pay the internet bill", state: running, step: 3 of 6 }
+Task { goal: "pay the internet bill", state: running, runId: "run-7c1" }
 ```
 
 The app is resolved at decision time, on the phone, from data already there:
@@ -149,13 +161,30 @@ The app is resolved at decision time, on the phone, from data already there:
 |---|---|---|
 | catalogue | `contracts/catalog/catalog.v1.json` | app ids, names, aliases, purposes, actions, per-platform launch details |
 | routing cases | `contracts/fixtures/routing.json` | lexical cases that pin "internet bill" to the right app |
-| recipes | installed package (brick 5) | candidate steps and the app each step targets |
+| recipes | installed package (brick 5) | the steps inside each app, and the app each step belongs to |
 | the chosen action | `Action` | `ui.launch` and `ui.stop` require `app`; the executor refuses without it |
 
-So the goal stays a sentence, the router proposes candidate apps, decision picks
-one, and the action names the package. Execution then launches exactly that
-package. Nothing is guessed in the UI layer and no network call is needed to
-identify an app.
+Three of those words are easy to swap, so:
+
+| Word | Answers | Content | Changes when |
+|---|---|---|---|
+| catalogue | which app could do this, and how do I open it | ids, names, aliases, purposes, launch details | a target app is added or renamed |
+| recipe | how a thing is done inside that app | steps, selectors, checks, app version pin | the app changes, or the recipe is improved |
+| candidates | what this turn may choose from | a shortlist: the matching apps and the steps installed for them | every iteration, from the two above |
+
+So the goal stays a sentence, the router narrows the catalogue to matching apps,
+the installed recipes supply the steps for those apps, and together they form the
+candidates for this turn. Decision picks one, and the action names the package.
+Execution then launches exactly that package. Nothing is guessed in the UI layer
+and no network call is needed to identify an app.
+
+**The router.** It is client code in `packages/core`, and it is the box between 3
+Tasks and 13 Decision on the map. It reads the catalogue's names, aliases and
+purposes plus the routing cases, and narrows the goal to a few matching apps. A
+prompt does not have to name an app: "pay the internet bill" matches on purpose
+and aliases, not on a package id. When two apps match at similar confidence,
+decision returns `needUser` with the options and the person picks; a named app
+just makes the match exact.
 
 #### How execution is told what to do
 
