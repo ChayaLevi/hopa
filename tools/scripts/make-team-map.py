@@ -10,7 +10,7 @@ from __future__ import annotations
 import html
 from pathlib import Path
 
-W, H = 1280, 1100
+W, H = 1280, 1170
 
 INK = "#1C1B18"
 MUTED = "#6B665C"
@@ -173,72 +173,69 @@ label(480, 352, "ask, answer")
 # --- Band B: the build ------------------------------------------------------
 band(24, 404, 1232, 232, "BUILD AND DELIVERY - days - starts when a target app changes, not when someone asks")
 
-box(120, 478, 130, 60, ["6 Recipe", "factory"], "knowledge")
-box(320, 478, 130, 60, ["5 Target-app", "knowledge"], "knowledge")
-box(540, 478, 130, 60, ["8 Verification", "farm"], "integration")
-box(760, 478, 130, 60, ["7 Recipe", "delivery"], "knowledge")
+box(240, 478, 130, 60, ["6 Recipe", "factory"], "knowledge")
+box(440, 478, 130, 60, ["5 Target-app", "knowledge"], "knowledge")
+box(640, 478, 130, 60, ["8 Verification", "farm"], "integration")
+box(840, 478, 130, 60, ["7 Recipe", "delivery"], "knowledge")
 
-arrow([(250, 508), (318, 508)])
-label(284, 498, "new recipe")
-arrow([(450, 508), (538, 508)])
-label(494, 498, "version to test")
-arrow([(560, 540), (560, 570), (400, 570), (400, 540)], dashed=True)
-label(480, 580, "failures")
-arrow([(670, 508), (758, 508)])
-label(714, 498, "pass")
-arrow([(385, 478), (385, 452), (825, 452), (825, 476)])
-label(600, 442, "package")
+box(40, 466, 150, 50, ["onboard a", "target app"], "knowledge")
+box(40, 544, 150, 58, ["catalogue, authored", "ids, aliases, launch"], "knowledge")
+arrow([(115, 516), (115, 542)])
+label(215, 620, "build its knowledge")
+arrow([(115, 602), (115, 620), (315, 620), (315, 540)], dashed=True)
+arrow([(190, 560), (205, 560), (205, 398), (415, 398), (415, 330)])
+label(310, 392, "compiled into the client")
 
-arrow([(890, 508), (920, 508), (920, 304), (792, 304)])
-label(856, 296, "installs, signature checked")
+arrow([(370, 508), (438, 508)])
+label(404, 498, "new recipe")
+arrow([(570, 508), (638, 508)])
+label(604, 498, "version to test")
+arrow([(660, 540), (660, 570), (500, 570), (500, 540)], dashed=True)
+label(580, 580, "failures")
+arrow([(770, 508), (838, 508)])
+label(804, 498, "pass")
+arrow([(505, 478), (505, 452), (905, 452), (905, 476)])
+label(705, 442, "package")
 
-box(930, 470, 150, 60, ["catalogue, authored", "ids, aliases, launch"], "knowledge")
-box(930, 556, 150, 60, ["onboard a target app"], "knowledge")
-arrow([(1005, 556), (1005, 532)])
-arrow([(1005, 470), (1005, 398), (415, 398), (415, 330)])
-label(700, 392, "compiled into the client")
+arrow([(970, 508), (1000, 508), (1000, 304), (792, 304)])
+label(900, 296, "installs, signature checked")
 
 # --- Band C: the learning loop ---------------------------------------------
-band(24, 646, 1232, 262, "LEARNING - weeks - read in batches, change plans")
-text(40, 686, ["10 Product lab"], size=13, weight="600", anchor="start")
-rect(40, 696, 690, 196, "#FBF7EE", dash="4 4", radius=10)
+band(24, 646, 1232, 324, "LEARNING - weeks - read in batches, change plans")
+text(40, 684, ["10 Product lab - what it produces, and who gets it"],
+     size=13, weight="600", anchor="start")
+rect(40, 692, 900, 262, "#FBF7EE", dash="4 4", radius=10)
 
-box(150, 706, 300, 44, ["ingest run records"], "algorithms")
-box(60, 776, 190, 44, ["rank failures"], "algorithms")
-box(310, 776, 190, 44, ["read pilot numbers"], "algorithms")
-box(520, 776, 190, 44, ["score HOPA-Bench"], "algorithms")
-
-arrow([(200, 750), (155, 774)])
-arrow([(320, 750), (405, 774)])
-arrow([(440, 750), (615, 774)])
-
-arrow([(605, 540), (605, 690), (390, 690), (390, 704)])
-label(620, 620, "journals")
-arrow([(1080, 228), (1100, 228), (1100, 690), (350, 690), (350, 704)])
+arrow([(705, 538), (705, 670), (470, 670), (470, 690)])
+label(620, 640, "journals")
+arrow([(1080, 228), (1100, 228), (1100, 670), (430, 670), (430, 690)])
 label(1100, 600, "journals")
 
-arrow([(60, 798), (34, 798), (34, 460), (340, 460), (340, 474)])
-label(180, 450, "failure list")
-
-arrow([(710, 798), (760, 798)])
-text(768, 795, ["release cut"], size=13, anchor="start")
-text(768, 813, ["ships or blocks a release"], size=11, colour=MUTED, anchor="start")
-
-arrow([(405, 820), (405, 872), (760, 872)])
-text(768, 869, ["priorities"], size=13, anchor="start")
-text(768, 887, ["what the next weeks are spent on"], size=11, colour=MUTED, anchor="start")
-
-box(60, 836, 280, 44, ["research thrust (R1, R2, R3)"], "algorithms")
-arrow([(440, 750), (505, 750), (505, 826), (200, 826), (200, 834)], dashed=True)
-text(360, 842, ["method + dataset + report"], size=11, anchor="start")
-text(360, 858, ["productionise in 5 Knowledge, or park"], size=11, colour=MUTED, anchor="start")
+rows = [
+    (712, ["rank failures by app version"], "failure list", "weekly",
+     "to 5 Target-app knowledge"),
+    (772, ["score HOPA-Bench"], "score per release", "every release",
+     "to release cut (12)"),
+    (832, ["read pilot numbers"], "time, steps, repeats, waits", "monthly",
+     "to priorities"),
+    (892, ["one research question", "e.g. recipes that survive updates"],
+     "method + dataset + report", "about 6 months",
+     "to 5: produce, or park"),
+]
+for y, left, artifact, cadence, consumer in rows:
+    box(60, y, 300, 48, left, "algorithms")
+    centre = y + 24
+    arrow([(360, centre), (620, centre)])
+    label(490, centre - 3, artifact)
+    text(490, centre + 13, [cadence], size=11, colour=MUTED)
+    text(634, centre + 4, [consumer], size=13, anchor="start")
 
 # 11 Platform: what the transport layer actually does.
-rail(920, TEAM["platform"][0], "11 Platform and services -",
+rail(982, TEAM["platform"][0], "11 Platform and services -",
      ["pair a phone with a PC", "tunnel, token rotation", "wire protocol between devices"])
 
 # --- Legend -----------------------------------------------------------------
-add(f'<text x="24" y="1000" font-size="12" fill="{MUTED}">Box colour is the owning team</text>')
+add(f'<text x="24" y="1056" font-size="12" fill="{MUTED}">Box colour is the owning team</text>')
 short = {
     "clients": "Clients",
     "platform": "Platform and services",
@@ -247,15 +244,15 @@ short = {
     "integration": "Integration and quality",
     "shared": "Architecture and contracts",
 }
-columns = [(24, 1014), (24, 1042), (452, 1014), (452, 1042), (880, 1014), (880, 1042)]
+columns = [(24, 1070), (24, 1098), (452, 1070), (452, 1098), (880, 1070), (880, 1098)]
 order = ["clients", "platform", "knowledge", "algorithms", "integration", "shared"]
 for key, (x, y) in zip(order, columns):
     rect(x, y, 16, 16, TEAM[key][0], radius=3)
     add(f'<text x="{x + 24}" y="{y + 12}" font-size="12" fill="{INK}">{esc(short[key])}</text>')
 
-text(24, 1078, ["13 Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider."],
+text(24, 1136, ["13 Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider."],
      size=12, colour=MUTED, anchor="start")
-text(24, 1098, ["A step covered by a recipe runs without a model call; the call is the fallback for everything else."],
+text(24, 1156, ["A step covered by a recipe runs without a model call; the call is the fallback for everything else."],
      size=12, colour=MUTED, anchor="start")
 
 add("</svg>")

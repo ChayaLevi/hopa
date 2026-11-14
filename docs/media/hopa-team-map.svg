@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1100" viewBox="0 0 1280 1100" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1170" viewBox="0 0 1280 1170" font-family="Segoe UI, Arial, sans-serif">
 <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8C8579"/></marker><marker id="tail" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M10,0 L0,5 L10,10 z" fill="#8C8579"/></marker></defs>
-<rect x="0" y="0" width="1280" height="1100" rx="0" fill="#F7F4EE" stroke="none" stroke-width="1.2"/>
+<rect x="0" y="0" width="1280" height="1170" rx="0" fill="#F7F4EE" stroke="none" stroke-width="1.2"/>
 <rect x="24" y="8" width="1232" height="44" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="40" y="36" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
 <tspan x="40" dy="0">12 Architecture and contracts -</tspan>
@@ -161,191 +161,217 @@
 <text x="40" y="426" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
 <tspan x="40" dy="0">BUILD AND DELIVERY - days - starts when a target app changes, not when someone asks</tspan>
 </text>
-<rect x="120" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="185" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="185" dy="0">6 Recipe</tspan>
-<tspan x="185" dy="16">factory</tspan>
+<rect x="240" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="305" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="305" dy="0">6 Recipe</tspan>
+<tspan x="305" dy="16">factory</tspan>
 </text>
-<rect x="320" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="385" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="385" dy="0">5 Target-app</tspan>
-<tspan x="385" dy="16">knowledge</tspan>
+<rect x="440" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="505" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="505" dy="0">5 Target-app</tspan>
+<tspan x="505" dy="16">knowledge</tspan>
 </text>
-<rect x="540" y="478" width="130" height="60" rx="6" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="605" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="605" dy="0">8 Verification</tspan>
-<tspan x="605" dy="16">farm</tspan>
+<rect x="640" y="478" width="130" height="60" rx="6" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="705" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="705" dy="0">8 Verification</tspan>
+<tspan x="705" dy="16">farm</tspan>
 </text>
-<rect x="760" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="825" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="825" dy="0">7 Recipe</tspan>
-<tspan x="825" dy="16">delivery</tspan>
+<rect x="840" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="905" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="905" dy="0">7 Recipe</tspan>
+<tspan x="905" dy="16">delivery</tspan>
 </text>
-<path d="M250,508 L318,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<rect x="40" y="466" width="150" height="50" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="115" y="488" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="115" dy="0">onboard a</tspan>
+<tspan x="115" dy="16">target app</tspan>
+</text>
+<rect x="40" y="544" width="150" height="58" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="115" y="570" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="115" dy="0">catalogue, authored</tspan>
+<tspan x="115" dy="16">ids, aliases, launch</tspan>
+</text>
+<path d="M115,516 L115,542" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="248.0" y="487" width="72.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="284" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="284" dy="0">new recipe</tspan>
+<rect x="151.1" y="609" width="127.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="215" y="621" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="215" dy="0">build its knowledge</tspan>
 </text>
 </g>
-<path d="M450,508 L538,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M115,602 L115,620 L315,620 L315,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
+<path d="M190,560 L205,560 L205,398 L415,398 L415,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="442.5" y="487" width="103.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="494" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="494" dy="0">version to test</tspan>
+<rect x="230.6" y="381" width="158.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="310" y="393" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="310" dy="0">compiled into the client</tspan>
 </text>
 </g>
-<path d="M560,540 L560,570 L400,570 L400,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
+<path d="M370,508 L438,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="450.2" y="569" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="480" y="581" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="480" dy="0">failures</tspan>
+<rect x="368.0" y="487" width="72.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="404" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="404" dy="0">new recipe</tspan>
 </text>
 </g>
-<path d="M670,508 L758,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M570,508 L638,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="696.6" y="487" width="34.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="714" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="714" dy="0">pass</tspan>
+<rect x="552.5" y="487" width="103.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="604" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="604" dy="0">version to test</tspan>
 </text>
 </g>
-<path d="M385,478 L385,452 L825,452 L825,476" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M660,540 L660,570 L500,570 L500,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
 <g>
-<rect x="573.3" y="431" width="53.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="600" y="443" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="600" dy="0">package</tspan>
+<rect x="550.2" y="569" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="580" y="581" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="580" dy="0">failures</tspan>
 </text>
 </g>
-<path d="M890,508 L920,508 L920,304 L792,304" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M770,508 L838,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="767.3" y="285" width="177.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="856" y="297" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="856" dy="0">installs, signature checked</tspan>
+<rect x="786.6" y="487" width="34.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="804" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="804" dy="0">pass</tspan>
 </text>
 </g>
-<rect x="930" y="470" width="150" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="1005" y="497" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="1005" dy="0">catalogue, authored</tspan>
-<tspan x="1005" dy="16">ids, aliases, launch</tspan>
-</text>
-<rect x="930" y="556" width="150" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="1005" y="591" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="1005" dy="0">onboard a target app</tspan>
-</text>
-<path d="M1005,556 L1005,532" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<path d="M1005,470 L1005,398 L415,398 L415,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M505,478 L505,452 L905,452 L905,476" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="620.6" y="381" width="158.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="700" y="393" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="700" dy="0">compiled into the client</tspan>
+<rect x="678.3" y="431" width="53.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="705" y="443" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="705" dy="0">package</tspan>
 </text>
 </g>
-<rect x="24" y="646" width="1232" height="262" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
+<path d="M970,508 L1000,508 L1000,304 L792,304" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<g>
+<rect x="811.3" y="285" width="177.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="900" y="297" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="900" dy="0">installs, signature checked</tspan>
+</text>
+</g>
+<rect x="24" y="646" width="1232" height="324" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
 <text x="40" y="668" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
 <tspan x="40" dy="0">LEARNING - weeks - read in batches, change plans</tspan>
 </text>
-<text x="40" y="686" font-size="13" fill="#1C1B18" font-weight="600" text-anchor="start">
-<tspan x="40" dy="0">10 Product lab</tspan>
+<text x="40" y="684" font-size="13" fill="#1C1B18" font-weight="600" text-anchor="start">
+<tspan x="40" dy="0">10 Product lab - what it produces, and who gets it</tspan>
 </text>
-<rect x="40" y="696" width="690" height="196" rx="10" fill="#FBF7EE" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="4 4"/>
-<rect x="150" y="706" width="300" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="300" y="733" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="300" dy="0">ingest run records</tspan>
-</text>
-<rect x="60" y="776" width="190" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="155" y="803" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="155" dy="0">rank failures</tspan>
-</text>
-<rect x="310" y="776" width="190" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="405" y="803" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="405" dy="0">read pilot numbers</tspan>
-</text>
-<rect x="520" y="776" width="190" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="615" y="803" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="615" dy="0">score HOPA-Bench</tspan>
-</text>
-<path d="M200,750 L155,774" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<path d="M320,750 L405,774" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<path d="M440,750 L615,774" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<path d="M605,540 L605,690 L390,690 L390,704" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<rect x="40" y="692" width="900" height="262" rx="10" fill="#FBF7EE" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="4 4"/>
+<path d="M705,538 L705,670 L470,670 L470,690" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="590.2" y="609" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="620" y="621" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<rect x="590.2" y="629" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="620" y="641" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="620" dy="0">journals</tspan>
 </text>
 </g>
-<path d="M1080,228 L1100,228 L1100,690 L350,690 L350,704" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M1080,228 L1100,228 L1100,670 L430,670 L430,690" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="1070.2" y="589" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="1100" y="601" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
 <tspan x="1100" dy="0">journals</tspan>
 </text>
 </g>
-<path d="M60,798 L34,798 L34,460 L340,460 L340,474" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<rect x="60" y="712" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="210" y="741" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="210" dy="0">rank failures by app version</tspan>
+</text>
+<path d="M360,736 L620,736" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="137.8" y="439" width="84.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="180" y="451" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="180" dy="0">failure list</tspan>
+<rect x="447.8" y="722" width="84.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="490" y="734" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">failure list</tspan>
 </text>
 </g>
-<path d="M710,798 L760,798" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<text x="768" y="795" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="768" dy="0">release cut</tspan>
+<text x="490" y="749" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">weekly</tspan>
 </text>
-<text x="768" y="813" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="768" dy="0">ships or blocks a release</tspan>
+<text x="634" y="740" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<tspan x="634" dy="0">to 5 Target-app knowledge</tspan>
 </text>
-<path d="M405,820 L405,872 L760,872" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
-<text x="768" y="869" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="768" dy="0">priorities</tspan>
+<rect x="60" y="772" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="210" y="801" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="210" dy="0">score HOPA-Bench</tspan>
 </text>
-<text x="768" y="887" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="768" dy="0">what the next weeks are spent on</tspan>
+<path d="M360,796 L620,796" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<g>
+<rect x="432.3" y="782" width="115.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="490" y="794" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">score per release</tspan>
 </text>
-<rect x="60" y="836" width="280" height="44" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="200" y="863" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="200" dy="0">research thrust (R1, R2, R3)</tspan>
+</g>
+<text x="490" y="809" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">every release</tspan>
 </text>
-<path d="M440,750 L505,750 L505,826 L200,826 L200,834" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
-<text x="360" y="842" font-size="11" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="360" dy="0">method + dataset + report</tspan>
+<text x="634" y="800" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<tspan x="634" dy="0">to release cut (12)</tspan>
 </text>
-<text x="360" y="858" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="360" dy="0">productionise in 5 Knowledge, or park</tspan>
+<rect x="60" y="832" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="210" y="861" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="210" dy="0">read pilot numbers</tspan>
 </text>
-<rect x="24" y="920" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="40" y="948" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<path d="M360,856 L620,856" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<g>
+<rect x="401.3" y="842" width="177.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="490" y="854" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">time, steps, repeats, waits</tspan>
+</text>
+</g>
+<text x="490" y="869" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">monthly</tspan>
+</text>
+<text x="634" y="860" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<tspan x="634" dy="0">to priorities</tspan>
+</text>
+<rect x="60" y="892" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="210" y="913" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="210" dy="0">one research question</tspan>
+<tspan x="210" dy="16">e.g. recipes that survive updates</tspan>
+</text>
+<path d="M360,916 L620,916" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<g>
+<rect x="407.5" y="902" width="165.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="490" y="914" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">method + dataset + report</tspan>
+</text>
+</g>
+<text x="490" y="929" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="490" dy="0">about 6 months</tspan>
+</text>
+<text x="634" y="920" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
+<tspan x="634" dy="0">to 5: produce, or park</tspan>
+</text>
+<rect x="24" y="982" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="40" y="1010" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
 <tspan x="40" dy="0">11 Platform and services -</tspan>
 </text>
-<rect x="320" y="928" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="470" y="947" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<rect x="320" y="990" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="470" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="470" dy="0">pair a phone with a PC</tspan>
 </text>
-<rect x="638" y="928" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="788" y="947" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<rect x="638" y="990" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="788" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="788" dy="0">tunnel, token rotation</tspan>
 </text>
-<rect x="956" y="928" width="296" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="1104" y="947" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<rect x="956" y="990" width="296" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1104" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="1104" dy="0">wire protocol between devices</tspan>
 </text>
-<text x="24" y="1000" font-size="12" fill="#6B665C">Box colour is the owning team</text>
-<rect x="24" y="1014" width="16" height="16" rx="3" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="48" y="1026" font-size="12" fill="#1C1B18">Clients</text>
-<rect x="24" y="1042" width="16" height="16" rx="3" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="48" y="1054" font-size="12" fill="#1C1B18">Platform and services</text>
-<rect x="452" y="1014" width="16" height="16" rx="3" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="476" y="1026" font-size="12" fill="#1C1B18">Target-app knowledge</text>
-<rect x="452" y="1042" width="16" height="16" rx="3" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="476" y="1054" font-size="12" fill="#1C1B18">Algorithms and measurement</text>
-<rect x="880" y="1014" width="16" height="16" rx="3" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="904" y="1026" font-size="12" fill="#1C1B18">Integration and quality</text>
-<rect x="880" y="1042" width="16" height="16" rx="3" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="904" y="1054" font-size="12" fill="#1C1B18">Architecture and contracts</text>
-<text x="24" y="1078" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
+<text x="24" y="1056" font-size="12" fill="#6B665C">Box colour is the owning team</text>
+<rect x="24" y="1070" width="16" height="16" rx="3" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="48" y="1082" font-size="12" fill="#1C1B18">Clients</text>
+<rect x="24" y="1098" width="16" height="16" rx="3" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="48" y="1110" font-size="12" fill="#1C1B18">Platform and services</text>
+<rect x="452" y="1070" width="16" height="16" rx="3" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="476" y="1082" font-size="12" fill="#1C1B18">Target-app knowledge</text>
+<rect x="452" y="1098" width="16" height="16" rx="3" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="476" y="1110" font-size="12" fill="#1C1B18">Algorithms and measurement</text>
+<rect x="880" y="1070" width="16" height="16" rx="3" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="904" y="1082" font-size="12" fill="#1C1B18">Integration and quality</text>
+<rect x="880" y="1098" width="16" height="16" rx="3" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="904" y="1110" font-size="12" fill="#1C1B18">Architecture and contracts</text>
+<text x="24" y="1136" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
 <tspan x="24" dy="0">13 Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider.</tspan>
 </text>
-<text x="24" y="1098" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
+<text x="24" y="1156" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
 <tspan x="24" dy="0">A step covered by a recipe runs without a model call; the call is the fallback for everything else.</tspan>
 </text>
 </svg>
