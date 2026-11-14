@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="744" viewBox="0 0 980 744" font-family="Segoe UI, Arial, sans-serif">
+<rect width="980" height="744" fill="#F7F4EE"/>
+<text x="140" y="30" font-size="20" font-weight="600" fill="#1C1B18">How HOPA gets built: one ability at a time</text>
+<text x="140" y="54" font-size="12" fill="#6B665C">Each step is one team, one written agreement and one demonstration. It stands on the step below.</text>
+<rect x="140" y="86" width="700" height="58" rx="12" fill="#EAF3EC" stroke="#E4DFD3"/>
+<circle cx="174" cy="115.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="120.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">8</text>
+<text x="204" y="110" font-size="16" font-weight="600" fill="#1C1B18">It proves it works</text>
+<text x="204" y="130" font-size="12" fill="#6B665C">Numbers team</text>
+<text x="822" y="119.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="152" width="700" height="58" rx="12" fill="#EAF3EC" stroke="#E4DFD3"/>
+<circle cx="174" cy="181.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="186.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">7</text>
+<text x="204" y="176" font-size="16" font-weight="600" fill="#1C1B18">It works across devices</text>
+<text x="204" y="196" font-size="12" fill="#6B665C">Connection team</text>
+<text x="822" y="185.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="218" width="700" height="58" rx="12" fill="#EAF3EC" stroke="#E4DFD3"/>
+<circle cx="174" cy="247.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="252.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">6</text>
+<text x="204" y="242" font-size="16" font-weight="600" fill="#1C1B18">It knows how apps work</text>
+<text x="204" y="262" font-size="12" fill="#6B665C">Know-how team</text>
+<text x="822" y="251.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="284" width="700" height="58" rx="12" fill="#FDEFE7" stroke="#E4DFD3"/>
+<circle cx="174" cy="313.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="318.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
+<text x="204" y="308" font-size="16" font-weight="600" fill="#1C1B18">It decides and asks</text>
+<text x="204" y="328" font-size="12" fill="#6B665C">Judgement team + Family team</text>
+<text x="822" y="317.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="350" width="700" height="58" rx="12" fill="#FDEFE7" stroke="#E4DFD3"/>
+<circle cx="174" cy="379.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="384.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+<text x="204" y="374" font-size="16" font-weight="600" fill="#1C1B18">It remembers</text>
+<text x="204" y="394" font-size="12" fill="#6B665C">Memory team</text>
+<text x="822" y="383.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="416" width="700" height="58" rx="12" fill="#E8F0FF" stroke="#E4DFD3"/>
+<circle cx="174" cy="445.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="450.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+<text x="204" y="440" font-size="16" font-weight="600" fill="#1C1B18">It stops and asks</text>
+<text x="204" y="460" font-size="12" fill="#6B665C">App team + Rulebook team</text>
+<text x="822" y="449.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="482" width="700" height="58" rx="12" fill="#E8F0FF" stroke="#E4DFD3"/>
+<circle cx="174" cy="511.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="516.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+<text x="204" y="506" font-size="16" font-weight="600" fill="#1C1B18">It can do things</text>
+<text x="204" y="526" font-size="12" fill="#6B665C">Hands team</text>
+<text x="822" y="515.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="548" width="700" height="58" rx="12" fill="#E8F0FF" stroke="#E4DFD3"/>
+<circle cx="174" cy="577.0" r="16" fill="#0A59F7" opacity="1"/>
+<text x="174" y="582.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+<text x="204" y="572" font-size="16" font-weight="600" fill="#1C1B18">It answers</text>
+<text x="204" y="592" font-size="12" fill="#6B665C">App team + Rulebook team</text>
+<text x="822" y="581.0" font-size="11" fill="#6B665C" text-anchor="end">one team</text>
+<rect x="140" y="614" width="700" height="58" rx="12" fill="#F1ECE3" stroke="#E4DFD3" stroke-dasharray="6 5"/>
+<circle cx="174" cy="643.0" r="16" fill="#0A59F7" opacity="0.25"/>
+<text x="174" y="648.0" font-size="14" font-weight="700" fill="#1C1B18" text-anchor="middle">0</text>
+<text x="204" y="638" font-size="16" font-weight="600" fill="#1C1B18">Where we are today</text>
+<text x="204" y="658" font-size="12" fill="#6B665C">chat on a phone and a computer</text>
+<text x="822" y="647.0" font-size="11" fill="#6B665C" text-anchor="end">starting point</text>
+<line x1="106" y1="662" x2="106" y2="98" stroke="#E8703A" stroke-width="3"/>
+<polygon points="106,86 99,100 113,100" fill="#E8703A"/>
+<text x="92" y="350" font-size="11" fill="#E8703A" text-anchor="middle" transform="rotate(-90 92,350)">the product grows upward</text>
+<text x="140" y="722" font-size="11" fill="#6B665C">Every arrow between two layers is one written agreement between two teams. A step starts when the agreement below it is stable.</text>
+</svg>
