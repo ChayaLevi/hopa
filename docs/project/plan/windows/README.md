@@ -1,6 +1,6 @@
 # Windows client plan
 
-Status: **v1, W3 8/9, W4 6/8, W5 5/8, W6 3/7.** Written 2026-11-14 from the
+Status: **v1, W3 8/9, W4 6/8, W5 5/8, W6 5/7, W7 0/16.** Written 2026-11-14 from the
 Android plan, the expansion portfolio and ADR-0021.
 
 Android is the active client; Windows is next; Harmony is frozen (ADR-0020).
@@ -164,6 +164,38 @@ Behaviour parity is W4; this is the look. The Harmony laptop app is the referenc
 
 Gate: the parity table has no unexplained gaps and a person cannot tell the two
 clients apart from the screenshots.
+
+### W7. Surface finish (backlog, no new architecture)
+
+The items below are visible gaps against the Harmony laptop app, found by walking
+the two screens side by side. None needs a new component; each ends with a
+screenshot or a transcript.
+
+Sidebar
+- [ ] Session hover `⋯` menu with Rename and Delete. (evidence: hover screenshot; menu actions)
+- [ ] `Ctrl+K` command palette: search sessions, New chat, Settings, Stop. (evidence: palette screenshot; keyboard-only open/close)
+- [ ] `Activity` pane: the run list already stored, one row per turn with steps, duration and outcome. (evidence: pane screenshot)
+- [ ] `Capabilities` pane: what this PC can observe and drive, read from `WindowsDevice`. (evidence: pane screenshot)
+- [ ] `Plans` pane: scheduled tasks, read-only until scheduling exists on Windows. (evidence: pane screenshot or an explicit "not on Windows yet" row)
+
+Rail
+- [ ] `Earlier: <question>` line above the step list. (evidence: rail screenshot)
+- [ ] `MEASURED` line with latency and tokens. (evidence: rail screenshot after a turn)
+- [ ] Evidence frame block (`WHAT HOPA SAW`) when a step captured a screenshot. (evidence: rail screenshot)
+- [ ] Approval inside the rail instead of a separate window. (evidence: rail screenshot with Allow / Not now)
+
+Fields and chrome
+- [ ] `PasswordBox` styled like `TextBox`: the bridge token and model key are still white. (evidence: settings screenshot)
+- [ ] Settings dialog with the same borderless chrome as the main window. (evidence: settings screenshot without a system title bar)
+- [ ] Tray and taskbar icon use the laptop mark instead of `SystemIcons.Information`. (evidence: tray screenshot; icon file or runtime render)
+- [ ] Composer grows with the text up to a cap, then scrolls. (evidence: 5-line draft screenshot)
+
+Behaviour
+- [ ] The `Phone` target chip proven with a live bridge turn: chip switches target, the step lands on the phone. (evidence: transcript with bridge and dumpsys)
+
+Blocked, listed so they are not forgotten
+- [ ] High contrast theme: every surface follows the system colours. (blocked: decision - full theme or chrome and text only)
+- [ ] 200% scaling pass. (blocked: needs the display set to 200 %)
 
 ## 6. Acceptance: assertions, not "opens"
 
