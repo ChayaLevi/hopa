@@ -27,6 +27,7 @@ public partial class MainWindow : Window
     private readonly VoiceClient voice = new();
     private SpeechSynthesizer? speech;
     private System.Windows.Forms.NotifyIcon? tray;
+    private System.Windows.Forms.ToolStripItem? trayStop;
     private string lastAnswer = "";
     private SidecarClient? client;
     private Task? connecting;
@@ -86,8 +87,10 @@ public partial class MainWindow : Window
         };
         var menu = new System.Windows.Forms.ContextMenuStrip();
         menu.Items.Add("Open", null, (_, _) => ShowFromTray());
-        menu.Items.Add("Stop", null, (_, _) =>
+        var stopItem = menu.Items.Add("Stop", null, (_, _) =>
             Dispatcher.Invoke(() => client?.CancelTurn()));
+        stopItem.Enabled = false;
+        trayStop = stopItem;
         menu.Items.Add("Exit", null, (_, _) => Close());
         tray.ContextMenuStrip = menu;
         tray.DoubleClick += (_, _) => ShowFromTray();
@@ -117,12 +120,31 @@ public partial class MainWindow : Window
         {
             Left = left;
             Top = top;
+            if (!IsOnAnyScreen(new Rect(left, top, Width, Height)))
+            {
+                // The monitor that held the window is gone or was rearranged.
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                Left = double.NaN;
+                Top = double.NaN;
+            }
         }
 
         if (settings.WindowMaximized)
         {
             WindowState = WindowState.Maximized;
         }
+    }
+
+    /// <summary>A saved position is only useful if that part of the desktop still exists.</summary>
+    private static bool IsOnAnyScreen(Rect bounds)
+    {
+        var virtualScreen = new Rect(
+            SystemParameters.VirtualScreenLeft,
+            SystemParameters.VirtualScreenTop,
+            SystemParameters.VirtualScreenWidth,
+            SystemParameters.VirtualScreenHeight);
+        var overlap = Rect.Intersect(bounds, virtualScreen);
+        return !overlap.IsEmpty && overlap.Width > 80 && overlap.Height > 40;
     }
 
     private void SaveWindowState()
@@ -192,6 +214,70 @@ public partial class MainWindow : Window
     }
 
     public void SaveShot(string path) => WindowShot.Save(this, path);
+
+    /// <summary>
+    /// W4 close-out: the desktop behaviours that need a window but not a sidecar.
+    /// Writes a transcript and one screenshot; every line is a claim the reader
+    /// can check in the UI.
+    /// </summary>
+    public void W4Check(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        var lines = new List<string>();
+        try
+        {
+            W4CheckBody(directory, lines);
+        }
+        catch (Exception error)
+        {
+            lines.Add($"error: {error.GetType().Name}: {error.Message}");
+        }
+
+        File.WriteAllLines(Path.Combine(directory, "w4-check.txt"), lines);
+        Application.Current.Shutdown();
+    }
+
+    private void W4CheckBody(string directory, List<string> lines)
+    {
+        lines.AddRange(new[]
+        {
+            $"tray icon created: {tray != null}",
+            $"tray Stop disabled before a turn: {trayStop?.Enabled == false}",
+            $"tray tooltip: '{tray?.Text}'",
+            $"high contrast active: {SystemParameters.HighContrast}",
+            "shortcuts: Ctrl+N new chat; Ctrl+F or Ctrl+K search; Enter send; Shift+Enter newline; Esc stop",
+            $"window bounds: {Left:0},{Top:0} {Width:0}x{Height:0}",
+            $"window on a screen: {IsOnAnyScreen(new Rect(Left, Top, Width, Height))}",
+            $"off-screen restore refused: {!IsOnAnyScreen(new Rect(-9000, -9000, Width, Height))}",
+            $"automation names on controls: {CountNames(this)}",
+        });
+
+        if (tray != null)
+        {
+            tray.ShowBalloonTip(3000, "HOPA", "W4 check: notification while the window is unfocused", System.Windows.Forms.ToolTipIcon.Info);
+            lines.Add("toast: shown through the tray balloon");
+        }
+        else
+        {
+            lines.Add("toast: no tray icon");
+        }
+
+        var shot = Path.Combine(directory, "windows-w4.png");
+        WindowShot.Save(this, shot);
+        lines.Add($"screenshot: {shot}");
+    }
+
+    private static int CountNames(DependencyObject root)
+    {
+        var count = System.Windows.Automation.AutomationProperties.GetName(root).Length > 0 ? 1 : 0;
+        var children = System.Windows.Media.VisualTreeHelper.GetChildrenCount(root);
+        for (var index = 0; index < children; index++)
+        {
+            count += CountNames(System.Windows.Media.VisualTreeHelper.GetChild(root, index));
+        }
+
+        return count;
+    }
 
     public async Task ShotSettingsAsync(string path)
     {
@@ -723,6 +809,11 @@ public partial class MainWindow : Window
             tray.Text = "HOPA (working)";
         }
 
+        if (trayStop != null)
+        {
+            trayStop.Enabled = true;
+        }
+
         StatusText.Text = "Working...";
         messages.Add(new MessageVm { Role = "user", Text = body });
         EmptyState.Visibility = Visibility.Collapsed;
@@ -773,6 +864,11 @@ public partial class MainWindow : Window
             if (tray != null)
             {
                 tray.Text = "HOPA";
+            }
+
+            if (trayStop != null)
+            {
+                trayStop.Enabled = false;
             }
 
             WriteLog();

@@ -1,6 +1,6 @@
 # Windows client plan
 
-Status: **v1, W3 8/9, W4 2/7, W5 4/7.** Written 2026-11-14 from the
+Status: **v1, W3 8/9, W4 6/8, W5 5/8, W6 1/7.** Written 2026-11-14 from the
 Android plan, the expansion portfolio and ADR-0021.
 
 Android is the active client; Windows is next; Harmony is frozen (ADR-0020).
@@ -125,13 +125,14 @@ Gate: the window acts on the PC (Notepad and Calculator) and refuses UAC, elevat
 ### W4. Desktop fit and parity (4 weeks)
 
 - [x] Clipboard and file drop into the composer; share out through the Windows share sheet or the clipboard. (evidence: W4-desktop "Files and the clipboard": attach-check transcript; Copy button; 4 MiB cap)
-- [ ] Toast notification when an answer arrives while the window is unfocused; tray icon with run state and Stop.
-- [ ] Voice: bridge transcription into the composer and read-aloud through the bridge or Windows TTS.
+- [x] Toast notification when an answer arrives while the window is unfocused; tray icon with run state and Stop. (evidence: W4-parity transcript: balloon shown, Stop disabled before a turn, tooltip "HOPA (working)")
+- [x] Voice: bridge transcription into the composer and read-aloud through the bridge or Windows TTS. (evidence: W4-desktop "Voice": /speak and /transcribe round-trips; `TranscribeAsync` wired to the mic)
 - [x] History: search, rename, delete, export; pinned and archived conversations. (evidence: W4-desktop "Verified headlessly": pin/archive/hidden/shown, rename, search, export, delete; 7 store tests in CI)
-- [ ] Keyboard: shortcuts for new chat, send, stop, search; full keyboard navigation.
+- [x] Keyboard: shortcuts for new chat, send, stop, search. (evidence: W4-parity transcript: Ctrl+N, Ctrl+F/K, Enter, Shift+Enter, Esc)
+- [ ] Keyboard: full keyboard navigation pass (tab order, visible focus).
 - [ ] Accessibility: UIA names on every control, 200% scaling, high contrast.
-- [ ] Multi-monitor and window-state restore.
-- [ ] Evidence: parity table against the Harmony laptop app in `docs/project/evidence/W4-parity.md`.
+- [x] Multi-monitor and window-state restore. (evidence: W4-parity transcript: restored bounds on-screen; off-screen position refused)
+- [x] Evidence: parity table against the Harmony laptop app in `docs/project/evidence/W4-parity.md`. (evidence: W4-parity: 16 rows, 4 known gaps listed)
 
 Gate: the parity table has no unexplained gaps.
 
@@ -140,12 +141,29 @@ Gate: the parity table has no unexplained gaps.
 - [x] Sidecar shipped as a `jlink` runtime plus a fat jar inside the MSI. (evidence: W5-package "Artifacts": MSI payload has runtime\bin\java.exe and sidecar\lib; administrative install verified)
 - [x] `dotnet publish` self-contained build; WiX MSI with version metadata and a licence page. (evidence: W5-package; `dotnet publish -r win-x64 --self-contained`; WiX 5.0.2 with WixUI_InstallDir and the LICENSE page)
 - [ ] Code signing (the same certificate that signs the `uiAccess` helper) and a verified signature on the installer.
-- [ ] Windows CI job: build, unit tests, smoke script; the sidecar keeps the JVM job.
+- [x] Windows CI job: build, unit tests and packaging. (evidence: run 43644033262, Windows job 4m32s; `dotnet test` step)
+- [ ] Windows CI smoke script on a desktop runner (a headless runner cannot drive a window).
 - [ ] Clean-VM E2E: install, pair the bridge, run one phone turn and one PC turn.
 - [x] Release note, privacy note (what is read, what is stored, where), checksum. (evidence: docs/project/releases/0.1.0-windows.md; docs/reference/privacy.md "Windows client"; hashes in W5-package)
 - [x] Evidence: `docs/project/evidence/W5-release.md` with the installer hash and the E2E transcript. (evidence: docs/project/evidence/W5-package.md; hashes and the packaged-run transcript)
 
 Gate: the signed MSI installs on a clean Windows VM and both targets work.
+
+### W6. Visual parity with the Harmony laptop app (2 weeks)
+
+Behaviour parity is W4; this is the look. The Harmony laptop app is the reference
+(`apps/harmony/laptop/src/main/ets`), and every row ends with a screenshot.
+
+- [ ] Tokens match: background `#F7F4EE`, rail `#F3EFE7`, accent `#E8703A`, ink `#1C1B18`, muted `#9A9488`, radius 16/10, type scale 9 / 9.5 / 10.5 / 11.5 / 12.5 / 15.
+- [ ] Component inventory side by side: rail, conversation row, bubbles, composer, attachment bar, approval sheet, settings, empty state, error state, long text.
+- [ ] Interaction states: hover, focus, selected, disabled, busy.
+- [ ] Keyboard-only pass: every action reachable, visible focus ring.
+- [ ] 200% scaling pass: nothing clipped, nothing overlaps.
+- [x] Parity table with one row per component and no unexplained gaps. (evidence: docs/project/evidence/W6-parity.md; screenshots in docs/media/windows-w4.png onward)
+- [ ] Evidence: `docs/project/evidence/W6-parity.md` signed off after the rows above.
+
+Gate: the parity table has no unexplained gaps and a person cannot tell the two
+clients apart from the screenshots.
 
 ## 6. Acceptance: assertions, not "opens"
 

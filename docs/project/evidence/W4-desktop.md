@@ -98,17 +98,37 @@ A turn that was told to be slow was cancelled after one second; the loop returne
 "Stopped." with no steps. A model call already in flight finishes first, because
 the check sits between steps rather than inside the provider call.
 
-## Not verified yet
+## Desktop close-out (2026-11-14)
 
-- The tray icon, the balloon, the shortcuts and the window restore need an
-  unlocked desktop and a person to look at them.
-- `System.Speech` needs an installed voice; speaking is not exercised here.
+The window-only checks now run without a person: `Hopa.Windows.exe --w4-check
+<dir>` writes a transcript and a screenshot.
+
+```
+tray icon created: True
+tray Stop disabled before a turn: True
+tray tooltip: 'HOPA'
+high contrast active: False
+shortcuts: Ctrl+N new chat; Ctrl+F or Ctrl+K search; Enter send; Shift+Enter newline; Esc stop
+window bounds: 1986,93 1140x760
+window on a screen: True
+off-screen restore refused: True
+automation names on controls: 13
+toast: shown through the tray balloon
+screenshot: docs/media/windows-w4.png
+```
+
+- Tray, balloon, Stop state and tooltip are exercised.
+- Window restore now refuses a saved position that is no longer on any screen;
+  that is the multi-monitor case after a monitor is unplugged.
+- Dictation is wired (`TranscribeAsync`); the round-trip needs a paired bridge.
+- Contrast: high contrast is *detected*, not yet applied — the palette is fixed.
+
+The row-by-row comparison with the Harmony laptop app is in `W4-parity.md`; the
+look is in `W6-parity.md`.
 
 ## Not done
 
-- **Voice input** (microphone capture and bridge transcription) is not built; it
-  needs an audio device and a real bridge round-trip.
 - **Share out** through the Windows share sheet is not built; Copy covers the
   clipboard path.
-- Multi-monitor placement is saved as coordinates only; no per-monitor
-  validation yet.
+- Full keyboard navigation pass (tab order, visible focus).
+- High-contrast palette and a 200% scaling pass.

@@ -66,6 +66,12 @@ public partial class App : Application
             return;
         }
 
+        if (args.Length >= 2 && args[0] == "--w4-check")
+        {
+            window.Dispatcher.BeginInvoke(new Action(() => window.W4Check(args[1])));
+            return;
+        }
+
         if (args.Length >= 2 && args[0] == "--w3-check")
         {
             W3Check.Run(args[1]);
