@@ -21,6 +21,16 @@ public partial class SettingsWindow : Window
         Select(ToneBox, settings.Tone);
     }
 
+    private void Header_Drag(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         var settings = new AppSettings

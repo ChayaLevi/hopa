@@ -42,6 +42,7 @@ public partial class MainWindow : Window
     private string? outputPath;
     private bool switching;
     private bool running;
+    private string lastQuestion = "";
 
     public MainWindow()
     {
@@ -70,6 +71,13 @@ public partial class MainWindow : Window
         ConversationList.ItemsSource = grouped.View;
         MessagesList.ItemsSource = messages;
         SetupTray();
+        using (var icon = LaptopIcon())
+        {
+            Icon = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+                icon.Handle, Int32Rect.Empty,
+                System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+        }
+
         SourceInitialized += (_, _) => RoundCorners();
         Loaded += (_, _) => RestoreWindowState();
         Closing += (_, _) => SaveWindowState();
@@ -91,11 +99,36 @@ public partial class MainWindow : Window
         DwmSetWindowAttribute(handle, 33, ref round, sizeof(int));
     }
 
+    /// <summary>The laptop mark, drawn once at 32 px for the tray and the taskbar.</summary>
+    private static System.Drawing.Icon LaptopIcon()
+    {
+        var bitmap = new System.Drawing.Bitmap(32, 32);
+        using (var g = System.Drawing.Graphics.FromImage(bitmap))
+        {
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.Clear(System.Drawing.Color.Transparent);
+            var orange = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(0xE8, 0x70, 0x3A));
+            var cream = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(0xFF, 0xFD, 0xF7));
+            var ink = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(0x1C, 0x1B, 0x18));
+            g.FillRectangle(orange, 5, 6, 22, 16);
+            g.FillRectangle(orange, 25, 10, 3, 5);
+            g.FillRectangle(cream, 8, 9, 16, 10);
+            g.FillEllipse(ink, 11, 12, 2, 2);
+            g.FillEllipse(ink, 17, 12, 2, 2);
+            g.DrawArc(new System.Drawing.Pen(ink, 1.6f), 12, 14, 8, 4, 20, 140);
+            g.FillRectangle(orange, 2, 23, 28, 4);
+            g.FillRectangle(cream, 14, 24, 4, 1);
+        }
+
+        var handle = bitmap.GetHicon();
+        return System.Drawing.Icon.FromHandle(handle);
+    }
+
     private void SetupTray()
     {
         tray = new System.Windows.Forms.NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Information,
+            Icon = LaptopIcon(),
             Text = "HOPA",
             Visible = true,
         };
@@ -970,6 +1003,8 @@ public partial class MainWindow : Window
             ? goal
             : attachment != null ? Describe(attachment) : "";
 
+        var previousQuestion = lastQuestion;
+        var clock = System.Diagnostics.Stopwatch.StartNew();
         running = true;
         SendButton.IsEnabled = true;
         SendButton.Content = "\u25A0";
@@ -1036,6 +1071,16 @@ public partial class MainWindow : Window
             }
 
             TitleText.Text = title;
+            clock.Stop();
+            RailMeasured.Text = $"answered in {clock.Elapsed.TotalSeconds:0.0} s";
+            RailMeasured.Visibility = Visibility.Visible;
+            if (previousQuestion.Length > 0)
+            {
+                RailEarlier.Text = "Earlier: " + previousQuestion;
+                RailEarlier.Visibility = Visibility.Visible;
+            }
+
+            lastQuestion = body;
             UpsertConversation(conversationId, title);
             ScrollToEnd();
             StatusText.Text = "";
@@ -1269,6 +1314,23 @@ public partial class MainWindow : Window
         }
 
         ApplyFilter();
+    }
+
+    private void More_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement element || element.DataContext is not ConversationVm vm)
+        {
+            return;
+        }
+
+        ConversationList.SelectedItem = vm;
+        if (ConversationList.ContextMenu is { } menu)
+        {
+            menu.PlacementTarget = element;
+            menu.IsOpen = true;
+        }
+
+        e.Handled = true;
     }
 
     private async void Pin_Click(object sender, RoutedEventArgs e)

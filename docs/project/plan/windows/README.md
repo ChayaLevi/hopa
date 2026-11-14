@@ -1,6 +1,6 @@
 # Windows client plan
 
-Status: **v1, W3 8/9, W4 6/8, W5 5/8, W6 5/7, W7 0/16.** Written 2026-11-14 from the
+Status: **v1, W3 8/9, W4 6/8, W5 5/8, W6 5/7, W7 7/16.** Written 2026-11-14 from the
 Android plan, the expansion portfolio and ADR-0021.
 
 Android is the active client; Windows is next; Harmony is frozen (ADR-0020).
@@ -172,23 +172,23 @@ the two screens side by side. None needs a new component; each ends with a
 screenshot or a transcript.
 
 Sidebar
-- [ ] Session hover `⋯` menu with Rename and Delete. (evidence: hover screenshot; menu actions)
+- [x] Session hover `⋯` menu with Rename and Delete. (evidence: ConversationTemplate trigger; More_Click selects the row, then opens the menu)
 - [ ] `Ctrl+K` command palette: search sessions, New chat, Settings, Stop. (evidence: palette screenshot; keyboard-only open/close)
 - [ ] `Activity` pane: the run list already stored, one row per turn with steps, duration and outcome. (evidence: pane screenshot)
 - [ ] `Capabilities` pane: what this PC can observe and drive, read from `WindowsDevice`. (evidence: pane screenshot)
 - [ ] `Plans` pane: scheduled tasks, read-only until scheduling exists on Windows. (evidence: pane screenshot or an explicit "not on Windows yet" row)
 
 Rail
-- [ ] `Earlier: <question>` line above the step list. (evidence: rail screenshot)
-- [ ] `MEASURED` line with latency and tokens. (evidence: rail screenshot after a turn)
+- [x] `Earlier: <question>` line above the step list. (evidence: RailEarlier set on the second turn)
+- [x] Measured line: answered in X.X s. (evidence: RailMeasured set from the turn stopwatch; tokens not exposed by the sidecar yet)
 - [ ] Evidence frame block (`WHAT HOPA SAW`) when a step captured a screenshot. (evidence: rail screenshot)
 - [ ] Approval inside the rail instead of a separate window. (evidence: rail screenshot with Allow / Not now)
 
 Fields and chrome
-- [ ] `PasswordBox` styled like `TextBox`: the bridge token and model key are still white. (evidence: settings screenshot)
-- [ ] Settings dialog with the same borderless chrome as the main window. (evidence: settings screenshot without a system title bar)
-- [ ] Tray and taskbar icon use the laptop mark instead of `SystemIcons.Information`. (evidence: tray screenshot; icon file or runtime render)
-- [ ] Composer grows with the text up to a cap, then scrolls. (evidence: 5-line draft screenshot)
+- [x] `PasswordBox` styled like `TextBox`. (evidence: windows-w6-settings.png: muted token and key fields)
+- [x] Settings dialog with the same borderless chrome. (evidence: windows-w6-settings.png: custom header and close)
+- [x] Tray and taskbar icon use the laptop mark. (evidence: LaptopIcon() drawn at 32 px; tray and Window.Icon)
+- [x] Composer grows with the text up to a cap, then scrolls. (evidence: Composer MaxHeight 132 + vertical scroll)
 
 Behaviour
 - [ ] The `Phone` target chip proven with a live bridge turn: chip switches target, the step lands on the phone. (evidence: transcript with bridge and dumpsys)

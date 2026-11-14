@@ -76,13 +76,25 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding Title}" FontSize="12.5" VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis" Foreground="{Binding TitleInk}" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding PinLabel}" FontSize="9" FontWeight="SemiBold"
-                               Foreground="#E8703A" Margin="6,0,0,0" />
-                    <TextBlock Text="{Binding UpdatedLabel}" FontSize="9.5" Foreground="#9A9488"
-                               Margin="8,0,0,0" />
-                </StackPanel>
+                <Grid Grid.Column="1" VerticalAlignment="Center">
+                    <StackPanel x:Name="RowMeta" Orientation="Horizontal">
+                        <TextBlock Text="{Binding PinLabel}" FontSize="9" FontWeight="SemiBold"
+                                   Foreground="#E8703A" Margin="6,0,0,0" />
+                        <TextBlock Text="{Binding UpdatedLabel}" FontSize="9.5" Foreground="#9A9488"
+                                   Margin="8,0,0,0" />
+                    </StackPanel>
+                    <TextBlock x:Name="More" Text="\u22EF" FontSize="13" Foreground="#9A9488"
+                               HorizontalAlignment="Right" Cursor="Hand" Visibility="Collapsed"
+                               MouseLeftButtonUp="More_Click" Margin="6,0,0,0" />
+                </Grid>
             </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                             Value="True">
+                    <Setter TargetName="More" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="RowMeta" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
         </DataTemplate>
     </Window.Resources>
 
@@ -284,9 +296,10 @@
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="1">
                             <TextBox x:Name="Composer" BorderThickness="0" Background="Transparent"
-                                     FontSize="13.5" TextWrapping="Wrap" MinHeight="38"
+                                     FontSize="13.5" TextWrapping="Wrap" MinHeight="38" MaxHeight="132"
                                      VerticalContentAlignment="Center" KeyDown="Composer_KeyDown"
                                      TextChanged="Composer_TextChanged"
+                                     VerticalScrollBarVisibility="Auto"
                                      AutomationProperties.Name="Message" />
                             <TextBlock x:Name="ComposerPlaceholder" Text="Ask HOPA…" IsHitTestVisible="False"
                                        VerticalAlignment="Center" FontSize="13.5" Foreground="#9A9488" />
@@ -324,6 +337,11 @@
                     </StackPanel>
                     <TextBlock x:Name="RailFacts" DockPanel.Dock="Top" Text="" FontSize="10.5"
                                Foreground="#9A9488" Margin="0,3,0,0" />
+                    <TextBlock x:Name="RailEarlier" DockPanel.Dock="Top" Text="" FontSize="10"
+                               Foreground="#9A9488" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Visibility="Collapsed" />
+                    <TextBlock x:Name="RailMeasured" DockPanel.Dock="Top" Text="" FontSize="10"
+                               Foreground="#9A9488" Margin="0,6,0,0" Visibility="Collapsed" />
                     <Border DockPanel.Dock="Bottom" BorderBrush="#E9E4DA" BorderThickness="0,1,0,0"
                             Padding="0,10,0,0">
                         <StackPanel Orientation="Horizontal">
