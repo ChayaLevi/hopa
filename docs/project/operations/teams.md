@@ -40,66 +40,115 @@ brick, one owner of its data, and one contract at each edge.
 
 ## Bricks
 
-Twelve bricks cover the product. Each one is a candidate team at maximum
+Thirteen bricks cover the product. Each one is a candidate team at maximum
 parallelism; the next section shows how they merge when there are fewer people.
 
-| # | Brick | What it owns |
-|---|---|---|
-| 1 | **Client applications** | The screen and the controls: chat, approvals, notifications, settings, task inbox. Android now, Windows next. |
-| 2 | **Device execution** | Performing one step on a device (system API, share, GUI) and verifying the result. |
-| 3 | **Tasks** | What a person asked for: state, next step, resume, handoff to another device. |
-| 4 | **Family and approvals** | The household's rules: who is in the family, what each member may do, who confirms an action. |
-| 5 | **Target-app knowledge** | The instructions for "how to do X in target app Y": steps, selectors, postconditions, versions. |
-| 6 | **Knowledge factory** | How those instructions are produced: models, consensus, human review. |
-| 7 | **Knowledge delivery** | Signed recipe versions, canary rollout, rollback, pinned to a target-app build. |
-| 8 | **Verification farm** | Phones and emulators, regression, flake control, failure taxonomy. |
-| 9 | **Notification understanding** | Turning a notification into an event or a task: date, owner, urgency. |
-| 10 | **Product lab** | What to fix first, pilot numbers, user behaviour, the research thrusts. |
-| 11 | **Platform and integrations** | Device-to-device and device-to-cloud transport, API, pairing. |
-| 12 | **Architecture and security** | Shared contracts, CI, release, approval policy, secrets, threat model. |
+| # | Brick | What it owns | Effort to a first version |
+|---|---|---|---|
+| 1 | **Client applications** | The screen and the controls: chat, approvals, notifications, settings, task inbox. Android first, Windows next. | Android is largely done; a new screen is about a week |
+| 2 | **Device execution** | Performing one step on a device (system API, share, GUI) and checking the result against the postcondition. | Both paths exist; each new app adds selectors and checks |
+| 3 | **Tasks** | What a person asked for: state, next step, resume, handoff to another device. | 8-10 weeks |
+| 4 | **Family and approvals** | The household's rules: who is in the family, what each member may do, who confirms an action. | 8-10 weeks |
+| 5 | **Target-app knowledge** | The instructions for "how to do X in target app Y": steps, selectors, postconditions, versions. | 6-8 weeks for the format and the first app |
+| 6 | **Knowledge factory** | How those instructions are produced: models, consensus, human review. | 6-8 weeks |
+| 7 | **Knowledge delivery** | The signed package of recipes, its version, canary rollout, rollback, pinned to a target-app build. | 3-4 weeks |
+| 8 | **Verification farm** | Re-running recipes on the device matrix: regression, flake control, failure taxonomy, the go/no-go before a rollout. | 6-8 weeks |
+| 9 | **Notification understanding** | Turning a notification into an event or a task: date, owner, urgency. | 2-3 weeks |
+| 10 | **Product lab** | What to fix first, pilot numbers, user behaviour, the research thrusts. | ongoing, one researcher |
+| 11 | **Platform and integrations** | Device-to-device and device-to-cloud transport, API, pairing. | exists; ongoing |
+| 12 | **Architecture and security** | Shared contracts, CI, release, signing, secrets, threat model. | ongoing, half to one person |
+| 13 | **Decision (LAIX)** | Chooses the next action: reads the task, the household rules and the known recipes, picks one step, runs the approval gate. LAIX is the current implementation. | 3-5 weeks to port to Kotlin |
+
+Numbers 1-12 keep the values they had; 13 is new. The loop has a decide step, so
+it needed a brick: a task says what to do, knowledge says how, and decision picks
+the step that runs now.
 
 ### How the bricks connect
+
+Two pictures instead of one. The first follows a single request from the person
+to the step that runs. The second follows a single recipe from production to the
+phone. Numbers match the brick table above.
+
+**One request.**
 
 ```mermaid
 flowchart TB
     person(["Person"])
-    arch["12 Architecture and security"]
-
-    subgraph platform["11 Platform - carries every message between these boxes"]
-        clients["1 Clients"]
-        tasks["3 Tasks"]
-        knowledge["5 Target-app knowledge"]
-        execution["2 Execution"]
-        farm["8 Farm"]
-        lab["10 Product lab"]
-        family["4 Family"]
-        notes["9 Notifications"]
-        factory["6 Factory"]
-        delivery["7 Delivery"]
-    end
+    clients["1 Clients"]
+    tasks["3 Tasks"]
+    decision["13 Decision (LAIX)"]
+    family["4 Family"]
+    knowledge["5 Target-app knowledge"]
+    execution["2 Execution"]
 
     person -->|asks| clients
     clients -->|request| tasks
-    notes -->|makes a task| tasks
-    tasks -->|who approves| family
-    family -->|yes or no| tasks
-    tasks -->|needs the steps| knowledge
-    factory -->|new recipe| knowledge
-    knowledge -->|signed version| delivery
-    knowledge -->|one step| execution
-    execution -->|verify| farm
-    farm -->|journals| lab
-    arch -.->|contracts, CI, releases| platform
+    tasks -->|what is next| decision
+    knowledge -->|the step for this app| decision
+    decision -->|needs a yes| family
+    family -->|yes or no| decision
+    decision -->|perform and check| execution
 ```
 
-Numbers match the brick table above. Arrows carry what one brick hands to the
-next, and the labels say what is handed over. Everything except the person sits
-inside the platform band because every arrow between the boxes needs transport;
-architecture sits outside because it sets the rules the boxes follow.
+Reading it: the task records what the person wants; decision picks one step from
+what knowledge knows about the app; family answers whether this member may take
+it; execution performs the step and checks the result. A notification (9) enters
+at the task, and every arrow above travels over platform (11).
 
-### Three things that look alike
+**One recipe, from production to the phone.**
 
-Tasks, knowledge and family are easy to mix up, so here is how each one works.
+```mermaid
+flowchart LR
+    factory["6 Factory"] -->|new recipe| knowledge["5 Knowledge"]
+    knowledge -->|version to test| farm["8 Farm"]
+    farm -->|failures| knowledge
+    farm -->|go or no-go| delivery["7 Delivery"]
+    delivery -->|signed package| clients["1 Clients"]
+    farm -->|journals| lab["10 Product lab"]
+```
+
+Reading it: the factory proposes a recipe; knowledge owns it; the farm runs it on
+the device matrix and sends failures back; only a version that passes goes to
+delivery, which puts a signed package on the phone. The lab reads the numbers
+afterwards.
+
+**The two bands.** 11 Platform and 12 Architecture are not steps in either
+picture, so they are not drawn as boxes. Platform carries every arrow between
+the boxes; architecture sets the contracts, CI, release and signing rules that
+every box follows. They wrap both pictures, which is why the earlier single
+diagram put them above and below everything.
+
+### The bricks people asked about
+
+**7 Delivery. Signed package of what?** Of recipes: for one target app, the
+steps, the selectors, the check that proves the step worked, and the app build it
+was tested against - in one file with a signature. The phone refuses an unsigned
+or expired package. The work is the format, the signature check in the client,
+the registry, canary rollout to a few devices, and rollback in one command.
+Three to four weeks for the first version. Without 7, a recipe stays in the
+factory and nothing reaches a phone safely.
+
+**8 Farm. Is it just logging for the lab?** No. It answers one question the other
+bricks cannot: *does this recipe still work on version X of the app?* It owns the
+device matrix (emulator, Windows machine, one real phone), the go/no-go that
+delivery waits for, and the failure list that becomes next week's work. Its
+journals also feed the lab, but that is a side effect, not the job. Six to eight
+weeks, then continuous.
+
+**12 Architecture. Why is it on top?** Because it is not a step: it has no place
+in the request path, which is why it was wrong to draw it beside the person. It
+is the layer every box follows - shared contracts, CI, the release cut, signing
+keys, the security review. Half to one person, continuously, not a project.
+
+**13 Decision. Where is LAIX?** In 13. It is the step that chooses what to do
+next, and LAIX is its current implementation. It is the only brick that reads
+both the household rules and the known recipes at the same time, which is why it
+sits between the task and the execution.
+
+### Things that look alike
+
+Tasks, knowledge, decision and family are easy to mix up, so here is how each
+one works.
 
 **Tasks and knowledge.**
 
@@ -114,6 +163,11 @@ KNOWLEDGE  "In the bank app: Payments -> Internet -> amount -> confirm"
 A task refers to knowledge and keeps the steps out of itself. Knowledge carries
 the steps and stays separate from who asked. It is the difference between an
 order in a restaurant and the cookbook.
+
+**Decision and knowledge.** Knowledge holds the steps for one app. Decision
+chooses which step runs now, for this task and this person, and calls the
+approval gate. Knowledge changes when an app changes; decision changes when a
+policy or a model changes.
 
 **Tasks and family.** A task answers "what and when"; family answers "who is
 allowed to approve it". They change for different reasons, so they are separate
@@ -169,9 +223,9 @@ merge at each size.
 
 | Teams | Composition |
 |---|---|
-| **12** | One team per brick: maximum parallelism, heavy coordination |
-| **7** | 1 - 2+8 - 3+9 - 4 - 5+6+7 - 10 - 11, plus 12 as a shared role |
-| **5** | 1 - 2+8 - 3+4+9 - 5+6+7 - 10, plus 11 and 12 as shared roles |
+| **13** | One team per brick: maximum parallelism, heavy coordination |
+| **7** | 1 - 2+8 - 3+9 - 4 - 5+6+7 - 10+13 - 11, plus 12 as a shared role |
+| **5** | 1 - 2+8 - 3+4+9 - 5+6+7 - 10+13, plus 11 and 12 as shared roles |
 
 Merging is allowed when the same two to four people would do both jobs and the
 edge between them is trivial. Each brick has exactly one owner.
@@ -185,7 +239,7 @@ edge between them is trivial. Each brick has exactly one owner.
 | Tasks and notifications | 3 + 9 | A request stays findable, and a notification can become a task |
 | Family and approvals | 4 | The family decides who may do what |
 | Target-app knowledge | 5 + 6 + 7 | A new target app is supported in days and survives updates |
-| Product lab | 10 | We know what to fix first and can prove the effect |
+| Algorithms and measurement | 10 + 13 | We know what to fix first, can prove the effect, and the next step is chosen well |
 | Platform and integrations | 11 | Devices and services find each other and stay connected |
 
 Shared roles:
@@ -213,7 +267,7 @@ split later.
 | | `services/tasks` *(new)*<br>[Tasks and notifications] | Durable tasks, approvals pending, resume. Moves to its own team when the hire lands |
 | | `contracts/tasks` *(new)* | The task contract, reviewed with Integration |
 | **Target-app knowledge** | `contracts/recipes`, `services/mapping` *(new)* | The recipe contract, the factory, publishing, rollout and rollback |
-| **Algorithms and measurement**<br>[Product lab] | `packages/decision` *(new, after the LAIX port)* | The decision contract and policies |
+| **Algorithms and measurement**<br>[Algorithms and measurement] | `packages/decision` *(new, after the LAIX port)* | The decision contract and policies |
 | | `services/evals/bench`, `services/evals/baseline` | HOPA-Bench with its task set and results; the reference loop used by the bench |
 | **Integration, release and quality**<br>[Verification farm, brick 8] | `.github/workflows` | Every CI job, Android and Windows; the release job that publishes the APK |
 | | `services/tools`, `tools/` | Repository checks, scripts, the smoke runner |
@@ -227,12 +281,17 @@ split later.
 | From -> To | Artifact | Meaning |
 |---|---|---|
 | Client -> Tasks | Request | "This is what the person asked" |
-| Tasks -> Target-app knowledge | Recipe request | "Which recipe performs this step?" |
-| Tasks -> Execution | Step | "Perform this and verify" |
-| Family -> Tasks | Approval rule | "This action needs X's confirmation" |
-| Target-app knowledge -> Client | Signed recipe | "These are the steps, this version" |
-| Factory -> Target-app knowledge | New recipe | "Here is a candidate, reviewed" |
-| Target-app knowledge -> Delivery | Release | "Publish this version" |
+| Tasks -> Decision | Task state | "This is what to do next" |
+| Decision -> Knowledge | Recipe lookup | "Which step performs this?" |
+| Knowledge -> Decision | Step | "These are the controls and the check" |
+| Decision -> Family | Approval check | "May this member do this now?" |
+| Family -> Decision | Yes or no | "Allowed, or ask someone else" |
+| Decision -> Execution | Step | "Perform this and check" |
+| Factory -> Knowledge | New recipe | "Here is a candidate, reviewed" |
+| Knowledge -> Farm | Version to test | "Test this on the matrix" |
+| Farm -> Knowledge | Failures | "Version X breaks on this app build" |
+| Farm -> Delivery | Go or no-go | "This version passed" |
+| Delivery -> Client | Signed package | "Install these recipes" |
 | Execution/Farm -> Product lab | Journal entries | "What happened, in how many steps" |
 | Product lab -> all | Findings | "Fix this first; these numbers hold" |
 | Platform -> all | Transport | "Messages arrive" |
@@ -263,12 +322,12 @@ Rules that keep parallelism from turning into noise:
 | Tasks and notifications | 2 developers + 0.5 product |
 | Family and approvals | 2 developers |
 | Target-app knowledge | 2 developers |
-| Product lab | 1 researcher + 0.5 analyst |
+| Algorithms and measurement | 1 engineer on decisions, plus 1 researcher + 0.5 analyst for the lab |
 | Platform and integrations | 1 backend developer |
 | Architecture and security | 1 engineer (can be 0.5 + 0.5 security reviewer) |
 
-About 12 full-time equivalents at seven teams. At five teams the same work fits
-in about 9: Tasks and family merge, and the two shared roles stay shared.
+About 13 full-time equivalents at seven teams. At five teams the same work fits
+in about 10: Tasks and family merge, and the two shared roles stay shared.
 
 ## People and ownership (2026-11)
 
@@ -300,8 +359,9 @@ it on day one.
 | **farm** | The devices that run the benchmark and the app matrix: the Android emulator, the Windows machine, and one real phone when one is available. | `.github/workflows`, the Windows `--matrix-check` |
 
 Why six teams: the **Tasks** brick lives inside Platform until the hire
-(Amir + Batya), and the **farm** lives inside Integration (Yoni). Both are
-already separate folders and contracts, so splitting them later is a staffing change.
+(Amir + Batya), the **farm** lives inside Integration (Yoni), and **decision**
+lives inside Algorithms (Sefi). All three are already separate folders and
+contracts, so splitting them later is a staffing change.
 
 ### Who to ask for a path
 
