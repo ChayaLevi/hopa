@@ -159,7 +159,7 @@ The app is resolved at decision time, on the phone, from data already there:
 
 | Input | Where | What it contributes |
 |---|---|---|
-| catalogue | `contracts/catalog/catalog.v1.json` | app ids, names, aliases, purposes, actions, per-platform launch details |
+| catalogue | `contracts/catalog/catalog.v1.json`, written at onboarding | app ids, names, aliases, purposes, actions, per-platform launch details |
 | routing cases | `contracts/fixtures/routing.json` | lexical cases that pin "internet bill" to the right app |
 | recipes | installed package (brick 5) | the steps inside each app, and the app each step belongs to |
 | the chosen action | `Action` | `ui.launch` and `ui.stop` require `app`; the executor refuses without it |
@@ -269,10 +269,12 @@ phone and a PC can drive each other and share chat. `services/backend` is planne
 for a hosted mode where the loop runs on our side; the device keeps the loop
 until that exists.
 
-**Build and delivery (days).** No person is involved; an app update or a new
-target app starts it. The factory proposes a recipe, knowledge owns it, the farm
-runs it on the device matrix and returns the failures, and only a version the farm
-passes reaches delivery, which signs the package and installs it on the phone.
+**Build and delivery (days).** It starts when a target app changes or a new app
+is onboarded, not when someone asks. People run it - factory, owners, farm, release
+- but no end user is part of it: the factory proposes a recipe, knowledge owns it,
+the farm runs it on the device matrix and returns the failures, and only a version
+the farm passes reaches delivery, which signs the package and installs it on the
+phone.
 
 **Learning (weeks).** Runs write journals; the lab reads them in batches and
 publishes the failure list, the bench score and the pilot numbers. It sits beside
