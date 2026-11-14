@@ -117,7 +117,7 @@ add("<defs>"
 rect(0, 0, W, H, "#F7F4EE", stroke="none", radius=0)
 
 # 12 Architecture: what the shared role actually does.
-rail(8, TEAM["shared"][0], "12 Architecture and contracts -",
+rail(8, TEAM["shared"][0], "Architecture and contracts -",
      ["review every contract change", "keep both CI pipelines green", "cut and sign each release"])
 
 # --- Band A: the device -----------------------------------------------------
@@ -126,18 +126,18 @@ band(24, 60, 1232, 330, "ON THE DEVICE - seconds - the loop repeats until the ta
 add(f'<ellipse cx="100" cy="204" rx="42" ry="24" fill="{PAPER}" stroke="{BORDER}" stroke-width="1.2"/>')
 text(100, 209, ["Person"], size=13)
 
-box(160, 180, 130, 48, ["1 Clients"], "clients")
-box(330, 180, 130, 48, ["3 Tasks"], "platform")
+box(160, 180, 130, 48, ["Clients"], "clients")
+box(330, 180, 130, 48, ["Tasks"], "platform")
 box(480, 180, 130, 48, ["router", "goal to apps"], "clients")
-box(630, 180, 140, 48, ["13 Decision", "rules: LAIX"], "algorithms")
-box(810, 180, 130, 48, ["4 Family rules"], "clients")
-box(970, 180, 130, 48, ["2 Execution"], "clients")
+box(630, 180, 140, 48, ["Decision", "rules: LAIX"], "algorithms")
+box(810, 180, 130, 48, ["Family rules"], "clients")
+box(970, 180, 130, 48, ["Execution"], "clients")
 box(1120, 180, 120, 48, ["target app"], "external", dashed=True)
 
-box(340, 100, 140, 38, ["9 Notifications"], "platform")
+box(340, 100, 140, 38, ["Notifications"], "platform")
 box(620, 96, 180, 40, ["model provider (network)"], "external", dashed=True)
 box(330, 280, 170, 48, ["catalogue (installed)", "ids, aliases, cases"], "shared")
-box(630, 280, 160, 48, ["5 recipes (installed)"], "knowledge")
+box(630, 280, 160, 48, ["recipes (installed)"], "knowledge")
 
 arrow([(142, 204), (158, 204)])
 arrow([(290, 204), (328, 204)])
@@ -173,10 +173,10 @@ label(480, 352, "ask, answer")
 # --- Band B: the build ------------------------------------------------------
 band(24, 404, 1232, 232, "BUILD AND DELIVERY - days - starts when a target app changes, not when someone asks")
 
-box(240, 478, 130, 60, ["6 Recipe", "factory"], "knowledge")
-box(440, 478, 130, 60, ["5 Target-app", "knowledge"], "knowledge")
-box(640, 478, 130, 60, ["8 Verification", "farm"], "integration")
-box(840, 478, 130, 60, ["7 Recipe", "delivery"], "knowledge")
+box(240, 478, 130, 60, ["Recipe", "factory"], "knowledge")
+box(440, 478, 130, 60, ["Target-app", "knowledge"], "knowledge")
+box(640, 478, 130, 60, ["Verification", "farm"], "integration")
+box(840, 478, 130, 60, ["Recipe", "delivery"], "knowledge")
 
 box(40, 466, 150, 50, ["onboard a", "target app"], "knowledge")
 box(40, 544, 150, 58, ["catalogue, authored", "ids, aliases, launch"], "knowledge")
@@ -202,7 +202,7 @@ label(900, 296, "installs, signature checked")
 
 # --- Band C: the learning loop ---------------------------------------------
 band(24, 646, 1232, 324, "LEARNING - weeks - read in batches, change plans")
-text(40, 684, ["10 Product lab - what it produces, and who gets it"],
+text(40, 684, ["Product lab - what it produces, and who gets it"],
      size=13, weight="600", anchor="start")
 rect(40, 692, 900, 262, "#FBF7EE", dash="4 4", radius=10)
 
@@ -213,14 +213,14 @@ label(1100, 600, "journals")
 
 rows = [
     (712, ["rank failures by app version"], "failure list", "weekly",
-     "to 5 Target-app knowledge"),
+     "to Target-app knowledge"),
     (772, ["score HOPA-Bench"], "score per release", "every release",
-     "to release cut (12)"),
+     "to the release cut"),
     (832, ["read pilot numbers"], "time, steps, repeats, waits", "monthly",
      "to priorities"),
     (892, ["one research question", "e.g. recipes that survive updates"],
      "method + dataset + report", "about 6 months",
-     "to 5: produce, or park"),
+     "to knowledge: produce, or park"),
 ]
 for y, left, artifact, cadence, consumer in rows:
     box(60, y, 300, 48, left, "algorithms")
@@ -231,7 +231,7 @@ for y, left, artifact, cadence, consumer in rows:
     text(634, centre + 4, [consumer], size=13, anchor="start")
 
 # 11 Platform: what the transport layer actually does.
-rail(982, TEAM["platform"][0], "11 Platform and services -",
+rail(982, TEAM["platform"][0], "Platform and services -",
      ["pair a phone with a PC", "tunnel, token rotation", "wire protocol between devices"])
 
 # --- Legend -----------------------------------------------------------------
@@ -250,7 +250,7 @@ for key, (x, y) in zip(order, columns):
     rect(x, y, 16, 16, TEAM[key][0], radius=3)
     add(f'<text x="{x + 24}" y="{y + 12}" font-size="12" fill="{INK}">{esc(short[key])}</text>')
 
-text(24, 1136, ["13 Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider."],
+text(24, 1136, ["Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider."],
      size=12, colour=MUTED, anchor="start")
 text(24, 1156, ["A step covered by a recipe runs without a model call; the call is the fallback for everything else."],
      size=12, colour=MUTED, anchor="start")

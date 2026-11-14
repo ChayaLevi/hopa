@@ -3,7 +3,7 @@
 <rect x="0" y="0" width="1280" height="1170" rx="0" fill="#F7F4EE" stroke="none" stroke-width="1.2"/>
 <rect x="24" y="8" width="1232" height="44" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="40" y="36" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="40" dy="0">12 Architecture and contracts -</tspan>
+<tspan x="40" dy="0">Architecture and contracts -</tspan>
 </text>
 <rect x="320" y="16" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="470" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -27,11 +27,11 @@
 </text>
 <rect x="160" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="225" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="225" dy="0">1 Clients</tspan>
+<tspan x="225" dy="0">Clients</tspan>
 </text>
 <rect x="330" y="180" width="130" height="48" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="395" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="395" dy="0">3 Tasks</tspan>
+<tspan x="395" dy="0">Tasks</tspan>
 </text>
 <rect x="480" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="545" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -40,16 +40,16 @@
 </text>
 <rect x="630" y="180" width="140" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="700" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="700" dy="0">13 Decision</tspan>
+<tspan x="700" dy="0">Decision</tspan>
 <tspan x="700" dy="16">rules: LAIX</tspan>
 </text>
 <rect x="810" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="875" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="875" dy="0">4 Family rules</tspan>
+<tspan x="875" dy="0">Family rules</tspan>
 </text>
 <rect x="970" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="1035" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="1035" dy="0">2 Execution</tspan>
+<tspan x="1035" dy="0">Execution</tspan>
 </text>
 <rect x="1120" y="180" width="120" height="48" rx="6" fill="#FFFFFF" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="5 4"/>
 <text x="1180" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -57,7 +57,7 @@
 </text>
 <rect x="340" y="100" width="140" height="38" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="410" y="124" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="410" dy="0">9 Notifications</tspan>
+<tspan x="410" dy="0">Notifications</tspan>
 </text>
 <rect x="620" y="96" width="180" height="40" rx="6" fill="#FFFFFF" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="5 4"/>
 <text x="710" y="121" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -70,7 +70,7 @@
 </text>
 <rect x="630" y="280" width="160" height="48" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="710" y="309" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="710" dy="0">5 recipes (installed)</tspan>
+<tspan x="710" dy="0">recipes (installed)</tspan>
 </text>
 <path d="M142,204 L158,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <path d="M290,204 L328,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
@@ -163,22 +163,22 @@
 </text>
 <rect x="240" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="305" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="305" dy="0">6 Recipe</tspan>
+<tspan x="305" dy="0">Recipe</tspan>
 <tspan x="305" dy="16">factory</tspan>
 </text>
 <rect x="440" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="505" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="505" dy="0">5 Target-app</tspan>
+<tspan x="505" dy="0">Target-app</tspan>
 <tspan x="505" dy="16">knowledge</tspan>
 </text>
 <rect x="640" y="478" width="130" height="60" rx="6" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="705" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="705" dy="0">8 Verification</tspan>
+<tspan x="705" dy="0">Verification</tspan>
 <tspan x="705" dy="16">farm</tspan>
 </text>
 <rect x="840" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="905" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="905" dy="0">7 Recipe</tspan>
+<tspan x="905" dy="0">Recipe</tspan>
 <tspan x="905" dy="16">delivery</tspan>
 </text>
 <rect x="40" y="466" width="150" height="50" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
@@ -253,7 +253,7 @@
 <tspan x="40" dy="0">LEARNING - weeks - read in batches, change plans</tspan>
 </text>
 <text x="40" y="684" font-size="13" fill="#1C1B18" font-weight="600" text-anchor="start">
-<tspan x="40" dy="0">10 Product lab - what it produces, and who gets it</tspan>
+<tspan x="40" dy="0">Product lab - what it produces, and who gets it</tspan>
 </text>
 <rect x="40" y="692" width="900" height="262" rx="10" fill="#FBF7EE" stroke="#C9C2B5" stroke-width="1.2" stroke-dasharray="4 4"/>
 <path d="M705,538 L705,670 L470,670 L470,690" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
@@ -285,7 +285,7 @@
 <tspan x="490" dy="0">weekly</tspan>
 </text>
 <text x="634" y="740" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="634" dy="0">to 5 Target-app knowledge</tspan>
+<tspan x="634" dy="0">to Target-app knowledge</tspan>
 </text>
 <rect x="60" y="772" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="801" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -302,7 +302,7 @@
 <tspan x="490" dy="0">every release</tspan>
 </text>
 <text x="634" y="800" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="634" dy="0">to release cut (12)</tspan>
+<tspan x="634" dy="0">to the release cut</tspan>
 </text>
 <rect x="60" y="832" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="861" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -337,11 +337,11 @@
 <tspan x="490" dy="0">about 6 months</tspan>
 </text>
 <text x="634" y="920" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="634" dy="0">to 5: produce, or park</tspan>
+<tspan x="634" dy="0">to knowledge: produce, or park</tspan>
 </text>
 <rect x="24" y="982" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="40" y="1010" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
-<tspan x="40" dy="0">11 Platform and services -</tspan>
+<tspan x="40" dy="0">Platform and services -</tspan>
 </text>
 <rect x="320" y="990" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="470" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -369,7 +369,7 @@
 <rect x="880" y="1098" width="16" height="16" rx="3" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="904" y="1110" font-size="12" fill="#1C1B18">Architecture and contracts</text>
 <text x="24" y="1136" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="24" dy="0">13 Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider.</tspan>
+<tspan x="24" dy="0">Decision holds the LAIX policy and its record. The client, not LAIX, calls the model provider.</tspan>
 </text>
 <text x="24" y="1156" font-size="12" fill="#6B665C" font-weight="400" text-anchor="start">
 <tspan x="24" dy="0">A step covered by a recipe runs without a model call; the call is the fallback for everything else.</tspan>
