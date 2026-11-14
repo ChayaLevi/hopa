@@ -65,52 +65,39 @@ the step that runs now.
 
 ### How the bricks connect
 
-The bricks run on three different clocks, and mixing them in one picture is what
-made the first draft unreadable:
+One map for the whole system. The three bands are three clocks; the colour of a
+box is the team that owns it; every arrow carries the artifact named on it.
 
-| Picture | Clock | Starts because | Ends when |
+![HOPA team map: three clocks, thirteen bricks, six teams](../../media/hopa-team-map.svg)
+
+The source is `tools/scripts/make-team-map.py`; rerun
+`py -3 tools/scripts/make-team-map.py` after changing a brick, a team or an
+arrow. The SVG is committed, so the page renders without a build step.
+
+| Band | Clock | Starts because | Ends when |
 |---|---|---|---|
-| The request | seconds | a person asks, or a notification arrives | the step ran and was checked |
-| The recipe pipeline | days | an app was updated, or a new app is supported | a signed package is on the phone |
-| The learning loop | weeks | journals accumulate | a finding changes a team plan or a release |
+| On the device | seconds | a person asks, or a notification arrives | the step ran and was checked |
+| Build and delivery | days | an app was updated, or a new app is supported | a signed package is installed |
+| Learning | weeks | journals accumulate | a finding changes a plan or a release |
 
-Numbers match the brick table above. The same brick can appear in more than one
-picture: 1 Clients renders the screen in the first, and installs packages in the
-second.
+| Team | Bricks it owns |
+|---|---|
+| Clients | 1 Clients, 2 Execution, 4 Family rules |
+| Platform and services | 3 Tasks, 9 Notifications, 11 Platform |
+| Target-app knowledge | 5 Knowledge, 6 Factory, 7 Delivery |
+| Algorithms and measurement | 10 Product lab, 13 Decision |
+| Integration, release and quality | 8 Farm, the release cut, CI |
+| Architecture and contracts (shared) | 12 Architecture |
 
-**Same clock: the request.** The loop repeats until the task closes.
+That covers all thirteen bricks. 4 Family and 9 Notifications have no team of
+their own in this shape: they sit with the team whose code they extend, and both
+become separate teams in the seven-team shape.
 
-```mermaid
-flowchart TB
-    person(["Person"])
-    observe["observe - 2 Execution"]
-    decide["decide - 13 Decision"]
-    gate["gate - 4 Family rules"]
-    act["act - 2 Execution"]
-    verify["verify - 2 Execution"]
-
-    person -->|goal| client["1 Clients"]
-    client -->|Task| task["3 Tasks"]
-    task -->|goal, history| decide
-    observe -->|Observation| decide
-    decide -->|Action| gate
-    gate -->|allow| act
-    act -->|executed| verify
-    verify -->|next Observation| observe
-    decide -->|done| close["close - 3 Tasks"]
-    gate -->|ask| user["1 Clients shows the question"]
-    user -->|answer| decide
-
-    model["model provider"]
-    decide -->|prompt| model
-    model -->|Decision| decide
-```
-
-One iteration, in order:
+One iteration of the device loop, in order:
 
 | # | Stage | Runs in | Takes | Produces |
 |---|---|---|---|---|
-| 0 | intake: a person or a notification | 1 Clients, 9 Notifications | the goal text | a task in 3 |
+| 0 | intake | 1 Clients, 9 Notifications | a request, or a notification event | a task in 3 |
 | 1 | observe | 2 Execution | the current screen | `Observation`: nodes, refs, hash |
 | 2 | decide | 13 Decision | goal, history, observation, catalogue, recipes, policy | `Decision` |
 | 3 | gate | 4 Family rules | the action kind and the member | allow, ask, deny |
@@ -120,7 +107,8 @@ One iteration, in order:
 
 Steps 1-5 repeat; one request is normally three to ten iterations. Deny leaves
 the task waiting; ask goes to the person through the client; `ui.wait` is a
-single iteration that only looks again.
+single iteration that only looks again. Every action passes the gate: the gate
+returns allow at once for a kind the policy does not mark sensitive or payment.
 
 #### Where each box runs
 
@@ -227,38 +215,14 @@ phone and a PC can drive each other and share chat. `services/backend` is planne
 for a hosted mode where the loop runs on our side; the device keeps the loop
 until that exists.
 
-**Slower clock: the recipe pipeline.** No person is involved. An app update or a
-new target app starts it.
+**Build and delivery (days).** No person is involved; an app update or a new
+target app starts it. The factory proposes a recipe, knowledge owns it, the farm
+runs it on the device matrix and returns the failures, and only a version the farm
+passes reaches delivery, which signs the package and installs it on the phone.
 
-```mermaid
-flowchart LR
-    factory["6 Factory"] -->|new recipe| knowledge["5 Target-app knowledge"]
-    knowledge -->|version to test| farm["8 Farm"]
-    farm -->|failures| knowledge
-    farm -->|go or no-go| delivery["7 Delivery"]
-    delivery -->|signed package| clients["1 Clients"]
-```
-
-Reading it: the factory proposes a recipe; knowledge owns it; the farm runs it on
-the device matrix and sends failures back; only a version that passes goes to
-delivery, which puts a signed package on the phone. This is the whole loop that
-keeps a recipe true when an app changes.
-
-**Slowest clock: the learning loop.** Journeys from real runs and from the farm
-are read later, in batches, to decide what to do next week.
-
-```mermaid
-flowchart LR
-    execution["2 Execution"] -->|journals| lab["10 Product lab"]
-    farm["8 Farm"] -->|journals| lab
-    lab -->|failure list| teams["team plans"]
-    lab -->|HOPA-Bench score| release["release"]
-    lab -->|pilot numbers| priorities["priorities"]
-```
-
-Reading it: the lab is not a stage in the recipe pipeline; it sits beside it,
-reads what the runs produced, and publishes findings that other teams act on. It
-does not gate a release and it does not write features.
+**Learning (weeks).** Runs write journals; the lab reads them in batches and
+publishes the failure list, the bench score and the pilot numbers. It sits beside
+the pipeline rather than in it: it neither gates a release nor writes features.
 
 #### What the Product lab produces
 
@@ -274,11 +238,10 @@ It is research plus measurement, and both have named outputs.
 It is not QA: QA runs the release, the lab measures it. It is not product: it
 proposes what to fix first, and the owning team decides.
 
-**The two bands.** 11 Platform and 12 Architecture are not phases on any clock,
-so they are not drawn as boxes. Platform carries every arrow between the boxes;
-architecture sets the contracts, CI, release and signing rules that every box
-follows. They wrap all three pictures, which is why the earlier single diagram
-put them above and below everything.
+**The two layers.** 11 Platform and 12 Architecture are not phases on any
+clock, so they are the strips above and below the bands on the map: platform
+carries every arrow that leaves a device, architecture sets the contracts, CI,
+release and signing rules every box follows.
 
 ### Notifications from target apps
 
@@ -548,15 +511,15 @@ Eight people today, so the shape is **six teams**; the seven-team table above is
 the shape when the two open hires land. Nothing moves when that happens: Tasks
 has its own service already, and the farm is a folder.
 
-| Team | Lead | Second | Folders | What they ship |
-|---|---|---|---|---|
-| **Clients** | Michael | Chaya | `apps/android`, `apps/windows`, `apps/harmony` (frozen), `packages/core`, `packages/data`, `packages/capabilities` | Screens and flows, the share target, settings, visual parity with Harmony; the APK and the MSI shell |
-| **Platform and services** | Amir | Batya | `services/backend`, `services/bridge`, `services/relay`, `services/wire`, `services/brain` (the service); `services/tasks` until the hire | The pairing code, tokens, the phone-to-PC tunnel, the wire protocol, the brain service |
-| **Target-app knowledge** | Nizzan | Shira | `contracts/recipes`, `services/mapping` | A recipe per target app: steps, selectors, the check that it worked, the app version it is pinned to |
-| **Algorithms and measurement** | Sefi | - | `packages/decision` (after the LAIX port), `services/evals/bench`, `services/evals/baseline` | The HOPA-Bench task set and its score per release; four numbers read from journals |
-| **Integration, release and quality** | Yoni | - | `.github/workflows`, `docs/project/evidence`, the release checklist | Green CI, the release APK and MSI, the failure list, the signing and permission review |
-| **Architecture and contracts** (shared role) | Michael + Amir + Yoni | - | `contracts/` | Contract text, seam reviews, release veto |
-| **Design** (shared role) | open | - | theme files in `packages/` | One visual language for every client |
+| Team | Bricks | Lead | Second | Folders | What they ship |
+|---|---|---|---|---|---|
+| **Clients** | 1, 2, 4 | Michael | Chaya | `apps/android`, `apps/windows`, `apps/harmony` (frozen), `packages/core`, `packages/data`, `packages/capabilities` | Screens and flows, the share target, settings, the approval gate, visual parity with Harmony; the APK and the MSI shell |
+| **Platform and services** | 3, 9, 11 | Amir | Batya | `services/backend`, `services/bridge`, `services/relay`, `services/wire`, `services/brain` (the service); `services/tasks` until the hire | The pairing code, tokens, the phone-to-PC tunnel, the wire protocol, the brain service, the notification reader |
+| **Target-app knowledge** | 5, 6, 7 | Nizzan | Shira | `contracts/recipes`, `services/mapping` | A recipe per target app: steps, selectors, the check that it worked, the app version it is pinned to |
+| **Algorithms and measurement** | 10, 13 | Sefi | - | `packages/decision` (after the LAIX port), `services/evals/bench`, `services/evals/baseline` | The HOPA-Bench task set and its score per release; the decision policy and its record; four numbers read from journals |
+| **Integration, release and quality** | 8 | Yoni | - | `.github/workflows`, `docs/project/evidence`, the release checklist | Green CI, the release APK and MSI, the farm, the failure list, the signing and permission review |
+| **Architecture and contracts** (shared role) | 12 | Michael + Amir + Yoni | - | `contracts/` | Contract text, seam reviews, release veto |
+| **Design** (shared role) | part of 1 | open | - | theme files in `packages/` | One visual language for every client |
 
 ### The words that were doing too much work
 
