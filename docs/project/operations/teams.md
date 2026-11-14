@@ -176,7 +176,17 @@ step, so the next iteration sees the real screen, not an assumption.
 
 #### What decision is
 
-It is one model turn plus one policy check. Inputs:
+Three names, three different things:
+
+- **13 Decision** is the brick: the component that makes exactly one decision per
+  iteration and returns one `Action`, one question, or a stop.
+- **LAIX** is the policy and record contract that component implements: the verbs
+  (observe, act, verify, ask, wait, guide, escalate), the reason codes and the
+  decision trail.
+- **The model provider** is separate again: the client calls it to propose the
+  next action. LAIX neither is a model nor calls one.
+
+What it takes:
 
 | Input | Source | Notes |
 |---|---|---|
@@ -205,10 +215,25 @@ is classified from the action kind and the screen words in the policy file, neve
 from a model flag, so a model cannot promote its own action to a payment. The
 gate turns that classification into allow, ask or deny.
 
-LAIX is the current implementation of this contract: its policy rules (when to
-ask, when to retry, when to escalate) and its decision record. The Python harness
-runs off-device on journals during the pilot; the shipped form is the Kotlin port
-in `packages/decision`, because Android and Windows have to agree.
+The LAIX verbs, mapped onto this contract:
+
+| LAIX verb | In HOPA |
+|---|---|
+| act | return one `Action`; the gate passes it |
+| observe | one more observe iteration (`ui.observe`) |
+| verify | check the postcondition after the action |
+| ask | `needUser: true` with `say` and `options` |
+| wait | `ui.wait`, or a retry after a deadline |
+| guide | show the next instruction instead of acting |
+| escalate | hand the decision to another family member |
+
+LAIX also carries a reason code, a confidence or score, an attention budget and
+the commitments made so far into the next decision. Today's `Decision` schema has
+none of those fields; the Kotlin port in `packages/decision` is where they land.
+
+Where it runs: the policy ships inside the client, because Android and Windows
+have to make the same decision. The Python LAIX harness runs off-device on
+journals during the pilot; it is not a dependency of the APK or the MSI.
 
 `services/bridge` and `services/relay` are not in this path: they exist so a
 phone and a PC can drive each other and share chat. `services/backend` is planned
@@ -226,14 +251,34 @@ the pipeline rather than in it: it neither gates a release nor writes features.
 
 #### What the Product lab produces
 
-It is research plus measurement, and both have named outputs.
+Is it research? Partly. It has two jobs, and only one of them is research.
 
-| Output | Form | Used by | How often |
+| Job | What it is | Output | Cadence |
 |---|---|---|---|
-| Failure list | the steps that failed, with app version and log, ranked | every team's weekly plan | weekly |
-| HOPA-Bench score | one number per release, plus the tasks that failed | the release cut | every release |
-| Pilot numbers | time saved, steps used, retries, repeats within 7 days | priorities, the family pilot | monthly |
-| A research result | a method, a dataset and a report (R1), or a study (R3) | engineering, which then productionises or parks it | per thrust, about six months |
+| Measurement | numbers read from run records, no opinions | failure list, HOPA-Bench score, pilot numbers | weekly, per release, monthly |
+| Research | one thrust at a time, with a hypothesis, a dataset and a written result | a method, a dataset and a report (R1), or a study (R3) | about six months per thrust |
+
+One researcher owns the research job, one analyst owns the measurement job. The
+research half may produce a negative result; the measurement half may not be
+late.
+
+**What a pilot is.** Five to ten households using a release on their own phones
+for four to six weeks, with journals on and consent recorded. Not a demo, not a
+lab study.
+
+**Pilot numbers**, defined:
+
+| Number | Definition | What it tells us |
+|---|---|---|
+| Success rate | tasks closed with `done`, divided by tasks started | the headline |
+| Time per task | median minutes from request to done, against the household's own estimate at onboarding | what a family actually feels |
+| Steps per task | loop iterations per completed task | a recipe or a prompt problem |
+| Retry rate | steps that needed a second attempt, divided by all steps | instability; a farm concern |
+| Repeat within 7 days | the same goal asked again within a week | the first run failed or was not trusted |
+| Wait for approval | median minutes a task waits for a yes | approval design |
+
+The numbers come from run records in `packages/data`: no screen content, no
+message text.
 
 It is not QA: QA runs the release, the lab measures it. It is not product: it
 proposes what to fix first, and the owning team decides.
@@ -579,6 +624,8 @@ to ask, and is the one to use when a pull request is stuck.
   (Michael + Sefi). The product path is the Kotlin port in `packages/decision`,
   so behaviour matches on Android and Windows; a Python runtime beside the loop
   would add a second behaviour to keep in step.
+- **What LAIX is not:** a model, and not a caller of one. The client calls the
+  model; LAIX rules on the proposal and records why.
 - **Where it runs:** the decision contract and policies ship inside the client
   (Kotlin port). The Python harness stays in research: it reads journals
   off-device and is not a dependency of the APK or the MSI.

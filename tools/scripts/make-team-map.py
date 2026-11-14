@@ -20,12 +20,12 @@ BAND = "#D9D3C7"
 PAPER = "#FFFFFF"
 
 TEAM = {
-    "clients": ("#DCE9F5", "Clients (Michael, Chaya)"),
-    "platform": ("#E8E1F4", "Platform and services (Amir, Batya)"),
-    "knowledge": ("#DFEDE1", "Target-app knowledge (Nizzan, Shira)"),
-    "algorithms": ("#F7E8CE", "Algorithms and measurement (Sefi)"),
-    "integration": ("#F3DEDE", "Integration, release and quality (Yoni)"),
-    "shared": ("#E7E3DA", "Architecture and contracts (shared)"),
+    "clients": ("#DCE9F5", "Clients"),
+    "platform": ("#E8E1F4", "Platform and services"),
+    "knowledge": ("#DFEDE1", "Target-app knowledge"),
+    "algorithms": ("#F7E8CE", "Algorithms and measurement"),
+    "integration": ("#F3DEDE", "Integration, release and quality"),
+    "shared": ("#E7E3DA", "Architecture and contracts"),
 }
 
 parts: list[str] = []
@@ -106,7 +106,7 @@ rect(0, 0, W, H, "#F7F4EE", stroke="none", radius=0)
 
 # 12 Architecture: a strip above everything.
 rect(24, 16, 1232, 30, TEAM["shared"][0])
-text(40, 36, ["12 Architecture and contracts (shared) - contracts, CI, release cut, signing - applies to every box below"],
+text(40, 36, ["12 Architecture and contracts - contracts, CI, release cut, signing - applies to every box below"],
      size=13, anchor="start")
 
 # --- Band A: the device -----------------------------------------------------
@@ -122,6 +122,9 @@ box(1020, 176, 130, 48, ["target app"], "external", dashed=True)
 box(340, 100, 140, 38, ["9 Notifications"], "platform")
 box(560, 84, 180, 40, ["model provider (network)"], "external", dashed=True)
 box(500, 276, 160, 48, ["5 recipes (installed)"], "knowledge")
+box(300, 276, 170, 48, ["catalogue", "apps, aliases, launch"], "shared")
+arrow([(470, 288), (492, 288), (492, 234), (498, 230)])
+label(430, 264, "candidates")
 
 # Person
 add(f'<ellipse cx="100" cy="200" rx="42" ry="24" fill="{PAPER}" stroke="{BORDER}" stroke-width="1.2"/>')
@@ -150,9 +153,12 @@ label(560, 252, "candidate steps")
 arrow([(915, 224), (915, 250), (630, 250), (630, 226)])
 label(770, 240, "next Observation")
 
+arrow([(745, 226), (745, 340), (225, 340), (225, 226)], dashed=True, tail=True)
+label(480, 336, "ask, answer")
+
 # 11 Platform: a bracket under every band, because every cross-device arrow uses it.
 rect(24, 822, 1232, 28, TEAM["platform"][0])
-text(40, 841, ["11 Platform and services (Amir, Batya) - every arrow that leaves a device travels over this layer"],
+text(40, 841, ["11 Platform and services - every arrow that leaves a device travels over this layer"],
      size=12, anchor="start")
 
 # --- Band B: the build ------------------------------------------------------
@@ -198,7 +204,7 @@ short = {
     "knowledge": "Target-app knowledge",
     "algorithms": "Algorithms and measurement",
     "integration": "Integration and quality",
-    "shared": "Architecture (shared)",
+    "shared": "Architecture and contracts",
 }
 columns = [(24, 892), (24, 920), (452, 892), (452, 920), (880, 892), (880, 920)]
 order = ["clients", "platform", "knowledge", "algorithms", "integration", "shared"]
