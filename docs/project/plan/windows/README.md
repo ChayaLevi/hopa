@@ -1,6 +1,6 @@
 # Windows client plan
 
-Status: **v1, W3 8/9, W4 6/8, W5 5/8, W6 1/7.** Written 2026-11-14 from the
+Status: **v1, W3 8/9, W4 6/8, W5 5/8, W6 3/7.** Written 2026-11-14 from the
 Android plan, the expansion portfolio and ADR-0021.
 
 Android is the active client; Windows is next; Harmony is frozen (ADR-0020).

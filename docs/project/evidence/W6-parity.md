@@ -60,8 +60,18 @@ template, so a new button cannot drift.
 Keyboard: `KeyboardNavigation.TabNavigation=Cycle`, 17 focusable controls, 13 of
 them named for UIA (`w4-check.txt`).
 
-Screenshots so far: `docs/media/windows-w4.png` (chat, empty state),
-`docs/media/windows-w6-settings.png` (settings, orange Save).
+Screenshots so far (all rendered by the app itself, not captured by hand):
+
+| Screenshot | Shows |
+|---|---|
+| `docs/media/windows-w4.png` | rail, conversation row, composer, empty state |
+| `docs/media/windows-w6-settings.png` | settings, provider fields, orange Save |
+| `docs/media/windows-w6-approval.png` | approval sheet with amount, merchant, consequence |
+| `docs/media/windows-w6-steps.png` | run details, one line per step |
+
+Still missing from the inventory: bubbles with real content, the attachment bar,
+the error state and long text. They need a turn, not a render, which is why they
+are not ticked yet.
 
 ## Keyboard and scaling
 

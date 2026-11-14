@@ -215,6 +215,46 @@ public partial class MainWindow : Window
 
     public void SaveShot(string path) => WindowShot.Save(this, path);
 
+    /// <summary>W6: the windows that only appear mid-turn, rendered for the parity table.</summary>
+    public void ShotComponents(string directory)
+    {
+        Directory.CreateDirectory(directory);
+
+        var approval = new ApprovalWindow(new System.Text.Json.Nodes.JsonObject
+        {
+            ["title"] = "Pay the internet bill?",
+            ["body"] = "The bank app is open on the payment screen.",
+            ["amount"] = "42.00",
+            ["merchant"] = "CityNet",
+            ["consequence"] = "The money leaves the account and cannot be taken back.",
+        })
+        {
+            Owner = this,
+        };
+        approval.Show();
+        approval.UpdateLayout();
+        Directory.CreateDirectory(directory);
+        WindowShot.Save(approval, Path.Combine(directory, "windows-w6-approval.png"));
+        approval.Close();
+
+        var steps = new StepsWindow(new[]
+        {
+            "1 tap Payments (verified)",
+            "2 tap Internet (verified)",
+            "3 type 42.00 (verified)",
+            "4 tap Confirm, payment, approved by the family",
+        })
+        {
+            Owner = this,
+        };
+        steps.Show();
+        steps.UpdateLayout();
+        WindowShot.Save(steps, Path.Combine(directory, "windows-w6-steps.png"));
+        steps.Close();
+
+        Application.Current.Shutdown();
+    }
+
     /// <summary>
     /// W4 close-out: the desktop behaviours that need a window but not a sidecar.
     /// Writes a transcript and one screenshot; every line is a claim the reader
