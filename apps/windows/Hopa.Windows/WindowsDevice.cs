@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using FlaUI.Core.AutomationElements;
@@ -30,6 +31,30 @@ public sealed class WindowsDevice : IDisposable
 
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hwnd, int command);
+
+    [DllImport("user32.dll")]
+    private static extern bool AttachThreadInput(uint attach, uint attachTo, bool attachFlag);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
 
     private static readonly string[] SecureProcesses =
     {
@@ -157,8 +182,7 @@ public sealed class WindowsDevice : IDisposable
                     throw new InvalidOperationException("launch needs an app");
                 }
 
-                Process.Start(new ProcessStartInfo(app) { UseShellExecute = true });
-                return $"launched {app}";
+                return Launch(app);
             default:
                 throw new InvalidOperationException($"the Windows adapter cannot '{op}' yet");
         }
@@ -351,26 +375,216 @@ public sealed class WindowsDevice : IDisposable
         return $"clicked {point.X},{point.Y}";
     }
 
+    public string? FirstEditableRef()
+    {
+        foreach (var pair in refs)
+        {
+            if (Safe(() => pair.Value.Patterns.Value.IsSupported))
+            {
+                return pair.Key;
+            }
+        }
+
+        return null;
+    }
+
+    public string ReadRefValue(string refId)
+    {
+        if (!refs.TryGetValue(refId, out var element))
+        {
+            return "";
+        }
+
+        try
+        {
+            return element.Patterns.Value.IsSupported
+                ? element.Patterns.Value.Pattern.Value.Value ?? ""
+                : "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    /// <summary>PNG of the foreground window, or null when the screen is not capturable.</summary>
+    public byte[]? CaptureWindow()
+    {
+        try
+        {
+            var handle = GetForegroundWindow();
+            if (!GetWindowRect(handle, out var rect))
+            {
+                return null;
+            }
+
+            var width = rect.Right - rect.Left;
+            var height = rect.Bottom - rect.Top;
+            if (width <= 0 || height <= 0)
+            {
+                return null;
+            }
+
+            using var bitmap = new System.Drawing.Bitmap(width, height);
+            using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
+            {
+                graphics.CopyFromScreen(rect.Left, rect.Top, 0, 0, bitmap.Size);
+            }
+
+            using var stream = new MemoryStream();
+            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+            return stream.ToArray();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private string Launch(string app)
+    {
+        Process.Start(new ProcessStartInfo(app) { UseShellExecute = true });
+        var needle = Path.GetFileNameWithoutExtension(app).ToLowerInvariant();
+        var deadline = DateTime.UtcNow.AddSeconds(8);
+        IntPtr handle = IntPtr.Zero;
+        while (DateTime.UtcNow < deadline && handle == IntPtr.Zero)
+        {
+            Thread.Sleep(400);
+            handle = FindWindowFor(needle);
+        }
+
+        if (handle == IntPtr.Zero)
+        {
+            throw new InvalidOperationException($"launched {app}, but no window appeared");
+        }
+
+        ForceForeground(handle);
+        Thread.Sleep(500);
+        if (GetForegroundWindow() != handle)
+        {
+            AppActivateByHandle(handle);
+            Thread.Sleep(600);
+        }
+
+        if (GetForegroundWindow() != handle)
+        {
+            throw new InvalidOperationException(
+                $"launched {app}, but could not bring it forward (foreground={ForegroundApp().ToLowerInvariant()})");
+        }
+
+        return $"launched {app} (foreground={ForegroundApp().ToLowerInvariant()})";
+    }
+
+    /// <summary>UIA is not enough for some windows; WScript.Shell can still
+    /// activate by process id.</summary>
+    private void AppActivateByHandle(IntPtr handle)
+    {
+        try
+        {
+            GetWindowThreadProcessId(handle, out var pid);
+            var type = System.Type.GetTypeFromProgID("WScript.Shell");
+            if (type == null)
+            {
+                return;
+            }
+
+            dynamic shell = Activator.CreateInstance(type)!;
+            shell.AppActivate((int)pid);
+        }
+        catch
+        {
+            // The caller checks the foreground and reports honestly.
+        }
+    }
+
+    private IntPtr FindWindowFor(string needle)
+    {
+        try
+        {
+            foreach (var window in automation.GetDesktop().FindAllChildren(cf => cf.ByControlType(ControlType.Window)))
+            {
+                var title = Safe(() => window.Properties.Name.ValueOrDefault ?? "").ToLowerInvariant();
+                if (title == "program manager" || Safe(() => window.Properties.IsOffscreen.ValueOrDefault))
+                {
+                    continue;
+                }
+
+                var process = ProcessNameFor(window).ToLowerInvariant();
+                if (process == needle || title.Contains(needle))
+                {
+                    return (IntPtr)Safe(() => window.Properties.NativeWindowHandle.Value);
+                }
+            }
+        }
+        catch
+        {
+            // The desktop enumeration can throw mid-change; the caller says so.
+        }
+
+        return IntPtr.Zero;
+    }
+
+    private static string ProcessNameFor(AutomationElement element)
+    {
+        try
+        {
+            return Process.GetProcessById(element.Properties.ProcessId.Value).ProcessName;
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    /// <summary>Windows blocks a background process from stealing focus; attaching
+    /// to the thread that currently owns the input queue is the standard way
+    /// around it.</summary>
+    private static void ForceForeground(IntPtr handle)
+    {
+        ShowWindow(handle, 9);
+        if (SetForegroundWindow(handle))
+        {
+            return;
+        }
+
+        var foreground = GetForegroundWindow();
+        var foregroundThread = GetWindowThreadProcessId(foreground, out _);
+        var current = GetCurrentThreadId();
+        if (foregroundThread != current && AttachThreadInput(current, foregroundThread, true))
+        {
+            SetForegroundWindow(handle);
+            AttachThreadInput(current, foregroundThread, false);
+        }
+    }
+
     private string Type(System.Text.Json.Nodes.JsonObject message)
     {
         var text = message["text"]?.GetValue<string>() ?? "";
         var refId = message["ref"]?.GetValue<string>();
-        if (!string.IsNullOrEmpty(refId) && refs.TryGetValue(refId, out var element))
+        if (string.IsNullOrEmpty(refId))
         {
-            try
-            {
-                if (element.Patterns.Value.IsSupported)
-                {
-                    element.Patterns.Value.Pattern.SetValue(text);
-                    return $"set {refId} to {text.Length} chars";
-                }
+            throw new InvalidOperationException(
+                "type needs a ref on Windows; blind typing would hit whatever window is focused");
+        }
 
-                element.Focus();
-            }
-            catch (Exception error)
+        if (!refs.TryGetValue(refId, out var element))
+        {
+            throw new InvalidOperationException($"stale ref {refId}; observe again");
+        }
+
+        try
+        {
+            if (element.Patterns.Value.IsSupported)
             {
-                _ = error;
+                element.Patterns.Value.Pattern.SetValue(text);
+                return $"set {refId} to {text.Length} chars";
             }
+
+            element.Focus();
+        }
+        catch (Exception error)
+        {
+            _ = error;
         }
 
         Keyboard.Type(text);

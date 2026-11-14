@@ -1,7 +1,6 @@
-# W3 — the Windows device adapter (in progress)
+# W3 — the Windows device adapter
 
-Date: 2026-11-14. Host: Windows; .NET 8; the user session is **locked**
-(`LockApp` is the foreground window), which blocks the input half of this phase.
+Date: 2026-11-14. Host: Windows; .NET 8; session unlocked for the final matrix.
 
 ## What exists
 
@@ -76,22 +75,69 @@ cd apps\android
 BUILD SUCCESSFUL
 ```
 
-## Blocked
+## Live matrix (unlocked session)
 
-- The session must be unlocked for `tap`/`type` verification, the screenshots and
-  the app matrix. Rerun after unlocking:
+`Hopa.Windows.exe --matrix-check out.txt` drives the adapter directly: launch,
+wait for the window, force it forward, observe, screenshot, and for Notepad click
+the edit field and type.
 
-  ```powershell
-  cd apps\windows\Hopa.Windows
-  .\bin\Debug\net8.0-windows\Hopa.Windows.exe --pc-check out.txt
-  ```
+```
+blind type refused: type needs a ref on Windows; blind typing would hit whatever window is focused
+--- notepad
+launched notepad (foreground=notepad)
+observe: app=Notepad nodes=45
+screenshot: windows-matrix-notepad.png (38540 bytes)
+type via e3: readback='HOPA matrix 2026'
+--- calc
+launched calc (foreground=applicationframehost)
+observe: app=ApplicationFrameHost nodes=54
+screenshot: windows-matrix-calc.png (39235 bytes)
+--- explorer
+launched explorer (foreground=explorer)
+observe: app=explorer nodes=331
+screenshot: windows-matrix-explorer.png (314332 bytes)
+--- chrome
+launched chrome (foreground=chrome)
+observe: app=chrome nodes=106
+screenshot: windows-matrix-chrome.png (81058 bytes)
+--- code
+launched code (foreground=code)
+observe: app=Code nodes=120
+screenshot: windows-matrix-code.png (213262 bytes)
+```
 
-  Expected: `open notepad` observes `Hopa.Windows`, launches Notepad, the next
-  turn observes `notepad`, types into it, and the second observation differs.
+The five screenshots are `docs/media/windows-matrix-*.png`.
 
-## Plan boxes
+What the matrix proves:
 
-None of the eight W3 boxes is ticked yet: the adapter is built, but the input
-and matrix evidence needs an unlocked desktop. The secure-surface refusal (W0's
-last box) is part of this phase too: a locked or elevated window must report
-"cannot see or touch" and never a false success.
+- the observation is a real UIA tree per app (45–331 nodes), with refs and the
+  producer's hash;
+- **launch brings the app forward** and refuses when it cannot (see below);
+- **typing by ref** reaches the control: Notepad's edit read back
+  `HOPA matrix 2026`;
+- **screenshots** capture the foreground window as PNG;
+- Calculator is a packaged app: its window belongs to `ApplicationFrameHost`,
+  which is now accepted because the foreground *handle* is compared, not the
+  process name.
+
+## Safety fixes found by the matrix
+
+The first run exposed two dangerous shortcuts, both fixed:
+
+1. **Blind typing.** `type` without a ref typed into whatever window had focus
+   (it hit the editor hosting this chat; no Enter was pressed). `type` now
+   refuses without a ref.
+2. **Silent launch failure.** Notepad did not come forward and the matrix typed
+   into the old foreground. `launch` now forces the window forward and throws
+   "could not bring it forward" if the foreground handle is still something
+   else.
+
+## Remaining live checks
+
+- Password-field redaction: the code marks `IsPassword` and the producer drops
+  it, but no password field was exercised.
+- Elevated windows and `uiAccess`: no certificate, so HOPA refuses elevated
+  windows rather than acting in them.
+- Per-monitor DPI: not exercised on a second monitor.
+- Per-call UIA timeouts: not implemented yet; a hung control would stall the
+  call until the sidecar's 20 s device timeout.

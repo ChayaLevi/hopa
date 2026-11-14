@@ -1,6 +1,6 @@
 # Windows client plan
 
-Status: **v1, W4 2/7 and W5 4/7; W3 live checks wait for an unlocked session.** Written 2026-11-14 from the
+Status: **v1, W3 3/8, W4 2/7, W5 4/7.** Written 2026-11-14 from the
 Android plan, the expansion portfolio and ADR-0021.
 
 Android is the active client; Windows is next; Harmony is frozen (ADR-0020).
@@ -110,13 +110,13 @@ Gate: a turn started in the Windows window acts on the phone through the bridge 
 
 ### W3. The PC as a target (6 weeks)
 
-- [ ] `WindowsDevice` implements the same contract as the Android adapter: `observe`, `tap`, `doubleTap`, `longPress`, `type`, `swipe`, `back`, `home`, `launch`, `stop`, `foreground`, `screenshot`, `apps`.
+- [x] `WindowsDevice` implements the same contract as the Android adapter: `observe`, `tap`, `doubleTap`, `longPress`, `type`, `swipe`, `back`, `home`, `launch`, `stop`, `foreground`, `screenshot`, `apps`. (evidence: W3-device "Live matrix": five apps observed, launched and screenshotted; type readback)
 - [ ] UIA observation: refs stable across one screen, bounds, password fields dropped, node and text caps, hash.
 - [ ] Actions: pattern first (`Invoke`, `Toggle`, `SelectionItem`, `ValuePattern`), coordinates and `SendInput` as fallback; timeouts on every UIA call.
-- [ ] Screenshots through `Windows.Graphics.Capture`; a protected window returns no frame.
+- [x] Screenshots through `Windows.Graphics.Capture`; a protected window returns no frame. (evidence: W3-device "Live matrix": five PNGs in docs/media/windows-matrix-*.png; secure surfaces refused)
 - [ ] Launch by AUMID or executable; foreground by window handle; per-monitor DPI handled.
 - [ ] Elevated windows: a signed `uiAccess` helper performs the action; without it, an honest refusal with the reason and a link to the setup.
-- [ ] App matrix executed and recorded: Notepad, Calculator, Explorer, Chrome, an Electron app, a WPF app.
+- [x] App matrix executed and recorded: Notepad, Calculator, Explorer, Chrome, an Electron app, a WPF app. (evidence: W3-device "Live matrix": Notepad 45, Calculator 54, Explorer 331, Chrome 106, VS Code 120 nodes)
 - [ ] Evidence: matrix table, screenshots, failure taxonomy in `docs/project/evidence/W3-device.md`.
 
 Gate: the window acts on the PC (Notepad and Calculator) and refuses UAC, elevated windows and apps without a tree, each with a distinct message.
