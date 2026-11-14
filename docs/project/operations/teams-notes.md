@@ -164,7 +164,9 @@ The son may help remotely until she turns it off.
 | Date | Decision | Why |
 |---|---|---|
 | 2026-11-14 | Teams are named by outcome, not activity | "Research" and "numbers" describe work, not a reason to fund a team |
-| 2026-11-14 | Twelve bricks are the full map; seven teams is the starting point | Twelve is maximum parallelism without enough people; seven keeps every brick owned |
+| 2026-11-14 | Thirteen bricks are the full map; seven teams is the starting point | Maximum parallelism without enough people; seven keeps every brick owned |
+| 2026-11-14 | Decisions are brick 13, not part of knowledge | Knowledge says how a step works; decision says which step runs now. They change for different reasons |
+| 2026-11-14 | The farm is a gate before delivery, not a logger | A recipe reaches a phone only after the matrix run passes, so delivery waits on the farm |
 | 2026-11-14 | Tasks and family are separate bricks | They change for different reasons |
 | 2026-11-14 | Knowledge is separate from tasks | Cookbook page versus order |
 | 2026-11-14 | One owner per folder; shared contracts belong to Architecture | Prevents two teams editing the same thing |
@@ -176,7 +178,7 @@ The son may help remotely until she turns it off.
 
 | Shape | When it is right | Cost |
 |---|---|---|
-| 12 teams | Full funding, high parallelism | Heavy coordination, 20+ people |
+| 13 teams | Full funding, high parallelism | Heavy coordination, 20+ people |
 | 7 teams (recommended) | The intended staffing | Needs the two shared contracts first |
 | 5 teams | Smaller budget | Tasks and family share a lead; slower on both |
 | 4 teams (the first sketch) | Very small team | Blurred ownership; rejected for now |
