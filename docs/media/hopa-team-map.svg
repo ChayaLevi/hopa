@@ -5,17 +5,17 @@
 <text x="40" y="36" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
 <tspan x="40" dy="0">Architecture and contracts -</tspan>
 </text>
-<rect x="320" y="16" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="470" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="470" dy="0">review every contract change</tspan>
+<rect x="320" y="16" width="294" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="467" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="467" dy="0">review every contract change</tspan>
 </text>
-<rect x="638" y="16" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="788" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="788" dy="0">keep both CI pipelines green</tspan>
+<rect x="628" y="16" width="294" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="776" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="776" dy="0">keep both builds passing their checks</tspan>
 </text>
-<rect x="956" y="16" width="296" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="1104" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="1104" dy="0">cut and sign each release</tspan>
+<rect x="937" y="16" width="294" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1084" y="35" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="1084" dy="0">build, sign and publish each release</tspan>
 </text>
 <rect x="24" y="60" width="1232" height="330" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>
 <text x="40" y="82" font-size="12" fill="#6B665C" font-weight="600" text-anchor="start">
@@ -343,17 +343,21 @@
 <text x="40" y="1010" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">
 <tspan x="40" dy="0">Platform and services -</tspan>
 </text>
-<rect x="320" y="990" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="470" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="470" dy="0">pair a phone with a PC</tspan>
+<rect x="320" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="428" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="428" dy="0">pair the devices once</tspan>
 </text>
-<rect x="638" y="990" width="300" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="788" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="788" dy="0">tunnel, token rotation</tspan>
+<rect x="551" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="660" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="660" dy="0">keep the link encrypted</tspan>
 </text>
-<rect x="956" y="990" width="296" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="1104" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="1104" dy="0">wire protocol between devices</tspan>
+<rect x="783" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="891" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="891" dy="0">renew access codes</tspan>
+</text>
+<rect x="1014" y="990" width="217" height="28" rx="4" fill="#F1EDE4" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1123" y="1009" font-size="12" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="1123" dy="0">message format both sides use</tspan>
 </text>
 <text x="24" y="1056" font-size="12" fill="#6B665C">Box colour is the owning team</text>
 <rect x="24" y="1070" width="16" height="16" rx="3" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>

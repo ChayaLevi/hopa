@@ -97,12 +97,13 @@ def band(x: int, y: int, w: int, h: int, title: str) -> None:
 def rail(y: int, fill: str, title: str, cells: list[str]) -> None:
     rect(24, y, 1232, 44, fill)
     text(40, y + 28, [title], size=13, anchor="start")
-    x = 320
+    left, right, gap = 320, 1232, 14
+    width = (right - left - gap * (len(cells) - 1)) / len(cells)
+    x = left
     for cell in cells:
-        width = 300 if x < 900 else 296
-        rect(x, y + 8, width, 28, CELL, radius=4)
-        text(x + width // 2, y + 27, [cell], size=12)
-        x += width + 18
+        rect(int(x), y + 8, int(width), 28, CELL, radius=4)
+        text(int(x + width / 2), y + 27, [cell], size=12)
+        x += width + gap
 
 
 add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" '
@@ -118,7 +119,7 @@ rect(0, 0, W, H, "#F7F4EE", stroke="none", radius=0)
 
 # 12 Architecture: what the shared role actually does.
 rail(8, TEAM["shared"][0], "Architecture and contracts -",
-     ["review every contract change", "keep both CI pipelines green", "cut and sign each release"])
+     ["review every contract change", "keep both builds passing their checks", "build, sign and publish each release"])
 
 # --- Band A: the device -----------------------------------------------------
 band(24, 60, 1232, 330, "ON THE DEVICE - seconds - the loop repeats until the task closes")
@@ -232,7 +233,7 @@ for y, left, artifact, cadence, consumer in rows:
 
 # 11 Platform: what the transport layer actually does.
 rail(982, TEAM["platform"][0], "Platform and services -",
-     ["pair a phone with a PC", "tunnel, token rotation", "wire protocol between devices"])
+     ["pair the devices once", "keep the link encrypted", "renew access codes", "message format both sides use"])
 
 # --- Legend -----------------------------------------------------------------
 add(f'<text x="24" y="1056" font-size="12" fill="{MUTED}">Box colour is the owning team</text>')
