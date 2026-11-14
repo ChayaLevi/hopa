@@ -33,6 +33,8 @@ window bounds: 1986,93 1140x760
 window on a screen: True
 off-screen restore refused: True
 automation names on controls: 13
+focusable controls: 17
+tab navigation: Cycle
 toast: shown through the tray balloon
 screenshot: docs/media/windows-w4.png
 ```

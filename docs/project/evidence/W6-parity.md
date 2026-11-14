@@ -47,14 +47,21 @@ The screenshot `docs/media/windows-w4.png` is the result.
 
 | State | Harmony | Windows |
 |---|---|---|
-| hover | custom tint | default WPF |
-| focus ring | custom | default WPF |
-| selected conversation | tinted row | tinted row |
-| disabled control | dimmed | dimmed |
+| hover | custom tint | `#F3EFE7` tint, one template for every button and row |
+| focus ring | custom | `#E8703A` 1.5 px ring on the focused control |
+| pressed | darker tint | `#E9E4DA` |
+| selected conversation | tinted row | `#E9E4DA` row |
+| disabled control | dimmed | 0.45 opacity, arrow cursor |
 | busy (turn running) | send becomes stop | send becomes stop, tray says "working" |
 
-Hover and focus are the visible difference: Harmony has its own, Windows uses the
-Windows theme.
+The states live in `App.xaml`: one `Button` template and one `ListBoxItem`
+template, so a new button cannot drift.
+
+Keyboard: `KeyboardNavigation.TabNavigation=Cycle`, 17 focusable controls, 13 of
+them named for UIA (`w4-check.txt`).
+
+Screenshots so far: `docs/media/windows-w4.png` (chat, empty state),
+`docs/media/windows-w6-settings.png` (settings, orange Save).
 
 ## Keyboard and scaling
 

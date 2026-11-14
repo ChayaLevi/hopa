@@ -250,6 +250,8 @@ public partial class MainWindow : Window
             $"window on a screen: {IsOnAnyScreen(new Rect(Left, Top, Width, Height))}",
             $"off-screen restore refused: {!IsOnAnyScreen(new Rect(-9000, -9000, Width, Height))}",
             $"automation names on controls: {CountNames(this)}",
+            $"focusable controls: {CountFocusable(this)}",
+            $"tab navigation: {KeyboardNavigation.GetTabNavigation(this)}",
         });
 
         if (tray != null)
@@ -265,6 +267,18 @@ public partial class MainWindow : Window
         var shot = Path.Combine(directory, "windows-w4.png");
         WindowShot.Save(this, shot);
         lines.Add($"screenshot: {shot}");
+    }
+
+    private static int CountFocusable(DependencyObject root)
+    {
+        var count = root is System.Windows.FrameworkElement element && element.Focusable && element.IsVisible ? 1 : 0;
+        var children = System.Windows.Media.VisualTreeHelper.GetChildrenCount(root);
+        for (var index = 0; index < children; index++)
+        {
+            count += CountFocusable(System.Windows.Media.VisualTreeHelper.GetChild(root, index));
+        }
+
+        return count;
     }
 
     private static int CountNames(DependencyObject root)

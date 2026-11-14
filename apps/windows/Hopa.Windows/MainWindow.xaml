@@ -8,6 +8,8 @@
         ResizeMode="CanResize"
         AllowDrop="True"
         Drop="Window_Drop"
+        KeyboardNavigation.TabNavigation="Cycle"
+        KeyboardNavigation.ControlTabNavigation="Cycle"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <DataTemplate x:Key="MessageTemplate">

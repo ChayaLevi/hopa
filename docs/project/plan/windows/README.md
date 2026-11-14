@@ -156,7 +156,7 @@ Behaviour parity is W4; this is the look. The Harmony laptop app is the referenc
 
 - [x] Tokens match: background `#F7F4EE`, rail `#F3EFE7`, accent `#E8703A`, ink `#1C1B18`, muted `#9A9488`, radius 10/9, type scale 9 / 9.5 / 10.5 / 11.5 / 12.5 / 15. (evidence: W6-parity tokens table; blue `#0A59F7` buttons found and fixed; `docs/media/windows-w4.png`)
 - [ ] Component inventory side by side: rail, conversation row, bubbles, composer, attachment bar, approval sheet, settings, empty state, error state, long text.
-- [ ] Interaction states: hover, focus, selected, disabled, busy.
+- [x] Interaction states: hover, focus, selected, disabled, busy. (evidence: `App.xaml` templates; W6-parity states table; `windows-w4.png`, `windows-w6-settings.png`)
 - [ ] Keyboard-only pass: every action reachable, visible focus ring.
 - [ ] 200% scaling pass: nothing clipped, nothing overlaps.
 - [x] Parity table with one row per component and no unexplained gaps. (evidence: docs/project/evidence/W6-parity.md; screenshots in docs/media/windows-w4.png onward)
