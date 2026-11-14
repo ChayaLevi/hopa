@@ -178,15 +178,15 @@
 <tspan x="505" dy="0">Target-app</tspan>
 <tspan x="505" dy="16">knowledge</tspan>
 </text>
-<rect x="640" y="478" width="130" height="60" rx="6" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="705" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="705" dy="0">Verification</tspan>
-<tspan x="705" dy="16">farm</tspan>
+<rect x="860" y="478" width="130" height="60" rx="6" fill="#F3DEDE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="925" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="925" dy="0">Verification</tspan>
+<tspan x="925" dy="16">farm</tspan>
 </text>
-<rect x="840" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="905" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="905" dy="0">Recipe</tspan>
-<tspan x="905" dy="16">delivery</tspan>
+<rect x="1060" y="478" width="130" height="60" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="1125" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="1125" dy="0">Recipe</tspan>
+<tspan x="1125" dy="16">delivery</tspan>
 </text>
 <rect x="40" y="466" width="150" height="50" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="115" y="488" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -220,39 +220,51 @@
 <tspan x="404" dy="0">new recipe</tspan>
 </text>
 </g>
+<rect x="640" y="478" width="150" height="60" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="715" y="505" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="715" dy="0">Replay</tspan>
+<tspan x="715" dy="16">on recorded runs</tspan>
+</text>
 <path d="M570,508 L638,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="552.5" y="487" width="103.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<rect x="549.4" y="487" width="109.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="604" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="604" dy="0">version to test</tspan>
+<tspan x="604" dy="0">candidate change</tspan>
 </text>
 </g>
-<path d="M660,540 L660,570 L500,570 L500,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
+<path d="M790,508 L858,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="550.2" y="569" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="580" y="581" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="580" dy="0">failures</tspan>
+<rect x="784.9" y="487" width="78.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="824" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="824" dy="0">what passed</tspan>
 </text>
 </g>
-<path d="M770,508 L838,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M880,540 L880,570 L500,570 L500,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
 <g>
-<rect x="786.6" y="487" width="34.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="804" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="804" dy="0">pass</tspan>
+<rect x="660.2" y="569" width="59.6" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="690" y="581" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="690" dy="0">failures</tspan>
 </text>
 </g>
-<path d="M505,478 L505,452 L905,452 L905,476" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M990,508 L1058,508" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="678.3" y="431" width="53.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="705" y="443" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="705" dy="0">package</tspan>
+<rect x="1006.6" y="487" width="34.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="1024" y="499" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="1024" dy="0">pass</tspan>
 </text>
 </g>
-<path d="M970,508 L1000,508 L1000,304 L792,304" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M505,478 L505,452 L1125,452 L1125,476" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="811.3" y="285" width="177.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="900" y="297" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="900" dy="0">installs, signature checked</tspan>
+<rect x="788.3" y="431" width="53.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="815" y="443" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="815" dy="0">package</tspan>
+</text>
+</g>
+<path d="M1190,508 L1215,508 L1215,304 L792,304" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<g>
+<rect x="911.3" y="285" width="177.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="1000" y="297" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="1000" dy="0">installs, signature checked</tspan>
 </text>
 </g>
 <rect x="24" y="646" width="1232" height="354" rx="10" fill="none" stroke="#D9D3C7" stroke-width="1.2" stroke-dasharray="7 5"/>

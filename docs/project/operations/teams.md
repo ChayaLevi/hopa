@@ -270,11 +270,11 @@ for a hosted mode where the loop runs on our side; the device keeps the loop
 until that exists.
 
 **Build and delivery (days).** It starts when a target app changes or a new app
-is onboarded, not when someone asks. People run it - factory, owners, farm, release
-- but no end user is part of it: the factory proposes a recipe, knowledge owns it,
-the farm runs it on the device matrix and returns the failures, and only a version
-the farm passes reaches delivery, which signs the package and installs it on the
-phone.
+is onboarded, not when someone asks. People run it - factory, owners, replay, farm,
+release - but no end user is part of it: the factory proposes a recipe, knowledge
+owns it, replay runs the change against recorded runs in minutes, the farm then
+runs it on the device matrix and returns the failures, and only a version the farm
+passes reaches delivery, which signs the package and installs it on the phone.
 
 **Learning (weeks).** Runs write journals; the lab reads them in batches and
 publishes the failure list, the bench score and the pilot numbers. It sits beside
@@ -663,7 +663,7 @@ to ask, and is the one to use when a pull request is stuck.
 | `services/tasks` (new) | Amir (Batya) |
 | `contracts/tasks` | Amir + Yoni |
 | `contracts/recipes`, `services/mapping` (new) | Nizzan (Shira) |
-| `services/evals/bench`, `services/evals/baseline` | Sefi |
+| `services/evals/bench`, `services/evals/baseline`, `services/evals/replay` | Sefi; replay is run in CI by Yoni |
 | `.github/workflows`, `services/tools`, `tools/`, `docs/project/evidence` | Yoni |
 | `contracts/*` (other than tasks and recipes) | Michael + Amir review |
 | `docs/design/decisions` | Michael + Amir + Yoni |
