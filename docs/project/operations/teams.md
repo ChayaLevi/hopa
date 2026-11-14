@@ -60,39 +60,41 @@ parallelism; the next section shows how they merge when there are fewer people.
 
 ### How the bricks connect
 
-```
-                        PERSON
-                           |
-                 +---------v----------+
-                 | 1. OUR CLIENTS     |
-                 +---------+----------+
-                           | request
-                 +---------v----------+      +--------------------+
-                 | 3. TASKS           |<---->| 4. FAMILY          |
-                 | what and when      | who  | who may approve    |
-                 +---------+----------+      +--------------------+
-                           | "how is it done?"
-                           v
-   +-------------+   +----------------------------+   +--------------+
-   | 6. FACTORY  |-->| 5. TARGET-APP KNOWLEDGE    |-->| 7. DELIVERY  |
-   +-------------+   +--------------+-------------+   +--------------+
-                                   |
-                                   | "perform this step"
-                         +---------v----------+
-                         | 2. EXECUTION       |
-                         +---------+----------+
-                                   | verify
-                         +---------v----------+
-                         | 8. FARM            |
-                         +--------------------+
+```mermaid
+flowchart TB
+    arch["12 - Architecture and security<br/>contracts, CI, releases for every team"]
+    person(["Person"])
+    clients["1 - Our clients"]
+    tasks["3 - Tasks<br/>what and when"]
+    family["4 - Family<br/>who may approve"]
+    notifications["9 - Notifications"]
+    knowledge["5 - Target-app knowledge"]
+    factory["6 - Factory"]
+    delivery["7 - Delivery"]
+    execution["2 - Execution"]
+    farm["8 - Farm"]
+    lab["10 - Product lab"]
+    platform["11 - Platform and integrations<br/>carries messages between every box"]
 
-  Reading the arrows:
-    the request runs top to bottom
-    the knowledge loop runs left to right: factory -> knowledge -> delivery
-  9. NOTIFICATIONS ---> create tasks (3)
- 10. PRODUCT LAB  <--- reads the journals of every team
- 11. PLATFORM     ---  under everything: carries messages
- 12. ARCHITECTURE ---  above everything: contracts and releases
+    arch -. applies to every box .-> person
+    person --> clients
+    clients -->|request| tasks
+    notifications -->|makes a task| tasks
+    tasks -->|who approves| family
+    family -->|yes or no| tasks
+    tasks -->|how is it done?| knowledge
+    factory -->|new recipe| knowledge
+    knowledge -->|signed version| delivery
+    knowledge -->|perform this step| execution
+    execution -->|verify| farm
+    farm -->|journals| lab
+    execution -. runs over .-> platform
+    clients -. runs over .-> platform
+
+    classDef band fill:#F3EFE7,stroke:#E9E4DA,color:#6B665C
+    classDef plain fill:#FFFFFF,stroke:#E9E4DA,color:#1C1B18
+    class arch,platform band
+    class person,clients,tasks,family,notifications,knowledge,factory,delivery,execution,farm,lab plain
 ```
 
 ### Three things that look alike
@@ -195,23 +197,30 @@ Shared roles:
 
 ## Where each team lives in the repository
 
-The existing services already have owners; the new tracks add folders beside
-them rather than inside them.
+Read each row as **this team owns this folder**. A folder has one owner; another
+team may send a pull request into it, but the owner merges it. The names are the
+six teams that exist today; the seven-team names sit in brackets where they
+split later.
 
-| Path | What it is | Owner |
+| Owner | Paths they own | What lives there |
 |---|---|---|
-| `apps/android`, `apps/windows` | Client shells | Client applications |
-| `apps/harmony` | Frozen client (ADR-0020) | maintenance only |
-| `services/bridge`, `services/relay`, `services/wire` | Transport, pairing, shared protocol | Platform and integrations |
-| `services/backend` | Reserved for the server phase; README only, on purpose | Platform and integrations |
-| `services/brain` | JVM reference of routing, prompts and target-app knowledge | Platform and integrations own the service; knowledge content arrives by PR from the Target-app knowledge team |
-| `services/tasks` *(new)* | Durable tasks | Tasks and notifications |
-| `services/mapping` *(new)* | Recipe factory and publishing | Target-app knowledge |
-| `services/evals/bench`, `services/evals/baseline` | Benchmark and reference agent | Product lab |
-| `services/tools` | Repository checks and scripts | Architecture and security |
-| `services/docs` | Service documentation | Each team writes its own; Architecture edits the index |
-| `contracts/tasks` *(new)* | The task contract | Tasks and notifications |
-| `contracts/recipes` *(new)* | The recipe contract | Target-app knowledge |
+| **Clients**<br>[Client applications] | `apps/android`, `apps/windows` | The screens, the share target, settings, the APK and the MSI shell |
+| | `packages/core`, `packages/data`, `packages/capabilities` | The loop, the stored records, the device capabilities |
+| | `apps/harmony` | Frozen client (ADR-0020); maintenance only |
+| **Platform and services**<br>[Platform and integrations] | `services/bridge`, `services/relay`, `services/wire` | Transport, pairing, the wire protocol |
+| | `services/backend` | Reserved for the server phase; README only until then |
+| | `services/brain` | The routing and prompt service. Prompts and target-app knowledge arrive as pull requests from Target-app knowledge |
+| | `services/tasks` *(new)*<br>[Tasks and notifications] | Durable tasks, approvals pending, resume. Moves to its own team when the hire lands |
+| | `contracts/tasks` *(new)* | The task contract, reviewed with Integration |
+| **Target-app knowledge** | `contracts/recipes`, `services/mapping` *(new)* | The recipe contract, the factory, publishing, rollout and rollback |
+| **Algorithms and measurement**<br>[Product lab] | `packages/decision` *(new, after the LAIX port)* | The decision contract and policies |
+| | `services/evals/bench`, `services/evals/baseline` | HOPA-Bench with its task set and results; the reference loop used by the bench |
+| **Integration, release and quality**<br>[Verification farm, brick 8] | `.github/workflows` | Every CI job, Android and Windows; the release job that publishes the APK |
+| | `services/tools`, `tools/` | Repository checks, scripts, the smoke runner |
+| | `docs/project/evidence` | The failure list and the proof for each plan tick |
+| **Architecture and contracts** (shared) | `contracts/` (recipes and tasks excepted) | Shared contracts and their review |
+| | `docs/design/decisions` | ADRs and the release veto |
+| **Every team** | `services/docs`, its own service README | The team that owns the service writes its docs; Architecture edits only the index |
 
 ## Edges: what one team hands to another
 
@@ -267,35 +276,53 @@ Eight people today, so the shape is **six teams**; the seven-team table above is
 the shape when the two open hires land. Nothing moves when that happens: Tasks
 has its own service already, and the farm is a folder.
 
-| Team | Lead | Second | Owns |
-|---|---|---|---|
-| **Clients** | Michael | Chaya | `apps/android`, `apps/windows`, `apps/harmony` (frozen), `packages/` |
-| **Platform and services** | Amir | Batya | `services/backend`, `bridge`, `relay`, `wire`, `brain` (service), pairing and tokens |
-| **Apps and knowledge** | Nizzan | Shira | app analysis, `contracts/recipes`, `services/mapping`, factory and delivery |
-| **Algorithms and measurement** | Sefi | - | LAIX algorithms, decision policies, `services/evals`, benchmarks, metrics |
-| **Integration, release and quality** | Yoni | - | CI, releases, integration tests, the verification farm, security, the gaps |
-| **Architecture and contracts** (shared role) | Michael + Amir + Yoni | - | `contracts/`, shared rules, seam reviews, release veto |
+| Team | Lead | Second | Folders | What they ship |
+|---|---|---|---|---|
+| **Clients** | Michael | Chaya | `apps/android`, `apps/windows`, `apps/harmony` (frozen), `packages/core`, `packages/data`, `packages/capabilities` | Screens and flows, the share target, settings, visual parity with Harmony; the APK and the MSI shell |
+| **Platform and services** | Amir | Batya | `services/backend`, `services/bridge`, `services/relay`, `services/wire`, `services/brain` (the service); `services/tasks` until the hire | The pairing code, tokens, the phone-to-PC tunnel, the wire protocol, the brain service |
+| **Target-app knowledge** | Nizzan | Shira | `contracts/recipes`, `services/mapping` | A recipe per target app: steps, selectors, the check that it worked, the app version it is pinned to |
+| **Algorithms and measurement** | Sefi | - | `packages/decision` (after the LAIX port), `services/evals/bench`, `services/evals/baseline` | The HOPA-Bench task set and its score per release; four numbers read from journals |
+| **Integration, release and quality** | Yoni | - | `.github/workflows`, `docs/project/evidence`, the release checklist | Green CI, the release APK and MSI, the failure list, the signing and permission review |
+| **Architecture and contracts** (shared role) | Michael + Amir + Yoni | - | `contracts/` | Contract text, seam reviews, release veto |
+| **Design** (shared role) | open | - | theme files in `packages/` | One visual language for every client |
+
+### The words that were doing too much work
+
+Each of these now names a file, a number or a check, so a new person can find
+it on day one.
+
+| Word | What it means here | Where to look |
+|---|---|---|
+| **benchmark** | HOPA-Bench: 20 fixed tasks (Settings, Clock, Calendar, Browser, Notes, Contacts, Messages, Music, Files) written as YAML. Each task names a success check the device itself must show. One run gives one number: how many of the 20 passed. | `services/evals/bench/tasks`, results in `services/evals/bench/results` |
+| **metric** | One number read from the journals of real runs: time to finish, steps used, retries per step, and whether the person asked for the same thing again within 7 days. | `services/evals`, journal records from `packages/data` |
+| **the gaps** | The failure list: every step that did not run or whose check said no, with the target-app version and the log. It is the first input to each week's planning. | `docs/project/evidence`, ticked in `docs/project/plan` |
+| **security** | Four concrete things: APK and recipe signing keys; keystore files and `keystore.properties` stay out of git; secrets on Windows live in Credential Manager, not in settings JSON; the bridge and relay are reviewed for what they expose. | `apps/android` signing, `apps/windows` settings, `services/bridge` |
+| **farm** | The devices that run the benchmark and the app matrix: the Android emulator, the Windows machine, and one real phone when one is available. | `.github/workflows`, the Windows `--matrix-check` |
 
 Why six teams: the **Tasks** brick lives inside Platform until the hire
 (Amir + Batya), and the **farm** lives inside Integration (Yoni). Both are
-already separate folders and contracts, so splitting them later is a staffing
-a staffing change.
+already separate folders and contracts, so splitting them later is a staffing change.
 
-### Folder and service owners
+### Who to ask for a path
 
-| Path | Owner |
+The table above says which **team** owns a folder. This one says which **person**
+to ask, and is the one to use when a pull request is stuck.
+
+| Path | Person |
 |---|---|
 | `apps/android`, `apps/windows`, `apps/harmony` | Michael (Chaya) |
 | `packages/core`, `packages/data`, `packages/capabilities` | Michael |
 | `packages/decision` (new, from LAIX) | Sefi (algorithms) + Michael (contract and Kotlin port) |
-| `services/backend`, `bridge`, `relay`, `wire` | Amir (Batya) |
+| `services/backend`, `services/bridge`, `services/relay`, `services/wire` | Amir (Batya) |
 | `services/brain` | Amir owns the service; knowledge and prompts arrive from Nizzan |
 | `services/tasks` (new) | Amir (Batya) |
 | `contracts/tasks` | Amir + Yoni |
 | `contracts/recipes`, `services/mapping` (new) | Nizzan (Shira) |
-| `services/evals` | Sefi |
-| `services/tools`, CI, releases | Yoni |
+| `services/evals/bench`, `services/evals/baseline` | Sefi |
+| `.github/workflows`, `services/tools`, `tools/`, `docs/project/evidence` | Yoni |
 | `contracts/*` (other than tasks and recipes) | Michael + Amir review |
+| `docs/design/decisions` | Michael + Amir + Yoni |
+| `services/docs` | the owner of each service; Architecture edits the index |
 
 ### Where the seconds go
 
@@ -326,8 +353,8 @@ a staffing change.
 | Michael | clients + LAIX + architecture is too much | Chaya in clients; LAIX algorithms to Sefi; contracts reviewed with Amir |
 | Amir | four services plus tasks | Batya; Yoni takes CI and release |
 | Nizzan | a new area with no second | Shira; one system app as the first case |
-| Sefi | "algorithms everywhere" is too broad | scope: decisions, LAIX, benchmarks, metrics |
-| Yoni | "everything unowned" is vague | charter: integration, release, quality, farm, security |
+| Sefi | "algorithms everywhere" is too broad | scope: the decision contract, HOPA-Bench, the four journal numbers |
+| Yoni | many things have no other owner | charter: CI, release, failure list, signing, farm |
 | - | no product or designer | reserve 0.5 product and 0.5 design, or parity and priorities drift |
 
 ### First 90 days
@@ -337,8 +364,8 @@ a staffing change.
 | Michael + Chaya | the Windows gates (W3-W5) and the Android gates; Windows visual parity (W6) |
 | Amir + Batya | `contracts/tasks` and the `services/tasks` skeleton; token rotation; bridge and relay |
 | Nizzan + Shira | the first system app: analysis -> `contracts/recipes` -> one recipe end to end |
-| Sefi | the LAIX pilot on HOPA episodes; the decision contract and benchmark; metrics from journals |
-| Yoni | Windows and Android CI jobs, the farm on the runners, the release checklist, security |
+| Sefi | the LAIX pilot on HOPA episodes; the decision contract; a HOPA-Bench score for the current release; the four journal numbers |
+| Yoni | Windows and Android CI jobs, the farm on the runners, the release checklist, the failure list, the signing review |
 
 ## Launch waves
 
