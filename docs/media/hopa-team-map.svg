@@ -330,14 +330,14 @@
 </text>
 <rect x="60" y="892" width="300" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="210" y="913" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="210" dy="0">a problem we cannot fix by hand</tspan>
-<tspan x="210" dy="16">e.g. recipes break after app updates</tspan>
+<tspan x="210" dy="0">goal: still works after an app update</tspan>
+<tspan x="210" dy="16">measured: steps that pass, before and after</tspan>
 </text>
 <path d="M360,916 L620,916" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="395.1" y="902" width="189.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<rect x="416.8" y="902" width="146.4" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="490" y="914" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="490" dy="0">a study: method, data, report</tspan>
+<tspan x="490" dy="0">method + data + report</tspan>
 </text>
 </g>
 <text x="490" y="929" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
@@ -347,10 +347,10 @@
 <tspan x="634" dy="0">to Target-app knowledge: adopt or drop</tspan>
 </text>
 <text x="60" y="962" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="60" dy="0">One researcher owns the bottom row: a problem the failure list cannot explain,</tspan>
+<tspan x="60" dy="0">One researcher owns the bottom row: a goal today's recipes cannot reach.</tspan>
 </text>
 <text x="60" y="978" font-size="11" fill="#6B665C" font-weight="400" text-anchor="start">
-<tspan x="60" dy="0">answered with a study and a method, then adopted into recipes or dropped.</tspan>
+<tspan x="60" dy="0">It is measured as the share of steps still passing after an update; a method comes back, adopted or dropped.</tspan>
 </text>
 <rect x="24" y="1012" width="1232" height="44" rx="6" fill="#E8E1F4" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="40" y="1040" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="start">

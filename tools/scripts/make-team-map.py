@@ -221,8 +221,8 @@ rows = [
      "to the next release: ship or block"),
     (832, ["read the pilot homes' runs"], "minutes per task, steps, repeats", "monthly",
      "to the next plan"),
-    (892, ["a problem we cannot fix by hand", "e.g. recipes break after app updates"],
-     "a study: method, data, report", "about 6 months",
+    (892, ["goal: still works after an app update", "measured: steps that pass, before and after"],
+     "method + data + report", "about 6 months",
      "to Target-app knowledge: adopt or drop"),
 ]
 for y, left, artifact, cadence, consumer in rows:
@@ -232,8 +232,8 @@ for y, left, artifact, cadence, consumer in rows:
     label(490, centre - 3, artifact)
     text(490, centre + 13, [cadence], size=11, colour=MUTED)
     text(634, centre + 4, [consumer], size=13, anchor="start")
-text(60, 962, ["One researcher owns the bottom row: a problem the failure list cannot explain,"], size=11, colour=MUTED, anchor="start")
-text(60, 978, ["answered with a study and a method, then adopted into recipes or dropped."], size=11, colour=MUTED, anchor="start")
+text(60, 962, ["One researcher owns the bottom row: a goal today's recipes cannot reach."], size=11, colour=MUTED, anchor="start")
+text(60, 978, ["It is measured as the share of steps still passing after an update; a method comes back, adopted or dropped."], size=11, colour=MUTED, anchor="start")
 
 # 11 Platform: what the transport layer actually does.
 rail(1012, TEAM["platform"][0], "Platform and services -",
