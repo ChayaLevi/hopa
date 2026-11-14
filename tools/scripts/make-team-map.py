@@ -137,7 +137,7 @@ box(1120, 180, 120, 48, ["target app"], "external", dashed=True)
 
 box(340, 100, 140, 38, ["Notifications"], "platform")
 box(620, 96, 180, 40, ["model provider (network)"], "external", dashed=True)
-box(330, 280, 170, 48, ["catalogue (installed)", "ids, aliases, cases"], "shared")
+box(470, 280, 150, 48, ["catalogue (installed)", "ids, aliases, cases"], "shared")
 box(630, 280, 160, 48, ["recipes (installed)"], "knowledge")
 
 arrow([(142, 204), (158, 204)])
@@ -160,8 +160,8 @@ label(660, 150, "prompt")
 label(772, 170, "Decision")
 label(700, 86, "only if no recipe step fits")
 
-arrow([(420, 280), (420, 246), (545, 246), (545, 230)])
-label(480, 252, "apps, aliases, cases")
+arrow([(545, 280), (545, 230)])
+label(466, 254, "apps, aliases, cases")
 arrow([(700, 280), (700, 230)])
 label(700, 252, "steps")
 
@@ -184,7 +184,7 @@ box(40, 544, 150, 58, ["catalogue, authored", "ids, aliases, launch"], "knowledg
 arrow([(115, 516), (115, 542)])
 label(215, 620, "build its knowledge")
 arrow([(115, 602), (115, 620), (315, 620), (315, 540)], dashed=True)
-arrow([(190, 560), (205, 560), (205, 398), (415, 398), (415, 330)])
+arrow([(190, 560), (205, 560), (205, 398), (545, 398), (545, 330)])
 label(310, 392, "compiled into the client")
 
 arrow([(370, 508), (438, 508)])

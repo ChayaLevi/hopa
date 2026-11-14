@@ -63,10 +63,10 @@
 <text x="710" y="121" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="710" dy="0">model provider (network)</tspan>
 </text>
-<rect x="330" y="280" width="170" height="48" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="415" y="301" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="415" dy="0">catalogue (installed)</tspan>
-<tspan x="415" dy="16">ids, aliases, cases</tspan>
+<rect x="470" y="280" width="150" height="48" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="545" y="301" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="545" dy="0">catalogue (installed)</tspan>
+<tspan x="545" dy="16">ids, aliases, cases</tspan>
 </text>
 <rect x="630" y="280" width="160" height="48" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="710" y="309" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -129,11 +129,11 @@
 <tspan x="700" dy="0">only if no recipe step fits</tspan>
 </text>
 </g>
-<path d="M420,280 L420,246 L545,246 L545,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M545,280 L545,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="413.0" y="241" width="134.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="480" y="253" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="480" dy="0">apps, aliases, cases</tspan>
+<rect x="399.0" y="243" width="134.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="466" y="255" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="466" dy="0">apps, aliases, cases</tspan>
 </text>
 </g>
 <path d="M700,280 L700,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
@@ -199,7 +199,7 @@
 </text>
 </g>
 <path d="M115,602 L115,620 L315,620 L315,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
-<path d="M190,560 L205,560 L205,398 L415,398 L415,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M190,560 L205,560 L205,398 L545,398 L545,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="230.6" y="381" width="158.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="310" y="393" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
