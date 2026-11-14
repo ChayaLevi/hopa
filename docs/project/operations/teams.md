@@ -62,40 +62,40 @@ parallelism; the next section shows how they merge when there are fewer people.
 
 ```mermaid
 flowchart TB
-    arch["12 - Architecture and security<br/>contracts, CI, releases for every team"]
     person(["Person"])
-    clients["1 - Our clients"]
-    tasks["3 - Tasks<br/>what and when"]
-    family["4 - Family<br/>who may approve"]
-    notifications["9 - Notifications"]
-    knowledge["5 - Target-app knowledge"]
-    factory["6 - Factory"]
-    delivery["7 - Delivery"]
-    execution["2 - Execution"]
-    farm["8 - Farm"]
-    lab["10 - Product lab"]
-    platform["11 - Platform and integrations<br/>carries messages between every box"]
+    arch["12 Architecture and security"]
 
-    arch -. applies to every box .-> person
-    person --> clients
+    subgraph platform["11 Platform - carries every message between these boxes"]
+        clients["1 Clients"]
+        tasks["3 Tasks"]
+        knowledge["5 Target-app knowledge"]
+        execution["2 Execution"]
+        farm["8 Farm"]
+        lab["10 Product lab"]
+        family["4 Family"]
+        notes["9 Notifications"]
+        factory["6 Factory"]
+        delivery["7 Delivery"]
+    end
+
+    person -->|asks| clients
     clients -->|request| tasks
-    notifications -->|makes a task| tasks
+    notes -->|makes a task| tasks
     tasks -->|who approves| family
     family -->|yes or no| tasks
-    tasks -->|how is it done?| knowledge
+    tasks -->|needs the steps| knowledge
     factory -->|new recipe| knowledge
     knowledge -->|signed version| delivery
-    knowledge -->|perform this step| execution
+    knowledge -->|one step| execution
     execution -->|verify| farm
     farm -->|journals| lab
-    execution -. runs over .-> platform
-    clients -. runs over .-> platform
-
-    classDef band fill:#F3EFE7,stroke:#E9E4DA,color:#6B665C
-    classDef plain fill:#FFFFFF,stroke:#E9E4DA,color:#1C1B18
-    class arch,platform band
-    class person,clients,tasks,family,notifications,knowledge,factory,delivery,execution,farm,lab plain
+    arch -.->|contracts, CI, releases| platform
 ```
+
+Numbers match the brick table above. Arrows carry what one brick hands to the
+next, and the labels say what is handed over. Everything except the person sits
+inside the platform band because every arrow between the boxes needs transport;
+architecture sits outside because it sets the rules the boxes follow.
 
 ### Three things that look alike
 
