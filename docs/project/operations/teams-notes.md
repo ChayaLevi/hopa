@@ -18,7 +18,7 @@ section directly; engineers can use the glossary and the edges table in
 | **Execution** | Doing one step on the phone and checking that it actually worked. |
 | **Task** | The record of what a person asked for: who asked, when, who approves, done or not. |
 | **Family approval** | The rule about who must confirm an action before it happens. |
-| **Target app** | A third-party app HOPA acts in (a bank, a messenger). Never our own client. |
+| **Target app** | A third-party app HOPA acts in (a bank, a messenger); our clients are separate software. |
 | **Family** | The household that uses HOPA: an adult, often an older parent, sometimes a child. |
 | **Target-app knowledge (a "recipe")** | Step-by-step instructions for one target app, plus how to tell the step worked. |
 | **Knowledge factory** | How instructions are produced: models propose, humans review. |

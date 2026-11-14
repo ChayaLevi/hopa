@@ -6,30 +6,27 @@ into teams with clear ownership, and answers the questions that came up while
 reviewing it: what a team owns, where two teams meet, and how many teams to
 run at once.
 
-This is not the delivery plan. Android keeps
+The delivery plan lives in
 [`project/plan/android/`](../plan/android/README.md); this page says who builds
 what next to it.
 
-## Who uses HOPA, and what "app" means
+## Who uses HOPA
 
-HOPA is used by a **household**, not by one anonymous user: an adult who sets it
-up, often an older parent who needs help, and sometimes a child. They share
-devices and chores, and some actions need another member's yes. That household is
-the "family" in brick 4 - it is a product fact, not a feature invented for the
-table.
+HOPA is used by a **household**: an adult who sets it up, often an older parent
+who needs help, and sometimes a child. They share devices and chores, and some
+actions need another member's yes. The household is the "family" in brick 4.
 
-Two words are easy to confuse:
+## The words in this document
 
-- **client** - our own software on the user's device: `apps/android`,
-  `apps/windows`, `apps/harmony`. When this document says "app" alone, it does
-  **not** mean these.
-- **target app** - a third-party app HOPA operates: a bank, a messenger, a school
-  app. "Target-app knowledge" below means knowledge of target apps; "pinned to a target-app
-  build" means pinned to a version of a target app.
-
-The other nouns: a **service** runs on a computer or server; the **engine**
-(`packages/`) is shared code inside the clients; a **contract** is the written
-agreement between two teams; a **recipe** is the instructions for one target app.
+- **client** - our software on the user's device: `apps/android`, `apps/windows`,
+  `apps/harmony`.
+- **target app** - a third-party app HOPA acts in: a bank, a messenger, a school
+  app. "Target-app knowledge" is knowledge of these apps, and a recipe is
+  pinned to a target-app build.
+- **service** - a part that runs on a computer or server.
+- **engine** - the shared code inside the clients (`packages/`).
+- **contract** - the written agreement between two teams.
+- **recipe** - the instructions for one target app.
 
 ## The rule
 
@@ -41,7 +38,7 @@ brick, one owner of its data, and one contract at each edge.
 - Yes -> one team.
 - No -> two teams, even if the words sound alike.
 
-## Bricks, not departments
+## Bricks
 
 Twelve bricks cover the product. Each one is a candidate team at maximum
 parallelism; the next section shows how they merge when there are fewer people.
@@ -96,11 +93,11 @@ parallelism; the next section shows how they merge when there are fewer people.
 12. ARCHITECTURE ---  above everything: contracts and releases
 ```
 
-### What is not the same thing
+### Three things that look alike
 
-These two questions came up first, so they are answered explicitly.
+Tasks, knowledge and family are easy to mix up, so here is how each one works.
 
-**Tasks are not knowledge.**
+**Tasks and knowledge.**
 
 ```
 TASK       "Mum asks to pay the internet bill"
@@ -110,18 +107,18 @@ KNOWLEDGE  "In the bank app: Payments -> Internet -> amount -> confirm"
            which controls - how to tell it worked
 ```
 
-A task refers to knowledge; it does not store the steps. Knowledge does not know
-who asked for it. It is the difference between an order in a restaurant and the
-cookbook.
+A task refers to knowledge and keeps the steps out of itself. Knowledge carries
+the steps and stays separate from who asked. It is the difference between an
+order in a restaurant and the cookbook.
 
-**Tasks are not family.** A task answers "what and when"; family answers "who is
+**Tasks and family.** A task answers "what and when"; family answers "who is
 allowed to approve it". They change for different reasons, so they are separate
 bricks and can be separate teams.
 
 ## What "approve" actually means
 
 The family is the household from above. Families approve **permissions for
-actions**, not feelings.
+actions**: who may do what, and who says yes.
 
 | Action | Who asks | Who approves | Example rule |
 |---|---|---|---|
@@ -147,7 +144,7 @@ Mother:      [confirms]
 HOPA:        performs it and shows the receipt
 ```
 
-The rules belong to the family, not to HOPA:
+The rules belong to the family:
 
 ```
 Child may:    look, search, set an alarm.
@@ -163,7 +160,7 @@ member may do, and who is asked before an action.
 
 ## How many teams
 
-The number is a staffing decision, not a doctrine. The table shows which bricks
+The number is a staffing decision. The table shows which bricks
 merge at each size.
 
 | Teams | Composition |
@@ -173,7 +170,7 @@ merge at each size.
 | **5** | 1 - 2+8 - 3+4+9 - 5+6+7 - 10, plus 11 and 12 as shared roles |
 
 Merging is allowed when the same two to four people would do both jobs and the
-edge between them is trivial. One brick must never have two owners.
+edge between them is trivial. Each brick has exactly one owner.
 
 ### Recommended start: seven teams
 
@@ -181,13 +178,13 @@ edge between them is trivial. One brick must never have two owners.
 |---|---|---|
 | Client applications | 1 | The person gets the result on their own device |
 | Execution and verification | 2 + 8 | A step runs on the phone and is proven to have worked |
-| Tasks and notifications | 3 + 9 | A request is never lost, and a notification can become a task |
+| Tasks and notifications | 3 + 9 | A request stays findable, and a notification can become a task |
 | Family and approvals | 4 | The family decides who may do what |
-| Target-app knowledge | 5 + 6 + 7 | A new target app is supported in days, not months, and survives updates |
+| Target-app knowledge | 5 + 6 + 7 | A new target app is supported in days and survives updates |
 | Product lab | 10 | We know what to fix first and can prove the effect |
 | Platform and integrations | 11 | Devices and services find each other and stay connected |
 
-Shared roles, not teams:
+Shared roles:
 
 | Role | Bricks | Why shared |
 |---|---|---|
@@ -202,7 +199,7 @@ them rather than inside them.
 | Path | What it is | Owner |
 |---|---|---|
 | `apps/android`, `apps/windows` | Client shells | Client applications |
-| `apps/harmony` | Frozen client (ADR-0020) | nobody; maintenance only |
+| `apps/harmony` | Frozen client (ADR-0020) | maintenance only |
 | `services/bridge`, `services/relay`, `services/wire` | Transport, pairing, shared protocol | Platform and integrations |
 | `services/backend` | Reserved for the server phase; README only, on purpose | Platform and integrations |
 | `services/brain` | JVM reference of routing, prompts and target-app knowledge | Platform and integrations own the service; knowledge content arrives by PR from the Target-app knowledge team |
@@ -241,10 +238,10 @@ Fri  Demo: five minutes per team, working software only
 
 Rules that keep parallelism from turning into noise:
 
-1. One owner per folder; a team does not edit another team's folder.
+1. One owner per folder; a team edits its own folder and asks elsewhere.
 2. A shared contract changes only through Architecture and review.
-3. A dependency is written down in the team plan, never kept quiet.
-4. The Product lab blocks nobody: it produces methods and numbers, not features.
+3. A dependency is written down in the team plan.
+4. The Product Lab unblocks everyone: it produces methods and numbers.
 
 ## Staffing
 
@@ -277,10 +274,10 @@ has its own service already, and the farm is a folder.
 | **Integration, release and quality** | Yoni | - | CI, releases, integration tests, the verification farm, security, the gaps |
 | **Architecture and contracts** (shared role) | Michael + Amir + Yoni | - | `contracts/`, shared rules, seam reviews, release veto |
 
-Why six and not seven: the **Tasks** brick lives inside Platform until the hire
+Why six teams: the **Tasks** brick lives inside Platform until the hire
 (Amir + Batya), and the **farm** lives inside Integration (Yoni). Both are
 already separate folders and contracts, so splitting them later is a staffing
-change, not a refactor.
+a staffing change.
 
 ### Folder and service owners
 
@@ -314,8 +311,9 @@ change, not a refactor.
   wrote LAIX and keeps the contract and compatibility.
 - **Inside HOPA:** a pilot in Algorithms first, on HOPA's own journals (two to
   three weeks), then a decision on a Kotlin port in `packages/decision`
-  (Michael + Sefi). A Python runtime beside the loop is not the product path:
-  behaviour must match on Android and Windows.
+  (Michael + Sefi). The product path is the Kotlin port in `packages/decision`,
+  so behaviour matches on Android and Windows; a Python runtime beside the loop
+  would add a second behaviour to keep in step.
 - If LAIX is also a product of its own, it needs a named owner; otherwise it
   dissolves into HOPA.
 

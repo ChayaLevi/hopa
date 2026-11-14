@@ -343,7 +343,7 @@ Only six words from the "Lives in" lines; everything else is spelled out above.
 | **service** | a part that runs on a computer or server, never on the phone |
 | **bridge** | the link that lets the computer (or the cloud) reach the phone |
 | **contract** | the written agreement between two teams: what is handed over and how it is checked |
-| **target app** | a third-party app HOPA acts in (a bank, a messenger); never our own client |
+| **target app** | a third-party app HOPA acts in (a bank, a messenger); our clients are separate software |
 | **recipe** | step-by-step instructions for one target app, with the check that says it worked |
 | **gate** | the safety rules a step must pass before anything happens |
 
