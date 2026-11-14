@@ -33,10 +33,10 @@
 <text x="395" y="209" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="395" dy="0">Tasks</tspan>
 </text>
-<rect x="480" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="545" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="545" dy="0">router</tspan>
-<tspan x="545" dy="16">goal to apps</tspan>
+<rect x="460" y="180" width="130" height="48" rx="6" fill="#DCE9F5" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="525" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="525" dy="0">router</tspan>
+<tspan x="525" dy="16">goal to apps</tspan>
 </text>
 <rect x="630" y="180" width="140" height="48" rx="6" fill="#F7E8CE" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="700" y="201" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -63,10 +63,10 @@
 <text x="710" y="121" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
 <tspan x="710" dy="0">model provider (network)</tspan>
 </text>
-<rect x="470" y="280" width="150" height="48" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
-<text x="545" y="301" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
-<tspan x="545" dy="0">catalogue (installed)</tspan>
-<tspan x="545" dy="16">ids, aliases, cases</tspan>
+<rect x="450" y="280" width="150" height="48" rx="6" fill="#E7E3DA" stroke="#C9C2B5" stroke-width="1.2"/>
+<text x="525" y="301" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
+<tspan x="525" dy="0">catalogue (installed)</tspan>
+<tspan x="525" dy="16">ids, aliases, cases</tspan>
 </text>
 <rect x="630" y="280" width="160" height="48" rx="6" fill="#DFEDE1" stroke="#C9C2B5" stroke-width="1.2"/>
 <text x="710" y="309" font-size="13" fill="#1C1B18" font-weight="400" text-anchor="middle">
@@ -87,6 +87,7 @@
 <tspan x="469" dy="0">goal, state</tspan>
 </text>
 </g>
+<path d="M590,204 L628,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <path d="M770,204 L808,204" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="765.4" y="183" width="47.2" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
@@ -129,11 +130,11 @@
 <tspan x="700" dy="0">only if no recipe step fits</tspan>
 </text>
 </g>
-<path d="M545,280 L545,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M525,280 L525,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
-<rect x="478.0" y="241" width="134.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
-<text x="545" y="253" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
-<tspan x="545" dy="0">apps, aliases, cases</tspan>
+<rect x="458.0" y="241" width="134.0" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
+<text x="525" y="253" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
+<tspan x="525" dy="0">apps, aliases, cases</tspan>
 </text>
 </g>
 <path d="M700,280 L700,230" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
@@ -199,7 +200,7 @@
 </text>
 </g>
 <path d="M115,602 L115,620 L315,620 L315,540" fill="none" stroke="#8C8579" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#head)"/>
-<path d="M190,560 L205,560 L205,398 L545,398 L545,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
+<path d="M190,560 L205,560 L205,398 L525,398 L525,330" fill="none" stroke="#8C8579" stroke-width="1.4" marker-end="url(#head)"/>
 <g>
 <rect x="230.6" y="381" width="158.8" height="16" rx="3" fill="#F7F4EE" stroke="#E4DED2" stroke-width="0.8"/>
 <text x="310" y="393" font-size="11" fill="#6B665C" font-weight="400" text-anchor="middle">
