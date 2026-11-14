@@ -60,11 +60,12 @@ def text(x: int, y: int, lines: list[str], size: int = 13, colour: str = INK,
 
 
 def box(x: int, y: int, w: int, h: int, label: list[str], team: str,
-        dashed: bool = False) -> None:
+        dashed: bool = False, size: int = 13) -> None:
     fill = TEAM[team][0] if team in TEAM else PAPER
     rect(x, y, w, h, fill, dash="5 4" if dashed else None)
-    first = y + h // 2 - (len(label) - 1) * 8 + 5
-    text(x + w // 2, first, label)
+    gap = size + 3
+    first = y + h // 2 - (len(label) - 1) * gap // 2 + size // 2 - 2
+    text(x + w // 2, first, label, size=size)
 
 
 def arrow(points: list[tuple[int, int]], dashed: bool = False,
@@ -128,11 +129,11 @@ add(f'<ellipse cx="100" cy="204" rx="42" ry="24" fill="{PAPER}" stroke="{BORDER}
 text(100, 209, ["Person"], size=13)
 
 box(160, 180, 130, 48, ["Clients"], "clients")
-box(330, 180, 130, 48, ["Tasks"], "platform")
-box(500, 180, 110, 48, ["router", "goal to apps"], "clients")
-box(650, 180, 140, 48, ["Decision", "rules: LAIX"], "algorithms")
+box(330, 180, 130, 48, ["Tasks", "waits, then resumes"], "platform")
+box(495, 180, 125, 48, ["router", "one or many apps"], "clients")
+box(650, 174, 140, 56, ["Decision", "rules: LAIX", "stop or repeat"], "algorithms", size=12)
 box(830, 180, 130, 48, ["Family rules"], "clients")
-box(990, 180, 130, 48, ["Execution"], "clients")
+box(990, 180, 130, 48, ["Execution", "drives apps, files"], "clients")
 box(1140, 180, 100, 48, ["target app"], "external", dashed=True)
 
 box(340, 100, 140, 38, ["Notifications"], "platform")
@@ -143,9 +144,9 @@ box(630, 280, 160, 48, ["recipes (installed)"], "knowledge")
 arrow([(142, 204), (158, 204)])
 arrow([(290, 204), (328, 204)])
 label(309, 170, "create task")
-arrow([(460, 204), (498, 204)])
+arrow([(460, 204), (493, 204)])
 label(479, 166, "goal, state")
-arrow([(610, 204), (648, 204)])
+arrow([(620, 204), (648, 204)])
 label(629, 188, "apps")
 arrow([(790, 204), (828, 204)])
 label(809, 194, "Action")
@@ -156,30 +157,36 @@ arrow([(1120, 204), (1138, 204)])
 arrow([(410, 138), (410, 178)])
 label(410, 158, "event")
 
-arrow([(690, 178), (690, 136)], dashed=True)
-arrow([(730, 136), (730, 178)], dashed=True)
+arrow([(690, 174), (690, 136)], dashed=True)
+arrow([(730, 136), (730, 174)], dashed=True)
 label(668, 157, "prompt")
 label(786, 157, "one action")
 label(700, 86, "only if no recipe step fits")
 
 arrow([(550, 280), (550, 230)])
 label(550, 252, "which apps match")
-arrow([(700, 280), (700, 230)])
+arrow([(700, 280), (700, 232)])
 label(700, 252, "steps")
 
-arrow([(1040, 228), (1040, 264), (735, 264), (735, 230)])
+arrow([(1040, 228), (1040, 264), (735, 264), (735, 232)])
 label(885, 258, "Observation + record")
 
+arrow([(1010, 228), (1010, 372), (470, 372), (470, 476)], dashed=True)
+label(700, 366, "correction")
+arrow([(650, 214), (625, 214), (625, 460), (350, 460), (350, 476)], dashed=True)
+label(296, 446, "explore, person approves")
 arrow([(880, 228), (880, 356), (225, 356), (225, 230)], dashed=True, tail=True)
 label(480, 352, "ask, answer")
 
 # --- Band B: the build ------------------------------------------------------
-band(24, 404, 1232, 232, "BUILD AND DELIVERY - days - starts when a target app changes, not when someone asks")
+band(24, 404, 1232, 232, "BUILD AND DELIVERY - days - starts when an app changes, or a run needs a new recipe")
 
-box(240, 478, 130, 60, ["Recipe", "factory"], "knowledge")
-box(440, 478, 130, 60, ["Target-app", "knowledge"], "knowledge")
-box(860, 478, 130, 60, ["Verification", "farm"], "integration")
-box(1060, 478, 130, 60, ["Recipe", "delivery"], "knowledge")
+box(220, 478, 130, 60, ["Recipe", "factory"], "knowledge")
+box(380, 478, 130, 60, ["Target-app", "knowledge"], "knowledge")
+box(540, 478, 140, 60, ["Replay", "on recorded runs"], "algorithms")
+box(710, 478, 130, 60, ["Verification", "farm"], "integration")
+box(870, 478, 130, 60, ["Recipe", "delivery"], "knowledge")
+box(520, 556, 140, 48, ["repair a", "broken step"], "algorithms")
 
 box(40, 466, 150, 50, ["onboard a", "target app"], "knowledge")
 box(40, 544, 150, 58, ["catalogue, authored", "ids, aliases, launch"], "knowledge")
@@ -189,22 +196,24 @@ arrow([(115, 602), (115, 620), (315, 620), (315, 540)], dashed=True)
 arrow([(190, 560), (205, 560), (205, 398), (550, 398), (550, 330)])
 label(310, 392, "compiled into the client")
 
-arrow([(370, 508), (438, 508)])
-label(404, 498, "new recipe")
-box(640, 478, 150, 60, ["Replay", "on recorded runs"], "algorithms")
-arrow([(570, 508), (638, 508)])
-label(604, 498, "candidate change")
-arrow([(790, 508), (858, 508)])
-label(824, 498, "what passed")
-arrow([(880, 540), (880, 570), (500, 570), (500, 540)], dashed=True)
-label(690, 580, "failures")
-arrow([(990, 508), (1058, 508)])
-label(1024, 498, "pass")
-arrow([(505, 478), (505, 452), (1125, 452), (1125, 476)])
-label(815, 442, "package")
+arrow([(350, 508), (378, 508)])
+label(364, 492, "new recipe")
+arrow([(510, 508), (538, 508)])
+label(524, 492, "candidate")
+arrow([(680, 508), (708, 508)])
+label(694, 492, "passing")
+arrow([(840, 508), (868, 508)])
+label(854, 492, "pass")
 
-arrow([(1190, 508), (1215, 508), (1215, 304), (792, 304)])
-label(1000, 296, "installs, signature checked")
+arrow([(790, 540), (790, 580), (662, 580)], dashed=True)
+arrow([(520, 580), (445, 580), (445, 540)], dashed=True)
+label(736, 572, "failures")
+
+arrow([(445, 478), (445, 452), (935, 452), (935, 476)])
+label(700, 442, "package")
+
+arrow([(1000, 508), (1030, 508), (1030, 304), (792, 304)])
+label(900, 296, "installs, signature checked")
 
 # --- Band C: the learning loop ---------------------------------------------
 band(24, 646, 1232, 354, "LEARNING - weeks - read in batches, change plans")
