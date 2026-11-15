@@ -36,4 +36,22 @@ class DsmlDecisionTest {
         val outcome = DecisionParser().parse(raw)
         assertEquals("E_SCHEMA", outcome.error?.code)
     }
+
+    @Test
+    fun a_different_pipe_style_is_still_the_same_action() {
+        val raw = "<|DSML|invoke name='ui.tap'>" +
+            "<|DSML|parameter name='ref' string=\"true\">e4</|DSML|parameter>" +
+            "</|DSML|invoke>"
+        val action = DecisionParser().parse(raw).decision?.action
+        assertEquals("ui.tap", action?.kind)
+        assertEquals("e4", action?.ref)
+    }
+
+    @Test
+    fun markup_that_cannot_be_decoded_is_an_error_not_chat_text() {
+        val raw = "<||DSML||calls>\n<||DSML||something else>\n</||DSML||calls>"
+        val outcome = DecisionParser().parse(raw)
+        assertNull(outcome.text)
+        assertEquals("E_SCHEMA", outcome.error?.code)
+    }
 }

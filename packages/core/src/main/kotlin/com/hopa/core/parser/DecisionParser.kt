@@ -13,12 +13,13 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
-private val DSML_INVOKE = Regex(
-    """<\|\|DSML\|\|invoke\s+name="([^"]+)">([\s\S]*?)</\|\|DSML\|\|invoke>""",
+private val TOOL_INVOKE = Regex(
+    """invoke\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)</[^>]*invoke>""",
 )
-private val DSML_PARAMETER = Regex(
-    """<\|\|DSML\|\|parameter\s+name="([^"]+)"[^>]*>([\s\S]*?)</\|\|DSML\|\|parameter>""",
+private val TOOL_PARAMETER = Regex(
+    """parameter\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)</[^>]*parameter>""",
 )
+private val TOOL_MARKUP = Regex("""<\|+\s*/?\s*DSML""")
 
 class DecisionParser {
     fun parse(raw: String): ParseOutcome {
@@ -31,6 +32,14 @@ class DecisionParser {
         val objects = BalancedObjectScanner.scan(text)
         for (candidate in objects.asReversed()) {
             direct(candidate)?.let { return it }
+        }
+        if (TOOL_MARKUP.containsMatchIn(text) || text.contains("invoke name=")) {
+            return ParseOutcome(
+                error = HopaError(
+                    ErrorCodes.SCHEMA,
+                    "the model sent tool markup instead of one action",
+                ),
+            )
         }
         return ParseOutcome(text = raw)
     }
@@ -110,10 +119,10 @@ class DecisionParser {
      * ``<||DSML||invoke name="ui.launch">``. The action is the same; read it.
      */
     private fun dsml(value: String): ParseOutcome? {
-        if (!value.contains("DSML")) {
+        if (!value.contains("invoke name=") && !value.contains("DSML")) {
             return null
         }
-        val invoke = DSML_INVOKE.find(value) ?: return null
+        val invoke = TOOL_INVOKE.find(value) ?: return null
         val kind = invoke.groupValues[1].trim()
         if (ActionKind.fromWire(kind) == null) {
             return ParseOutcome(
@@ -121,7 +130,7 @@ class DecisionParser {
             )
         }
         val params = mutableMapOf<String, String>()
-        for (parameter in DSML_PARAMETER.findAll(invoke.groupValues[2])) {
+        for (parameter in TOOL_PARAMETER.findAll(invoke.groupValues[2])) {
             params[parameter.groupValues[1].trim()] = parameter.groupValues[2].trim()
         }
         val action = Action(
