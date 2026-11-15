@@ -46,12 +46,24 @@ class AgentLoop(
     ): TurnResult {
         var observation = runCatching { device.observe() }.getOrNull()
         val surfaceAvailable = observation != null
-        val route = AppRouter.route(context.goal, CatalogRoutes.targets(context.installedApps))
-        val installed = InstalledAppsBlock().text(context.installedApps)
+        val route = AppRouter.route(
+            context.goal,
+            CatalogRoutes.targets(context.installedApps, context.platform),
+        )
+        val installed = if (
+            context.platform.equals("android", ignoreCase = true) ||
+            context.installedApps.isNotEmpty()
+        ) {
+            InstalledAppsBlock().text(context.installedApps)
+        } else {
+            ""
+        }
         val system = promptBuilder.build(
             memory = context.memory,
             skills = context.skills,
-            apps = AppCatalogBlock.text() + "\n\n" + installed,
+            apps = listOf(AppCatalogBlock.text(), installed)
+                .filter { it.isNotEmpty() }
+                .joinToString("\n\n"),
             routerHint = RouterHint.text(route),
             surfaceAvailable = surfaceAvailable,
             webAvailable = webAvailable,

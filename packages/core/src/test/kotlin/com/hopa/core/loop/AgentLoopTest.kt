@@ -106,7 +106,7 @@ class AgentLoopTest {
             harness.loop.run(
                 "run-7",
                 "trace-7",
-                TurnContext("open bilibili", installedApps = installed),
+                TurnContext("open bilibili", installedApps = installed, platform = "android"),
             ) { false }
         }
 

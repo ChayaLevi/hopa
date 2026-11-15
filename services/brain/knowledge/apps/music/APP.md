@@ -1,14 +1,18 @@
 ---
-
 name: music
 display: Music
-bundle: com.huawei.hmsapp.music
 aliases: [音乐, 播放器]
 pace: careful
 validated: verified
-platform: harmonyos
-ability: MainAbility
-bundle_verified: Mate 80, 2026-11-08
+harmony: com.huawei.hmsapp.music
+harmony_ability: MainAbility
+harmony_verified: Mate 80, 2026-11-08
+android:
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Music
 

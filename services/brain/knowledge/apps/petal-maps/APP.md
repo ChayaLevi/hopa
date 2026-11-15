@@ -1,14 +1,18 @@
 ---
-
 name: petal-maps
 display: Petal Maps
-bundle: com.huawei.hmos.maps.app
 aliases: [地图, petal maps]
 pace: careful
 validated: verified
-platform: harmonyos
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
+harmony: com.huawei.hmos.maps.app
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.huawei.maps.app
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Petal Maps
 

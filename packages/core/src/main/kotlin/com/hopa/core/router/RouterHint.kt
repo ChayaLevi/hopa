@@ -11,7 +11,7 @@ object RouterHint {
         }
         if (target.bundle.isEmpty()) {
             return "ROUTER SUGGESTION: this looks like a ${target.display} task, " +
-                "but no Android package is verified for it. Do not guess a package; " +
+                "but no launch target is verified for it on this device. Do not guess one; " +
                 "say what is missing and offer the web channel if one exists."
         }
         return "ROUTER SUGGESTION: this is a ${target.display} task. " +

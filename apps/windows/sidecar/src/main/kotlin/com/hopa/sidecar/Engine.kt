@@ -112,7 +112,7 @@ class Engine(
                 loop.run(
                     runId = "run-$id",
                     traceId = UUID.randomUUID().toString(),
-                    context = TurnContext(goal = goal, history = history),
+                    context = TurnContext(goal = goal, history = history, platform = "windows"),
                     isCancelled = { cancelled },
                 )
             }

@@ -8,8 +8,15 @@ data class CatalogApp(
     val aliases: List<String>,
     val purpose: String,
     val actions: List<String>,
-    val bundle: String,
-    val activity: String,
+    val harmonyos: CatalogTarget,
+    val android: CatalogTarget,
+    val windows: CatalogTarget,
+)
+
+/** One platform's launch target; the same shape on every platform. */
+data class CatalogTarget(
+    val id: String,
+    val detail: String,
     val verified: Boolean,
 )
 
@@ -30,9 +37,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Alipay", "支付宝", "alipay"),
         purpose = "Payments, transfers, bills and mini programs.",
         actions = listOf("Sending money or paying a bill is a payment: always ask, show the amount and recipient.", "Never read a password or verification code; hand login to the user."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.alipay.mobile.client",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.eg.android.AlipayGphone",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "appgallery",
@@ -40,9 +59,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("应用市场", "app store"),
         purpose = "Open AppGallery. Search for an app by name.",
         actions = listOf("Install with the Install button; review permissions first.", "Updates are under Me > Updates."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmsapp.appgallery",
+            detail = "MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.huawei.appmarket",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "baidu",
@@ -50,9 +81,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Baidu", "百度", "baidu"),
         purpose = "Search, news feed and mini programs.",
         actions = listOf("Reading is safe; publishing or commenting is public: ask first."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.baidu.baiduapp",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.baidu.searchbox",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "bilibili",
@@ -60,9 +103,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Bilibili", "B站", "哔哩哔哩", "bili"),
         purpose = "Video, search, comments, favourites, downloads.",
         actions = listOf("Watching is safe; posting, commenting and following are public actions: ask.", "If the app is absent, use https://www.bilibili.com in the built-in browser."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "yylx.danmaku.bili",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "tv.danmaku.bili",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "browser",
@@ -70,9 +125,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("浏览器"),
         purpose = "Open Browser. The address bar accepts a URL or a search.",
         actions = listOf("Search results open in the same tab unless opened long-press.", "Tabs are managed from the tab counter."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.browser",
+            detail = "MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "calendar",
@@ -80,9 +147,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("日历", "日程"),
         purpose = "Open Calendar. Use + to create an event.",
         actions = listOf("Set the title, start and end time, then save.", "Switch between day, week and month views."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.calendar",
+            detail = "MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "camera",
@@ -90,9 +169,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("相机", "拍照"),
         purpose = "Open Camera. The shutter takes a photo.",
         actions = listOf("Switch between photo and video.", "Open the gallery from the thumbnail."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.camera",
+            detail = "com.huawei.hmos.camera.MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "clock",
@@ -100,9 +191,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("闹钟", "时钟", "alarm"),
         purpose = "Open Clock. The Alarm tab lists alarms.",
         actions = listOf("Add an alarm with the + button; set the time and repeat days.", "Delete an alarm with a long press."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.clock",
+            detail = "com.huawei.hmos.clock.phone",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "contacts",
@@ -110,9 +213,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("联系人", "通讯录"),
         purpose = "Open Contacts. Use the search field for a name.",
         actions = listOf("Open a contact to call, message or edit.", "Create a contact with the + button."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.ohos.contacts",
+            detail = "com.ohos.contacts.EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "douyin",
@@ -120,9 +235,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Douyin", "抖音", "TikTok China"),
         purpose = "Feed, search, profile, messages, shopping.",
         actions = listOf("Liking, commenting, following, posting and buying are public or paid actions: ask first.", "Purchases inside Douyin are payments: always ask, show the total.", "Web fallback: https://www.douyin.com."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.ss.hm.ugc.aweme",
+            detail = "MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.ss.android.ugc.aweme",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "files",
@@ -130,9 +257,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("文件", "文件管理"),
         purpose = "Open Files. Browse categories or internal storage.",
         actions = listOf("Use search for a file name.", "Long-press a file for copy, move, rename or delete."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.filemanager",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "gallery",
@@ -140,9 +279,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("图库", "相册"),
         purpose = "Open Gallery. Albums are on the Albums tab.",
         actions = listOf("Search by place, object or date.", "Long-press a photo to share or delete."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.photos",
+            detail = "com.huawei.hmos.photos.MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "jd",
@@ -150,9 +301,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("JD", "京东", "jd"),
         purpose = "Shopping, search, cart and orders.",
         actions = listOf("Checkout is a payment: always ask, show the item and total.", "Publishing a review is public: ask first."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.jd.hm.mall",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.jingdong.app.mall",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "kuaishou",
@@ -160,9 +323,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Kuaishou", "快手", "Kwai"),
         purpose = "Short video, live, messages, shop.",
         actions = listOf("Liking, commenting, following, posting and buying: ask first.", "Live gifts and shop purchases are payments: always ask."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.kuaishou.hmapp",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.smile.gifmaker",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "music",
@@ -170,9 +345,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("音乐", "播放器"),
         purpose = "Open Music. Search or browse the library.",
         actions = listOf("Tap a track to play; the mini player controls pause and next.", "Playlists are under My Music."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmsapp.music",
+            detail = "MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "notepad",
@@ -180,9 +367,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("备忘录", "笔记", "notes"),
         purpose = "Open Notes. Use + to create a note.",
         actions = listOf("Type the body, then go back to save.", "Search notes with the magnifier."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.notepad",
+            detail = "MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "notepad.exe",
+            detail = "Notepad",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "petal-maps",
@@ -190,9 +389,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("地图", "petal maps"),
         purpose = "Open Petal Maps. Search for a place or address.",
         actions = listOf("Start a route with the directions button.", "Choose walking, driving or transit."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.maps.app",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.huawei.maps.app",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "quark",
@@ -200,9 +411,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Quark", "夸克", "quark"),
         purpose = "Browser, search, documents and downloads.",
         actions = listOf("Reading is safe; submitting a form or message needs approval."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.quark.ohosbrowser",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.quark.browser",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "qunar",
@@ -210,9 +433,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Qunar", "去哪儿", "qunar"),
         purpose = "Flights, hotels, trains and travel search.",
         actions = listOf("Booking is a payment: always ask, show dates, destination and total."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.qunar.hos",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.Qunar",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "settings",
@@ -220,9 +455,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("设置", "settings"),
         purpose = "Open Settings to change Wi-Fi, Bluetooth, Display or Battery.",
         actions = listOf("Wi-Fi: Settings > WLAN. Toggle the switch.", "Bluetooth: Settings > Bluetooth. Toggle the switch.", "Display: Settings > Display & brightness."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.huawei.hmos.settings",
+            detail = "com.huawei.hmos.settings.MainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.android.settings",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "taobao",
@@ -230,9 +477,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Taobao", "淘宝", "taobao"),
         purpose = "Shopping, search, cart, orders and reviews.",
         actions = listOf("Checkout is a payment: always ask, show the item and total.", "Publishing a review is public: ask first."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.taobao.taobao4hmos",
+            detail = "Taobao_mainAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.taobao.taobao",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "ctrip",
@@ -240,9 +499,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Trip.com", "携程", "ctrip"),
         purpose = "Flights, hotels, trains and travel search.",
         actions = listOf("Booking is a payment: always ask, show dates, destination and total."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.ctrip.harmonynext",
+            detail = "CTEntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "ctrip.android.view",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "wechat",
@@ -250,9 +521,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("WeChat", "微信", "weixin", "wechat"),
         purpose = "Chats, contacts, search, Moments, Pay, mini programs.",
         actions = listOf("Sending a message is public and effectively irreversible: show recipient and text, then ask.", "WeChat Pay is a payment: always ask, show amount and merchant if visible.", "Never read a verification code or password; hand login to the user."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.tencent.wechat",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.tencent.mm",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "WeChat.exe",
+            detail = "WeChat",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "weibo",
@@ -260,9 +543,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Weibo", "微博", "sina weibo"),
         purpose = "Feed, search, profile, comments, direct messages.",
         actions = listOf("To post: tap Skip if an ad shows, then tap Home. The orange + exists only on the Home feed, top-right near 1210,200.", "The + has no label. Tap it, choose 写微博 (not Album), then type and tap Send. Send greys out until there is text.", "Posting, reposting, commenting and following are public: ask first.", "Web fallback: https://weibo.com."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.sina.weibo.stage",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.sina.weibo",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "wps",
@@ -270,9 +565,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("WPS", "WPS Office", "金山办公", "wps"),
         purpose = "Documents, spreadsheets and presentations.",
         actions = listOf("Editing or sharing a document changes someone else's file: ask first."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "cn.wps.mobileoffice.hap",
+            detail = "DocumentAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "cn.wps.moffice_eng",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "wps.exe",
+            detail = "WPS Office",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "xianyu",
@@ -280,9 +587,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Xianyu", "闲鱼", "idlefish"),
         purpose = "Marketplace listings, search, chat with sellers, orders.",
         actions = listOf("Buying, bidding, making an offer and confirming receipt involve money: always ask, show item, price and seller.", "Publishing a listing is public: ask first."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "com.taobao.idlefish4ohos",
+            detail = "EntryAbility",
+            verified = true,
+        ),
+        android = CatalogTarget(
+            id = "com.taobao.idlefish",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "baijiahao",
@@ -290,9 +609,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Baijiahao", "Baidu Baijiahao", "百家号"),
         purpose = "Publishing an article or changing a published post is irreversible: ask first.",
         actions = listOf("If no HarmonyOS app is installed, use https://baijiahao.baidu.com in the built-in browser."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "boss-zhipin",
@@ -300,9 +631,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("BOSS", "BOSS直聘", "boss zhipin", "zhipin"),
         purpose = "Jobs, search, recruiter chat, resume.",
         actions = listOf("Sending a message to a recruiter is public and hard to undo: ask first.", "Uploading or replacing a resume changes what employers see: ask first.", "Web fallback: https://www.zhipin.com."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.hpbr.bosszhipin",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "dedao",
@@ -310,9 +653,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Dedao", "得到", "luojilab"),
         purpose = "Courses, audio, notes, purchases.",
         actions = listOf("Buying a course is a payment: always ask.", "Reading and playback are safe."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "feishu",
@@ -320,9 +675,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Feishu", "Lark", "飞书"),
         purpose = "Chats, docs, calendar, meetings.",
         actions = listOf("Sending a message or creating a meeting invites other people: ask first.", "Documents can be edited collaboratively; check before overwriting content."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.ss.android.lark",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "Feishu.exe",
+            detail = "Feishu",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "jike",
@@ -330,9 +697,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Jike", "即刻", "ruguo"),
         purpose = "Feed, topics, comments, messages.",
         actions = listOf("Posting, commenting and following are public actions: ask first."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.ruguoapp.jike",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "qqmail",
@@ -340,9 +719,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("QQ Mail", "QQ邮箱", "qqmail", "foxmail"),
         purpose = "Inbox, search, read, compose, attachments.",
         actions = listOf("Sending mail is irreversible: show recipients, subject and body, then ask.", "Never read a password or one-time code aloud; hand login over to the user."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.tencent.androidqqmail",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "toutiao",
@@ -350,9 +741,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Toutiao", "今日头条", "jinri toutiao"),
         purpose = "News feed, search, comments, video.",
         actions = listOf("Reading is safe; commenting, posting and following: ask first."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.ss.android.article.news",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "xiaohongshu",
@@ -360,9 +763,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Xiaohongshu", "小红书", "RED", "xhs"),
         purpose = "Feed, search, notes, comments, messages, shop.",
         actions = listOf("Liking, collecting, commenting, following and posting: ask first.", "Shop checkout is a payment: always ask, show the total.", "Web fallback: https://www.xiaohongshu.com."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.xingin.xhs",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
     CatalogApp(
         id = "zhihu",
@@ -370,9 +785,21 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         aliases = listOf("Zhihu", "知乎"),
         purpose = "Feed, search, questions, answers, comments, messages.",
         actions = listOf("Publishing an answer, comment or message is public: ask first.", "Web fallback: https://www.zhihu.com."),
-        bundle = "",
-        activity = "",
-        verified = false,
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.zhihu.android",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
     ),
 )
 

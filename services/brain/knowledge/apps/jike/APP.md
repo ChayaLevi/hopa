@@ -1,11 +1,18 @@
 ---
 name: jike
 display: Jike
-bundle: UNCONFIRMED
 aliases: [Jike, 即刻, ruguo]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android: com.ruguoapp.jike
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Jike
 

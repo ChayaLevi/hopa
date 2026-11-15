@@ -304,6 +304,7 @@ class ChatViewModel(
                             memory = memory,
                             skills = skills,
                             installedApps = installed,
+                            platform = "android",
                         ),
                         isCancelled = { container.cancelRequested.value },
                     )

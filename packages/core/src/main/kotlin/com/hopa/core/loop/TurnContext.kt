@@ -10,4 +10,6 @@ data class TurnContext(
     val skills: String = "",
     /** What this phone can open right now; the model launches by these packages. */
     val installedApps: List<InstalledApp> = emptyList(),
+    /** Which client is running: android, windows, harmonyos. */
+    val platform: String = "",
 )

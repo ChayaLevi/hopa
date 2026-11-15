@@ -1,11 +1,18 @@
 ---
 name: dedao
 display: Dedao
-bundle: UNCONFIRMED
 aliases: [Dedao, 得到, luojilab]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android:
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Dedao
 

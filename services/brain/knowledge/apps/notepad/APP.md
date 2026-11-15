@@ -1,14 +1,18 @@
 ---
-
 name: notepad
 display: Notes
-bundle: com.huawei.hmos.notepad
 aliases: [备忘录, 笔记, notes]
 pace: careful
 validated: verified
-platform: harmonyos
-ability: MainAbility
-bundle_verified: Mate 80, 2026-11-08
+harmony: com.huawei.hmos.notepad
+harmony_ability: MainAbility
+harmony_verified: Mate 80, 2026-11-08
+android:
+android_activity:
+android_verified:
+windows: notepad.exe
+windows_window: Notepad
+windows_verified:
 ---
 # Notes
 

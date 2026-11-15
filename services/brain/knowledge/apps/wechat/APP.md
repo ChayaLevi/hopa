@@ -1,14 +1,18 @@
 ---
-
 name: wechat
 display: WeChat
-bundle: com.tencent.wechat
 aliases: [WeChat, 微信, weixin, wechat]
 pace: careful
 validated: verified
-platform: harmonyos
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
+harmony: com.tencent.wechat
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.tencent.mm
+android_activity:
+android_verified:
+windows: WeChat.exe
+windows_window: WeChat
+windows_verified:
 ---
 # WeChat
 

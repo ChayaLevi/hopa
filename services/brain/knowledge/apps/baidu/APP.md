@@ -1,13 +1,18 @@
 ---
 name: baidu
 display: Baidu
-bundle: com.baidu.baiduapp
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
 aliases: [Baidu, 百度, baidu]
 pace: careful
 validated: verified
-platform: harmonyos
+harmony: com.baidu.baiduapp
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.baidu.searchbox
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Baidu
 

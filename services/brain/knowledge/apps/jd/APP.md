@@ -1,13 +1,18 @@
 ---
 name: jd
 display: JD
-bundle: com.jd.hm.mall
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
 aliases: [JD, 京东, jd]
 pace: careful
 validated: verified
-platform: harmonyos
+harmony: com.jd.hm.mall
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.jingdong.app.mall
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # JD
 

@@ -1,11 +1,18 @@
 ---
 name: toutiao
 display: Toutiao
-bundle: UNCONFIRMED
 aliases: [Toutiao, 今日头条, jinri toutiao]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android: com.ss.android.article.news
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Toutiao
 

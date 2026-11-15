@@ -54,7 +54,7 @@ def load_apps() -> list[dict[str, str]]:
     apps: list[dict[str, str]] = []
     for path in sorted(APPS.glob("*/APP.md")):
         fields = parse_front_matter(path.read_text(encoding="utf-8"))
-        bundle = fields.get("bundle", "").strip()
+        bundle = fields.get("harmony", fields.get("bundle", "")).strip()
         if bundle.upper() in {"", "UNCONFIRMED", "UNKNOWN"}:
             bundle = ""
         apps.append(

@@ -1,14 +1,18 @@
 ---
-
 name: bilibili
 display: Bilibili
-bundle: yylx.danmaku.bili
 aliases: [Bilibili, B站, 哔哩哔哩, bili]
 pace: careful
 validated: verified
-platform: harmonyos
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
+harmony: yylx.danmaku.bili
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: tv.danmaku.bili
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Bilibili
 

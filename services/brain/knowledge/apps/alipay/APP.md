@@ -1,13 +1,18 @@
 ---
 name: alipay
 display: Alipay
-bundle: com.alipay.mobile.client
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
 aliases: [Alipay, 支付宝, alipay]
 pace: careful
 validated: verified
-platform: harmonyos
+harmony: com.alipay.mobile.client
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.eg.android.AlipayGphone
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Alipay
 

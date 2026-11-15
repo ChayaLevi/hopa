@@ -115,6 +115,30 @@ def shorten(value: str, limit: int) -> str:
     return value[: limit - 1].rstrip() + "…"
 
 
+PLATFORMS = (
+    ("harmonyos", "harmony", "harmony_ability", "harmony_verified"),
+    ("android", "android", "android_activity", "android_verified"),
+    ("windows", "windows", "windows_window", "windows_verified"),
+)
+
+
+def platform_block(fields: dict[str, str], name: str, detail: str, verified: str) -> dict:
+    """Every platform has the same four keys, whether or not it can launch."""
+    launch = fields.get(name, "").strip()
+    if launch.upper() in {"UNCONFIRMED", "UNKNOWN"}:
+        launch = ""
+    device = fields.get(verified, "").strip()
+    confirmed = bool(launch)
+    return {
+        "id": launch,
+        "detail": fields.get(detail, "").strip(),
+        "confirmed": confirmed,
+        "verified": confirmed and bool(device),
+        "device": device,
+        "state": "unknown" if not launch else ("verified" if device else "unconfirmed"),
+    }
+
+
 def collect_apps() -> list[dict]:
     entries: list[dict] = []
     for path in sorted(KNOWLEDGE.glob("*/APP.md")):
@@ -123,9 +147,9 @@ def collect_apps() -> list[dict]:
         paragraph, bullets = parse_body(text)
         purpose = bullets[0] if bullets else paragraph
         actions = bullets[1 : MAX_ACTIONS + 1]
-        bundle = fields["bundle"]
-        confirmed = bundle.upper() not in {"UNCONFIRMED", "UNKNOWN"}
-        verified = confirmed and bool(fields.get("bundle_verified", "").strip())
+        platforms = {
+            key: platform_block(fields, *names) for key, *names in PLATFORMS
+        }
         entries.append(
             {
                 "id": fields["name"],
@@ -133,14 +157,7 @@ def collect_apps() -> list[dict]:
                 "aliases": parse_list(fields.get("aliases", "[]")),
                 "purpose": shorten(purpose, MAX_PURPOSE),
                 "actions": [shorten(action, MAX_ACTION) for action in actions],
-                "platforms": {
-                    "harmonyos": {
-                        "bundle": bundle if confirmed else "",
-                        "ability": fields.get("ability", "").strip(),
-                        "confirmed": confirmed,
-                        "verified": verified,
-                    }
-                },
+                "platforms": platforms,
             }
         )
     entries.sort(
@@ -229,17 +246,17 @@ def render_ets(data: dict) -> str:
         "export const APP_CATALOG: CatalogApp[] = [",
     ]
     for app in apps:
-        harmony = app["platforms"].get("harmonyos", {})
+        harmony = app["platforms"]["harmonyos"]
         aliases = ", ".join(escape(alias) for alias in app["aliases"])
         actions = ", ".join(escape(action) for action in app["actions"])
         lines.append("  {")
         lines.append(f"    name: {escape(app['id'])},")
         lines.append(f"    display: {escape(app['display'])},")
-        lines.append(f"    bundle: {escape(harmony.get('bundle', ''))},")
+        lines.append(f"    bundle: {escape(harmony['id'])},")
         lines.append(f"    aliases: [{aliases}],")
-        lines.append(f"    confirmed: {str(harmony.get('confirmed', False)).lower()},")
-        lines.append(f"    verified: {str(harmony.get('verified', False)).lower()},")
-        lines.append(f"    ability: {escape(harmony.get('ability', ''))},")
+        lines.append(f"    confirmed: {str(harmony['confirmed']).lower()},")
+        lines.append(f"    verified: {str(harmony['verified']).lower()},")
+        lines.append(f"    ability: {escape(harmony['detail'])},")
         lines.append(f"    purpose: {escape(app['purpose'])},")
         lines.append(f"    actions: [{actions}],")
         lines.append("  },")
@@ -291,8 +308,15 @@ def render_kotlin(data: dict) -> str:
         "    val aliases: List<String>,",
         "    val purpose: String,",
         "    val actions: List<String>,",
-        "    val bundle: String,",
-        "    val activity: String,",
+        "    val harmonyos: CatalogTarget,",
+        "    val android: CatalogTarget,",
+        "    val windows: CatalogTarget,",
+        ")",
+        "",
+        "/** One platform's launch target; the same shape on every platform. */",
+        "data class CatalogTarget(",
+        "    val id: String,",
+        "    val detail: String,",
         "    val verified: Boolean,",
         ")",
         "",
@@ -309,16 +333,19 @@ def render_kotlin(data: dict) -> str:
         "val APP_CATALOG: List<CatalogApp> = listOf(",
     ]
     for app in data["apps"]:
-        android = app["platforms"].get("android", {})
         lines.append("    CatalogApp(")
         lines.append(f"        id = {kotlin_string(app['id'])},")
         lines.append(f"        display = {kotlin_string(app['display'])},")
         lines.append(f"        aliases = {kotlin_list(app['aliases'])},")
         lines.append(f"        purpose = {kotlin_string(app['purpose'])},")
         lines.append(f"        actions = {kotlin_list(app['actions'])},")
-        lines.append(f"        bundle = {kotlin_string(android.get('package', ''))},")
-        lines.append(f"        activity = {kotlin_string(android.get('activity', ''))},")
-        lines.append(f"        verified = {str(android.get('verified', False)).lower()},")
+        for key in ("harmonyos", "android", "windows"):
+            block = app["platforms"][key]
+            lines.append(f"        {key} = CatalogTarget(")
+            lines.append(f"            id = {kotlin_string(block['id'])},")
+            lines.append(f"            detail = {kotlin_string(block['detail'])},")
+            lines.append(f"            verified = {str(block['verified']).lower()},")
+            lines.append("        ),")
         lines.append("    ),")
     lines.append(")")
     lines.append("")

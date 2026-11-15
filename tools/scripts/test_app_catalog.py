@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 from pathlib import Path
+
+PACKAGE_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-zA-Z0-9_]+)+$")
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "tools" / "scripts" / "build-app-catalog.py"
@@ -53,7 +56,7 @@ def test_catalogue_counts_and_status() -> None:
     assert sum(1 for item in harmony if item["verified"]) == 26
     assert sum(1 for item in harmony if not item["confirmed"]) == 9
     # Verified apps must carry a launchable ability.
-    assert all(item["ability"] for item in harmony if item["verified"])
+    assert all(item["detail"] for item in harmony if item["verified"])
 
 
 def test_unconfirmed_apps_have_no_bundle() -> None:
@@ -61,7 +64,7 @@ def test_unconfirmed_apps_have_no_bundle() -> None:
     for app in module.collect_apps():
         harmony = app["platforms"]["harmonyos"]
         if not harmony["confirmed"]:
-            assert harmony["bundle"] == ""
+            assert harmony["id"] == ""
             assert harmony["verified"] is False
 
 
@@ -73,7 +76,7 @@ def test_render_emits_both_catalogues() -> None:
     assert "export const SITE_CATALOG" in output
     assert "verified: true" in output
     assert "verified: false" in output
-    assert all("://" not in app["platforms"]["harmonyos"]["bundle"] for app in data["apps"])
+    assert all("://" not in app["platforms"]["harmonyos"]["id"] for app in data["apps"])
     assert all("://" not in domain for site in data["sites"] for domain in site["domains"])
 
 
@@ -84,7 +87,7 @@ def test_neutral_json_is_platform_free() -> None:
     assert parsed["schemaVersion"] == "1"
     app = next(item for item in parsed["apps"] if item["id"] == "alipay")
     assert "bundle" not in app
-    assert app["platforms"]["harmonyos"]["bundle"] == "com.alipay.mobile.client"
+    assert app["platforms"]["harmonyos"]["id"] == "com.alipay.mobile.client"
     site = next(item for item in parsed["sites"] if item["id"] == "amazon.com")
     assert site["domains"]
     assert "purpose" in site
@@ -119,3 +122,52 @@ def test_committed_files_are_current() -> None:
     data = module.document(module.collect_apps(), module.collect_sites())
     assert module.CATALOG.read_text(encoding="utf-8") == module.render_json(data)
     assert module.TARGET.read_text(encoding="utf-8") == module.render_ets(data)
+
+def test_android_packages_are_shaped_and_unique() -> None:
+    module = _module()
+    data = module.document(module.collect_apps(), module.collect_sites())
+    packages = [
+        app["platforms"]["android"]["id"]
+        for app in data["apps"]
+        if app["platforms"]["android"]["id"]
+    ]
+    assert packages, "no app declares an Android package"
+    for package in packages:
+        assert PACKAGE_RE.match(package), package
+    assert len(packages) == len(set(packages)), "two apps share an Android package"
+    harmony = {
+        app["platforms"]["harmonyos"]["id"]
+        for app in data["apps"]
+        if app["platforms"]["harmonyos"]["id"]
+    }
+    assert not (set(packages) & harmony), "an Android package is reused as a Harmony bundle"
+
+
+def test_kotlin_rendering_carries_each_platform_separately() -> None:
+    module = _module()
+    data = module.document(module.collect_apps(), module.collect_sites())
+    output = module.render_kotlin(data)
+    bilibili = next(app for app in data["apps"] if app["id"] == "bilibili")
+    assert "android = CatalogTarget(" in output
+    assert 'id = "tv.danmaku.bili"' in output
+    assert (
+        f'id = {module.kotlin_string(bilibili["platforms"]["harmonyos"]["id"])}'
+        in output
+    )
+    # The ArkTS rendering stays Harmony-only: an Android package must not leak.
+    ets = module.render_ets(data)
+    assert "tv.danmaku.bili" not in ets
+
+def test_every_app_describes_every_platform_the_same_way() -> None:
+    module = _module()
+    data = module.document(module.collect_apps(), module.collect_sites())
+    expected = {"id", "detail", "confirmed", "verified", "device", "state"}
+    for app in data["apps"]:
+        assert set(app["platforms"]) == {"harmonyos", "android", "windows"}, app["id"]
+        for block in app["platforms"].values():
+            assert set(block) == expected, app["id"]
+            assert block["state"] in {"verified", "unconfirmed", "unknown"}
+            assert block["confirmed"] == bool(block["id"])
+            assert block["state"] == "unknown" if not block["id"] else block["state"] != "unknown"
+            if block["verified"]:
+                assert block["id"] and block["device"]

@@ -1,13 +1,18 @@
 ---
 name: appgallery
 display: AppGallery
-bundle: com.huawei.hmsapp.appgallery
-bundle_verified: 2026-11-06
-ability: MainAbility
 aliases: [应用市场, app store]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony: com.huawei.hmsapp.appgallery
+harmony_ability: MainAbility
+harmony_verified: 2026-11-06
+android: com.huawei.appmarket
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # AppGallery
 

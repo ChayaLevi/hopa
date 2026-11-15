@@ -1,11 +1,18 @@
 ---
 name: feishu
 display: Feishu
-bundle: UNCONFIRMED
 aliases: [Feishu, Lark, 飞书]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android: com.ss.android.lark
+android_activity:
+android_verified:
+windows: Feishu.exe
+windows_window: Feishu
+windows_verified:
 ---
 # Feishu / Lark
 

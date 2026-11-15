@@ -1,11 +1,18 @@
 ---
 name: xiaohongshu
 display: Xiaohongshu
-bundle: UNCONFIRMED
 aliases: [Xiaohongshu, 小红书, RED, xhs]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android: com.xingin.xhs
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Xiaohongshu (RED)
 
