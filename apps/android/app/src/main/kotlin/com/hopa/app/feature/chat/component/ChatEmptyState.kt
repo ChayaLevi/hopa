@@ -52,7 +52,7 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .offset(y = (-44).dp)
+                .offset(y = (-20).dp)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -60,7 +60,7 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
             HopaMascot(sizeDp = 76.dp)
             Text(
                 text = greeting(),
-                fontSize = cappedSp(11f),
+                fontSize = cappedSp(13f),
                 color = HopaColor.TextHint,
                 modifier = Modifier.padding(top = 8.dp),
             )
@@ -72,14 +72,14 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
             )
             Text(
                 text = "Your assistant. Ask for anything.",
-                fontSize = cappedSp(12.5f),
+                fontSize = cappedSp(14.5f),
                 color = HopaColor.TextSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 6.dp),
             )
             Text(
                 text = "Payments always ask first.",
-                fontSize = cappedSp(10f),
+                fontSize = cappedSp(12f),
                 color = HopaColor.TextHint,
                 modifier = Modifier.padding(top = 2.dp),
             )
@@ -126,7 +126,7 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
                                 overflow = TextOverflow.Ellipsis,
                                 softWrap = false,
                                 color = HopaColor.TextPrimary,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                             )
                         }
                     }
@@ -136,7 +136,7 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, top = 10.dp, bottom = 6.dp),
+                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 2.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Pill(
@@ -154,7 +154,7 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
                             "$ritualTitle?",
                             fontSize = cappedSp(11.5f),
                             color = HopaColor.TextSecondary,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         )
                     }
                 }
@@ -185,7 +185,7 @@ private fun Pill(text: String, onClick: () -> Unit) {
             text,
             fontSize = cappedSp(11.5f),
             color = HopaColor.Primary,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
         )
     }
 }
