@@ -8,9 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,7 +21,7 @@ import com.hopa.app.ui.theme.HopaColor
 
 /**
  * Choose where apps open. A scene shows what will happen, four tiles choose it,
- * one button proves it, and the setup steps stay folded until they are needed.
+ * one button proves it, and setup happens in a dialog you can actually see.
  */
 @Composable
 fun SettingsScreenAccessScreen(
@@ -37,9 +35,8 @@ fun SettingsScreenAccessScreen(
     onOpenScreenControl: () -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
-    var wirelessAddress by rememberSaveable { mutableStateOf("") }
-    var wirelessCode by rememberSaveable { mutableStateOf("") }
     val mode = state.settings.screenPath
+    val bridgeReady = state.settings.bridgeUrl.isNotBlank()
 
     SettingsPage(title = "Running apps", onBack = onBack) {
         ModeSceneSwitch(mode = mode)
@@ -114,11 +111,10 @@ fun SettingsScreenAccessScreen(
         }
 
         if (mode != "onscreen") {
-            val bridgeReady = state.settings.bridgeUrl.isNotBlank()
             SettingsGroup {
                 SettingsRow(
-                    if (bridgeReady) "Turn on background mode" else "Show me the steps",
-                    if (bridgeReady) "One press, then just ask" else "Takes a minute",
+                    if (bridgeReady) "Turn on background mode" else "Set up background mode",
+                    if (bridgeReady) "One press, then just ask" else "Two steps, about a minute",
                     Icons.Filled.Menu,
                 ) {
                     if (bridgeReady) onStartBackgroundHelper() else setup = true
@@ -126,36 +122,21 @@ fun SettingsScreenAccessScreen(
             }
         }
 
-        TextButton(onClick = { setup = !setup }) {
-            Text(if (setup) "Hide the steps" else "Set it up without a computer")
-        }
-        if (setup) {
-            Text(
-                "1. In Android settings open Developer options, then Wireless debugging, " +
-                    "then \"Pair device with pairing code\".\n" +
-                    "2. Type the address and the six digits here.",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            OutlinedTextField(
-                value = wirelessAddress,
-                onValueChange = { wirelessAddress = it },
-                label = { Text("Address, e.g. 192.168.1.5:37123") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = wirelessCode,
-                onValueChange = { wirelessCode = it },
-                label = { Text("Six digits") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Button(
-                onClick = { onPairWireless(wirelessAddress, wirelessCode) },
-                enabled = !state.busy && wirelessAddress.isNotBlank() &&
-                    wirelessCode.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Connect")
-            }
-        }
+        Text(
+            "Background mode survives restarts; after a phone reboot, press it once more.",
+            fontSize = 12.sp,
+            color = HopaColor.TextHint,
+        )
+    }
+
+    if (setup) {
+        BackgroundSetupDialog(
+            busy = state.busy,
+            onDismiss = { setup = false },
+            onConnect = { address, code ->
+                onPairWireless(address, code)
+                setup = false
+            },
+        )
     }
 }

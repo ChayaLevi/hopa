@@ -118,11 +118,15 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(onClick = onRunCheck, enabled = !state.busy) {
-                    Text(if (state.busy) "Checking\u2026" else "Check it works")
+                    Text(if (state.busy) "Checking\u2026" else "Check that it works")
                 }
                 TextButton(onClick = { onOpenPage(PAGE_SCREEN) }) {
-                    Text("How each mode works")
+                    Text("Set up")
                 }
+            }
+            // A button that reports nowhere is a broken button.
+            state.screenCheck.take(2).forEach { check ->
+                CheckRow(check) { onOpenPage(PAGE_SCREEN) }
             }
         }
 

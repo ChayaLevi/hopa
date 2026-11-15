@@ -305,7 +305,7 @@ class SettingsViewModel(
                 ok = true,
             )
             _state.update { it.copy(busy = false, screenCheck = checks) }
-        }
+        }.invokeOnCompletion { _state.update { it.copy(busy = false) } }
     }
 
     /** Pair with this phone's own adbd; no PC needed after this succeeds. */
