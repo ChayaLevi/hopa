@@ -27,7 +27,9 @@ class SystemPromptBuilder {
                 "{\"schemaVersion\":\"1\",\"kind\":\"ui.tap\",\"ref\":\"<ref>\",\"timeoutMs\":3000}; " +
                 "{\"schemaVersion\":\"1\",\"kind\":\"ui.type\",\"ref\":\"<ref>\",\"text\":\"...\",\"timeoutMs\":3000}.",
             "A successful ui.launch already brings the app to the front; never launch the same app twice in one task.",
-            "Tap a text field before typing into it, so the field has focus.",
+            "Tap a text field before typing into it, so the field has focus. If " +
+                "typing fails, send ui.type with no ref: the focused field receives " +
+                "the text. Never open and close the same field twice.",
             "Use element refs from ELEMENTS. Never invent coordinates.",
             webRule,
             "After every action the next turn carries SCREEN with the visible text and " +

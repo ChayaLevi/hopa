@@ -78,6 +78,7 @@ class AgentLoop(
 
         val records = mutableListOf<RunRecord>()
         val narration = mutableListOf<String>()
+        val steps = mutableListOf<String>()
         val launched = mutableSetOf<String>()
         var usage = ModelUsage()
 
@@ -145,6 +146,21 @@ class AgentLoop(
                 }
             }
 
+            val signature = "${action.kind}|${action.ref}|${action.text}|${action.app}|${action.x},${action.y}"
+            if (action.kind !in READ_ONLY_KINDS) {
+                steps += signature
+            }
+            if (steps.count { it == signature } >= 3) {
+                // Tapping the same field forever is a failure, not progress.
+                return TurnResult(
+                    answer = "I kept repeating the same step, so I stopped. " +
+                        "The screen did not react the way I expected.",
+                    records = records,
+                    narration = narration,
+                    error = HopaError(ErrorCodes.BLOCKED, "repeated action: ${action.kind}"),
+                    usage = usage,
+                )
+            }
             if (isCancelled()) {
                 return TurnResult("Stopped.", records, narration, usage = usage)
             }
@@ -182,6 +198,11 @@ class AgentLoop(
             error = if (final.isSuccess) null else HopaError(ErrorCodes.TIMEOUT, "step limit"),
             usage = usage,
         )
+    }
+
+    private companion object {
+        /** Reading the screen again is not a loop; acting on it twice is. */
+        val READ_ONLY_KINDS = setOf("ui.observe", "ui.wait", "web.read")
     }
 
     private fun emptyObservation(): Observation = Observation(

@@ -70,8 +70,10 @@ class AccessibilityDevice(
     }
 
     override suspend fun type(text: String, ref: String?) {
-        val node = ref ?: throw IllegalArgumentException("type needs a ref")
-        val target = refs[node] ?: throw IllegalArgumentException("stale ref $node")
+        // A search box that was just tapped usually owns the input focus, and the
+        // model often sends the text without a ref. Use the focused field, then
+        // the first editable node, instead of failing and letting the loop repeat.
+        val target = typingTarget(ref)
         target.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
         val args = Bundle().apply {
             putCharSequence(
@@ -90,6 +92,27 @@ class AccessibilityDevice(
             return
         }
         throw IllegalStateException("the field refused the text")
+    }
+
+    private fun typingTarget(ref: String?): AccessibilityNodeInfo {
+        if (ref != null) {
+            refs[ref]?.let { return it }
+        }
+        val root = service().activeRoot() ?: throw IllegalStateException("no window to type into")
+        root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)?.let { return it }
+        firstEditable(root)?.let { return it }
+        throw IllegalStateException("no text field is focused")
+    }
+
+    private fun firstEditable(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+        if (node.isEditable) {
+            return node
+        }
+        for (index in 0 until node.childCount) {
+            val child = node.getChild(index) ?: continue
+            firstEditable(child)?.let { return it }
+        }
+        return null
     }
 
     override suspend fun swipe(fromX: Int, fromY: Int, toX: Int, toY: Int, velocity: Int) {
