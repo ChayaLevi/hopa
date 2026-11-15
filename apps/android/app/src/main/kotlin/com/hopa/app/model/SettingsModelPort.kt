@@ -1,6 +1,8 @@
 package com.hopa.app.model
 
 import com.hopa.capabilities.llm.ModelFactory
+import com.hopa.capabilities.llm.ProviderChoice
+import com.hopa.capabilities.llm.ProviderChoiceRules
 import com.hopa.core.model.ModelPort
 import com.hopa.core.model.ModelReply
 import com.hopa.core.model.ModelRequest
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.first
 class SettingsModelPort(
     private val settings: SettingsRepository,
     private val factory: ModelFactory,
+    private val rules: ProviderChoiceRules = ProviderChoiceRules(),
 ) : ModelPort {
     private var cachedKey: String = ""
     private var cached: ModelPort? = null
@@ -18,7 +21,8 @@ class SettingsModelPort(
     override suspend fun complete(request: ModelRequest): ModelReply {
         val current = settings.settings.first()
         val key = settings.modelKey()
-        if (current.provider != "stub" && key.isBlank()) {
+        val choice = rules.choose(current.provider, current.endpoint, key)
+        if (choice == ProviderChoice.CLOUD && key.isBlank()) {
             throw IOException("no model key configured")
         }
         val signature = "${current.provider}|${current.endpoint}|${current.model}|$key"

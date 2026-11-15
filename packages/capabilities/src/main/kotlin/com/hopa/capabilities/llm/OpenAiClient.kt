@@ -36,7 +36,11 @@ class OpenAiClient(
         val payload = buildJsonObject {
             put("model", modelName)
             put("max_tokens", request.maxTokens)
-            put("reasoning_effort", request.reasoningEffort)
+            // Plain OpenAI-compatible servers (DeepSeek, Ollama, LM Studio,
+            // vLLM) reject fields they do not know, so only send it when set.
+            if (request.reasoningEffort.isNotBlank()) {
+                put("reasoning_effort", request.reasoningEffort)
+            }
             putJsonArray("messages") {
                 request.messages.forEach { message ->
                     add(

@@ -23,6 +23,7 @@ fun SettingsRoute(
         state = state,
         onBack = onBack,
         onSave = viewModel::save,
+        onTestModel = viewModel::testModel,
         onTestBridge = viewModel::testBridge,
         onTestNotification = viewModel::testNotification,
         onTone = viewModel::setTone,

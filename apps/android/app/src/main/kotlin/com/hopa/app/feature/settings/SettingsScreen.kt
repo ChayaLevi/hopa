@@ -42,6 +42,7 @@ fun SettingsScreen(
     state: SettingsUiState,
     onBack: () -> Unit,
     onSave: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
+    onTestModel: (String, String, String, String) -> Unit,
     onTestBridge: (String, String) -> Unit,
     onTestNotification: () -> Unit,
     onTone: (String) -> Unit,
@@ -99,16 +100,48 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("Model", style = MaterialTheme.typography.titleLarge)
-            OutlinedTextField(
-                value = provider,
-                onValueChange = { provider = it },
-                label = { Text("Provider (stub, openai, lan)") },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Text("Where answers come from", style = MaterialTheme.typography.bodySmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                for ((value, title) in listOf(
+                    "stub" to "Demo",
+                    "openai" to "Cloud",
+                    "lan" to "LAN",
+                )) {
+                    // "stub" is the demo, "lan" marks a local server; any other
+                    // provider name means a cloud endpoint.
+                    val current = when (provider) {
+                        "stub" -> "stub"
+                        "lan" -> "lan"
+                        else -> "openai"
+                    }
+                    val chosen = current == value
+                    Text(
+                        title,
+                        fontSize = 12.sp,
+                        color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
+                        modifier = Modifier
+                            .background(
+                                if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
+                                RoundedCornerShape(16.dp),
+                            )
+                            .clickable {
+                                if (!chosen) {
+                                    provider = value
+                                    endpoint = when (value) {
+                                        "lan" -> "http://192.168.1.5:11434/v1"
+                                        "openai" -> "https://api.deepseek.com/v1"
+                                        else -> endpoint
+                                    }
+                                }
+                            }
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    )
+                }
+            }
             OutlinedTextField(
                 value = endpoint,
                 onValueChange = { endpoint = it },
-                label = { Text("Endpoint") },
+                label = { Text("Endpoint, e.g. https://api.deepseek.com/v1") },
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
@@ -124,7 +157,29 @@ fun SettingsScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Button(
+                    onClick = { onTestModel(provider, endpoint, model, key) },
+                    enabled = !state.busy,
+                ) {
+                    Text("Test the model")
+                }
+            }
             Text("Provider state: ${state.providerState.label()}")
+            state.modelTest?.let { result ->
+                Text(
+                    result,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (result.startsWith("Model answered")) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -218,7 +273,10 @@ fun SettingsScreen(
                 Text(if (state.busy) "Saving\u2026" else "Save")
             }
             if (state.saved) {
-                Text("Saved", color = MaterialTheme.colorScheme.primary)
+                Text(
+                    state.notice ?: "Saved",
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
             state.error?.let { error ->
                 Text(error, color = MaterialTheme.colorScheme.error)

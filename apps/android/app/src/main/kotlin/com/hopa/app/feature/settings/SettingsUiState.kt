@@ -13,4 +13,6 @@ data class SettingsUiState(
     val error: String? = null,
     val bridgeStatus: String? = null,
     val notice: String? = null,
+    /** The last "Test the model" outcome, shown next to the button. */
+    val modelTest: String? = null,
 )

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.bridge.BridgeClient
 import com.hopa.capabilities.llm.ProviderStateResolver
+import com.hopa.core.model.ModelMessage
+import com.hopa.core.model.ModelRequest
 import com.hopa.data.settings.AppSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -39,11 +42,22 @@ class SettingsViewModel(
     ) {
         viewModelScope.launch {
             _state.update { it.copy(busy = true, saved = false, error = null) }
+            // A key the user just typed turns the demo off. Leaving the
+            // provider on "stub" while a key is present was the reason chat
+            // kept answering with the demo model.
+            val trimmedProvider = provider.trim()
+            val trimmedEndpoint = endpoint.trim()
+            val effectiveProvider = when {
+                key.isBlank() -> trimmedProvider.ifBlank { "stub" }
+                trimmedProvider.isBlank() || trimmedProvider.equals("stub", true) ->
+                    if (trimmedEndpoint.startsWith("http://")) "lan" else "openai"
+                else -> trimmedProvider
+            }
             runCatching {
                 container.settings.update {
                     it.copy(
-                        provider = provider.trim(),
-                        endpoint = endpoint.trim(),
+                        provider = effectiveProvider,
+                        endpoint = trimmedEndpoint,
                         model = model.trim(),
                         notifyAnswers = notifyAnswers,
                         webEnabled = webEnabled,
@@ -58,11 +72,46 @@ class SettingsViewModel(
                     container.settings.setBridgeToken(bridgeKey.trim())
                 }
                 reload()
-                _state.update { it.copy(saved = true) }
+                val note = if (effectiveProvider != trimmedProvider) {
+                    "Saved as $effectiveProvider: a key turns the demo off"
+                } else {
+                    null
+                }
+                _state.update { it.copy(saved = true, notice = note) }
             }.onFailure { error ->
                 _state.update { it.copy(error = error.message ?: "Could not save") }
             }
             _state.update { it.copy(busy = false) }
+        }
+    }
+
+    /** Ask the configured model one short question, so a wrong key or URL shows up here. */
+    fun testModel(provider: String, endpoint: String, model: String, key: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, modelTest = "Testing\u2026") }
+            val effectiveKey = key.trim().ifBlank {
+                runCatching { container.settings.modelKey() }.getOrDefault("")
+            }
+            val message = runCatching {
+                val client = container.modelFactory.create(
+                    provider = provider.trim(),
+                    endpoint = endpoint.trim(),
+                    apiKey = effectiveKey,
+                    modelName = model.trim(),
+                )
+                val reply = withTimeout(30_000) {
+                    client.complete(
+                        ModelRequest(
+                            messages = listOf(ModelMessage("user", "Reply with the single word: ready")),
+                            maxTokens = 32,
+                        ),
+                    )
+                }
+                "Model answered: ${reply.text.trim().take(80)}"
+            }.getOrElse { error ->
+                "Model failed: ${error.message ?: error::class.simpleName}"
+            }
+            _state.update { it.copy(busy = false, modelTest = message) }
         }
     }
 
