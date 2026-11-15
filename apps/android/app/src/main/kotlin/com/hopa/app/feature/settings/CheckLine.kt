@@ -16,8 +16,9 @@ import com.hopa.app.ui.theme.HopaColor
 fun CheckLine(line: String) {
     val lower = line.lowercase()
     val state = when {
-        lower.contains(" off") || lower.contains("not ") || lower.contains("could not") ||
-            lower.contains("no ") || lower.contains("fail") -> DotState.Attention
+        lower.contains("(optional)") -> DotState.Good
+        lower.contains(" off") || lower.contains("not ") || lower.contains("no ") ||
+            lower.contains("could not") || lower.contains("fail") -> DotState.Attention
         else -> DotState.Good
     }
     Row(

@@ -213,18 +213,18 @@ class SettingsViewModel(
             val service = HopaAccessibilityService.instance
             val enabled = AccessibilityState.isEnabled(container.context)
             lines += if (enabled && service != null) {
-                "Phone access: on, the screen can be read"
+                "Seeing your screen: yes"
             } else if (enabled) {
-                "Phone access: enabled but not connected - turn the switch off and on"
+                "Seeing your screen: almost - turn it off and on in Android settings"
             } else {
-                "Phone access: off - Settings, Accessibility, HOPA"
+                "Seeing your screen: no - turn on Screen control"
             }
 
             val socket = withContext(Dispatchers.IO) { container.shell.connect() }
             lines += if (socket) {
-                "Background helper: running"
+                "Background mode: ready"
             } else {
-                "Background helper: not running - use Start or Pair below"
+                "Background mode: needs one step"
             }
 
             if (socket) {
@@ -236,9 +236,9 @@ class SettingsViewModel(
                     val observation = runCatching { device.observe() }.getOrNull()
                     val elements = observation?.tree?.children?.size ?: 0
                     lines += if (opened.isSuccess) {
-                        "Hidden screen: Settings opened ($elements elements read)"
+                        "Tried it: Settings opened out of sight and was read"
                     } else {
-                        "Hidden screen: ${opened.exceptionOrNull()?.message}"
+                        "Tried it: ${opened.exceptionOrNull()?.message}"
                     }
                     runCatching {
                         (device as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
@@ -255,13 +255,13 @@ class SettingsViewModel(
                         true
                     }.getOrDefault(false)
                 }
-                lines += if (health) "PC bridge: answers at ${current.bridgeUrl}" else
-                    "PC bridge: no answer at ${current.bridgeUrl}"
+                lines += if (health) "Your computer: connected" else
+                    "Your computer: no answer at ${current.bridgeUrl}"
             } else {
-                lines += "PC bridge: not configured (optional)"
+                lines += "Your computer: not set up (optional)"
             }
 
-            lines += "Mode: ${pathLabel(current.screenPath)}"
+            lines += "Apps will run: ${pathLabel(current.screenPath).lowercase()}"
             _state.update { it.copy(busy = false, screenCheck = lines) }
         }
     }

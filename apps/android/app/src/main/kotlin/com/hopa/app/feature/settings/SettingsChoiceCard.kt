@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,17 +25,18 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * A choice you can see the state of: the selected card is outlined and carries a
- * check, the others are quiet. One line each, no paragraph.
+ * A mode card: what it does in one line, and when it is the chosen one, how to
+ * use it in plain words. Nobody should have to infer the steps.
  */
 @Composable
 fun SettingsChoiceCard(
     title: String,
     description: String,
+    howTo: String,
     selected: Boolean,
     onSelect: () -> Unit,
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
@@ -48,34 +50,41 @@ fun SettingsChoiceCard(
             )
             .clickable(onClick = onSelect)
             .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp),
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 title,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 color = HopaColor.TextPrimary,
+                modifier = Modifier.weight(1f),
             )
-            Text(description, fontSize = 13.sp, color = HopaColor.TextSecondary)
-        }
-        if (selected) {
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier
-                    .size(22.dp)
-                    .background(HopaColor.Primary, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = HopaColor.OnPrimary,
-                    modifier = Modifier.size(14.dp),
-                )
+            if (selected) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .background(HopaColor.Primary, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = HopaColor.OnPrimary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                }
             }
+        }
+        Text(description, fontSize = 13.sp, color = HopaColor.TextSecondary)
+        if (selected) {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                thickness = 0.6.dp,
+                color = HopaColor.Divider,
+            )
+            Text("How to use it", fontSize = 12.sp, color = HopaColor.TextHint)
+            Text(howTo, fontSize = 13.sp, color = HopaColor.TextPrimary)
         }
     }
 }

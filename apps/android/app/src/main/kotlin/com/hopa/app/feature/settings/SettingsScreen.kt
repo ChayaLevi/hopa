@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
@@ -12,19 +11,20 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
+import com.hopa.capabilities.llm.ProviderState
 
 /**
- * Settings as a state dashboard: two live tiles for the things that decide
- * whether HOPA works, then short groups for the rest. No uppercase labels, no
- * paragraph explanations on this page.
+ * Settings as a dashboard: two tiles for the things that decide whether HOPA can
+ * help at all, then short groups. Plain words: no mechanism on this page.
  */
 @Composable
 fun SettingsScreen(
@@ -39,18 +39,17 @@ fun SettingsScreen(
     onOpenAbout: () -> Unit,
 ) {
     val settings = state.settings
-    val modelOk = state.providerState == com.hopa.capabilities.llm.ProviderState.CLOUD ||
-        state.providerState == com.hopa.capabilities.llm.ProviderState.LAN
-    val ready = modelOk && state.phoneAccess
+    val answers = state.providerState == ProviderState.CLOUD ||
+        state.providerState == ProviderState.LAN
 
     SettingsPage(title = "", onBack = onBack) {
         SettingsHeader(
             title = "Settings",
             summary = when {
-                ready -> "Everything HOPA needs is on."
-                !modelOk && !state.phoneAccess -> "Two things need you: model and phone access."
-                !modelOk -> "Add a model key to get real answers."
-                else -> "Turn on phone access so HOPA can act."
+                answers && state.phoneAccess -> "Everything is ready."
+                !answers && !state.phoneAccess -> "Two things need you below."
+                !answers -> "Add a key so HOPA can answer."
+                else -> "Allow screen control so HOPA can help."
             },
         )
 
@@ -59,70 +58,72 @@ fun SettingsScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             SettingsTile(
-                title = "Model",
+                title = "Answers",
                 value = providerSummary(state),
-                state = if (modelOk) DotState.Good else DotState.Attention,
-                icon = Icons.Filled.Build,
+                state = if (answers) DotState.Good else DotState.Attention,
+                icon = Icons.Filled.Star,
                 onClick = { onOpenPage(PAGE_MODEL) },
                 modifier = Modifier.weight(1f),
             )
             SettingsTile(
-                title = "Screen access",
+                title = "Running apps",
                 value = shortPathLabel(settings.screenPath),
                 state = if (state.phoneAccess) DotState.Good else DotState.Off,
-                icon = Icons.Filled.Settings,
+                icon = Icons.Filled.PlayArrow,
                 onClick = { onOpenPage(PAGE_SCREEN) },
                 modifier = Modifier.weight(1f),
             )
         }
 
-        SettingsSection("Assistant")
+        SettingsSection("How HOPA talks")
         SettingsGroup {
             SettingsRow(
-                "Character",
+                "Tone and length",
                 "${settings.tone} - ${settings.chattiness}",
                 Icons.Filled.Face,
             ) { onOpenPage(PAGE_CHARACTER) }
             SettingsDivider()
             SettingsRow(
-                "Notifications",
+                "Alerts",
                 if (settings.notifyAnswers) "On" else "Off",
                 Icons.Filled.Notifications,
             ) { onOpenPage(PAGE_NOTIFICATIONS) }
             SettingsDivider()
-            SettingsRow(
-                "PC bridge",
-                settings.bridgeUrl.ifBlank { "Not paired" },
-                Icons.Filled.Share,
-            ) { onOpenPage(PAGE_BRIDGE) }
+            SettingsRow("Modes", "Everyday and others", Icons.Filled.Menu) {
+                onOpenProfiles()
+            }
         }
 
-        SettingsSection("Phone")
+        SettingsSection("This phone")
         SettingsGroup {
             SettingsRow(
-                "Phone access",
+                "Screen control",
                 if (state.phoneAccess) "On" else "Off",
                 Icons.Filled.Lock,
             ) { onOpenAccessibility() }
             SettingsDivider()
-            SettingsRow("Capabilities", "What HOPA can use", Icons.Filled.List) {
-                onOpenCapabilities()
+            SettingsRow("Apps on this phone", "Everything HOPA can open", Icons.Filled.List) {
+                onOpenLaunchpad()
             }
             SettingsDivider()
-            SettingsRow("Launchpad", "Apps on this phone", Icons.Filled.Menu) {
-                onOpenLaunchpad()
+            SettingsRow("What HOPA can do", "Tools it may use", Icons.Filled.Info) {
+                onOpenCapabilities()
             }
         }
 
         SettingsSection("More")
         SettingsGroup {
-            SettingsRow("Profiles", "Everyday and other modes", Icons.Filled.Person) {
-                onOpenProfiles()
+            SettingsRow(
+                "My computer",
+                settings.bridgeUrl.ifBlank { "Not connected" },
+                Icons.Filled.Share,
+            ) { onOpenPage(PAGE_BRIDGE) }
+            SettingsDivider()
+            SettingsRow("Health check", "Test everything quickly", Icons.Filled.Info) {
+                onOpenSelfCheck()
             }
             SettingsDivider()
-            SettingsRow("Self-check", "Diagnostics", Icons.Filled.List) { onOpenSelfCheck() }
-            SettingsDivider()
-            SettingsRow("About", "Version and licences", Icons.Filled.Info) { onOpenAbout() }
+            SettingsRow("About", "Version and licences", Icons.Filled.Person) { onOpenAbout() }
         }
 
         state.error?.let { error ->

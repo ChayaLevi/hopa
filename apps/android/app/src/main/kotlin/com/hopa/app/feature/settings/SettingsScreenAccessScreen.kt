@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * Where runs happen: three cards you can read at a glance, one primary action to
- * prove the chain works, and the pairing form folded behind a link.
+ * How HOPA opens other apps. Each mode says what it does and, once chosen, how to
+ * use it - in plain words, with no mechanism named.
  */
 @Composable
 fun SettingsScreenAccessScreen(
@@ -33,29 +33,41 @@ fun SettingsScreenAccessScreen(
     onPairWireless: (String, String) -> Unit,
     onRunCheck: () -> Unit,
 ) {
-    var pairing by rememberSaveable { mutableStateOf(false) }
+    var setup by rememberSaveable { mutableStateOf(false) }
     var wirelessAddress by rememberSaveable { mutableStateOf("") }
     var wirelessCode by rememberSaveable { mutableStateOf("") }
 
-    SettingsPage(title = "Screen access", onBack = onBack) {
+    SettingsPage(title = "Running apps", onBack = onBack) {
         SettingsChoiceCard(
-            title = "Auto",
-            description = "Hidden first, then the PC, then this screen.",
+            title = "Automatic",
+            description = "HOPA picks the best one available right now.",
+            howTo = "Do nothing else. Just ask for something; if a mode does not work, " +
+                "HOPA moves to the next one and tells you where it ran.",
             selected = state.settings.screenPath == "auto",
         ) { onScreenPath("auto") }
+
         SettingsChoiceCard(
-            title = "Hidden screen",
-            description = "Apps run where you cannot see them. Your phone stays put.",
+            title = "Without showing",
+            description = "Apps run out of sight. You keep using your phone.",
+            howTo = "Turn it on once: use your computer, or the steps at the bottom. " +
+                "After that just ask; the app opens out of sight and your screen stays " +
+                "where it is.",
             selected = state.settings.screenPath == "background",
         ) { onScreenPath("background") }
+
         SettingsChoiceCard(
-            title = "This screen",
-            description = "HOPA works on your screen and you watch every tap.",
+            title = "On this phone",
+            description = "You watch every tap on your own screen.",
+            howTo = "Nothing to set up. Ask, and HOPA will take over your screen for a " +
+                "moment while it taps. Keep the phone in your hand.",
             selected = state.settings.screenPath == "onscreen",
         ) { onScreenPath("onscreen") }
+
         SettingsChoiceCard(
-            title = "PC bridge",
-            description = "The computer drives this phone over adb.",
+            title = "From my computer",
+            description = "Your computer does the tapping; the phone screen stays free.",
+            howTo = "Start HOPA on your computer, connect it once from Settings, then " +
+                "ask from the phone. Works only while the computer is on and connected.",
             selected = state.settings.screenPath == "bridge",
         ) { onScreenPath("bridge") }
 
@@ -64,19 +76,17 @@ fun SettingsScreenAccessScreen(
             enabled = !state.busy,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(if (state.busy) "Checking\u2026" else "Check this setup")
+            Text(if (state.busy) "Checking\u2026" else "Check that it works")
         }
         if (state.screenCheck.isEmpty()) {
             Text(
-                "Opens Settings on the chosen surface, reads it and closes it again.",
+                "Opens Settings for you, reads it and closes it again. Nothing stays open.",
                 style = MaterialTheme.typography.bodySmall,
                 color = HopaColor.TextHint,
             )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.screenCheck.forEach { line ->
-                    CheckLine(line)
-                }
+                state.screenCheck.forEach { line -> CheckLine(line) }
             }
         }
 
@@ -84,26 +94,28 @@ fun SettingsScreenAccessScreen(
             Text(message, fontSize = 13.sp, color = HopaColor.TextSecondary)
         }
 
-        if (state.settings.screenPath == "background" || state.settings.screenPath == "auto") {
+        if (state.settings.screenPath != "onscreen") {
             SettingsGroup {
                 SettingsRow(
-                    "Start the helper",
+                    "Turn on background mode",
                     if (state.settings.bridgeUrl.isBlank()) {
-                        "Needs the PC bridge, or pair below"
+                        "Needs your computer, or the steps below"
                     } else {
-                        "Through the paired PC"
+                        "Using your computer"
                     },
                     Icons.Filled.Menu,
                 ) { if (state.settings.bridgeUrl.isNotBlank()) onStartBackgroundHelper() }
             }
         }
 
-        TextButton(onClick = { pairing = !pairing }) {
-            Text(if (pairing) "Hide pairing" else "Pair this phone without a PC")
+        TextButton(onClick = { setup = !setup }) {
+            Text(if (setup) "Hide the steps" else "Set it up without a computer")
         }
-        if (pairing) {
+        if (setup) {
             Text(
-                "Wireless debugging, Pair device with pairing code.",
+                "1. In Android settings open Developer options, then Wireless debugging, " +
+                    "then \"Pair device with pairing code\".\n" +
+                    "2. Type the address and the six digits here.",
                 style = MaterialTheme.typography.bodySmall,
             )
             OutlinedTextField(
@@ -115,7 +127,7 @@ fun SettingsScreenAccessScreen(
             OutlinedTextField(
                 value = wirelessCode,
                 onValueChange = { wirelessCode = it },
-                label = { Text("Six-digit pairing code") },
+                label = { Text("Six digits") },
                 modifier = Modifier.fillMaxWidth(),
             )
             Button(
@@ -124,7 +136,7 @@ fun SettingsScreenAccessScreen(
                     wirelessCode.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Pair")
+                Text("Connect")
             }
         }
     }
