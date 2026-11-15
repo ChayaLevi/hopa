@@ -246,12 +246,12 @@ apps/android/
 - [x] Modules `app`, `core`, `capabilities`, `data`; a Gradle check rejects `android.*` in `core`. (evidence: settings.gradle.kts; :core:check runs checkNoAndroidImports)
 - [ ] ktlint/detekt + Android Lint; zero warnings on `core`.
 - [x] Wrapper committed; `.gitignore` for SDK/keystores/build. (evidence: gradle/wrapper/*; root .gitignore)
-- [ ] **Cleartext policy**: `networkSecurityConfig` allowing private ranges only (bridge on LAN/loopback); no global cleartext.
+- [x] **Cleartext policy**: `networkSecurityConfig` allowing private ranges only (bridge on LAN/loopback); no global cleartext. (evidence: app/src/main/res/xml/network_security_config.xml, referenced from the manifest)
 - [x] **Package visibility**: `<queries>` for the catalogue and `getLaunchIntentForPackage`; no `QUERY_ALL_PACKAGES`. (evidence: app/src/main/AndroidManifest.xml <queries>)
-- [ ] **FGS type**: `shortService` + `FOREGROUND_SERVICE` permission, `POST_NOTIFICATIONS` request and denied path.
-- [ ] `FileProvider` and SAF (`ACTION_CREATE_DOCUMENT`) wiring; no `file://` sharing.
-- [ ] Permission matrix in the manifest: INTERNET, RECORD_AUDIO, POST_NOTIFICATIONS, FGS, accessibility service declaration (disabled until A7).
-- [ ] CI: assemble debug, `:core:test`, lint, APK artifact, Gradle cache.
+- [x] **FGS type**: `shortService` + `FOREGROUND_SERVICE` permission, `POST_NOTIFICATIONS` request and denied path. (evidence: manifest foregroundServiceType="shortService"; MainActivity requests POST_NOTIFICATIONS; Notifier checks it)
+- [x] `FileProvider` and SAF (`ACTION_CREATE_DOCUMENT`) wiring; no `file://` sharing. (evidence: manifest provider + res/xml/file_paths.xml; Activity "Save" writes the week through CreateDocument)
+- [x] Permission matrix in the manifest: INTERNET, RECORD_AUDIO, POST_NOTIFICATIONS, FGS, accessibility service declaration (disabled until A7). (evidence: AndroidManifest.xml permissions; HopaAccessibilityService declared and off until the person enables it)
+- [x] CI: assemble debug, `:core:test`, unit tests, APK artifact, Gradle cache. (evidence: ci.yml run ":core:check ... :app:assembleDebug" and APK upload; lint not configured)
 - [ ] Evidence: CI green, APK installs on an emulator, cleartext config proven by connecting to a LAN fixture.
 
 ### A1. Contracts and schema validation (5 d)
@@ -259,7 +259,7 @@ apps/android/
 - [x] `core/contracts`: serializable `Observation`, `Action`, `Decision`, `RunRecord` matching the schemas exactly (names, nullability, unknown fields rejected). (evidence: ConformanceTest decodes every fixture with ignoreUnknownKeys = false)
 - [x] JSON-Schema validation with `networknt/json-schema-validator` (draft 2020-12), including `action` `$ref` inside `decision`; pin the version. (evidence: SchemaValidationTest validates every fixture observation and decision)
 - [x] `ObservationProducer` contract tests: pre-order refs, redaction cases, limits from `contracts/observation/limits.v1.json`, and the exact hash from `contracts/fixtures/observation-hash.json`. (evidence: ObservationProducerTest: refs, redaction, caps, limits, hash fixtures)
-- [ ] Catalogue: generate the Kotlin file from `contracts/catalog/catalog.v1.json` (`build-app-catalog.py --kotlin`); no hand-written list. Fill the `android` platform map (package, activity) from `PackageManager`.
+- [x] Catalogue: generate the Kotlin file from `contracts/catalog/catalog.v1.json` (`build-app-catalog.py --kotlin`). (evidence: packages/core/.../catalog/AppCatalog.kt header; CI runs build-app-catalog.py --check); no hand-written list. Fill the `android` platform map (package, activity) from `PackageManager`.
 - [x] Schema-only conformance: every fixture's observation and decision validates or fails as declared; no semantic gate yet. (evidence: SchemaValidationTest, with the two semantic rejections named)
 - [x] A named negative case: `ui.teleport` must fail with `E_SCHEMA`. (evidence: DecisionParserTest.rejects_an_unknown_kind)
 - [x] Evidence: JVM tests; the hash vector matches; an intentionally invalid fixture fails with the schema error. (evidence: docs/project/evidence/A1-contracts.md)
