@@ -33,6 +33,7 @@ fun SettingsScreenAccessScreen(
     onRunCheck: () -> Unit,
     onOpenBridge: () -> Unit,
     onOpenScreenControl: () -> Unit,
+    onPlanFirst: (Boolean) -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = state.settings.screenPath
@@ -120,6 +121,17 @@ fun SettingsScreenAccessScreen(
                     if (bridgeReady) onStartBackgroundHelper() else setup = true
                 }
             }
+        }
+
+        SettingsPanel {
+            SettingsSwitchRow("Show me the plan first", state.settings.planFirst) {
+                onPlanFirst(it)
+            }
+            Text(
+                "Nothing gets tapped until you approve the numbered plan.",
+                fontSize = 12.sp,
+                color = HopaColor.TextHint,
+            )
         }
 
         Text(

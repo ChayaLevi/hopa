@@ -10,6 +10,7 @@ import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.core.gate.ApprovalRequest
 import com.hopa.core.loop.TurnContext
 import com.hopa.core.model.ModelMessage
+import com.hopa.core.model.ModelRequest
 import com.hopa.core.observation.ScreenPath
 import com.hopa.core.observation.ScreenPathOrder
 import com.hopa.core.observation.ScreenSource
@@ -204,6 +205,41 @@ class ChatViewModel(
         sendText(text)
     }
 
+    private var planApprovedFor = ""
+    private var pendingGoal = ""
+
+    /** The person read the plan; run exactly that goal now. */
+    fun approvePlan() {
+        val goal = pendingGoal
+        val plan = _state.value.pendingPlan
+        if (goal.isBlank() || plan == null) {
+            return
+        }
+        planApprovedFor = goal
+        _state.update { it.copy(pendingPlan = null) }
+        sendText(goal)
+    }
+
+    fun cancelPlan() {
+        pendingGoal = ""
+        _state.update { it.copy(pendingPlan = null) }
+    }
+
+    /** Keep the work as a reusable skill, so the next similar ask starts ahead. */
+    fun saveSkill(goal: String, steps: List<String>) {
+        if (goal.isBlank() || steps.isEmpty()) {
+            return
+        }
+        viewModelScope.launch {
+            runCatching {
+                container.skills.add(
+                    trigger = goal.take(80),
+                    action = steps.joinToString("\n"),
+                )
+            }
+        }
+    }
+
     /** Remove the last exchange from the thread. */
     fun undoLast() {
         if (_state.value.busy) {
@@ -246,6 +282,9 @@ class ChatViewModel(
     ) {
         val conversation = _state.value.current ?: return
         val body = text.ifBlank { attachment?.let(AttachmentRules::describe).orEmpty() }
+        if (planApprovedFor.isNotEmpty() && planApprovedFor != body) {
+            planApprovedFor = ""
+        }
         _state.update {
             it.copy(
                 input = "",
@@ -313,6 +352,42 @@ class ChatViewModel(
             }
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
+            if (current.planFirst && planApprovedFor != body) {
+                // One approval for the whole chain: the model writes the plan, the
+                // person reads it, and only then does anything get tapped.
+                val plan = runCatching {
+                    container.model.complete(
+                        ModelRequest(
+                            messages = listOf(
+                                ModelMessage(
+                                    "system",
+                                    "You are planning, not acting. Reply with a numbered " +
+                                        "plan of at most six short steps, one per line, " +
+                                        "no other text.",
+                                ),
+                                ModelMessage("user", body),
+                            ),
+                            maxTokens = 400,
+                        ),
+                    ).text
+                }.getOrNull()
+                val steps = plan.orEmpty()
+                    .lineSequence()
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .map { it.replaceFirst(Regex("^\\d+[.)]\\s*"), "") }
+                    .take(6)
+                    .toList()
+                container.busy.value = false
+                stopRunService()
+                if (steps.isEmpty()) {
+                    _state.update { it.copy(busy = false, error = "No plan came back") }
+                } else {
+                    pendingGoal = body
+                    _state.update { it.copy(busy = false, pendingPlan = steps) }
+                }
+                return@launch
+            }
             val facts = runCatching { container.memory.promptText() }.getOrDefault("")
             val character = "Character: ${current.tone} tone, ${current.chattiness} length."
             val memory = listOf(facts, character).filter { it.isNotBlank() }
@@ -414,6 +489,34 @@ class ChatViewModel(
             )
             val all = container.conversations.all()
             container.busy.value = false
+            val steps = result?.records.orEmpty().map { record ->
+                val target = record.action.app
+                    ?: record.action.ref
+                    ?: record.action.url
+                    ?: record.action.text?.take(40)
+                    ?: ""
+                val suffix = if (target.isBlank()) "" else " $target"
+                "${record.step}. ${record.action.kind}$suffix"
+            }
+            val summary = RunSummary(
+                goal = body,
+                path = device.sourceName,
+                steps = steps,
+                executed = result?.records?.count { it.executed } ?: 0,
+                verified = result?.records?.count { it.verified } ?: 0,
+                tokens = result?.usage?.totalTokens ?: 0,
+                millis = System.currentTimeMillis() - now,
+            )
+            com.hopa.app.privacy.TurnLog.add(
+                com.hopa.app.privacy.TurnLogEntry(
+                    at = System.currentTimeMillis(),
+                    path = device.sourceName,
+                    steps = steps.size,
+                    tokens = summary.tokens,
+                    charactersSent = history.sumOf { it.content.length } + body.length,
+                    goal = body.take(80),
+                ),
+            )
             _state.update {
                 it.copy(
                     current = all.firstOrNull { item -> item.id == conversation.id },
@@ -422,6 +525,7 @@ class ChatViewModel(
                     error = result?.error?.message,
                     options = result?.options.orEmpty(),
                     lastPath = device.sourceName,
+                    lastRun = summary,
                 )
             }
             answerOutsideApp(answer)

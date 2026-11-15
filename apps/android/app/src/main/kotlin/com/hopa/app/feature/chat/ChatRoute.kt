@@ -58,6 +58,9 @@ fun ChatRoute(
         onDismissAttachmentNotice = viewModel::dismissAttachmentNotice,
         easy = easy,
         onOpenSettings = onOpenSettings,
+        onApprovePlan = viewModel::approvePlan,
+        onCancelPlan = viewModel::cancelPlan,
+        onSaveSkill = viewModel::saveSkill,
     )
 
     if (chatsOpen) {

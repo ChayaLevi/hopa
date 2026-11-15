@@ -168,6 +168,13 @@ class SettingsViewModel(
         }
     }
 
+    fun setPlanFirst(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(planFirst = value) }
+            reload()
+        }
+    }
+
     fun setNotifications(value: Boolean) {
         viewModelScope.launch {
             container.settings.update { it.copy(notifyAnswers = value) }

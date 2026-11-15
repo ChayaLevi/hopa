@@ -97,8 +97,12 @@ fun ChatScreen(
     onDismissAttachmentNotice: () -> Unit,
     easy: Boolean = false,
     onOpenSettings: () -> Unit = {},
+    onApprovePlan: () -> Unit = {},
+    onCancelPlan: () -> Unit = {},
+    onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
 ) {
     val messages = state.current?.messages.orEmpty()
+    var evidence by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -368,6 +372,34 @@ fun ChatScreen(
                     fontSize = 10.sp,
                     color = HopaColor.TextHint,
                     modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                )
+            }
+            val run = state.lastRun
+            if (run != null && messages.isNotEmpty()) {
+                Text(
+                    "What happened: ${run.executed} steps, ${run.verified} confirmed",
+                    fontSize = 11.sp,
+                    color = HopaColor.Primary,
+                    modifier = Modifier
+                        .padding(start = 8.dp, top = 2.dp)
+                        .clickable { evidence = true },
+                )
+            }
+            if (evidence && run != null) {
+                EvidenceSheet(
+                    run = run,
+                    onSaveSkill = {
+                        onSaveSkill(run.goal, run.steps)
+                        evidence = false
+                    },
+                    onDismiss = { evidence = false },
+                )
+            }
+            state.pendingPlan?.let { plan ->
+                PlanSheet(
+                    steps = plan,
+                    onApprove = onApprovePlan,
+                    onCancel = onCancelPlan,
                 )
             }
             if (messages.isEmpty()) {

@@ -15,4 +15,6 @@ data class AppSettings(
     val chattiness: String = "balanced",
     /** auto, background, onscreen or bridge; auto is the only one a user needs. */
     val screenPath: String = "auto",
+    /** Show the numbered plan and wait for one approval before acting. */
+    val planFirst: Boolean = false,
 )

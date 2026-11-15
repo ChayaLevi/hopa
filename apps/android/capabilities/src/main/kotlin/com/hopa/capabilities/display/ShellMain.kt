@@ -24,8 +24,12 @@ object ShellMain {
         println("hopa-display: listening")
         while (true) {
             val client = runCatching { socket.accept() }.getOrNull() ?: continue
-            runCatching { serve(client) }
-            runCatching { client.close() }
+            // One connection owns one display, so several clients can run several
+            // tasks at the same time on separate hidden screens.
+            Thread {
+                runCatching { serve(client) }
+                runCatching { client.close() }
+            }.apply { isDaemon = true }.start()
         }
     }
 

@@ -31,6 +31,7 @@ class DataStoreSettingsRepository(
             tone = prefs[TONE] ?: "friendly",
             chattiness = prefs[CHATTINESS] ?: "balanced",
             screenPath = prefs[SCREEN_PATH] ?: "auto",
+            planFirst = prefs[PLAN_FIRST] ?: false,
         )
     }
 
@@ -50,6 +51,7 @@ class DataStoreSettingsRepository(
             prefs[TONE] = next.tone
             prefs[CHATTINESS] = next.chattiness
             prefs[SCREEN_PATH] = next.screenPath
+            prefs[PLAN_FIRST] = next.planFirst
         }
     }
 
@@ -81,6 +83,7 @@ class DataStoreSettingsRepository(
         val TONE = stringPreferencesKey("tone")
         val CHATTINESS = stringPreferencesKey("chattiness")
         val SCREEN_PATH = stringPreferencesKey("screen_path")
+        val PLAN_FIRST = booleanPreferencesKey("plan_first")
         const val MODEL_KEY = "model_key"
         const val BRIDGE_TOKEN = "bridge_token"
         const val BRIDGE_REFRESH = "bridge_refresh"

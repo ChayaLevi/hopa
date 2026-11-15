@@ -30,6 +30,7 @@ fun SettingsRoute(
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf("") }
+    val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()
     val backToHub = { page = "" }
 
     // A page slides in from the side it belongs to: deeper to the right, back to
@@ -63,6 +64,7 @@ fun SettingsRoute(
                 onRunCheck = viewModel::runScreenCheck,
                 onOpenBridge = { page = PAGE_BRIDGE },
                 onOpenScreenControl = onOpenAccessibility,
+                onPlanFirst = viewModel::setPlanFirst,
             )
 
             PAGE_BRIDGE -> SettingsBridgeScreen(
@@ -79,6 +81,11 @@ fun SettingsRoute(
                 onTone = viewModel::setTone,
                 onChattiness = viewModel::setChattiness,
                 onOpenProfiles = onOpenProfiles,
+            )
+
+            PAGE_PRIVACY -> SettingsPrivacyScreen(
+                entries = privacy,
+                onBack = backToHub,
             )
 
             PAGE_NOTIFICATIONS -> SettingsNotificationsScreen(

@@ -19,4 +19,8 @@ data class ChatUiState(
     val attachmentNotice: String? = null,
     /** Where the last turn ran: background, bridge or this screen. */
     val lastPath: String = "",
+    /** What the last turn did, for the proof sheet. */
+    val lastRun: RunSummary? = null,
+    /** A plan waiting for one approval before it runs. */
+    val pendingPlan: List<String>? = null,
 )
