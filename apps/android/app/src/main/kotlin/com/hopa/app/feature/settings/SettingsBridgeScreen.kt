@@ -38,7 +38,7 @@ fun SettingsBridgeScreen(
         useBridge = state.settings.useBridge
     }
 
-    SettingsPage(title = "PC bridge", onBack = onBack) {
+    SettingsPage(title = "My computer", onBack = onBack) {
         SettingsSwitchRow("Use the bridge for device actions", useBridge) { useBridge = it }
         OutlinedTextField(
             value = bridgeUrl,

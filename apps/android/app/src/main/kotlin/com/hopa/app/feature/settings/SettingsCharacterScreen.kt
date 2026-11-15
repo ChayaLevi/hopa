@@ -24,7 +24,7 @@ fun SettingsCharacterScreen(
     onChattiness: (String) -> Unit,
     onOpenProfiles: () -> Unit,
 ) {
-    SettingsPage(title = "Character", onBack = onBack) {
+    SettingsPage(title = "Tone and length", onBack = onBack) {
         Text("Tone", fontSize = 13.sp, color = HopaColor.TextHint)
         SettingsSegment(
             options = listOf("friendly" to "Friendly", "direct" to "Direct"),

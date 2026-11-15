@@ -52,35 +52,29 @@ fun SettingsScreen(
             },
         )
 
-        // Hero: readiness and the two facts that decide it.
+        // Two facts decide whether HOPA can help; nothing else belongs up here.
         SettingsPanel {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                StatusRing(ready = ready, total = 2)
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    StatusLine(
-                        "Answers",
-                        if (answers) providerSummary(state) else "Needs a key",
-                        answers,
-                    ) { onOpenPage(PAGE_MODEL) }
-                    StatusLine(
-                        "Screen control",
-                        if (state.phoneAccess) "On" else "Off",
-                        state.phoneAccess,
-                    ) { onOpenAccessibility() }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                StatusLine(
+                    "Answers",
+                    if (answers) providerSummary(state) else "needs a key",
+                    answers,
+                ) { onOpenPage(PAGE_MODEL) }
+                StatusLine(
+                    "Screen control",
+                    if (state.phoneAccess) "on" else "off",
+                    state.phoneAccess,
+                ) { onOpenAccessibility() }
+                if (ready < 2) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (!answers) {
+                            QuickChip("Add a key") { onOpenPage(PAGE_MODEL) }
+                        }
+                        if (!state.phoneAccess) {
+                            QuickChip("Allow screen control") { onOpenAccessibility() }
+                        }
+                    }
                 }
-            }
-        }
-
-        // The fix, offered as one tap instead of a page to find.
-        if (ready < 2) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                QuickChip("Add a key") { onOpenPage(PAGE_MODEL) }
-                QuickChip("Allow screen control") { onOpenAccessibility() }
             }
         }
 

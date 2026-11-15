@@ -47,7 +47,7 @@ fun SettingsModelScreen(
         }
     }
 
-    SettingsPage(title = "Model", onBack = onBack) {
+    SettingsPage(title = "Answers", onBack = onBack) {
         SettingsSegment(
             options = listOf(
                 "stub" to "Demo",

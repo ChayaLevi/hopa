@@ -25,7 +25,7 @@ fun SettingsNotificationsScreen(
         notify = state.settings.notifyAnswers
     }
 
-    SettingsPage(title = "Notifications", onBack = onBack) {
+    SettingsPage(title = "Alerts", onBack = onBack) {
         SettingsSwitchRow("Notify when an answer is ready", notify) { notify = it }
         Button(
             onClick = {

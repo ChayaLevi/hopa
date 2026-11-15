@@ -44,7 +44,7 @@ fun AccessibilityScreen(
         containerColor = HopaColor.Bg,
         topBar = {
             TopAppBar(
-                title = { Text("Phone access") },
+                title = { Text("Screen control") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
