@@ -272,6 +272,15 @@ class ChatViewModel(
                         attachment = attachment,
                     ),
                 )
+                // The store is the source of truth, but the screen reads the state,
+                // so the bubble has to be published now or it waits for the answer.
+                val shown = container.conversations.all()
+                _state.update {
+                    it.copy(
+                        current = shown.firstOrNull { item -> item.id == conversation.id },
+                        conversations = shown,
+                    )
+                }
             }
             if (!(AccessibilityState.isEnabled(container.context) &&
                     HopaAccessibilityService.instance != null)
@@ -314,7 +323,7 @@ class ChatViewModel(
             val sources = buildList {
                 bridged?.let { add(ScreenSource("bridge", it, budgetMs = 15_000)) }
                 if (current.accessibilityAllowed) {
-                    add(ScreenSource("accessibility", container.device, budgetMs = 4_000))
+                    add(ScreenSource("accessibility", container.device, budgetMs = 8_000))
                 }
             }
             val device = ScreenSourceDevice(

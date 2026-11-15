@@ -102,6 +102,8 @@ fun ChatScreen(
     // the app comes back; a stale "off" banner would hide the only real fix.
     var accessEnabled by remember { mutableStateOf(AccessibilityState.isEnabled(context)) }
     var accessConnected by remember { mutableStateOf(HopaAccessibilityService.instance != null) }
+    // Android turns the service off on every reinstall and the binding can come
+    // back a moment later, so the state is re-read on resume and then polled.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -111,6 +113,13 @@ fun ChatScreen(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(2_000)
+            accessEnabled = AccessibilityState.isEnabled(context)
+            accessConnected = HopaAccessibilityService.instance != null
+        }
     }
     val micPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
