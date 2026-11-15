@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.hopa.data.database.entity.RunRecordEntity
 
 @Dao
@@ -19,6 +20,13 @@ interface RunRecordDao {
 
     @Query("SELECT * FROM run_records WHERE runId = :runId ORDER BY step DESC LIMIT 1")
     suspend fun last(runId: String): RunRecordEntity?
+
+    /** One transaction: a record is never written without the prune that follows it. */
+    @Transaction
+    suspend fun insertAndPrune(record: RunRecordEntity, keep: Int) {
+        insert(record)
+        prune(keep)
+    }
 
     @Query("DELETE FROM run_records")
     suspend fun clearAll()

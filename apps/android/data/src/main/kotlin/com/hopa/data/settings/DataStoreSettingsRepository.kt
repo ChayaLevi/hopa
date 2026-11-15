@@ -53,6 +53,8 @@ class DataStoreSettingsRepository(
 
     override suspend fun modelKey(): String = secrets.get(MODEL_KEY)
 
+    override suspend fun hasModelKey(): Boolean = secrets.present(MODEL_KEY)
+
     override suspend fun setModelKey(value: String) = secrets.set(MODEL_KEY, value)
 
     override suspend fun bridgeToken(): String = secrets.get(BRIDGE_TOKEN)

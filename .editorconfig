@@ -13,3 +13,9 @@ indent_size = 4
 [*.{ts,ets,json,json5,yml,yaml,md}]
 indent_style = space
 indent_size = 2
+
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+ktlint_code_style = intellij_idea

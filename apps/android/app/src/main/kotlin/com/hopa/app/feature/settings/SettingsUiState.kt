@@ -6,6 +6,8 @@ import com.hopa.data.settings.AppSettings
 data class SettingsUiState(
     val settings: AppSettings = AppSettings(),
     val key: String = "",
+    /** True when a key is on disk, even if it cannot be decrypted. */
+    val keySaved: Boolean = false,
     val bridgeKey: String = "",
     val providerState: ProviderState = ProviderState.DEMO,
     val busy: Boolean = false,
@@ -13,4 +15,6 @@ data class SettingsUiState(
     val error: String? = null,
     val bridgeStatus: String? = null,
     val notice: String? = null,
+    /** The last "Test the model" outcome, shown next to the button. */
+    val modelTest: String? = null,
 )

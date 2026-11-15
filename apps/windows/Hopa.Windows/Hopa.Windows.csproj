@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Hopa.Windows</AssemblyName>
+    <RootNamespace>Hopa.Windows</RootNamespace>
+    <Version>0.1.0</Version>
+    <Product>HOPA</Product>
+    <Company>HOPA</Company>
+    <AssemblyTitle>HOPA for Windows</AssemblyTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WPF reads DPI awareness from the manifest; the WinForms analyzer asks for
+         ApplicationHighDpiMode instead, which WPF does not use. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FlaUI.UIA3" Version="4.0.0" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageReference Include="System.Speech" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\mascot.png" />
+  </ItemGroup>
+
+</Project>

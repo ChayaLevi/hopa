@@ -13,8 +13,7 @@ class RoomRunRecorder(
     override suspend fun append(draft: RunRecordDraft): RunRecord {
         val previous = dao.last(draft.runId)?.hash ?: RunChain.SEED
         val record = RunChain.seal(draft, previous)
-        dao.insert(RunRecordMapper.entity(record))
-        dao.prune(100)
+        dao.insertAndPrune(RunRecordMapper.entity(record), keep = 100)
         return record
     }
 

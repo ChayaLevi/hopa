@@ -4,6 +4,7 @@ import android.content.Context
 import com.hopa.app.model.SettingsModelPort
 import com.hopa.capabilities.accessibility.AccessibilityDevice
 import com.hopa.capabilities.llm.ModelFactory
+import com.hopa.capabilities.llm.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
@@ -35,6 +36,10 @@ class AppContainer(context: Context) {
     val cancelRequested = MutableStateFlow(false)
     /** A goal handed to the chat by a profile home (Power's command bar). */
     val pendingGoal = MutableStateFlow<String?>(null)
+    /** A file shared into the app, waiting in the composer. */
+    val pendingAttachment = MutableStateFlow<com.hopa.data.sessions.Attachment?>(null)
+    val pendingNotice = MutableStateFlow<String?>(null)
+    val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
     val recorder = RoomRunRecorder(database.runRecordDao())
     val pendingApprovals = com.hopa.data.approvals.RoomPendingApprovalStore(
@@ -60,7 +65,9 @@ class AppContainer(context: Context) {
         factory = factory,
         clock = clock,
     )
-    val model = SettingsModelPort(settings, ModelFactory())
+    val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
+    /** Shared by the settings screen's "Test the model" button. */
+    val modelFactory: ModelFactory = ModelFactory()
     val loop = AgentLoop(
         model = model,
         device = device,

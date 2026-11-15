@@ -1141,26 +1141,14 @@ export struct ChatPage {
           }
         })
       }
-      if (AgentService.get().isBridgeConfigured()) {
-        Row({ space: 6 }) {
-          Blank()
-          Text(this.targetRole === '2in1' ? 'Laptop' : 'Phone')
-            .fontSize(10)
-            .fontColor(this.targetRole === '2in1'
-              ? $r('app.color.primary')
-              : $r('app.color.text_hint'))
-            .padding({ left: 8, right: 8, top: 4, bottom: 4 })
-            .backgroundColor($r('app.color.surface_muted'))
-            .borderRadius(8)
-            .onClick(() => {
-              this.targetRole = this.targetRole === '2in1' ? '' : '2in1';
-            })
-        }
-        .width('100%')
-        .padding({ bottom: 4 })
-      }
       ChatComposer({
         draft: this.draft,
+        targetLabel: AgentService.get().isBridgeConfigured()
+          ? (this.targetRole === '2in1' ? 'Laptop' : 'Phone')
+          : '',
+        onTarget: () => {
+          this.targetRole = this.targetRole === '2in1' ? '' : '2in1';
+        },
         busy: this.busy,
         recording: this.recording,
         onDraft: (value: string) => {

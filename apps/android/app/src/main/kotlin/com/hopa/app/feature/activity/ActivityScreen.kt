@@ -46,6 +46,7 @@ fun ActivityScreen(
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
     onShare: () -> Unit,
+    onSave: () -> Unit,
     onUnavailable: (String) -> Unit,
 ) {
     Scaffold(
@@ -83,7 +84,7 @@ fun ActivityScreen(
             }
 
             SectionLabel("WEEK")
-            WeekCard(state = state, onShare = onShare)
+            WeekCard(state = state, onShare = onShare, onSave = onSave)
 
             val recent = state.records.takeLast(3).reversed()
             if (recent.isNotEmpty()) {
@@ -200,7 +201,7 @@ private fun LastRunCard(state: ActivityUiState) {
 }
 
 @Composable
-private fun WeekCard(state: ActivityUiState, onShare: () -> Unit) {
+private fun WeekCard(state: ActivityUiState, onShare: () -> Unit, onSave: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,6 +221,17 @@ private fun WeekCard(state: ActivityUiState, onShare: () -> Unit) {
                 color = HopaColor.TextHint,
             )
         }
+        Text(
+            text = "Save",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = HopaColor.TextSecondary,
+            modifier = Modifier
+                .clickable(onClick = onSave)
+                .background(HopaColor.SurfaceMuted, RoundedCornerShape(9.dp))
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "Share",
             fontSize = 11.sp,

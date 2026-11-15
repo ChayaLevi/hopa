@@ -4,14 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.bridge.BridgeClient
+import com.hopa.capabilities.llm.ProviderState
 import com.hopa.capabilities.llm.ProviderStateResolver
+import com.hopa.core.model.ModelMessage
+import com.hopa.core.model.ModelRequest
 import com.hopa.data.settings.AppSettings
+import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -40,29 +45,115 @@ class SettingsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(busy = true, saved = false, error = null) }
             runCatching {
-                container.settings.update {
-                    it.copy(
-                        provider = provider.trim(),
-                        endpoint = endpoint.trim(),
-                        model = model.trim(),
-                        notifyAnswers = notifyAnswers,
-                        webEnabled = webEnabled,
-                        bridgeUrl = bridgeUrl.trim(),
-                        useBridge = useBridge,
-                    )
-                }
-                if (key.isNotBlank()) {
-                    container.settings.setModelKey(key.trim())
-                }
-                if (bridgeKey.isNotBlank()) {
-                    container.settings.setBridgeToken(bridgeKey.trim())
-                }
-                reload()
-                _state.update { it.copy(saved = true) }
+                persist(provider, endpoint, model, key, notifyAnswers, webEnabled, bridgeUrl, bridgeKey, useBridge)
+            }.onSuccess { note ->
+                _state.update { it.copy(saved = true, notice = note) }
             }.onFailure { error ->
                 _state.update { it.copy(error = error.message ?: "Could not save") }
             }
             _state.update { it.copy(busy = false) }
+        }
+    }
+
+    /**
+     * Write every field on the screen, including the key, then read the
+     * settings back. The read-back is the point: a key that only exists in the
+     * text field used to look configured while the next screen saw nothing.
+     */
+    private suspend fun persist(
+        provider: String,
+        endpoint: String,
+        model: String,
+        key: String,
+        notifyAnswers: Boolean,
+        webEnabled: Boolean,
+        bridgeUrl: String,
+        bridgeKey: String,
+        useBridge: Boolean,
+    ): String? {
+        // A key the user just typed turns the demo off. Leaving the provider on
+        // "stub" while a key is present kept chat on the demo model.
+        val trimmedProvider = provider.trim()
+        val trimmedEndpoint = endpoint.trim()
+        val effectiveProvider = when {
+            key.isBlank() -> trimmedProvider.ifBlank { "stub" }
+            trimmedProvider.isBlank() || trimmedProvider.equals("stub", true) ->
+                if (trimmedEndpoint.startsWith("http://")) "lan" else "openai"
+            else -> trimmedProvider
+        }
+        container.settings.update {
+            it.copy(
+                provider = effectiveProvider,
+                endpoint = trimmedEndpoint,
+                model = model.trim(),
+                notifyAnswers = notifyAnswers,
+                webEnabled = webEnabled,
+                bridgeUrl = bridgeUrl.trim(),
+                useBridge = useBridge,
+            )
+        }
+        if (key.isNotBlank()) {
+            container.settings.setModelKey(key.trim())
+        }
+        if (bridgeKey.isNotBlank()) {
+            container.settings.setBridgeToken(bridgeKey.trim())
+        }
+        reload()
+        if (key.isNotBlank() && _state.value.key.isBlank()) {
+            throw IOException("the key did not reach the Keystore")
+        }
+        return if (effectiveProvider != trimmedProvider) {
+            "Saved as $effectiveProvider: a key turns the demo off"
+        } else {
+            null
+        }
+    }
+
+    /**
+     * Save first, then ask the saved model one short question. Testing with the
+     * typed key alone told the user the model worked while nothing was stored.
+     */
+    fun testModel(
+        provider: String,
+        endpoint: String,
+        model: String,
+        key: String,
+        notifyAnswers: Boolean,
+        webEnabled: Boolean,
+        bridgeUrl: String,
+        bridgeKey: String,
+        useBridge: Boolean,
+    ) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, modelTest = "Testing\u2026", error = null) }
+            val message = runCatching {
+                persist(provider, endpoint, model, key, notifyAnswers, webEnabled, bridgeUrl, bridgeKey, useBridge)
+                val current = container.settings.settings.first()
+                val storedKey = container.settings.modelKey()
+                val state = ProviderStateResolver()
+                    .resolve(current.provider, current.endpoint, storedKey)
+                if (state == ProviderState.DEMO) {
+                    throw IOException("no key is stored, so this is still the demo model")
+                }
+                val client = container.modelFactory.create(
+                    provider = current.provider,
+                    endpoint = current.endpoint,
+                    apiKey = storedKey,
+                    modelName = current.model,
+                )
+                val reply = withTimeout(30_000) {
+                    client.complete(
+                        ModelRequest(
+                            messages = listOf(ModelMessage("user", "Reply with the single word: ready")),
+                            maxTokens = 32,
+                        ),
+                    )
+                }
+                "Model answered: ${reply.text.trim().take(80)}"
+            }.getOrElse { error ->
+                "Model failed: ${error.message ?: error::class.simpleName}"
+            }
+            _state.update { it.copy(busy = false, modelTest = message, saved = message.startsWith("Model answered")) }
         }
     }
 
@@ -143,13 +234,20 @@ class SettingsViewModel(
     private suspend fun reload() {
         val settings: AppSettings = container.settings.settings.first()
         val key = container.settings.modelKey()
+        val keySaved = container.settings.hasModelKey()
         val bridgeKey = container.settings.bridgeToken()
         _state.update {
             it.copy(
                 settings = settings,
                 key = key,
+                keySaved = keySaved,
                 bridgeKey = bridgeKey,
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),
+                error = if (keySaved && key.isBlank()) {
+                    "The saved key cannot be read on this phone; paste it again"
+                } else {
+                    it.error
+                },
             )
         }
     }

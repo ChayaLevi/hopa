@@ -24,14 +24,22 @@ class KeystoreSecretStore(
 
     override suspend fun set(alias: String, value: String) = withContext(Dispatchers.IO) {
         if (value.isBlank()) {
-            prefs.edit().remove(alias).apply()
+            prefs.edit().remove(alias).commit()
         } else {
-            prefs.edit().putString(alias, encrypt(value)).apply()
+            // commit(), not apply(): a key typed just before the user leaves the
+            // screen must be on disk before the process can die.
+            prefs.edit().putString(alias, encrypt(value)).commit()
         }
+        Unit
     }
 
     override suspend fun clear(alias: String) = withContext(Dispatchers.IO) {
-        prefs.edit().remove(alias).apply()
+        prefs.edit().remove(alias).commit()
+        Unit
+    }
+
+    override suspend fun present(alias: String): Boolean = withContext(Dispatchers.IO) {
+        prefs.contains(alias)
     }
 
     private fun key(): SecretKey {

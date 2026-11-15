@@ -1,6 +1,8 @@
 package com.hopa.app.feature.activity
 
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +23,16 @@ fun ActivityRoute(
     val viewModel: ActivityViewModel = viewModel(factory = ActivityViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val saveWeek = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain"),
+    ) { uri ->
+        if (uri != null) {
+            context.contentResolver.openOutputStream(uri)?.use { stream ->
+                stream.write(viewModel.shareText().toByteArray())
+            }
+            Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
@@ -39,6 +51,7 @@ fun ActivityRoute(
             }
             context.startActivity(Intent.createChooser(send, "Share week"))
         },
+        onSave = { saveWeek.launch("hopa-week.txt") },
         onUnavailable = { feature ->
             Toast.makeText(
                 context,
