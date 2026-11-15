@@ -382,12 +382,13 @@ class ChatViewModel(
             } finally {
                 stopRunService()
             }
+            val answer = result?.answer ?: "I stopped after two minutes."
             container.conversations.append(
                 conversation.id,
                 ChatMessage(
                     id = "m-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(6)}",
                     role = "assistant",
-                    text = result?.answer ?: "I stopped after two minutes.",
+                    text = answer,
                     timestamp = System.currentTimeMillis(),
                 ),
             )
@@ -402,7 +403,25 @@ class ChatViewModel(
                     options = result?.options.orEmpty(),
                 )
             }
+            answerOutsideApp(answer)
         }.invokeOnCompletion { container.busy.value = false }
+    }
+
+    /**
+     * A run happens inside another app, so the answer is invisible until the
+     * person switches back. Try to bring HOPA forward and leave a notification in
+     * case Android refuses a background activity start.
+     */
+    private suspend fun answerOutsideApp(text: String) {
+        if (text.isBlank() || com.hopa.app.service.AppVisibility.foreground) {
+            return
+        }
+        val notify = runCatching { container.settings.settings.first().notifyAnswers }
+            .getOrDefault(true)
+        if (notify) {
+            runCatching { com.hopa.app.service.Notifier.postAnswer(container.context, text) }
+        }
+        container.bringToFront()
     }
 
     private fun startRunService() {

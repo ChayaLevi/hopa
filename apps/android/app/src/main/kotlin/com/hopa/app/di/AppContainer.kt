@@ -111,6 +111,21 @@ class AppContainer(context: Context) {
         return com.hopa.capabilities.bridge.AdbDevice(client, clock)
     }
 
+    /**
+     * Bring the chat back after a run that happened in another app. Android may
+     * refuse a background activity start; the caller posts a notification too, so
+     * a refusal still leaves a way in.
+     */
+    fun bringToFront() {
+        val intent = android.content.Intent(context, com.hopa.app.MainActivity::class.java)
+            .addFlags(
+                android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT,
+            )
+        runCatching { context.startActivity(intent) }
+    }
+
     /** Read a reply aloud: the PC voice when a bridge is configured, else TTS. */
     suspend fun speak(text: String): Boolean {
         val current = settings.settings.first()

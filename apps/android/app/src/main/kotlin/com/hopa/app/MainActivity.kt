@@ -15,6 +15,16 @@ import com.hopa.capabilities.bridge.BridgeClient
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    override fun onStart() {
+        super.onStart()
+        com.hopa.app.service.AppVisibility.foreground = true
+    }
+
+    override fun onStop() {
+        com.hopa.app.service.AppVisibility.foreground = false
+        super.onStop()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
