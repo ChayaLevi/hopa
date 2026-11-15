@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -255,7 +256,10 @@ fun HopaMascot(
                     Text(
                         "Hi, I'm HOPA \uD83D\uDC4B",
                         color = Color.White,
-                        fontSize = (sizeDp.value * 0.19f).sp,
+                        fontSize = (
+                            sizeDp.value * 0.19f /
+                                LocalDensity.current.fontScale.coerceAtLeast(1f)
+                            ).sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
