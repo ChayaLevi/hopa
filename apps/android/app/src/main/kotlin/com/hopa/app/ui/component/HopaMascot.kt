@@ -8,6 +8,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -228,7 +229,7 @@ fun HopaMascot(
         if (bubble && sizeDp >= 56.dp) {
             Box(
                 modifier = Modifier
-                    .offset(x = sizeDp * 0.38f, y = -sizeDp * 1.02f)
+                    .offset(x = sizeDp * 0.50f, y = -sizeDp * 1.02f)
                     .requiredWidth(sizeDp * 1.70f)
                     .requiredHeight(sizeDp * 0.99f)
                     .graphicsLayer(rotationZ = -3f),
@@ -248,7 +249,7 @@ fun HopaMascot(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = sizeDp * 0.20f),
+                        .padding(top = sizeDp * 0.20f, start = sizeDp * 0.14f, end = sizeDp * 0.14f),
                     contentAlignment = Alignment.TopCenter,
                 ) {
                     Text(
@@ -257,6 +258,8 @@ fun HopaMascot(
                         fontSize = (sizeDp.value * 0.19f).sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

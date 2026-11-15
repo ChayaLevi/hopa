@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -39,6 +41,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -186,6 +189,7 @@ fun ChatScreen(
             }
         },
         bottomBar = {
+            val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
             Column(
                 modifier = Modifier
                     .navigationBarsPadding()
@@ -262,14 +266,14 @@ fun ChatScreen(
                             .padding(start = 20.dp, end = 20.dp, bottom = 4.dp),
                     )
                 }
-                if (easy) {
+                if (!imeVisible && easy) {
                     HopaBottomBarEasy(
                         active = activeTab,
                         onSelect = { key ->
                             if (key == "settings") onOpenSettings() else onSelectTab(key)
                         },
                     )
-                } else {
+                } else if (!imeVisible) {
                     HopaBottomBar(
                         active = activeTab,
                         onSelect = onSelectTab,
