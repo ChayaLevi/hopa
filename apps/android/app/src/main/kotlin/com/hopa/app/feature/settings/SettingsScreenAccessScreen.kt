@@ -33,6 +33,8 @@ fun SettingsScreenAccessScreen(
     onStartBackgroundHelper: () -> Unit,
     onPairWireless: (String, String) -> Unit,
     onRunCheck: () -> Unit,
+    onOpenBridge: () -> Unit,
+    onOpenScreenControl: () -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     var wirelessAddress by rememberSaveable { mutableStateOf("") }
@@ -94,8 +96,16 @@ fun SettingsScreenAccessScreen(
                 color = HopaColor.TextHint,
             )
         } else {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                state.screenCheck.take(4).forEach { line -> CheckLine(line) }
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                state.screenCheck.take(4).forEach { check ->
+                    CheckRow(check) { picked ->
+                        when (picked.id) {
+                            "screen" -> onOpenScreenControl()
+                            "background" -> setup = true
+                            "computer" -> onOpenBridge()
+                        }
+                    }
+                }
             }
         }
 

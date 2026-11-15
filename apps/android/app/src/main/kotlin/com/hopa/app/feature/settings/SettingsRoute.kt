@@ -61,6 +61,8 @@ fun SettingsRoute(
                 onStartBackgroundHelper = viewModel::startBackgroundHelper,
                 onPairWireless = viewModel::pairWireless,
                 onRunCheck = viewModel::runScreenCheck,
+                onOpenBridge = { page = PAGE_BRIDGE },
+                onOpenScreenControl = onOpenAccessibility,
             )
 
             PAGE_BRIDGE -> SettingsBridgeScreen(

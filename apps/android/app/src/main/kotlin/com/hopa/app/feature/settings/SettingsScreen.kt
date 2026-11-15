@@ -112,7 +112,6 @@ fun SettingsScreen(
                     color = HopaColor.TextHint,
                 )
             }
-            state.screenCheck.take(3).forEach { line -> CheckLine(line) }
         }
 
         Row(

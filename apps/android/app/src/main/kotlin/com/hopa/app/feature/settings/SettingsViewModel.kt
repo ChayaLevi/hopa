@@ -216,36 +216,59 @@ class SettingsViewModel(
     fun runScreenCheck() {
         viewModelScope.launch {
             _state.update { it.copy(busy = true, screenCheck = emptyList()) }
-            val lines = mutableListOf<String>()
+            val checks = mutableListOf<ScreenCheck>()
             val service = HopaAccessibilityService.instance
             val enabled = AccessibilityState.isEnabled(container.context)
-            lines += if (enabled && service != null) {
-                "Seeing your screen: yes"
+            checks += if (enabled && service != null) {
+                ScreenCheck("screen", "HOPA can see your screen", ok = true)
             } else if (enabled) {
-                "Seeing your screen: almost - turn it off and on in Android settings"
+                ScreenCheck(
+                    "screen",
+                    "Screen control is on but not answering - tap Fix to open it",
+                    ok = false,
+                    action = "Fix",
+                )
             } else {
-                "Seeing your screen: no - turn on Screen control"
+                ScreenCheck(
+                    "screen",
+                    "Screen control is off - tap Fix, then turn on HOPA",
+                    ok = false,
+                    action = "Fix",
+                )
             }
 
             val socket = withContext(Dispatchers.IO) { container.shell.connect() }
-            lines += if (socket) {
-                "Background mode: ready"
+            checks += if (socket) {
+                ScreenCheck("background", "Background mode is on", ok = true)
             } else {
-                "Background mode: needs one step"
+                ScreenCheck(
+                    "background",
+                    "Background mode is off - tap Set up, then pair once",
+                    ok = false,
+                    action = "Set up",
+                )
             }
 
             if (socket) {
                 val device = runCatching { container.backgroundDevice() }.getOrNull()
                 if (device == null) {
-                    lines += "Hidden screen: could not be created"
+                    checks += ScreenCheck(
+                        "tried",
+                        "Test failed: the hidden screen could not start",
+                        ok = false,
+                    )
                 } else {
                     val opened = runCatching { device.launch("com.android.settings") }
                     val observation = runCatching { device.observe() }.getOrNull()
                     val elements = observation?.tree?.children?.size ?: 0
-                    lines += if (opened.isSuccess) {
-                        "Tried it: Settings opened out of sight and was read"
+                    checks += if (opened.isSuccess) {
+                        ScreenCheck("tried", "Tested it: Settings opened out of sight", ok = true)
                     } else {
-                        "Tried it: ${opened.exceptionOrNull()?.message}"
+                        ScreenCheck(
+                            "tried",
+                            "Test failed: ${opened.exceptionOrNull()?.message}",
+                            ok = false,
+                        )
                     }
                     runCatching {
                         (device as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
@@ -262,14 +285,26 @@ class SettingsViewModel(
                         true
                     }.getOrDefault(false)
                 }
-                lines += if (health) "Your computer: connected" else
-                    "Your computer: no answer at ${current.bridgeUrl}"
+                checks += if (health) {
+                    ScreenCheck("computer", "Your computer is connected", ok = true)
+                } else {
+                    ScreenCheck(
+                        "computer",
+                        "Your computer is not answering - tap Fix",
+                        ok = false,
+                        action = "Fix",
+                    )
+                }
             } else {
-                lines += "Your computer: not set up (optional)"
+                checks += ScreenCheck("computer", "Your computer is not set up (optional)", ok = true)
             }
 
-            lines += "Apps will run: ${pathLabel(current.screenPath).lowercase()}"
-            _state.update { it.copy(busy = false, screenCheck = lines) }
+            checks += ScreenCheck(
+                "mode",
+                "Apps will open: ${pathLabel(current.screenPath).lowercase()}",
+                ok = true,
+            )
+            _state.update { it.copy(busy = false, screenCheck = checks) }
         }
     }
 

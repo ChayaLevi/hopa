@@ -17,8 +17,8 @@ data class SettingsUiState(
     val notice: String? = null,
     /** The last "Test the model" outcome, shown next to the button. */
     val modelTest: String? = null,
-    /** Lines from the screen-access self-check, one per step. */
-    val screenCheck: List<String> = emptyList(),
+    /** Results of the screen-access self-check, each with its next action. */
+    val screenCheck: List<ScreenCheck> = emptyList(),
     /** True when the accessibility service is enabled and bound now. */
     val phoneAccess: Boolean = false,
 )
