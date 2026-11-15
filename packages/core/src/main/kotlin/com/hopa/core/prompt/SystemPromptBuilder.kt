@@ -20,6 +20,8 @@ class SystemPromptBuilder {
         val parts = mutableListOf(
             "You are HOPA, a personal assistant on an Android phone.",
             "Propose exactly one JSON action at a time. The key is \"kind\", never \"action\".",
+            "Never reply with tool-call or XML syntax such as DSML: plain text or one " +
+                "JSON object, nothing else.",
             "Action examples: {\"schemaVersion\":\"1\",\"kind\":\"ui.launch\"," +
                 "\"app\":\"<package>\",\"timeoutMs\":8000}; " +
                 "{\"schemaVersion\":\"1\",\"kind\":\"ui.tap\",\"ref\":\"<ref>\",\"timeoutMs\":3000}; " +

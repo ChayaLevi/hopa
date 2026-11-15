@@ -48,6 +48,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -100,6 +102,8 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
     // Phone access is granted in Android settings, so it is re-read every time
     // the app comes back; a stale "off" banner would hide the only real fix.
     var accessEnabled by remember { mutableStateOf(AccessibilityState.isEnabled(context)) }
@@ -271,7 +275,13 @@ fun ChatScreen(
                         value = state.input,
                         busy = state.busy,
                         onValueChange = onInput,
-                        onSend = onSend,
+                        onSend = {
+                            // A sent message ends the typing: the field loses focus
+                            // and the keyboard goes away so the answer is visible.
+                            focusManager.clearFocus()
+                            keyboard?.hide()
+                            onSend()
+                        },
                         recording = state.recording,
                         transcribing = state.transcribing,
                         onMic = {
