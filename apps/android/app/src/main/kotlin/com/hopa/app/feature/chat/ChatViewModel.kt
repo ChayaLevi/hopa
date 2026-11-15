@@ -10,6 +10,8 @@ import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.core.gate.ApprovalRequest
 import com.hopa.core.loop.TurnContext
 import com.hopa.core.model.ModelMessage
+import com.hopa.core.observation.ScreenPath
+import com.hopa.core.observation.ScreenPathOrder
 import com.hopa.core.observation.ScreenSource
 import com.hopa.core.observation.ScreenSourceDevice
 import com.hopa.data.sessions.Attachment
@@ -318,12 +320,29 @@ class ChatViewModel(
             val skills = runCatching { container.skills.promptText() }.getOrDefault("")
             val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
             val bridged = runCatching { container.bridgedDevice() }.getOrNull()
-            // Bridge first, then accessibility with a four-second guard; the first
-            // source that can see the screen also performs every action of the turn.
-            val sources = buildList {
-                bridged?.let { add(ScreenSource("bridge", it, budgetMs = 15_000)) }
-                if (current.accessibilityAllowed) {
-                    add(ScreenSource("accessibility", container.device, budgetMs = 8_000))
+            val preferred = ScreenPath.of(current.screenPath)
+            val background = if (
+                preferred == ScreenPath.AUTO || preferred == ScreenPath.BACKGROUND
+            ) {
+                runCatching { container.backgroundDevice() }.getOrNull()
+            } else {
+                null
+            }
+            val onscreen = current.accessibilityAllowed &&
+                HopaAccessibilityService.instance != null
+            // The order is a setting: the background display leaves the person's
+            // screen alone, so AUTO tries it first, then the bridge, then the screen.
+            val ordered = ScreenPathOrder().order(
+                preferred = preferred,
+                background = background != null,
+                bridge = bridged != null,
+                onscreen = onscreen,
+            )
+            val sources = ordered.mapNotNull { name ->
+                when (name) {
+                    "background" -> ScreenSource("background", background!!, budgetMs = 8_000)
+                    "bridge" -> ScreenSource("bridge", bridged!!, budgetMs = 15_000)
+                    else -> ScreenSource("accessibility", container.device, budgetMs = 8_000)
                 }
             }
             val device = ScreenSourceDevice(
@@ -381,6 +400,7 @@ class ChatViewModel(
                 }
             } finally {
                 stopRunService()
+                (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
             }
             val answer = result?.answer ?: "I stopped after two minutes."
             container.conversations.append(

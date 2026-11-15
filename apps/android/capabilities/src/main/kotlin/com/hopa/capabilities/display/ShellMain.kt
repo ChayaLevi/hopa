@@ -1,0 +1,152 @@
+package com.hopa.capabilities.display
+
+import android.content.Context
+import android.hardware.display.DisplayManager
+import android.net.LocalServerSocket
+import android.net.LocalSocket
+import java.io.BufferedReader
+import java.io.InputStreamReader
+
+/**
+ * The shell half of the background display. Started as uid 2000 with
+ * `app_process` (CLASSPATH points at the APK), it owns the virtual display and
+ * the input injection, and answers the app over an abstract local socket.
+ */
+object ShellMain {
+    private const val SOCKET = "hopa-display"
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val socket = runCatching { LocalServerSocket(SOCKET) }.getOrElse {
+            System.err.println("hopa-display: cannot listen: ${it.message}")
+            return
+        }
+        println("hopa-display: listening")
+        while (true) {
+            val client = runCatching { socket.accept() }.getOrNull() ?: continue
+            runCatching { serve(client) }
+            runCatching { client.close() }
+        }
+    }
+
+    private fun serve(socket: LocalSocket) {
+        val reader = BufferedReader(InputStreamReader(socket.inputStream))
+        val out = socket.outputStream
+        var host: DisplayHost? = null
+        var input: DisplayInput? = null
+        var launcher: DisplayLauncher? = null
+        val context = systemContext()
+
+        fun reply(line: String) {
+            out.write((line + "\n").toByteArray())
+            out.flush()
+        }
+
+        while (true) {
+            val line = reader.readLine() ?: return
+            val parts = line.trim().split(' ').filter { it.isNotEmpty() }
+            if (parts.isEmpty()) {
+                continue
+            }
+            when (parts[0]) {
+                "display" -> {
+                    if (parts.size < 4) {
+                        reply("err display needs width height dpi")
+                        continue
+                    }
+                    host?.release()
+                    val manager = context?.getSystemService(DisplayManager::class.java)
+                    if (manager == null) {
+                        reply("err no display manager in the helper")
+                        continue
+                    }
+                    val created = runCatching {
+                        DisplayHost(manager, parts[1].toInt(), parts[2].toInt(), parts[3].toInt())
+                    }
+                    if (created.isFailure) {
+                        host = null
+                        input = null
+                        launcher = null
+                        reply("err ${created.exceptionOrNull()?.message ?: "createDisplay failed"}")
+                        continue
+                    }
+                    host = created.getOrThrow()
+                    input = DisplayInput(host!!.displayId)
+                    launcher = DisplayLauncher(host!!.displayId)
+                    reply("ok ${host!!.displayId}")
+                }
+
+                "launch" -> reply(
+                    if (parts.size < 2) {
+                        "err launch needs a package"
+                    } else {
+                        runCatching { launcher!!.launch(parts[1]) }
+                            .getOrElse { "err ${it.message}" }
+                    },
+                )
+
+                "tap" -> reply(
+                    if (input != null && parts.size >= 3) {
+                        if (input!!.tap(parts[1].toInt(), parts[2].toInt())) "ok" else "err tap refused"
+                    } else {
+                        "err no display"
+                    },
+                )
+
+                "swipe" -> reply(
+                    if (input != null && parts.size >= 6) {
+                        val sent = input!!.swipe(
+                            parts[1].toInt(),
+                            parts[2].toInt(),
+                            parts[3].toInt(),
+                            parts[4].toInt(),
+                            parts[5].toInt(),
+                        )
+                        if (sent) "ok" else "err swipe refused"
+                    } else {
+                        "err no display"
+                    },
+                )
+
+                "key" -> reply(
+                    if (input != null && parts.size >= 2) {
+                        if (input!!.key(parts[1].toInt())) "ok" else "err key refused"
+                    } else {
+                        "err no display"
+                    },
+                )
+
+                "top" -> reply("ok ${runCatching { launcher?.topPackage() }.getOrNull().orEmpty()}")
+
+                "shot" -> {
+                    val bytes = runCatching { host?.frameJpeg() }.getOrNull()
+                    if (bytes == null) {
+                        reply("err no frame yet")
+                    } else {
+                        reply("ok ${bytes.size}")
+                        out.write(bytes)
+                        out.flush()
+                    }
+                }
+
+                "release" -> {
+                    host?.release()
+                    host = null
+                    input = null
+                    launcher = null
+                    reply("ok")
+                }
+
+                "ping" -> reply("ok")
+                else -> reply("err unknown command ${parts[0]}")
+            }
+        }
+    }
+
+    /** A Context from a bare `app_process`: the system context is enough here. */
+    private fun systemContext(): Context? = runCatching {
+        val activityThread = Class.forName("android.app.ActivityThread")
+        val thread = activityThread.getMethod("systemMain").invoke(null)
+        activityThread.getMethod("getSystemContext").invoke(thread) as? Context
+    }.getOrNull()
+}

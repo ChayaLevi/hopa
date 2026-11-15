@@ -28,6 +28,7 @@ fun SettingsRoute(
         onTestNotification = viewModel::testNotification,
         onTone = viewModel::setTone,
         onChattiness = viewModel::setChattiness,
+        onScreenPath = viewModel::setScreenPath,
         onOpenSelfCheck = onOpenSelfCheck,
         onOpenAbout = onOpenAbout,
         onPairBridge = viewModel::pairBridge,

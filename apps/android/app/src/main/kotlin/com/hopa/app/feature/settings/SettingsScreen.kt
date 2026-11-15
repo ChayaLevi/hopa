@@ -54,6 +54,7 @@ fun SettingsScreen(
     onOpenLaunchpad: () -> Unit,
     onOpenProfiles: () -> Unit,
     onOpenAccessibility: () -> Unit,
+    onScreenPath: (String) -> Unit,
 ) {
     var provider by rememberSaveable { mutableStateOf(state.settings.provider) }
     var endpoint by rememberSaveable { mutableStateOf(state.settings.endpoint) }
@@ -289,6 +290,42 @@ fun SettingsScreen(
             state.error?.let { error ->
                 Text(error, color = MaterialTheme.colorScheme.error)
             }
+            Text("Where runs happen", style = MaterialTheme.typography.titleLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                for ((value, title) in listOf(
+                    "auto" to "Auto",
+                    "background" to "Background",
+                    "onscreen" to "This screen",
+                    "bridge" to "PC bridge",
+                )) {
+                    val chosen = state.settings.screenPath == value
+                    Text(
+                        title,
+                        fontSize = 12.sp,
+                        color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
+                        modifier = Modifier
+                            .background(
+                                if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
+                                RoundedCornerShape(16.dp),
+                            )
+                            .clickable { onScreenPath(value) }
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    )
+                }
+            }
+            Text(
+                "Auto uses a hidden background screen when the helper is running, " +
+                    "then the PC bridge, then this screen.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                "Background screen needs phone access on (it reads that screen's " +
+                    "tree) and the helper started once over adb:\n" +
+                    "adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) " +
+                    "app_process / com.hopa.capabilities.display.ShellMain",
+                style = MaterialTheme.typography.bodySmall,
+                color = HopaColor.TextHint,
+            )
             Text("Character", style = MaterialTheme.typography.titleLarge)
             Text("Tone", style = MaterialTheme.typography.bodySmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

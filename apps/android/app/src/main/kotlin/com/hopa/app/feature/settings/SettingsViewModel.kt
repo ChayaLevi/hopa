@@ -164,6 +164,14 @@ class SettingsViewModel(
         }
     }
 
+    /** auto, background, onscreen or bridge; the same words the core enum uses. */
+    fun setScreenPath(value: String) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(screenPath = value) }
+            reload()
+        }
+    }
+
     fun setChattiness(value: String) {
         viewModelScope.launch {
             container.settings.update { it.copy(chattiness = value) }

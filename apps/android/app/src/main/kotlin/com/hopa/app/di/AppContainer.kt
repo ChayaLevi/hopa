@@ -65,6 +65,24 @@ class AppContainer(context: Context) {
         factory = factory,
         clock = clock,
     )
+    /** The hidden background display: one helper process, one socket. */
+    val shell = com.hopa.capabilities.display.ShellClient()
+
+    /** A device on the background display, or null when the helper is absent. */
+    suspend fun backgroundDevice(): com.hopa.core.ports.DevicePort? =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            if (!shell.connect()) {
+                return@withContext null
+            }
+            val metrics = context.resources.displayMetrics
+            val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
+            if (device.start(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)) {
+                device
+            } else {
+                null
+            }
+        }
+
     val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
     val modelFactory: ModelFactory = ModelFactory()

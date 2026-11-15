@@ -12,6 +12,8 @@ class NodeTreeReader(
     private val service: HopaAccessibilityService,
     private val maxNodes: Int = 400,
     private val maxText: Int = 6_000,
+    /** Read the window on this display instead of the one the person sees. */
+    private val displayId: Int = -1,
 ) {
     val refs: MutableMap<String, AccessibilityNodeInfo> = mutableMapOf()
     private var counter = 0
@@ -25,22 +27,29 @@ class NodeTreeReader(
         truncated = false
         focusedRef = ""
         texts.clear()
-        val root = service.activeRoot()
+        val root = if (displayId >= 0) {
+            service.windows.firstOrNull { it.displayId == displayId }?.root
+        } else {
+            service.activeRoot()
+        }
         val tree = if (root == null) {
             ObservationNode(type = "root")
         } else {
             convert(root)
         }
-        val metrics = service.resources.displayMetrics
         val display = runCatching {
-            service.getSystemService(DisplayManager::class.java)
-                ?.getDisplay(Display.DEFAULT_DISPLAY)
+            val manager = service.getSystemService(DisplayManager::class.java)
+            val target = if (displayId >= 0) displayId else Display.DEFAULT_DISPLAY
+            manager?.getDisplay(target)
         }.getOrNull()
+        val metrics = android.util.DisplayMetrics().also {
+            if (display != null) display.getRealMetrics(it) else it.setTo(service.resources.displayMetrics)
+        }
         val observation = Observation(
             id = "obs-${System.currentTimeMillis()}",
             timestamp = System.currentTimeMillis(),
-            displayId = display?.displayId ?: Display.DEFAULT_DISPLAY,
             windowId = root?.windowId?.toString() ?: "active",
+            displayId = if (displayId >= 0) displayId else display?.displayId ?: Display.DEFAULT_DISPLAY,
             rotation = display?.rotation ?: 0,
             density = metrics.density,
             screenSize = ScreenSize(metrics.widthPixels, metrics.heightPixels),

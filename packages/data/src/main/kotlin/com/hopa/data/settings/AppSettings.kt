@@ -13,4 +13,6 @@ data class AppSettings(
     val accessibilityAllowed: Boolean = true,
     val tone: String = "friendly",
     val chattiness: String = "balanced",
+    /** auto, background, onscreen or bridge; auto is the only one a user needs. */
+    val screenPath: String = "auto",
 )
