@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -60,6 +61,7 @@ import com.hopa.app.feature.chat.component.ChatEmptyState
 import com.hopa.app.feature.chat.component.Composer
 import com.hopa.app.feature.chat.component.MessageBubble
 import com.hopa.app.feature.chat.component.PendingAttachmentRow
+import com.hopa.app.feature.chat.component.ThinkingIndicator
 import com.hopa.app.ui.component.ApprovalSheet
 import com.hopa.app.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaBottomBarEasy
@@ -142,9 +144,10 @@ fun ChatScreen(
         if (messages.isNotEmpty()) {
             // Two passes: the first scroll runs on estimated item heights, and a
             // tall attachment bubble settles only after the next measure.
-            listState.animateScrollToItem(messages.lastIndex)
+            val last = if (state.busy) messages.size else messages.lastIndex
+            listState.animateScrollToItem(last)
             withFrameNanos { }
-            listState.animateScrollToItem(messages.lastIndex)
+            listState.animateScrollToItem(last)
         }
     }
     Scaffold(
@@ -351,6 +354,7 @@ fun ChatScreen(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(messages, key = ChatMessage::id) { message ->
@@ -360,6 +364,11 @@ fun ChatScreen(
                             onRetry = onRetry,
                             onUndo = onUndo,
                         )
+                    }
+                    if (state.busy) {
+                        item(key = "thinking") {
+                            ThinkingIndicator()
+                        }
                     }
                 }
             }
