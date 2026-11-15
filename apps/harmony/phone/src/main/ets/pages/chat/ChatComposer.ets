@@ -7,6 +7,9 @@ export struct ChatComposer {
   @Prop draft: string = '';
   @Prop busy: boolean = false;
   @Prop @Watch('onRecordingChange') recording: boolean = false;
+  /** "" when no bridge; otherwise the device the run will target. */
+  @Prop targetLabel: string = '';
+  onTarget: () => void = () => {};
   onDraft: (value: string) => void = () => {};
   onSend: () => void = () => {};
   onStop: () => void = () => {};
@@ -96,6 +99,18 @@ export struct ChatComposer {
   build() {
     Column({ space: 6 }) {
       Row({ space: 4 }) {
+        if (this.targetLabel.length > 0 && !this.recording) {
+          Text(this.targetLabel)
+            .fontSize(10)
+            .fontColor($r('app.color.text_secondary'))
+            .padding({ left: 7, right: 7, top: 4, bottom: 4 })
+            .backgroundColor($r('app.color.surface_muted'))
+            .borderRadius(8)
+            .margin({ left: 2 })
+            .onClick(() => {
+              this.onTarget();
+            })
+        }
         if (this.recording) {
           Row({ space: 6 }) {
             Circle({ width: 7, height: 7 })
