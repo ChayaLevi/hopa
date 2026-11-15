@@ -10,7 +10,6 @@ import com.networknt.schema.JsonSchema
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import kotlinx.serialization.encodeToString
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -83,8 +82,7 @@ class SchemaValidationTest {
 
     private fun schema(name: String): JsonSchema = factory.getSchema(inline(read(name)))
 
-    private fun read(name: String): JsonNode =
-        mapper.readTree(resource("/schemas/$name"))
+    private fun read(name: String): JsonNode = mapper.readTree(resource("/schemas/$name"))
 
     private fun resource(path: String): String =
         requireNotNull(javaClass.getResource(path)) { "missing $path" }.readText()

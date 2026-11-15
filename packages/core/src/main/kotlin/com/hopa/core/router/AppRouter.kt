@@ -79,12 +79,9 @@ object AppRouter {
         }
     }
 
-    private fun isAsciiAlnum(value: Char): Boolean =
-        value in 'a'..'z' || value in '0'..'9'
+    private fun isAsciiAlnum(value: Char): Boolean = value in 'a'..'z' || value in '0'..'9'
 
-    private fun normaliseHost(value: String): String =
-        value.trim().lowercase().removePrefix("www.")
+    private fun normaliseHost(value: String): String = value.trim().lowercase().removePrefix("www.")
 
-    private fun canOpen(target: RouteTarget): Boolean =
-        target.bundle.isNotEmpty() || target.domains.isNotEmpty()
+    private fun canOpen(target: RouteTarget): Boolean = target.bundle.isNotEmpty() || target.domains.isNotEmpty()
 }

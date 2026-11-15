@@ -8,11 +8,12 @@ import kotlinx.serialization.json.JsonPrimitive
 
 object CanonicalJson {
     fun encode(element: JsonElement): String = when (element) {
-        is JsonObject -> element.entries
-            .sortedBy { it.key }
-            .joinToString(separator = ",", prefix = "{", postfix = "}") { entry ->
-                "${JsonPrimitive(entry.key)}:${encode(entry.value)}"
-            }
+        is JsonObject ->
+            element.entries
+                .sortedBy { it.key }
+                .joinToString(separator = ",", prefix = "{", postfix = "}") { entry ->
+                    "${JsonPrimitive(entry.key)}:${encode(entry.value)}"
+                }
 
         is JsonArray -> element.joinToString(
             separator = ",",

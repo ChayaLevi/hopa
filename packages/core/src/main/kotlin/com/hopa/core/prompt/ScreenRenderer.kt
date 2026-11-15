@@ -19,7 +19,7 @@ class ScreenRenderer(
         if (node.ref.isNotEmpty()) {
             val bounds = node.bounds?.joinToString(",") ?: ""
             val label = node.text.ifEmpty { node.description }
-            lines += "${node.ref} ${node.type} ${label} [$bounds]"
+            lines += "${node.ref} ${node.type} $label [$bounds]"
         }
         for (child in node.children) {
             if (lines.size >= maxLines) {

@@ -13,11 +13,9 @@ class InMemoryRunRecorder : RunRecorder {
         return record
     }
 
-    override suspend fun records(runId: String): List<RunRecord> =
-        runs[runId]?.toList() ?: emptyList()
+    override suspend fun records(runId: String): List<RunRecord> = runs[runId]?.toList() ?: emptyList()
 
-    override suspend fun all(): List<RunRecord> =
-        runs.values.flatten().sortedByDescending { it.timestamp.orEmpty() }
+    override suspend fun all(): List<RunRecord> = runs.values.flatten().sortedByDescending { it.timestamp.orEmpty() }
 
     override suspend fun clear() {
         runs.clear()

@@ -3,12 +3,12 @@ package com.hopa.core.observation
 import com.hopa.core.contracts.Observation
 import com.hopa.core.contracts.ObservationNode
 import com.hopa.core.json.CanonicalJson
-import java.security.MessageDigest
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.security.MessageDigest
 
 object ObservationHasher {
     fun hash(observation: Observation): String {

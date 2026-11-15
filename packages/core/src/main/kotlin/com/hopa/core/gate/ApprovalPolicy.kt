@@ -24,8 +24,7 @@ class ApprovalPolicy(
             .forEach { trustedApps += it }
     }
 
-    fun isTrustedApp(packageName: String): Boolean =
-        trustedApps.contains(packageName.trim().lowercase())
+    fun isTrustedApp(packageName: String): Boolean = trustedApps.contains(packageName.trim().lowercase())
 
     fun classify(action: Action, observation: Observation? = null): RiskLevel {
         val app = action.app?.trim()?.lowercase().orEmpty()
@@ -72,6 +71,5 @@ class ApprovalPolicy(
         )
     }
 
-    fun extractPaymentContext(observation: Observation?): PaymentContext =
-        classifier.extractPaymentContext(observation)
+    fun extractPaymentContext(observation: Observation?): PaymentContext = classifier.extractPaymentContext(observation)
 }

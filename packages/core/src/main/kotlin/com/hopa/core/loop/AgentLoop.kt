@@ -142,7 +142,7 @@ class AgentLoop(
                 before = before,
             )
             records += result.record
-            narration += RunNarrator.line(action, result.record.executed)
+            narration += RunNarrator.line(action, result.record.executed, result.record.error)
             observation = result.observation
             clock.sleep(config.settleMillis)
             messages += ModelMessage("user", screenRenderer.render(result.observation))

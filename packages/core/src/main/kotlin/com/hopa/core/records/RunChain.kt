@@ -3,10 +3,10 @@ package com.hopa.core.records
 import com.hopa.core.contracts.RunRecord
 import com.hopa.core.json.CanonicalJson
 import com.hopa.core.json.HopaJson
-import java.security.MessageDigest
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
+import java.security.MessageDigest
 
 object RunChain {
     val SEED: String = "sha256:" + digest("")

@@ -1,10 +1,19 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 kotlin {
     jvmToolchain(17)
+}
+
+// AppCatalog.kt is generated from contracts/catalog by build-app-catalog.py;
+// its long lines are the generator's, not a person's to wrap.
+ktlint {
+    filter {
+        exclude("**/catalog/AppCatalog.kt")
+    }
 }
 
 sourceSets {

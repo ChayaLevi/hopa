@@ -102,9 +102,8 @@ class ActionClassifier {
         return false
     }
 
-    private fun hasAmount(text: String): Boolean =
-        ApprovalPolicyData.CURRENCY_RE.containsMatchIn(text) ||
-            ApprovalPolicyData.TOTAL_RE.containsMatchIn(text)
+    private fun hasAmount(text: String): Boolean = ApprovalPolicyData.CURRENCY_RE.containsMatchIn(text) ||
+        ApprovalPolicyData.TOTAL_RE.containsMatchIn(text)
 
     private fun containsAny(text: String, words: List<String>): Boolean {
         val lower = text.lowercase()

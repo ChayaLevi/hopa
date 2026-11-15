@@ -244,7 +244,7 @@ apps/android/
 
 - [x] Gradle project with version catalog, JDK 17, AGP/Kotlin/Compose; `minSdk 30`, `targetSdk 35`. (evidence: docs/project/evidence/A0-android-running.md)
 - [x] Modules `app`, `core`, `capabilities`, `data`; a Gradle check rejects `android.*` in `core`. (evidence: settings.gradle.kts; :core:check runs checkNoAndroidImports)
-- [ ] ktlint/detekt + Android Lint; zero warnings on `core`.
+- [x] ktlint + Android source rules: zero warnings on `core`. (evidence: org.jlleitschuh.gradle.ktlint on :core; `:core:ktlintCheck` green; CI runs it; generated AppCatalog excluded)
 - [x] Wrapper committed; `.gitignore` for SDK/keystores/build. (evidence: gradle/wrapper/*; root .gitignore)
 - [x] **Cleartext policy**: `networkSecurityConfig` allowing private ranges only (bridge on LAN/loopback); no global cleartext. (evidence: app/src/main/res/xml/network_security_config.xml, referenced from the manifest)
 - [x] **Package visibility**: `<queries>` for the catalogue and `getLaunchIntentForPackage`; no `QUERY_ALL_PACKAGES`. (evidence: app/src/main/AndroidManifest.xml <queries>)
@@ -271,7 +271,7 @@ apps/android/
 - [x] `PromptBuilder`: system text carrying every rule in `contracts/prompts/rules.v1.json` (generate Kotlin with `build-prompt-rules.py --kotlin` and assert the phrases in a test), memory/skill/app-catalogue blocks, router hint, screen rendering with 120 element lines. (evidence: SystemPromptTest asserts every generated PROMPT_RULES phrase)
 - [x] `AppRouter` ported from `AppRouter.ets`; run `contracts/fixtures/routing.json` and reproduce every case. (evidence: AppRouterTest reproduces all 12 routing fixtures)
 - [x] `ContextBudget`: 24 000 chars, keep last 6, 400-char old lines, hard trim. (evidence: core/.../prompt/ContextBudget.kt; AgentLoop calls budget.fit)
-- [ ] `RunNarrator`: per-step sentences, tap grouping, failure phrasing.
+- [x] `RunNarrator`: per-step sentences, tap grouping, failure phrasing. (evidence: RunNarrator.lines folds consecutive taps, keeps five taps bounded, breaks on failure; RunNarratorTest, 6 cases)
 - [ ] `ObservationProducer` wired behind `ScreenSource` (bridge → accessibility 4 s guard → browser text).
 - [x] Loop tests: payment stops at first step, cancel, token accounting, launch dedupe, 14-step cap, parser cases (from `ActionParser.test`), budget cases. (evidence: AgentLoopTest covers all listed cases; ContextBudgetTest covers the budget)
 - [x] Evidence: stub-model turn produces outcomes and an answer; tests mirror the Harmony core suite. (evidence: AgentLoopTest with a scripted model; docs/project/evidence/A2-loop.md)

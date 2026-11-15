@@ -31,12 +31,7 @@ class ObservationProducer(
         return normalized.copy(hash = ObservationHasher.hash(normalized))
     }
 
-    private fun flatten(
-        node: ObservationNode,
-        parent: Int,
-        parentDropped: Boolean,
-        into: MutableList<Item>,
-    ) {
+    private fun flatten(node: ObservationNode, parent: Int, parentDropped: Boolean, into: MutableList<Item>) {
         val index = into.size
         val dropped = parentDropped || isSecret(node)
         into += Item(node, parent, dropped)

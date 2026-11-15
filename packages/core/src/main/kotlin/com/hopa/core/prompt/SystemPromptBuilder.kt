@@ -19,7 +19,8 @@ class SystemPromptBuilder {
         val parts = mutableListOf(
             "You are HOPA, a personal assistant on an Android phone.",
             "Propose exactly one JSON action at a time. The key is \"kind\", never \"action\".",
-            "Action examples: {\"schemaVersion\":\"1\",\"kind\":\"ui.launch\",\"app\":\"<package>\",\"timeoutMs\":8000}; " +
+            "Action examples: {\"schemaVersion\":\"1\",\"kind\":\"ui.launch\"," +
+                "\"app\":\"<package>\",\"timeoutMs\":8000}; " +
                 "{\"schemaVersion\":\"1\",\"kind\":\"ui.tap\",\"ref\":\"<ref>\",\"timeoutMs\":3000}; " +
                 "{\"schemaVersion\":\"1\",\"kind\":\"ui.type\",\"ref\":\"<ref>\",\"text\":\"...\",\"timeoutMs\":3000}.",
             "A successful ui.launch already brings the app to the front; never launch the same app twice in one task.",

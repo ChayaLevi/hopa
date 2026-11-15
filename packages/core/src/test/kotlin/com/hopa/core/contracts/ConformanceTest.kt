@@ -6,7 +6,6 @@ import com.hopa.core.json.HopaJson
 import com.hopa.core.observation.ObservationHasher
 import com.hopa.core.parser.DecisionParser
 import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive

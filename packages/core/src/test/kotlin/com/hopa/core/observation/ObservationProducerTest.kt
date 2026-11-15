@@ -122,16 +122,14 @@ class ObservationProducerTest {
         )
     }
 
-    private fun observation(
-        text: String = "",
-        tree: ObservationNode = ObservationNode(type = "root"),
-    ): Observation = Observation(
-        id = "obs-test",
-        timestamp = 1,
-        screenSize = ScreenSize(width = 1080, height = 2400),
-        text = text,
-        tree = tree,
-    )
+    private fun observation(text: String = "", tree: ObservationNode = ObservationNode(type = "root")): Observation =
+        Observation(
+            id = "obs-test",
+            timestamp = 1,
+            screenSize = ScreenSize(width = 1080, height = 2400),
+            text = text,
+            tree = tree,
+        )
 
     private fun collectRefs(node: ObservationNode, into: MutableList<String>) {
         if (node.ref.isNotEmpty()) {
