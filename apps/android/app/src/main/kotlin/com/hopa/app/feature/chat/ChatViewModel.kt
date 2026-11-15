@@ -8,6 +8,8 @@ import com.hopa.app.di.AppContainer
 import com.hopa.core.gate.ApprovalRequest
 import com.hopa.core.loop.TurnContext
 import com.hopa.core.model.ModelMessage
+import com.hopa.core.observation.ScreenSource
+import com.hopa.core.observation.ScreenSourceDevice
 import com.hopa.data.sessions.Attachment
 import com.hopa.data.sessions.AttachmentRules
 import com.hopa.data.sessions.ChatMessage
@@ -277,12 +279,18 @@ class ChatViewModel(
                 .joinToString("\n\n")
             val skills = runCatching { container.skills.promptText() }.getOrDefault("")
             val bridged = runCatching { container.bridgedDevice() }.getOrNull()
-            val device = bridged
-                ?: if (current.accessibilityAllowed) {
-                    container.device
-                } else {
-                    com.hopa.capabilities.device.UnavailableDevicePort()
+            // Bridge first, then accessibility with a four-second guard; the first
+            // source that can see the screen also performs every action of the turn.
+            val sources = buildList {
+                bridged?.let { add(ScreenSource("bridge", it, budgetMs = 15_000)) }
+                if (current.accessibilityAllowed) {
+                    add(ScreenSource("accessibility", container.device, budgetMs = 4_000))
                 }
+            }
+            val device = ScreenSourceDevice(
+                sources = sources,
+                fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
+            )
             val loop = container.loopFor(device)
             val result = try {
                 withTimeoutOrNull(120_000) {

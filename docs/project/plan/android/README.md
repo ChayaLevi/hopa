@@ -272,7 +272,8 @@ apps/android/
 - [x] `AppRouter` ported from `AppRouter.ets`; run `contracts/fixtures/routing.json` and reproduce every case. (evidence: AppRouterTest reproduces all 12 routing fixtures)
 - [x] `ContextBudget`: 24 000 chars, keep last 6, 400-char old lines, hard trim. (evidence: core/.../prompt/ContextBudget.kt; AgentLoop calls budget.fit)
 - [x] `RunNarrator`: per-step sentences, tap grouping, failure phrasing. (evidence: RunNarrator.lines folds consecutive taps, keeps five taps bounded, breaks on failure; RunNarratorTest, 6 cases)
-- [ ] `ObservationProducer` wired behind `ScreenSource` (bridge → accessibility 4 s guard → browser text).
+- [x] `ObservationProducer` behind `ScreenSource`: bridge first, accessibility with a 4 s guard, one source per turn. (evidence: ScreenSourceDevice; ScreenSourceDeviceTest covers precedence, timeout, failure, action routing, fallback; ChatViewModel builds bridge + accessibility sources)
+- [ ] Browser text as the third source. (blocked: BrowserPort has no implementation yet; A11 browser)
 - [x] Loop tests: payment stops at first step, cancel, token accounting, launch dedupe, 14-step cap, parser cases (from `ActionParser.test`), budget cases. (evidence: AgentLoopTest covers all listed cases; ContextBudgetTest covers the budget)
 - [x] Evidence: stub-model turn produces outcomes and an answer; tests mirror the Harmony core suite. (evidence: AgentLoopTest with a scripted model; docs/project/evidence/A2-loop.md)
 
