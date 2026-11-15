@@ -9,6 +9,9 @@ interface SettingsRepository {
 
     suspend fun modelKey(): String
 
+    /** True when a model key is stored, even if it cannot be decrypted. */
+    suspend fun hasModelKey(): Boolean
+
     suspend fun setModelKey(value: String)
 
     suspend fun bridgeToken(): String

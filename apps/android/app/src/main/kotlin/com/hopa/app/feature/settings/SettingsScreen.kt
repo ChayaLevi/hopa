@@ -42,7 +42,7 @@ fun SettingsScreen(
     state: SettingsUiState,
     onBack: () -> Unit,
     onSave: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
-    onTestModel: (String, String, String, String) -> Unit,
+    onTestModel: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
     onTestBridge: (String, String) -> Unit,
     onTestNotification: () -> Unit,
     onTone: (String) -> Unit,
@@ -157,15 +157,23 @@ fun SettingsScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Text(
+                if (state.keySaved) {
+                    "A key is saved on this phone"
+                } else {
+                    "No key saved yet: paste one, then Save or Test"
+                },
+                style = MaterialTheme.typography.bodySmall,
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Button(
-                    onClick = { onTestModel(provider, endpoint, model, key) },
+                    onClick = { onTestModel(provider, endpoint, model, key, notify, web, bridgeUrl, bridgeKey, useBridge) },
                     enabled = !state.busy,
                 ) {
-                    Text("Test the model")
+                    Text("Save and test")
                 }
             }
             Text("Provider state: ${state.providerState.label()}")
