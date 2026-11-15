@@ -37,6 +37,8 @@ class SystemPromptBuilder {
                 "earlier, try it again before saying it still fails.",
             "Do not mention internal machinery (capabilities, bridges, web fallbacks) to " +
                 "the user; say what you can do for them instead.",
+            "If the screen says phone access is off, answer in one short sentence and " +
+                "give the path Settings, Accessibility, HOPA. Do not repeat it in later turns.",
             "Payments and irreversible actions stop for user approval.",
         )
         if (memory.isNotEmpty()) {

@@ -36,7 +36,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +52,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.hopa.app.feature.chat.component.AccessibilityBanner
 import com.hopa.app.feature.chat.component.ChatEmptyState
 import com.hopa.app.feature.chat.component.Composer
 import com.hopa.app.feature.chat.component.MessageBubble
@@ -57,6 +66,8 @@ import com.hopa.app.ui.component.HopaBottomBarEasy
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
+import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.data.sessions.ChatMessage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,6 +97,22 @@ fun ChatScreen(
     val messages = state.current?.messages.orEmpty()
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    // Phone access is granted in Android settings, so it is re-read every time
+    // the app comes back; a stale "off" banner would hide the only real fix.
+    var phoneAccess by remember {
+        mutableStateOf(AccessibilityState.isEnabled(context) && HopaAccessibilityService.instance != null)
+    }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                phoneAccess = AccessibilityState.isEnabled(context) &&
+                    HopaAccessibilityService.instance != null
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     val micPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
@@ -216,6 +243,12 @@ fun ChatScreen(
                         attachment = attachment,
                         onDiscard = onDiscardAttachment,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
+                    )
+                }
+                if (!phoneAccess) {
+                    AccessibilityBanner(
+                        onOpenSettings = { AccessibilityState.openSettings(context) },
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 6.dp),
                     )
                 }
                 Box(
