@@ -340,7 +340,7 @@ class ChatViewModel(
                         id = "m-${System.currentTimeMillis()}-screen",
                         role = "assistant",
                         text = "I cannot read the screen right now: " +
-                            device.lastError.ifBlank { "no window is available" } +
+                            device.lastError.take(180).ifBlank { "no window is available" } +
                             ". Phone access is " +
                             if (AccessibilityState.isEnabled(container.context)) {
                                 "on; turn the HOPA service off and on again."

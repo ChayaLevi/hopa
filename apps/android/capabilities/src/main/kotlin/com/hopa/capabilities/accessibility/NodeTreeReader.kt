@@ -1,5 +1,7 @@
 package com.hopa.capabilities.accessibility
 
+import android.hardware.display.DisplayManager
+import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
 import com.hopa.core.contracts.Observation
 import com.hopa.core.contracts.ObservationNode
@@ -30,12 +32,16 @@ class NodeTreeReader(
             convert(root)
         }
         val metrics = service.resources.displayMetrics
+        val display = runCatching {
+            service.getSystemService(DisplayManager::class.java)
+                ?.getDisplay(Display.DEFAULT_DISPLAY)
+        }.getOrNull()
         val observation = Observation(
             id = "obs-${System.currentTimeMillis()}",
             timestamp = System.currentTimeMillis(),
-            displayId = service.display?.displayId ?: 0,
+            displayId = display?.displayId ?: Display.DEFAULT_DISPLAY,
             windowId = root?.windowId?.toString() ?: "active",
-            rotation = service.display?.rotation ?: 0,
+            rotation = display?.rotation ?: 0,
             density = metrics.density,
             screenSize = ScreenSize(metrics.widthPixels, metrics.heightPixels),
             focus = focusedRef,
