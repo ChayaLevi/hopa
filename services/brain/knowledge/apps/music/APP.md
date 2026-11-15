@@ -7,7 +7,7 @@ validated: verified
 harmony: com.huawei.hmsapp.music
 harmony_ability: MainAbility
 harmony_verified: Mate 80, 2026-11-08
-android:
+android: com.sec.android.app.music
 android_activity:
 android_verified:
 windows:

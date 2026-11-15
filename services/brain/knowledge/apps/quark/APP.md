@@ -16,7 +16,5 @@ windows_verified:
 ---
 # Quark
 
-HarmonyOS bundle: `com.quark.ohosbrowser` (verified on a Mate 80).
-
 - Browser, search, documents and downloads.
 - Reading is safe; submitting a form or message needs approval.

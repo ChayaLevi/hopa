@@ -87,13 +87,24 @@ Different per client: only the identifier that `ui.launch` receives.
 
 1. The model names an app by display name or id, never by package.
 2. The client resolves the catalog entry to *its* identifier
-   (`CatalogRoutes.targets(installed, platform)`).
-3. If the identifier is absent, nothing is guessed: the router says no launch
-   target is verified and offers the site fallback.
-4. On Android, a label match against the installed inventory is the last resort;
-   a run record says when that path was used.
-5. A launch that the device refuses is reported as a device error, not as a
+   (`CatalogRoutes.targets(installed, platform)`); only that function may read a
+   platform column, and the structure check enforces it.
+3. No id on this platform, or no id at all → nothing is guessed: the router says
+   no launch target is verified and offers the site fallback.
+4. On Android an id is used when it is `verified`, or when the package is really
+   in the installed inventory. An unconfirmed id the phone does not have falls
+   back to a label match; with no match the target stays empty.
+5. Windows uses the catalog's `windows` column as its app list (there is no
+   installed inventory yet), so a wrong exe fails honestly at launch.
+6. A launch that the device refuses is reported as a device error, not as a
    success.
+
+## Coverage today
+
+54 apps. 44 have an Android package, 16 an exe, 26 a Harmony bundle (all
+verified on a device). Android packages for the Galaxy S24 set and Windows exes
+for the desktop set are unconfirmed until a run on that device; the inventory
+check above is what keeps them safe in the meantime.
 
 ## Vocabulary versus truth
 

@@ -16,7 +16,5 @@ windows_verified:
 ---
 # Baidu
 
-HarmonyOS bundle: `com.baidu.baiduapp` (verified on a Mate 80).
-
 - Search, news feed and mini programs.
 - Reading is safe; publishing or commenting is public: ask first.

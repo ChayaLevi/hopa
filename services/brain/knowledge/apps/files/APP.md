@@ -7,11 +7,11 @@ validated: pending
 harmony: com.huawei.hmos.filemanager
 harmony_ability: EntryAbility
 harmony_verified: 2026-11-06
-android:
+android: com.google.android.documentsui
 android_activity:
 android_verified:
-windows:
-windows_window:
+windows: explorer.exe
+windows_window: File Explorer
 windows_verified:
 ---
 # Files

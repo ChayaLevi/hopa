@@ -16,8 +16,6 @@ windows_verified:
 ---
 # WeChat
 
-HarmonyOS bundle: `com.tencent.wechat` (verified on a Mate 80).
-
 - Chats, contacts, search, Moments, Pay, mini programs.
 - Sending a message is public and effectively irreversible: show recipient and
   text, then ask.

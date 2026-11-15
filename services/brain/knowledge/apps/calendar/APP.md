@@ -7,7 +7,7 @@ validated: pending
 harmony: com.huawei.hmos.calendar
 harmony_ability: MainAbility
 harmony_verified: 2026-11-06
-android:
+android: com.samsung.android.calendar
 android_activity:
 android_verified:
 windows:

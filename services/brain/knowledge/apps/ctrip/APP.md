@@ -16,7 +16,5 @@ windows_verified:
 ---
 # Trip.com
 
-HarmonyOS bundle: `com.ctrip.harmonynext` (verified on a Mate 80).
-
 - Flights, hotels, trains and travel search.
 - Booking is a payment: always ask, show dates, destination and total.

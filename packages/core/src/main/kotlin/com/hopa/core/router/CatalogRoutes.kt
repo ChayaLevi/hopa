@@ -44,15 +44,26 @@ object CatalogRoutes {
         app: CatalogApp,
         platform: String,
         installed: List<InstalledApp>,
-    ): String = when (platform.lowercase()) {
-        "android" -> app.android.id.ifBlank {
-            // The catalog may lag behind the phone; a matching label is a last resort.
-            installedPackage(app.display, app.aliases, installed)
+    ): String {
+        val target = when (platform.lowercase()) {
+            "android" -> app.android
+            "windows" -> app.windows
+            "harmonyos", "harmony" -> app.harmonyos
+            else -> return ""
         }
-
-        "harmonyos", "harmony" -> app.harmonyos.id
-        "windows" -> app.windows.id
-        else -> ""
+        if (target.id.isBlank()) {
+            return ""
+        }
+        if (!platform.equals("android", ignoreCase = true)) {
+            return target.id
+        }
+        // On a phone the installed list is the authority: an unconfirmed package
+        // is only used when it is really there, otherwise a label match decides.
+        val present = installed.any { it.packageName.equals(target.id, ignoreCase = true) }
+        if (target.verified || present) {
+            return target.id
+        }
+        return installedPackage(app.display, app.aliases, installed)
     }
 
     /** The phone's own package for a catalog name; empty when the app is not installed. */

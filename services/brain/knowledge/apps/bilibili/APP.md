@@ -16,8 +16,6 @@ windows_verified:
 ---
 # Bilibili
 
-HarmonyOS bundle: `yylx.danmaku.bili` (verified on a Mate 80).
-
 - Video, search, comments, favourites, downloads.
 - Watching is safe; posting, commenting and following are public actions: ask.
 - If the app is absent, use https://www.bilibili.com in the built-in browser.

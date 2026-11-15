@@ -16,8 +16,6 @@ windows_verified:
 ---
 # Weibo
 
-HarmonyOS bundle: `com.sina.weibo.stage` (verified on a Mate 80).
-
 - Feed, search, profile, comments, direct messages.
 - To post: tap Skip if an ad shows, then tap Home. The orange + exists only on the Home feed, top-right near 1210,200.
 - The + has no label. Tap it, choose 写微博 (not Album), then type and tap Send. Send greys out until there is text.

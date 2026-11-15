@@ -16,8 +16,6 @@ windows_verified:
 ---
 # Douyin
 
-HarmonyOS bundle: `com.ss.hm.ugc.aweme` (verified on a Mate 80).
-
 - Feed, search, profile, messages, shopping.
 - Liking, commenting, following, posting and buying are public or paid actions:
   ask first.

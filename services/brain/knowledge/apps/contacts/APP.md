@@ -7,7 +7,7 @@ validated: pending
 harmony: com.ohos.contacts
 harmony_ability: com.ohos.contacts.EntryAbility
 harmony_verified: 2026-11-06
-android:
+android: com.samsung.android.app.contacts
 android_activity:
 android_verified:
 windows:

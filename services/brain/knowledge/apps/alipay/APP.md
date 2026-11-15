@@ -16,8 +16,6 @@ windows_verified:
 ---
 # Alipay
 
-HarmonyOS bundle: `com.alipay.mobile.client` (verified on a Mate 80).
-
 - Payments, transfers, bills and mini programs.
 - Sending money or paying a bill is a payment: always ask, show the amount and recipient.
 - Never read a password or verification code; hand login to the user.

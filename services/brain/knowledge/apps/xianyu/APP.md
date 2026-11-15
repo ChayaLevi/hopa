@@ -16,8 +16,6 @@ windows_verified:
 ---
 # Xianyu
 
-HarmonyOS bundle: `com.taobao.idlefish4ohos` (verified on a Mate 80).
-
 - Marketplace listings, search, chat with sellers, orders.
 - Buying, bidding, making an offer and confirming receipt involve money: always
   ask, show item, price and seller.

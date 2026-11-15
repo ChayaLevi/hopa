@@ -12,8 +12,8 @@ class CatalogRoutesInstalledTest {
     )
 
     @Test
-    fun android_reads_the_android_package_from_the_catalog() {
-        val bilibili = CatalogRoutes.targets(platform = "android")
+    fun android_uses_the_catalog_package_when_the_phone_has_it() {
+        val bilibili = CatalogRoutes.targets(installed, platform = "android")
             .first { it.name == "bilibili" }
         assertEquals("tv.danmaku.bili", bilibili.bundle)
     }
@@ -31,10 +31,21 @@ class CatalogRoutesInstalledTest {
     }
 
     @Test
-    fun an_app_that_is_not_installed_and_has_no_android_package_stays_empty() {
-        val gallery = CatalogRoutes.targets(platform = "android")
-            .first { it.name == "gallery" }
-        assertEquals("", gallery.bundle)
+    fun an_app_with_no_android_target_stays_empty() {
+        val discord = CatalogRoutes.targets(platform = "android")
+            .first { it.name == "discord" }
+        assertEquals("", discord.bundle)
+    }
+
+    @Test
+    fun an_unconfirmed_package_is_used_only_when_the_phone_has_it() {
+        val without = CatalogRoutes.targets(platform = "android")
+            .first { it.name == "bilibili" }
+        assertEquals("", without.bundle)
+
+        val catalog = CatalogRoutes.targets(installed, platform = "android")
+            .first { it.name == "bilibili" }
+        assertEquals("tv.danmaku.bili", catalog.bundle)
     }
 
     @Test
@@ -46,13 +57,13 @@ class CatalogRoutesInstalledTest {
 
     @Test
     fun the_router_hint_names_the_android_package() {
-        val route = AppRouter.route("open bilibili", CatalogRoutes.targets(platform = "android"))
+        val route = AppRouter.route("open bilibili", CatalogRoutes.targets(installed, platform = "android"))
         assertTrue(RouterHint.text(route).contains("\"app\":\"tv.danmaku.bili\""))
     }
 
     @Test
     fun the_router_hint_refuses_a_target_it_does_not_have() {
-        val route = AppRouter.route("open gallery", CatalogRoutes.targets(platform = "android"))
+        val route = AppRouter.route("open discord", CatalogRoutes.targets(platform = "android"))
         assertTrue(RouterHint.text(route).contains("no launch target is verified"))
     }
 }

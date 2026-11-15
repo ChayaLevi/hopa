@@ -16,8 +16,6 @@ windows_verified:
 ---
 # JD
 
-HarmonyOS bundle: `com.jd.hm.mall` (verified on a Mate 80).
-
 - Shopping, search, cart and orders.
 - Checkout is a payment: always ask, show the item and total.
 - Publishing a review is public: ask first.

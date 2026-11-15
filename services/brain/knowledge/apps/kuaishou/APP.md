@@ -16,8 +16,6 @@ windows_verified:
 ---
 # Kuaishou
 
-HarmonyOS bundle: `com.kuaishou.hmapp` (verified on a Mate 80).
-
 - Short video, live, messages, shop.
 - Liking, commenting, following, posting and buying: ask first.
 - Live gifts and shop purchases are payments: always ask.

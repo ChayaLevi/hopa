@@ -13,10 +13,10 @@ class InstalledAppsBlock(
 ) {
     fun text(apps: List<InstalledApp>): String {
         if (apps.isEmpty()) {
-            return "INSTALLED APPS ON THIS PHONE: none could be listed.\n" +
+            return "APPS THIS CLIENT CAN OPEN: none could be listed.\n" +
                 "Do not guess a package name; ask the person to open the app."
         }
-        val lines = mutableListOf("INSTALLED APPS ON THIS PHONE (label - package):")
+        val lines = mutableListOf("APPS THIS CLIENT CAN OPEN (label - target):")
         apps.asSequence()
             .filter { it.label.isNotBlank() && it.packageName.isNotBlank() }
             .distinctBy { it.packageName }
@@ -24,8 +24,8 @@ class InstalledAppsBlock(
             .take(limit)
             .forEach { lines += "${it.label} - ${it.packageName}" }
         lines += ""
-        lines += "Open one of these with ui.launch and its package name. " +
-            "Never invent a package name and never launch the same app twice."
+        lines += "Open one of these with ui.launch and its target. " +
+            "Never invent a target and never launch the same app twice."
         return lines.joinToString("\n")
     }
 }

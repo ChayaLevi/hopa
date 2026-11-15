@@ -16,7 +16,7 @@ class InstalledAppsBlockTest {
         )
         assertTrue(text.contains("Bilibili - tv.danmaku.bili"))
         assertTrue(text.contains("Settings - com.android.settings"))
-        assertTrue(text.contains("Never invent a package"))
+        assertTrue(text.contains("Never invent a target"))
     }
 
     @Test

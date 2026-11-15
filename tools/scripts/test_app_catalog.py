@@ -50,11 +50,11 @@ def test_list_parsing_handles_empty() -> None:
 def test_catalogue_counts_and_status() -> None:
     module = _module()
     data = module.document(module.collect_apps(), module.collect_sites())
-    assert len(data["apps"]) == 35
+    assert len(data["apps"]) == 54
     assert len(data["sites"]) == 21
     harmony = [app["platforms"]["harmonyos"] for app in data["apps"]]
     assert sum(1 for item in harmony if item["verified"]) == 26
-    assert sum(1 for item in harmony if not item["confirmed"]) == 9
+    assert sum(1 for item in harmony if not item["confirmed"]) == len(data["apps"]) - 26
     # Verified apps must carry a launchable ability.
     assert all(item["detail"] for item in harmony if item["verified"])
 

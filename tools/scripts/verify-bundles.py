@@ -62,7 +62,7 @@ def load_apps() -> list[dict[str, str]]:
                 "name": fields.get("name", path.parent.name),
                 "display": fields.get("display", path.parent.name),
                 "bundle": bundle,
-                "verified": fields.get("bundle_verified", "").strip(),
+                "verified": fields.get("harmony_verified", fields.get("bundle_verified", "")).strip(),
                 "ability": fields.get("ability", "").strip(),
                 "validated": fields.get("validated", "").strip(),
             }

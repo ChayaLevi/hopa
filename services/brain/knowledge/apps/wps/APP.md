@@ -16,7 +16,5 @@ windows_verified:
 ---
 # WPS Office
 
-HarmonyOS bundle: `cn.wps.mobileoffice.hap` (verified on a Mate 80).
-
 - Documents, spreadsheets and presentations.
 - Editing or sharing a document changes someone else's file: ask first.

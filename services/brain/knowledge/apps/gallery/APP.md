@@ -7,7 +7,7 @@ validated: pending
 harmony: com.huawei.hmos.photos
 harmony_ability: com.huawei.hmos.photos.MainAbility
 harmony_verified: 2026-11-06
-android:
+android: com.sec.android.gallery3d
 android_activity:
 android_verified:
 windows:
