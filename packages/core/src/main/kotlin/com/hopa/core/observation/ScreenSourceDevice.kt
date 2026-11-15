@@ -19,17 +19,26 @@ class ScreenSourceDevice(
     var sourceName: String = ""
         private set
 
+    /** Why the last source failed, so the client can say something useful. */
+    var lastError: String = ""
+        private set
+
     override suspend fun observe(): Observation {
         chosen?.let { return it.observe() }
 
         for (source in sources) {
-            val observation = withTimeoutOrNull(source.budgetMs) {
-                runCatching { source.device.observe() }.getOrNull()
+            val outcome = withTimeoutOrNull(source.budgetMs) {
+                runCatching { source.device.observe() }
             }
+            val observation = outcome?.getOrNull()
             if (observation != null) {
                 chosen = source.device
                 sourceName = source.name
                 return observation
+            }
+            lastError = when {
+                outcome == null -> "${source.name} timed out after ${source.budgetMs} ms"
+                else -> "${source.name}: ${outcome.exceptionOrNull()?.message ?: "no observation"}"
             }
         }
 

@@ -330,6 +330,36 @@ class ChatViewModel(
                 sources = sources,
                 fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
             )
+            device.observe()
+            if (device.sourceName == "fallback") {
+                container.busy.value = false
+                stopRunService()
+                container.conversations.append(
+                    conversation.id,
+                    ChatMessage(
+                        id = "m-${System.currentTimeMillis()}-screen",
+                        role = "assistant",
+                        text = "I cannot read the screen right now: " +
+                            device.lastError.ifBlank { "no window is available" } +
+                            ". Phone access is " +
+                            if (AccessibilityState.isEnabled(container.context)) {
+                                "on; turn the HOPA service off and on again."
+                            } else {
+                                "off; turn it on in Settings, Accessibility, HOPA."
+                            },
+                        timestamp = System.currentTimeMillis(),
+                    ),
+                )
+                val all = container.conversations.all()
+                _state.update {
+                    it.copy(
+                        current = all.firstOrNull { item -> item.id == conversation.id },
+                        conversations = all,
+                        busy = false,
+                    )
+                }
+                return@launch
+            }
             val loop = container.loopFor(device)
             val result = try {
                 withTimeoutOrNull(120_000) {
