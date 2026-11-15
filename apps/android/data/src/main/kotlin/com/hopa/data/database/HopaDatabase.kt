@@ -26,7 +26,7 @@ import com.hopa.data.database.entity.TurnEntity
         MemoryFactEntity::class,
         SkillEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class HopaDatabase : RoomDatabase() {
@@ -50,6 +50,7 @@ abstract class HopaDatabase : RoomDatabase() {
                     Migrations.MIGRATION_2_3,
                     Migrations.MIGRATION_3_4,
                     Migrations.MIGRATION_4_5,
+        Migrations.MIGRATION_5_6,
                 )
                 .build()
     }

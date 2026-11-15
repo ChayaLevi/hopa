@@ -48,6 +48,18 @@ class ActionExecutorTest {
     }
 
     @Test
+    fun an_approved_payment_runs_and_is_recorded_as_payment() = runBlocking {
+        val harness = Harness(allow = true)
+        val result = harness.execute(Action(kind = "payment.pay", text = "42.00"))
+
+        assertTrue(result.record.executed)
+        assertEquals("payment", result.record.classification)
+        assertEquals(true, result.record.approved)
+        assertEquals(null, result.record.error)
+        assertEquals(1, harness.approval.asked)
+    }
+
+    @Test
     fun a_tap_that_changes_nothing_is_not_verified() = runBlocking {
         val harness = Harness(allow = false, changingTap = false)
         val result = harness.execute(Action(kind = "ui.tap", ref = "e1"))

@@ -15,4 +15,8 @@ data class PendingApprovalEntity(
     val isPayment: Boolean,
     val actionJson: String,
     val createdAt: Long,
+    /** [left, top, right, bottom] of the amount, empty when unknown. */
+    val highlightJson: String = "",
+    /** The app a "remember this app" answer applies to, empty when none. */
+    val rememberPackage: String = "",
 )

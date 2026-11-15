@@ -68,7 +68,26 @@ class ApprovalPolicy(
             consequence = payment.consequence,
             isPayment = isPayment,
             action = action,
+            highlight = highlightFor(observation, payment.amount),
+            rememberPackage = if (isPayment) null else action.app?.takeIf { it.isNotBlank() },
         )
+    }
+
+    /** The bounds of the node that shows the amount, so the sheet can point at it. */
+    private fun highlightFor(observation: Observation?, amount: String): List<Int>? {
+        if (observation == null || amount.isBlank()) {
+            return null
+        }
+
+        fun visit(node: com.hopa.core.contracts.ObservationNode): List<Int>? {
+            val bounds = node.bounds
+            if (bounds != null && bounds.size == 4 && node.text.contains(amount, ignoreCase = true)) {
+                return bounds
+            }
+            return node.children.firstNotNullOfOrNull { visit(it) }
+        }
+
+        return visit(observation.tree)
     }
 
     fun extractPaymentContext(observation: Observation?): PaymentContext = classifier.extractPaymentContext(observation)

@@ -59,4 +59,15 @@ object Migrations {
             )
         }
     }
+
+    val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                "ALTER TABLE pending_approvals ADD COLUMN highlightJson TEXT NOT NULL DEFAULT ''",
+            )
+            database.execSQL(
+                "ALTER TABLE pending_approvals ADD COLUMN rememberPackage TEXT NOT NULL DEFAULT ''",
+            )
+        }
+    }
 }

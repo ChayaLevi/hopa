@@ -30,6 +30,8 @@ class RoomPendingApprovalStore(
                     .encodeToJsonElement(Action.serializer(), request.action)
                     .toString(),
                 createdAt = System.currentTimeMillis(),
+                highlightJson = request.highlight?.joinToString(",").orEmpty(),
+                rememberPackage = request.rememberPackage.orEmpty(),
             ),
         )
     }
@@ -56,6 +58,11 @@ class RoomPendingApprovalStore(
                 Action.serializer(),
                 HopaJson.element.parseToJsonElement(row.actionJson),
             ),
+            highlight = row.highlightJson
+                .split(',')
+                .mapNotNull { it.toIntOrNull() }
+                .takeIf { it.size == 4 },
+            rememberPackage = row.rememberPackage.takeIf { it.isNotEmpty() },
         )
     }
 }

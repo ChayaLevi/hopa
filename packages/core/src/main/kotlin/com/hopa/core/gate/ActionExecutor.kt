@@ -190,6 +190,13 @@ class ActionExecutor(
                 return port.run(action.text.orEmpty())
             }
 
+            // A payment is still a device gesture: the tap or the card entry the
+            // person approved. Without this, an approved payment could never run.
+            "payment.pay", "payment.confirm", "payment.checkout", "payment.authorize" ->
+                device.tap(action.ref, action.x, action.y)
+
+            "payment.enterCard" -> device.type(action.text.orEmpty(), action.ref)
+
             else -> throw UnsupportedOperationException("unsupported kind: ${action.kind}")
         }
         return ""
