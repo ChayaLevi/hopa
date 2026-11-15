@@ -100,14 +100,13 @@ fun ChatScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     // Phone access is granted in Android settings, so it is re-read every time
     // the app comes back; a stale "off" banner would hide the only real fix.
-    var phoneAccess by remember {
-        mutableStateOf(AccessibilityState.isEnabled(context) && HopaAccessibilityService.instance != null)
-    }
+    var accessEnabled by remember { mutableStateOf(AccessibilityState.isEnabled(context)) }
+    var accessConnected by remember { mutableStateOf(HopaAccessibilityService.instance != null) }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                phoneAccess = AccessibilityState.isEnabled(context) &&
-                    HopaAccessibilityService.instance != null
+                accessEnabled = AccessibilityState.isEnabled(context)
+                accessConnected = HopaAccessibilityService.instance != null
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -245,9 +244,11 @@ fun ChatScreen(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
                     )
                 }
-                if (!phoneAccess) {
+                if (!accessEnabled || !accessConnected) {
                     AccessibilityBanner(
                         onOpenSettings = { AccessibilityState.openSettings(context) },
+                        enabled = accessEnabled,
+                        connected = accessConnected,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 6.dp),
                     )
                 }

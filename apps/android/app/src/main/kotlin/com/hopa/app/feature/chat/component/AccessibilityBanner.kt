@@ -23,6 +23,8 @@ import com.hopa.app.ui.theme.HopaColor
 @Composable
 fun AccessibilityBanner(
     onOpenSettings: () -> Unit,
+    enabled: Boolean,
+    connected: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -39,13 +41,17 @@ fun AccessibilityBanner(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                "Phone access is off, so HOPA cannot see or tap apps.",
+                when {
+                    !enabled -> "Phone access is off, so HOPA cannot see or tap apps."
+                    !connected -> "Phone access is on but not connected; reopen HOPA if this stays."
+                    else -> ""
+                },
                 fontSize = 12.sp,
                 color = HopaColor.TextSecondary,
                 modifier = Modifier.weight(1f),
             )
             Text(
-                "Turn on",
+                if (enabled) "Check" else "Turn on",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 color = HopaColor.Primary,
