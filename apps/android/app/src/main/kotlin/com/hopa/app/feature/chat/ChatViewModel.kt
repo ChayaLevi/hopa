@@ -421,6 +421,7 @@ class ChatViewModel(
                     busy = false,
                     error = result?.error?.message,
                     options = result?.options.orEmpty(),
+                    lastPath = device.sourceName,
                 )
             }
             answerOutsideApp(answer)

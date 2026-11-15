@@ -17,4 +17,6 @@ data class ChatUiState(
     val voiceError: String? = null,
     val attachment: Attachment? = null,
     val attachmentNotice: String? = null,
+    /** Where the last turn ran: background, bridge or this screen. */
+    val lastPath: String = "",
 )

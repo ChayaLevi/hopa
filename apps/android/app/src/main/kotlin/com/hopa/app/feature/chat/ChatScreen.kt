@@ -358,6 +358,18 @@ fun ChatScreen(
                     trackColor = HopaColor.PrimarySoft,
                 )
             }
+            if (messages.isNotEmpty() && state.lastPath.isNotEmpty()) {
+                Text(
+                    "Ran on " + when (state.lastPath) {
+                        "background" -> "the hidden screen"
+                        "bridge" -> "the PC bridge"
+                        else -> "this screen"
+                    },
+                    fontSize = 10.sp,
+                    color = HopaColor.TextHint,
+                    modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                )
+            }
             if (messages.isEmpty()) {
                 ChatEmptyState(onQuick = onQuick)
             } else {
