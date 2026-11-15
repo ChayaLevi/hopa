@@ -35,6 +35,7 @@ fun AccessibilityScreen(
     allowed: Boolean,
     serviceEnabled: Boolean,
     connected: Boolean,
+    installedAt: String,
     onToggle: (Boolean) -> Unit,
     onOpenSettings: () -> Unit,
     onBack: () -> Unit,
@@ -118,6 +119,21 @@ fun AccessibilityScreen(
                         color = if (connected) HopaColor.Success else HopaColor.TextHint,
                         modifier = Modifier.padding(top = 4.dp),
                     )
+                    Text(
+                        "This copy was installed $installedAt",
+                        fontSize = 12.sp,
+                        color = HopaColor.TextHint,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                    if (serviceEnabled && !connected) {
+                        Text(
+                            "Turn the switch off, wait a second, then on again. If it " +
+                                "stays not connected, restart the phone and open HOPA.",
+                            fontSize = 12.sp,
+                            color = HopaColor.Warning,
+                            modifier = Modifier.padding(top = 6.dp),
+                        )
+                    }
                 }
             }
             Button(onClick = onOpenSettings) {

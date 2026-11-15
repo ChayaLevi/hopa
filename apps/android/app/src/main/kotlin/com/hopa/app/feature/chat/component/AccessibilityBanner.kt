@@ -43,7 +43,7 @@ fun AccessibilityBanner(
             Text(
                 when {
                     !enabled -> "Phone access is off, so HOPA cannot see or tap apps."
-                    !connected -> "Phone access is on but not connected; reopen HOPA if this stays."
+                    !connected -> "Phone access is on but not connected; turn the switch off and on again."
                     else -> ""
                 },
                 fontSize = 12.sp,
