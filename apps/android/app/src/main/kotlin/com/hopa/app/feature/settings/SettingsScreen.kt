@@ -1,8 +1,10 @@
 package com.hopa.app.feature.settings
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
@@ -14,12 +16,15 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * The settings hub: grouped rows with a leading icon, one subject per row,
- * detail on its own page.
+ * Settings as a state dashboard: two live tiles for the things that decide
+ * whether HOPA works, then short groups for the rest. No uppercase labels, no
+ * paragraph explanations on this page.
  */
 @Composable
 fun SettingsScreen(
@@ -34,15 +39,45 @@ fun SettingsScreen(
     onOpenAbout: () -> Unit,
 ) {
     val settings = state.settings
-    SettingsPage(title = "Settings", onBack = onBack) {
+    val modelOk = state.providerState == com.hopa.capabilities.llm.ProviderState.CLOUD ||
+        state.providerState == com.hopa.capabilities.llm.ProviderState.LAN
+    val ready = modelOk && state.phoneAccess
+
+    SettingsPage(title = "", onBack = onBack) {
+        SettingsHeader(
+            title = "Settings",
+            summary = when {
+                ready -> "Everything HOPA needs is on."
+                !modelOk && !state.phoneAccess -> "Two things need you: model and phone access."
+                !modelOk -> "Add a model key to get real answers."
+                else -> "Turn on phone access so HOPA can act."
+            },
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            SettingsTile(
+                title = "Model",
+                value = providerSummary(state),
+                state = if (modelOk) DotState.Good else DotState.Attention,
+                icon = Icons.Filled.Build,
+                onClick = { onOpenPage(PAGE_MODEL) },
+                modifier = Modifier.weight(1f),
+            )
+            SettingsTile(
+                title = "Screen access",
+                value = shortPathLabel(settings.screenPath),
+                state = if (state.phoneAccess) DotState.Good else DotState.Off,
+                icon = Icons.Filled.Settings,
+                onClick = { onOpenPage(PAGE_SCREEN) },
+                modifier = Modifier.weight(1f),
+            )
+        }
+
         SettingsSection("Assistant")
         SettingsGroup {
-            SettingsRow(
-                "Model",
-                "${providerSummary(state)} - ${settings.model}",
-                Icons.Filled.Build,
-            ) { onOpenPage(PAGE_MODEL) }
-            SettingsDivider()
             SettingsRow(
                 "Character",
                 "${settings.tone} - ${settings.chattiness}",
@@ -51,28 +86,10 @@ fun SettingsScreen(
             SettingsDivider()
             SettingsRow(
                 "Notifications",
-                if (settings.notifyAnswers) "On when an answer is ready" else "Off",
+                if (settings.notifyAnswers) "On" else "Off",
                 Icons.Filled.Notifications,
             ) { onOpenPage(PAGE_NOTIFICATIONS) }
-        }
-
-        SettingsSection("Phone")
-        SettingsGroup {
-            SettingsRow(
-                "Screen access",
-                pathLabel(settings.screenPath),
-                Icons.Filled.Settings,
-            ) { onOpenPage(PAGE_SCREEN) }
             SettingsDivider()
-            SettingsRow(
-                "Phone access",
-                "Read and tap other apps",
-                Icons.Filled.Lock,
-            ) { onOpenAccessibility() }
-        }
-
-        SettingsSection("Computer")
-        SettingsGroup {
             SettingsRow(
                 "PC bridge",
                 settings.bridgeUrl.ifBlank { "Not paired" },
@@ -80,37 +97,32 @@ fun SettingsScreen(
             ) { onOpenPage(PAGE_BRIDGE) }
         }
 
-        SettingsSection("More")
+        SettingsSection("Phone")
         SettingsGroup {
             SettingsRow(
-                "Capabilities",
-                "What HOPA can use on this phone",
-                Icons.Filled.List,
-            ) { onOpenCapabilities() }
+                "Phone access",
+                if (state.phoneAccess) "On" else "Off",
+                Icons.Filled.Lock,
+            ) { onOpenAccessibility() }
             SettingsDivider()
-            SettingsRow(
-                "Launchpad",
-                "Apps installed on this phone",
-                Icons.Filled.Menu,
-            ) { onOpenLaunchpad() }
+            SettingsRow("Capabilities", "What HOPA can use", Icons.Filled.List) {
+                onOpenCapabilities()
+            }
             SettingsDivider()
-            SettingsRow(
-                "Profiles",
-                "Everyday and other modes",
-                Icons.Filled.Person,
-            ) { onOpenProfiles() }
+            SettingsRow("Launchpad", "Apps on this phone", Icons.Filled.Menu) {
+                onOpenLaunchpad()
+            }
+        }
+
+        SettingsSection("More")
+        SettingsGroup {
+            SettingsRow("Profiles", "Everyday and other modes", Icons.Filled.Person) {
+                onOpenProfiles()
+            }
             SettingsDivider()
-            SettingsRow(
-                "Self-check",
-                "Diagnostics and counters",
-                Icons.Filled.CheckCircle,
-            ) { onOpenSelfCheck() }
+            SettingsRow("Self-check", "Diagnostics", Icons.Filled.List) { onOpenSelfCheck() }
             SettingsDivider()
-            SettingsRow(
-                "About",
-                "Version, licences, the mascot",
-                Icons.Filled.Info,
-            ) { onOpenAbout() }
+            SettingsRow("About", "Version and licences", Icons.Filled.Info) { onOpenAbout() }
         }
 
         state.error?.let { error ->

@@ -12,10 +12,10 @@ import com.hopa.app.ui.theme.HopaColor
 @Composable
 fun SettingsSection(title: String) {
     Text(
-        title.uppercase(),
-        fontSize = 11.sp,
-        letterSpacing = 0.8.sp,
-        color = HopaColor.TextHint,
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+        title,
+        fontSize = 13.sp,
+        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+        color = HopaColor.TextSecondary,
+        modifier = Modifier.padding(start = 4.dp, top = 6.dp),
     )
 }
