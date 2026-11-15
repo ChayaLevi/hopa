@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,7 +56,7 @@ fun SettingsScreen(
 
         // Two facts decide whether HOPA can help; nothing else belongs up here.
         SettingsPanel {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column {
                 StatusLine(
                     "Answers",
                     if (answers) providerSummary(state) else "needs a key",
@@ -65,8 +67,12 @@ fun SettingsScreen(
                     if (state.phoneAccess) "on" else "off",
                     state.phoneAccess,
                 ) { onOpenAccessibility() }
+                SettingsDivider()
                 if (ready < 2) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         if (!answers) {
                             QuickChip("Add a key") { onOpenPage(PAGE_MODEL) }
                         }
@@ -108,14 +114,26 @@ fun SettingsScreen(
                 modifier = Modifier.padding(top = 12.dp),
             )
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TextButton(onClick = onRunCheck, enabled = !state.busy) {
-                    Text(if (state.busy) "Checking\u2026" else "Check that it works")
+                Button(
+                    onClick = onRunCheck,
+                    enabled = !state.busy,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        if (state.busy) "Checking\u2026" else "Check that it works",
+                        fontSize = 13.sp,
+                    )
                 }
-                TextButton(onClick = { onOpenPage(PAGE_SCREEN) }) {
-                    Text("Set up")
+                OutlinedButton(
+                    onClick = { onOpenPage(PAGE_SCREEN) },
+                    modifier = Modifier,
+                ) {
+                    Text("Set up", fontSize = 13.sp)
                 }
             }
             // A button that reports nowhere is a broken button.
