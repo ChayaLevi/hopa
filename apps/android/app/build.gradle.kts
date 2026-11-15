@@ -1,5 +1,8 @@
 import java.util.Properties
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -25,7 +28,7 @@ android {
         minSdk = 30
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "0.1.0-" + SimpleDateFormat("yyMMdd-HHmm").format(Date())
     }
 
     signingConfigs {

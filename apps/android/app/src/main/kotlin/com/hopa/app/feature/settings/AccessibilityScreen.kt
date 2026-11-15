@@ -120,7 +120,7 @@ fun AccessibilityScreen(
                         modifier = Modifier.padding(top = 4.dp),
                     )
                     Text(
-                        "This copy was installed $installedAt",
+                        "Build $installedAt",
                         fontSize = 12.sp,
                         color = HopaColor.TextHint,
                         modifier = Modifier.padding(top = 4.dp),

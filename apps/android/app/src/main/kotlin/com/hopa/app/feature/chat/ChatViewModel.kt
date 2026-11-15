@@ -273,6 +273,33 @@ class ChatViewModel(
                     ),
                 )
             }
+            if (!(AccessibilityState.isEnabled(container.context) &&
+                    HopaAccessibilityService.instance != null)
+            ) {
+                // Nothing below can work without a screen, and asking the model to
+                // guess produced a paragraph of apology instead of the one real fix.
+                container.busy.value = false
+                stopRunService()
+                container.conversations.append(
+                    conversation.id,
+                    ChatMessage(
+                        id = "m-${System.currentTimeMillis()}-local",
+                        role = "assistant",
+                        text = "Phone access is off, so I cannot see or tap apps. " +
+                            "Turn it on in Settings, Accessibility, HOPA, then ask again.",
+                        timestamp = System.currentTimeMillis(),
+                    ),
+                )
+                val all = container.conversations.all()
+                _state.update {
+                    it.copy(
+                        current = all.firstOrNull { item -> item.id == conversation.id },
+                        conversations = all,
+                        busy = false,
+                    )
+                }
+                return@launch
+            }
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
             val facts = runCatching { container.memory.promptText() }.getOrDefault("")
