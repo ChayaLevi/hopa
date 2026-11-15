@@ -1,21 +1,14 @@
 package com.hopa.app.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,14 +16,19 @@ import com.hopa.app.ui.theme.HopaColor
 import com.hopa.capabilities.llm.ProviderState
 
 /**
- * Settings as a dashboard: two tiles for the things that decide whether HOPA can
- * help at all, then short groups. Plain words: no mechanism on this page.
+ * Settings as one control surface, not a menu: a readiness ring, controls that
+ * act where they are, and one-tap fixes for the thing that is missing.
  */
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
     onBack: () -> Unit,
     onOpenPage: (String) -> Unit,
+    onScreenPath: (String) -> Unit,
+    onTone: (String) -> Unit,
+    onChattiness: (String) -> Unit,
+    onToggleAlerts: (Boolean) -> Unit,
+    onRunCheck: () -> Unit,
     onOpenCapabilities: () -> Unit,
     onOpenLaunchpad: () -> Unit,
     onOpenProfiles: () -> Unit,
@@ -41,89 +39,128 @@ fun SettingsScreen(
     val settings = state.settings
     val answers = state.providerState == ProviderState.CLOUD ||
         state.providerState == ProviderState.LAN
+    val ready = (if (answers) 1 else 0) + (if (state.phoneAccess) 1 else 0)
 
     SettingsPage(title = "Settings", onBack = onBack, collapseTitle = true) {
         SettingsHeader(
             title = "Settings",
-            summary = when {
-                answers && state.phoneAccess -> "Everything is ready."
-                !answers && !state.phoneAccess -> "Two things need you below."
-                !answers -> "Add a key so HOPA can answer."
-                else -> "Allow screen control so HOPA can help."
+            summary = if (ready == 2) {
+                "Ready to help."
+            } else {
+                "One step left before HOPA can act for you."
             },
         )
+
+        // Hero: readiness and the two facts that decide it.
+        SettingsPanel {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StatusRing(ready = ready, total = 2)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    StatusLine(
+                        "Answers",
+                        if (answers) providerSummary(state) else "Needs a key",
+                        answers,
+                    ) { onOpenPage(PAGE_MODEL) }
+                    StatusLine(
+                        "Screen control",
+                        if (state.phoneAccess) "On" else "Off",
+                        state.phoneAccess,
+                    ) { onOpenAccessibility() }
+                }
+            }
+        }
+
+        // The fix, offered as one tap instead of a page to find.
+        if (ready < 2) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                QuickChip("Add a key") { onOpenPage(PAGE_MODEL) }
+                QuickChip("Allow screen control") { onOpenAccessibility() }
+            }
+        }
+
+        SettingsPanel {
+            Text("Running apps", fontSize = 15.sp, color = HopaColor.TextPrimary)
+            Text(
+                "Where apps open when you ask.",
+                fontSize = 13.sp,
+                color = HopaColor.TextSecondary,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+            SettingsSegment(
+                options = listOf(
+                    "auto" to "Auto",
+                    "background" to "Hidden",
+                    "onscreen" to "This screen",
+                    "bridge" to "Computer",
+                ),
+                selected = settings.screenPath,
+                onSelect = onScreenPath,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = onRunCheck, enabled = !state.busy) {
+                    Text(if (state.busy) "Checking\u2026" else "Check it works")
+                }
+                Text(
+                    shortPathLabel(settings.screenPath),
+                    fontSize = 12.sp,
+                    color = HopaColor.TextHint,
+                )
+            }
+            state.screenCheck.take(3).forEach { line -> CheckLine(line) }
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            SettingsTile(
-                title = "Answers",
-                value = providerSummary(state),
-                state = if (answers) DotState.Good else DotState.Attention,
-                icon = Icons.Filled.Star,
-                onClick = { onOpenPage(PAGE_MODEL) },
-                modifier = Modifier.weight(1f),
-            )
-            SettingsTile(
-                title = "Running apps",
-                value = shortPathLabel(settings.screenPath),
-                state = if (state.phoneAccess) DotState.Good else DotState.Off,
-                icon = Icons.Filled.PlayArrow,
-                onClick = { onOpenPage(PAGE_SCREEN) },
-                modifier = Modifier.weight(1f),
-            )
-        }
-
-        SettingsSection("How HOPA talks")
-        SettingsGroup {
-            SettingsRow(
-                "Tone and length",
-                "${settings.tone.replaceFirstChar { it.uppercase() }}, ${settings.chattiness}",
-                Icons.Filled.Face,
-            ) { onOpenPage(PAGE_CHARACTER) }
-            SettingsDivider()
-            SettingsRow(
-                "Alerts",
-                if (settings.notifyAnswers) "On" else "Off",
-                Icons.Filled.Notifications,
-            ) { onOpenPage(PAGE_NOTIFICATIONS) }
-            SettingsDivider()
-            SettingsRow("Modes", "Everyday and others", Icons.Filled.Menu) {
-                onOpenProfiles()
+            SettingsPanel(modifier = Modifier.weight(1f)) {
+                Text("Tone", fontSize = 13.sp, color = HopaColor.TextSecondary)
+                SettingsSegment(
+                    options = listOf("friendly" to "Friendly", "direct" to "Direct"),
+                    selected = settings.tone,
+                    onSelect = onTone,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                Text(
+                    "Length",
+                    fontSize = 13.sp,
+                    color = HopaColor.TextSecondary,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+                SettingsSegment(
+                    options = listOf(
+                        "short" to "Short",
+                        "balanced" to "Balanced",
+                        "detailed" to "Long",
+                    ),
+                    selected = settings.chattiness,
+                    onSelect = onChattiness,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
             }
         }
 
-        SettingsSection("This phone")
-        SettingsGroup {
-            SettingsRow(
-                "Screen control",
-                if (state.phoneAccess) "On" else "Off",
-                Icons.Filled.Lock,
-            ) { onOpenAccessibility() }
-            SettingsDivider()
-            SettingsRow("Apps on this phone", "Everything HOPA can open", Icons.Filled.List) {
-                onOpenLaunchpad()
-            }
-            SettingsDivider()
-            SettingsRow("What HOPA can do", "Tools it may use", Icons.Filled.Info) {
-                onOpenCapabilities()
+        SettingsPanel {
+            SettingsSwitchRow("Alerts when an answer is ready", settings.notifyAnswers) {
+                onToggleAlerts(it)
             }
         }
 
-        SettingsSection("More")
-        SettingsGroup {
-            SettingsRow(
-                "My computer",
-                settings.bridgeUrl.ifBlank { "Not connected" },
-                Icons.Filled.Share,
-            ) { onOpenPage(PAGE_BRIDGE) }
-            SettingsDivider()
-            SettingsRow("Health check", "Test everything quickly", Icons.Filled.Info) {
-                onOpenSelfCheck()
-            }
-            SettingsDivider()
-            SettingsRow("About", "Version and licences", Icons.Filled.Person) { onOpenAbout() }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            QuickChip("Apps") { onOpenLaunchpad() }
+            QuickChip("Modes") { onOpenProfiles() }
+            QuickChip("Tools") { onOpenCapabilities() }
+            QuickChip("Health") { onOpenSelfCheck() }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            QuickChip("My computer") { onOpenPage(PAGE_BRIDGE) }
+            QuickChip("About") { onOpenAbout() }
         }
 
         state.error?.let { error ->

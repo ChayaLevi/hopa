@@ -168,6 +168,13 @@ class SettingsViewModel(
         }
     }
 
+    fun setNotifications(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(notifyAnswers = value) }
+            reload()
+        }
+    }
+
     /** auto, background, onscreen or bridge; the same words the core enum uses. */
     fun setScreenPath(value: String) {
         viewModelScope.launch {

@@ -26,9 +26,10 @@ fun SettingsSegment(
     options: List<Pair<String, String>>,
     selected: String,
     onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(HopaColor.SurfaceAlt, RoundedCornerShape(14.dp))
             .padding(3.dp),

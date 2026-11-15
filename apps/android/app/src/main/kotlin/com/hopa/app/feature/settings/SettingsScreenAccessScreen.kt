@@ -2,6 +2,7 @@ package com.hopa.app.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -21,8 +22,8 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * How HOPA opens other apps. Each mode says what it does and, once chosen, how to
- * use it - in plain words, with no mechanism named.
+ * Choose where apps open. A scene shows what will happen, four tiles choose it,
+ * one button proves it, and the setup steps stay folded until they are needed.
  */
 @Composable
 fun SettingsScreenAccessScreen(
@@ -36,40 +37,48 @@ fun SettingsScreenAccessScreen(
     var setup by rememberSaveable { mutableStateOf(false) }
     var wirelessAddress by rememberSaveable { mutableStateOf("") }
     var wirelessCode by rememberSaveable { mutableStateOf("") }
+    val mode = state.settings.screenPath
 
     SettingsPage(title = "Running apps", onBack = onBack) {
-        SettingsChoiceCard(
-            title = "Automatic",
-            description = "HOPA picks the best one available right now.",
-            howTo = "Do nothing else. Just ask for something; if a mode does not work, " +
-                "HOPA moves to the next one and tells you where it ran.",
-            selected = state.settings.screenPath == "auto",
-        ) { onScreenPath("auto") }
+        ModeSceneSwitch(mode = mode)
 
-        SettingsChoiceCard(
-            title = "Without showing",
-            description = "Apps run out of sight. You keep using your phone.",
-            howTo = "Turn it on once: use your computer, or the steps at the bottom. " +
-                "After that just ask; the app opens out of sight and your screen stays " +
-                "where it is.",
-            selected = state.settings.screenPath == "background",
-        ) { onScreenPath("background") }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ModeTile("auto", "Auto", mode == "auto", { onScreenPath("auto") }, Modifier.weight(1f))
+            ModeTile(
+                "background",
+                "Hidden",
+                mode == "background",
+                { onScreenPath("background") },
+                Modifier.weight(1f),
+            )
+            ModeTile(
+                "onscreen",
+                "Here",
+                mode == "onscreen",
+                { onScreenPath("onscreen") },
+                Modifier.weight(1f),
+            )
+            ModeTile(
+                "bridge",
+                "Computer",
+                mode == "bridge",
+                { onScreenPath("bridge") },
+                Modifier.weight(1f),
+            )
+        }
 
-        SettingsChoiceCard(
-            title = "On this phone",
-            description = "You watch every tap on your own screen.",
-            howTo = "Nothing to set up. Ask, and HOPA will take over your screen for a " +
-                "moment while it taps. Keep the phone in your hand.",
-            selected = state.settings.screenPath == "onscreen",
-        ) { onScreenPath("onscreen") }
-
-        SettingsChoiceCard(
-            title = "From my computer",
-            description = "Your computer does the tapping; the phone screen stays free.",
-            howTo = "Start HOPA on your computer, connect it once from Settings, then " +
-                "ask from the phone. Works only while the computer is on and connected.",
-            selected = state.settings.screenPath == "bridge",
-        ) { onScreenPath("bridge") }
+        Text(
+            when (mode) {
+                "background" -> "Apps open out of sight. Turn it on once, then just ask."
+                "onscreen" -> "HOPA uses your screen for a moment; you see every tap."
+                "bridge" -> "Your computer does the tapping. Works while it is on."
+                else -> "Picks the best available: hidden, computer, then your screen."
+            },
+            style = MaterialTheme.typography.bodySmall,
+        )
 
         Button(
             onClick = onRunCheck,
@@ -80,13 +89,13 @@ fun SettingsScreenAccessScreen(
         }
         if (state.screenCheck.isEmpty()) {
             Text(
-                "Opens Settings for you, reads it and closes it again. Nothing stays open.",
+                "Opens Settings for you, reads it and closes it again.",
                 style = MaterialTheme.typography.bodySmall,
                 color = HopaColor.TextHint,
             )
         } else {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.screenCheck.forEach { line -> CheckLine(line) }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                state.screenCheck.take(4).forEach { line -> CheckLine(line) }
             }
         }
 
@@ -94,24 +103,15 @@ fun SettingsScreenAccessScreen(
             Text(message, fontSize = 13.sp, color = HopaColor.TextSecondary)
         }
 
-        if (state.settings.screenPath != "onscreen") {
+        if (mode != "onscreen") {
             val bridgeReady = state.settings.bridgeUrl.isNotBlank()
             SettingsGroup {
                 SettingsRow(
                     if (bridgeReady) "Turn on background mode" else "Show me the steps",
-                    if (bridgeReady) {
-                        "Uses your computer, one press after a restart"
-                    } else {
-                        "Takes a minute; needs developer options"
-                    },
+                    if (bridgeReady) "One press, then just ask" else "Takes a minute",
                     Icons.Filled.Menu,
                 ) {
-                    if (bridgeReady) {
-                        onStartBackgroundHelper()
-                    } else {
-                        // Nothing to start yet: the honest action is the setup steps.
-                        setup = true
-                    }
+                    if (bridgeReady) onStartBackgroundHelper() else setup = true
                 }
             }
         }
