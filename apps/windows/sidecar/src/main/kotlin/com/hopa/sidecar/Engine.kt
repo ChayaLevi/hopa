@@ -129,6 +129,7 @@ class Engine(
                         history = history,
                         platform = "windows",
                         installedApps = windowsApps(),
+                        phoneAccess = true,
                     ),
                     isCancelled = { cancelled },
                 )

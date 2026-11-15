@@ -5,6 +5,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
+import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.core.gate.ApprovalRequest
 import com.hopa.core.loop.TurnContext
 import com.hopa.core.model.ModelMessage
@@ -305,6 +307,8 @@ class ChatViewModel(
                             skills = skills,
                             installedApps = installed,
                             platform = "android",
+                            phoneAccess = AccessibilityState.isEnabled(container.context) &&
+                                HopaAccessibilityService.instance != null,
                         ),
                         isCancelled = { container.cancelRequested.value },
                     )

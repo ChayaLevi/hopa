@@ -67,6 +67,7 @@ class AgentLoop(
             routerHint = RouterHint.text(route),
             surfaceAvailable = surfaceAvailable,
             webAvailable = webAvailable,
+            phoneAccess = context.phoneAccess,
         )
         val messages = mutableListOf(ModelMessage("system", system))
         messages += budget.fit(context.history)
