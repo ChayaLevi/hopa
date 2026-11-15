@@ -50,8 +50,18 @@ class ShellDisplayDevice(
     var error: String = ""
         private set
 
+    private val launched = mutableSetOf<String>()
+
+    /**
+     * Leaving apps behind would let the system move them onto the person's screen
+     * the moment the display goes away, so the run closes what it opened.
+     */
     fun stop() {
+        if (displayId > 0 && launched.isNotEmpty()) {
+            runCatching { client.finish(launched.toList()) }
+        }
         runCatching { client.release() }
+        launched.clear()
         displayId = -1
     }
 
@@ -149,6 +159,7 @@ class ShellDisplayDevice(
         if (!ok) {
             throw IllegalStateException(payload)
         }
+        launched += packageName
     }
 
     override suspend fun stop(packageName: String) {

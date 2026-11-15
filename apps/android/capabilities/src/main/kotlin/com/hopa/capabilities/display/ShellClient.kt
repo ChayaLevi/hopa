@@ -68,6 +68,9 @@ class ShellClient {
         return bytes
     }
 
+    fun finish(packages: List<String>): Pair<Boolean, String> =
+        send(protocol.finish(packages))
+
     fun release() {
         runCatching { send(protocol.release()) }
     }

@@ -21,6 +21,9 @@ class DisplayProtocol {
 
     fun top(): String = "top"
 
+    /** Close the apps this run started, so releasing the display cannot push them onto the phone. */
+    fun finish(packages: List<String>): String = "finish ${packages.joinToString(",")}"
+
     fun release(): String = "release"
 
     /** `ok <payload>` or `err <message>`; the payload may be empty. */

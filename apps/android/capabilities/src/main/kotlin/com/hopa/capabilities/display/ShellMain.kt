@@ -129,6 +129,26 @@ object ShellMain {
                     }
                 }
 
+                "finish" -> {
+                    val packages = parts.drop(1)
+                        .flatMap { it.split(',') }
+                        .map { it.trim() }
+                        .filter { it.matches(Regex("[A-Za-z][A-Za-z0-9_.]*")) }
+                    var closed = 0
+                    for (packageName in packages) {
+                        val output = runCatching {
+                            ProcessBuilder("sh", "-c", "am force-stop $packageName")
+                                .redirectErrorStream(true)
+                                .start()
+                                .also { it.waitFor() }
+                        }
+                        if (output.isSuccess) {
+                            closed += 1
+                        }
+                    }
+                    reply("ok closed $closed")
+                }
+
                 "release" -> {
                     host?.release()
                     host = null

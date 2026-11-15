@@ -74,6 +74,24 @@ class BackgroundDisplayTest {
         )
     }
 
+
+    @Test
+    fun the_phone_screen_does_not_change() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val before = instrumentation.uiAutomation.takeScreenshot()
+        assumeTrue("cannot read the phone screen", before != null)
+
+        assumeTrue("settings is not on this phone", client.launch("com.android.settings").first)
+        Thread.sleep(2_500)
+        val after = instrumentation.uiAutomation.takeScreenshot()
+        assumeTrue("cannot read the phone screen after the launch", after != null)
+
+        assertTrue(
+            "the app opened on the phone's own screen instead of the background display",
+            before!!.sameAs(after),
+        )
+    }
+
     @Test
     fun a_tap_changes_the_frame() {
         assumeTrue("settings is not on this phone", client.launch("com.android.settings").first)

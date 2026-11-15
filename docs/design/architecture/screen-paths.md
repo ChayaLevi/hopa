@@ -57,6 +57,9 @@ Settings ──"Start the background screen"──► bridge /helper
 - `ChatViewModel` builds the source list from the setting, gives each source a
   budget (8 s background, 15 s bridge, 8 s accessibility) and releases the
   background display when the turn ends.
+- Before releasing, the run sends `finish <packages>` for everything it started
+  and the helper force-stops those packages. Otherwise the system would move the
+  leftover tasks onto the person's own screen the moment the display disappears.
 - `ScreenSourceDevice` keeps using the source that answered for the whole turn,
   so observation and action never disagree about which screen is being driven.
 
@@ -64,9 +67,10 @@ Settings ──"Start the background screen"──► bridge /helper
 
 - JVM: `ScreenPathOrderTest`.
 - Device: `app/src/androidTest/.../BackgroundDisplayTest` — the display is not
-  the phone's own, it draws a frame, Settings starts on it, and a tap changes
-  the frame. Without a running helper the cases are skipped with a reason, so a
-  machine with no phone stays green.
+  the phone's own, it draws a frame, Settings starts on it, a tap changes the
+  frame, and the phone's own screen is pixel-identical before and after a launch
+  on the background display. Without a running helper the cases are skipped with
+  a reason, so a machine with no phone stays green.
 
 ```powershell
 # one-time per boot
@@ -80,7 +84,8 @@ adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) `
 
 - Pairing inside the app: today the helper is started by the bridge (or the
   command above), not by a wireless-debugging handshake in the app.
-- Finishing a task the way Mika does: moving or closing the apps the run left on
-  the background display, and per-app audio isolation.
+- Ending a task mid-way: the run closes what it opened, but a task cancelled
+  while an app is mid-flow leaves that app's own state behind.
+- Per-app audio isolation: an app on the background display can still be heard.
 - The assertion that the visible screen is unchanged during a run belongs in the
   device suite; it needs a real phone to compare window focus before and after.
