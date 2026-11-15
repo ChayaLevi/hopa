@@ -4,6 +4,11 @@ import com.hopa.core.contracts.Observation
 import com.hopa.core.ports.DevicePort
 import kotlinx.coroutines.withTimeoutOrNull
 
+/**
+ * A DevicePort that picks the first source that can see the screen and then uses
+ * that same source for every action of the turn. Observing through one device and
+ * acting through another would be a lie about what the person is looking at.
+ */
 class ScreenSourceDevice(
     private val sources: List<ScreenSource>,
     private val fallback: DevicePort,
