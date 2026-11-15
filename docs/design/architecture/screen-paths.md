@@ -84,13 +84,24 @@ adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) `
 .\gradlew.bat :app:connectedDebugAndroidTest
 ```
 
+## Pairing inside the app
+
+Settings → Where runs happen → *Pair this phone* takes the address and six-digit
+code Android shows under Wireless debugging, calls `adb pair` through
+`libadb-android` (SPAKE2, Apache-2.0), then connects over TLS to the port adbd
+advertises and runs the helper with `shell:`. After that the phone needs no PC;
+the key and certificate live in the app's private storage and are reused.
+
+If pairing is unavailable (wireless debugging off, different network, mDNS
+blocked), the same button path falls back to the PC bridge, and the chat line
+says which surface was actually used.
+
 ## Not here yet
 
-- Pairing inside the app: today the helper is started by the bridge (or the
-  command above), not by a wireless-debugging handshake in the app.
 - Ending a task mid-way: the run closes what it opened, but a task cancelled
   while an app is mid-flow leaves that app's own state behind.
 - Audio isolation depends on the `PLAY_AUDIO` AppOps flag existing on the
   device; where it is missing the helper says so and the run is audible.
-- The assertion that the visible screen is unchanged during a run belongs in the
-  device suite; it needs a real phone to compare window focus before and after.
+- Nothing in this path has been exercised on a phone yet: the display, the tap
+  injection, the mute and the pairing handshake all need one run on real
+  hardware before they count as working.

@@ -56,6 +56,7 @@ fun SettingsScreen(
     onOpenAccessibility: () -> Unit,
     onScreenPath: (String) -> Unit,
     onStartBackgroundHelper: () -> Unit,
+    onPairWireless: (String, String) -> Unit,
 ) {
     var provider by rememberSaveable { mutableStateOf(state.settings.provider) }
     var endpoint by rememberSaveable { mutableStateOf(state.settings.endpoint) }
@@ -66,6 +67,8 @@ fun SettingsScreen(
     var bridgeUrl by rememberSaveable { mutableStateOf(state.settings.bridgeUrl) }
     var bridgeKey by rememberSaveable { mutableStateOf("") }
     var pairCode by rememberSaveable { mutableStateOf("") }
+    var wirelessAddress by rememberSaveable { mutableStateOf("") }
+    var wirelessCode by rememberSaveable { mutableStateOf("") }
     var useBridge by rememberSaveable { mutableStateOf(state.settings.useBridge) }
 
     LaunchedEffect(state.settings, state.key) {
@@ -321,6 +324,29 @@ fun SettingsScreen(
             )
             Button(onClick = onStartBackgroundHelper, enabled = !state.busy) {
                 Text("Start the background screen")
+            }
+            Text(
+                "No PC? Pair this phone directly: Wireless debugging, Pair device " +
+                    "with pairing code, then type the address and code here.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            OutlinedTextField(
+                value = wirelessAddress,
+                onValueChange = { wirelessAddress = it },
+                label = { Text("Pairing address, e.g. 192.168.1.5:37123") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = wirelessCode,
+                onValueChange = { wirelessCode = it },
+                label = { Text("Six-digit pairing code") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Button(
+                onClick = { onPairWireless(wirelessAddress, wirelessCode) },
+                enabled = !state.busy,
+            ) {
+                Text("Pair this phone")
             }
             Text(
                 "It starts the helper on the phone through the paired PC bridge and " +

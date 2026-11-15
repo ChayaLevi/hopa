@@ -30,6 +30,7 @@ fun SettingsRoute(
         onChattiness = viewModel::setChattiness,
         onScreenPath = viewModel::setScreenPath,
         onStartBackgroundHelper = viewModel::startBackgroundHelper,
+        onPairWireless = viewModel::pairWireless,
         onOpenSelfCheck = onOpenSelfCheck,
         onOpenAbout = onOpenAbout,
         onPairBridge = viewModel::pairBridge,

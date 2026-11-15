@@ -198,6 +198,15 @@ class SettingsViewModel(
         }
     }
 
+    /** Pair with this phone's own adbd; no PC needed after this succeeds. */
+    fun pairWireless(address: String, code: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val message = container.pairWireless(address, code)
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
     /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
     fun startBackgroundHelper() {
         viewModelScope.launch {

@@ -68,11 +68,30 @@ class AppContainer(context: Context) {
     /** The hidden background display: one helper process, one socket. */
     val shell = com.hopa.capabilities.display.ShellClient()
 
-    /** A device on the background display, or null when the helper is absent. */
+    /**
+     * Wireless debugging inside the app: pair once with the code Android shows,
+     * then adbd gives this app shell and no PC is needed.
+     */
+    val wireless = com.hopa.capabilities.display.WirelessShell(context)
+
+    /**
+     * A device on the background display, or null when no helper can be reached.
+     * A paired bridge can start the helper itself, so the common case needs no
+     * button press; after a reboot the first background run does it.
+     */
     suspend fun backgroundDevice(): com.hopa.core.ports.DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             if (!shell.connect()) {
-                return@withContext null
+                val startedHere = runCatching { wireless.connectAndStartHelper() }
+                    .getOrDefault("")
+                    .contains("ready")
+                if (!startedHere) {
+                    startHelperThroughBridge()
+                }
+                kotlinx.coroutines.delay(1_500)
+                if (!shell.connect()) {
+                    return@withContext null
+                }
             }
             val metrics = context.resources.displayMetrics
             val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
@@ -82,6 +101,42 @@ class AppContainer(context: Context) {
                 null
             }
         }
+
+    /** Pair with this phone's own adbd, then start the helper with that shell. */
+    suspend fun pairWireless(address: String, code: String): String =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val host = address.substringBefore(':').trim()
+            val port = address.substringAfter(':', "").trim().toIntOrNull()
+            if (host.isEmpty() || port == null) {
+                return@withContext "Use the address Android shows: ip:port"
+            }
+            val paired = wireless.pair(host, port, code)
+            if (!paired.startsWith("Paired")) {
+                return@withContext paired
+            }
+            val started = wireless.connectAndStartHelper()
+            if (started.contains("ready") && shell.connect()) {
+                "Wireless shell is ready; the background screen can be used"
+            } else {
+                started
+            }
+        }
+
+    /** Ask the paired PC to start the helper on the phone as shell. */
+    private suspend fun startHelperThroughBridge(): Boolean {
+        val current = settings.settings.first()
+        if (current.bridgeUrl.isBlank()) {
+            return false
+        }
+        val token = settings.bridgeToken()
+        if (token.isBlank()) {
+            return false
+        }
+        return runCatching {
+            com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token).startHelper()
+            true
+        }.getOrDefault(false)
+    }
 
     val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
