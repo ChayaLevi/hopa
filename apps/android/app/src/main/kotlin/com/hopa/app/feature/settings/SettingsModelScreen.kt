@@ -48,41 +48,26 @@ fun SettingsModelScreen(
     }
 
     SettingsPage(title = "Model", onBack = onBack) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for ((value, title) in listOf(
+        SettingsSegment(
+            options = listOf(
                 "stub" to "Demo",
                 "openai" to "Cloud",
                 "lan" to "LAN",
-            )) {
-                val current = when (provider) {
-                    "stub" -> "stub"
-                    "lan" -> "lan"
-                    else -> "openai"
+            ),
+            selected = when (provider) {
+                "stub" -> "stub"
+                "lan" -> "lan"
+                else -> "openai"
+            },
+            onSelect = { value ->
+                provider = value
+                endpoint = when (value) {
+                    "lan" -> "http://192.168.1.5:11434/v1"
+                    "openai" -> "https://api.deepseek.com/v1"
+                    else -> endpoint
                 }
-                val chosen = current == value
-                Text(
-                    title,
-                    fontSize = 12.sp,
-                    color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
-                    modifier = Modifier
-                        .background(
-                            if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
-                            RoundedCornerShape(16.dp),
-                        )
-                        .clickable {
-                            if (!chosen) {
-                                provider = value
-                                endpoint = when (value) {
-                                    "lan" -> "http://192.168.1.5:11434/v1"
-                                    "openai" -> "https://api.deepseek.com/v1"
-                                    else -> endpoint
-                                }
-                            }
-                        }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                )
-            }
-        }
+            },
+        )
         OutlinedTextField(
             value = endpoint,
             onValueChange = { endpoint = it },

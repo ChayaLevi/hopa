@@ -1,12 +1,8 @@
 package com.hopa.app.feature.settings
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -22,9 +18,8 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * Where a run happens: the hidden background screen, the paired PC, or the
- * phone's own screen. Every button reports under itself, because a silent button
- * is indistinguishable from a broken one.
+ * Where a run happens, what each choice means, and one button that checks the
+ * whole chain instead of leaving the person to guess.
  */
 @Composable
 fun SettingsScreenAccessScreen(
@@ -39,88 +34,76 @@ fun SettingsScreenAccessScreen(
     var wirelessCode by rememberSaveable { mutableStateOf("") }
 
     SettingsPage(title = "Screen access", onBack = onBack) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for ((value, title) in listOf(
+        SettingsSegment(
+            options = listOf(
                 "auto" to "Auto",
-                "background" to "Background",
+                "background" to "Hidden",
                 "onscreen" to "This screen",
-                "bridge" to "PC bridge",
-            )) {
-                val chosen = state.settings.screenPath == value
-                Text(
-                    title,
-                    fontSize = 12.sp,
-                    color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
-                    modifier = Modifier
-                        .background(
-                            if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
-                            RoundedCornerShape(16.dp),
-                        )
-                        .clickable { onScreenPath(value) }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                )
-            }
+                "bridge" to "PC",
+            ),
+            selected = state.settings.screenPath,
+            onSelect = onScreenPath,
+        )
+        Text(
+            "Auto tries hidden, then the PC, then this screen, and takes the first " +
+                "that works. A forced choice is used alone.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SettingsGuideRow(
+                "Hidden screen",
+                "Apps run where you cannot see them; your phone stays put. " +
+                    "Needs the helper and phone access.",
+            )
+            SettingsGuideRow(
+                "PC",
+                "The computer drives this phone over adb. Needs the bridge and its code.",
+            )
+            SettingsGuideRow(
+                "This screen",
+                "HOPA works on your screen, so you watch every tap.",
+            )
         }
-        Text(
-            "Auto tries the hidden screen first, then the PC bridge, then this screen. " +
-                "A forced choice is used alone.",
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Text(
-            "The hidden screen needs the helper running and phone access on, " +
-                "because its tree is read through accessibility.",
-            style = MaterialTheme.typography.bodySmall,
-            color = HopaColor.TextHint,
-        )
 
-        Text("What each choice means", fontSize = 14.sp, color = HopaColor.TextPrimary)
-        Text(
-            "Background - apps open on a screen you cannot see; your phone stays " +
-                "where it is. Needs the helper running.\n" +
-                "PC bridge - the PC drives this phone over adb; needs the bridge " +
-                "running on the PC and its pair code.\n" +
-                "This screen - HOPA works on your own screen and you watch it tap.",
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Text(
-            "After a run the chat says which one was used (\"Ran on \u2026\"). " +
-                "Auto falls back to the next choice that works and reports that one.",
-            style = MaterialTheme.typography.bodySmall,
-            color = HopaColor.TextHint,
-        )
-
-        Button(onClick = onRunCheck, enabled = !state.busy) {
+        Button(onClick = onRunCheck, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
             Text(if (state.busy) "Checking\u2026" else "Run a check")
         }
-        Text(
-            "The check reads phone access, opens Settings on the hidden screen, " +
-                "reads it back and closes it again.",
-            style = MaterialTheme.typography.bodySmall,
-            color = HopaColor.TextHint,
-        )
-        state.screenCheck.forEach { line ->
-            Text("\u2022 $line", fontSize = 12.sp, color = HopaColor.TextSecondary)
-        }
-
-        Text("Get the hidden screen ready", fontSize = 14.sp, color = HopaColor.TextPrimary)
-        if (state.settings.bridgeUrl.isBlank()) {
+        if (state.screenCheck.isEmpty()) {
             Text(
-                "With a PC: pair the bridge first, then this button appears.",
+                "Reads phone access, opens Settings on the hidden screen, reads it " +
+                    "back and closes it. Nothing is left open.",
                 style = MaterialTheme.typography.bodySmall,
                 color = HopaColor.TextHint,
             )
+        } else {
+            state.screenCheck.forEach { line ->
+                Text("\u2022 $line", fontSize = 13.sp, color = HopaColor.TextSecondary)
+            }
         }
+
+        Text("Get the hidden screen ready", fontSize = 15.sp, color = HopaColor.TextPrimary)
         Button(
             onClick = onStartBackgroundHelper,
             enabled = !state.busy && state.settings.bridgeUrl.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(if (state.busy) "Working\u2026" else "Start through the PC bridge")
         }
+        Text(
+            if (state.settings.bridgeUrl.isBlank()) {
+                "Needs the PC bridge paired first."
+            } else {
+                "Press once after a phone reboot."
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = HopaColor.TextHint,
+        )
         state.bridgeStatus?.let { message ->
-            Text(message, fontSize = 12.sp, color = HopaColor.TextSecondary)
+            Text(message, fontSize = 13.sp, color = HopaColor.TextSecondary)
         }
 
-        Text("Pair without a PC", fontSize = 14.sp, color = HopaColor.TextPrimary)
+        Text("Or pair without a PC", fontSize = 15.sp, color = HopaColor.TextPrimary)
         Text(
             "Developer options, Wireless debugging, Pair device with pairing code. " +
                 "Type the address and the six digits here.",
@@ -141,15 +124,14 @@ fun SettingsScreenAccessScreen(
         Button(
             onClick = { onPairWireless(wirelessAddress, wirelessCode) },
             enabled = !state.busy && wirelessAddress.isNotBlank() && wirelessCode.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Pair this phone")
         }
-        if (wirelessAddress.isBlank() || wirelessCode.isBlank()) {
-            Text(
-                "Fill both fields first; the button stays off until then.",
-                fontSize = 11.sp,
-                color = HopaColor.TextHint,
-            )
-        }
+        Text(
+            "Both fields are needed before the button turns on.",
+            style = MaterialTheme.typography.bodySmall,
+            color = HopaColor.TextHint,
+        )
     }
 }

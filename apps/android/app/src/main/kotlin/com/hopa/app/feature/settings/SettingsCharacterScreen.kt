@@ -23,42 +23,22 @@ fun SettingsCharacterScreen(
     onOpenProfiles: () -> Unit,
 ) {
     SettingsPage(title = "Character", onBack = onBack) {
-        Text("Tone", fontSize = 12.sp, color = HopaColor.TextHint)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (value in listOf("friendly", "direct")) {
-                val chosen = state.settings.tone == value
-                Text(
-                    value,
-                    fontSize = 12.sp,
-                    color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
-                    modifier = Modifier
-                        .background(
-                            if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
-                            RoundedCornerShape(16.dp),
-                        )
-                        .clickable { onTone(value) }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                )
-            }
-        }
-        Text("Length", fontSize = 12.sp, color = HopaColor.TextHint)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (value in listOf("short", "balanced", "detailed")) {
-                val chosen = state.settings.chattiness == value
-                Text(
-                    value,
-                    fontSize = 12.sp,
-                    color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
-                    modifier = Modifier
-                        .background(
-                            if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
-                            RoundedCornerShape(16.dp),
-                        )
-                        .clickable { onChattiness(value) }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                )
-            }
-        }
+        Text("Tone", fontSize = 13.sp, color = HopaColor.TextHint)
+        SettingsSegment(
+            options = listOf("friendly" to "Friendly", "direct" to "Direct"),
+            selected = state.settings.tone,
+            onSelect = onTone,
+        )
+        Text("Length", fontSize = 13.sp, color = HopaColor.TextHint)
+        SettingsSegment(
+            options = listOf(
+                "short" to "Short",
+                "balanced" to "Balanced",
+                "detailed" to "Detailed",
+            ),
+            selected = state.settings.chattiness,
+            onSelect = onChattiness,
+        )
         SettingsRow("Profiles", "Everyday and other modes", onOpenProfiles)
     }
 }
