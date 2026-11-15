@@ -17,6 +17,7 @@ import com.hopa.core.ports.Clock
 import com.hopa.core.ports.DevicePort
 import com.hopa.core.prompt.AppCatalogBlock
 import com.hopa.core.prompt.ContextBudget
+import com.hopa.core.prompt.InstalledAppsBlock
 import com.hopa.core.prompt.ScreenRenderer
 import com.hopa.core.prompt.SystemPromptBuilder
 import com.hopa.core.records.RunRecorder
@@ -45,11 +46,12 @@ class AgentLoop(
     ): TurnResult {
         var observation = runCatching { device.observe() }.getOrNull()
         val surfaceAvailable = observation != null
-        val route = AppRouter.route(context.goal, CatalogRoutes.targets())
+        val route = AppRouter.route(context.goal, CatalogRoutes.targets(context.installedApps))
+        val installed = InstalledAppsBlock().text(context.installedApps)
         val system = promptBuilder.build(
             memory = context.memory,
             skills = context.skills,
-            apps = AppCatalogBlock.text(),
+            apps = AppCatalogBlock.text() + "\n\n" + installed,
             routerHint = RouterHint.text(route),
             surfaceAvailable = surfaceAvailable,
             webAvailable = webAvailable,

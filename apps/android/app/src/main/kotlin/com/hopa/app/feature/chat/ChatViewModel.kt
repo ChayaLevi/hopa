@@ -278,6 +278,7 @@ class ChatViewModel(
             val memory = listOf(facts, character).filter { it.isNotBlank() }
                 .joinToString("\n\n")
             val skills = runCatching { container.skills.promptText() }.getOrDefault("")
+            val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
             val bridged = runCatching { container.bridgedDevice() }.getOrNull()
             // Bridge first, then accessibility with a four-second guard; the first
             // source that can see the screen also performs every action of the turn.
@@ -302,6 +303,7 @@ class ChatViewModel(
                             history = history,
                             memory = memory,
                             skills = skills,
+                            installedApps = installed,
                         ),
                         isCancelled = { container.cancelRequested.value },
                     )

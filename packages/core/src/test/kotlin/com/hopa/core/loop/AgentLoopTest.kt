@@ -6,6 +6,7 @@ import com.hopa.core.model.ModelPort
 import com.hopa.core.model.ModelReply
 import com.hopa.core.model.ModelRequest
 import com.hopa.core.model.ModelUsage
+import com.hopa.core.ports.InstalledApp
 import com.hopa.core.records.InMemoryRunRecorder
 import com.hopa.core.records.RunRecordFactory
 import com.hopa.core.testing.FakeApproval
@@ -97,6 +98,23 @@ class AgentLoopTest {
         assertEquals(6, result.usage.completionTokens)
     }
 
+    @Test
+    fun the_prompt_carries_the_packages_installed_on_this_phone() {
+        val harness = Harness(replies = listOf("Done."))
+        val installed = listOf(InstalledApp("tv.danmaku.bili", "Bilibili"))
+        runBlocking {
+            harness.loop.run(
+                "run-7",
+                "trace-7",
+                TurnContext("open bilibili", installedApps = installed),
+            ) { false }
+        }
+
+        val prompt = harness.model.lastSystem
+        assertTrue(prompt.contains("Bilibili - tv.danmaku.bili"))
+        assertTrue(prompt.contains("\"app\":\"tv.danmaku.bili\""))
+    }
+
     private class Harness(
         replies: List<String>,
         val device: FakeDevice = FakeDevice(),
@@ -127,8 +145,10 @@ class AgentLoopTest {
     private class ScriptedModel(private val replies: List<String>) : ModelPort {
         var calls = 0
         var usage = ModelUsage()
+        var lastSystem = ""
 
         override suspend fun complete(request: ModelRequest): ModelReply {
+            lastSystem = request.messages.firstOrNull { it.role == "system" }?.content ?: lastSystem
             val text = replies.getOrElse(calls) { replies.lastOrNull().orEmpty() }
             calls += 1
             return ModelReply(text = text, usage = usage)
