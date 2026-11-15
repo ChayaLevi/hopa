@@ -123,6 +123,30 @@ fun AccessibilityScreen(
             Button(onClick = onOpenSettings) {
                 Text("Open Android accessibility settings")
             }
+            Surface(
+                color = HopaColor.SurfaceAlt,
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        "Android blocks this switch for apps installed outside a store",
+                        fontSize = 13.sp,
+                        color = HopaColor.TextPrimary,
+                    )
+                    Text(
+                        "If Android says \"App was denied access\", allow it first: " +
+                            "Settings, Apps, HOPA, then the three-dot menu, " +
+                            "Allow restricted settings. On Samsung, if that item is " +
+                            "missing, turn off Auto Blocker under Security and privacy, " +
+                            "repeat the step, then turn it back on. A reinstall repeats " +
+                            "this once more.",
+                        fontSize = 12.sp,
+                        color = HopaColor.TextHint,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
+            }
             Text(
                 "The PC bridge is the preferred path. Accessibility is the fallback " +
                     "that keeps working when no PC is connected.",
