@@ -129,6 +129,26 @@ object ShellMain {
                     }
                 }
 
+                "mute", "unmute" -> {
+                    val packageName = parts.getOrNull(1)
+                    if (packageName == null || !packageName.matches(Regex("[A-Za-z][A-Za-z0-9_.]*"))) {
+                        reply("err mute needs a package")
+                        continue
+                    }
+                    val mode = if (parts[0] == "mute") "ignore" else "default"
+                    val output = runCatching {
+                        ProcessBuilder("sh", "-c", "appops set $packageName PLAY_AUDIO $mode")
+                            .redirectErrorStream(true)
+                            .start()
+                            .also { it.waitFor() }
+                    }
+                    if (output.isSuccess) {
+                        reply("ok $packageName $mode")
+                    } else {
+                        reply("err appops refused $packageName")
+                    }
+                }
+
                 "finish" -> {
                     val packages = parts.drop(1)
                         .flatMap { it.split(',') }

@@ -58,6 +58,7 @@ class ShellDisplayDevice(
      */
     fun stop() {
         if (displayId > 0 && launched.isNotEmpty()) {
+            launched.forEach { runCatching { client.unmute(it) } }
             runCatching { client.finish(launched.toList()) }
         }
         runCatching { client.release() }
@@ -160,6 +161,8 @@ class ShellDisplayDevice(
             throw IllegalStateException(payload)
         }
         launched += packageName
+        // The app is on a hidden display, so its sound would come from nowhere.
+        runCatching { client.mute(packageName) }
     }
 
     override suspend fun stop(packageName: String) {

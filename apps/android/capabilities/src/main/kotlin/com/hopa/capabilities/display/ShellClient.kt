@@ -68,6 +68,10 @@ class ShellClient {
         return bytes
     }
 
+    fun mute(packageName: String): Pair<Boolean, String> = send(protocol.mute(packageName))
+
+    fun unmute(packageName: String): Pair<Boolean, String> = send(protocol.unmute(packageName))
+
     fun finish(packages: List<String>): Pair<Boolean, String> =
         send(protocol.finish(packages))
 

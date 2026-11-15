@@ -21,6 +21,11 @@ class DisplayProtocol {
 
     fun top(): String = "top"
 
+    /** A run on the hidden display must not be heard on the phone. */
+    fun mute(packageName: String): String = "mute $packageName"
+
+    fun unmute(packageName: String): String = "unmute $packageName"
+
     /** Close the apps this run started, so releasing the display cannot push them onto the phone. */
     fun finish(packages: List<String>): String = "finish ${packages.joinToString(",")}"
 

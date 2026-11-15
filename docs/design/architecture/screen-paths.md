@@ -60,6 +60,10 @@ Settings ──"Start the background screen"──► bridge /helper
 - Before releasing, the run sends `finish <packages>` for everything it started
   and the helper force-stops those packages. Otherwise the system would move the
   leftover tasks onto the person's own screen the moment the display disappears.
+- After a successful launch the helper sets the AppOps `PLAY_AUDIO` mode of that
+  package to `ignore`, so a video or a voice message on the hidden display is not
+  heard. The mode is returned to `default` before the package is closed; a silent
+  failure is reported, not hidden.
 - `ScreenSourceDevice` keeps using the source that answered for the whole turn,
   so observation and action never disagree about which screen is being driven.
 
@@ -86,6 +90,7 @@ adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) `
   command above), not by a wireless-debugging handshake in the app.
 - Ending a task mid-way: the run closes what it opened, but a task cancelled
   while an app is mid-flow leaves that app's own state behind.
-- Per-app audio isolation: an app on the background display can still be heard.
+- Audio isolation depends on the `PLAY_AUDIO` AppOps flag existing on the
+  device; where it is missing the helper says so and the run is audible.
 - The assertion that the visible screen is unchanged during a run belongs in the
   device suite; it needs a real phone to compare window focus before and after.
