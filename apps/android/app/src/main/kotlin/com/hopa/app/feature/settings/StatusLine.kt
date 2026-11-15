@@ -29,6 +29,7 @@ fun StatusLine(
     ) {
         StatusDot(if (ok) DotState.Good else DotState.Attention)
         Text(title, fontSize = 14.sp, color = HopaColor.TextPrimary)
+        Text("\u00b7", fontSize = 13.sp, color = HopaColor.TextHint)
         Text(value, fontSize = 13.sp, color = HopaColor.TextSecondary)
     }
 }

@@ -45,8 +45,8 @@ fun SettingsSegment(
                         RoundedCornerShape(11.dp),
                     )
                     .clickable { onSelect(value) }
-                    .padding(horizontal = 4.dp, vertical = 9.dp),
-                fontSize = 13.sp,
+                    .padding(horizontal = 2.dp, vertical = 9.dp),
+                fontSize = 12.sp,
                 fontWeight = if (chosen) FontWeight.Medium else FontWeight.Normal,
                 color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
                 maxLines = 1,

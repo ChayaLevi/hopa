@@ -1,5 +1,6 @@
 package com.hopa.app.feature.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -84,33 +85,44 @@ fun SettingsScreen(
         }
 
         SettingsPanel {
-            Text("Running apps", fontSize = 15.sp, color = HopaColor.TextPrimary)
-            Text(
-                "Where apps open when you ask.",
-                fontSize = 13.sp,
-                color = HopaColor.TextSecondary,
-                modifier = Modifier.padding(top = 2.dp),
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenPage(PAGE_SCREEN) },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Running apps", fontSize = 15.sp, color = HopaColor.TextPrimary)
+                    Text(
+                        "Where apps open when you ask.",
+                        fontSize = 13.sp,
+                        color = HopaColor.TextSecondary,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                Text("\u203a", fontSize = 20.sp, color = HopaColor.TextHint)
+            }
             SettingsSegment(
                 options = listOf(
                     "auto" to "Auto",
                     "background" to "Hidden",
-                    "onscreen" to "This screen",
-                    "bridge" to "Computer",
+                    "onscreen" to "Here",
+                    "bridge" to "PC",
                 ),
                 selected = settings.screenPath,
                 onSelect = onScreenPath,
                 modifier = Modifier.padding(top = 12.dp),
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 TextButton(onClick = onRunCheck, enabled = !state.busy) {
                     Text(if (state.busy) "Checking\u2026" else "Check it works")
                 }
-                Text(
-                    shortPathLabel(settings.screenPath),
-                    fontSize = 12.sp,
-                    color = HopaColor.TextHint,
-                )
+                TextButton(onClick = { onOpenPage(PAGE_SCREEN) }) {
+                    Text("How each mode works")
+                }
             }
         }
 
