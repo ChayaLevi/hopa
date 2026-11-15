@@ -55,6 +55,7 @@ fun SettingsScreen(
     onOpenProfiles: () -> Unit,
     onOpenAccessibility: () -> Unit,
     onScreenPath: (String) -> Unit,
+    onStartBackgroundHelper: () -> Unit,
 ) {
     var provider by rememberSaveable { mutableStateOf(state.settings.provider) }
     var endpoint by rememberSaveable { mutableStateOf(state.settings.endpoint) }
@@ -318,11 +319,13 @@ fun SettingsScreen(
                     "then the PC bridge, then this screen.",
                 style = MaterialTheme.typography.bodySmall,
             )
+            Button(onClick = onStartBackgroundHelper, enabled = !state.busy) {
+                Text("Start the background screen")
+            }
             Text(
-                "Background screen needs phone access on (it reads that screen's " +
-                    "tree) and the helper started once over adb:\n" +
-                    "adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) " +
-                    "app_process / com.hopa.capabilities.display.ShellMain",
+                "It starts the helper on the phone through the paired PC bridge and " +
+                    "needs phone access on, because the background screen's tree is " +
+                    "read through it. After a phone reboot, press this once.",
                 style = MaterialTheme.typography.bodySmall,
                 color = HopaColor.TextHint,
             )

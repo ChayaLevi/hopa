@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import base64
 import hmac
+import re
 import json
 import os
 import secrets
@@ -42,6 +43,9 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+
+# Only a package name may reach the shell command that starts the helper.
+_PACKAGE_RE = re.compile(r"[A-Za-z][A-Za-z0-9_.]*")
 from typing import Any
 
 from .chat_store import ChatStore
@@ -461,6 +465,15 @@ class _Handler(BaseHTTPRequestHandler):
             return {"bundle": device.foreground()}
         if self.path == "/apps":
             return {"apps": device.apps()}
+        if self.path == "/helper":
+            package = str(data.get("package", "") or "com.hopa.android").strip()
+            if not _PACKAGE_RE.fullmatch(package):
+                raise BridgeError("bad package name")
+            starter = getattr(device, "start_helper", None)
+            if starter is None:
+                raise BridgeError("this device has no background helper")
+            print(f"helper: {package}", file=sys.stderr, flush=True)
+            return starter(package)
         if self.path == "/tap":
             print(f"tap {data.get('x')},{data.get('y')}", file=sys.stderr, flush=True)
             _retry(device.tap, int(data["x"]), int(data["y"]))

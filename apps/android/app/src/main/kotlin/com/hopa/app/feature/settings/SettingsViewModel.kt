@@ -198,6 +198,29 @@ class SettingsViewModel(
         }
     }
 
+    /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
+    fun startBackgroundHelper() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val current = container.settings.settings.first()
+            val token = container.settings.bridgeToken()
+            val message = when {
+                current.bridgeUrl.isBlank() -> "Bridge: set an address first"
+                token.isBlank() -> "Bridge: pair first, then start the helper"
+                else -> runCatching {
+                    val output = BridgeClient(current.bridgeUrl, token).startHelper()
+                    container.shell.close()
+                    if (container.shell.connect()) {
+                        "Background screen is ready"
+                    } else {
+                        "Helper started but did not answer: ${output.take(120)}"
+                    }
+                }.getOrElse { error -> "Background: ${error.message}" }
+            }
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
     fun pairBridge(url: String, code: String) {
         viewModelScope.launch {
             if (url.isBlank() || code.isBlank()) {

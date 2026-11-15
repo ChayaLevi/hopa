@@ -8,6 +8,8 @@ of the bridge already understands.
 
 from __future__ import annotations
 
+from typing import Any
+
 import re
 import xml.etree.ElementTree as ElementTree
 
@@ -127,6 +129,15 @@ class AndroidDevice:
 
     def shell(self, command: str) -> str:
         return self._adb.shell(command)
+
+    def start_helper(self, package: str) -> dict[str, Any]:
+        """Start the app's background-display helper as shell (uid 2000)."""
+        command = (
+            f"CLASSPATH=$(pm path {package} | cut -d: -f2); "
+            "nohup app_process / com.hopa.capabilities.display.ShellMain "
+            ">/dev/null 2>&1 & echo started"
+        )
+        return {"ok": True, "output": self._adb.shell(command)}
 
     def pull(self, remote: str, local: str) -> None:
         self._adb.pull(remote, local)
