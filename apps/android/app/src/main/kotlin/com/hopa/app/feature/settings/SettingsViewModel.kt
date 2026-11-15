@@ -3,6 +3,8 @@ package com.hopa.app.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
+import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.capabilities.bridge.BridgeClient
 import com.hopa.capabilities.llm.ProviderState
 import com.hopa.capabilities.llm.ProviderStateResolver
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -195,6 +199,70 @@ class SettingsViewModel(
                     "Could not show a notification"
                 },
             )
+        }
+    }
+
+    /**
+     * Say, step by step, what works right now. The person should never have to
+     * guess whether phone access, the helper or the bridge is the missing piece.
+     */
+    fun runScreenCheck() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, screenCheck = emptyList()) }
+            val lines = mutableListOf<String>()
+            val service = HopaAccessibilityService.instance
+            val enabled = AccessibilityState.isEnabled(container.context)
+            lines += if (enabled && service != null) {
+                "Phone access: on, the screen can be read"
+            } else if (enabled) {
+                "Phone access: enabled but not connected - turn the switch off and on"
+            } else {
+                "Phone access: off - Settings, Accessibility, HOPA"
+            }
+
+            val socket = withContext(Dispatchers.IO) { container.shell.connect() }
+            lines += if (socket) {
+                "Background helper: running"
+            } else {
+                "Background helper: not running - use Start or Pair below"
+            }
+
+            if (socket) {
+                val device = runCatching { container.backgroundDevice() }.getOrNull()
+                if (device == null) {
+                    lines += "Hidden screen: could not be created"
+                } else {
+                    val opened = runCatching { device.launch("com.android.settings") }
+                    val observation = runCatching { device.observe() }.getOrNull()
+                    val elements = observation?.tree?.children?.size ?: 0
+                    lines += if (opened.isSuccess) {
+                        "Hidden screen: Settings opened ($elements elements read)"
+                    } else {
+                        "Hidden screen: ${opened.exceptionOrNull()?.message}"
+                    }
+                    runCatching {
+                        (device as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                    }
+                }
+            }
+
+            val current = container.settings.settings.first()
+            if (current.bridgeUrl.isNotBlank()) {
+                val token = container.settings.bridgeToken()
+                val health = withContext(Dispatchers.IO) {
+                    runCatching {
+                        com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token).health()
+                        true
+                    }.getOrDefault(false)
+                }
+                lines += if (health) "PC bridge: answers at ${current.bridgeUrl}" else
+                    "PC bridge: no answer at ${current.bridgeUrl}"
+            } else {
+                lines += "PC bridge: not configured (optional)"
+            }
+
+            lines += "Mode: ${pathLabel(current.screenPath)}"
+            _state.update { it.copy(busy = false, screenCheck = lines) }
         }
     }
 

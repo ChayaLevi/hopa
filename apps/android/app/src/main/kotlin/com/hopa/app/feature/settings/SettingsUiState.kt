@@ -17,4 +17,6 @@ data class SettingsUiState(
     val notice: String? = null,
     /** The last "Test the model" outcome, shown next to the button. */
     val modelTest: String? = null,
+    /** Lines from the screen-access self-check, one per step. */
+    val screenCheck: List<String> = emptyList(),
 )

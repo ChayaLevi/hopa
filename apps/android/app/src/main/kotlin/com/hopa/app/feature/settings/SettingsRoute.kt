@@ -2,6 +2,9 @@ package com.hopa.app.feature.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
@@ -19,24 +22,59 @@ fun SettingsRoute(
 ) {
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
-    SettingsScreen(
-        state = state,
-        onBack = onBack,
-        onSave = viewModel::save,
-        onTestModel = viewModel::testModel,
-        onTestBridge = viewModel::testBridge,
-        onTestNotification = viewModel::testNotification,
-        onTone = viewModel::setTone,
-        onChattiness = viewModel::setChattiness,
-        onScreenPath = viewModel::setScreenPath,
-        onStartBackgroundHelper = viewModel::startBackgroundHelper,
-        onPairWireless = viewModel::pairWireless,
-        onOpenSelfCheck = onOpenSelfCheck,
-        onOpenAbout = onOpenAbout,
-        onPairBridge = viewModel::pairBridge,
-        onOpenCapabilities = onOpenCapabilities,
-        onOpenLaunchpad = onOpenLaunchpad,
-        onOpenProfiles = onOpenProfiles,
-        onOpenAccessibility = onOpenAccessibility,
-    )
+    var page by rememberSaveable { mutableStateOf("") }
+    val backToHub = { page = "" }
+
+    when (page) {
+        PAGE_MODEL -> SettingsModelScreen(
+            state = state,
+            onBack = backToHub,
+            onSave = viewModel::save,
+            onTestModel = viewModel::testModel,
+        )
+
+        PAGE_SCREEN -> SettingsScreenAccessScreen(
+            state = state,
+            onBack = backToHub,
+            onScreenPath = viewModel::setScreenPath,
+            onStartBackgroundHelper = viewModel::startBackgroundHelper,
+            onPairWireless = viewModel::pairWireless,
+            onRunCheck = viewModel::runScreenCheck,
+        )
+
+        PAGE_BRIDGE -> SettingsBridgeScreen(
+            state = state,
+            onBack = backToHub,
+            onSave = viewModel::save,
+            onTestBridge = viewModel::testBridge,
+            onPairBridge = viewModel::pairBridge,
+        )
+
+        PAGE_CHARACTER -> SettingsCharacterScreen(
+            state = state,
+            onBack = backToHub,
+            onTone = viewModel::setTone,
+            onChattiness = viewModel::setChattiness,
+            onOpenProfiles = onOpenProfiles,
+        )
+
+        PAGE_NOTIFICATIONS -> SettingsNotificationsScreen(
+            state = state,
+            onBack = backToHub,
+            onSave = viewModel::save,
+            onTestNotification = viewModel::testNotification,
+        )
+
+        else -> SettingsScreen(
+            state = state,
+            onBack = onBack,
+            onOpenPage = { page = it },
+            onOpenCapabilities = onOpenCapabilities,
+            onOpenLaunchpad = onOpenLaunchpad,
+            onOpenProfiles = onOpenProfiles,
+            onOpenAccessibility = onOpenAccessibility,
+            onOpenSelfCheck = onOpenSelfCheck,
+            onOpenAbout = onOpenAbout,
+        )
+    }
 }

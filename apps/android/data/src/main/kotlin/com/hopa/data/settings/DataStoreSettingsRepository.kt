@@ -30,6 +30,7 @@ class DataStoreSettingsRepository(
             accessibilityAllowed = prefs[ACCESSIBILITY_ALLOWED] ?: true,
             tone = prefs[TONE] ?: "friendly",
             chattiness = prefs[CHATTINESS] ?: "balanced",
+            screenPath = prefs[SCREEN_PATH] ?: "auto",
         )
     }
 
@@ -48,6 +49,7 @@ class DataStoreSettingsRepository(
             prefs[ACCESSIBILITY_ALLOWED] = next.accessibilityAllowed
             prefs[TONE] = next.tone
             prefs[CHATTINESS] = next.chattiness
+            prefs[SCREEN_PATH] = next.screenPath
         }
     }
 
@@ -78,6 +80,7 @@ class DataStoreSettingsRepository(
         val ACCESSIBILITY_ALLOWED = booleanPreferencesKey("accessibility_allowed")
         val TONE = stringPreferencesKey("tone")
         val CHATTINESS = stringPreferencesKey("chattiness")
+        val SCREEN_PATH = stringPreferencesKey("screen_path")
         const val MODEL_KEY = "model_key"
         const val BRIDGE_TOKEN = "bridge_token"
         const val BRIDGE_REFRESH = "bridge_refresh"
