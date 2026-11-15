@@ -42,7 +42,7 @@ fun SettingsScreen(
     val answers = state.providerState == ProviderState.CLOUD ||
         state.providerState == ProviderState.LAN
 
-    SettingsPage(title = "", onBack = onBack) {
+    SettingsPage(title = "Settings", onBack = onBack, collapseTitle = true) {
         SettingsHeader(
             title = "Settings",
             summary = when {
@@ -79,7 +79,7 @@ fun SettingsScreen(
         SettingsGroup {
             SettingsRow(
                 "Tone and length",
-                "${settings.tone} - ${settings.chattiness}",
+                "${settings.tone.replaceFirstChar { it.uppercase() }}, ${settings.chattiness}",
                 Icons.Filled.Face,
             ) { onOpenPage(PAGE_CHARACTER) }
             SettingsDivider()

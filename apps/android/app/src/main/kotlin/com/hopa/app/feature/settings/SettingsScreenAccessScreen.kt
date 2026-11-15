@@ -95,16 +95,24 @@ fun SettingsScreenAccessScreen(
         }
 
         if (state.settings.screenPath != "onscreen") {
+            val bridgeReady = state.settings.bridgeUrl.isNotBlank()
             SettingsGroup {
                 SettingsRow(
-                    "Turn on background mode",
-                    if (state.settings.bridgeUrl.isBlank()) {
-                        "Needs your computer, or the steps below"
+                    if (bridgeReady) "Turn on background mode" else "Show me the steps",
+                    if (bridgeReady) {
+                        "Uses your computer, one press after a restart"
                     } else {
-                        "Using your computer"
+                        "Takes a minute; needs developer options"
                     },
                     Icons.Filled.Menu,
-                ) { if (state.settings.bridgeUrl.isNotBlank()) onStartBackgroundHelper() }
+                ) {
+                    if (bridgeReady) {
+                        onStartBackgroundHelper()
+                    } else {
+                        // Nothing to start yet: the honest action is the setup steps.
+                        setup = true
+                    }
+                }
             }
         }
 

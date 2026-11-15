@@ -1,5 +1,8 @@
 package com.hopa.app.feature.settings
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -16,25 +19,45 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
-/** One settings page: a titled screen with a back arrow and a scrolling body. */
+/**
+ * One settings page: a back arrow, an optional collapsing title, and a scrolling
+ * body. With [collapseTitle] the big header in the body is the title until it
+ * scrolls away, then the bar picks it up - the pattern every 2026 app uses.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPage(
     title: String,
     onBack: () -> Unit,
+    collapseTitle: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val scroll = rememberScrollState()
+    val scrolled by remember {
+        derivedStateOf { scroll.value > 48 }
+    }
     Scaffold(
         containerColor = HopaColor.Bg,
         topBar = {
             TopAppBar(
-                title = { Text(title, fontSize = 18.sp, fontWeight = FontWeight.Medium) },
+                title = {
+                    AnimatedVisibility(
+                        visible = !collapseTitle || scrolled,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                    ) {
+                        Text(title, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -47,7 +70,7 @@ fun SettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             content = content,
