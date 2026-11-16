@@ -22,9 +22,7 @@ fun SettingsRoute(
     container: AppContainer,
     onBack: () -> Unit,
     onOpenCapabilities: () -> Unit,
-    onOpenLaunchpad: () -> Unit,
     onOpenProfiles: () -> Unit,
-    onOpenAccessibility: () -> Unit,
     onOpenSelfCheck: () -> Unit,
     onOpenAbout: () -> Unit,
 ) {
@@ -69,28 +67,6 @@ fun SettingsRoute(
                 onBack = backToHub,
                 onSave = viewModel::save,
                 onTestModel = viewModel::testModel,
-            )
-
-            PAGE_SCREEN -> SettingsScreenAccessScreen(
-                state = state,
-                onBack = backToHub,
-                onScreenPath = viewModel::setScreenPath,
-                onStartBackgroundHelper = viewModel::startBackgroundHelper,
-                onPairWireless = viewModel::pairWireless,
-                onRunCheck = viewModel::runScreenCheck,
-                onOpenBridge = { page = PAGE_BRIDGE },
-                onOpenScreenControl = onOpenAccessibility,
-                onPlanFirst = viewModel::setPlanFirst,
-                onReplaySkills = viewModel::setReplaySkills,
-                onVision = viewModel::setVision,
-            )
-
-            PAGE_BRIDGE -> SettingsBridgeScreen(
-                state = state,
-                onBack = backToHub,
-                onSave = viewModel::save,
-                onTestBridge = viewModel::testBridge,
-                onPairBridge = viewModel::pairBridge,
             )
 
             PAGE_CHARACTER -> SettingsCharacterScreen(
@@ -144,15 +120,11 @@ fun SettingsRoute(
                 state = state,
                 onBack = onBack,
                 onOpenPage = { page = it },
-                onScreenPath = viewModel::setScreenPath,
                 onTone = viewModel::setTone,
                 onChattiness = viewModel::setChattiness,
                 onToggleAlerts = viewModel::setNotifications,
-                onRunCheck = viewModel::runScreenCheck,
                 onOpenCapabilities = onOpenCapabilities,
-                onOpenLaunchpad = onOpenLaunchpad,
                 onOpenProfiles = onOpenProfiles,
-                onOpenAccessibility = onOpenAccessibility,
                 onOpenSelfCheck = onOpenSelfCheck,
                 onOpenAbout = onOpenAbout,
             )

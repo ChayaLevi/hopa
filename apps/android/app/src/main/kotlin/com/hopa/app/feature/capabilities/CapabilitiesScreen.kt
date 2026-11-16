@@ -35,24 +35,19 @@ import com.hopa.app.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.capabilities.llm.ProviderState
 
 /** Capabilities: what HOPA can use on this phone and what powers it. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CapabilitiesScreen(
-    provider: ProviderState,
-    endpoint: String,
     records: Int,
-    apps: Int,
     facts: Int = 0,
     skills: Int = 0,
     accessibilityEnabled: Boolean,
     activeTab: String,
     onSelectTab: (String) -> Unit,
-    onOpenLaunchpad: () -> Unit,
+    onOpenRunningApps: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenDevice: () -> Unit,
     onOpenBrowser: () -> Unit,
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
@@ -60,8 +55,6 @@ fun CapabilitiesScreen(
     onUnavailable: (String) -> Unit,
 ) {
     val ready = accessibilityEnabled
-    val control = if (accessibilityEnabled) "On-device" else "Not set up"
-    val model = if (provider == ProviderState.NO_MODEL) "No model" else provider.label()
     Scaffold(
         containerColor = HopaColor.Bg,
         topBar = {
@@ -107,7 +100,7 @@ fun CapabilitiesScreen(
                     .fillMaxWidth()
                     .background(HopaColor.Surface, RoundedCornerShape(14.dp))
                     .border(1.dp, HopaColor.Divider, RoundedCornerShape(14.dp))
-                    .clickable(onClick = onOpenDevice)
+                    .clickable(onClick = onOpenRunningApps)
                     .padding(14.dp),
                 verticalAlignment = Alignment.Top,
             ) {
@@ -118,7 +111,7 @@ fun CapabilitiesScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(
-                        text = if (ready) "Ready on this phone" else "Finish setup",
+                        text = "Running apps",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Medium,
                         color = HopaColor.TextPrimary,
@@ -136,40 +129,50 @@ fun CapabilitiesScreen(
                                 ),
                         )
                         Text(
-                            text = "$model \u00b7 $control",
+                            text = if (ready) {
+                                "Ready on this phone"
+                            } else {
+                                "Needs screen access"
+                            },
                             fontSize = 11.sp,
                             color = HopaColor.TextSecondary,
                         )
                     }
+                    Text(
+                        text = "Open, tap and type in other apps: the surface, the setup " +
+                            "and the apps themselves.",
+                        fontSize = 11.sp,
+                        color = HopaColor.TextHint,
+                    )
                 }
             }
 
             SectionLabel("WHAT HOPA CAN USE")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Tile(
-                    title = "Launchpad",
-                    subtitle = "Apps and sites to open",
-                    onClick = onOpenLaunchpad,
-                    modifier = Modifier.weight(1f),
-                )
-                Tile(
                     title = "Browser",
                     subtitle = "Read, click and type",
                     onClick = onOpenBrowser,
                     modifier = Modifier.weight(1f),
                 )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Tile(
                     title = "Memory",
                     subtitle = if (facts == 1) "1 fact" else "$facts facts",
                     onClick = onOpenMemory,
                     modifier = Modifier.weight(1f),
                 )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Tile(
                     title = "Runs",
                     subtitle = actionCountLabel(records),
                     onClick = onOpenRuns,
+                    modifier = Modifier.weight(1f),
+                )
+                Tile(
+                    title = "Skills",
+                    subtitle = if (skills == 1) "1 trigger" else "$skills triggers",
+                    onClick = onOpenMemory,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -186,14 +189,6 @@ fun CapabilitiesScreen(
                     title = "MCP servers",
                     subtitle = "Phone and PC tools",
                     onClick = { onUnavailable("MCP servers") },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Tile(
-                    title = "Skills",
-                    subtitle = if (skills == 1) "1 trigger" else "$skills triggers",
-                    onClick = onOpenMemory,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -252,10 +247,3 @@ private fun Tile(
 
 private fun actionCountLabel(count: Int): String =
     "$count ${if (count == 1) "action" else "actions"}"
-
-private fun ProviderState.label(): String = when (this) {
-    ProviderState.CLOUD -> "Cloud model"
-    ProviderState.LAN -> "LAN model"
-    ProviderState.DEMO -> "Demo model (no key)"
-    ProviderState.NO_MODEL -> "No model"
-}

@@ -1,11 +1,14 @@
-package com.hopa.app.feature.settings
+package com.hopa.app.feature.runningapps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,33 +20,52 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hopa.app.feature.settings.BackgroundSetupDialog
+import com.hopa.app.feature.settings.CheckRow
+import com.hopa.app.feature.settings.ModeSceneSwitch
+import com.hopa.app.feature.settings.ModeTile
+import com.hopa.app.feature.settings.SettingsDivider
+import com.hopa.app.feature.settings.SettingsGroup
+import com.hopa.app.feature.settings.SettingsPage
+import com.hopa.app.feature.settings.SettingsPanel
+import com.hopa.app.feature.settings.SettingsRow
+import com.hopa.app.feature.settings.SettingsSection
+import com.hopa.app.feature.settings.SettingsSwitchRow
+import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * Choose where apps open. A scene shows what will happen, four tiles choose it,
- * one button proves it, and setup happens in a dialog you can actually see.
+ * One page for everything about opening another app: which surface runs the
+ * taps, what that surface needs before it works, the apps themselves, and the
+ * three switches that change a run. Settings owns none of this any more.
  */
 @Composable
-fun SettingsScreenAccessScreen(
+fun RunningAppsScreen(
     state: SettingsUiState,
     onBack: () -> Unit,
     onScreenPath: (String) -> Unit,
     onStartBackgroundHelper: () -> Unit,
     onPairWireless: (String, String) -> Unit,
     onRunCheck: () -> Unit,
-    onOpenBridge: () -> Unit,
-    onOpenScreenControl: () -> Unit,
     onPlanFirst: (Boolean) -> Unit,
-    onReplaySkills: (Boolean) -> Unit,
     onVision: (Boolean) -> Unit,
+    onReplaySkills: (Boolean) -> Unit,
+    onOpenLaunchpad: () -> Unit,
+    onOpenScreenAccess: () -> Unit,
+    onOpenComputer: () -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = state.settings.screenPath
     val bridgeReady = state.settings.bridgeUrl.isNotBlank()
 
     SettingsPage(title = "Running apps", onBack = onBack) {
+        Text(
+            "Where apps open when you ask, what it takes to open them, and the " +
+                "apps themselves.",
+            style = MaterialTheme.typography.bodySmall,
+            color = HopaColor.TextHint,
+        )
         ModeSceneSwitch(mode = mode)
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -71,7 +93,6 @@ fun SettingsScreenAccessScreen(
                 Modifier.weight(1f),
             )
         }
-
         Text(
             when (mode) {
                 "background" -> "Apps open out of sight. Turn it on once, then just ask."
@@ -81,7 +102,6 @@ fun SettingsScreenAccessScreen(
             },
             style = MaterialTheme.typography.bodySmall,
         )
-
         Button(
             onClick = onRunCheck,
             enabled = !state.busy,
@@ -100,19 +120,17 @@ fun SettingsScreenAccessScreen(
                 state.screenCheck.take(4).forEach { check ->
                     CheckRow(check) { picked ->
                         when (picked.id) {
-                            "screen" -> onOpenScreenControl()
+                            "screen" -> onOpenScreenAccess()
                             "background" -> setup = true
-                            "computer" -> onOpenBridge()
+                            "computer" -> onOpenComputer()
                         }
                     }
                 }
             }
         }
-
         state.bridgeStatus?.let { message ->
             Text(message, fontSize = 13.sp, color = HopaColor.TextSecondary)
         }
-
         if (mode != "onscreen") {
             SettingsGroup {
                 SettingsRow(
@@ -125,6 +143,34 @@ fun SettingsScreenAccessScreen(
             }
         }
 
+        SettingsSection("Apps")
+        SettingsGroup {
+            SettingsRow(
+                "Apps and sites",
+                "The catalog of everything HOPA can open here",
+                Icons.Filled.List,
+            ) {
+                onOpenLaunchpad()
+            }
+            SettingsDivider()
+            SettingsRow(
+                "Screen access",
+                if (state.phoneAccess) "On - HOPA can see and tap" else "Off - needed to run anything",
+                Icons.Filled.Lock,
+            ) {
+                onOpenScreenAccess()
+            }
+            SettingsDivider()
+            SettingsRow(
+                "My computer",
+                if (bridgeReady) "Paired" else "Not set up",
+                Icons.Filled.Share,
+            ) {
+                onOpenComputer()
+            }
+        }
+
+        SettingsSection("When it runs")
         SettingsPanel {
             SettingsSwitchRow("Show me the plan first", state.settings.planFirst) {
                 onPlanFirst(it)
