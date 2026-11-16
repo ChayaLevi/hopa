@@ -3,29 +3,34 @@ package com.hopa.core.prompt
 import com.hopa.core.ports.InstalledApp
 
 /**
- * The apps this phone can actually open. The catalog names apps; this lists the
- * package that exists on the device, which is the only thing ui.launch accepts.
- * Without it the model had no package for any app and the router told it not to
- * guess, so an app could be named but never opened.
+ * Apps on this device that the catalog does not describe. The catalog block
+ * already names the ones HOPA knows, with their rules; repeating them here only
+ * spends context, so this list is the remainder: things a person installed that
+ * HOPA has no opinion about.
  */
 class InstalledAppsBlock(
     private val limit: Int = 100,
 ) {
-    fun text(apps: List<InstalledApp>): String {
+    fun text(apps: List<InstalledApp>, known: Set<String> = emptySet()): String {
         if (apps.isEmpty()) {
             return "APPS THIS CLIENT CAN OPEN: none could be listed.\n" +
                 "Do not guess a package name; ask the person to open the app."
         }
-        val lines = mutableListOf("APPS THIS CLIENT CAN OPEN (label - target):")
-        apps.asSequence()
+        val rest = apps.asSequence()
             .filter { it.label.isNotBlank() && it.packageName.isNotBlank() }
+            .filter { it.packageName.lowercase() !in known }
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
             .take(limit)
-            .forEach { lines += "${it.label} - ${it.packageName}" }
+            .toList()
+        if (rest.isEmpty()) {
+            return ""
+        }
+        val lines = mutableListOf("OTHER APPS ON THIS PHONE (label - target):")
+        rest.forEach { lines += "${it.label} - ${it.packageName}" }
         lines += ""
-        lines += "Open one of these with ui.launch and its target. " +
-            "Never invent a target and never launch the same app twice."
+        lines += "These have no catalog entry, so no rules come with them. " +
+            "Prefer the apps above; ask before doing something irreversible in one of these."
         return lines.joinToString("\n")
     }
 }

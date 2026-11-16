@@ -21,4 +21,6 @@ data class AppSettings(
     val replaySkills: Boolean = true,
     /** Attach a screenshot to each model call (needs a model that sees images). */
     val vision: Boolean = false,
+    /** Packages whose typed calls, messages and closing skip the question. */
+    val trustedApps: Set<String> = emptySet(),
 )

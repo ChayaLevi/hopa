@@ -107,7 +107,14 @@ on screen is always a row that can open.
 7. An app with a target but no install still gets a row: on Android, tapping it
    offers the Play Store page for that package, and a package Play answers 404
    for says so instead of opening a blank page.
-8. On Android a row opens the app's card: status, the surface a run would use,
+8. The catalog block the model reads carries the guardrails on the same
+   line as the name and target ("payments always ask", "never read a code"), so
+   an app's rules travel with it instead of living only in the UI.
+9. Trust is per app and lives in settings: a trusted app skips the question for
+   its typed calls, messages and closing, while payments, uninstalling and
+   deleting always ask. The list is shared with Harmony through
+   `contracts/policy/approval.v1.json`.
+10. On Android a row opens the app's card: status, the surface a run would use,
    the package, and the catalog's guardrail bullets. The card, not Settings, is
    where a person judges whether HOPA should touch that app.
 

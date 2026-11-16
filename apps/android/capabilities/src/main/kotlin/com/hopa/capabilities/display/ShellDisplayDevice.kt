@@ -8,8 +8,6 @@ import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.capabilities.accessibility.NodeTreeReader
 import com.hopa.capabilities.accessibility.GestureDispatcher
 import com.hopa.core.contracts.Observation
-import com.hopa.core.contracts.ObservationNode
-import com.hopa.core.contracts.ScreenSize
 import com.hopa.core.observation.ObservationProducer
 import com.hopa.core.ports.DevicePort
 import com.hopa.core.ports.InstalledApp
@@ -67,7 +65,15 @@ class ShellDisplayDevice(
     }
 
     override suspend fun observe(): Observation {
-        val service = HopaAccessibilityService.instance ?: return offline()
+        val service = HopaAccessibilityService.instance
+            ?: throw IllegalStateException(
+                "screen access is off, so the hidden screen cannot be read",
+            )
+        if (displayId <= 0) {
+            throw IllegalStateException(
+                error.ifBlank { "the hidden screen is not running" },
+            )
+        }
         val reader = NodeTreeReader(service, displayId = displayId)
         val raw = reader.read()
         refs = reader.refs
@@ -170,7 +176,15 @@ class ShellDisplayDevice(
     }
 
     override suspend fun stop(packageName: String) {
-        throw UnsupportedOperationException("the background display closes with the run")
+        // The helper owns the display, so it is also the only thing that can
+        // close an app on it. Forgetting the package keeps the end-of-run sweep
+        // from closing it twice.
+        val (ok, payload) = client.finish(listOf(packageName))
+        if (!ok) {
+            throw IllegalStateException(payload)
+        }
+        launched -= packageName
+        runCatching { client.unmute(packageName) }
     }
 
     override suspend fun foreground(): String = client.top()
@@ -189,7 +203,8 @@ class ShellDisplayDevice(
         return payload
     }
 
-    override suspend fun apps(): List<InstalledApp> = emptyList()
+    override suspend fun apps(): List<InstalledApp> =
+        com.hopa.capabilities.system.AndroidPackageCatalog(context).installed()
 
     private fun pointFor(ref: String?, x: Int?, y: Int?): Pair<Int, Int> {
         if (ref != null) {
@@ -204,16 +219,6 @@ class ShellDisplayDevice(
         return x to y
     }
 
-    private fun offline(): Observation {
-        val observation = Observation(
-            id = "obs-background-offline",
-            timestamp = System.currentTimeMillis(),
-            screenSize = ScreenSize(0, 0),
-            text = "The background screen is not available: ${error.ifBlank { "no display" }}.",
-            tree = ObservationNode(type = "root"),
-        )
-        return observation
-    }
 
     private companion object {
         const val KEYCODE_BACK = 4

@@ -187,6 +187,24 @@ class SettingsViewModel(
         }
     }
 
+    fun setTrusted(packageName: String, trusted: Boolean) {
+        if (packageName.isBlank()) {
+            return
+        }
+        viewModelScope.launch {
+            container.settings.update { current ->
+                current.copy(
+                    trustedApps = if (trusted) {
+                        current.trustedApps + packageName
+                    } else {
+                        current.trustedApps - packageName
+                    },
+                )
+            }
+            reload()
+        }
+    }
+
     fun setReplaySkills(value: Boolean) {
         viewModelScope.launch {
             container.settings.update { it.copy(replaySkills = value) }

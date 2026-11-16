@@ -55,3 +55,11 @@ The owner wants both, to show both to colleagues.
 - **adb only.** Rejected: the phone would be useless without a PC, which defeats
   an APK that runs the loop itself.
 - **Root/ADB shell on device.** Rejected: not shippable to normal users.
+
+## Update 2026-11-16
+
+The priority in this decision ("bridge first, then accessibility") was replaced
+by a setting with four surfaces: **Auto** (hidden, then computer, then this
+screen), **Hidden**, **Here**, **Computer**. `ScreenPathOrder` is the pure
+function that decides, and the run records which surface answered. The seam this
+ADR describes - one `DevicePort`, several adapters - is unchanged.

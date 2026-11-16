@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hopa.app.ui.component.AppIcon
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.component.HopaStatusPill
 import com.hopa.app.ui.theme.HopaColor
@@ -42,11 +44,13 @@ fun AppCardScreen(
     target: RouteTarget?,
     surface: String,
     screenAccess: Boolean,
+    trusted: Boolean,
     status: String,
     onBack: () -> Unit,
     onOpen: () -> Unit,
     onInstall: () -> Unit,
     onOpenScreenAccess: () -> Unit,
+    onTrust: (Boolean) -> Unit,
 ) {
     val installed = target != null && target.status == "ready" && target.bundle.isNotBlank()
     Scaffold(
@@ -89,19 +93,12 @@ fun AppCardScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(HopaColor.PrimarySoft, RoundedCornerShape(18.dp)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        target.display.take(1).uppercase(),
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = HopaColor.Primary,
-                    )
-                }
+                AppIcon(
+                    packageName = target.bundle,
+                    label = target.display,
+                    size = 60.dp,
+                    corner = 18.dp,
+                )
                 Text(
                     target.purpose.ifBlank { target.name },
                     fontSize = 13.sp,
@@ -178,6 +175,31 @@ fun AppCardScreen(
                         color = HopaColor.TextHint,
                     )
                     Text("\u203a", fontSize = 16.sp, color = HopaColor.TextHint)
+                }
+            }
+
+            Card {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Skip the question for this app",
+                            fontSize = 14.sp,
+                            color = HopaColor.TextPrimary,
+                        )
+                        Text(
+                            "Typed calls, messages and closing it. Payments and " +
+                                "uninstalling always ask.",
+                            fontSize = 11.sp,
+                            color = HopaColor.TextHint,
+                        )
+                    }
+                    Switch(checked = trusted, onCheckedChange = onTrust)
                 }
             }
 

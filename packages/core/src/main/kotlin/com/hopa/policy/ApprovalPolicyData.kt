@@ -47,14 +47,13 @@ object ApprovalPolicyData {
         "web.type",
     )
     val SENSITIVE_KINDS: List<String> = listOf(
-        "ui.sendMessage",
-        "ui.call",
         "system.sendMessage",
         "system.call",
         "system.delete",
         "system.uninstall",
-        "system.reset",
-        "sandbox.runNetworked",
+        "system.share",
+        "app.function",
+        "ui.stop",
     )
     val ALLOWED_KINDS: List<String> = listOf(
         "web.navigate",
@@ -72,14 +71,14 @@ object ApprovalPolicyData {
         "ui.launch",
         "ui.wait",
         "ui.observe",
-        "a11y.observe",
         "system.setAlarm",
         "system.addEvent",
         "system.openLink",
         "sandbox.run",
     )
     val TRUSTED_APP_KINDS: List<String> = listOf(
-        "ui.sendMessage",
+        "app.function",
+        "ui.stop",
         "system.sendMessage",
     )
     val MERCHANT_PREFIXES: List<String> = listOf(

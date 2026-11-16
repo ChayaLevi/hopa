@@ -332,35 +332,9 @@ class ChatViewModel(
                     )
                 }
             }
-            if (!(AccessibilityState.isEnabled(container.context) &&
-                    HopaAccessibilityService.instance != null)
-            ) {
-                // Nothing below can work without a screen, and asking the model to
-                // guess produced a paragraph of apology instead of the one real fix.
-                container.busy.value = false
-                stopRunService()
-                container.conversations.append(
-                    conversation.id,
-                    ChatMessage(
-                        id = "m-${System.currentTimeMillis()}-local",
-                        role = "assistant",
-                        text = "Phone access is off, so I cannot see or tap apps. " +
-                            "Turn it on in Settings, Accessibility, HOPA, then ask again.",
-                        timestamp = System.currentTimeMillis(),
-                    ),
-                )
-                val all = container.conversations.all()
-                _state.update {
-                    it.copy(
-                        current = all.firstOrNull { item -> item.id == conversation.id },
-                        conversations = all,
-                        busy = false,
-                    )
-                }
-                return@launch
-            }
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
+            container.policy.setTrustedApps(current.trustedApps.toList())
             if (current.planFirst && planApprovedFor != body) {
                 // One approval for the whole chain: the model writes the plan, the
                 // person reads it, and only then does anything get tapped.
@@ -442,14 +416,13 @@ class ChatViewModel(
                     ChatMessage(
                         id = "m-${System.currentTimeMillis()}-screen",
                         role = "assistant",
-                        text = "I cannot read the screen right now: " +
-                            device.lastError.take(180).ifBlank { "no window is available" } +
-                            ". Phone access is " +
-                            if (AccessibilityState.isEnabled(container.context)) {
-                                "on; turn the HOPA service off and on again."
-                            } else {
-                                "off; turn it on in Settings, Accessibility, HOPA."
-                            },
+                        // The refusal now comes from the surface that was actually
+                        // tried, so a run on the hidden screen or the computer is not
+                        // blocked by a local permission it does not need.
+                        text = "I cannot reach your apps: " +
+                            device.lastError.take(180).ifBlank { "no screen answered" } +
+                            ". Open Running apps: turn on screen access, start the " +
+                            "hidden screen, or pair your computer.",
                         timestamp = System.currentTimeMillis(),
                     ),
                 )
@@ -522,8 +495,7 @@ class ChatViewModel(
                             appFunctions = typedFunctions(device),
                             vision = current.vision,
                             platform = "android",
-                            phoneAccess = AccessibilityState.isEnabled(container.context) &&
-                                HopaAccessibilityService.instance != null,
+                            phoneAccess = device.sourceName != "fallback",
                         ),
                         isCancelled = { container.cancelRequested.value },
                     )

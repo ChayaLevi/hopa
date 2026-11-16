@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.hopa.data.secrets.SecretStore
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +35,7 @@ class DataStoreSettingsRepository(
             planFirst = prefs[PLAN_FIRST] ?: false,
             replaySkills = prefs[REPLAY_SKILLS] ?: true,
             vision = prefs[VISION] ?: false,
+            trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
         )
     }
 
@@ -56,6 +58,7 @@ class DataStoreSettingsRepository(
             prefs[PLAN_FIRST] = next.planFirst
             prefs[REPLAY_SKILLS] = next.replaySkills
             prefs[VISION] = next.vision
+            prefs[TRUSTED_APPS] = next.trustedApps
         }
     }
 
@@ -90,6 +93,7 @@ class DataStoreSettingsRepository(
         val PLAN_FIRST = booleanPreferencesKey("plan_first")
         val REPLAY_SKILLS = booleanPreferencesKey("replay_skills")
         val VISION = booleanPreferencesKey("vision")
+        val TRUSTED_APPS = stringSetPreferencesKey("trusted_apps")
         const val MODEL_KEY = "model_key"
         const val BRIDGE_TOKEN = "bridge_token"
         const val BRIDGE_REFRESH = "bridge_refresh"

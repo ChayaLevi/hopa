@@ -35,13 +35,11 @@ fun SettingsModelScreen(
     var endpoint by rememberSaveable { mutableStateOf(state.settings.endpoint) }
     var model by rememberSaveable { mutableStateOf(state.settings.model) }
     var key by rememberSaveable { mutableStateOf("") }
-    var web by rememberSaveable { mutableStateOf(state.settings.webEnabled) }
 
     LaunchedEffect(state.settings, state.key) {
         provider = state.settings.provider
         endpoint = state.settings.endpoint
         model = state.settings.model
-        web = state.settings.webEnabled
         if (key.isEmpty()) {
             key = state.key
         }
@@ -101,7 +99,7 @@ fun SettingsModelScreen(
                         model,
                         key,
                         state.settings.notifyAnswers,
-                        web,
+                        state.settings.webEnabled,
                         state.settings.bridgeUrl,
                         "",
                         state.settings.useBridge,
@@ -119,7 +117,7 @@ fun SettingsModelScreen(
                         model,
                         key,
                         state.settings.notifyAnswers,
-                        web,
+                        state.settings.webEnabled,
                         state.settings.bridgeUrl,
                         "",
                         state.settings.useBridge,
@@ -144,7 +142,6 @@ fun SettingsModelScreen(
                 },
             )
         }
-        SettingsSwitchRow("Web capability", web) { web = it }
         Text(
             "LAN works without internet when the endpoint is an OpenAI-compatible " +
                 "server on the same network.",

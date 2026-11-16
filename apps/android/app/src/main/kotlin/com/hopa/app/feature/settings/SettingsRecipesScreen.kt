@@ -18,6 +18,7 @@ import java.util.Locale
 @Composable
 fun SettingsRecipesScreen(
     recipes: List<Recipe>,
+    names: Map<String, String> = emptyMap(),
     onBack: () -> Unit,
     onDelete: (String) -> Unit,
 ) {
@@ -36,7 +37,12 @@ fun SettingsRecipesScreen(
                 SettingsPanel {
                     Text(recipe.goal, fontSize = 14.sp, color = HopaColor.TextPrimary)
                     Text(
-                        "${recipe.steps.size} steps - ${clock(recipe.at)}",
+                        listOfNotNull(
+                            names[recipe.app.lowercase()]?.takeIf { it.isNotBlank() }
+                                ?.let { "in $it" },
+                            "${recipe.steps.size} steps",
+                            clock(recipe.at),
+                        ).joinToString(" - "),
                         fontSize = 12.sp,
                         color = HopaColor.TextSecondary,
                     )

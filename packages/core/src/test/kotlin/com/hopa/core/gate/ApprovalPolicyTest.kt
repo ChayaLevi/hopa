@@ -59,6 +59,31 @@ class ApprovalPolicyTest {
     }
 
     @Test
+    fun trust_covers_typed_calls_and_closing_but_never_payments() {
+        policy.setTrustedApps(listOf("com.example.maps"))
+        assertFalse(
+            policy.requiresApproval(
+                Action(kind = "app.function", app = "com.example.maps"),
+            ),
+        )
+        assertFalse(
+            policy.requiresApproval(Action(kind = "ui.stop", app = "com.example.maps")),
+        )
+        // A payment in a trusted app still asks.
+        assertTrue(
+            policy.requiresApproval(
+                Action(kind = "payment.pay", app = "com.example.maps"),
+            ),
+        )
+        // Uncatalogued sensitive device actions are not app-scoped.
+        assertTrue(
+            policy.requiresApproval(
+                Action(kind = "system.uninstall", app = "com.example.maps"),
+            ),
+        )
+    }
+
+    @Test
     fun extracts_amount_and_merchant() {
         val context = policy.extractPaymentContext(
             screen("Merchant: Blue Cafe\nAmount \$4.50"),
