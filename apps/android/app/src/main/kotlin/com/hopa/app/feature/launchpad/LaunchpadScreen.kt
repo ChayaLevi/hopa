@@ -16,11 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,14 +66,9 @@ fun LaunchpadScreen(
         target.matches(needle) || target.domains.any { it.lowercase().contains(needle) }
     }
 
-    Scaffold(containerColor = HopaColor.Bg) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
+    Scaffold(
+        containerColor = HopaColor.Bg,
+        topBar = {
             HopaTopBar {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -85,6 +84,15 @@ fun LaunchpadScreen(
                     color = HopaColor.TextPrimary,
                 )
             }
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,14 +107,7 @@ fun LaunchpadScreen(
                     section = 1
                 }
             }
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = { Text("Search apps and sites", fontSize = 13.sp) },
-                singleLine = true,
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.fillMaxWidth(),
-            )
+            LaunchpadSearch(query) { query = it }
             if (status.isNotEmpty()) {
                 Text(
                     status,
@@ -158,6 +159,38 @@ private fun RouteTarget.matches(needle: String): Boolean {
         name.lowercase().contains(needle) ||
         aliases.any { it.lowercase().contains(needle) } ||
         purpose.lowercase().contains(needle)
+}
+
+@Composable
+private fun LaunchpadSearch(
+    query: String,
+    onQuery: (String) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(38.dp)
+            .background(HopaColor.Surface, RoundedCornerShape(10.dp))
+            .border(1.dp, HopaColor.Divider, RoundedCornerShape(10.dp))
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        BasicTextField(
+            value = query,
+            onValueChange = onQuery,
+            singleLine = true,
+            textStyle = TextStyle(fontSize = 13.sp, color = HopaColor.TextPrimary),
+            cursorBrush = SolidColor(HopaColor.Primary),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            modifier = Modifier.fillMaxWidth(),
+            decorationBox = { inner ->
+                if (query.isEmpty()) {
+                    Text("Search apps and sites", fontSize = 13.sp, color = HopaColor.TextHint)
+                }
+                inner()
+            },
+        )
+    }
 }
 
 @Composable
