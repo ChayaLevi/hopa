@@ -80,7 +80,12 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             RunningAppsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                onOpenLaunchpad = { navController.navigate(HopaDestination.LAUNCHPAD) },
+                onOpenApp = { name ->
+                    navController.navigate(
+                        HopaDestination.APP_CARD + "/" + android.net.Uri.encode(name),
+                    )
+                },
+                onOpenAllApps = { navController.navigate(HopaDestination.LAUNCHPAD) },
                 onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
                 onOpenComputer = { navController.navigate(HopaDestination.COMPUTER) },
             )

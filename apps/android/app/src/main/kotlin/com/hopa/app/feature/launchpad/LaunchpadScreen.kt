@@ -18,10 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.HopaTopBar
+import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.core.router.RouteTarget
 
@@ -68,21 +64,7 @@ fun LaunchpadScreen(
     Scaffold(
         containerColor = HopaColor.Bg,
         topBar = {
-            HopaTopBar {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = HopaColor.TextPrimary,
-                    )
-                }
-                Text(
-                    "Launchpad",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = HopaColor.TextPrimary,
-                )
-            }
+            HopaPageHeader(title = "Launchpad", onBack = onBack)
         },
     ) { padding ->
         Column(

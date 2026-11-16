@@ -1,7 +1,7 @@
 package com.hopa.app.feature.launchpad
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,30 +16,26 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.HopaTopBar
+import com.hopa.app.ui.component.HopaPageHeader
+import com.hopa.app.ui.component.HopaStatusPill
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.core.router.RouteTarget
 
 /**
- * One app: what it is for, whether this phone has it, how a run would reach it,
- * and the few rules the catalog keeps about it. Everything a person needs
- * before asking HOPA to touch an app lives here, not in Settings.
+ * One app: whether it is here, how a run would reach it, and the few rules the
+ * catalog keeps. The card is the decision point, so it leads with the one action
+ * and hides the details below it.
  */
 @Composable
 fun AppCardScreen(
@@ -52,26 +48,22 @@ fun AppCardScreen(
     onInstall: () -> Unit,
     onOpenScreenAccess: () -> Unit,
 ) {
+    val installed = target != null && target.status == "ready" && target.bundle.isNotBlank()
     Scaffold(
         containerColor = HopaColor.Bg,
         topBar = {
-            HopaTopBar {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = HopaColor.TextPrimary,
-                    )
-                }
-                Text(
-                    target?.display.orEmpty().ifBlank { "App" },
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = HopaColor.TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            HopaPageHeader(
+                title = target?.display.orEmpty().ifBlank { "App" },
+                onBack = onBack,
+                status = target?.let {
+                    {
+                        HopaStatusPill(
+                            text = if (installed) "Installed" else "Not installed",
+                            color = if (installed) HopaColor.Success else HopaColor.Warning,
+                        )
+                    }
+                },
+            )
         },
     ) { padding ->
         if (target == null) {
@@ -79,64 +71,43 @@ fun AppCardScreen(
                 "This app is not in the catalog any more.",
                 fontSize = 13.sp,
                 color = HopaColor.TextSecondary,
-                modifier = Modifier.padding(padding).padding(20.dp),
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(20.dp),
             )
             return@Scaffold
         }
-        val installed = target.status == "ready" && target.bundle.isNotBlank()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 20.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
-                        .background(HopaColor.PrimarySoft, RoundedCornerShape(14.dp)),
+                        .size(60.dp)
+                        .background(HopaColor.PrimarySoft, RoundedCornerShape(18.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         target.display.take(1).uppercase(),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.SemiBold,
                         color = HopaColor.Primary,
                     )
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(
-                        target.display,
-                        fontSize = 19.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = HopaColor.TextPrimary,
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .background(
-                                    if (installed) HopaColor.Success else HopaColor.Warning,
-                                    CircleShape,
-                                ),
-                        )
-                        Text(
-                            if (installed) "Installed" else "Not installed",
-                            fontSize = 11.sp,
-                            color = if (installed) HopaColor.Success else HopaColor.Warning,
-                            modifier = Modifier.padding(start = 4.dp),
-                        )
-                    }
-                }
-            }
-
-            if (target.purpose.isNotBlank()) {
-                Text(target.purpose, fontSize = 13.sp, color = HopaColor.TextSecondary)
+                Text(
+                    target.purpose.ifBlank { target.name },
+                    fontSize = 13.sp,
+                    color = HopaColor.TextSecondary,
+                    modifier = Modifier.weight(1f),
+                )
             }
 
             Button(
@@ -144,9 +115,12 @@ fun AppCardScreen(
                 enabled = installed || target.target.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(46.dp),
+                    .height(50.dp),
             ) {
-                Text(if (installed) "Open ${target.display}" else "Get it on Play Store")
+                Text(
+                    if (installed) "Open ${target.display}" else "Get it on Play Store",
+                    fontSize = 15.sp,
+                )
             }
             if (status.isNotBlank()) {
                 Text(
@@ -160,69 +134,108 @@ fun AppCardScreen(
                 )
             }
 
-            Text("How a run reaches it", fontSize = 13.sp, color = HopaColor.TextSecondary)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(HopaColor.Surface, RoundedCornerShape(14.dp))
-                    .border(1.dp, HopaColor.Divider, RoundedCornerShape(14.dp))
-                    .padding(14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Icon(Icons.Filled.Menu, contentDescription = null, tint = HopaColor.TextSecondary)
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Opens with $surface", fontSize = 14.sp, color = HopaColor.TextPrimary)
+            Card {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
                     Text(
-                        "Change it on Running apps.",
-                        fontSize = 11.sp,
-                        color = HopaColor.TextHint,
-                    )
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(HopaColor.Surface, RoundedCornerShape(14.dp))
-                    .border(1.dp, HopaColor.Divider, RoundedCornerShape(14.dp))
-                    .clickable(onClick = onOpenScreenAccess)
-                    .padding(14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Icon(Icons.Filled.Lock, contentDescription = null, tint = HopaColor.TextSecondary)
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        if (screenAccess) "Screen access is on" else "Screen access is off",
+                        "A run opens it on $surface",
                         fontSize = 14.sp,
                         color = HopaColor.TextPrimary,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Line()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onOpenScreenAccess)
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .background(
+                                if (screenAccess) HopaColor.Success else HopaColor.Warning,
+                                CircleShape,
+                            ),
                     )
                     Text(
-                        if (screenAccess) {
-                            "HOPA can read this app's screen and tap in it."
-                        } else {
-                            "Turn it on to let a run see and tap."
-                        },
-                        fontSize = 11.sp,
+                        "Screen access",
+                        fontSize = 14.sp,
+                        color = HopaColor.TextPrimary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        if (screenAccess) "On" else "Off",
+                        fontSize = 12.sp,
                         color = HopaColor.TextHint,
                     )
+                    Text("\u203a", fontSize = 16.sp, color = HopaColor.TextHint)
                 }
             }
 
             if (target.actions.isNotEmpty()) {
-                Text("Before it acts", fontSize = 13.sp, color = HopaColor.TextSecondary)
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    target.actions.forEach { rule ->
-                        Text("\u2022  $rule", fontSize = 12.sp, color = HopaColor.TextSecondary)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Before it acts",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = HopaColor.TextSecondary,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                    Card {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            target.actions.forEach { rule ->
+                                Text(
+                                    "\u2022  $rule",
+                                    fontSize = 12.sp,
+                                    color = HopaColor.TextSecondary,
+                                )
+                            }
+                        }
                     }
                 }
             }
 
             Text(
-                "Package: ${target.target.ifBlank { "not known for Android" }}",
+                "Package: ${target.target.ifBlank { "not known on Android" }}",
                 fontSize = 11.sp,
                 color = HopaColor.TextHint,
+                modifier = Modifier.padding(start = 4.dp),
             )
         }
     }
+}
+
+@Composable
+private fun Card(content: @Composable () -> Unit) {
+    Surface(
+        color = HopaColor.Surface,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, HopaColor.Divider),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column { content() }
+    }
+}
+
+@Composable
+private fun Line() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp)
+            .height(1.dp)
+            .background(HopaColor.Divider),
+    )
 }

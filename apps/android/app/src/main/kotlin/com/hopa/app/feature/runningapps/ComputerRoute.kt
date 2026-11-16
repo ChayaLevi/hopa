@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
-import com.hopa.app.feature.settings.SettingsBridgeScreen
 import com.hopa.app.feature.settings.SettingsViewModel
 import com.hopa.app.feature.settings.SettingsViewModelFactory
 
@@ -18,7 +17,7 @@ fun ComputerRoute(
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    SettingsBridgeScreen(
+    ComputerScreen(
         state = state,
         onBack = onBack,
         onSave = viewModel::save,
