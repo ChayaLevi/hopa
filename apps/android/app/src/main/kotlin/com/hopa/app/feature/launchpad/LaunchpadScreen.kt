@@ -188,16 +188,8 @@ private fun LaunchpadAppRow(
     onOpen: () -> Unit,
 ) {
     val ready = target.status == "ready" && target.bundle.isNotBlank()
-    val word = when (target.status) {
-        "ready" -> "Installed"
-        "unconfirmed" -> "Not installed"
-        else -> "No app target"
-    }
-    val dot = when (target.status) {
-        "ready" -> HopaColor.Success
-        "unconfirmed" -> HopaColor.Warning
-        else -> HopaColor.TextHint
-    }
+    val word = if (ready) "Installed" else "Not installed"
+    val dot = if (ready) HopaColor.Success else HopaColor.Warning
     LaunchpadRow(
         monogram = monogram(target.display.ifBlank { target.name }),
         monogramTint = HopaColor.Primary,

@@ -35,6 +35,9 @@ fun LaunchpadRoute(
                 status = "Could not read the catalog: ${it.message ?: "unknown error"}"
                 emptyList()
             }
+            // Only what this phone can attempt: an app whose catalog entry has no
+            // Android target is a row that can never open, so it is not shown.
+            .filter { target -> target.kind == "site" || target.status != "none" }
     }
 
     LaunchpadScreen(

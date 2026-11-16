@@ -83,6 +83,12 @@ Shared by every client: id, display, aliases, purpose, guardrails, risk classes
 
 Different per client: only the identifier that `ui.launch` receives.
 
+Every launchpad lists only the entries that have a target on that client:
+Android hides catalog entries with no Android package, Harmony hides entries
+with no HarmonyOS bundle, Windows hides entries with no exe. The catalog stays
+whole in `contracts/`; the filter happens where the target is resolved, so a row
+on screen is always a row that can open.
+
 ## Runtime rules
 
 1. The model names an app by display name or id, never by package.
@@ -120,5 +126,5 @@ device; the router uses the catalog to understand the sentence.
   the other 31 are `unknown` until we map them.
 - Per-platform guardrail differences: the bullets are shared even when one
   platform has no equivalent action.
-- Vision: a screenshot is captured on Android but never sent to the model, so
-  the screen is text-only.
+- Vision: a screenshot can ride with the model request on Android (opt-in, off
+  by default), so a canvas or a video is not text-only any more.
