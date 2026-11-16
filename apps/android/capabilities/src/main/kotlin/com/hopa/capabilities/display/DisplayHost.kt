@@ -76,6 +76,8 @@ class DisplayHost(
                     flags,
                 )
                 if (created != null) {
+                    System.err.println("display flags: ${Integer.toHexString(flags)}")
+                    System.err.flush()
                     return created
                 }
             } catch (error: SecurityException) {

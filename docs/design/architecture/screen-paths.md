@@ -33,7 +33,8 @@ Capabilities → Running apps ──"Start the background screen"──► bridg
                                               │ abstract socket "hopa-display"
                                               ▼
               DisplayHost: createVirtualDisplay + ImageReader
-              DisplayInput: InputManager.injectInputEvent(displayId)
+              DisplayInput: InputManagerGlobal.injectInputEvent(displayId)
+                            or `input touchscreen -d <display> …`
               DisplayLauncher: cmd package resolve-activity + am start --display
                                               │ frames (JPEG), top package
                                               ▼
@@ -46,8 +47,15 @@ Capabilities → Running apps ──"Start the background screen"──► bridg
 - The app never sees a `Surface`: the helper owns the `ImageReader` and sends
   JPEG frames over the socket, so screenshots do not use the accessibility
   screenshot API.
-- The UI tree comes from the accessibility window **on that display**
-  (`NodeTreeReader(displayId)`), which is why phone access is still required.
+- The UI tree comes from the accessibility window **event for the package just
+  launched**: `AccessibilityWindowInfo.getDisplayId()` reports 0 for every
+  window on this build, so a display id cannot find the hidden tree. The service
+  keeps the richest recent source per package, which is why phone access is
+  still required.
+- Input goes through the hidden `injectInputEvent` when the build has it; when
+  it does not (Android 17 removed the two-argument overload and moved the
+  manager to `InputManagerGlobal`), the helper runs the system's own
+  `input touchscreen -d <display> …` per gesture.
 - The app talks to the helper on **loopback** (`127.0.0.1:47821`), not on an
   abstract UNIX socket: SELinux denies `untrusted_app` a connection to a
   socket owned by the shell, and that cannot be changed without root. The
@@ -109,6 +117,10 @@ says which surface was actually used.
   S24 (Android 17) on 2026-11-16; see
   `docs/project/evidence/hidden-display-2026-11-16.md`. The phone's own screen
   stayed on HOPA throughout.
+- A full model turn read the hidden Settings screen (the answer listed the real
+  categories) and a tap opened Connections, after which the model read that page
+  too: 2 steps, 2 confirmed. Reading uses the per-package window event; the tap
+  was delivered by `input touchscreen -d <display>`.
 
 ## Not here yet
 
@@ -116,5 +128,5 @@ says which surface was actually used.
   while an app is mid-flow leaves that app's own state behind.
 - Audio isolation depends on the `PLAY_AUDIO` AppOps flag existing on the
   device; where it is missing the helper says so and the run is audible.
-- Tap, swipe and typing **on** the hidden display, a full model turn against it,
-  two parallel tasks, and the wireless pairing handshake are still unproven.
+- Two parallel tasks against two hidden displays, and the wireless pairing
+  handshake, are still unproven.

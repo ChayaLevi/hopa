@@ -10,7 +10,7 @@ person's screen stayed on HOPA throughout.
 |---|---|
 | Phone | Samsung Galaxy S24, `SM-S926B` |
 | Android | 17 (SDK 37), build `CP2A.260605.016.S926BXXSIEZJ1` |
-| APK | `0.1.0-261116-1625` (debug, minSdk 29) |
+| APK | `0.1.0-261116-1825` (debug, minSdk 29) |
 | Helper | `tools/scripts/android-display-helper.sh`, started with `adb shell sh` as uid 2000 |
 | Transport | loopback `127.0.0.1:47821`, token from the app's private files |
 
@@ -70,14 +70,12 @@ was approved, the run went to the hidden display (helper log: `display`, `top`,
 `launch`, `mute`, `unmute`, `finish`, `release`), and the model answered honestly
 that the screen came back with no readable text or elements.
 
-So the launch works and the turn does not touch the phone. What does not work yet
-is **reading the hidden display**: `NodeTreeReader(displayId)` found no window
+So the launch works and the turn does not touch the phone. What did not work yet
+was **reading the hidden display**: `NodeTreeReader(displayId)` found no window
 for the virtual display, even though the accessibility service is bound and the
-app was drawn there. That is the next gap: the window has to be located (or the
-tree read through a different channel) before taps on the hidden display can be
-aimed at anything.
+app was drawn there.
 
-### The reading gap, as observed
+### Why the display id could not be used
 
 `AccessibilityWindowInfo.getDisplayId()` cannot be trusted on this build: every
 window — SystemUI, the launcher, HOPA itself — reports `display=0`, so matching a
@@ -91,19 +89,65 @@ The rule that follows: an existing but empty hidden display is a normal start (i
 returns "The hidden screen is empty. Open an app with ui.launch"), and the window
 is identified by the package the run just launched, not by a display id.
 
-The next attempt keeps the newest window-event source and reads it when neither
-the display id nor the package match finds a window. The event does arrive
-(log: "read com.android.settings from the last window event"), but its node has
-no readable children, so the model still sees an empty screen. That points at
-focus: a display without its own focus may not expose a full subtree. The next
-things to try, in order: trusted-display flags with a logged fallback, reading
-the hierarchy through the helper (`dumpsys activity top`,
-`cmd window dump-visible-window-views`), and a frame plus a vision model as the
-last resort.
+### Reading now works
+
+The newest accessibility window event carries the hidden tree even when the window
+list does not. The first attempt kept one such source globally and its node had no
+readable children. Two changes fixed that:
+
+1. an event for the same package is replaced only by a richer one (more children),
+   so a window-state event with an empty root cannot evict the content event;
+2. sources are kept per package, so two runs cannot evict each other.
+
+Asking "List the categories in Settings" then answered with the real screen:
+
+> Your account card (the signed-in Samsung account), then Warranty and care,
+> Connections, Connected devices, Galaxy AI, Modes and Routines, Sounds and
+> vibration, Notifications, Display, Battery, Wallpaper and style, Themes, Home
+> screen, and Lock screen and AOD.
+
+The helper log for that run shows `launch com.android.settings` and no tap. The
+readable tree in the event had `children=19`.
+
+### Taps on the hidden display now work
+
+`injectInputEvent` moved on Android 17: `InputManager.getInstance()` is gone and
+the two-argument overload does not exist. Two failed attempts were reported
+honestly, first as "every tap came back refused", then as "the screen is still
+coming back empty". Both causes are fixed:
+
+- the helper resolves `InputManagerGlobal` (with the old class as fallback) and
+  looks for `injectInputEvent` by name and arity (2 or 3 arguments, `targetUid=-1`
+  for the targeted overload);
+- when reflection is unavailable or returns `false`, the helper runs the system's
+  own `input touchscreen -d <display> …` (one gesture per call, exit code is the
+  result) — this is what actually delivered on this build;
+- the cached tree for a package is dropped on `launch` and on `tap`, and the read
+  after a tap waits up to 6 s for a fresh tree, so the answer never describes the
+  previous screen.
+
+Proof: "Go into Connections from the Settings list and tell me what is there"
+finished with **2 steps, 2 confirmed** and the answer listed the Connections page:
+
+> Wi-Fi with its toggle, Wi-Fi Calling with its toggle, Bluetooth (2 devices
+> connected) with its toggle, and NFC and contactless payments with its toggle.
+> Then SIM manager, Mobile networks, Data usage, Mobile Hotspot and Tethering,
+> and More connection settings.
+
+Helper log for the same run: `display 1080 2340 450` (flags `17dc9`), `top`,
+`launch com.android.settings`, `mute`, `tap 359 1340`, `unmute`, `finish`,
+`release`. The phone's own screen stayed on HOPA.
 
 ## Still not exercised
 
-- Taps, swipes and typing **on** the hidden display.
-- Two parallel tasks against two hidden displays.
-- The in-app wireless pairing handshake.
+- Two parallel tasks against two hidden displays. The first attempt is
+  inconclusive: the helper log did show two `display` sessions, but the second
+  goal never became a turn (the text did not reach the input field), so only one
+  run happened. Plan-first is off; the retry sends goal A, waits about three
+  seconds, sends goal B, then checks for two different `launch` packages, two task
+  chips and two `background` rows in `run_history`.
+- The in-app wireless pairing handshake. The phone has no Wi-Fi at the moment, and
+  wireless debugging reports "IP address and port: Unavailable (Wi-Fi
+  disconnected)", so this cannot be tested yet.
+- The Android 10 MediaProjection path; there is no Android 10 phone here.
 - Other OEMs; this was one Samsung device with Android 17.

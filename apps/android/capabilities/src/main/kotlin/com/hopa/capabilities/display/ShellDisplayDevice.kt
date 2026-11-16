@@ -106,12 +106,13 @@ class ShellDisplayDevice(
     }
 
     override suspend fun tap(ref: String?, x: Int?, y: Int?) {
+        launched.lastOrNull()?.let { HopaAccessibilityService.forget(it) }
         if (ref != null) {
             val node = refs[ref] ?: throw IllegalArgumentException("stale ref $ref")
             val bounds = Rect()
             node.getBoundsInScreen(bounds)
             val (ok, payload) = onIo { client.tap(bounds.centerX(), bounds.centerY()) }
-            delay(250)
+            delay(TAP_SETTLE_MS)
             if (!ok) {
                 throw IllegalStateException(payload)
             }
@@ -121,7 +122,7 @@ class ShellDisplayDevice(
             throw IllegalArgumentException("tap needs a ref or coordinates")
         }
         val (ok, payload) = onIo { client.tap(x, y) }
-        delay(250)
+        delay(TAP_SETTLE_MS)
         if (!ok) {
             throw IllegalStateException(payload)
         }
@@ -190,6 +191,8 @@ class ShellDisplayDevice(
     }
 
     override suspend fun launch(packageName: String) {
+        // Reading the launcher's tree after the tap would describe the old screen.
+        HopaAccessibilityService.forget(packageName)
         val (ok, payload) = onIo { client.launch(packageName) }
         delay(1_500)
         if (!ok) {
@@ -270,9 +273,8 @@ class ShellDisplayDevice(
             )
             return fallback
         }
-        val event = HopaAccessibilityService.lastSource
-        val fresh = System.currentTimeMillis() - HopaAccessibilityService.lastSourceAt < 5_000
-        if (event != null && fresh && HopaAccessibilityService.lastSourcePackage == expected) {
+        val event = HopaAccessibilityService.sourceFor(expected)
+        if (event != null) {
             android.util.Log.w("HopaDisplay", "read $expected from the last window event")
             return event
         }
@@ -289,7 +291,8 @@ class ShellDisplayDevice(
     )
 
     private companion object {
-        const val OBSERVE_WAIT_MS = 2_500L
+        const val OBSERVE_WAIT_MS = 6_000L
+        const val TAP_SETTLE_MS = 700L
         const val KEYCODE_BACK = 4
         const val KEYCODE_HOME = 3
     }

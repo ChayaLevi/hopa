@@ -8,7 +8,9 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.hopa.app.HopaApplication
@@ -20,6 +22,8 @@ import com.hopa.app.R
  * a 120 s cap enforced by the caller.
  */
 class RunService : Service() {
+    private val watchdog = Handler(Looper.getMainLooper())
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -58,10 +62,21 @@ class RunService : Service() {
             0
         }
         ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, type)
+        // A shortService that is still running after three minutes is a system
+        // error ("did not stop within a timeout"). The run is capped at 120 s;
+        // this is the belt-and-braces stop for a turn that leaked its finally.
+        watchdog.removeCallbacksAndMessages(null)
+        watchdog.postDelayed({ stopSelf() }, WATCHDOG_MS)
+        val busy = (application as HopaApplication).container.busy.value
+        if (!busy) {
+            // Started for a turn that already finished (or never began).
+            stopSelf()
+        }
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
+        watchdog.removeCallbacksAndMessages(null)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }
@@ -86,5 +101,7 @@ class RunService : Service() {
         const val CHANNEL = "hopa_runs"
         const val NOTIFICATION_ID = 1001
         const val ACTION_STOP = "com.hopa.app.STOP_RUN"
+        /** Short of the three-minute shortService limit, longer than the run cap. */
+        const val WATCHDOG_MS = 150_000L
     }
 }
