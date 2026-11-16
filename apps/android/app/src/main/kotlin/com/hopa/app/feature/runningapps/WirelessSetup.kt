@@ -1,6 +1,7 @@
-package com.hopa.app.feature.runningapps
+﻿package com.hopa.app.feature.runningapps
 
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.provider.Settings
 import com.hopa.app.MainActivity
 import com.hopa.app.di.AppContainer
@@ -21,6 +22,8 @@ import kotlinx.coroutines.withContext
 class WirelessSetup(
     private val container: AppContainer,
 ) {
+    private val verbose =
+        (container.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     suspend fun run(): String = withContext(Dispatchers.Main) { pair() }
 
     /**
@@ -60,7 +63,7 @@ class WirelessSetup(
         if (!awaitText(screen, "Developer options", OPEN_WAIT_MS)) {
             return "Android's Developer options did not open."
         }
-        android.util.Log.d("HopaSetup", "page=${screen.texts().take(4)}")
+        if (verbose) android.util.Log.d("HopaSetup", "page=${screen.texts().take(4)}")
         if (!clickRow(screen, "Wireless debugging")) {
             return "Could not open Wireless debugging."
         }
@@ -109,14 +112,14 @@ class WirelessSetup(
     private suspend fun clickRow(screen: ScreenTree, part: String): Boolean {
         repeat(SCROLLS) { attempt ->
             if (screen.clickText(part)) {
-                android.util.Log.d("HopaSetup", "pressed \"$part\" on attempt $attempt")
+                if (verbose) android.util.Log.d("HopaSetup", "pressed \"$part\" on attempt $attempt")
                 delay(SETTLE_MS)
                 return true
             }
-            android.util.Log.d("HopaSetup", "not pressable yet: \"$part\" (attempt $attempt)")
+            if (verbose) android.util.Log.d("HopaSetup", "not pressable yet: \"$part\" (attempt $attempt)")
             screen.scrollForward()
             delay(SETTLE_MS)
-            android.util.Log.d("HopaSetup", "after scroll: ${screen.texts().take(3)}")
+            if (verbose) android.util.Log.d("HopaSetup", "after scroll: ${screen.texts().take(3)}")
         }
         return false
     }

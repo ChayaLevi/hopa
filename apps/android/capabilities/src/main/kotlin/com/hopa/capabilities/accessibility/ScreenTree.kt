@@ -13,6 +13,8 @@ class ScreenTree(
     private val service: HopaAccessibilityService,
 ) {
     private val gestures = GestureDispatcher(service)
+    private val verbose =
+        (service.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     /** The window of [packageName] when it is on screen, else the focused one. */
     fun root(packageName: String = SETTINGS): AccessibilityNodeInfo? {
@@ -62,10 +64,12 @@ class ScreenTree(
         // A row half under the toolbar or the navigation bar is not tappable.
         val window = boundsOf(root(packageName) ?: return false)
         if (bounds.centerY() < window.top + TOP_MARGIN || bounds.centerY() > window.bottom - BOTTOM_MARGIN) {
-            android.util.Log.d(
-                "HopaScreen",
-                "\"$part\" sits at ${bounds.centerY()}, window ${window.top}..${window.bottom}",
-            )
+            if (verbose) {
+                android.util.Log.d(
+                    "HopaScreen",
+                    "\"$part\" sits at ${bounds.centerY()}, window ${window.top}..${window.bottom}",
+                )
+            }
             return false
         }
         gestures.tap(bounds.centerX(), bounds.centerY())
@@ -92,7 +96,9 @@ class ScreenTree(
             bounds.top + (bounds.height() * 0.4f).toInt(),
             900,
         )
-        android.util.Log.d("HopaScreen", "scroll: swipe=$swiped on $bounds")
+        if (verbose) {
+            android.util.Log.d("HopaScreen", "scroll: swipe=$swiped on $bounds")
+        }
         return swiped
     }
 

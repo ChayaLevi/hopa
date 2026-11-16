@@ -65,6 +65,8 @@ jobs:
         run: python tools/checks/check-routing.py
       - name: Android structure
         run: python tools/checks/check-android-structure.py
+      - name: Helper start command is in sync
+        run: python tools/checks/check-helper-command.py
       - name: Every setting is stored
         run: python tools/checks/check-settings-fields.py
       - name: Observation hash vector
