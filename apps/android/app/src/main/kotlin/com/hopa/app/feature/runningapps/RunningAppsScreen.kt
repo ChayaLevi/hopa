@@ -224,6 +224,19 @@ fun RunningAppsScreen(
                     fontSize = 11.sp,
                     color = HopaColor.TextHint,
                 )
+                // Pairing runs after the dialog closes, so its answer has to land
+                // somewhere visible; a silent failure leaves the code unusable.
+                state.bridgeStatus?.let { message ->
+                    Text(
+                        message,
+                        fontSize = 12.sp,
+                        color = if (message.startsWith("Paired")) {
+                            HopaColor.Success
+                        } else {
+                            HopaColor.Warning
+                        },
+                    )
+                }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

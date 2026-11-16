@@ -33,7 +33,10 @@ class WirelessShell(
         return runCatching {
             manager.pair(host.trim(), port, code.trim())
             "Paired. Now open Wireless debugging again so the connect port is live."
-        }.getOrElse { "Pairing failed: ${it.message}" }
+        }.getOrElse { error ->
+            android.util.Log.w("HopaWireless", "pairing with $host:$port failed", error)
+            "Pairing failed: ${error.message}"
+        }
     }
 
     /** Connect to the TLS port adbd advertises, then start the helper as shell. */

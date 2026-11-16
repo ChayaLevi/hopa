@@ -177,8 +177,31 @@ global source would have let one run read the other's screen.
 
 ## Still not exercised
 
-- The in-app wireless pairing handshake. The phone has no Wi-Fi at the moment, and
-  wireless debugging reports "IP address and port: Unavailable (Wi-Fi
-  disconnected)", so this cannot be tested yet.
 - The Android 10 MediaProjection path; there is no Android 10 phone here.
 - Other OEMs; this was one Samsung device with Android 17.
+
+## Wireless pairing is closed by the platform
+
+The in-app flow asks for the address and the six-digit code Android shows under
+"Pair device with pairing code", then calls `AdbPairingManager.pair`. On this
+phone it cannot succeed, and the reason is not the app:
+
+1. With the pairing dialog in front, the pairing port accepts a TCP connection
+   (`tcp reachable while dialog is foreground`). The dialog showed
+   `192.168.1.110:41563`.
+2. Switching to HOPA — with `am start` and, separately, with the Recents key —
+   makes the same port refuse connections immediately (`ECONNREFUSED`).
+3. The app's own attempt therefore ends as
+   `Pairing failed: failed to connect to /192.168.1.110 (port …) … ECONNREFUSED`
+   in the `HopaWireless` log.
+
+So the pairing listener lives only while the dialog holds the window focus, and
+a code has to be typed in another app — the one thing that cannot be done while
+it is in front. adbd's key list also stayed at one key (the PC) after both
+attempts: no pairing was half-completed.
+
+A QR flow is the shape that could work here: the app opens the QR dialog,
+captures its own screen through accessibility, decodes the service name,
+password and port, and pairs from the background while the QR dialog stays in
+front. That is a feature, not a fix, and it has not been built. Until then the
+PC bridge is the working way to start the helper without a cable.

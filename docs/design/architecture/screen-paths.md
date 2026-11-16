@@ -107,6 +107,15 @@ six-digit code Android shows under Wireless debugging, calls `adb pair` through
 advertises and runs the helper with `shell:`. After that the phone needs no PC;
 the key and certificate live in the app's private storage and are reused.
 
+**Measured on a Galaxy S24 with Android 17:** the pairing port refuses
+connections as soon as the settings dialog loses window focus (switching apps
+or pressing Recents both do it), so a code cannot be typed in HOPA while the
+listener is alive. The app reports
+`Pairing failed: failed to connect … ECONNREFUSED` and the bridge remains the
+working path. A QR-code flow — open the QR dialog, capture the screen through
+accessibility, decode the service name, password and port, pair from the
+background — is the shape that can work here, and it is not built.
+
 If pairing is unavailable (wireless debugging off, different network, mDNS
 blocked), the same button path falls back to the PC bridge, and the chat line
 says which surface was actually used.
@@ -131,4 +140,6 @@ says which surface was actually used.
   while an app is mid-flow leaves that app's own state behind.
 - Audio isolation depends on the `PLAY_AUDIO` AppOps flag existing on the
   device; where it is missing the helper says so and the run is audible.
-- The wireless pairing handshake is still unproven; it needs the phone on Wi-Fi.
+- The wireless pairing handshake: the pairing port closes when the settings
+  dialog loses focus on Android 17, so the code flow cannot complete; see the
+  pairing section above.
