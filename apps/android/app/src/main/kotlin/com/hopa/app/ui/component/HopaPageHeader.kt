@@ -3,6 +3,7 @@ package com.hopa.app.ui.component
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,15 +25,17 @@ import androidx.compose.ui.unit.dp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * A page header with a large title, the 2026 shape: the back arrow and the
- * title own the top of the screen, and a status line can sit under them. Used as
- * a Scaffold's `topBar`, so the status-bar inset is counted exactly once.
+ * A page header with a large title, the 2026 shape: the title owns the top of
+ * the screen, a back arrow when the page is pushed, an action or two on the
+ * right, and a status line under it. Used as a Scaffold's `topBar`, so the
+ * status-bar inset is counted exactly once.
  */
 @Composable
 fun HopaPageHeader(
     title: String,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     status: @Composable (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -46,26 +49,39 @@ fun HopaPageHeader(
                 .padding(end = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = HopaColor.TextPrimary,
+            if (onBack != null) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = HopaColor.TextPrimary,
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = HopaColor.TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = HopaColor.TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 20.dp),
                 )
             }
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = HopaColor.TextPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            actions()
         }
         if (status != null) {
-            Box(
-                modifier = Modifier.padding(start = 20.dp, top = 2.dp),
-            ) {
+            Box(modifier = Modifier.padding(start = 20.dp, top = 2.dp)) {
                 status()
             }
         }

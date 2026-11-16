@@ -27,6 +27,7 @@ fun AppCardRoute(
     var target by remember { mutableStateOf<RouteTarget?>(null) }
     var surface by remember { mutableStateOf("Auto") }
     var screenAccess by remember { mutableStateOf(false) }
+    var trusted by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
@@ -39,12 +40,14 @@ fun AppCardRoute(
         val settings = runCatching { container.settings.settings.first() }.getOrNull()
         surface = surfaceLabel(settings?.screenPath.orEmpty())
         screenAccess = AccessibilityState.isEnabled(container.context)
+        trusted = settings?.trustedApps?.contains(name) == true
     }
 
     AppCardScreen(
         target = target,
         surface = surface,
         screenAccess = screenAccess,
+        trusted = trusted,
         status = status,
         onBack = onBack,
         onOpen = {
@@ -77,6 +80,20 @@ fun AppCardRoute(
             }
         },
         onOpenScreenAccess = onOpenScreenAccess,
+        onTrust = { value ->
+            trusted = value
+            scope.launch {
+                container.settings.update { current ->
+                    current.copy(
+                        trustedApps = if (value) {
+                            current.trustedApps + name
+                        } else {
+                            current.trustedApps - name
+                        },
+                    )
+                }
+            }
+        },
     )
 }
 

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaMascot
-import com.hopa.app.ui.component.HopaTopBar
+import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.theme.HopaColor
 
 /** Capabilities: what HOPA can use on this phone and what powers it. */
@@ -58,28 +58,23 @@ fun CapabilitiesScreen(
     Scaffold(
         containerColor = HopaColor.Bg,
         topBar = {
-            HopaTopBar {
-                Text(
-                    text = "Capabilities",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = HopaColor.TextPrimary,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = "Settings",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = HopaColor.Primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .clickable(onClick = onOpenSettings)
-                        .background(HopaColor.PrimarySoft, RoundedCornerShape(20.dp))
-                        .width(88.dp)
-                        .height(40.dp)
-                        .padding(top = 10.dp),
-                )
-            }
+            HopaPageHeader(
+                title = "Capabilities",
+                actions = {
+                    Text(
+                        text = "Settings",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = HopaColor.Primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .clickable(onClick = onOpenSettings)
+                            .background(HopaColor.PrimarySoft, RoundedCornerShape(20.dp))
+                            .height(40.dp)
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                    )
+                },
+            )
         },
         bottomBar = {
             Column(modifier = Modifier.navigationBarsPadding()) {

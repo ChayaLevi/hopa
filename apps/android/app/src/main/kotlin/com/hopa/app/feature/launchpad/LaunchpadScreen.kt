@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hopa.app.ui.component.AppIcon
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.core.router.RouteTarget
@@ -206,6 +207,7 @@ private fun LaunchpadAppRow(
     val word = if (ready) "Installed" else "Not installed"
     val dot = if (ready) HopaColor.Success else HopaColor.Warning
     LaunchpadRow(
+        packageName = target.bundle,
         monogram = monogram(target.display.ifBlank { target.name }),
         monogramTint = HopaColor.Primary,
         monogramBg = HopaColor.PrimarySoft,
@@ -247,6 +249,7 @@ private fun LaunchpadSiteRow(
     onOpen: () -> Unit,
 ) {
     LaunchpadRow(
+        packageName = "",
         monogram = monogram(target.display.ifBlank { target.name }),
         monogramTint = HopaColor.TextSecondary,
         monogramBg = HopaColor.SurfaceMuted,
@@ -271,6 +274,7 @@ private fun LaunchpadSiteRow(
 
 @Composable
 private fun LaunchpadRow(
+    packageName: String,
     monogram: String,
     monogramTint: Color,
     monogramBg: Color,
@@ -287,19 +291,13 @@ private fun LaunchpadRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .background(monogramBg, RoundedCornerShape(10.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                monogram,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                color = monogramTint,
-            )
-        }
+        AppIcon(
+            packageName = packageName,
+            label = monogram,
+            size = 36.dp,
+            fallbackTint = monogramTint,
+            fallbackBg = monogramBg,
+        )
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(3.dp),

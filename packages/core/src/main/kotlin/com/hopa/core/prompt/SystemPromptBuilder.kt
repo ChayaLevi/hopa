@@ -4,7 +4,7 @@ class SystemPromptBuilder {
     fun build(
         memory: String = "",
         skills: String = "",
-        apps: String = AppCatalogBlock.text(),
+        apps: String = "",
         routerHint: String = "",
         surfaceAvailable: Boolean = true,
         webAvailable: Boolean = true,

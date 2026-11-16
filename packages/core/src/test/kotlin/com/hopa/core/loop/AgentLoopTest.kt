@@ -111,7 +111,8 @@ class AgentLoopTest {
         }
 
         val prompt = harness.model.lastSystem
-        assertTrue(prompt.contains("Bilibili - tv.danmaku.bili"))
+        assertTrue(prompt.contains("Bilibili: tv.danmaku.bili"))
+        assertTrue(prompt.contains("posting, commenting and following are public actions: ask."))
         assertTrue(prompt.contains("\"app\":\"tv.danmaku.bili\""))
     }
 

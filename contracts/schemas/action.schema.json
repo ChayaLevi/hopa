@@ -22,6 +22,7 @@
         "ui.launch",
         "ui.stop",
         "ui.wait",
+        "app.function",
         "web.navigate",
         "web.read",
         "web.click",

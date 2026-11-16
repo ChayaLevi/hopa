@@ -11,6 +11,13 @@ import kotlinx.coroutines.delay
  */
 class Replayer(private val container: AppContainer) {
     suspend fun replay(recipe: Recipe, device: DevicePort): Int {
+        if (recipe.app.isNotBlank()) {
+            val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
+            if (installed.none { it.packageName.equals(recipe.app, ignoreCase = true) }) {
+                // The app the recipe was recorded in is gone; let the model plan again.
+                return 0
+            }
+        }
         val executor = container.executorFor(device)
         var observation = runCatching { device.observe() }.getOrNull() ?: return 0
         var done = 0

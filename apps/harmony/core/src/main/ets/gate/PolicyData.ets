@@ -45,14 +45,13 @@ export const INTERACTIVE_KINDS: string[] = [
   "web.type",
 ];
 export const SENSITIVE_KINDS: string[] = [
-  "ui.sendMessage",
-  "ui.call",
   "system.sendMessage",
   "system.call",
   "system.delete",
   "system.uninstall",
-  "system.reset",
-  "sandbox.runNetworked",
+  "system.share",
+  "app.function",
+  "ui.stop",
 ];
 export const ALLOWED_KINDS: string[] = [
   "web.navigate",
@@ -70,14 +69,14 @@ export const ALLOWED_KINDS: string[] = [
   "ui.launch",
   "ui.wait",
   "ui.observe",
-  "a11y.observe",
   "system.setAlarm",
   "system.addEvent",
   "system.openLink",
   "sandbox.run",
 ];
 export const TRUSTED_APP_KINDS: string[] = [
-  "ui.sendMessage",
+  "app.function",
+  "ui.stop",
   "system.sendMessage",
 ];
 export const MERCHANT_PREFIXES: string[] = [

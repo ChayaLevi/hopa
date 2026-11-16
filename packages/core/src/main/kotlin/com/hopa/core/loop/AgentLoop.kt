@@ -46,15 +46,20 @@ class AgentLoop(
     ): TurnResult {
         var observation = runCatching { device.observe() }.getOrNull()
         val surfaceAvailable = observation != null
-        val route = AppRouter.route(
-            context.goal,
-            CatalogRoutes.targets(context.installedApps, context.platform),
-        )
+        val targets = CatalogRoutes.targets(context.installedApps, context.platform)
+        val route = AppRouter.route(context.goal, targets)
+        val known = targets
+            .filter { it.bundle.isNotBlank() }
+            .map { it.bundle.lowercase() }
+            .toSet()
+        val names = targets
+            .filter { it.bundle.isNotBlank() }
+            .associate { it.bundle.lowercase() to it.display }
         val installed = if (
             context.platform.equals("android", ignoreCase = true) ||
             context.installedApps.isNotEmpty()
         ) {
-            InstalledAppsBlock().text(context.installedApps)
+            InstalledAppsBlock().text(context.installedApps, known)
         } else {
             ""
         }
@@ -62,11 +67,11 @@ class AgentLoop(
             memory = context.memory,
             skills = context.skills,
             apps = listOf(
-                AppCatalogBlock.text(),
+                AppCatalogBlock.text(targets),
                 installed,
                 typedFunctions(context.appFunctions),
             ).filter { it.isNotEmpty() }.joinToString("\n\n"),
-            routerHint = RouterHint.text(route),
+            routerHint = RouterHint.text(route, webAvailable),
             surfaceAvailable = surfaceAvailable,
             webAvailable = webAvailable,
             phoneAccess = context.phoneAccess,
@@ -183,7 +188,7 @@ class AgentLoop(
                 before = before,
             )
             records += result.record
-            narration += RunNarrator.line(action, result.record.executed, result.record.error)
+            narration += RunNarrator.line(action, result.record.executed, result.record.error, names)
             observation = result.observation
             clock.sleep(config.settleMillis)
             messages += ModelMessage("user", screenRenderer.render(result.observation))

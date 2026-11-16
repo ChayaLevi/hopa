@@ -70,6 +70,7 @@ class ParallelRunner(
 
         try {
             val settings = container.settings.settings.first()
+            container.policy.setTrustedApps(settings.trustedApps.toList())
             val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
             val loop = container.loopFor(
                 ScreenSourceDevice(
@@ -84,8 +85,12 @@ class ParallelRunner(
                     context = TurnContext(
                         goal = goal,
                         history = emptyList(),
-                        memory = "A background task. Do not disturb the person's screen.",
-                        skills = "",
+                        memory = listOf(
+                            "A background task. Do not disturb the person's screen.",
+                            runCatching { container.memory.promptText() }.getOrDefault(""),
+                        ).filter { it.isNotBlank() }.joinToString("\n\n"),
+                        skills = runCatching { container.skills.promptText() }.getOrDefault(""),
+                        vision = settings.vision,
                         installedApps = installed,
                         platform = "android",
                         phoneAccess = settings.accessibilityAllowed,

@@ -35,12 +35,19 @@ fun SettingsRoute(
         mutableStateOf(emptyList<com.hopa.data.database.entity.RunHistoryEntity>())
     }
     var historyFilter by rememberSaveable { mutableStateOf("") }
+    var appNames by rememberSaveable { mutableStateOf(emptyMap<String, String>()) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val backToHub = { page = "" }
 
     androidx.compose.runtime.LaunchedEffect(page) {
         if (page == PAGE_RECIPES) {
             recipes = container.recipes.all()
+            appNames = runCatching {
+                val installed = container.packages.installed()
+                com.hopa.core.router.CatalogRoutes.targets(installed, "android")
+                    .filter { it.bundle.isNotBlank() }
+                    .associate { it.bundle.lowercase() to it.display }
+            }.getOrDefault(emptyMap())
         }
         if (page == PAGE_HISTORY) {
             history = container.runHistory.latest(historyFilter.ifBlank { null })
@@ -97,6 +104,7 @@ fun SettingsRoute(
 
             PAGE_RECIPES -> SettingsRecipesScreen(
                 recipes = recipes,
+                names = appNames,
                 onBack = backToHub,
                 onDelete = { goal ->
                     container.recipes.delete(goal)

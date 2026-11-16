@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.feature.settings.BackgroundSetupDialog
 import com.hopa.app.feature.settings.SettingsUiState
+import com.hopa.app.ui.component.AppIcon
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.component.HopaStatusPill
 import com.hopa.app.ui.theme.HopaColor
@@ -398,19 +399,12 @@ private fun MiniAppRow(app: RouteTarget, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(30.dp)
-                .background(HopaColor.PrimarySoft, RoundedCornerShape(9.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                app.display.take(1).uppercase(),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = HopaColor.Primary,
-            )
-        }
+        AppIcon(
+            packageName = app.bundle,
+            label = app.display,
+            size = 30.dp,
+            corner = 9.dp,
+        )
         Text(
             app.display,
             fontSize = 14.sp,

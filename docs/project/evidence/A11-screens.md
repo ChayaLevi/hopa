@@ -1,3 +1,5 @@
+> Note (2026-11-16): Device control was folded into Capabilities -> Running apps; this page records the state at its date.
+
 # A11 - feature screens
 
 Date: 2026-11-13/14. One item complete: the Capabilities hub. On 2026-11-14

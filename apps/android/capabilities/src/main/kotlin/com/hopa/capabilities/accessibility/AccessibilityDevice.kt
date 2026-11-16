@@ -12,9 +12,6 @@ import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
 import com.hopa.capabilities.display.MediaProjectionCapture
 import com.hopa.core.contracts.Observation
-import com.hopa.core.contracts.ObservationNode
-import com.hopa.core.contracts.ScreenSize
-import com.hopa.core.observation.ObservationHasher
 import com.hopa.core.ports.DevicePort
 import com.hopa.core.ports.InstalledApp
 import java.io.ByteArrayOutputStream
@@ -30,7 +27,10 @@ class AccessibilityDevice(
     private var lastShot = 0L
 
     override suspend fun observe(): Observation {
-        val service = HopaAccessibilityService.instance ?: return offline()
+        val service = HopaAccessibilityService.instance
+            ?: throw IllegalStateException(
+                "screen access is off; turn it on in Settings, Accessibility, HOPA",
+            )
         val reader = NodeTreeReader(service)
         val raw = reader.read()
         refs = reader.refs
@@ -190,20 +190,8 @@ class AccessibilityDevice(
         }
     }
 
-    override suspend fun apps(): List<InstalledApp> {
-        val manager = context.packageManager
-        return manager.getInstalledApplications(0)
-            .asSequence()
-            .filter { it.packageName != context.packageName }
-            .map {
-                InstalledApp(
-                    packageName = it.packageName,
-                    label = manager.getApplicationLabel(it).toString(),
-                )
-            }
-            .sortedBy { it.label.lowercase() }
-            .toList()
-    }
+    override suspend fun apps(): List<InstalledApp> =
+        com.hopa.capabilities.system.AndroidPackageCatalog(context).installed()
 
     private fun service(): HopaAccessibilityService {
         if (!AccessibilityState.isEnabled(context)) {
@@ -226,14 +214,4 @@ class AccessibilityDevice(
         return x to y
     }
 
-    private fun offline(): Observation {
-        val observation = Observation(
-            id = "obs-offline",
-            timestamp = System.currentTimeMillis(),
-            screenSize = ScreenSize(0, 0),
-            text = "Accessibility is not enabled. Turn on HOPA in Settings > Accessibility.",
-            tree = ObservationNode(type = "root"),
-        )
-        return observation.copy(hash = ObservationHasher.hash(observation))
-    }
 }
