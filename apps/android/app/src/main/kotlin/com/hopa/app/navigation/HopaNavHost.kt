@@ -1,9 +1,11 @@
 package com.hopa.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.hopa.app.di.AppContainer
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.app.feature.memory.MemoryRoute
@@ -31,7 +33,9 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onOpenUsage = { navController.navigate(HopaDestination.USAGE) },
                 onOpenMemory = { navController.navigate(HopaDestination.MEMORY) },
                 onOpenDevice = { navController.navigate(HopaDestination.DEVICE) },
-                onOpenBrowser = { navController.navigate(HopaDestination.BROWSER) },
+                onOpenBrowser = {
+                    navController.navigate(HopaDestination.BROWSER + "?url=")
+                },
                 initialGoal = initialGoal,
             )
         }
@@ -47,8 +51,19 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.BROWSER) {
-            BrowserRoute(onBack = { navController.popBackStack() })
+        composable(
+            route = HopaDestination.BROWSER + "?url={url}",
+            arguments = listOf(
+                navArgument("url") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+            ),
+        ) { entry ->
+            BrowserRoute(
+                initialUrl = entry.arguments?.getString("url").orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
         }
         composable(HopaDestination.DEVICE) {
             DeviceRoute(
@@ -101,6 +116,11 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             LaunchpadRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
+                onOpenSite = { url ->
+                    navController.navigate(
+                        HopaDestination.BROWSER + "?url=" + android.net.Uri.encode(url),
+                    )
+                },
             )
         }
     }

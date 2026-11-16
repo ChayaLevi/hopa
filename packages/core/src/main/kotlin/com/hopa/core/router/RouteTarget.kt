@@ -9,4 +9,9 @@ data class RouteTarget(
     val aliases: List<String> = emptyList(),
     val purpose: String = "",
     val actions: List<String> = emptyList(),
+    /**
+     * How ready this target is on this client: `ready` (it opens here),
+     * `unconfirmed` (an id exists but this device does not have it) or `none`.
+     */
+    val status: String = "",
 )
