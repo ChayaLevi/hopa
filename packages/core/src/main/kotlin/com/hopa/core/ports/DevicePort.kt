@@ -34,13 +34,10 @@ interface DevicePort {
     suspend fun screenshot(): ByteArray?
 
     /** Call a typed function an app publishes (Android 16 AppFunctions). */
-    suspend fun appFunction(
-        packageName: String,
-        function: String,
-        parameters: String,
-    ): String = throw UnsupportedOperationException(
-        "this device does not offer app functions",
-    )
+    suspend fun appFunction(packageName: String, function: String, parameters: String): String =
+        throw UnsupportedOperationException(
+            "this device does not offer app functions",
+        )
 
     suspend fun apps(): List<InstalledApp>
 }

@@ -32,9 +32,9 @@ from __future__ import annotations
 
 import base64
 import hmac
-import re
 import json
 import os
+import re
 import secrets
 import subprocess
 import sys
@@ -43,13 +43,13 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-
-# Only a package name may reach the shell command that starts the helper.
-_PACKAGE_RE = re.compile(r"[A-Za-z][A-Za-z0-9_.]*")
 from typing import Any
 
 from .chat_store import ChatStore
 from .device_port import DevicePort
+
+# Only a package name may reach the shell command that starts the helper.
+_PACKAGE_RE = re.compile(r"[A-Za-z][A-Za-z0-9_.]*")
 
 
 class BridgeError(Exception):

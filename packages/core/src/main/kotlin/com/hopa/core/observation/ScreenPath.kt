@@ -12,10 +12,10 @@ enum class ScreenPath(val wire: String) {
     ONSCREEN("onscreen"),
 
     /** A paired PC bridge over adb. */
-    BRIDGE("bridge");
+    BRIDGE("bridge"),
+    ;
 
     companion object {
-        fun of(value: String): ScreenPath =
-            entries.firstOrNull { it.wire == value.trim().lowercase() } ?: AUTO
+        fun of(value: String): ScreenPath = entries.firstOrNull { it.wire == value.trim().lowercase() } ?: AUTO
     }
 }

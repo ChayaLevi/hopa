@@ -6,20 +6,16 @@ package com.hopa.core.observation
  * the background display first because it leaves the screen alone.
  */
 class ScreenPathOrder {
-    fun order(
-        preferred: ScreenPath,
-        background: Boolean,
-        bridge: Boolean,
-        onscreen: Boolean,
-    ): List<String> = when (preferred) {
-        ScreenPath.AUTO -> buildList {
-            if (background) add("background")
-            if (bridge) add("bridge")
-            if (onscreen) add("accessibility")
-        }
+    fun order(preferred: ScreenPath, background: Boolean, bridge: Boolean, onscreen: Boolean): List<String> =
+        when (preferred) {
+            ScreenPath.AUTO -> buildList {
+                if (background) add("background")
+                if (bridge) add("bridge")
+                if (onscreen) add("accessibility")
+            }
 
-        ScreenPath.BACKGROUND -> if (background) listOf("background") else emptyList()
-        ScreenPath.BRIDGE -> if (bridge) listOf("bridge") else emptyList()
-        ScreenPath.ONSCREEN -> if (onscreen) listOf("accessibility") else emptyList()
-    }
+            ScreenPath.BACKGROUND -> if (background) listOf("background") else emptyList()
+            ScreenPath.BRIDGE -> if (bridge) listOf("bridge") else emptyList()
+            ScreenPath.ONSCREEN -> if (onscreen) listOf("accessibility") else emptyList()
+        }
 }

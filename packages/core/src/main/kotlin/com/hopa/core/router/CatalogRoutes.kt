@@ -11,10 +11,7 @@ import com.hopa.core.ports.InstalledApp
  * empty target, which the router hint reports instead of inventing one.
  */
 object CatalogRoutes {
-    fun targets(
-        installed: List<InstalledApp> = emptyList(),
-        platform: String = "",
-    ): List<RouteTarget> {
+    fun targets(installed: List<InstalledApp> = emptyList(), platform: String = ""): List<RouteTarget> {
         val apps = APP_CATALOG.map { app ->
             RouteTarget(
                 name = app.id,
@@ -40,11 +37,7 @@ object CatalogRoutes {
         return apps + sites
     }
 
-    private fun launchTarget(
-        app: CatalogApp,
-        platform: String,
-        installed: List<InstalledApp>,
-    ): String {
+    private fun launchTarget(app: CatalogApp, platform: String, installed: List<InstalledApp>): String {
         val target = when (platform.lowercase()) {
             "android" -> app.android
             "windows" -> app.windows
@@ -67,11 +60,7 @@ object CatalogRoutes {
     }
 
     /** The phone's own package for a catalog name; empty when the app is not installed. */
-    private fun installedPackage(
-        display: String,
-        aliases: List<String>,
-        installed: List<InstalledApp>,
-    ): String {
+    private fun installedPackage(display: String, aliases: List<String>, installed: List<InstalledApp>): String {
         if (installed.isEmpty()) {
             return ""
         }

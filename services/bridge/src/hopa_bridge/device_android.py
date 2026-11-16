@@ -8,10 +8,9 @@ of the bridge already understands.
 
 from __future__ import annotations
 
-from typing import Any
-
 import re
 import xml.etree.ElementTree as ElementTree
+from typing import Any
 
 from .adb import Adb, AdbError
 from .layout import Layout, Node
