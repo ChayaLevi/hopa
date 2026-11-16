@@ -9,6 +9,7 @@ class SystemPromptBuilder {
         surfaceAvailable: Boolean = true,
         webAvailable: Boolean = true,
         phoneAccess: Boolean? = null,
+        vision: Boolean = false,
     ): String {
         val webRule = if (webAvailable) {
             "web.navigate, web.read, web.click and web.type exist; open a site with " +
@@ -64,6 +65,11 @@ class SystemPromptBuilder {
         }
         if (routerHint.isNotEmpty()) {
             parts += routerHint
+        }
+        if (vision) {
+            parts += "A screenshot of the current screen is attached to the latest " +
+                "message. Use it for things the tree cannot describe, and never read " +
+                "out anything that looks like a password or a code."
         }
         if (phoneAccess != null) {
             parts += if (phoneAccess) {

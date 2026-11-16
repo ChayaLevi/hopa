@@ -168,6 +168,13 @@ class SettingsViewModel(
         }
     }
 
+    fun setVision(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(vision = value) }
+            reload()
+        }
+    }
+
     fun setReplaySkills(value: Boolean) {
         viewModelScope.launch {
             container.settings.update { it.copy(replaySkills = value) }

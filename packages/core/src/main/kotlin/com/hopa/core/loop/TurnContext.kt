@@ -12,6 +12,9 @@ data class TurnContext(
     val installedApps: List<InstalledApp> = emptyList(),
     /** Which client is running: android, windows, harmonyos. */
     val platform: String = "",
+    /** Send a screenshot with each model call; the model must accept images. */
+    val vision: Boolean = false,
+
     /** Typed functions the foreground app publishes, already formatted. */
     val appFunctions: String = "",
 

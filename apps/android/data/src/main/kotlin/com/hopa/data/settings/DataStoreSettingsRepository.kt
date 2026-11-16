@@ -33,6 +33,7 @@ class DataStoreSettingsRepository(
             screenPath = prefs[SCREEN_PATH] ?: "auto",
             planFirst = prefs[PLAN_FIRST] ?: false,
             replaySkills = prefs[REPLAY_SKILLS] ?: true,
+            vision = prefs[VISION] ?: false,
         )
     }
 
@@ -54,6 +55,7 @@ class DataStoreSettingsRepository(
             prefs[SCREEN_PATH] = next.screenPath
             prefs[PLAN_FIRST] = next.planFirst
             prefs[REPLAY_SKILLS] = next.replaySkills
+            prefs[VISION] = next.vision
         }
     }
 
@@ -87,6 +89,7 @@ class DataStoreSettingsRepository(
         val SCREEN_PATH = stringPreferencesKey("screen_path")
         val PLAN_FIRST = booleanPreferencesKey("plan_first")
         val REPLAY_SKILLS = booleanPreferencesKey("replay_skills")
+        val VISION = booleanPreferencesKey("vision")
         const val MODEL_KEY = "model_key"
         const val BRIDGE_TOKEN = "bridge_token"
         const val BRIDGE_REFRESH = "bridge_refresh"

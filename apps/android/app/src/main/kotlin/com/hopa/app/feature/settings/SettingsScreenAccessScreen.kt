@@ -35,6 +35,7 @@ fun SettingsScreenAccessScreen(
     onOpenScreenControl: () -> Unit,
     onPlanFirst: (Boolean) -> Unit,
     onReplaySkills: (Boolean) -> Unit,
+    onVision: (Boolean) -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = state.settings.screenPath
@@ -130,6 +131,16 @@ fun SettingsScreenAccessScreen(
             }
             Text(
                 "Nothing gets tapped until you approve the numbered plan.",
+                fontSize = 12.sp,
+                color = HopaColor.TextHint,
+            )
+            SettingsDivider()
+            SettingsSwitchRow("Look at the screen too", state.settings.vision) {
+                onVision(it)
+            }
+            Text(
+                "Sends a screenshot with the request. Only works with a model that " +
+                    "accepts pictures, and it costs more.",
                 fontSize = 12.sp,
                 color = HopaColor.TextHint,
             )

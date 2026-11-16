@@ -70,6 +70,7 @@ class AgentLoop(
             surfaceAvailable = surfaceAvailable,
             webAvailable = webAvailable,
             phoneAccess = context.phoneAccess,
+            vision = context.vision,
         )
         val messages = mutableListOf(ModelMessage("system", system))
         messages += budget.fit(context.history)
@@ -88,7 +89,14 @@ class AgentLoop(
             if (isCancelled()) {
                 return TurnResult("Stopped.", records, narration, usage = usage)
             }
-            val reply = runCatching { model.complete(ModelRequest(messages)) }
+            val frames = if (context.vision) {
+                runCatching { device.screenshot() }.getOrNull()?.let { bytes ->
+                    listOf(java.util.Base64.getEncoder().encodeToString(bytes))
+                }.orEmpty()
+            } else {
+                emptyList()
+            }
+            val reply = runCatching { model.complete(ModelRequest(messages, images = frames)) }
                 .getOrElse { error ->
                     return TurnResult(
                         answer = "I could not reach the model. Check the provider and network.",

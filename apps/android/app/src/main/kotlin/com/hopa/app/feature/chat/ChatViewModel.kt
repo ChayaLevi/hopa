@@ -520,6 +520,7 @@ class ChatViewModel(
                             skills = skills,
                             installedApps = installed,
                             appFunctions = typedFunctions(device),
+                            vision = current.vision,
                             platform = "android",
                             phoneAccess = AccessibilityState.isEnabled(container.context) &&
                                 HopaAccessibilityService.instance != null,
