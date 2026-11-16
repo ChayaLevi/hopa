@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         applicationId = "com.hopa.android"
-        minSdk = 30
+        minSdk = 29
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0-" + SimpleDateFormat("yyMMdd-HHmm").format(Date())

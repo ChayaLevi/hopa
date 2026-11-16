@@ -173,6 +173,18 @@ class SettingsViewModel(
             container.settings.update { it.copy(vision = value) }
             reload()
         }
+        // Below API 30 there is no accessibility screenshot, so turning vision on
+        // asks for MediaProjection consent once; API 30+ needs no extra grant.
+        if (value &&
+            android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R &&
+            !com.hopa.capabilities.display.MediaProjectionCapture.isActive
+        ) {
+            com.hopa.app.service.ScreenCaptureRequester.request()
+        } else if (!value &&
+            com.hopa.capabilities.display.MediaProjectionCapture.isActive
+        ) {
+            com.hopa.app.service.ScreenCaptureService.stop(container.context)
+        }
     }
 
     fun setReplaySkills(value: Boolean) {
