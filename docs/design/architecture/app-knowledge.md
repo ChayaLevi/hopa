@@ -104,6 +104,9 @@ on screen is always a row that can open.
    installed inventory yet), so a wrong exe fails honestly at launch.
 6. A launch that the device refuses is reported as a device error, not as a
    success.
+7. An app with a target but no install still gets a row: on Android, tapping it
+   offers the Play Store page for that package, and a package Play answers 404
+   for says so instead of opening a blank page.
 
 ## Coverage today
 

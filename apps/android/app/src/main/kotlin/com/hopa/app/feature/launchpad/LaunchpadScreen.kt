@@ -41,8 +41,8 @@ import com.hopa.core.router.RouteTarget
 
 /**
  * The catalogue as a list: apps and sites, the same two sections Harmony shows.
- * A row opens the app or the site; a dot says whether this phone can open it.
- * Tapping only opens what is really there; nothing is guessed.
+ * A row opens the app or the site; a dot says whether this phone can open it,
+ * and a missing app offers its store page instead of doing nothing.
  */
 @Composable
 fun LaunchpadScreen(
@@ -51,6 +51,7 @@ fun LaunchpadScreen(
     status: String,
     onBack: () -> Unit,
     onLaunch: (RouteTarget) -> Unit,
+    onInstall: (RouteTarget) -> Unit,
     onOpenSite: (RouteTarget) -> Unit,
 ) {
     var section by rememberSaveable { mutableStateOf(0) }
@@ -135,7 +136,11 @@ fun LaunchpadScreen(
                         if (target.kind == "site") {
                             LaunchpadSiteRow(target) { onOpenSite(target) }
                         } else {
-                            LaunchpadAppRow(target) { onLaunch(target) }
+                            LaunchpadAppRow(
+                                target = target,
+                                onOpen = { onLaunch(target) },
+                                onInstall = { onInstall(target) },
+                            )
                         }
                     }
                 }
@@ -186,15 +191,21 @@ private fun LaunchpadSegment(
 private fun LaunchpadAppRow(
     target: RouteTarget,
     onOpen: () -> Unit,
+    onInstall: () -> Unit,
 ) {
     val ready = target.status == "ready" && target.bundle.isNotBlank()
-    val word = if (ready) "Installed" else "Not installed"
+    val word = if (ready) "Installed" else "Not installed \u00b7 Play"
     val dot = if (ready) HopaColor.Success else HopaColor.Warning
     LaunchpadRow(
         monogram = monogram(target.display.ifBlank { target.name }),
         monogramTint = HopaColor.Primary,
         monogramBg = HopaColor.PrimarySoft,
-        onOpen = { if (ready) onOpen() },
+        onOpen = {
+            when {
+                ready -> onOpen()
+                target.target.isNotBlank() -> onInstall()
+            }
+        },
     ) {
         Text(
             target.display.ifBlank { target.name },

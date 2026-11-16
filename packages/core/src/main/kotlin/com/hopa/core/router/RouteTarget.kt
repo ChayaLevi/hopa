@@ -14,4 +14,10 @@ data class RouteTarget(
      * `unconfirmed` (an id exists but this device does not have it) or `none`.
      */
     val status: String = "",
+    /**
+     * The identifier the catalog names for this platform, even when it is not
+     * installed here. [bundle] is what would actually launch; this is what the
+     * entry is called, so a store page can be offered for a missing app.
+     */
+    val target: String = "",
 )
