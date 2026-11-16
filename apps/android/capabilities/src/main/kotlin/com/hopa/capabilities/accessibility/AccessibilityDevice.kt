@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
@@ -146,6 +147,11 @@ class AccessibilityDevice(
         HopaAccessibilityService.instance?.activeRoot()?.packageName?.toString().orEmpty()
 
     override suspend fun screenshot(): ByteArray? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            // takeScreenshot() is API 30+. On Android 10 the agent works
+            // from the accessibility tree; no image is attached.
+            return null
+        }
         val now = System.currentTimeMillis()
         if (now - lastShot < 1_000) {
             return null
