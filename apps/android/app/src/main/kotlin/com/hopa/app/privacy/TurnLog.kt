@@ -13,7 +13,16 @@ object TurnLog {
     private val _entries = MutableStateFlow<List<TurnLogEntry>>(emptyList())
     val entries: StateFlow<List<TurnLogEntry>> = _entries.asStateFlow()
 
+    private var file: TurnLogFile? = null
+
+    /** Called once at start-up so the list survives a restart. */
+    fun attach(file: TurnLogFile) {
+        this.file = file
+        _entries.value = file.load().reversed()
+    }
+
     fun add(entry: TurnLogEntry) {
         _entries.value = (listOf(entry) + _entries.value).take(50)
+        file?.append(entry)
     }
 }

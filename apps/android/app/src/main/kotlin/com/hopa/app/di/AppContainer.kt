@@ -29,6 +29,12 @@ class AppContainer(context: Context) {
         context = context,
         secrets = KeystoreSecretStore(context),
     )
+    init {
+        com.hopa.app.privacy.TurnLog.attach(
+            com.hopa.app.privacy.TurnLogFile(context),
+        )
+    }
+
     private val database = HopaDatabase.build(context)
     val conversations: ConversationStore = RoomConversationStore(database)
     val selectedConversation = MutableStateFlow<String?>(null)

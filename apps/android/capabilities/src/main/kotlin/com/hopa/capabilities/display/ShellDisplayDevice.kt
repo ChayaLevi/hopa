@@ -149,9 +149,13 @@ class ShellDisplayDevice(
     }
 
     override suspend fun pressHome() {
-        // Home would leave the background display; the honest "back to the start"
-        // is a back press on that display.
-        pressBack()
+        // HOME on the hidden display reaches its own launcher, so the app is put
+        // away without touching the person's screen.
+        val (ok, payload) = client.key(KEYCODE_HOME)
+        delay(250)
+        if (!ok) {
+            throw IllegalStateException(payload)
+        }
     }
 
     override suspend fun launch(packageName: String) {
@@ -201,5 +205,6 @@ class ShellDisplayDevice(
 
     private companion object {
         const val KEYCODE_BACK = 4
+        const val KEYCODE_HOME = 3
     }
 }
