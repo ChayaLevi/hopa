@@ -29,6 +29,7 @@ fun AppCardRoute(
     var screenAccess by remember { mutableStateOf(false) }
     var trusted by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
+    var functions by remember { mutableStateOf(emptyList<String>()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(name) {
@@ -41,6 +42,18 @@ fun AppCardRoute(
         surface = surfaceLabel(settings?.screenPath.orEmpty())
         screenAccess = AccessibilityState.isEnabled(container.context)
         trusted = settings?.trustedApps?.contains(name) == true
+        // Functions live behind the helper; without it the card simply has none.
+        functions = withContext(Dispatchers.IO) {
+            runCatching {
+                val packageName = target?.target.orEmpty()
+                if (packageName.isBlank() || !container.shell.connect()) {
+                    emptyList()
+                } else {
+                    val (ok, json) = container.shell.appFunctions(packageName)
+                    if (ok) com.hopa.capabilities.display.AppFunctions.names(json) else emptyList()
+                }
+            }.getOrDefault(emptyList())
+        }
     }
 
     AppCardScreen(
@@ -49,6 +62,7 @@ fun AppCardRoute(
         screenAccess = screenAccess,
         trusted = trusted,
         status = status,
+        functions = functions,
         onBack = onBack,
         onOpen = {
             target?.let { current ->

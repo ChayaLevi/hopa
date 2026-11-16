@@ -402,20 +402,18 @@ class SettingsViewModel(
 
     /** Read the code from Android's pairing dialog instead of asking for it. */
     fun pairWirelessFromScreen() {
-        viewModelScope.launch {
-            _state.update { it.copy(busy = true, bridgeStatus = null) }
-            val message = com.hopa.app.feature.runningapps.WirelessSetup(container).run()
-            _state.update { it.copy(busy = false, bridgeStatus = message) }
-        }
+        com.hopa.app.service.PairingService.start(
+            container.context,
+            com.hopa.app.service.PairingService.MODE_AUTO,
+        )
     }
 
     /** Wait for a dialog the person opens, then read its code and pair. */
     fun pairWirelessWaiting() {
-        viewModelScope.launch {
-            _state.update { it.copy(busy = true, bridgeStatus = null) }
-            val message = com.hopa.app.feature.runningapps.WirelessSetup(container).waitForDialog()
-            _state.update { it.copy(busy = false, bridgeStatus = message) }
-        }
+        com.hopa.app.service.PairingService.start(
+            container.context,
+            com.hopa.app.service.PairingService.MODE_WAIT,
+        )
     }
 
     /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
@@ -480,6 +478,20 @@ class SettingsViewModel(
                 "Bridge ok: ${devices ?: "paired"}, $nodes nodes"
             }.getOrElse { error -> "Bridge: ${error.message}" }
             _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
+    /** Only the helper's liveness; cheap enough to run while the page is open. */
+    fun refreshBackground() {
+        viewModelScope.launch {
+            val running = withContext(Dispatchers.IO) {
+                runCatching {
+                    container.shell.connect() && container.shell.ping()
+                }.getOrDefault(false)
+            }
+            _state.update {
+                if (it.backgroundRunning == running) it else it.copy(backgroundRunning = running)
+            }
         }
     }
 

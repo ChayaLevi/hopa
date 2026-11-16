@@ -50,6 +50,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            testProguardFiles("test-proguard-rules.pro")
         }
         release {
             isMinifyEnabled = true
@@ -58,6 +59,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            testProguardFiles("test-proguard-rules.pro")
             signingConfig = if (hasReleaseSigning) {
                 signingConfigs.getByName("release")
             } else {
@@ -67,8 +69,7 @@ android {
     }
 
     defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"    }
 
     buildFeatures {
         compose = true
@@ -113,5 +114,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
+    // androidx.test refers to these annotations; R8 needs them on the test
+    // classpath or it refuses to minify the instrumentation APK.
+    androidTestImplementation("com.google.errorprone:error_prone_annotations:2.27.1")
     testImplementation(project(":testing"))
 }

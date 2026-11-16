@@ -40,6 +40,8 @@ class AppContainer(context: Context) {
     val selectedConversation = MutableStateFlow<String?>(null)
     val busy = MutableStateFlow(false)
     val cancelRequested = MutableStateFlow(false)
+    /** The last wireless-pairing answer, shown on the Running apps page. */
+    val pairingStatus = MutableStateFlow<String?>(null)
     /**
      * Goals handed to the chat from outside (a deep link, a profile home).
      * A queue, not a slot: two links in a row must both run, and the second

@@ -31,7 +31,13 @@ class ShellClient(
 
     fun connect(): Boolean {
         if (connected) {
-            return true
+            // A socket can look connected after the helper died; one round trip
+            // tells the truth, and a stale client then reconnects instead of
+            // driving a dead helper.
+            if (send(protocol.ping()).first) {
+                return true
+            }
+            close()
         }
         return runCatching {
             val created = Socket()
@@ -68,6 +74,9 @@ class ShellClient(
     fun key(code: Int): Pair<Boolean, String> = send(protocol.key(code))
 
     fun top(): String = send(protocol.top()).second
+
+    /** True only when the helper answered this round trip. */
+    fun ping(): Boolean = send(protocol.ping()).first
 
     fun shot(): ByteArray? {
         val (ok, payload) = send(protocol.shot())

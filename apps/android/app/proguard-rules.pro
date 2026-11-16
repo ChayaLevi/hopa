@@ -20,3 +20,7 @@
 # The gateway between Compose and the Android views it hosts.
 -keep class androidx.compose.** { *; }
 -dontwarn androidx.compose.**
+
+# androidx.test refers to these compile-only annotations; the device test APK
+# does not carry them, and R8 only needs to know they are absent on purpose.
+-dontwarn com.google.errorprone.annotations.**
