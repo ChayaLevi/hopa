@@ -1,13 +1,17 @@
 package com.hopa.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.hopa.app.di.AppContainer
+import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.app.feature.memory.MemoryRoute
-import com.hopa.app.feature.device.DeviceRoute
+import com.hopa.app.feature.runningapps.ComputerRoute
+import com.hopa.app.feature.runningapps.RunningAppsRoute
 import com.hopa.app.feature.browser.BrowserRoute
 import com.hopa.app.feature.profiles.ProfilesRoute
 import com.hopa.app.feature.runs.RunsRoute
@@ -26,12 +30,13 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             HomeShell(
                 container = container,
                 onOpenSettings = { navController.navigate(HopaDestination.SETTINGS) },
-                onOpenLaunchpad = { navController.navigate(HopaDestination.LAUNCHPAD) },
                 onOpenRuns = { navController.navigate(HopaDestination.RUNS) },
                 onOpenUsage = { navController.navigate(HopaDestination.USAGE) },
                 onOpenMemory = { navController.navigate(HopaDestination.MEMORY) },
-                onOpenDevice = { navController.navigate(HopaDestination.DEVICE) },
-                onOpenBrowser = { navController.navigate(HopaDestination.BROWSER) },
+                onOpenRunningApps = { navController.navigate(HopaDestination.RUNNING_APPS) },
+                onOpenBrowser = {
+                    navController.navigate(HopaDestination.BROWSER + "?url=")
+                },
                 initialGoal = initialGoal,
             )
         }
@@ -47,15 +52,18 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.BROWSER) {
-            BrowserRoute(onBack = { navController.popBackStack() })
-        }
-        composable(HopaDestination.DEVICE) {
-            DeviceRoute(
-                container = container,
+        composable(
+            route = HopaDestination.BROWSER + "?url={url}",
+            arguments = listOf(
+                navArgument("url") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+            ),
+        ) { entry ->
+            BrowserRoute(
+                initialUrl = entry.arguments?.getString("url").orEmpty(),
                 onBack = { navController.popBackStack() },
-                onOpenBridgeSettings = { navController.navigate(HopaDestination.SETTINGS) },
-                onOpenAccessibility = { navController.navigate(HopaDestination.ACCESSIBILITY) },
             )
         }
         composable(HopaDestination.SETTINGS) {
@@ -63,11 +71,29 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 container = container,
                 onBack = { navController.popBackStack() },
                 onOpenCapabilities = { navController.popBackStack() },
-                onOpenLaunchpad = { navController.navigate(HopaDestination.LAUNCHPAD) },
                 onOpenProfiles = { navController.navigate(HopaDestination.PROFILES) },
-                onOpenAccessibility = { navController.navigate(HopaDestination.ACCESSIBILITY) },
                 onOpenSelfCheck = { navController.navigate(HopaDestination.SELF_CHECK) },
                 onOpenAbout = { navController.navigate(HopaDestination.ABOUT) },
+            )
+        }
+        composable(HopaDestination.RUNNING_APPS) {
+            RunningAppsRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onOpenApp = { name ->
+                    navController.navigate(
+                        HopaDestination.APP_CARD + "/" + android.net.Uri.encode(name),
+                    )
+                },
+                onOpenAllApps = { navController.navigate(HopaDestination.LAUNCHPAD) },
+                onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
+                onOpenComputer = { navController.navigate(HopaDestination.COMPUTER) },
+            )
+        }
+        composable(HopaDestination.COMPUTER) {
+            ComputerRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
             )
         }
         composable(HopaDestination.SELF_CHECK) {
@@ -101,6 +127,29 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             LaunchpadRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
+                onOpenApp = { name ->
+                    navController.navigate(
+                        HopaDestination.APP_CARD + "/" + android.net.Uri.encode(name),
+                    )
+                },
+                onOpenSite = { url ->
+                    navController.navigate(
+                        HopaDestination.BROWSER + "?url=" + android.net.Uri.encode(url),
+                    )
+                },
+            )
+        }
+        composable(
+            route = HopaDestination.APP_CARD + "/{name}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+            ),
+        ) { entry ->
+            AppCardRoute(
+                container = container,
+                name = entry.arguments?.getString("name").orEmpty(),
+                onBack = { navController.popBackStack() },
+                onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
             )
         }
     }

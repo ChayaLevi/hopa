@@ -26,7 +26,7 @@ comparison is honest; `ScreenPathOrder` is pure and unit-tested.
 ## The background display
 
 ```
-Settings ──"Start the background screen"──► bridge /helper
+Capabilities → Running apps ──"Start the background screen"──► bridge /helper
                                               │ adb shell
                                               ▼
                           app_process …ShellMain  (uid 2000)
@@ -86,8 +86,8 @@ adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) `
 
 ## Pairing inside the app
 
-Settings → Where runs happen → *Pair this phone* takes the address and six-digit
-code Android shows under Wireless debugging, calls `adb pair` through
+Capabilities → Running apps → *Pair this phone* takes the address and
+six-digit code Android shows under Wireless debugging, calls `adb pair` through
 `libadb-android` (SPAKE2, Apache-2.0), then connects over TLS to the port adbd
 advertises and runs the helper with `shell:`. After that the phone needs no PC;
 the key and certificate live in the app's private storage and are reused.

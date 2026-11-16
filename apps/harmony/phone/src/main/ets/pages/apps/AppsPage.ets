@@ -5,8 +5,10 @@ import { AppLauncher } from '../../services/AppLauncher';
 /**
  * The app and site catalogue as a searchable list.
  *
- * A row is an app or a site; tapping an app opens it, tapping a site opens it
- * in the built-in browser. The status is a small dot + word, not a bundle dump.
+ * Only apps this phone can actually open are listed: the catalog names every
+ * platform, and a row with no HarmonyOS bundle would be a dead end. A row is an
+ * app or a site; tapping an app opens it, tapping a site opens it in the
+ * built-in browser. The status is a small dot + word, not a bundle dump.
  */
 @Component
 export struct AppsPage {
@@ -20,13 +22,23 @@ export struct AppsPage {
     return text.toLowerCase().indexOf(needle) >= 0;
   }
 
+  private known(): CatalogApp[] {
+    const known: CatalogApp[] = [];
+    for (const app of APP_CATALOG) {
+      if (app.bundle.length > 0) {
+        known.push(app);
+      }
+    }
+    return known;
+  }
+
   private apps(): CatalogApp[] {
     const needle: string = this.query.trim().toLowerCase();
     if (needle.length === 0) {
-      return APP_CATALOG;
+      return this.known();
     }
     const result: CatalogApp[] = [];
-    for (const app of APP_CATALOG) {
+    for (const app of this.known()) {
       let hit: boolean = this.matches(app.display, needle) || this.matches(app.name, needle);
       for (const alias of app.aliases) {
         if (this.matches(alias, needle)) {
@@ -214,7 +226,7 @@ export struct AppsPage {
   build() {
     Column({ space: 10 }) {
       Row({ space: 2 }) {
-        this.Segment('Apps', APP_CATALOG.length, 0)
+        this.Segment('Apps', this.known().length, 0)
         this.Segment('Sites', SITE_CATALOG.length, 1)
       }
       .width('100%')

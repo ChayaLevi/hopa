@@ -83,6 +83,12 @@ Shared by every client: id, display, aliases, purpose, guardrails, risk classes
 
 Different per client: only the identifier that `ui.launch` receives.
 
+Every launchpad lists only the entries that have a target on that client:
+Android hides catalog entries with no Android package, Harmony hides entries
+with no HarmonyOS bundle, Windows hides entries with no exe. The catalog stays
+whole in `contracts/`; the filter happens where the target is resolved, so a row
+on screen is always a row that can open.
+
 ## Runtime rules
 
 1. The model names an app by display name or id, never by package.
@@ -98,6 +104,12 @@ Different per client: only the identifier that `ui.launch` receives.
    installed inventory yet), so a wrong exe fails honestly at launch.
 6. A launch that the device refuses is reported as a device error, not as a
    success.
+7. An app with a target but no install still gets a row: on Android, tapping it
+   offers the Play Store page for that package, and a package Play answers 404
+   for says so instead of opening a blank page.
+8. On Android a row opens the app's card: status, the surface a run would use,
+   the package, and the catalog's guardrail bullets. The card, not Settings, is
+   where a person judges whether HOPA should touch that app.
 
 ## Coverage today
 
@@ -120,5 +132,5 @@ device; the router uses the catalog to understand the sentence.
   the other 31 are `unknown` until we map them.
 - Per-platform guardrail differences: the bullets are shared even when one
   platform has no equivalent action.
-- Vision: a screenshot is captured on Android but never sent to the model, so
-  the screen is text-only.
+- Vision: a screenshot can ride with the model request on Android (opt-in, off
+  by default), so a canvas or a video is not text-only any more.

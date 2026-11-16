@@ -5,37 +5,52 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
-import com.hopa.core.ports.InstalledApp
-import kotlinx.coroutines.launch
+import com.hopa.core.router.CatalogRoutes
+import com.hopa.core.router.RouteTarget
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
+/**
+ * The catalog, resolved for this phone. Nothing here lists apps the catalog does
+ * not describe, and a row that cannot open says why on its card instead of doing
+ * nothing.
+ */
 @Composable
 fun LaunchpadRoute(
     container: AppContainer,
     onBack: () -> Unit,
+    onOpenApp: (String) -> Unit,
+    onOpenSite: (String) -> Unit,
 ) {
-    var apps by remember { mutableStateOf<List<InstalledApp>>(emptyList()) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+    var targets by remember { mutableStateOf(emptyList<RouteTarget>()) }
+    var status by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        apps = runCatching { container.packages.installed() }
+        val installed = withContext(Dispatchers.IO) {
+            runCatching { container.packages.installed() }.getOrDefault(emptyList())
+        }
+        targets = runCatching { CatalogRoutes.targets(installed, "android") }
             .getOrElse {
-                error = it.message
+                status = "Could not read the catalog: ${it.message ?: "unknown error"}"
                 emptyList()
             }
+            // Only what this phone can attempt: an app whose catalog entry has no
+            // Android target is a row that can never open, so it is not shown.
+            .filter { target -> target.kind == "site" || target.status != "none" }
     }
 
     LaunchpadScreen(
-        apps = apps,
-        error = error,
+        apps = targets.filter { it.kind == "app" },
+        sites = targets.filter { it.kind == "site" },
+        status = status,
         onBack = onBack,
-        onLaunch = { packageName ->
-            scope.launch {
-                runCatching { container.packages.launch(packageName) }
-                    .onFailure { error = it.message }
+        onOpenApp = { target -> onOpenApp(target.name) },
+        onOpenSite = { site ->
+            val domain = site.domains.firstOrNull().orEmpty()
+            if (domain.isNotBlank()) {
+                onOpenSite("https://$domain")
             }
         },
     )

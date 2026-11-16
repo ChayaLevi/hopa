@@ -24,11 +24,10 @@ import com.hopa.data.settings.AppSettings
 fun HomeShell(
     container: AppContainer,
     onOpenSettings: () -> Unit,
-    onOpenLaunchpad: () -> Unit,
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
     onOpenMemory: () -> Unit,
-    onOpenDevice: () -> Unit,
+    onOpenRunningApps: () -> Unit,
     onOpenBrowser: () -> Unit,
     initialGoal: String = "",
 ) {
@@ -51,11 +50,10 @@ fun HomeShell(
         PowerShell(
             container = container,
             onOpenSettings = onOpenSettings,
-            onOpenLaunchpad = onOpenLaunchpad,
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
             onOpenMemory = onOpenMemory,
-            onOpenDevice = onOpenDevice,
+            onOpenRunningApps = onOpenRunningApps,
             onOpenBrowser = onOpenBrowser,
             initialGoal = initialGoal,
             shared = incoming,
@@ -88,12 +86,11 @@ fun HomeShell(
             container = container,
             activeTab = tab,
             onSelectTab = selectTab,
-            onOpenLaunchpad = onOpenLaunchpad,
             onOpenSettings = onOpenSettings,
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
             onOpenMemory = onOpenMemory,
-            onOpenDevice = onOpenDevice,
+            onOpenRunningApps = onOpenRunningApps,
             onOpenBrowser = onOpenBrowser,
         )
 
@@ -152,11 +149,10 @@ private fun EasyShell(
 private fun PowerShell(
     container: AppContainer,
     onOpenSettings: () -> Unit,
-    onOpenLaunchpad: () -> Unit,
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
     onOpenMemory: () -> Unit,
-    onOpenDevice: () -> Unit,
+    onOpenRunningApps: () -> Unit,
     onOpenBrowser: () -> Unit,
     initialGoal: String,
     shared: Boolean,
@@ -194,12 +190,11 @@ private fun PowerShell(
             container = container,
             activeTab = tab,
             onSelectTab = select,
-            onOpenLaunchpad = onOpenLaunchpad,
             onOpenSettings = onOpenSettings,
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
             onOpenMemory = onOpenMemory,
-            onOpenDevice = onOpenDevice,
+            onOpenRunningApps = onOpenRunningApps,
             onOpenBrowser = onOpenBrowser,
         )
 

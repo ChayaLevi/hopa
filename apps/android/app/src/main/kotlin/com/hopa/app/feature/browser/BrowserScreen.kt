@@ -47,10 +47,10 @@ import org.json.JSONTokener
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrowserScreen(onBack: () -> Unit) {
+fun BrowserScreen(initialUrl: String = "", onBack: () -> Unit) {
     val context = LocalContext.current
     val focus = LocalFocusManager.current
-    var address by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf(initialUrl) }
     var error by remember { mutableStateOf<String?>(null) }
     var status by remember { mutableStateOf("") }
     var toolsOpen by remember { mutableStateOf(false) }
@@ -215,6 +215,9 @@ fun BrowserScreen(onBack: () -> Unit) {
                             webViewClient = WebViewClient()
                             setBackgroundColor(android.graphics.Color.TRANSPARENT)
                             webView = this
+                            if (initialUrl.startsWith("https://")) {
+                                loadUrl(initialUrl)
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxSize(),
