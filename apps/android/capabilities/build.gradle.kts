@@ -35,6 +35,10 @@ dependencies {
     // Wireless-debugging pairing inside the app: adb pair (SPAKE2) and the TLS
     // connection to adbd. Apache-2.0 (dual licensed with GPL).
     implementation("com.github.MuntashirAkon:libadb-android:3.1.1")
+    // Pairing derives a key with a Conscrypt method that Android 17 removed from
+    // the platform jar. The public library keeps it, and libadb uses it when it
+    // is on the classpath (SslUtils.isCustomConscrypt).
+    implementation("org.conscrypt:conscrypt-android:2.9.0")
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.core)

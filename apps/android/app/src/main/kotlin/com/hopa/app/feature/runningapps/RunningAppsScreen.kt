@@ -56,6 +56,8 @@ fun RunningAppsScreen(
     onScreenPath: (String) -> Unit,
     onStartBackgroundHelper: () -> Unit,
     onPairWireless: (String, String) -> Unit,
+    onPairWirelessFromScreen: () -> Unit,
+    onPairWirelessWaiting: () -> Unit,
     onRunCheck: () -> Unit,
     onPlanFirst: (Boolean) -> Unit,
     onVision: (Boolean) -> Unit,
@@ -324,6 +326,14 @@ fun RunningAppsScreen(
             onConnect = { address, code ->
                 onPairWireless(address, code)
                 setup = false
+            },
+            onPairAutomatically = {
+                setup = false
+                onPairWirelessFromScreen()
+            },
+            onWaitForDialog = {
+                setup = false
+                onPairWirelessWaiting()
             },
         )
     }

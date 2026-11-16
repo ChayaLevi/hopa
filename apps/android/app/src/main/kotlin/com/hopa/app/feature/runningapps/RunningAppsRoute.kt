@@ -47,6 +47,8 @@ fun RunningAppsRoute(
         onScreenPath = viewModel::setScreenPath,
         onStartBackgroundHelper = viewModel::startBackgroundHelper,
         onPairWireless = viewModel::pairWireless,
+        onPairWirelessFromScreen = viewModel::pairWirelessFromScreen,
+        onPairWirelessWaiting = viewModel::pairWirelessWaiting,
         onRunCheck = viewModel::runScreenCheck,
         onPlanFirst = viewModel::setPlanFirst,
         onVision = viewModel::setVision,

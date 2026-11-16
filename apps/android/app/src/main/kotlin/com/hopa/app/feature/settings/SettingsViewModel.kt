@@ -400,6 +400,24 @@ class SettingsViewModel(
         }
     }
 
+    /** Read the code from Android's pairing dialog instead of asking for it. */
+    fun pairWirelessFromScreen() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val message = com.hopa.app.feature.runningapps.WirelessSetup(container).run()
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
+    /** Wait for a dialog the person opens, then read its code and pair. */
+    fun pairWirelessWaiting() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val message = com.hopa.app.feature.runningapps.WirelessSetup(container).waitForDialog()
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
     /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
     fun startBackgroundHelper() {
         viewModelScope.launch {
