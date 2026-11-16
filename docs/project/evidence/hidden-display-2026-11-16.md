@@ -63,10 +63,23 @@ launch never reached the person's display.
    readiness check ran before the helper printed its line; the APK hash was taken
    before the device flushed the last block.
 
+## A first model turn on the hidden display
+
+Asking "Open Settings and tell me the first screen" with plan-first on: the plan
+was approved, the run went to the hidden display (helper log: `display`, `top`,
+`launch`, `mute`, `unmute`, `finish`, `release`), and the model answered honestly
+that the screen came back with no readable text or elements.
+
+So the launch works and the turn does not touch the phone. What does not work yet
+is **reading the hidden display**: `NodeTreeReader(displayId)` found no window
+for the virtual display, even though the accessibility service is bound and the
+app was drawn there. That is the next gap: the window has to be located (or the
+tree read through a different channel) before taps on the hidden display can be
+aimed at anything.
+
 ## Still not exercised
 
-- Taps, swipes and typing **on** the hidden display (the check launches and reads,
-  it does not act).
-- A full model turn against the hidden display, and two parallel tasks.
+- Taps, swipes and typing **on** the hidden display.
+- Two parallel tasks against two hidden displays.
 - The in-app wireless pairing handshake.
 - Other OEMs; this was one Samsung device with Android 17.
