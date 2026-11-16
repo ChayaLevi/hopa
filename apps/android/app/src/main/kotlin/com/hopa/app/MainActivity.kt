@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
         if (streamFrom(intent) == null) {
             val goal = goalFrom(intent)
             if (goal.isNotBlank()) {
-                container.pendingGoal.value = goal
+                container.pendingGoals.trySend(goal)
             }
         }
         intakeFrom(intent, container)

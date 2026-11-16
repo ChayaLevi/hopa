@@ -210,7 +210,7 @@ private fun PowerShell(
             active = "chat",
             onSelectTab = select,
             onRun = { goal ->
-                container.pendingGoal.value = goal
+                container.pendingGoals.trySend(goal)
                 chatStarted = true
                 tab = "chat"
             },
