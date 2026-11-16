@@ -8,6 +8,8 @@ import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.capabilities.accessibility.NodeTreeReader
 import com.hopa.capabilities.accessibility.GestureDispatcher
 import com.hopa.core.contracts.Observation
+import com.hopa.core.contracts.ObservationNode
+import com.hopa.core.contracts.ScreenSize
 import com.hopa.core.observation.ObservationProducer
 import com.hopa.core.ports.DevicePort
 import com.hopa.core.ports.InstalledApp
@@ -74,7 +76,30 @@ class ShellDisplayDevice(
                 error.ifBlank { "the hidden screen is not running" },
             )
         }
-        val reader = NodeTreeReader(service, displayId = displayId)
+        // A freshly launched activity needs a moment before its window has a
+        // root; polling here is cheaper than a turn that sees an empty screen.
+        val deadline = System.currentTimeMillis() + OBSERVE_WAIT_MS
+        var window = windowRoot(service)
+        while (window == null && System.currentTimeMillis() < deadline) {
+            delay(200)
+            window = windowRoot(service)
+        }
+        if (window == null) {
+            if (launched.isEmpty()) {
+                // Nothing has been opened here yet. That is the normal start of a
+                // hidden run, not a broken surface; the model opens an app next.
+                return emptyScreen()
+            }
+            val inventory = service.windows.joinToString { item ->
+                "display=${item.displayId} pkg=${item.root?.packageName ?: "no-root"}"
+            }
+            val message = "no window for ${launched.lastOrNull()} on the hidden display " +
+                "(display $displayId; windows: ${inventory.ifBlank { "none" }})"
+            // The fallback path hides this from the person, so it must be in the log.
+            android.util.Log.w("HopaDisplay", message)
+            throw IllegalStateException(message)
+        }
+        val reader = NodeTreeReader(service, displayId = displayId, rootOverride = window)
         val raw = reader.read()
         refs = reader.refs
         return producer.produce(raw)
@@ -225,7 +250,46 @@ class ShellDisplayDevice(
     }
 
 
+    /**
+     * The window on this display, or — when the system does not report a display
+     * id for a virtual display — the window of the app this run launched.
+     */
+    private fun windowRoot(service: HopaAccessibilityService): AccessibilityNodeInfo? {
+        service.windows
+            .filter { it.displayId == displayId }
+            .firstNotNullOfOrNull { window -> window.root }
+            ?.let { return it }
+        val expected = launched.lastOrNull() ?: return null
+        val fallback = service.windows.firstNotNullOfOrNull { window ->
+            window.root?.takeIf { it.packageName?.toString() == expected }
+        }
+        if (fallback != null) {
+            android.util.Log.w(
+                "HopaDisplay",
+                "window for $expected did not report display $displayId; used the package match",
+            )
+            return fallback
+        }
+        val event = HopaAccessibilityService.lastSource
+        val fresh = System.currentTimeMillis() - HopaAccessibilityService.lastSourceAt < 5_000
+        if (event != null && fresh && HopaAccessibilityService.lastSourcePackage == expected) {
+            android.util.Log.w("HopaDisplay", "read $expected from the last window event")
+            return event
+        }
+        return null
+    }
+
+    /** The hidden display exists and is empty; the run is expected to open something. */
+    private fun emptyScreen(): Observation = Observation(
+        id = "obs-hidden-empty",
+        timestamp = System.currentTimeMillis(),
+        screenSize = ScreenSize(width, height),
+        text = "The hidden screen is empty. Open an app with ui.launch, then read it.",
+        tree = ObservationNode(type = "root"),
+    )
+
     private companion object {
+        const val OBSERVE_WAIT_MS = 2_500L
         const val KEYCODE_BACK = 4
         const val KEYCODE_HOME = 3
     }

@@ -10,7 +10,17 @@ class HopaAccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // The loop reads the tree on demand; events are intentionally ignored.
+        // The loop reads the tree on demand, but a virtual display can be missing
+        // from AccessibilityService.windows while its events still arrive; keep
+        // the newest source so that case can be read.
+        val source = event?.source ?: return
+        val packageName = event.packageName?.toString().orEmpty()
+        if (packageName.isEmpty()) {
+            return
+        }
+        lastSource = AccessibilityNodeInfo.obtain(source)
+        lastSourcePackage = packageName
+        lastSourceAt = System.currentTimeMillis()
     }
 
     override fun onInterrupt() {
@@ -33,6 +43,19 @@ class HopaAccessibilityService : AccessibilityService() {
     companion object {
         @Volatile
         var instance: HopaAccessibilityService? = null
+            private set
+
+        /** The newest window-event source, used when the window list lacks a display. */
+        @Volatile
+        var lastSource: AccessibilityNodeInfo? = null
+            private set
+
+        @Volatile
+        var lastSourcePackage: String = ""
+            private set
+
+        @Volatile
+        var lastSourceAt: Long = 0
             private set
     }
 }

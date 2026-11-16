@@ -14,6 +14,8 @@ class NodeTreeReader(
     private val maxText: Int = 6_000,
     /** Read the window on this display instead of the one the person sees. */
     private val displayId: Int = -1,
+    /** A root resolved by the caller, when the window's own ids are unreliable. */
+    private val rootOverride: AccessibilityNodeInfo? = null,
 ) {
     val refs: MutableMap<String, AccessibilityNodeInfo> = mutableMapOf()
     private var counter = 0
@@ -27,8 +29,10 @@ class NodeTreeReader(
         truncated = false
         focusedRef = ""
         texts.clear()
-        val root = if (displayId >= 0) {
-            service.windows.firstOrNull { it.displayId == displayId }?.root
+        val root = rootOverride ?: if (displayId >= 0) {
+            service.windows
+                .filter { it.displayId == displayId }
+                .firstNotNullOfOrNull { window -> window.root }
         } else {
             service.activeRoot()
         }

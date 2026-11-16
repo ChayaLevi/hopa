@@ -467,6 +467,9 @@ class SettingsViewModel(
 
     private suspend fun reload() {
         val settings: AppSettings = container.settings.settings.first()
+        val background = withContext(Dispatchers.IO) {
+            runCatching { container.shell.connect() }.getOrDefault(false)
+        }
         val key = container.settings.modelKey()
         val keySaved = container.settings.hasModelKey()
         val bridgeKey = container.settings.bridgeToken()
@@ -476,6 +479,7 @@ class SettingsViewModel(
                 key = key,
                 keySaved = keySaved,
                 bridgeKey = bridgeKey,
+                backgroundRunning = background,
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),
                 phoneAccess = AccessibilityState.isEnabled(container.context) &&
                     HopaAccessibilityService.instance != null,

@@ -8,9 +8,15 @@ import android.view.accessibility.AccessibilityManager
 object AccessibilityState {
     fun isEnabled(context: Context): Boolean {
         val manager = context.getSystemService(AccessibilityManager::class.java)
-        return manager
+        val listed = manager
             .getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
             .any { it.resolveInfo.serviceInfo.packageName == context.packageName }
+        if (listed) {
+            return true
+        }
+        // The manager can keep a stale list for a while after the service is
+        // rebound; a connected instance cannot exist without access being on.
+        return HopaAccessibilityService.instance != null
     }
 
     fun openSettings(context: Context) {

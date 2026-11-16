@@ -21,4 +21,6 @@ data class SettingsUiState(
     val screenCheck: List<ScreenCheck> = emptyList(),
     /** True when the accessibility service is enabled and bound now. */
     val phoneAccess: Boolean = false,
+    /** True when the hidden-display helper answers on loopback now. */
+    val backgroundRunning: Boolean = false,
 )

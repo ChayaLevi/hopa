@@ -71,6 +71,7 @@ fun RunningAppsScreen(
     val shown = apps.take(4)
     val backgroundCheck = state.screenCheck.firstOrNull { it.id == "background" }
     val needsSetup = backgroundCheck != null && !backgroundCheck.ok && mode != "onscreen"
+    val hiddenForced = mode == "background" && !state.backgroundRunning
 
     Scaffold(
         containerColor = HopaColor.Bg,
@@ -82,11 +83,13 @@ fun RunningAppsScreen(
                     HopaStatusPill(
                         text = when {
                             !state.phoneAccess -> "Needs screen access"
+                            hiddenForced -> "Hidden screen is off"
                             needsSetup -> "Background off"
                             else -> "Ready"
                         },
                         color = when {
                             !state.phoneAccess -> HopaColor.Warning
+                            hiddenForced -> HopaColor.Warning
                             needsSetup -> HopaColor.Warning
                             else -> HopaColor.Success
                         },
@@ -116,6 +119,7 @@ fun RunningAppsScreen(
                     Text(
                         when {
                             !state.phoneAccess -> "Screen access is off"
+                            hiddenForced -> "Hidden mode needs the helper running"
                             needsSetup -> "Background mode is not running"
                             else -> "Ready to open apps"
                         },
@@ -240,10 +244,18 @@ fun RunningAppsScreen(
                         HairLine()
                         InfoRow(
                             "Hidden screen",
-                            if (bridgeReady) "Start" else "Set up",
-                            false,
+                            when {
+                                state.backgroundRunning -> "Running"
+                                bridgeReady -> "Start"
+                                else -> "Set up"
+                            },
+                            state.backgroundRunning,
                             {
-                                if (bridgeReady) onStartBackgroundHelper() else setup = true
+                                if (state.backgroundRunning || bridgeReady) {
+                                    onStartBackgroundHelper()
+                                } else {
+                                    setup = true
+                                }
                             },
                         )
                         HairLine()

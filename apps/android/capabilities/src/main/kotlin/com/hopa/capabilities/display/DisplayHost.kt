@@ -32,6 +32,32 @@ class DisplayHost(
     val displayId: Int
         get() = display.display.displayId
 
+    init {
+        windowing(displayId)
+    }
+
+    /**
+     * Fullscreen windowing mode (1) and a local IME policy (0). Without them an
+     * activity can open in a window that does not match the display size, which
+     * makes every tap land somewhere else.
+     */
+    private fun windowing(id: Int) {
+        runCatching {
+            val wm = Class.forName("android.view.WindowManagerGlobal")
+                .getMethod("getWindowManagerService")
+                .invoke(null) ?: return@runCatching
+            val int = Int::class.javaPrimitiveType
+            wm.javaClass.getMethod("setWindowingMode", int, int).invoke(wm, id, 1)
+            wm.javaClass.getMethod("setDisplayImePolicy", int, int).invoke(wm, id, 0)
+        }.onFailure {
+            runCatching {
+                ProcessBuilder("sh", "-c", "wm set-display-windowing-mode -d $id 1")
+                    .start()
+                    .waitFor()
+            }
+        }
+    }
+
     private fun create(): VirtualDisplay {
         val attempts = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             listOf(flags(trusted = true), flags(trusted = false))

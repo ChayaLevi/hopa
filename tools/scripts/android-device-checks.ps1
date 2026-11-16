@@ -13,7 +13,10 @@
 # runs on the phone: the host only sends `sh /data/local/tmp/hopa_run.sh`.
 
 param(
-    [switch]$InstallOnly
+    [switch]$InstallOnly,
+    # Writes the accessibility settings for HOPA. A reinstall clears them on a
+    # Samsung, and a device test without them skips every screen case.
+    [switch]$EnableAccessibility
 )
 
 $ErrorActionPreference = "Continue"
@@ -23,6 +26,7 @@ $adb = Join-Path $sdk "platform-tools\adb.exe"
 $apk = Join-Path $root "apps\android\app\build\outputs\apk\debug\app-debug.apk"
 $package = "com.hopa.android"
 $component = "com.hopa.android/com.hopa.app.MainActivity"
+$service = "com.hopa.android/com.hopa.capabilities.accessibility.HopaAccessibilityService"
 $deviceApk = "/data/local/tmp/hopa.apk"
 $deviceScript = "/data/local/tmp/hopa_run.sh"
 
@@ -91,6 +95,18 @@ Write-Host "1/4 installing" -ForegroundColor Cyan
 Install-Apk
 $version = (& $adb shell dumpsys package $package 2>&1 | Select-String "versionName" | Select-Object -First 1).ToString().Trim()
 Write-Host "   $version" -ForegroundColor Green
+if ($EnableAccessibility) {
+    & $adb shell appops set $package ACCESS_RESTRICTED_SETTINGS allow 2>&1 | Out-Null
+    & $adb shell settings put secure enabled_accessibility_services $service 2>&1 | Out-Null
+    & $adb shell settings put secure accessibility_enabled 1 2>&1 | Out-Null
+    Start-Sleep -Seconds 2
+    $enabled = (& $adb shell settings get secure enabled_accessibility_services).Trim()
+    if ($enabled -match [regex]::Escape($package)) {
+        Write-Host "   screen access: on" -ForegroundColor Green
+    } else {
+        Write-Host "   screen access: could not be enabled from adb" -ForegroundColor Yellow
+    }
+}
 & $adb shell am start -n $component 2>&1 | Out-Null
 if ($InstallOnly) {
     Write-Host "install only: done" -ForegroundColor Cyan

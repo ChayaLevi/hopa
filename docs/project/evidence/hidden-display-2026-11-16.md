@@ -77,6 +77,30 @@ app was drawn there. That is the next gap: the window has to be located (or the
 tree read through a different channel) before taps on the hidden display can be
 aimed at anything.
 
+### The reading gap, as observed
+
+`AccessibilityWindowInfo.getDisplayId()` cannot be trusted on this build: every
+window — SystemUI, the launcher, HOPA itself — reports `display=0`, so matching a
+virtual display by display id finds nothing. On top of that, a run probed the
+surface **before** opening anything, and a display with no windows has no root to
+read; the strict check then threw and the turn fell back to the phone's screen
+(one answer described Settings with the phone's own account card, which is how the
+fallback was spotted).
+
+The rule that follows: an existing but empty hidden display is a normal start (it
+returns "The hidden screen is empty. Open an app with ui.launch"), and the window
+is identified by the package the run just launched, not by a display id.
+
+The next attempt keeps the newest window-event source and reads it when neither
+the display id nor the package match finds a window. The event does arrive
+(log: "read com.android.settings from the last window event"), but its node has
+no readable children, so the model still sees an empty screen. That points at
+focus: a display without its own focus may not expose a full subtree. The next
+things to try, in order: trusted-display flags with a logged fallback, reading
+the hierarchy through the helper (`dumpsys activity top`,
+`cmd window dump-visible-window-views`), and a frame plus a vision model as the
+last resort.
+
 ## Still not exercised
 
 - Taps, swipes and typing **on** the hidden display.
