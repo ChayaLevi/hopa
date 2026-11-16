@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * Phone access is the only way HOPA can see and tap other apps. When it is off,
- * the composer still works but every run fails, so the reason and the one tap
- * that fixes it belong above the field, not inside a model answer.
+ * Screen access is the local way to see and tap other apps. The hidden screen and
+ * a paired computer do not need it, so the banner says what is missing without
+ * claiming nothing can run; the one tap that fixes it belongs above the field.
  */
 @Composable
 fun AccessibilityBanner(
@@ -42,8 +42,8 @@ fun AccessibilityBanner(
         ) {
             Text(
                 when {
-                    !enabled -> "Phone access is off, so HOPA cannot see or tap apps."
-                    !connected -> "Phone access is on but not connected; turn the switch off and on again."
+                    !enabled -> "Screen access is off. Hidden mode or a paired computer can still act."
+                    !connected -> "Screen access is on but not connected; turn it off and on again."
                     else -> ""
                 },
                 fontSize = 12.sp,
