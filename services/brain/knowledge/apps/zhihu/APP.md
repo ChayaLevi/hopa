@@ -1,11 +1,18 @@
 ---
 name: zhihu
 display: Zhihu
-bundle: UNCONFIRMED
 aliases: [Zhihu, 知乎]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android: com.zhihu.android
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Zhihu
 

@@ -13,6 +13,14 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
+private val TOOL_INVOKE = Regex(
+    """invoke\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)</[^>]*invoke>""",
+)
+private val TOOL_PARAMETER = Regex(
+    """parameter\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)</[^>]*parameter>""",
+)
+private val TOOL_MARKUP = Regex("""<\|+\s*/?\s*DSML""")
+
 class DecisionParser {
     fun parse(raw: String): ParseOutcome {
         val text = raw.trim()
@@ -20,9 +28,18 @@ class DecisionParser {
             return ParseOutcome(text = raw)
         }
         direct(text)?.let { return it }
+        dsml(text)?.let { return it }
         val objects = BalancedObjectScanner.scan(text)
         for (candidate in objects.asReversed()) {
             direct(candidate)?.let { return it }
+        }
+        if (TOOL_MARKUP.containsMatchIn(text) || text.contains("invoke name=")) {
+            return ParseOutcome(
+                error = HopaError(
+                    ErrorCodes.SCHEMA,
+                    "the model sent tool markup instead of one action",
+                ),
+            )
         }
         return ParseOutcome(text = raw)
     }
@@ -90,6 +107,50 @@ class DecisionParser {
             decision = Decision(
                 action = action,
                 say = obj["say"]?.asString() ?: "",
+                done = false,
+                needUser = false,
+            ),
+        )
+    }
+
+    /**
+     * Some OpenAI-compatible models answer with their tool-call syntax instead of
+     * the JSON this loop asks for, for example DeepSeek's
+     * ``<||DSML||invoke name="ui.launch">``. The action is the same; read it.
+     */
+    private fun dsml(value: String): ParseOutcome? {
+        if (!value.contains("invoke name=") && !value.contains("DSML")) {
+            return null
+        }
+        val invoke = TOOL_INVOKE.find(value) ?: return null
+        val kind = invoke.groupValues[1].trim()
+        if (ActionKind.fromWire(kind) == null) {
+            return ParseOutcome(
+                error = HopaError(ErrorCodes.SCHEMA, "unknown action kind: $kind"),
+            )
+        }
+        val params = mutableMapOf<String, String>()
+        for (parameter in TOOL_PARAMETER.findAll(invoke.groupValues[2])) {
+            params[parameter.groupValues[1].trim()] = parameter.groupValues[2].trim()
+        }
+        val action = Action(
+            schemaVersion = "1",
+            kind = kind,
+            ref = params["ref"] ?: params["target"],
+            text = params["text"],
+            x = params["x"]?.toIntOrNull(),
+            y = params["y"]?.toIntOrNull(),
+            toX = params["toX"]?.toIntOrNull(),
+            toY = params["toY"]?.toIntOrNull(),
+            app = params["app"],
+            url = params["url"],
+            direction = params["direction"],
+            timeoutMs = params["timeoutMs"]?.toIntOrNull() ?: 3000,
+        )
+        return ParseOutcome(
+            decision = Decision(
+                action = action,
+                say = "",
                 done = false,
                 needUser = false,
             ),

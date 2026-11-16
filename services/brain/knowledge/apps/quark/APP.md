@@ -1,17 +1,20 @@
 ---
 name: quark
 display: Quark
-bundle: com.quark.ohosbrowser
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
 aliases: [Quark, 夸克, quark]
 pace: careful
 validated: verified
-platform: harmonyos
+harmony: com.quark.ohosbrowser
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.quark.browser
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Quark
-
-HarmonyOS bundle: `com.quark.ohosbrowser` (verified on a Mate 80).
 
 - Browser, search, documents and downloads.
 - Reading is safe; submitting a form or message needs approval.

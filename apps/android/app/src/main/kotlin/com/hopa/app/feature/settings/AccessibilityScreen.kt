@@ -35,6 +35,7 @@ fun AccessibilityScreen(
     allowed: Boolean,
     serviceEnabled: Boolean,
     connected: Boolean,
+    installedAt: String,
     onToggle: (Boolean) -> Unit,
     onOpenSettings: () -> Unit,
     onBack: () -> Unit,
@@ -43,7 +44,7 @@ fun AccessibilityScreen(
         containerColor = HopaColor.Bg,
         topBar = {
             TopAppBar(
-                title = { Text("Phone access") },
+                title = { Text("Screen control") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -118,10 +119,49 @@ fun AccessibilityScreen(
                         color = if (connected) HopaColor.Success else HopaColor.TextHint,
                         modifier = Modifier.padding(top = 4.dp),
                     )
+                    Text(
+                        "Build $installedAt",
+                        fontSize = 12.sp,
+                        color = HopaColor.TextHint,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                    if (serviceEnabled && !connected) {
+                        Text(
+                            "Turn the switch off, wait a second, then on again. If it " +
+                                "stays not connected, restart the phone and open HOPA.",
+                            fontSize = 12.sp,
+                            color = HopaColor.Warning,
+                            modifier = Modifier.padding(top = 6.dp),
+                        )
+                    }
                 }
             }
             Button(onClick = onOpenSettings) {
                 Text("Open Android accessibility settings")
+            }
+            Surface(
+                color = HopaColor.SurfaceAlt,
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        "Android blocks this switch for apps installed outside a store",
+                        fontSize = 13.sp,
+                        color = HopaColor.TextPrimary,
+                    )
+                    Text(
+                        "If Android says \"App was denied access\", allow it first: " +
+                            "Settings, Apps, HOPA, then the three-dot menu, " +
+                            "Allow restricted settings. On Samsung, if that item is " +
+                            "missing, turn off Auto Blocker under Security and privacy, " +
+                            "repeat the step, then turn it back on. A reinstall repeats " +
+                            "this once more.",
+                        fontSize = 12.sp,
+                        color = HopaColor.TextHint,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
             }
             Text(
                 "The PC bridge is the preferred path. Accessibility is the fallback " +

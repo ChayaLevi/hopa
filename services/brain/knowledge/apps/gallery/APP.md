@@ -1,13 +1,18 @@
 ---
 name: gallery
 display: Gallery
-bundle: com.huawei.hmos.photos
-bundle_verified: 2026-11-06
-ability: com.huawei.hmos.photos.MainAbility
 aliases: [图库, 相册]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony: com.huawei.hmos.photos
+harmony_ability: com.huawei.hmos.photos.MainAbility
+harmony_verified: 2026-11-06
+android: com.sec.android.gallery3d
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Gallery
 

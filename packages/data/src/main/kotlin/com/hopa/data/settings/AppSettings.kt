@@ -13,4 +13,12 @@ data class AppSettings(
     val accessibilityAllowed: Boolean = true,
     val tone: String = "friendly",
     val chattiness: String = "balanced",
+    /** auto, background, onscreen or bridge; auto is the only one a user needs. */
+    val screenPath: String = "auto",
+    /** Show the numbered plan and wait for one approval before acting. */
+    val planFirst: Boolean = false,
+    /** Repeat a goal that worked before without asking the model. */
+    val replaySkills: Boolean = true,
+    /** Attach a screenshot to each model call (needs a model that sees images). */
+    val vision: Boolean = false,
 )

@@ -1,13 +1,18 @@
 ---
 name: calendar
 display: Calendar
-bundle: com.huawei.hmos.calendar
-bundle_verified: 2026-11-06
-ability: MainAbility
 aliases: [日历, 日程]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony: com.huawei.hmos.calendar
+harmony_ability: MainAbility
+harmony_verified: 2026-11-06
+android: com.samsung.android.calendar
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Calendar
 

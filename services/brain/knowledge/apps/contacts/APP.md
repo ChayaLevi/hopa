@@ -1,13 +1,18 @@
 ---
 name: contacts
 display: Contacts
-bundle: com.ohos.contacts
-bundle_verified: 2026-11-06
-ability: com.ohos.contacts.EntryAbility
 aliases: [联系人, 通讯录]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony: com.ohos.contacts
+harmony_ability: com.ohos.contacts.EntryAbility
+harmony_verified: 2026-11-06
+android: com.samsung.android.app.contacts
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Contacts
 

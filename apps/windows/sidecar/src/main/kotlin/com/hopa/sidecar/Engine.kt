@@ -10,6 +10,8 @@ import com.hopa.core.loop.TurnContext
 import com.hopa.core.model.ModelMessage
 import com.hopa.core.model.ModelPort
 import com.hopa.core.ports.DevicePort
+import com.hopa.core.ports.InstalledApp
+import com.hopa.core.router.CatalogRoutes
 import com.hopa.data.sessions.Attachment
 import com.hopa.core.records.InMemoryRunRecorder
 import com.hopa.core.records.RunChain
@@ -39,6 +41,16 @@ class Engine(
         cancelled = true
         io.log("turn cancelled by the user")
     }
+
+    /**
+     * The apps this PC can open, from the catalog's windows column. There is no
+     * installed-app inventory here yet, so only entries we know how to start are
+     * offered, and the prompt says a launch may still fail.
+     */
+    private fun windowsApps(): List<InstalledApp> = CatalogRoutes
+        .targets(platform = "windows")
+        .filter { it.kind == "app" && it.bundle.isNotEmpty() }
+        .map { InstalledApp(packageName = it.bundle, label = it.display) }
 
     fun startTurn(
         id: String,
@@ -112,7 +124,13 @@ class Engine(
                 loop.run(
                     runId = "run-$id",
                     traceId = UUID.randomUUID().toString(),
-                    context = TurnContext(goal = goal, history = history),
+                    context = TurnContext(
+                        goal = goal,
+                        history = history,
+                        platform = "windows",
+                        installedApps = windowsApps(),
+                        phoneAccess = true,
+                    ),
                     isCancelled = { cancelled },
                 )
             }

@@ -37,10 +37,23 @@ fun AccessibilityRoute(
         }
     }
 
+    val installedAt = remember {
+        runCatching {
+            val info = context.packageManager.getPackageInfo(context.packageName, 0)
+            val install = java.text.SimpleDateFormat(
+                "yyyy-MM-dd HH:mm",
+                java.util.Locale.getDefault(),
+            ).format(java.util.Date(info.lastUpdateTime))
+            "${info.versionName} (installed $install)"
+
+        }.getOrDefault("")
+    }
+
     AccessibilityScreen(
         allowed = allowed,
         serviceEnabled = serviceEnabled,
         connected = connected,
+        installedAt = installedAt,
         onToggle = { value ->
             allowed = value
             scope.launch {

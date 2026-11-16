@@ -3,6 +3,8 @@ package com.hopa.app.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
+import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.capabilities.bridge.BridgeClient
 import com.hopa.capabilities.llm.ProviderState
 import com.hopa.capabilities.llm.ProviderStateResolver
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -164,6 +168,42 @@ class SettingsViewModel(
         }
     }
 
+    fun setVision(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(vision = value) }
+            reload()
+        }
+    }
+
+    fun setReplaySkills(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(replaySkills = value) }
+            reload()
+        }
+    }
+
+    fun setPlanFirst(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(planFirst = value) }
+            reload()
+        }
+    }
+
+    fun setNotifications(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(notifyAnswers = value) }
+            reload()
+        }
+    }
+
+    /** auto, background, onscreen or bridge; the same words the core enum uses. */
+    fun setScreenPath(value: String) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(screenPath = value) }
+            reload()
+        }
+    }
+
     fun setChattiness(value: String) {
         viewModelScope.launch {
             container.settings.update { it.copy(chattiness = value) }
@@ -187,6 +227,164 @@ class SettingsViewModel(
                     "Could not show a notification"
                 },
             )
+        }
+    }
+
+    /**
+     * Say, step by step, what works right now. The person should never have to
+     * guess whether phone access, the helper or the bridge is the missing piece.
+     */
+    fun runScreenCheck() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, screenCheck = emptyList()) }
+            val checks = mutableListOf<ScreenCheck>()
+            val service = HopaAccessibilityService.instance
+            val enabled = AccessibilityState.isEnabled(container.context)
+            checks += if (enabled && service != null) {
+                ScreenCheck("screen", "HOPA can see your screen", ok = true)
+            } else if (enabled) {
+                ScreenCheck(
+                    "screen",
+                    "Screen control is on but not answering - tap Fix to open it",
+                    ok = false,
+                    action = "Fix",
+                )
+            } else {
+                ScreenCheck(
+                    "screen",
+                    "Screen control is off - tap Fix, then turn on HOPA",
+                    ok = false,
+                    action = "Fix",
+                )
+            }
+
+            val socket = withContext(Dispatchers.IO) { container.shell.connect() }
+            checks += if (socket) {
+                ScreenCheck("background", "Background mode is on", ok = true)
+            } else {
+                ScreenCheck(
+                    "background",
+                    "Background mode is off - tap Set up, then pair once",
+                    ok = false,
+                    action = "Set up",
+                )
+            }
+
+            if (socket) {
+                // Android 16 lets apps publish typed functions; the shell sees them
+                // through `cmd app_function`, which is a cleaner door than tapping.
+                val listing = withContext(Dispatchers.IO) {
+                    runCatching { container.shell.appFunctions("com.android.settings") }
+                        .getOrNull()
+                }
+                checks += when {
+                    listing == null -> ScreenCheck(
+                        "appfn",
+                        "App functions: could not be checked",
+                        ok = true,
+                    )
+
+                    listing.second.contains("Can't find service") ||
+                        listing.second.contains("Unknown command") -> ScreenCheck(
+                        "appfn",
+                        "App functions: this Android does not offer them (needs 16)",
+                        ok = true,
+                    )
+
+                    else -> ScreenCheck(
+                        "appfn",
+                        "App functions: this Android supports them",
+                        ok = true,
+                    )
+                }
+
+                val device = runCatching { container.backgroundDevice() }.getOrNull()
+                if (device == null) {
+                    checks += ScreenCheck(
+                        "tried",
+                        "Test failed: the hidden screen could not start",
+                        ok = false,
+                    )
+                } else {
+                    val opened = runCatching { device.launch("com.android.settings") }
+                    val observation = runCatching { device.observe() }.getOrNull()
+                    val elements = observation?.tree?.children?.size ?: 0
+                    checks += if (opened.isSuccess) {
+                        ScreenCheck("tried", "Tested it: Settings opened out of sight", ok = true)
+                    } else {
+                        ScreenCheck(
+                            "tried",
+                            "Test failed: ${opened.exceptionOrNull()?.message}",
+                            ok = false,
+                        )
+                    }
+                    runCatching {
+                        (device as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                    }
+                }
+            }
+
+            val current = container.settings.settings.first()
+            if (current.bridgeUrl.isNotBlank()) {
+                val token = container.settings.bridgeToken()
+                val health = withContext(Dispatchers.IO) {
+                    runCatching {
+                        com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token).health()
+                        true
+                    }.getOrDefault(false)
+                }
+                checks += if (health) {
+                    ScreenCheck("computer", "Your computer is connected", ok = true)
+                } else {
+                    ScreenCheck(
+                        "computer",
+                        "Your computer is not answering - tap Fix",
+                        ok = false,
+                        action = "Fix",
+                    )
+                }
+            } else {
+                checks += ScreenCheck("computer", "Your computer is not set up (optional)", ok = true)
+            }
+
+            checks += ScreenCheck(
+                "mode",
+                "Apps will open: ${pathLabel(current.screenPath).lowercase()}",
+                ok = true,
+            )
+            _state.update { it.copy(busy = false, screenCheck = checks) }
+        }.invokeOnCompletion { _state.update { it.copy(busy = false) } }
+    }
+
+    /** Pair with this phone's own adbd; no PC needed after this succeeds. */
+    fun pairWireless(address: String, code: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val message = container.pairWireless(address, code)
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
+    /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
+    fun startBackgroundHelper() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val current = container.settings.settings.first()
+            val token = container.settings.bridgeToken()
+            val message = when {
+                current.bridgeUrl.isBlank() -> "Bridge: set an address first"
+                token.isBlank() -> "Bridge: pair first, then start the helper"
+                else -> runCatching {
+                    val output = BridgeClient(current.bridgeUrl, token).startHelper()
+                    container.shell.close()
+                    if (container.shell.connect()) {
+                        "Background screen is ready"
+                    } else {
+                        "Helper started but did not answer: ${output.take(120)}"
+                    }
+                }.getOrElse { error -> "Background: ${error.message}" }
+            }
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
         }
     }
 
@@ -243,6 +441,8 @@ class SettingsViewModel(
                 keySaved = keySaved,
                 bridgeKey = bridgeKey,
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),
+                phoneAccess = AccessibilityState.isEnabled(container.context) &&
+                    HopaAccessibilityService.instance != null,
                 error = if (keySaved && key.isBlank()) {
                     "The saved key cannot be read on this phone; paste it again"
                 } else {

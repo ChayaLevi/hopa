@@ -17,6 +17,7 @@ import com.hopa.core.ports.Clock
 import com.hopa.core.ports.DevicePort
 import com.hopa.core.prompt.AppCatalogBlock
 import com.hopa.core.prompt.ContextBudget
+import com.hopa.core.prompt.InstalledAppsBlock
 import com.hopa.core.prompt.ScreenRenderer
 import com.hopa.core.prompt.SystemPromptBuilder
 import com.hopa.core.records.RunRecorder
@@ -45,14 +46,31 @@ class AgentLoop(
     ): TurnResult {
         var observation = runCatching { device.observe() }.getOrNull()
         val surfaceAvailable = observation != null
-        val route = AppRouter.route(context.goal, CatalogRoutes.targets())
+        val route = AppRouter.route(
+            context.goal,
+            CatalogRoutes.targets(context.installedApps, context.platform),
+        )
+        val installed = if (
+            context.platform.equals("android", ignoreCase = true) ||
+            context.installedApps.isNotEmpty()
+        ) {
+            InstalledAppsBlock().text(context.installedApps)
+        } else {
+            ""
+        }
         val system = promptBuilder.build(
             memory = context.memory,
             skills = context.skills,
-            apps = AppCatalogBlock.text(),
+            apps = listOf(
+                AppCatalogBlock.text(),
+                installed,
+                typedFunctions(context.appFunctions),
+            ).filter { it.isNotEmpty() }.joinToString("\n\n"),
             routerHint = RouterHint.text(route),
             surfaceAvailable = surfaceAvailable,
             webAvailable = webAvailable,
+            phoneAccess = context.phoneAccess,
+            vision = context.vision,
         )
         val messages = mutableListOf(ModelMessage("system", system))
         messages += budget.fit(context.history)
@@ -63,6 +81,7 @@ class AgentLoop(
 
         val records = mutableListOf<RunRecord>()
         val narration = mutableListOf<String>()
+        val steps = mutableListOf<String>()
         val launched = mutableSetOf<String>()
         var usage = ModelUsage()
 
@@ -70,7 +89,14 @@ class AgentLoop(
             if (isCancelled()) {
                 return TurnResult("Stopped.", records, narration, usage = usage)
             }
-            val reply = runCatching { model.complete(ModelRequest(messages)) }
+            val frames = if (context.vision) {
+                runCatching { device.screenshot() }.getOrNull()?.let { bytes ->
+                    listOf(java.util.Base64.getEncoder().encodeToString(bytes))
+                }.orEmpty()
+            } else {
+                emptyList()
+            }
+            val reply = runCatching { model.complete(ModelRequest(messages, images = frames)) }
                 .getOrElse { error ->
                     return TurnResult(
                         answer = "I could not reach the model. Check the provider and network.",
@@ -130,6 +156,21 @@ class AgentLoop(
                 }
             }
 
+            val signature = "${action.kind}|${action.ref}|${action.text}|${action.app}|${action.x},${action.y}"
+            if (action.kind !in READ_ONLY_KINDS) {
+                steps += signature
+            }
+            if (steps.count { it == signature } >= 3) {
+                // Tapping the same field forever is a failure, not progress.
+                return TurnResult(
+                    answer = "I kept repeating the same step, so I stopped. " +
+                        "The screen did not react the way I expected.",
+                    records = records,
+                    narration = narration,
+                    error = HopaError(ErrorCodes.BLOCKED, "repeated action: ${action.kind}"),
+                    usage = usage,
+                )
+            }
             if (isCancelled()) {
                 return TurnResult("Stopped.", records, narration, usage = usage)
             }
@@ -167,6 +208,21 @@ class AgentLoop(
             error = if (final.isSuccess) null else HopaError(ErrorCodes.TIMEOUT, "step limit"),
             usage = usage,
         )
+    }
+
+    private companion object {
+        /** Reading the screen again is not a loop; acting on it twice is. */
+        val READ_ONLY_KINDS = setOf("ui.observe", "ui.wait", "web.read")
+    }
+
+    /** A short block for the foreground app's typed functions, when it has any. */
+    private fun typedFunctions(raw: String): String {
+        val text = raw.trim()
+        if (text.isEmpty() || text.startsWith("err")) {
+            return ""
+        }
+        return "TYPED FUNCTIONS OF THE CURRENT APP (call these instead of tapping):\n" +
+            text.take(1_500)
     }
 
     private fun emptyObservation(): Observation = Observation(

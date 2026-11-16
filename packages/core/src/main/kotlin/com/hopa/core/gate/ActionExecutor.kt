@@ -23,6 +23,7 @@ class ActionExecutor(
     private val recorder: RunRecorder,
     private val factory: RunRecordFactory,
     private val clock: Clock,
+    private val scrollGeometry: ScrollGeometry = ScrollGeometry(),
 ) {
     suspend fun execute(
         runId: String,
@@ -59,7 +60,7 @@ class ActionExecutor(
         }
 
         return runCatching {
-            val text = executeAction(action)
+            val text = executeAction(action, before)
             val after = runCatching { device.observe() }.getOrDefault(before)
             val changed = ObservationHasher.hash(after) != beforeHash
             val verified = text.isNotEmpty() || action.kind in setOf(
@@ -103,7 +104,7 @@ class ActionExecutor(
         }
     }
 
-    private suspend fun executeAction(action: Action): String {
+    private suspend fun executeAction(action: Action, before: Observation): String {
         when (action.kind) {
             "ui.observe" -> return ""
             "ui.tap" -> device.tap(action.ref, action.x, action.y)
@@ -118,12 +119,19 @@ class ActionExecutor(
                 action.toY ?: 500,
             )
 
-            "ui.scroll" -> device.swipe(
-                action.x ?: 500,
-                action.y ?: 1500,
-                action.toX ?: 500,
-                action.toY ?: 500,
-            )
+            "ui.scroll" -> {
+                val points = if (action.x != null && action.y != null) {
+                    intArrayOf(
+                        action.x,
+                        action.y,
+                        action.toX ?: action.x,
+                        action.toY ?: action.y,
+                    )
+                } else {
+                    scrollGeometry.swipe(before.screenSize, action.direction.orEmpty())
+                }
+                device.swipe(points[0], points[1], points[2], points[3])
+            }
 
             "ui.back" -> device.pressBack()
             "ui.home" -> device.pressHome()
@@ -132,6 +140,18 @@ class ActionExecutor(
                     ?: throw IllegalArgumentException("ui.launch needs app")
                 device.launch(packageName)
                 return ""
+            }
+
+            "app.function" -> {
+                val packageName = action.app?.takeIf { it.isNotBlank() }
+                    ?: throw IllegalArgumentException("app.function needs app")
+                val function = action.ref?.takeIf { it.isNotBlank() }
+                    ?: throw IllegalArgumentException("app.function needs ref")
+                return device.appFunction(
+                    packageName,
+                    function,
+                    action.text.orEmpty().ifBlank { "{}" },
+                )
             }
 
             "ui.stop" -> device.stop(
@@ -180,6 +200,12 @@ class ActionExecutor(
                 port.call(action.text.orEmpty())
             }
 
+            "system.setAlarm" -> {
+                val port = system ?: throw UnsupportedOperationException("no system port")
+                val clockTime = parseClock(action.text.orEmpty())
+                port.setAlarm(clockTime[0], clockTime[1], "")
+            }
+
             "system.uninstall" -> {
                 val port = system ?: throw UnsupportedOperationException("no system port")
                 port.uninstall(action.app ?: action.text.orEmpty())
@@ -200,6 +226,15 @@ class ActionExecutor(
             else -> throw UnsupportedOperationException("unsupported kind: ${action.kind}")
         }
         return ""
+    }
+
+    /** "07:30" or "7:30" to hour and minute; noon when the text makes no sense. */
+    private fun parseClock(text: String): IntArray {
+        val match = Regex("(\\d{1,2}):(\\d{2})").find(text) ?: return intArrayOf(12, 0)
+        return intArrayOf(
+            match.groupValues[1].toInt().coerceIn(0, 23),
+            match.groupValues[2].toInt().coerceIn(0, 59),
+        )
     }
 
     private fun label(level: RiskLevel): String = when (level) {

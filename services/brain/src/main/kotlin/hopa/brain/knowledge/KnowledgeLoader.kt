@@ -9,18 +9,28 @@ import java.nio.file.Path
  * Loads HarmonyOS app knowledge from Markdown files with a small, strict
  * front-matter block. No YAML library is required.
  *
- * Format:
+ * Format (one file per app, the same file every platform reads):
  * ```
  * ---
  * name: settings
  * display: Settings
- * bundle: com.huawei.hmos.settings
  * aliases: [设置, settings]
  * pace: careful
  * validated: pending
- * platform: harmonyos
+ * harmony: com.huawei.hmos.settings
+ * harmony_ability: MainAbility
+ * harmony_verified: Mate 80, 2026-11-08
+ * android: com.android.settings
+ * android_activity:
+ * android_verified:
+ * windows:
+ * windows_window:
+ * windows_verified:
  * ---
  * ```
+ *
+ * An empty `harmony:` means the app has no HarmonyOS build yet, so this
+ * service never launches it.
  */
 data class KnowledgeDocument(
     val entry: KnowledgeEntry,
@@ -73,15 +83,13 @@ object KnowledgeLoader {
         fun required(key: String): String =
             fields[key] ?: throw KnowledgeFormatException("$source: missing $key")
 
-        val platform = required("platform")
-        if (platform != "harmonyos") {
-            throw KnowledgeFormatException("$source: platform must be harmonyos, got $platform")
-        }
-
-        val bundle = required("bundle")
+        // One APP.md serves every platform. `harmony:` is the bundle this
+        // service can launch; it is empty when the app has no HarmonyOS build.
+        val bundle = fields["harmony"] ?: fields["bundle"].orEmpty()
         // UNCONFIRMED means the app is catalogued but no HarmonyOS bundle has
         // been verified on a device. It must never be used to launch anything.
-        val packages = if (bundle.equals("UNCONFIRMED", ignoreCase = true) ||
+        val packages = if (bundle.isBlank() ||
+            bundle.equals("UNCONFIRMED", ignoreCase = true) ||
             bundle.equals("unknown", ignoreCase = true)
         ) {
             emptyList()
@@ -93,14 +101,16 @@ object KnowledgeLoader {
             display = required("display"),
             aliases = parseList(fields["aliases"]),
             packages = packages,
-            service = fields["service"] ?: required("name"),
+            service = fields["harmony_ability"]?.ifBlank { null }
+                ?: fields["service"]?.ifBlank { null }
+                ?: required("name"),
         )
         return KnowledgeDocument(
             entry = entry,
             body = body,
             pace = required("pace"),
             validated = required("validated"),
-            platform = platform,
+            platform = "harmonyos",
         )
     }
 

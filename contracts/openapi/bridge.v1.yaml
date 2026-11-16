@@ -241,6 +241,36 @@ paths:
                         bundle: { type: string }
                         label: { type: string }
         "401": { $ref: "#/components/responses/Unauthorized" }
+  /helper:
+    post:
+      summary: Start the app's background-display helper as shell (uid 2000)
+      description: |
+        Runs the APK's own `ShellMain` through `app_process` with the app's
+        classpath, so a hidden display can be created without Shizuku or a
+        second tool on the phone. Android only: HarmonyOS has no such helper.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                package:
+                  type: string
+                  pattern: "^[A-Za-z][A-Za-z0-9_.]*$"
+                  default: com.hopa.android
+      responses:
+        "200":
+          description: Started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  output: { type: string, description: whatever the shell printed }
+        "400":
+          description: The package name is not a package name, or the device has no helper
+        "401": { $ref: "#/components/responses/Unauthorized" }
   /launch:
     post:
       summary: Start an app and report what came to the front

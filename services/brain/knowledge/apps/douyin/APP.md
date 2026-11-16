@@ -1,18 +1,20 @@
 ---
-
 name: douyin
 display: Douyin
-bundle: com.ss.hm.ugc.aweme
 aliases: [Douyin, 抖音, TikTok China]
 pace: careful
 validated: verified
-platform: harmonyos
-ability: MainAbility
-bundle_verified: Mate 80, 2026-11-08
+harmony: com.ss.hm.ugc.aweme
+harmony_ability: MainAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.ss.android.ugc.aweme
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Douyin
-
-HarmonyOS bundle: `com.ss.hm.ugc.aweme` (verified on a Mate 80).
 
 - Feed, search, profile, messages, shopping.
 - Liking, commenting, following, posting and buying are public or paid actions:

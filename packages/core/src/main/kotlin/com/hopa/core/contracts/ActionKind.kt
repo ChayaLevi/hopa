@@ -13,6 +13,7 @@ enum class ActionKind(val wire: String) {
     UI_LAUNCH("ui.launch"),
     UI_STOP("ui.stop"),
     UI_WAIT("ui.wait"),
+    APP_FUNCTION("app.function"),
     WEB_NAVIGATE("web.navigate"),
     WEB_READ("web.read"),
     WEB_CLICK("web.click"),

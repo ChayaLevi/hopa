@@ -1,5 +1,7 @@
 package com.hopa.capabilities.accessibility
 
+import android.hardware.display.DisplayManager
+import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
 import com.hopa.core.contracts.Observation
 import com.hopa.core.contracts.ObservationNode
@@ -10,6 +12,8 @@ class NodeTreeReader(
     private val service: HopaAccessibilityService,
     private val maxNodes: Int = 400,
     private val maxText: Int = 6_000,
+    /** Read the window on this display instead of the one the person sees. */
+    private val displayId: Int = -1,
 ) {
     val refs: MutableMap<String, AccessibilityNodeInfo> = mutableMapOf()
     private var counter = 0
@@ -23,19 +27,30 @@ class NodeTreeReader(
         truncated = false
         focusedRef = ""
         texts.clear()
-        val root = service.activeRoot()
+        val root = if (displayId >= 0) {
+            service.windows.firstOrNull { it.displayId == displayId }?.root
+        } else {
+            service.activeRoot()
+        }
         val tree = if (root == null) {
             ObservationNode(type = "root")
         } else {
             convert(root)
         }
-        val metrics = service.resources.displayMetrics
+        val display = runCatching {
+            val manager = service.getSystemService(DisplayManager::class.java)
+            val target = if (displayId >= 0) displayId else Display.DEFAULT_DISPLAY
+            manager?.getDisplay(target)
+        }.getOrNull()
+        val metrics = android.util.DisplayMetrics().also {
+            if (display != null) display.getRealMetrics(it) else it.setTo(service.resources.displayMetrics)
+        }
         val observation = Observation(
             id = "obs-${System.currentTimeMillis()}",
             timestamp = System.currentTimeMillis(),
-            displayId = service.display?.displayId ?: 0,
             windowId = root?.windowId?.toString() ?: "active",
-            rotation = service.display?.rotation ?: 0,
+            displayId = if (displayId >= 0) displayId else display?.displayId ?: Display.DEFAULT_DISPLAY,
+            rotation = display?.rotation ?: 0,
             density = metrics.density,
             screenSize = ScreenSize(metrics.widthPixels, metrics.heightPixels),
             focus = focusedRef,

@@ -6,7 +6,9 @@ Rules:
   * one public top-level declaration per file, and the file is named after it;
   * no ``Utils``/``Helpers``/``Common``/``Manager`` file names;
   * everything under ``packages/`` (the client engine) imports no ``android.*``
-    or ``androidx.*``.
+    or ``androidx.*``;
+  * only ``CatalogRoutes`` picks a catalog platform target, so no client can
+    read another platform's identifier by accident.
 
 The check covers both the Android app and the shared packages, so a module that
 moves between them keeps the same rules.
@@ -29,6 +31,8 @@ DECL = re.compile(
 )
 PACKAGE = re.compile(r"^package ([A-Za-z0-9_.]+)")
 VISIBILITY = re.compile(r"^(?:private |internal |protected )")
+PLATFORM_READ = re.compile(r"\b(?:app|target)\.(harmonyos|android|windows)\b")
+PLATFORM_OWNER = "CatalogRoutes.kt"
 
 
 def kotlin_files() -> list[Path]:
@@ -84,6 +88,14 @@ def check() -> list[str]:
                         f"{path.relative_to(ROOT)}: file name does not match {kind} {name}"
                     )
         relative = path.relative_to(ROOT)
+        if path.name != PLATFORM_OWNER and relative.parts[0] in {"packages", "apps"}:
+            for number, line in enumerate(text.splitlines(), 1):
+                match = PLATFORM_READ.search(line)
+                if match:
+                    problems.append(
+                        f"{relative}:{number}: reads a {match.group(1)} target outside "
+                        f"{PLATFORM_OWNER}"
+                    )
         if relative.parts[0] == "packages":
             for number, line in enumerate(text.splitlines(), 1):
                 stripped = line.strip()

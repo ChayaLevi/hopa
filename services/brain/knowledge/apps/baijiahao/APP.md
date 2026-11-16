@@ -1,11 +1,18 @@
 ---
 name: baijiahao
 display: Baidu Baijiahao
-bundle: UNCONFIRMED
 aliases: [Baijiahao, Baidu Baijiahao, 百家号]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android:
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Baidu Baijiahao
 

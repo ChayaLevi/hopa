@@ -1,11 +1,18 @@
 ---
 name: qqmail
 display: QQ Mail
-bundle: UNCONFIRMED
 aliases: [QQ Mail, QQ邮箱, qqmail, foxmail]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android: com.tencent.androidqqmail
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # QQ Mail
 

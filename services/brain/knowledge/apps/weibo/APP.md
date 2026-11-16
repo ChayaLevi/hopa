@@ -1,17 +1,20 @@
 ---
 name: weibo
 display: Weibo
-bundle: com.sina.weibo.stage
-ability: EntryAbility
-bundle_verified: Mate 80, 2026-11-08
 aliases: [Weibo, 微博, sina weibo]
 pace: careful
 validated: verified
-platform: harmonyos
+harmony: com.sina.weibo.stage
+harmony_ability: EntryAbility
+harmony_verified: Mate 80, 2026-11-08
+android: com.sina.weibo
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Weibo
-
-HarmonyOS bundle: `com.sina.weibo.stage` (verified on a Mate 80).
 
 - Feed, search, profile, comments, direct messages.
 - To post: tap Skip if an ad shows, then tap Home. The orange + exists only on the Home feed, top-right near 1210,200.

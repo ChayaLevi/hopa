@@ -25,6 +25,7 @@ Service documentation lives with the services: [`services/docs/`](../services/do
 | [architecture/data-flow.md](design/architecture/data-flow.md) | How does one goal become an action? |
 | [architecture/target-structure.md](design/architecture/target-structure.md) | The historical audit that produced the current folders |
 | [architecture/apps-android.md](design/architecture/apps-android.md) | How the Android app is shaped (planned) |
+| [architecture/screen-paths.md](design/architecture/screen-paths.md) | Which surface a run drives: background display, bridge, this screen |
 | [decisions/](design/decisions/README.md) | Why was a decision made? One ADR per decision |
 | [product/roadmap.md](design/product/roadmap.md) | What comes next? |
 | [product/coverage.md](design/product/coverage.md) | What works today, and what is blocked? |

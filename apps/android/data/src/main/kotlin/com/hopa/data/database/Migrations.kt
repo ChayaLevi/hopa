@@ -70,4 +70,16 @@ object Migrations {
             )
         }
     }
+
+    val MIGRATION_6_7: Migration = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `run_history` (" +
+                    "`id` TEXT NOT NULL, `at` INTEGER NOT NULL, `goal` TEXT NOT NULL, " +
+                    "`path` TEXT NOT NULL, `steps` INTEGER NOT NULL, " +
+                    "`tokens` INTEGER NOT NULL, `conversationId` TEXT NOT NULL, " +
+                    "PRIMARY KEY(`id`))",
+            )
+        }
+    }
 }

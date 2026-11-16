@@ -1,13 +1,18 @@
 ---
 name: browser
 display: Browser
-bundle: com.huawei.hmos.browser
-bundle_verified: 2026-11-06
-ability: MainAbility
 aliases: [浏览器]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony: com.huawei.hmos.browser
+harmony_ability: MainAbility
+harmony_verified: 2026-11-06
+android:
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # Browser
 

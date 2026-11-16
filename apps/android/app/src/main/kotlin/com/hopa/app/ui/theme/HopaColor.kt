@@ -2,21 +2,28 @@ package com.hopa.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+/**
+ * The palette every screen reads. The values switch with the theme; HopaTheme
+ * swaps the whole set and resets the composition, so a colour read anywhere in
+ * the tree is the current one.
+ */
 object HopaColor {
-    val Bg = Color(0xFFF7F4EE)
-    val Surface = Color(0xFFFFFFFF)
-    val SurfaceAlt = Color(0xFFF3EFE7)
-    val SurfaceMuted = Color(0xFFF1ECE3)
-    val TextPrimary = Color(0xFF1C1B18)
-    val TextSecondary = Color(0xFF6B665C)
-    val TextHint = Color(0xFF9A9488)
-    val Primary = Color(0xFF0A59F7)
-    val PrimarySoft = Color(0xFFE8F0FF)
-    val OnPrimary = Color(0xFFFFFFFF)
-    val Accent = Color(0xFFE8703A)
-    val Danger = Color(0xFFC0392B)
-    val Success = Color(0xFF2E7D5B)
-    val Warning = Color(0xFFB26A00)
-    val Divider = Color(0xFFE9E4DA)
-    val Scrim = Color(0x66000000)
+    internal var palette: HopaPalette = HopaPalettes.light
+
+    val Bg: Color get() = palette.bg
+    val Surface: Color get() = palette.surface
+    val SurfaceAlt: Color get() = palette.surfaceAlt
+    val SurfaceMuted: Color get() = palette.surfaceMuted
+    val TextPrimary: Color get() = palette.textPrimary
+    val TextSecondary: Color get() = palette.textSecondary
+    val TextHint: Color get() = palette.textHint
+    val Primary: Color get() = palette.primary
+    val PrimarySoft: Color get() = palette.primarySoft
+    val OnPrimary: Color get() = palette.onPrimary
+    val Accent: Color get() = palette.accent
+    val Danger: Color get() = palette.danger
+    val Success: Color get() = palette.success
+    val Warning: Color get() = palette.warning
+    val Divider: Color get() = palette.divider
+    val Scrim: Color get() = palette.scrim
 }

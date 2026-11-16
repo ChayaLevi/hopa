@@ -1,360 +1,294 @@
 package com.hopa.app.feature.settings
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.theme.HopaColor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.hopa.app.ui.theme.HopaColor
 import com.hopa.capabilities.llm.ProviderState
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Settings as one control surface, not a menu: a readiness ring, controls that
+ * act where they are, and one-tap fixes for the thing that is missing.
+ */
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
     onBack: () -> Unit,
-    onSave: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
-    onTestModel: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
-    onTestBridge: (String, String) -> Unit,
-    onTestNotification: () -> Unit,
+    onOpenPage: (String) -> Unit,
+    onScreenPath: (String) -> Unit,
     onTone: (String) -> Unit,
     onChattiness: (String) -> Unit,
-    onOpenSelfCheck: () -> Unit,
-    onOpenAbout: () -> Unit,
-    onPairBridge: (String, String) -> Unit,
+    onToggleAlerts: (Boolean) -> Unit,
+    onRunCheck: () -> Unit,
     onOpenCapabilities: () -> Unit,
     onOpenLaunchpad: () -> Unit,
     onOpenProfiles: () -> Unit,
     onOpenAccessibility: () -> Unit,
+    onOpenSelfCheck: () -> Unit,
+    onOpenAbout: () -> Unit,
 ) {
-    var provider by rememberSaveable { mutableStateOf(state.settings.provider) }
-    var endpoint by rememberSaveable { mutableStateOf(state.settings.endpoint) }
-    var model by rememberSaveable { mutableStateOf(state.settings.model) }
-    var key by rememberSaveable { mutableStateOf("") }
-    var notify by rememberSaveable { mutableStateOf(state.settings.notifyAnswers) }
-    var web by rememberSaveable { mutableStateOf(state.settings.webEnabled) }
-    var bridgeUrl by rememberSaveable { mutableStateOf(state.settings.bridgeUrl) }
-    var bridgeKey by rememberSaveable { mutableStateOf("") }
-    var pairCode by rememberSaveable { mutableStateOf("") }
-    var useBridge by rememberSaveable { mutableStateOf(state.settings.useBridge) }
-
-    LaunchedEffect(state.settings, state.key) {
-        provider = state.settings.provider
-        endpoint = state.settings.endpoint
-        model = state.settings.model
-        notify = state.settings.notifyAnswers
-        web = state.settings.webEnabled
-        bridgeUrl = state.settings.bridgeUrl
-        useBridge = state.settings.useBridge
-        if (key.isEmpty()) {
-            key = state.key
+    val settings = state.settings
+    var query by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf("")
+    }
+    val searchable = listOf(
+        Searchable("Answers", "model, key, provider, endpoint", Icons.Filled.Star,
+            { onOpenPage(PAGE_MODEL) }),
+        Searchable("Tone and length", "how HOPA talks, short, long", Icons.Filled.Face,
+            { onOpenPage(PAGE_CHARACTER) }),
+        Searchable("Alerts", "notifications, answer ready", Icons.Filled.Notifications,
+            { onOpenPage(PAGE_NOTIFICATIONS) }),
+        Searchable("Screen control", "accessibility, see and tap", Icons.Filled.Lock,
+            onOpenAccessibility),
+        Searchable("Running apps", "hidden screen, background, computer, mode",
+            Icons.Filled.Settings, { onOpenPage(PAGE_SCREEN) }),
+        Searchable("My computer", "bridge, pc, adb", Icons.Filled.Share,
+            { onOpenPage(PAGE_BRIDGE) }),
+        Searchable("Apps on this phone", "launchpad, installed", Icons.Filled.List,
+            onOpenLaunchpad),
+        Searchable("Modes", "profiles, everyday", Icons.Filled.Person, onOpenProfiles),
+        Searchable("What HOPA can do", "capabilities, tools", Icons.Filled.Info,
+            onOpenCapabilities),
+        Searchable("Health check", "self-check, diagnostics", Icons.Filled.Info,
+            onOpenSelfCheck),
+        Searchable("Privacy", "what left your phone, tokens", Icons.Filled.Lock,
+            { onOpenPage(PAGE_PRIVACY) }),
+        Searchable("Repeats", "skills, saved, replay", Icons.Filled.List,
+            { onOpenPage(PAGE_RECIPES) }),
+        Searchable("History", "runs, surfaces, compare", Icons.Filled.List,
+            { onOpenPage(PAGE_HISTORY) }),
+        Searchable("About", "version, licences", Icons.Filled.Info, onOpenAbout),
+    )
+    val matches = if (query.isBlank()) {
+        emptyList()
+    } else {
+        val needle = query.lowercase().trim()
+        searchable.filter {
+            it.title.lowercase().contains(needle) || it.keywords.contains(needle)
         }
     }
+    val answers = state.providerState == ProviderState.CLOUD ||
+        state.providerState == ProviderState.LAN
+    val ready = (if (answers) 1 else 0) + (if (state.phoneAccess) 1 else 0)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+    SettingsPage(title = "Settings", onBack = onBack, collapseTitle = true) {
+        androidx.compose.material3.OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            placeholder = { Text("Search settings") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (query.isNotBlank()) {
+            if (matches.isEmpty()) {
+                Text("Nothing matches \"$query\".", fontSize = 13.sp, color = HopaColor.TextSecondary)
+            } else {
+                SettingsGroup {
+                    matches.forEachIndexed { index, entry ->
+                        if (index > 0) {
+                            SettingsDivider()
+                        }
+                        SettingsRow(entry.title, entry.keywords, entry.icon) {
+                            query = ""
+                            entry.open()
+                        }
                     }
-                },
+                }
+            }
+            return@SettingsPage
+        }
+
+        SettingsHeader(
+            title = "Settings",
+            summary = if (ready == 2) {
+                "Ready to help."
+            } else {
+                "One step left before HOPA can act for you."
+            },
+        )
+
+        // Two facts decide whether HOPA can help; nothing else belongs up here.
+        SettingsPanel {
+            Column {
+                StatusLine(
+                    "Answers",
+                    if (answers) providerSummary(state) else "needs a key",
+                    answers,
+                ) { onOpenPage(PAGE_MODEL) }
+                StatusLine(
+                    "Screen control",
+                    if (state.phoneAccess) "on" else "off",
+                    state.phoneAccess,
+                ) { onOpenAccessibility() }
+                SettingsDivider()
+                if (ready < 2) {
+                    Row(
+                        modifier = Modifier.padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (!answers) {
+                            QuickChip("Add a key") { onOpenPage(PAGE_MODEL) }
+                        }
+                        if (!state.phoneAccess) {
+                            QuickChip("Allow screen control") { onOpenAccessibility() }
+                        }
+                    }
+                }
+            }
+        }
+
+        SettingsPanel {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenPage(PAGE_SCREEN) },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Running apps", fontSize = 15.sp, color = HopaColor.TextPrimary)
+                    Text(
+                        "Where apps open when you ask.",
+                        fontSize = 13.sp,
+                        color = HopaColor.TextSecondary,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                Text("\u203a", fontSize = 20.sp, color = HopaColor.TextHint)
+            }
+            SettingsSegment(
+                options = listOf(
+                    "auto" to "Auto",
+                    "background" to "Hidden",
+                    "onscreen" to "Here",
+                    "bridge" to "PC",
+                ),
+                selected = settings.screenPath,
+                onSelect = onScreenPath,
+                modifier = Modifier.padding(top = 12.dp),
             )
-        },
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Button(
+                    onClick = onRunCheck,
+                    enabled = !state.busy,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        if (state.busy) "Checking\u2026" else "Check that it works",
+                        fontSize = 13.sp,
+                    )
+                }
+                OutlinedButton(
+                    onClick = { onOpenPage(PAGE_SCREEN) },
+                    modifier = Modifier,
+                ) {
+                    Text("Set up", fontSize = 13.sp)
+                }
+            }
+            // A button that reports nowhere is a broken button.
+            state.screenCheck.take(2).forEach { check ->
+                CheckRow(check) { onOpenPage(PAGE_SCREEN) }
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("Model", style = MaterialTheme.typography.titleLarge)
-            Text("Where answers come from", style = MaterialTheme.typography.bodySmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for ((value, title) in listOf(
-                    "stub" to "Demo",
-                    "openai" to "Cloud",
-                    "lan" to "LAN",
-                )) {
-                    // "stub" is the demo, "lan" marks a local server; any other
-                    // provider name means a cloud endpoint.
-                    val current = when (provider) {
-                        "stub" -> "stub"
-                        "lan" -> "lan"
-                        else -> "openai"
-                    }
-                    val chosen = current == value
-                    Text(
-                        title,
-                        fontSize = 12.sp,
-                        color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
-                        modifier = Modifier
-                            .background(
-                                if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
-                                RoundedCornerShape(16.dp),
-                            )
-                            .clickable {
-                                if (!chosen) {
-                                    provider = value
-                                    endpoint = when (value) {
-                                        "lan" -> "http://192.168.1.5:11434/v1"
-                                        "openai" -> "https://api.deepseek.com/v1"
-                                        else -> endpoint
-                                    }
-                                }
-                            }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                    )
-                }
-            }
-            OutlinedTextField(
-                value = endpoint,
-                onValueChange = { endpoint = it },
-                label = { Text("Endpoint, e.g. https://api.deepseek.com/v1") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = model,
-                onValueChange = { model = it },
-                label = { Text("Model") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = key,
-                onValueChange = { key = it },
-                label = { Text("API key (stored in Keystore)") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Text(
-                if (state.keySaved) {
-                    "A key is saved on this phone"
-                } else {
-                    "No key saved yet: paste one, then Save or Test"
-                },
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(
-                    onClick = { onTestModel(provider, endpoint, model, key, notify, web, bridgeUrl, bridgeKey, useBridge) },
-                    enabled = !state.busy,
-                ) {
-                    Text("Save and test")
-                }
-            }
-            Text("Provider state: ${state.providerState.label()}")
-            state.modelTest?.let { result ->
+            SettingsPanel(modifier = Modifier.weight(1f)) {
+                Text("Tone", fontSize = 13.sp, color = HopaColor.TextSecondary)
+                SettingsSegment(
+                    options = listOf("friendly" to "Friendly", "direct" to "Direct"),
+                    selected = settings.tone,
+                    onSelect = onTone,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
                 Text(
-                    result,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (result.startsWith("Model answered")) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    },
+                    "Length",
+                    fontSize = 13.sp,
+                    color = HopaColor.TextSecondary,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+                SettingsSegment(
+                    options = listOf(
+                        "short" to "Short",
+                        "balanced" to "Balanced",
+                        "detailed" to "Long",
+                    ),
+                    selected = settings.chattiness,
+                    onSelect = onChattiness,
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text("Notify when an answer is ready")
-                Switch(checked = notify, onCheckedChange = { notify = it })
+        }
+
+        SettingsPanel {
+            SettingsSwitchRow("Alerts when an answer is ready", settings.notifyAnswers) {
+                onToggleAlerts(it)
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(onClick = onTestNotification) {
-                    Text("Send a test notification")
-                }
-                Text(
-                    state.notice ?: "",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text("Web capability")
-                Switch(checked = web, onCheckedChange = { web = it })
-            }
-            Text("Bridge (PC)", style = MaterialTheme.typography.titleLarge)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text("Use the bridge for device actions")
-                Switch(checked = useBridge, onCheckedChange = { useBridge = it })
-            }
-            OutlinedTextField(
-                value = bridgeUrl,
-                onValueChange = { bridgeUrl = it },
-                label = { Text("Bridge address, e.g. http://192.168.1.5:8766") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = pairCode,
-                onValueChange = { pairCode = it },
-                label = { Text("Pair code from the bridge console") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = bridgeKey,
-                onValueChange = { bridgeKey = it },
-                label = { Text("Bridge token (stored in Keystore)") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(
-                    onClick = { onPairBridge(bridgeUrl, pairCode) },
-                    enabled = !state.busy,
-                ) {
-                    Text("Pair")
-                }
-                Button(
-                    onClick = { onTestBridge(bridgeUrl, bridgeKey) },
-                    enabled = !state.busy,
-                ) {
-                    Text("Test bridge")
-                }
-            }
-            Text(
-                state.bridgeStatus ?: "adb acts on the PC; the phone just asks.",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Button(
-                onClick = {
-                    onSave(
-                        provider,
-                        endpoint,
-                        model,
-                        key,
-                        notify,
-                        web,
-                        bridgeUrl,
-                        bridgeKey,
-                        useBridge,
-                    )
-                },
-                enabled = !state.busy,
-            ) {
-                Text(if (state.busy) "Saving\u2026" else "Save")
-            }
-            if (state.saved) {
-                Text(
-                    state.notice ?: "Saved",
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-            state.error?.let { error ->
-                Text(error, color = MaterialTheme.colorScheme.error)
-            }
-            Text("Character", style = MaterialTheme.typography.titleLarge)
-            Text("Tone", style = MaterialTheme.typography.bodySmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for (value in listOf("friendly", "direct")) {
-                    val chosen = state.settings.tone == value
-                    Text(
-                        value,
-                        fontSize = 12.sp,
-                        color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
-                        modifier = Modifier
-                            .background(
-                                if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
-                                RoundedCornerShape(16.dp),
-                            )
-                            .clickable { onTone(value) }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                    )
-                }
-            }
-            Text("Length", style = MaterialTheme.typography.bodySmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for (value in listOf("short", "balanced", "detailed")) {
-                    val chosen = state.settings.chattiness == value
-                    Text(
-                        value,
-                        fontSize = 12.sp,
-                        color = if (chosen) HopaColor.OnPrimary else HopaColor.TextSecondary,
-                        modifier = Modifier
-                            .background(
-                                if (chosen) HopaColor.Primary else HopaColor.SurfaceAlt,
-                                RoundedCornerShape(16.dp),
-                            )
-                            .clickable { onChattiness(value) }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                    )
-                }
-            }
-            Button(onClick = onOpenProfiles) {
-                Text("Profiles")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onOpenSelfCheck) { Text("Self-check") }
-                Button(onClick = onOpenAbout) { Text("About") }
-            }
-            Button(onClick = onOpenCapabilities) {
-                Text("Capabilities")
-            }
-            Button(onClick = onOpenAccessibility) {
-                Text("Phone access")
-            }
-            Button(onClick = onOpenLaunchpad) {
-                Text("Launchpad")
-            }
-            Text(
-                "LAN works without internet when the endpoint is an OpenAI-compatible " +
-                    "server on the same network. The shell and the data work offline; " +
-                    "answers need a model.",
-                style = MaterialTheme.typography.bodySmall,
-            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            QuickChip("Apps") { onOpenLaunchpad() }
+            QuickChip("Modes") { onOpenProfiles() }
+            QuickChip("Tools") { onOpenCapabilities() }
+            QuickChip("Health") { onOpenSelfCheck() }
+            QuickChip("Privacy") { onOpenPage(PAGE_PRIVACY) }
+            QuickChip("Repeats") { onOpenPage(PAGE_RECIPES) }
+            QuickChip("History") { onOpenPage(PAGE_HISTORY) }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            QuickChip("My computer") { onOpenPage(PAGE_BRIDGE) }
+            QuickChip("About") { onOpenAbout() }
+        }
+
+        state.error?.let { error ->
+            Text(error, color = HopaColor.Danger, fontSize = 13.sp)
         }
     }
 }
 
-private fun ProviderState.label(): String = when (this) {
-    ProviderState.CLOUD -> "cloud"
-    ProviderState.LAN -> "LAN"
-    ProviderState.DEMO -> "demo"
-    ProviderState.NO_MODEL -> "no model"
-}
+internal const val PAGE_MODEL = "model"
+internal const val PAGE_CHARACTER = "character"
+internal const val PAGE_NOTIFICATIONS = "notifications"
+internal const val PAGE_SCREEN = "screen"
+internal const val PAGE_BRIDGE = "bridge"
+internal const val PAGE_PRIVACY = "privacy"
+internal const val PAGE_RECIPES = "recipes"
+internal const val PAGE_HISTORY = "history"
+
+/** One entry the search box can find: a title, its words, and where it goes. */
+private data class Searchable(
+    val title: String,
+    val keywords: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val open: () -> Unit,
+)

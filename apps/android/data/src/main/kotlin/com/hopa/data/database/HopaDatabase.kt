@@ -6,12 +6,14 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.hopa.data.database.dao.MemoryDao
 import com.hopa.data.database.dao.PendingApprovalDao
+import com.hopa.data.database.dao.RunHistoryDao
 import com.hopa.data.database.dao.RunRecordDao
 import com.hopa.data.database.dao.SessionDao
 import com.hopa.data.database.dao.SkillDao
 import com.hopa.data.database.dao.TurnDao
 import com.hopa.data.database.entity.MemoryFactEntity
 import com.hopa.data.database.entity.PendingApprovalEntity
+import com.hopa.data.database.entity.RunHistoryEntity
 import com.hopa.data.database.entity.RunRecordEntity
 import com.hopa.data.database.entity.SessionEntity
 import com.hopa.data.database.entity.SkillEntity
@@ -25,8 +27,9 @@ import com.hopa.data.database.entity.TurnEntity
         PendingApprovalEntity::class,
         MemoryFactEntity::class,
         SkillEntity::class,
+        RunHistoryEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false,
 )
 abstract class HopaDatabase : RoomDatabase() {
@@ -42,6 +45,8 @@ abstract class HopaDatabase : RoomDatabase() {
 
     abstract fun skillDao(): SkillDao
 
+    abstract fun runHistoryDao(): RunHistoryDao
+
     companion object {
         fun build(context: Context): HopaDatabase =
             Room.databaseBuilder(context, HopaDatabase::class.java, "hopa.db")
@@ -51,6 +56,7 @@ abstract class HopaDatabase : RoomDatabase() {
                     Migrations.MIGRATION_3_4,
                     Migrations.MIGRATION_4_5,
         Migrations.MIGRATION_5_6,
+                    Migrations.MIGRATION_6_7,
                 )
                 .build()
     }

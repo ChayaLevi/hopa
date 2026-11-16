@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,27 +37,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.hopa.app.feature.chat.component.AccessibilityBanner
 import com.hopa.app.feature.chat.component.ChatEmptyState
 import com.hopa.app.feature.chat.component.Composer
 import com.hopa.app.feature.chat.component.MessageBubble
 import com.hopa.app.feature.chat.component.PendingAttachmentRow
+import com.hopa.app.feature.chat.component.ThinkingIndicator
 import com.hopa.app.ui.component.ApprovalSheet
 import com.hopa.app.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaBottomBarEasy
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
+import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.data.sessions.ChatMessage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,10 +97,43 @@ fun ChatScreen(
     onDismissAttachmentNotice: () -> Unit,
     easy: Boolean = false,
     onOpenSettings: () -> Unit = {},
+    onApprovePlan: () -> Unit = {},
+    onCancelPlan: () -> Unit = {},
+    onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
+    tasks: List<com.hopa.app.tasks.TaskItem> = emptyList(),
+    onOpenTask: (com.hopa.app.tasks.TaskItem) -> Unit = {},
+    onDismissTask: (String) -> Unit = {},
 ) {
     val messages = state.current?.messages.orEmpty()
+    var evidence by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    // Phone access is granted in Android settings, so it is re-read every time
+    // the app comes back; a stale "off" banner would hide the only real fix.
+    var accessEnabled by remember { mutableStateOf(AccessibilityState.isEnabled(context)) }
+    var accessConnected by remember { mutableStateOf(HopaAccessibilityService.instance != null) }
+    // Android turns the service off on every reinstall and the binding can come
+    // back a moment later, so the state is re-read on resume and then polled.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                accessEnabled = AccessibilityState.isEnabled(context)
+                accessConnected = HopaAccessibilityService.instance != null
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(2_000)
+            accessEnabled = AccessibilityState.isEnabled(context)
+            accessConnected = HopaAccessibilityService.instance != null
+        }
+    }
     val micPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
@@ -107,9 +155,10 @@ fun ChatScreen(
         if (messages.isNotEmpty()) {
             // Two passes: the first scroll runs on estimated item heights, and a
             // tall attachment bubble settles only after the next measure.
-            listState.animateScrollToItem(messages.lastIndex)
+            val last = if (state.busy) messages.size else messages.lastIndex
+            listState.animateScrollToItem(last)
             withFrameNanos { }
-            listState.animateScrollToItem(messages.lastIndex)
+            listState.animateScrollToItem(last)
         }
     }
     Scaffold(
@@ -218,6 +267,30 @@ fun ChatScreen(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
                     )
                 }
+                if (tasks.isNotEmpty()) {
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        tasks.forEach { task ->
+                            TaskChip(
+                                task = task,
+                                onOpen = { onOpenTask(task) },
+                                onDismiss = { onDismissTask(task.id) },
+                            )
+                        }
+                    }
+                }
+                if (!accessEnabled || !accessConnected) {
+                    AccessibilityBanner(
+                        onOpenSettings = { AccessibilityState.openSettings(context) },
+                        enabled = accessEnabled,
+                        connected = accessConnected,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 6.dp),
+                    )
+                }
                 Box(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
                 ) {
@@ -225,7 +298,13 @@ fun ChatScreen(
                         value = state.input,
                         busy = state.busy,
                         onValueChange = onInput,
-                        onSend = onSend,
+                        onSend = {
+                            // A sent message ends the typing: the field loses focus
+                            // and the keyboard goes away so the answer is visible.
+                            focusManager.clearFocus()
+                            keyboard?.hide()
+                            onSend()
+                        },
                         recording = state.recording,
                         transcribing = state.transcribing,
                         onMic = {
@@ -302,12 +381,53 @@ fun ChatScreen(
                     trackColor = HopaColor.PrimarySoft,
                 )
             }
+            if (messages.isNotEmpty() && state.lastPath.isNotEmpty()) {
+                Text(
+                    "Ran on " + when (state.lastPath) {
+                        "background" -> "the hidden screen"
+                        "bridge" -> "the PC bridge"
+                        else -> "this screen"
+                    },
+                    fontSize = 10.sp,
+                    color = HopaColor.TextHint,
+                    modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                )
+            }
+            val run = state.lastRun
+            if (run != null && messages.isNotEmpty()) {
+                Text(
+                    "What happened: ${run.executed} steps, ${run.verified} confirmed",
+                    fontSize = 11.sp,
+                    color = HopaColor.Primary,
+                    modifier = Modifier
+                        .padding(start = 8.dp, top = 2.dp)
+                        .clickable { evidence = true },
+                )
+            }
+            if (evidence && run != null) {
+                EvidenceSheet(
+                    run = run,
+                    onSaveSkill = {
+                        onSaveSkill(run.goal, run.steps)
+                        evidence = false
+                    },
+                    onDismiss = { evidence = false },
+                )
+            }
+            state.pendingPlan?.let { plan ->
+                PlanSheet(
+                    steps = plan,
+                    onApprove = onApprovePlan,
+                    onCancel = onCancelPlan,
+                )
+            }
             if (messages.isEmpty()) {
                 ChatEmptyState(onQuick = onQuick)
             } else {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(messages, key = ChatMessage::id) { message ->
@@ -317,6 +437,11 @@ fun ChatScreen(
                             onRetry = onRetry,
                             onUndo = onUndo,
                         )
+                    }
+                    if (state.busy) {
+                        item(key = "thinking") {
+                            ThinkingIndicator()
+                        }
                     }
                 }
             }

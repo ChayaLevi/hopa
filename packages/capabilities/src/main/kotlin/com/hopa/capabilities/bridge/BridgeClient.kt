@@ -67,6 +67,21 @@ class BridgeClient(
 
     suspend fun observe(): JsonObject = call("POST", "/observe", body = "{}", timeout = 45)
 
+    /**
+     * Ask the PC to start the app's background-display helper on the phone as
+     * shell. The bridge already speaks adb, so this needs no pairing inside the
+     * app; the helper then owns the hidden display itself.
+     */
+    suspend fun startHelper(packageName: String = "com.hopa.android"): String {
+        val payload = call(
+            "POST",
+            "/helper",
+            body = """{"package":${quote(packageName)}}""",
+            timeout = 30,
+        )
+        return payload["output"]?.jsonPrimitive?.contentOrNull.orEmpty()
+    }
+
     suspend fun foreground(): String =
         call("POST", "/foreground", body = "{}", timeout = 20)["bundle"]?.jsonPrimitive
             ?.contentOrNull.orEmpty()

@@ -1,11 +1,18 @@
 ---
 name: boss-zhipin
 display: BOSS Zhipin
-bundle: UNCONFIRMED
 aliases: [BOSS, BOSS直聘, boss zhipin, zhipin]
 pace: careful
 validated: pending
-platform: harmonyos
+harmony:
+harmony_ability:
+harmony_verified:
+android: com.hpbr.bosszhipin
+android_activity:
+android_verified:
+windows:
+windows_window:
+windows_verified:
 ---
 # BOSS Zhipin
 

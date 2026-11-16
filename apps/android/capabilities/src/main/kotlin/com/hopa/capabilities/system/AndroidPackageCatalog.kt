@@ -5,20 +5,26 @@ import android.content.Intent
 import com.hopa.core.ports.InstalledApp
 import com.hopa.core.ports.PackageCatalog
 
+/**
+ * The apps this phone can open. Only launcher entries are listed: an app without
+ * one cannot be started by [launch], and listing it would invite a dead end.
+ */
 class AndroidPackageCatalog(
     private val context: Context,
 ) : PackageCatalog {
     override suspend fun installed(): List<InstalledApp> {
         val manager = context.packageManager
-        return manager.getInstalledApplications(0)
+        val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        return manager.queryIntentActivities(launcher, 0)
             .asSequence()
-            .filter { it.packageName != context.packageName }
+            .filter { it.activityInfo.packageName != context.packageName }
             .map {
                 InstalledApp(
-                    packageName = it.packageName,
-                    label = manager.getApplicationLabel(it).toString(),
+                    packageName = it.activityInfo.packageName,
+                    label = it.loadLabel(manager).toString(),
                 )
             }
+            .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
             .toList()
     }

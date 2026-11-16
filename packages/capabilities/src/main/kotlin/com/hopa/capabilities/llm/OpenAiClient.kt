@@ -42,11 +42,39 @@ class OpenAiClient(
                 put("reasoning_effort", request.reasoningEffort)
             }
             putJsonArray("messages") {
-                request.messages.forEach { message ->
+                val lastUser = request.messages.indexOfLast { it.role == "user" }
+                request.messages.forEachIndexed { index, message ->
                     add(
                         buildJsonObject {
                             put("role", message.role)
-                            put("content", message.content)
+                            if (index == lastUser && request.images.isNotEmpty()) {
+                                putJsonArray("content") {
+                                    add(
+                                        buildJsonObject {
+                                            put("type", "text")
+                                            put("text", message.content)
+                                        },
+                                    )
+                                    request.images.forEach { frame ->
+                                        add(
+                                            buildJsonObject {
+                                                put("type", "image_url")
+                                                put(
+                                                    "image_url",
+                                                    buildJsonObject {
+                                                        put(
+                                                            "url",
+                                                            "data:image/jpeg;base64,$frame",
+                                                        )
+                                                    },
+                                                )
+                                            },
+                                        )
+                                    }
+                                }
+                            } else {
+                                put("content", message.content)
+                            }
                         },
                     )
                 }

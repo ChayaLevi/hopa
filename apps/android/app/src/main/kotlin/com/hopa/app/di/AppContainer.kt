@@ -29,6 +29,12 @@ class AppContainer(context: Context) {
         context = context,
         secrets = KeystoreSecretStore(context),
     )
+    init {
+        com.hopa.app.privacy.TurnLog.attach(
+            com.hopa.app.privacy.TurnLogFile(context),
+        )
+    }
+
     private val database = HopaDatabase.build(context)
     val conversations: ConversationStore = RoomConversationStore(database)
     val selectedConversation = MutableStateFlow<String?>(null)
@@ -42,6 +48,7 @@ class AppContainer(context: Context) {
     val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
     val recorder = RoomRunRecorder(database.runRecordDao())
+    val runHistory = com.hopa.data.history.RoomRunHistory(database.runHistoryDao())
     val pendingApprovals = com.hopa.data.approvals.RoomPendingApprovalStore(
         database.pendingApprovalDao(),
     )
@@ -65,6 +72,82 @@ class AppContainer(context: Context) {
         factory = factory,
         clock = clock,
     )
+    /** Goals that run at the same time, each on its own hidden display. */
+    val runner by lazy { com.hopa.app.tasks.ParallelRunner(this) }
+
+    /** The hidden background display: one helper process, one socket. */
+    val shell = com.hopa.capabilities.display.ShellClient()
+
+    /**
+     * Wireless debugging inside the app: pair once with the code Android shows,
+     * then adbd gives this app shell and no PC is needed.
+     */
+    val wireless = com.hopa.capabilities.display.WirelessShell(context)
+
+    /**
+     * A device on the background display, or null when no helper can be reached.
+     * A paired bridge can start the helper itself, so the common case needs no
+     * button press; after a reboot the first background run does it.
+     */
+    suspend fun backgroundDevice(): com.hopa.core.ports.DevicePort? =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            if (!shell.connect()) {
+                val startedHere = runCatching { wireless.connectAndStartHelper() }
+                    .getOrDefault("")
+                    .contains("ready")
+                if (!startedHere) {
+                    startHelperThroughBridge()
+                }
+                kotlinx.coroutines.delay(1_500)
+                if (!shell.connect()) {
+                    return@withContext null
+                }
+            }
+            val metrics = context.resources.displayMetrics
+            val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
+            if (device.start(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)) {
+                device
+            } else {
+                null
+            }
+        }
+
+    /** Pair with this phone's own adbd, then start the helper with that shell. */
+    suspend fun pairWireless(address: String, code: String): String =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val host = address.substringBefore(':').trim()
+            val port = address.substringAfter(':', "").trim().toIntOrNull()
+            if (host.isEmpty() || port == null) {
+                return@withContext "Use the address Android shows: ip:port"
+            }
+            val paired = wireless.pair(host, port, code)
+            if (!paired.startsWith("Paired")) {
+                return@withContext paired
+            }
+            val started = wireless.connectAndStartHelper()
+            if (started.contains("ready") && shell.connect()) {
+                "Wireless shell is ready; the background screen can be used"
+            } else {
+                started
+            }
+        }
+
+    /** Ask the paired PC to start the helper on the phone as shell. */
+    private suspend fun startHelperThroughBridge(): Boolean {
+        val current = settings.settings.first()
+        if (current.bridgeUrl.isBlank()) {
+            return false
+        }
+        val token = settings.bridgeToken()
+        if (token.isBlank()) {
+            return false
+        }
+        return runCatching {
+            com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token).startHelper()
+            true
+        }.getOrDefault(false)
+    }
+
     val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
     val modelFactory: ModelFactory = ModelFactory()
@@ -109,6 +192,21 @@ class AppContainer(context: Context) {
             },
         )
         return com.hopa.capabilities.bridge.AdbDevice(client, clock)
+    }
+
+    /**
+     * Bring the chat back after a run that happened in another app. Android may
+     * refuse a background activity start; the caller posts a notification too, so
+     * a refusal still leaves a way in.
+     */
+    fun bringToFront() {
+        val intent = android.content.Intent(context, com.hopa.app.MainActivity::class.java)
+            .addFlags(
+                android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT,
+            )
+        runCatching { context.startActivity(intent) }
     }
 
     /** Read a reply aloud: the PC voice when a bridge is configured, else TTS. */
@@ -158,21 +256,27 @@ class AppContainer(context: Context) {
         )
     }
 
+    /** One executor per device path, sharing the policy, approval and recorder. */
+    fun executorFor(device: com.hopa.core.ports.DevicePort): ActionExecutor = ActionExecutor(
+        device = device,
+        browser = null,
+        system = AndroidSystemPort(context),
+        sandbox = null,
+        policy = policy,
+        approval = approval,
+        recorder = recorder,
+        factory = factory,
+        clock = clock,
+    )
+
+    /** Recipes that were replayed before; a matching goal runs without the model. */
+    val recipes by lazy { com.hopa.app.skills.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+
     /** One loop per device path, sharing the model, recorder and gate. */
     fun loopFor(device: com.hopa.core.ports.DevicePort): AgentLoop = AgentLoop(
         model = model,
         device = device,
-        executor = ActionExecutor(
-            device = device,
-            browser = null,
-            system = AndroidSystemPort(context),
-            sandbox = null,
-            policy = policy,
-            approval = approval,
-            recorder = recorder,
-            factory = factory,
-            clock = clock,
-        ),
+        executor = executorFor(device),
         recorder = recorder,
         clock = clock,
         webAvailable = false,
