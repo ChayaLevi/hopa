@@ -519,6 +519,7 @@ class ChatViewModel(
                             memory = memory,
                             skills = skills,
                             installedApps = installed,
+                            appFunctions = typedFunctions(device),
                             platform = "android",
                             phoneAccess = AccessibilityState.isEnabled(container.context) &&
                                 HopaAccessibilityService.instance != null,
@@ -610,6 +611,24 @@ class ChatViewModel(
             runCatching { com.hopa.app.service.Notifier.postAnswer(container.context, text) }
         }
         container.bringToFront()
+    }
+
+    /**
+     * Ask the helper what the foreground app publishes, so the model can choose a
+     * typed call over a series of taps. Empty when no shell is available.
+     */
+    private suspend fun typedFunctions(
+        device: com.hopa.core.observation.ScreenSourceDevice,
+    ): String {
+        if (!container.shell.connected) {
+            return ""
+        }
+        val foreground = runCatching { device.foreground() }.getOrDefault("")
+        if (foreground.isBlank()) {
+            return ""
+        }
+        return runCatching { container.shell.appFunctions(foreground).second }
+            .getOrDefault("")
     }
 
     private fun startRunService() {

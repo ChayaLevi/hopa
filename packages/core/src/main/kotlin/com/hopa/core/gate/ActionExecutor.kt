@@ -142,6 +142,18 @@ class ActionExecutor(
                 return ""
             }
 
+            "app.function" -> {
+                val packageName = action.app?.takeIf { it.isNotBlank() }
+                    ?: throw IllegalArgumentException("app.function needs app")
+                val function = action.ref?.takeIf { it.isNotBlank() }
+                    ?: throw IllegalArgumentException("app.function needs ref")
+                return device.appFunction(
+                    packageName,
+                    function,
+                    action.text.orEmpty().ifBlank { "{}" },
+                )
+            }
+
             "ui.stop" -> device.stop(
                 action.app?.takeIf { it.isNotBlank() }
                     ?: throw IllegalArgumentException("ui.stop needs app"),

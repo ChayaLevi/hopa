@@ -12,6 +12,9 @@ data class TurnContext(
     val installedApps: List<InstalledApp> = emptyList(),
     /** Which client is running: android, windows, harmonyos. */
     val platform: String = "",
+    /** Typed functions the foreground app publishes, already formatted. */
+    val appFunctions: String = "",
+
     /** True when the client can actually see and act on this device right now. */
     val phoneAccess: Boolean? = null,
 )

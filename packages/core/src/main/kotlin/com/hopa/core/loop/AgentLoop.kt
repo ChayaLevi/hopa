@@ -61,9 +61,11 @@ class AgentLoop(
         val system = promptBuilder.build(
             memory = context.memory,
             skills = context.skills,
-            apps = listOf(AppCatalogBlock.text(), installed)
-                .filter { it.isNotEmpty() }
-                .joinToString("\n\n"),
+            apps = listOf(
+                AppCatalogBlock.text(),
+                installed,
+                typedFunctions(context.appFunctions),
+            ).filter { it.isNotEmpty() }.joinToString("\n\n"),
             routerHint = RouterHint.text(route),
             surfaceAvailable = surfaceAvailable,
             webAvailable = webAvailable,
@@ -203,6 +205,16 @@ class AgentLoop(
     private companion object {
         /** Reading the screen again is not a loop; acting on it twice is. */
         val READ_ONLY_KINDS = setOf("ui.observe", "ui.wait", "web.read")
+    }
+
+    /** A short block for the foreground app's typed functions, when it has any. */
+    private fun typedFunctions(raw: String): String {
+        val text = raw.trim()
+        if (text.isEmpty() || text.startsWith("err")) {
+            return ""
+        }
+        return "TYPED FUNCTIONS OF THE CURRENT APP (call these instead of tapping):\n" +
+            text.take(1_500)
     }
 
     private fun emptyObservation(): Observation = Observation(

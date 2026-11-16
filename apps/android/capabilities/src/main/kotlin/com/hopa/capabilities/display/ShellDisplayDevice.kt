@@ -177,6 +177,18 @@ class ShellDisplayDevice(
 
     override suspend fun screenshot(): ByteArray? = client.shot()
 
+    override suspend fun appFunction(
+        packageName: String,
+        function: String,
+        parameters: String,
+    ): String {
+        val (ok, payload) = client.appFunctionCall(packageName, function, parameters)
+        if (!ok) {
+            throw IllegalStateException(payload)
+        }
+        return payload
+    }
+
     override suspend fun apps(): List<InstalledApp> = emptyList()
 
     private fun pointFor(ref: String?, x: Int?, y: Int?): Pair<Int, Int> {
