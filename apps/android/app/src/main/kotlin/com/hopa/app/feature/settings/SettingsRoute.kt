@@ -31,7 +31,14 @@ fun SettingsRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf("") }
     val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()
+    var recipes by rememberSaveable { mutableStateOf(emptyList<com.hopa.app.skills.Recipe>()) }
     val backToHub = { page = "" }
+
+    androidx.compose.runtime.LaunchedEffect(page) {
+        if (page == PAGE_RECIPES) {
+            recipes = container.recipes.all()
+        }
+    }
 
     // A page slides in from the side it belongs to: deeper to the right, back to
     // the left, with the hub itself as depth zero.
@@ -82,6 +89,15 @@ fun SettingsRoute(
                 onTone = viewModel::setTone,
                 onChattiness = viewModel::setChattiness,
                 onOpenProfiles = onOpenProfiles,
+            )
+
+            PAGE_RECIPES -> SettingsRecipesScreen(
+                recipes = recipes,
+                onBack = backToHub,
+                onDelete = { goal ->
+                    container.recipes.delete(goal)
+                    recipes = container.recipes.all()
+                },
             )
 
             PAGE_PRIVACY -> SettingsPrivacyScreen(

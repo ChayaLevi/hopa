@@ -33,6 +33,13 @@ class RecipeStore(file: File) {
         }.getOrDefault(emptyList())
     }
 
+    fun delete(goal: String) {
+        val remaining = all().filterNot { normalise(it.goal) == normalise(goal) }
+        runCatching {
+            file.writeText(remaining.joinToString("\n") + if (remaining.isEmpty()) "" else "\n")
+        }
+    }
+
     fun clear() {
         runCatching { file.delete() }
     }
