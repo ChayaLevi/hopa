@@ -7,16 +7,18 @@ import android.view.accessibility.AccessibilityManager
 
 object AccessibilityState {
     fun isEnabled(context: Context): Boolean {
-        val manager = context.getSystemService(AccessibilityManager::class.java)
-        val listed = manager
-            .getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
-            .any { it.resolveInfo.serviceInfo.packageName == context.packageName }
-        if (listed) {
+        // A connected instance cannot exist without access being on, and it is
+        // the answer that survives a rebind; the manager's list can lag and its
+        // entries are not always complete.
+        if (HopaAccessibilityService.instance != null) {
             return true
         }
-        // The manager can keep a stale list for a while after the service is
-        // rebound; a connected instance cannot exist without access being on.
-        return HopaAccessibilityService.instance != null
+        return runCatching {
+            val manager = context.getSystemService(AccessibilityManager::class.java)
+            manager
+                .getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+                .any { it.resolveInfo.serviceInfo.packageName == context.packageName }
+        }.getOrDefault(false)
     }
 
     fun openSettings(context: Context) {

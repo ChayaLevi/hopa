@@ -27,12 +27,13 @@ class HopaAccessibilityService : AccessibilityService() {
         val fresh = existing != null && now - existing.at < SOURCE_TTL_MS
         if (!fresh || children > existing!!.children) {
             sources[packageName] = EventSource(AccessibilityNodeInfo.obtain(source), now, children)
+            // Only when the cache changes: a content event fires on every keystroke.
+            android.util.Log.d(
+                "HopaA11y",
+                "$packageName children=$children packages=${sources.size}",
+            )
         }
         prune(now)
-        android.util.Log.d(
-            "HopaA11y",
-            "${event.eventType} $packageName children=$children packages=${sources.size}",
-        )
     }
 
     override fun onInterrupt() {
@@ -40,12 +41,18 @@ class HopaAccessibilityService : AccessibilityService() {
     }
 
     override fun onUnbind(intent: android.content.Intent?): Boolean {
-        instance = null
+        // A rebind can connect the new instance before the old one unbinds; only
+        // the instance that is still current may clear the handle.
+        if (instance === this) {
+            instance = null
+        }
         return super.onUnbind(intent)
     }
 
     override fun onDestroy() {
-        instance = null
+        if (instance === this) {
+            instance = null
+        }
         super.onDestroy()
     }
 

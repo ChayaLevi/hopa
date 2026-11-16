@@ -91,7 +91,7 @@ class DisplayInput(
             motion(down, down + 60, MotionEvent.ACTION_UP, x, y),
         )
         return try {
-            events.all { inject(it) } || shell("tap $x $y")
+            gesture(events, "tap $x $y")
         } finally {
             events.forEach { it.recycle() }
         }
@@ -103,8 +103,7 @@ class DisplayInput(
         val move = motion(down, down + millis, MotionEvent.ACTION_MOVE, toX, toY)
         val up = motion(down, down + millis + 60, MotionEvent.ACTION_UP, toX, toY)
         return try {
-            listOf(start, move, up).all { inject(it) } ||
-                shell("swipe $fromX $fromY $toX $toY $millis")
+            gesture(listOf(start, move, up), "swipe $fromX $fromY $toX $toY $millis")
         } finally {
             listOf(start, move, up).forEach { it.recycle() }
         }
@@ -116,7 +115,22 @@ class DisplayInput(
             KeyEvent(down, down, KeyEvent.ACTION_DOWN, code, 0),
             KeyEvent(down, down + 40, KeyEvent.ACTION_UP, code, 0),
         ).onEach { it.source = InputDevice.SOURCE_KEYBOARD }
-        return events.all { inject(it) } || shell("keyevent $code")
+        return gesture(events, "keyevent $code")
+    }
+
+    /**
+     * One path per gesture. If the down cannot be injected, the whole gesture
+     * goes to the shell; switching paths halfway would send the down twice and
+     * leave the display with a press that was never lifted.
+     */
+    private fun gesture(events: List<InputEvent>, command: String): Boolean {
+        if (events.isEmpty()) {
+            return false
+        }
+        if (!inject(events.first())) {
+            return shell(command)
+        }
+        return events.drop(1).all { inject(it) }
     }
 
     /**

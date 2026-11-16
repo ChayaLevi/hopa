@@ -275,7 +275,7 @@ class ShellDisplayDevice(
         }
         val event = HopaAccessibilityService.sourceFor(expected)
         if (event != null) {
-            android.util.Log.w("HopaDisplay", "read $expected from the last window event")
+            android.util.Log.w("HopaDisplay", "read $expected from its window event")
             return event
         }
         return null
