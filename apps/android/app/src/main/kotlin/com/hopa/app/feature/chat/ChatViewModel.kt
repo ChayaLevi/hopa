@@ -571,6 +571,16 @@ class ChatViewModel(
                 tokens = result?.usage?.totalTokens ?: 0,
                 millis = System.currentTimeMillis() - now,
             )
+            runCatching {
+                container.runHistory.record(
+                    at = System.currentTimeMillis(),
+                    goal = body,
+                    path = device.sourceName,
+                    steps = steps.size,
+                    tokens = summary.tokens,
+                    conversationId = conversation.id,
+                )
+            }
             com.hopa.app.privacy.TurnLog.add(
                 com.hopa.app.privacy.TurnLogEntry(
                     at = System.currentTimeMillis(),

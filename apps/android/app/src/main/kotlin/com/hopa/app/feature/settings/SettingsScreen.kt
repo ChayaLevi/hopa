@@ -186,6 +186,7 @@ fun SettingsScreen(
             QuickChip("Health") { onOpenSelfCheck() }
             QuickChip("Privacy") { onOpenPage(PAGE_PRIVACY) }
             QuickChip("Repeats") { onOpenPage(PAGE_RECIPES) }
+            QuickChip("History") { onOpenPage(PAGE_HISTORY) }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             QuickChip("My computer") { onOpenPage(PAGE_BRIDGE) }
@@ -205,3 +206,4 @@ internal const val PAGE_SCREEN = "screen"
 internal const val PAGE_BRIDGE = "bridge"
 internal const val PAGE_PRIVACY = "privacy"
 internal const val PAGE_RECIPES = "recipes"
+internal const val PAGE_HISTORY = "history"

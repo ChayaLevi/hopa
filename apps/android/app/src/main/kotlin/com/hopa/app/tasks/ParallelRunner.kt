@@ -103,6 +103,16 @@ class ParallelRunner(
                     timestamp = System.currentTimeMillis(),
                 ),
             )
+            runCatching {
+                container.runHistory.record(
+                    at = System.currentTimeMillis(),
+                    goal = goal,
+                    path = "background",
+                    steps = result?.records?.size ?: 0,
+                    tokens = result?.usage?.totalTokens ?: 0,
+                    conversationId = conversation.id,
+                )
+            }
             finish(id, "done", answer.take(80))
         } catch (error: Exception) {
             finish(id, "failed", error.message ?: "failed")

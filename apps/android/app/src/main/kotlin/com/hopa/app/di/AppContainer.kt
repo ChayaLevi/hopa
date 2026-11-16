@@ -48,6 +48,7 @@ class AppContainer(context: Context) {
     val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
     val recorder = RoomRunRecorder(database.runRecordDao())
+    val runHistory = com.hopa.data.history.RoomRunHistory(database.runHistoryDao())
     val pendingApprovals = com.hopa.data.approvals.RoomPendingApprovalStore(
         database.pendingApprovalDao(),
     )

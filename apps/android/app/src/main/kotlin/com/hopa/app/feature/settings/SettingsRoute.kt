@@ -14,6 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import com.hopa.app.di.AppContainer
 
 @Composable
@@ -32,11 +33,19 @@ fun SettingsRoute(
     var page by rememberSaveable { mutableStateOf("") }
     val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()
     var recipes by rememberSaveable { mutableStateOf(emptyList<com.hopa.app.skills.Recipe>()) }
+    var history by rememberSaveable {
+        mutableStateOf(emptyList<com.hopa.data.database.entity.RunHistoryEntity>())
+    }
+    var historyFilter by rememberSaveable { mutableStateOf("") }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val backToHub = { page = "" }
 
     androidx.compose.runtime.LaunchedEffect(page) {
         if (page == PAGE_RECIPES) {
             recipes = container.recipes.all()
+        }
+        if (page == PAGE_HISTORY) {
+            history = container.runHistory.latest(historyFilter.ifBlank { null })
         }
     }
 
@@ -89,6 +98,24 @@ fun SettingsRoute(
                 onTone = viewModel::setTone,
                 onChattiness = viewModel::setChattiness,
                 onOpenProfiles = onOpenProfiles,
+            )
+
+            PAGE_HISTORY -> SettingsHistoryScreen(
+                rows = history,
+                selected = historyFilter,
+                onFilter = {
+                    historyFilter = it
+                    scope.launch {
+                        history = container.runHistory.latest(it.ifBlank { null })
+                    }
+                },
+                onBack = backToHub,
+                onClear = {
+                    scope.launch {
+                        container.runHistory.clear()
+                        history = emptyList()
+                    }
+                },
             )
 
             PAGE_RECIPES -> SettingsRecipesScreen(
