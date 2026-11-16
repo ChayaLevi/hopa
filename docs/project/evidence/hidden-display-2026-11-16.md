@@ -138,14 +138,45 @@ Helper log for the same run: `display 1080 2340 450` (flags `17dc9`), `top`,
 `launch com.android.settings`, `mute`, `tap 359 1340`, `unmute`, `finish`,
 `release`. The phone's own screen stayed on HOPA.
 
+## Two tasks at once
+
+Two goals were sent three seconds apart through the app's own `hopa://ask` link,
+with plan-first off:
+
+- "Open Settings and open Connections"
+- "Open Calculator and tell me its buttons"
+
+The helper log shows two connections (`ping` twice), two displays created at the
+same time, and two launches that diverged:
+
+```
+cmd: ping
+cmd: display 1080 2340 450
+cmd: ping
+cmd: display 1080 2340 450
+display flags: 17dc9
+display flags: 17dc9
+cmd: top
+cmd: launch com.sec.android.app.popupcalculator
+...
+cmd: release
+cmd: launch com.android.settings
+cmd: tap 359 1340
+...
+```
+
+The calculator run finished and released its display while Settings was still
+tapping. Both answers described their own screen: the first listed the calculator
+keys (history, unit converter, scientific mode, the number pad), the second the
+Connections page. `run_history` has two rows nine seconds apart, both
+`background`, and the chat showed the second task's chip with its own dismiss
+button.
+
+This is also the proof that the per-package event cache was needed: a single
+global source would have let one run read the other's screen.
+
 ## Still not exercised
 
-- Two parallel tasks against two hidden displays. The first attempt is
-  inconclusive: the helper log did show two `display` sessions, but the second
-  goal never became a turn (the text did not reach the input field), so only one
-  run happened. Plan-first is off; the retry sends goal A, waits about three
-  seconds, sends goal B, then checks for two different `launch` packages, two task
-  chips and two `background` rows in `run_history`.
 - The in-app wireless pairing handshake. The phone has no Wi-Fi at the moment, and
   wireless debugging reports "IP address and port: Unavailable (Wi-Fi
   disconnected)", so this cannot be tested yet.

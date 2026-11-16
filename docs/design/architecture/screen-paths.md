@@ -121,6 +121,9 @@ says which surface was actually used.
   categories) and a tap opened Connections, after which the model read that page
   too: 2 steps, 2 confirmed. Reading uses the per-package window event; the tap
   was delivered by `input touchscreen -d <display>`.
+- Two goals sent three seconds apart ran on two hidden displays at once, launched
+  different apps, and answered from their own screens; history recorded two
+  `background` rows nine seconds apart.
 
 ## Not here yet
 
@@ -128,5 +131,4 @@ says which surface was actually used.
   while an app is mid-flow leaves that app's own state behind.
 - Audio isolation depends on the `PLAY_AUDIO` AppOps flag existing on the
   device; where it is missing the helper says so and the run is audible.
-- Two parallel tasks against two hidden displays, and the wireless pairing
-  handshake, are still unproven.
+- The wireless pairing handshake is still unproven; it needs the phone on Wi-Fi.
