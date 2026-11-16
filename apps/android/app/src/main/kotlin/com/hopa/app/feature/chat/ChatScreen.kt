@@ -74,6 +74,9 @@ import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.data.sessions.ChatMessage
 
+/** Two checks, four seconds: one dip is a rebind, two are a real outage. */
+private const val ACCESS_MISSES_BEFORE_OFF = 2
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -115,11 +118,13 @@ fun ChatScreen(
     // the app comes back; a stale "off" banner would hide the only real fix.
     var accessEnabled by remember { mutableStateOf(AccessibilityState.isEnabled(context)) }
     var accessConnected by remember { mutableStateOf(HopaAccessibilityService.instance != null) }
+    var accessMisses by remember { mutableStateOf(0) }
     // Android turns the service off on every reinstall and the binding can come
     // back a moment later, so the state is re-read on resume and then polled.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                accessMisses = 0
                 accessEnabled = AccessibilityState.isEnabled(context)
                 accessConnected = HopaAccessibilityService.instance != null
             }
@@ -130,8 +135,21 @@ fun ChatScreen(
     LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(2_000)
-            accessEnabled = AccessibilityState.isEnabled(context)
-            accessConnected = HopaAccessibilityService.instance != null
+            val enabled = AccessibilityState.isEnabled(context)
+            val connected = HopaAccessibilityService.instance != null
+            if (enabled && connected) {
+                accessMisses = 0
+                accessEnabled = true
+                accessConnected = true
+            } else {
+                // Samsung rebinds the service for a second or two after a run
+                // closes its display; a one-check dip is not worth a banner.
+                accessMisses = (accessMisses + 1).coerceAtMost(ACCESS_MISSES_BEFORE_OFF)
+                if (accessMisses >= ACCESS_MISSES_BEFORE_OFF) {
+                    accessEnabled = enabled
+                    accessConnected = connected
+                }
+            }
         }
     }
     val micPermission = rememberLauncherForActivityResult(

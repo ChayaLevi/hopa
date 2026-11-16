@@ -6,6 +6,9 @@ package com.hopa.capabilities.display
  * protocol is testable without Android and readable in a log.
  */
 class DisplayProtocol {
+    /** The first line on every connection; the helper closes when it does not match. */
+    fun auth(token: String): String = "auth $token"
+
     fun display(width: Int, height: Int, dpi: Int): String = "display $width $height $dpi"
 
     fun launch(packageName: String): String = "launch $packageName"
@@ -46,5 +49,14 @@ class DisplayProtocol {
             line.startsWith("err") -> false to line.removePrefix("err").trim()
             else -> false to line.ifBlank { "empty reply" }
         }
+    }
+
+    companion object {
+        /**
+         * Loopback only. An abstract UNIX socket owned by the shell cannot be
+         * reached from the app: SELinux denies untrusted_app -> shell, and that
+         * is the one wall the app cannot talk its way through.
+         */
+        const val PORT = 47821
     }
 }

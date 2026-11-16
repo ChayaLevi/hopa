@@ -72,11 +72,14 @@ class BridgeClient(
      * shell. The bridge already speaks adb, so this needs no pairing inside the
      * app; the helper then owns the hidden display itself.
      */
-    suspend fun startHelper(packageName: String = "com.hopa.android"): String {
+    suspend fun startHelper(
+        packageName: String = "com.hopa.android",
+        token: String,
+    ): String {
         val payload = call(
             "POST",
             "/helper",
-            body = """{"package":${quote(packageName)}}""",
+            body = """{"package":${quote(packageName)},"token":${quote(token)}}""",
             timeout = 30,
         )
         return payload["output"]?.jsonPrimitive?.contentOrNull.orEmpty()

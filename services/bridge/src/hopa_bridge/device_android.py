@@ -18,6 +18,8 @@ from .layout import Layout, Node
 _FOCUS_RE = re.compile(r"mCurrentFocus=Window\{[^}]*?\s([^/\s}]+)/")
 _RESUMED_RE = re.compile(r"mResumedActivity: ActivityRecord\{[^}]*?\s([^/\s}]+)/")
 _PACKAGE_RE = re.compile(r"^package:(\S+)$")
+# The display token comes from the app and reaches a shell command.
+_HELPER_TOKEN = re.compile(r"[A-Za-z0-9]{32,128}")
 
 _KEYCODES = {
     "back": "KEYCODE_BACK",
@@ -129,12 +131,26 @@ class AndroidDevice:
     def shell(self, command: str) -> str:
         return self._adb.shell(command)
 
-    def start_helper(self, package: str) -> dict[str, Any]:
-        """Start the app's background-display helper as shell (uid 2000)."""
+    def start_helper(self, package: str, token: str) -> dict[str, Any]:
+        """Start the app's background-display helper as shell (uid 2000).
+
+        The helper listens on loopback and requires the token the app keeps in
+        its private files; the class sits in a secondary dex, so the command
+        finds the classesN.dex that carries it (app_process reads only the dex
+        named in CLASSPATH).
+        """
+        if not _HELPER_TOKEN.fullmatch(token):
+            raise ValueError("bad helper token")
+        work = "/data/local/tmp/hopa-dex"
         command = (
-            f"CLASSPATH=$(pm path {package} | cut -d: -f2); "
-            "nohup app_process / com.hopa.capabilities.display.ShellMain "
-            ">/dev/null 2>&1 & echo started"
+            f"apk=$(pm path {package} | cut -d: -f2); "
+            f"rm -rf {work}; mkdir -p {work}; cd {work}; "
+            "unzip -o -q \"$apk\" 'classes*.dex'; "
+            "for f in classes*.dex; do "
+            'if grep -q com/hopa/capabilities/display/ShellMain "$f"; then '
+            f"CLASSPATH={work}/$f setsid app_process "
+            f"/ com.hopa.capabilities.display.ShellMain --token={token} "
+            ">/dev/null 2>&1 & echo started; break; fi; done"
         )
         return {"ok": True, "output": self._adb.shell(command)}
 

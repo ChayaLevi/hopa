@@ -33,11 +33,14 @@ class WirelessShell(
         return runCatching {
             manager.pair(host.trim(), port, code.trim())
             "Paired. Now open Wireless debugging again so the connect port is live."
-        }.getOrElse { "Pairing failed: ${it.message}" }
+        }.getOrElse { error ->
+            android.util.Log.w("HopaWireless", "pairing with $host:$port failed", error)
+            "Pairing failed: ${error.message}"
+        }
     }
 
     /** Connect to the TLS port adbd advertises, then start the helper as shell. */
-    fun connectAndStartHelper(): String {
+    fun connectAndStartHelper(token: String): String {
         val manager = manager()
         runCatching {
             if (!manager.isConnected) {
@@ -53,12 +56,7 @@ class WirelessShell(
         if (!manager.isConnected) {
             return "adbd did not accept the connection; is Wireless debugging on?"
         }
-        val packageName = context.packageName
-        val started = shell(
-            "CLASSPATH=\$(pm path $packageName | cut -d: -f2); " +
-                "nohup app_process / com.hopa.capabilities.display.ShellMain " +
-                ">/dev/null 2>&1 & echo started",
-        )
+        val started = shell(DisplayStart.command(context.packageName, token))
         return if (started.contains("started")) {
             "Wireless shell connected; the background screen is ready"
         } else {

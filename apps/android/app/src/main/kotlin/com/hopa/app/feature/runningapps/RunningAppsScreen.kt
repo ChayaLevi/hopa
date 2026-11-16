@@ -56,6 +56,8 @@ fun RunningAppsScreen(
     onScreenPath: (String) -> Unit,
     onStartBackgroundHelper: () -> Unit,
     onPairWireless: (String, String) -> Unit,
+    onPairWirelessFromScreen: () -> Unit,
+    onPairWirelessWaiting: () -> Unit,
     onRunCheck: () -> Unit,
     onPlanFirst: (Boolean) -> Unit,
     onVision: (Boolean) -> Unit,
@@ -71,6 +73,7 @@ fun RunningAppsScreen(
     val shown = apps.take(4)
     val backgroundCheck = state.screenCheck.firstOrNull { it.id == "background" }
     val needsSetup = backgroundCheck != null && !backgroundCheck.ok && mode != "onscreen"
+    val hiddenForced = mode == "background" && !state.backgroundRunning
 
     Scaffold(
         containerColor = HopaColor.Bg,
@@ -82,11 +85,13 @@ fun RunningAppsScreen(
                     HopaStatusPill(
                         text = when {
                             !state.phoneAccess -> "Needs screen access"
+                            hiddenForced -> "Hidden screen is off"
                             needsSetup -> "Background off"
                             else -> "Ready"
                         },
                         color = when {
                             !state.phoneAccess -> HopaColor.Warning
+                            hiddenForced -> HopaColor.Warning
                             needsSetup -> HopaColor.Warning
                             else -> HopaColor.Success
                         },
@@ -116,6 +121,7 @@ fun RunningAppsScreen(
                     Text(
                         when {
                             !state.phoneAccess -> "Screen access is off"
+                            hiddenForced -> "Hidden mode needs the helper running"
                             needsSetup -> "Background mode is not running"
                             else -> "Ready to open apps"
                         },
@@ -220,6 +226,19 @@ fun RunningAppsScreen(
                     fontSize = 11.sp,
                     color = HopaColor.TextHint,
                 )
+                // Pairing runs after the dialog closes, so its answer has to land
+                // somewhere visible; a silent failure leaves the code unusable.
+                state.bridgeStatus?.let { message ->
+                    Text(
+                        message,
+                        fontSize = 12.sp,
+                        color = if (message.startsWith("Paired")) {
+                            HopaColor.Success
+                        } else {
+                            HopaColor.Warning
+                        },
+                    )
+                }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -240,10 +259,18 @@ fun RunningAppsScreen(
                         HairLine()
                         InfoRow(
                             "Hidden screen",
-                            if (bridgeReady) "Start" else "Set up",
-                            false,
+                            when {
+                                state.backgroundRunning -> "Running"
+                                bridgeReady -> "Start"
+                                else -> "Set up"
+                            },
+                            state.backgroundRunning,
                             {
-                                if (bridgeReady) onStartBackgroundHelper() else setup = true
+                                if (state.backgroundRunning || bridgeReady) {
+                                    onStartBackgroundHelper()
+                                } else {
+                                    setup = true
+                                }
                             },
                         )
                         HairLine()
@@ -299,6 +326,14 @@ fun RunningAppsScreen(
             onConnect = { address, code ->
                 onPairWireless(address, code)
                 setup = false
+            },
+            onPairAutomatically = {
+                setup = false
+                onPairWirelessFromScreen()
+            },
+            onWaitForDialog = {
+                setup = false
+                onPairWirelessWaiting()
             },
         )
     }

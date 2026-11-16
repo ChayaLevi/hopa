@@ -1,21 +1,29 @@
 package com.hopa.capabilities.display
 
-import android.net.LocalSocket
-import android.net.LocalSocketAddress
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.OutputStream
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 
 /**
  * The app half: a thin synchronous client for [ShellMain]. Every call returns the
  * helper's own words, so a failure is reported with its reason instead of a
  * silent no-op.
+ *
+ * It talks to 127.0.0.1 and proves itself with the token from [DisplayToken]
+ * before anything else, because a socket owned by the shell cannot be reached
+ * from an app and loopback needs a guard of its own.
  */
-class ShellClient {
-    private var socket: LocalSocket? = null
+class ShellClient(
+    private val token: String = "",
+) {
+    private var socket: Socket? = null
     private var reader: BufferedReader? = null
     private var input: InputStream? = null
-    private var output: java.io.OutputStream? = null
+    private var output: OutputStream? = null
     private val protocol = DisplayProtocol()
 
     val connected: Boolean
@@ -26,13 +34,24 @@ class ShellClient {
             return true
         }
         return runCatching {
-            val created = LocalSocket()
-            created.connect(LocalSocketAddress(SOCKET, LocalSocketAddress.Namespace.ABSTRACT))
+            val created = Socket()
+            created.connect(
+                InetSocketAddress(InetAddress.getLoopbackAddress(), DisplayProtocol.PORT),
+                CONNECT_TIMEOUT_MS,
+            )
+            created.soTimeout = READ_TIMEOUT_MS
             socket = created
-            input = created.inputStream
-            output = created.outputStream
-            reader = BufferedReader(InputStreamReader(created.inputStream))
+            input = created.getInputStream()
+            output = created.getOutputStream()
+            reader = BufferedReader(InputStreamReader(created.getInputStream()))
+            if (!send(protocol.auth(token)).first) {
+                close()
+                return false
+            }
             send("ping").first
+        }.onFailure { error ->
+            // The reason matters: "off" without a cause is a dead end.
+            android.util.Log.w("HopaShell", "connect failed: ${error.message}", error)
         }.getOrDefault(false)
     }
 
@@ -105,10 +124,13 @@ class ShellClient {
             writer.flush()
             val line = reader?.readLine() ?: return false to "helper closed the socket"
             protocol.parse(line)
-        }.getOrElse { false to (it.message ?: "helper failed") }
+        }.onFailure { error ->
+            android.util.Log.w("HopaShell", "command failed: $command", error)
+        }.getOrElse { false to (it.message ?: "${it.javaClass.simpleName}: no reply") }
     }
 
     private companion object {
-        const val SOCKET = "hopa-display"
+        const val CONNECT_TIMEOUT_MS = 1_500
+        const val READ_TIMEOUT_MS = 30_000
     }
 }

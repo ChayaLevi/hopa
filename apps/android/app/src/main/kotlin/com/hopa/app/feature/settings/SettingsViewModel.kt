@@ -330,14 +330,19 @@ class SettingsViewModel(
 
                 val device = runCatching { container.backgroundDevice() }.getOrNull()
                 if (device == null) {
+                    val why = container.lastBackgroundError.ifBlank { "no display" }
                     checks += ScreenCheck(
                         "tried",
-                        "Test failed: the hidden screen could not start",
+                        "Hidden screen failed: $why",
                         ok = false,
                     )
                 } else {
-                    val opened = runCatching { device.launch("com.android.settings") }
-                    val observation = runCatching { device.observe() }.getOrNull()
+                    val opened = withContext(Dispatchers.IO) {
+                        runCatching { device.launch("com.android.settings") }
+                    }
+                    val observation = withContext(Dispatchers.IO) {
+                        runCatching { device.observe() }.getOrNull()
+                    }
                     val elements = observation?.tree?.children?.size ?: 0
                     checks += if (opened.isSuccess) {
                         ScreenCheck("tried", "Tested it: Settings opened out of sight", ok = true)
@@ -395,6 +400,24 @@ class SettingsViewModel(
         }
     }
 
+    /** Read the code from Android's pairing dialog instead of asking for it. */
+    fun pairWirelessFromScreen() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val message = com.hopa.app.feature.runningapps.WirelessSetup(container).run()
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
+    /** Wait for a dialog the person opens, then read its code and pair. */
+    fun pairWirelessWaiting() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, bridgeStatus = null) }
+            val message = com.hopa.app.feature.runningapps.WirelessSetup(container).waitForDialog()
+            _state.update { it.copy(busy = false, bridgeStatus = message) }
+        }
+    }
+
     /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
     fun startBackgroundHelper() {
         viewModelScope.launch {
@@ -405,7 +428,8 @@ class SettingsViewModel(
                 current.bridgeUrl.isBlank() -> "Bridge: set an address first"
                 token.isBlank() -> "Bridge: pair first, then start the helper"
                 else -> runCatching {
-                    val output = BridgeClient(current.bridgeUrl, token).startHelper()
+                    val output = BridgeClient(current.bridgeUrl, token)
+                        .startHelper(token = container.displayToken.value)
                     container.shell.close()
                     if (container.shell.connect()) {
                         "Background screen is ready"
@@ -461,6 +485,9 @@ class SettingsViewModel(
 
     private suspend fun reload() {
         val settings: AppSettings = container.settings.settings.first()
+        val background = withContext(Dispatchers.IO) {
+            runCatching { container.shell.connect() }.getOrDefault(false)
+        }
         val key = container.settings.modelKey()
         val keySaved = container.settings.hasModelKey()
         val bridgeKey = container.settings.bridgeToken()
@@ -470,6 +497,7 @@ class SettingsViewModel(
                 key = key,
                 keySaved = keySaved,
                 bridgeKey = bridgeKey,
+                backgroundRunning = background,
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),
                 phoneAccess = AccessibilityState.isEnabled(container.context) &&
                     HopaAccessibilityService.instance != null,

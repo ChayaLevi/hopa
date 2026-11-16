@@ -33,7 +33,8 @@ Capabilities → Running apps ──"Start the background screen"──► bridg
                                               │ abstract socket "hopa-display"
                                               ▼
               DisplayHost: createVirtualDisplay + ImageReader
-              DisplayInput: InputManager.injectInputEvent(displayId)
+              DisplayInput: InputManagerGlobal.injectInputEvent(displayId)
+                            or `input touchscreen -d <display> …`
               DisplayLauncher: cmd package resolve-activity + am start --display
                                               │ frames (JPEG), top package
                                               ▼
@@ -46,11 +47,24 @@ Capabilities → Running apps ──"Start the background screen"──► bridg
 - The app never sees a `Surface`: the helper owns the `ImageReader` and sends
   JPEG frames over the socket, so screenshots do not use the accessibility
   screenshot API.
-- The UI tree comes from the accessibility window **on that display**
-  (`NodeTreeReader(displayId)`), which is why phone access is still required.
+- The UI tree comes from the accessibility window **event for the package just
+  launched**: `AccessibilityWindowInfo.getDisplayId()` reports 0 for every
+  window on this build, so a display id cannot find the hidden tree. The service
+  keeps the richest recent source per package, which is why phone access is
+  still required.
+- Input goes through the hidden `injectInputEvent` when the build has it; when
+  it does not (Android 17 removed the two-argument overload and moved the
+  manager to `InputManagerGlobal`), the helper runs the system's own
+  `input touchscreen -d <display> …` per gesture.
+- The app talks to the helper on **loopback** (`127.0.0.1:47821`), not on an
+  abstract UNIX socket: SELinux denies `untrusted_app` a connection to a
+  socket owned by the shell, and that cannot be changed without root. The
+  first line is `auth <token>`; the token is created by the app, lives in its
+  private files and is passed to `app_process` when the app starts the helper.
 - The protocol is one line per command (`display`, `launch`, `tap`, `swipe`,
-  `key`, `top`, `shot`, `release`) and one line per reply, `ok …` or `err …`.
-  `DisplayProtocol` is plain Kotlin and unit-testable.
+  `key`, `top`, `shot`, `release`, `appfn`, `mute`, `unmute`, `finish`) and
+  one line per reply, `ok …` or `err …`. `DisplayProtocol` is plain Kotlin and
+  unit-testable.
 
 ## What runs where
 
@@ -77,9 +91,10 @@ Capabilities → Running apps ──"Start the background screen"──► bridg
   a reason, so a machine with no phone stays green.
 
 ```powershell
-# one-time per boot
-adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) `
-    app_process / com.hopa.capabilities.display.ShellMain
+# one-time per boot; the helper class sits in a secondary dex, so the script
+# extracts the right classesN.dex and starts app_process with it
+adb shell sh /data/local/tmp/hopa_display.sh
+# (the same script is pushed by tools/scripts/android-device-checks.ps1)
 
 .\gradlew.bat :app:connectedDebugAndroidTest
 ```
@@ -92,9 +107,32 @@ six-digit code Android shows under Wireless debugging, calls `adb pair` through
 advertises and runs the helper with `shell:`. After that the phone needs no PC;
 the key and certificate live in the app's private storage and are reused.
 
+**Measured on a Galaxy S24 with Android 17:** the pairing port refuses
+connections as soon as the settings dialog loses window focus (switching apps
+or pressing Recents both do it), so a code cannot be typed in HOPA while the
+listener is alive. The app reports
+`Pairing failed: failed to connect … ECONNREFUSED` and the bridge remains the
+working path. A QR-code flow — open the QR dialog, capture the screen through
+accessibility, decode the service name, password and port, pair from the
+background — is the shape that can work here, and it is not built.
+
 If pairing is unavailable (wireless debugging off, different network, mDNS
 blocked), the same button path falls back to the PC bridge, and the chat line
 says which surface was actually used.
+
+## What has been proven on hardware
+
+- The display, the launch, the mute and the release were exercised on a Galaxy
+  S24 (Android 17) on 2026-11-16; see
+  `docs/project/evidence/hidden-display-2026-11-16.md`. The phone's own screen
+  stayed on HOPA throughout.
+- A full model turn read the hidden Settings screen (the answer listed the real
+  categories) and a tap opened Connections, after which the model read that page
+  too: 2 steps, 2 confirmed. Reading uses the per-package window event; the tap
+  was delivered by `input touchscreen -d <display>`.
+- Two goals sent three seconds apart ran on two hidden displays at once, launched
+  different apps, and answered from their own screens; history recorded two
+  `background` rows nine seconds apart.
 
 ## Not here yet
 
@@ -102,6 +140,6 @@ says which surface was actually used.
   while an app is mid-flow leaves that app's own state behind.
 - Audio isolation depends on the `PLAY_AUDIO` AppOps flag existing on the
   device; where it is missing the helper says so and the run is audible.
-- Nothing in this path has been exercised on a phone yet: the display, the tap
-  injection, the mute and the pairing handshake all need one run on real
-  hardware before they count as working.
+- The wireless pairing handshake: the pairing port closes when the settings
+  dialog loses focus on Android 17, so the code flow cannot complete; see the
+  pairing section above.

@@ -11,12 +11,12 @@ class GestureDispatcher(
         dispatch(path, 40)
     }
 
-    fun swipe(fromX: Int, fromY: Int, toX: Int, toY: Int, durationMs: Long = 300) {
+    fun swipe(fromX: Int, fromY: Int, toX: Int, toY: Int, durationMs: Long = 300): Boolean {
         val path = Path().apply {
             moveTo(fromX.toFloat(), fromY.toFloat())
             lineTo(toX.toFloat(), toY.toFloat())
         }
-        dispatch(path, durationMs)
+        return dispatch(path, durationMs)
     }
 
     fun longPress(x: Int, y: Int) {
@@ -34,10 +34,10 @@ class GestureDispatcher(
         service.dispatchGesture(gesture, null, null)
     }
 
-    private fun dispatch(path: Path, durationMs: Long) {
+    private fun dispatch(path: Path, durationMs: Long): Boolean {
         val gesture = GestureDescription.Builder()
             .addStroke(GestureDescription.StrokeDescription(path, 0, durationMs))
             .build()
-        service.dispatchGesture(gesture, null, null)
+        return runCatching { service.dispatchGesture(gesture, null, null) }.getOrDefault(false)
     }
 }
