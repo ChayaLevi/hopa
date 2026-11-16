@@ -17,4 +17,6 @@ data class AppSettings(
     val screenPath: String = "auto",
     /** Show the numbered plan and wait for one approval before acting. */
     val planFirst: Boolean = false,
+    /** Repeat a goal that worked before without asking the model. */
+    val replaySkills: Boolean = true,
 )

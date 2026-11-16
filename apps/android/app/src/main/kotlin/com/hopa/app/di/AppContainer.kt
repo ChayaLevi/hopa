@@ -255,21 +255,27 @@ class AppContainer(context: Context) {
         )
     }
 
+    /** One executor per device path, sharing the policy, approval and recorder. */
+    fun executorFor(device: com.hopa.core.ports.DevicePort): ActionExecutor = ActionExecutor(
+        device = device,
+        browser = null,
+        system = AndroidSystemPort(context),
+        sandbox = null,
+        policy = policy,
+        approval = approval,
+        recorder = recorder,
+        factory = factory,
+        clock = clock,
+    )
+
+    /** Recipes that were replayed before; a matching goal runs without the model. */
+    val recipes by lazy { com.hopa.app.skills.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+
     /** One loop per device path, sharing the model, recorder and gate. */
     fun loopFor(device: com.hopa.core.ports.DevicePort): AgentLoop = AgentLoop(
         model = model,
         device = device,
-        executor = ActionExecutor(
-            device = device,
-            browser = null,
-            system = AndroidSystemPort(context),
-            sandbox = null,
-            policy = policy,
-            approval = approval,
-            recorder = recorder,
-            factory = factory,
-            clock = clock,
-        ),
+        executor = executorFor(device),
         recorder = recorder,
         clock = clock,
         webAvailable = false,

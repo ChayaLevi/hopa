@@ -463,6 +463,50 @@ class ChatViewModel(
                 }
                 return@launch
             }
+            // A goal that worked before runs from its recipe: no model, no tokens.
+            if (current.replaySkills) {
+                val recipe = runCatching { container.recipes.find(body) }.getOrNull()
+                if (recipe != null) {
+                    val replayed = runCatching {
+                        com.hopa.app.skills.Replayer(container).replay(recipe, device)
+                    }.getOrDefault(0)
+                    if (replayed == recipe.steps.size) {
+                        (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                        container.busy.value = false
+                        val answer = "Done - repeated the $replayed steps that worked last time."
+                        container.conversations.append(
+                            conversation.id,
+                            ChatMessage(
+                                id = "m-${System.currentTimeMillis()}-replay",
+                                role = "assistant",
+                                text = answer,
+                                timestamp = System.currentTimeMillis(),
+                            ),
+                        )
+                        val shown = container.conversations.all()
+                        _state.update {
+                            it.copy(
+                                current = shown.firstOrNull { item -> item.id == conversation.id },
+                                conversations = shown,
+                                busy = false,
+                                lastPath = device.sourceName,
+                                lastRun = RunSummary(
+                                    goal = body,
+                                    path = device.sourceName,
+                                    steps = recipe.steps.mapIndexed { index, action ->
+                                        "${index + 1}. ${action.kind}"
+                                    },
+                                    executed = replayed,
+                                    verified = replayed,
+                                    tokens = 0,
+                                    millis = System.currentTimeMillis() - now,
+                                ),
+                            )
+                        }
+                        return@launch
+                    }
+                }
+            }
             val loop = container.loopFor(device)
             val result = try {
                 withTimeoutOrNull(120_000) {
@@ -506,6 +550,16 @@ class ChatViewModel(
                     ?: ""
                 val suffix = if (target.isBlank()) "" else " $target"
                 "${record.step}. ${record.action.kind}$suffix"
+            }
+            if (!result?.error?.message.isNullOrBlank().not()) {
+                // only a clean run becomes a recipe
+            }
+            if (result != null && result.records.isNotEmpty() &&
+                result.records.all { it.executed }
+            ) {
+                runCatching {
+                    container.recipes.save(body, result.records.map { it.action })
+                }
             }
             val summary = RunSummary(
                 goal = body,

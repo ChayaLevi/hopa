@@ -32,6 +32,7 @@ class DataStoreSettingsRepository(
             chattiness = prefs[CHATTINESS] ?: "balanced",
             screenPath = prefs[SCREEN_PATH] ?: "auto",
             planFirst = prefs[PLAN_FIRST] ?: false,
+            replaySkills = prefs[REPLAY_SKILLS] ?: true,
         )
     }
 
@@ -52,6 +53,7 @@ class DataStoreSettingsRepository(
             prefs[CHATTINESS] = next.chattiness
             prefs[SCREEN_PATH] = next.screenPath
             prefs[PLAN_FIRST] = next.planFirst
+            prefs[REPLAY_SKILLS] = next.replaySkills
         }
     }
 
@@ -84,6 +86,7 @@ class DataStoreSettingsRepository(
         val CHATTINESS = stringPreferencesKey("chattiness")
         val SCREEN_PATH = stringPreferencesKey("screen_path")
         val PLAN_FIRST = booleanPreferencesKey("plan_first")
+        val REPLAY_SKILLS = booleanPreferencesKey("replay_skills")
         const val MODEL_KEY = "model_key"
         const val BRIDGE_TOKEN = "bridge_token"
         const val BRIDGE_REFRESH = "bridge_refresh"

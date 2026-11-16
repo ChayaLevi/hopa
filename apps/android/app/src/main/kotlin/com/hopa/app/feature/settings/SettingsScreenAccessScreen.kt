@@ -34,6 +34,7 @@ fun SettingsScreenAccessScreen(
     onOpenBridge: () -> Unit,
     onOpenScreenControl: () -> Unit,
     onPlanFirst: (Boolean) -> Unit,
+    onReplaySkills: (Boolean) -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = state.settings.screenPath
@@ -129,6 +130,16 @@ fun SettingsScreenAccessScreen(
             }
             Text(
                 "Nothing gets tapped until you approve the numbered plan.",
+                fontSize = 12.sp,
+                color = HopaColor.TextHint,
+            )
+            SettingsDivider()
+            SettingsSwitchRow("Repeat what worked before", state.settings.replaySkills) {
+                onReplaySkills(it)
+            }
+            Text(
+                "A goal that succeeded runs the same steps again without asking the " +
+                    "model. If a screen changed, HOPA stops and thinks instead.",
                 fontSize = 12.sp,
                 color = HopaColor.TextHint,
             )

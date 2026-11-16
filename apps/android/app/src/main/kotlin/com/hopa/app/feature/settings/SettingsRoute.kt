@@ -65,6 +65,7 @@ fun SettingsRoute(
                 onOpenBridge = { page = PAGE_BRIDGE },
                 onOpenScreenControl = onOpenAccessibility,
                 onPlanFirst = viewModel::setPlanFirst,
+                onReplaySkills = viewModel::setReplaySkills,
             )
 
             PAGE_BRIDGE -> SettingsBridgeScreen(

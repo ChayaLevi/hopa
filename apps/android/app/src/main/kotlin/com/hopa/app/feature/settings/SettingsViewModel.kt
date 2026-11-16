@@ -168,6 +168,13 @@ class SettingsViewModel(
         }
     }
 
+    fun setReplaySkills(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(replaySkills = value) }
+            reload()
+        }
+    }
+
     fun setPlanFirst(value: Boolean) {
         viewModelScope.launch {
             container.settings.update { it.copy(planFirst = value) }
