@@ -3,25 +3,45 @@ package com.hopa.app
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.hopa.app.di.AppContainer
+import com.hopa.app.service.ScreenCaptureRequester
+import com.hopa.app.service.ScreenCaptureService
 import com.hopa.capabilities.bridge.BridgeClient
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    // Screen-capture consent (Android 10 screenshots). Only an Activity can ask;
+    // on OK the token goes to the foreground service that holds the projection.
+    private val screenCapture = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val data = result.data
+        if (result.resultCode == RESULT_OK && data != null) {
+            ScreenCaptureService.start(this, result.resultCode, data)
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         com.hopa.app.service.AppVisibility.foreground = true
+        ScreenCaptureRequester.launch = {
+            val manager = getSystemService(MediaProjectionManager::class.java)
+            runCatching { screenCapture.launch(manager.createScreenCaptureIntent()) }
+        }
     }
 
     override fun onStop() {
         com.hopa.app.service.AppVisibility.foreground = false
+        ScreenCaptureRequester.launch = null
         super.onStop()
     }
 

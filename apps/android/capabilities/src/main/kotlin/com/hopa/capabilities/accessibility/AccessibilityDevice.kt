@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
+import com.hopa.capabilities.display.MediaProjectionCapture
 import com.hopa.core.contracts.Observation
 import com.hopa.core.contracts.ObservationNode
 import com.hopa.core.contracts.ScreenSize
@@ -148,9 +149,10 @@ class AccessibilityDevice(
 
     override suspend fun screenshot(): ByteArray? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            // takeScreenshot() is API 30+. On Android 10 the agent works
-            // from the accessibility tree; no image is attached.
-            return null
+            // takeScreenshot() is API 30+. On Android 10 use MediaProjection when
+            // the user has granted screen capture; otherwise the agent works from
+            // the accessibility tree and no image is attached.
+            return MediaProjectionCapture.capture()
         }
         val now = System.currentTimeMillis()
         if (now - lastShot < 1_000) {
