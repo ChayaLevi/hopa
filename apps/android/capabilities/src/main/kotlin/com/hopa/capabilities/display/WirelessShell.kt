@@ -13,12 +13,6 @@ import java.security.cert.CertificateFactory
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.KeyFactory
 import java.util.concurrent.TimeUnit
-import java.math.BigInteger
-import java.util.Date
-import org.bouncycastle.asn1.x500.X500Name
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 
 /**
  * Wireless debugging without a PC: pair with the phone's own adbd using the code
@@ -133,19 +127,7 @@ class WirelessShell(
         val generator = KeyPairGenerator.getInstance("RSA")
         generator.initialize(2048, SecureRandom.getInstance("SHA1PRNG"))
         val pair = generator.generateKeyPair()
-
-        val subject = X500Name("CN=HOPA")
-        val now = System.currentTimeMillis()
-        val builder = JcaX509v3CertificateBuilder(
-            subject,
-            BigInteger.valueOf((SecureRandom().nextInt() and Int.MAX_VALUE).toLong()),
-            Date(now - 86_400_000L),
-            Date(now + 3_600_000_000L * 24),
-            subject,
-            pair.public,
-        )
-        val signer = JcaContentSignerBuilder("SHA256withRSA").build(pair.private)
-        val certificate = JcaX509CertificateConverter().getCertificate(builder.build(signer))
+        val certificate = DerCertificate().selfSigned(pair)
 
         runCatching {
             privateFile.writeBytes(pair.private.encoded)

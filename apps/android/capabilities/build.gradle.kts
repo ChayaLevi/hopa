@@ -35,7 +35,6 @@ dependencies {
     // Wireless-debugging pairing inside the app: adb pair (SPAKE2) and the TLS
     // connection to adbd. Apache-2.0 (dual licensed with GPL).
     implementation("com.github.MuntashirAkon:libadb-android:3.1.1")
-    implementation("org.bouncycastle:bcpkix-jdk15to18:1.81")
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.core)
