@@ -145,7 +145,7 @@ class AndroidDevice:
         command = (
             f"apk=$(pm path {package} | cut -d: -f2); "
             f"rm -rf {work}; mkdir -p {work}; cd {work}; "
-            'unzip -o -q "$apk" \'classes*.dex\'; '
+            "unzip -o -q \"$apk\" 'classes*.dex'; "
             "for f in classes*.dex; do "
             'if grep -q com/hopa/capabilities/display/ShellMain "$f"; then '
             f"CLASSPATH={work}/$f setsid app_process "
