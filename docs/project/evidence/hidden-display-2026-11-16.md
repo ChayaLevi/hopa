@@ -10,7 +10,7 @@ person's screen stayed on HOPA throughout.
 |---|---|
 | Phone | Samsung Galaxy S24, `SM-S926B` |
 | Android | 17 (SDK 37), build `CP2A.260605.016.S926BXXSIEZJ1` |
-| APK | `0.1.0-261116-1955` (debug, minSdk 29) |
+| APK | `0.1.0-261116-2014` (debug, minSdk 29); the read/tap and parallel runs were on 1825 and 1955 |
 | Helper | `tools/scripts/android-display-helper.sh`, started with `adb shell sh` as uid 2000 |
 | Transport | loopback `127.0.0.1:47821`, token from the app's private files |
 
