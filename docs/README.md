@@ -40,9 +40,11 @@ Service documentation lives with the services: [`services/docs/`](../services/do
 | [harmony/build-and-sign.md](guides/harmony/build-and-sign.md) | How is the HAP signed and installed? |
 | [harmony/install-phone.md](guides/harmony/install-phone.md) | How does the app reach a phone? |
 | [harmony/acl-request.md](guides/harmony/acl-request.md) | How is the accessibility ACL requested? |
-| [android/README.md](guides/android/README.md) | How does Android run the loop, and how does it act? (planned) |
+| [android/setup.md](guides/android/setup.md) | How do I set up the Android toolchain on a new machine? |
+| [android/README.md](guides/android/README.md) | How does Android run the loop, and how does it act? |
+| [android/release.md](guides/android/release.md) | How is the APK signed and released? |
 
-`guides/android/` and `guides/windows/` appear when those apps do.
+`guides/windows/` appears when that app does.
 
 ## Reference
 
@@ -65,6 +67,8 @@ Service documentation lives with the services: [`services/docs/`](../services/do
 | [plan/README.md](project/plan/README.md) | The active refactor plan, with evidence |
 | [plan/android/README.md](project/plan/android/README.md) | How will the Android app be built, with what effort? |
 | [plan/windows/README.md](project/plan/windows/README.md) | How will the Windows client be built? |
+| [plan/backend/README.md](project/plan/backend/README.md) | How is the backend built, week by week? (week 1 planned) |
+| [evidence/B1-gateway.md](project/evidence/B1-gateway.md) | What proves the week-1 gateway works, and what is deferred? |
 | [status.md](project/status.md) | Where the daily experience stands, and known debts |
 | [operations/release.md](project/operations/release.md) | How is a release cut? |
 | [operations/versioning.md](project/operations/versioning.md) | How are versions numbered? |
