@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
@@ -102,6 +103,10 @@ fun RunningAppsScreen(
             },
             style = MaterialTheme.typography.bodySmall,
         )
+        SurfaceLine("Hidden", "A screen you cannot see, with the same apps. Needs the background helper.")
+        SurfaceLine("Here", "Your screen, and you watch every tap. Needs screen access.")
+        SurfaceLine("Computer", "A paired PC does the taps over adb. Needs the bridge switched on.")
+        SurfaceLine("Auto", "Tries hidden, then computer, then here, and says which one it used.")
         Button(
             onClick = onRunCheck,
             enabled = !state.busy,
@@ -218,5 +223,22 @@ fun RunningAppsScreen(
                 setup = false
             },
         )
+    }
+}
+
+/** One sentence about what a surface can actually do. */
+@Composable
+private fun SurfaceLine(name: String, detail: String) {
+    Row(
+        modifier = Modifier.padding(start = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text("\u00b7", fontSize = 12.sp, color = HopaColor.TextHint)
+        Text(
+            name,
+            fontSize = 12.sp,
+            color = HopaColor.TextSecondary,
+        )
+        Text(detail, fontSize = 12.sp, color = HopaColor.TextHint)
     }
 }

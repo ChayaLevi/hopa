@@ -15,4 +15,5 @@ object HopaDestination {
     const val CAPABILITIES = "capabilities"
     const val ACCESSIBILITY = "accessibility"
     const val LAUNCHPAD = "launchpad"
+    const val APP_CARD = "appcard"
 }

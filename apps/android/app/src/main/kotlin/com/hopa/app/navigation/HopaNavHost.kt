@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.hopa.app.di.AppContainer
+import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.app.feature.memory.MemoryRoute
 import com.hopa.app.feature.runningapps.ComputerRoute
@@ -121,11 +122,29 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             LaunchpadRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
+                onOpenApp = { name ->
+                    navController.navigate(
+                        HopaDestination.APP_CARD + "/" + android.net.Uri.encode(name),
+                    )
+                },
                 onOpenSite = { url ->
                     navController.navigate(
                         HopaDestination.BROWSER + "?url=" + android.net.Uri.encode(url),
                     )
                 },
+            )
+        }
+        composable(
+            route = HopaDestination.APP_CARD + "/{name}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+            ),
+        ) { entry ->
+            AppCardRoute(
+                container = container,
+                name = entry.arguments?.getString("name").orEmpty(),
+                onBack = { navController.popBackStack() },
+                onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
             )
         }
     }
