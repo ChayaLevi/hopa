@@ -75,8 +75,13 @@ class AppContainer(context: Context) {
     /** Goals that run at the same time, each on its own hidden display. */
     val runner by lazy { com.hopa.app.tasks.ParallelRunner(this) }
 
-    /** The hidden background display: one helper process, one socket. */
-    val shell = com.hopa.capabilities.display.ShellClient()
+    /** Why the last hidden-display start failed; empty when it worked. */
+    var lastBackgroundError: String = ""
+        private set
+
+    /** The hidden background display: one helper process, one loopback port. */
+    val displayToken = com.hopa.capabilities.display.DisplayToken(context)
+    val shell = com.hopa.capabilities.display.ShellClient(displayToken.value)
 
     /**
      * Wireless debugging inside the app: pair once with the code Android shows,
@@ -92,7 +97,7 @@ class AppContainer(context: Context) {
     suspend fun backgroundDevice(): com.hopa.core.ports.DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             if (!shell.connect()) {
-                val startedHere = runCatching { wireless.connectAndStartHelper() }
+                val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
                     .getOrDefault("")
                     .contains("ready")
                 if (!startedHere) {
@@ -106,8 +111,10 @@ class AppContainer(context: Context) {
             val metrics = context.resources.displayMetrics
             val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
             if (device.start(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)) {
+                lastBackgroundError = ""
                 device
             } else {
+                lastBackgroundError = device.error.ifBlank { "the helper refused a display" }
                 null
             }
         }
@@ -124,7 +131,7 @@ class AppContainer(context: Context) {
             if (!paired.startsWith("Paired")) {
                 return@withContext paired
             }
-            val started = wireless.connectAndStartHelper()
+            val started = wireless.connectAndStartHelper(displayToken.value)
             if (started.contains("ready") && shell.connect()) {
                 "Wireless shell is ready; the background screen can be used"
             } else {
@@ -143,7 +150,8 @@ class AppContainer(context: Context) {
             return false
         }
         return runCatching {
-            com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token).startHelper()
+            com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token)
+                .startHelper(token = displayToken.value)
             true
         }.getOrDefault(false)
     }

@@ -54,7 +54,7 @@ class ShellDisplayDevice(
      * Leaving apps behind would let the system move them onto the person's screen
      * the moment the display goes away, so the run closes what it opened.
      */
-    fun stop() {
+    fun stop() = kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
         if (displayId > 0 && launched.isNotEmpty()) {
             launched.forEach { runCatching { client.unmute(it) } }
             runCatching { client.finish(launched.toList()) }
@@ -85,7 +85,7 @@ class ShellDisplayDevice(
             val node = refs[ref] ?: throw IllegalArgumentException("stale ref $ref")
             val bounds = Rect()
             node.getBoundsInScreen(bounds)
-            val (ok, payload) = client.tap(bounds.centerX(), bounds.centerY())
+            val (ok, payload) = onIo { client.tap(bounds.centerX(), bounds.centerY()) }
             delay(250)
             if (!ok) {
                 throw IllegalStateException(payload)
@@ -95,7 +95,7 @@ class ShellDisplayDevice(
         if (x == null || y == null) {
             throw IllegalArgumentException("tap needs a ref or coordinates")
         }
-        val (ok, payload) = client.tap(x, y)
+        val (ok, payload) = onIo { client.tap(x, y) }
         delay(250)
         if (!ok) {
             throw IllegalStateException(payload)
@@ -110,7 +110,7 @@ class ShellDisplayDevice(
 
     override suspend fun longPress(ref: String?, x: Int?, y: Int?) {
         val (px, py) = pointFor(ref, x, y)
-        val (ok, payload) = client.swipe(px, py, px, py, 700)
+        val (ok, payload) = onIo { client.swipe(px, py, px, py, 700) }
         delay(250)
         if (!ok) {
             throw IllegalStateException(payload)
@@ -139,7 +139,7 @@ class ShellDisplayDevice(
 
     override suspend fun swipe(fromX: Int, fromY: Int, toX: Int, toY: Int, velocity: Int) {
         val millis = (400 - velocity).coerceIn(120, 900)
-        val (ok, payload) = client.swipe(fromX, fromY, toX, toY, millis)
+        val (ok, payload) = onIo { client.swipe(fromX, fromY, toX, toY, millis) }
         delay(250)
         if (!ok) {
             throw IllegalStateException(payload)
@@ -147,7 +147,7 @@ class ShellDisplayDevice(
     }
 
     override suspend fun pressBack() {
-        val (ok, payload) = client.key(KEYCODE_BACK)
+        val (ok, payload) = onIo { client.key(KEYCODE_BACK) }
         delay(250)
         if (!ok) {
             throw IllegalStateException(payload)
@@ -157,7 +157,7 @@ class ShellDisplayDevice(
     override suspend fun pressHome() {
         // HOME on the hidden display reaches its own launcher, so the app is put
         // away without touching the person's screen.
-        val (ok, payload) = client.key(KEYCODE_HOME)
+        val (ok, payload) = onIo { client.key(KEYCODE_HOME) }
         delay(250)
         if (!ok) {
             throw IllegalStateException(payload)
@@ -165,38 +165,39 @@ class ShellDisplayDevice(
     }
 
     override suspend fun launch(packageName: String) {
-        val (ok, payload) = client.launch(packageName)
+        val (ok, payload) = onIo { client.launch(packageName) }
         delay(1_500)
         if (!ok) {
             throw IllegalStateException(payload)
         }
         launched += packageName
         // The app is on a hidden display, so its sound would come from nowhere.
-        runCatching { client.mute(packageName) }
+        runCatching { onIo { client.mute(packageName) } }
     }
 
     override suspend fun stop(packageName: String) {
         // The helper owns the display, so it is also the only thing that can
         // close an app on it. Forgetting the package keeps the end-of-run sweep
         // from closing it twice.
-        val (ok, payload) = client.finish(listOf(packageName))
+        val (ok, payload) = onIo { client.finish(listOf(packageName)) }
         if (!ok) {
             throw IllegalStateException(payload)
         }
         launched -= packageName
-        runCatching { client.unmute(packageName) }
+        runCatching { onIo { client.unmute(packageName) } }
     }
 
-    override suspend fun foreground(): String = client.top()
+    override suspend fun foreground(): String = onIo { client.top() }
 
-    override suspend fun screenshot(): ByteArray? = client.shot()
+    override suspend fun screenshot(): ByteArray? = onIo { client.shot() }
 
     override suspend fun appFunction(
         packageName: String,
         function: String,
         parameters: String,
     ): String {
-        val (ok, payload) = client.appFunctionCall(packageName, function, parameters)
+        val (ok, payload) =
+            onIo { client.appFunctionCall(packageName, function, parameters) }
         if (!ok) {
             throw IllegalStateException(payload)
         }
@@ -205,6 +206,10 @@ class ShellDisplayDevice(
 
     override suspend fun apps(): List<InstalledApp> =
         com.hopa.capabilities.system.AndroidPackageCatalog(context).installed()
+
+    /** The client is blocking socket I/O, and StrictMode kills that on main. */
+    private suspend fun <T> onIo(block: () -> T): T =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { block() }
 
     private fun pointFor(ref: String?, x: Int?, y: Int?): Pair<Int, Int> {
         if (ref != null) {

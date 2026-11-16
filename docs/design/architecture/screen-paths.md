@@ -48,9 +48,15 @@ Capabilities → Running apps ──"Start the background screen"──► bridg
   screenshot API.
 - The UI tree comes from the accessibility window **on that display**
   (`NodeTreeReader(displayId)`), which is why phone access is still required.
+- The app talks to the helper on **loopback** (`127.0.0.1:47821`), not on an
+  abstract UNIX socket: SELinux denies `untrusted_app` a connection to a
+  socket owned by the shell, and that cannot be changed without root. The
+  first line is `auth <token>`; the token is created by the app, lives in its
+  private files and is passed to `app_process` when the app starts the helper.
 - The protocol is one line per command (`display`, `launch`, `tap`, `swipe`,
-  `key`, `top`, `shot`, `release`) and one line per reply, `ok …` or `err …`.
-  `DisplayProtocol` is plain Kotlin and unit-testable.
+  `key`, `top`, `shot`, `release`, `appfn`, `mute`, `unmute`, `finish`) and
+  one line per reply, `ok …` or `err …`. `DisplayProtocol` is plain Kotlin and
+  unit-testable.
 
 ## What runs where
 
@@ -97,12 +103,18 @@ If pairing is unavailable (wireless debugging off, different network, mDNS
 blocked), the same button path falls back to the PC bridge, and the chat line
 says which surface was actually used.
 
+## What has been proven on hardware
+
+- The display, the launch, the mute and the release were exercised on a Galaxy
+  S24 (Android 17) on 2026-11-16; see
+  `docs/project/evidence/hidden-display-2026-11-16.md`. The phone's own screen
+  stayed on HOPA throughout.
+
 ## Not here yet
 
 - Ending a task mid-way: the run closes what it opened, but a task cancelled
   while an app is mid-flow leaves that app's own state behind.
 - Audio isolation depends on the `PLAY_AUDIO` AppOps flag existing on the
   device; where it is missing the helper says so and the run is audible.
-- Nothing in this path has been exercised on a phone yet: the display, the tap
-  injection, the mute and the pairing handshake all need one run on real
-  hardware before they count as working.
+- Tap, swipe and typing **on** the hidden display, a full model turn against it,
+  two parallel tasks, and the wireless pairing handshake are still unproven.

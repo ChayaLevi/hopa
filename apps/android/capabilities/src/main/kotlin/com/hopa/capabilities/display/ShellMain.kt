@@ -2,44 +2,82 @@ package com.hopa.capabilities.display
 
 import android.content.Context
 import android.hardware.display.DisplayManager
-import android.net.LocalServerSocket
-import android.net.LocalSocket
+import android.os.Looper
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.ServerSocket
+import java.net.Socket
+import java.security.MessageDigest
 
 /**
  * The shell half of the background display. Started as uid 2000 with
- * `app_process` (CLASSPATH points at the APK), it owns the virtual display and
- * the input injection, and answers the app over an abstract local socket.
+ * `app_process` (CLASSPATH points at a dex that carries this class), it owns the
+ * virtual display and the input injection, and answers the app on loopback.
+ *
+ * Loopback, not an abstract UNIX socket: SELinux denies an app connecting to a
+ * socket owned by the shell, and that wall cannot be moved without root. The
+ * token from `--token=` is the guard instead; it is created by the app and never
+ * leaves the device.
  */
 object ShellMain {
-    private const val SOCKET = "hopa-display"
-
     @JvmStatic
     fun main(args: Array<String>) {
-        val socket = runCatching { LocalServerSocket(SOCKET) }.getOrElse {
+        val token = args.firstOrNull { it.startsWith(TOKEN_ARG) }?.substringAfter(TOKEN_ARG).orEmpty()
+        if (token.length < 16) {
+            System.err.println("hopa-display: start it with --token=<token>")
+            return
+        }
+        // ActivityThread.systemMain() builds its handler on the thread's Looper,
+        // so one has to exist before the system context is asked for.
+        runCatching { Looper.prepareMainLooper() }
+        val context = systemContext()
+        if (context == null) {
+            System.err.println("hopa-display: no system context; cannot reach the display manager")
+        }
+        val server = runCatching {
+            ServerSocket().apply {
+                reuseAddress = true
+                bind(InetSocketAddress(InetAddress.getLoopbackAddress(), DisplayProtocol.PORT))
+            }
+        }.getOrElse {
             System.err.println("hopa-display: cannot listen: ${it.message}")
             return
         }
-        println("hopa-display: listening")
+        println("hopa-display: listening on 127.0.0.1:${DisplayProtocol.PORT}")
         while (true) {
-            val client = runCatching { socket.accept() }.getOrNull() ?: continue
+            val client = runCatching { server.accept() }.getOrNull() ?: continue
             // One connection owns one display, so several clients can run several
             // tasks at the same time on separate hidden screens.
             Thread {
-                runCatching { serve(client) }
+                runCatching { serve(client, token, context) }
                 runCatching { client.close() }
             }.apply { isDaemon = true }.start()
         }
     }
 
-    private fun serve(socket: LocalSocket) {
-        val reader = BufferedReader(InputStreamReader(socket.inputStream))
-        val out = socket.outputStream
+    private fun serve(socket: Socket, token: String, context: Context?) {
+        val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
+        val out = socket.getOutputStream()
+        val hello = reader.readLine() ?: return
+        val given = if (hello.startsWith("auth ")) hello.removePrefix("auth ").trim() else ""
+        val matches = given.isNotEmpty() &&
+            MessageDigest.isEqual(given.toByteArray(), token.toByteArray())
+        if (!matches) {
+            runCatching {
+                out.write("err auth\n".toByteArray())
+                out.flush()
+            }
+            return
+        }
+        runCatching {
+            out.write("ok\n".toByteArray())
+            out.flush()
+        }
         var host: DisplayHost? = null
         var input: DisplayInput? = null
         var launcher: DisplayLauncher? = null
-        val context = systemContext()
 
         fun reply(line: String) {
             out.write((line + "\n").toByteArray())
@@ -48,6 +86,8 @@ object ShellMain {
 
         while (true) {
             val line = reader.readLine() ?: return
+            System.err.println("cmd: ${line.take(120)}")
+            System.err.flush()
             val parts = line.trim().split(' ').filter { it.isNotEmpty() }
             if (parts.isEmpty()) {
                 continue
@@ -59,7 +99,7 @@ object ShellMain {
                         continue
                     }
                     host?.release()
-                    val manager = context?.getSystemService(DisplayManager::class.java)
+                    val manager = displayManager(context)
                     if (manager == null) {
                         reply("err no display manager in the helper")
                         continue
@@ -227,6 +267,24 @@ object ShellMain {
     }.getOrDefault("")
 
     /** A Context from a bare `app_process`: the system context is enough here. */
+    /**
+     * The display manager must see the package that owns this uid: the helper
+     * runs as shell (2000), so a context for com.android.shell is asked for a
+     * manager, otherwise the system refuses with "packageName must match the
+     * owner uid".
+     */
+    private fun displayManager(context: Context?): DisplayManager? {
+        if (context == null) {
+            return null
+        }
+        val shell = runCatching {
+            context.createPackageContext("com.android.shell", Context.CONTEXT_IGNORE_SECURITY)
+        }.getOrNull() ?: context
+        return shell.getSystemService(DisplayManager::class.java)
+    }
+
+    private const val TOKEN_ARG = "--token="
+
     private fun systemContext(): Context? = runCatching {
         val activityThread = Class.forName("android.app.ActivityThread")
         val thread = activityThread.getMethod("systemMain").invoke(null)

@@ -330,14 +330,19 @@ class SettingsViewModel(
 
                 val device = runCatching { container.backgroundDevice() }.getOrNull()
                 if (device == null) {
+                    val why = container.lastBackgroundError.ifBlank { "no display" }
                     checks += ScreenCheck(
                         "tried",
-                        "Test failed: the hidden screen could not start",
+                        "Hidden screen failed: $why",
                         ok = false,
                     )
                 } else {
-                    val opened = runCatching { device.launch("com.android.settings") }
-                    val observation = runCatching { device.observe() }.getOrNull()
+                    val opened = withContext(Dispatchers.IO) {
+                        runCatching { device.launch("com.android.settings") }
+                    }
+                    val observation = withContext(Dispatchers.IO) {
+                        runCatching { device.observe() }.getOrNull()
+                    }
                     val elements = observation?.tree?.children?.size ?: 0
                     checks += if (opened.isSuccess) {
                         ScreenCheck("tried", "Tested it: Settings opened out of sight", ok = true)
@@ -405,7 +410,8 @@ class SettingsViewModel(
                 current.bridgeUrl.isBlank() -> "Bridge: set an address first"
                 token.isBlank() -> "Bridge: pair first, then start the helper"
                 else -> runCatching {
-                    val output = BridgeClient(current.bridgeUrl, token).startHelper()
+                    val output = BridgeClient(current.bridgeUrl, token)
+                        .startHelper(token = container.displayToken.value)
                     container.shell.close()
                     if (container.shell.connect()) {
                         "Background screen is ready"

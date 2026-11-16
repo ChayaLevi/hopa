@@ -57,7 +57,7 @@ class ParallelRunner(
         }
         patch(id) { it.copy(conversationId = conversation.id) }
 
-        val client = ShellClient()
+        val client = ShellClient(container.displayToken.value)
         val device = ShellDisplayDevice(client, container.context)
         val metrics = container.context.resources.displayMetrics
         val opened = runCatching { client.connect() }.getOrDefault(false) &&

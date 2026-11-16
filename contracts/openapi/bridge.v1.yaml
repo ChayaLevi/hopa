@@ -249,15 +249,24 @@ paths:
         classpath, so a hidden display can be created without Shizuku or a
         second tool on the phone. Android only: HarmonyOS has no such helper.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [token]
               properties:
                 package:
                   type: string
                   pattern: "^[A-Za-z][A-Za-z0-9_.]*$"
                   default: com.hopa.android
+                token:
+                  type: string
+                  pattern: "^[A-Za-z0-9]{32,128}$"
+                  description: |
+                    The display token from the app's private files. The helper
+                    listens on loopback and rejects a connection without it, so
+                    another app on the phone cannot drive the hidden screen.
       responses:
         "200":
           description: Started

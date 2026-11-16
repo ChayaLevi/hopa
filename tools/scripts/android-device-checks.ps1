@@ -53,8 +53,20 @@ function Install-Apk {
     Write-Host "   direct install refused by the host; staging instead" -ForegroundColor Yellow
 
     $md5 = (Get-FileHash $apk -Algorithm MD5).Hash.ToLower()
+    $size = (Get-Item $apk).Length
     Invoke-AdbIn -Path $apk -Destination $deviceApk
-    $remote = ((& $adb shell md5sum $deviceApk) -split "\s+")[0].Trim()
+    # adb can return before the device has flushed the last block, so wait for
+    # the size to settle before hashing; a mismatch is retried once.
+    for ($attempt = 0; $attempt -lt 2; $attempt++) {
+        for ($i = 0; $i -lt 20; $i++) {
+            $remoteSize = (& $adb shell stat -c %s $deviceApk 2>$null | Select-Object -First 1)
+            if ($remoteSize -and $remoteSize.Trim() -eq "$size") { break }
+            Start-Sleep -Milliseconds 500
+        }
+        $remote = ((& $adb shell md5sum $deviceApk) -split "\s+")[0].Trim()
+        if ($remote -eq $md5) { break }
+        if ($attempt -eq 0) { Invoke-AdbIn -Path $apk -Destination $deviceApk }
+    }
     if ($remote -ne $md5) {
         throw "the APK did not survive the transfer: local $md5, phone $remote"
     }
@@ -88,8 +100,13 @@ if ($InstallOnly) {
 Write-Host "2/4 starting the display helper" -ForegroundColor Cyan
 $helper = Join-Path $root "tools\scripts\android-display-helper.sh"
 if (-not (Test-Path $helper)) { throw "helper script missing: $helper" }
+# A shell script with CRLF fails on the phone ("set: -: unknown option"), and a
+# Windows checkout normalises it, so send a copy with LF endings.
+$helperLf = Join-Path $env:TEMP "hopa_display.sh"
+(Get-Content $helper -Raw).Replace("`r`n", "`n") |
+    Set-Content -Path $helperLf -Encoding ascii -NoNewline
 $deviceHelper = "/data/local/tmp/hopa_display.sh"
-Invoke-AdbIn -Path $helper -Destination $deviceHelper
+Invoke-AdbIn -Path $helperLf -Destination $deviceHelper
 $helperOut = & $adb shell sh $deviceHelper 2>&1
 $helperOut | Select-Object -Last 2 | ForEach-Object { Write-Host "   $_" }
 if (-not (($helperOut -join " ") -match "display ready")) {
