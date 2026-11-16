@@ -68,6 +68,16 @@ class ShellClient {
         return bytes
     }
 
+    fun appFunctions(packageName: String): Pair<Boolean, String> =
+        send(protocol.appFunctions(packageName))
+
+    fun appFunctionCall(
+        packageName: String,
+        function: String,
+        parameters: String,
+    ): Pair<Boolean, String> =
+        send(protocol.appFunctionCall(packageName, function, parameters.replace(" ", "")))
+
     fun mute(packageName: String): Pair<Boolean, String> = send(protocol.mute(packageName))
 
     fun unmute(packageName: String): Pair<Boolean, String> = send(protocol.unmute(packageName))

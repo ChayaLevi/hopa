@@ -257,6 +257,33 @@ class SettingsViewModel(
             }
 
             if (socket) {
+                // Android 16 lets apps publish typed functions; the shell sees them
+                // through `cmd app_function`, which is a cleaner door than tapping.
+                val listing = withContext(Dispatchers.IO) {
+                    runCatching { container.shell.appFunctions("com.android.settings") }
+                        .getOrNull()
+                }
+                checks += when {
+                    listing == null -> ScreenCheck(
+                        "appfn",
+                        "App functions: could not be checked",
+                        ok = true,
+                    )
+
+                    listing.second.contains("Can't find service") ||
+                        listing.second.contains("Unknown command") -> ScreenCheck(
+                        "appfn",
+                        "App functions: this Android does not offer them (needs 16)",
+                        ok = true,
+                    )
+
+                    else -> ScreenCheck(
+                        "appfn",
+                        "App functions: this Android supports them",
+                        ok = true,
+                    )
+                }
+
                 val device = runCatching { container.backgroundDevice() }.getOrNull()
                 if (device == null) {
                     checks += ScreenCheck(

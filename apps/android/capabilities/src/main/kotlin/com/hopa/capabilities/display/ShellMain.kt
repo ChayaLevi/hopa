@@ -153,6 +153,33 @@ object ShellMain {
                     }
                 }
 
+                "appfn" -> {
+                    val packageName = parts.getOrNull(1)
+                    if (packageName == null || !packageName.matches(Regex("[A-Za-z][A-Za-z0-9_.]*"))) {
+                        reply("err appfn needs a package")
+                        continue
+                    }
+                    reply("ok " + shellOut(
+                        "cmd app_function list-app-functions --package $packageName",
+                    ))
+                }
+
+                "appfn-call" -> {
+                    val packageName = parts.getOrNull(1)
+                    val function = parts.getOrNull(2)
+                    val parameters = parts.drop(3).joinToString(" ")
+                    if (packageName == null || function == null ||
+                        !packageName.matches(Regex("[A-Za-z][A-Za-z0-9_.]*"))
+                    ) {
+                        reply("err appfn-call needs a package and a function")
+                        continue
+                    }
+                    reply("ok " + shellOut(
+                        "cmd app_function execute-app-function --package $packageName " +
+                            "--function '$function' --parameters '$parameters'",
+                    ))
+                }
+
                 "finish" -> {
                     val packages = parts.drop(1)
                         .flatMap { it.split(',') }
@@ -186,6 +213,18 @@ object ShellMain {
             }
         }
     }
+
+    /** Run a shell command from the helper and return its output. */
+    private fun shellOut(command: String): String = runCatching {
+        ProcessBuilder("sh", "-c", command)
+            .redirectErrorStream(true)
+            .start()
+            .also { it.waitFor() }
+            .inputStream
+            .bufferedReader()
+            .readText()
+            .trim()
+    }.getOrDefault("")
 
     /** A Context from a bare `app_process`: the system context is enough here. */
     private fun systemContext(): Context? = runCatching {

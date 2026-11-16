@@ -17,6 +17,13 @@ class DisplayProtocol {
 
     fun key(code: Int): String = "key $code"
 
+    /** List the AppFunctions an app exposes (Android 16+). */
+    fun appFunctions(packageName: String): String = "appfn $packageName"
+
+    /** Call one AppFunction; [parameters] is compact JSON with no spaces. */
+    fun appFunctionCall(packageName: String, function: String, parameters: String): String =
+        "appfn-call $packageName $function $parameters"
+
     fun shot(): String = "shot"
 
     fun top(): String = "top"
