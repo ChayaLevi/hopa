@@ -175,7 +175,16 @@ class ChatViewModel(
     fun send() {
         val text = _state.value.input.trim()
         val attachment = _state.value.attachment
-        if ((text.isEmpty() && attachment == null) || _state.value.busy) {
+        if (text.isEmpty() && attachment == null) {
+            return
+        }
+        if (_state.value.busy) {
+            // The main turn is still going. A second goal goes to its own hidden
+            // display instead of being dropped on the floor.
+            if (text.isNotBlank() && container.runner.canStart()) {
+                container.runner.start(text)
+                _state.update { it.copy(input = "") }
+            }
             return
         }
         sendText(text, attachment = attachment)

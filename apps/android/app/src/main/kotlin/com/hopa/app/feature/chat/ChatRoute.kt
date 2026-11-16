@@ -21,6 +21,7 @@ fun ChatRoute(
 ) {
     val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val tasks by container.runner.tasks.collectAsStateWithLifecycle()
     var chatsOpen by remember { mutableStateOf(false) }
 
     val pendingGoal by container.pendingGoal.collectAsStateWithLifecycle()
@@ -61,6 +62,9 @@ fun ChatRoute(
         onApprovePlan = viewModel::approvePlan,
         onCancelPlan = viewModel::cancelPlan,
         onSaveSkill = viewModel::saveSkill,
+        tasks = tasks,
+        onOpenTask = { viewModel.select(it.conversationId) },
+        onDismissTask = { container.runner.dismiss(it) },
     )
 
     if (chatsOpen) {

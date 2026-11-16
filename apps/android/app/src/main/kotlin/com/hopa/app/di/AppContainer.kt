@@ -71,6 +71,9 @@ class AppContainer(context: Context) {
         factory = factory,
         clock = clock,
     )
+    /** Goals that run at the same time, each on its own hidden display. */
+    val runner by lazy { com.hopa.app.tasks.ParallelRunner(this) }
+
     /** The hidden background display: one helper process, one socket. */
     val shell = com.hopa.capabilities.display.ShellClient()
 

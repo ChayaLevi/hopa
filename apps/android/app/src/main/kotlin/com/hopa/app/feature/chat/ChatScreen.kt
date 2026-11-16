@@ -100,6 +100,9 @@ fun ChatScreen(
     onApprovePlan: () -> Unit = {},
     onCancelPlan: () -> Unit = {},
     onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
+    tasks: List<com.hopa.app.tasks.TaskItem> = emptyList(),
+    onOpenTask: (com.hopa.app.tasks.TaskItem) -> Unit = {},
+    onDismissTask: (String) -> Unit = {},
 ) {
     val messages = state.current?.messages.orEmpty()
     var evidence by remember { mutableStateOf(false) }
@@ -263,6 +266,22 @@ fun ChatScreen(
                         onDiscard = onDiscardAttachment,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
                     )
+                }
+                if (tasks.isNotEmpty()) {
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        tasks.forEach { task ->
+                            TaskChip(
+                                task = task,
+                                onOpen = { onOpenTask(task) },
+                                onDismiss = { onDismissTask(task.id) },
+                            )
+                        }
+                    }
                 }
                 if (!accessEnabled || !accessConnected) {
                     AccessibilityBanner(
