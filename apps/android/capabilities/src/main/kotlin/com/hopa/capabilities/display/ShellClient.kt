@@ -33,6 +33,10 @@ class ShellClient {
             output = created.outputStream
             reader = BufferedReader(InputStreamReader(created.inputStream))
             send("ping").first
+        }.onFailure { error ->
+            // The reason matters: a socket owned by the shell cannot always be
+            // reached from an app, and "off" without a cause is a dead end.
+            android.util.Log.w("HopaShell", "connect failed: ${error.message}", error)
         }.getOrDefault(false)
     }
 

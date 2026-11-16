@@ -77,9 +77,10 @@ Capabilities → Running apps ──"Start the background screen"──► bridg
   a reason, so a machine with no phone stays green.
 
 ```powershell
-# one-time per boot
-adb shell CLASSPATH=$(pm path com.hopa.android | cut -d: -f2) `
-    app_process / com.hopa.capabilities.display.ShellMain
+# one-time per boot; the helper class sits in a secondary dex, so the script
+# extracts the right classesN.dex and starts app_process with it
+adb shell sh /data/local/tmp/hopa_display.sh
+# (the same script is pushed by tools/scripts/android-device-checks.ps1)
 
 .\gradlew.bat :app:connectedDebugAndroidTest
 ```

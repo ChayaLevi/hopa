@@ -16,7 +16,7 @@ param(
     [switch]$InstallOnly
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $sdk = if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { "$env:LOCALAPPDATA\Android\Sdk" }
 $adb = Join-Path $sdk "platform-tools\adb.exe"
@@ -86,7 +86,15 @@ if ($InstallOnly) {
 }
 
 Write-Host "2/4 starting the display helper" -ForegroundColor Cyan
-& $adb shell "CLASSPATH=$(pm path $package | cut -d: -f2); nohup app_process / com.hopa.capabilities.display.ShellMain >/dev/null 2>&1 & echo started"
+$helper = Join-Path $root "tools\scripts\android-display-helper.sh"
+if (-not (Test-Path $helper)) { throw "helper script missing: $helper" }
+$deviceHelper = "/data/local/tmp/hopa_display.sh"
+Invoke-AdbIn -Path $helper -Destination $deviceHelper
+$helperOut = & $adb shell sh $deviceHelper 2>&1
+$helperOut | Select-Object -Last 2 | ForEach-Object { Write-Host "   $_" }
+if (-not (($helperOut -join " ") -match "display ready")) {
+    Write-Host "   hidden display did not start; device tests will skip" -ForegroundColor Yellow
+}
 
 Write-Host "3/4 accessibility state" -ForegroundColor Cyan
 $enabled = & $adb shell settings get secure enabled_accessibility_services

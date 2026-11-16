@@ -12,6 +12,11 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
+# The hidden-display helper is started by name from `app_process` as shell, so
+# nothing in the app references it and R8 would remove it. Keep the entry point;
+# everything it drives is then reachable.
+-keep class com.hopa.capabilities.display.ShellMain { *; }
+
 # The gateway between Compose and the Android views it hosts.
 -keep class androidx.compose.** { *; }
 -dontwarn androidx.compose.**
