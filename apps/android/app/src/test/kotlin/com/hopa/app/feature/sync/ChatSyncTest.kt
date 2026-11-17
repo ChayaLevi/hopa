@@ -1,9 +1,9 @@
 package com.hopa.app.feature.sync
 
 import com.hopa.net.bridge.ChatTransport
-import com.hopa.state.sessions.ChatMessage
-import com.hopa.state.sessions.Conversation
-import com.hopa.state.sessions.InMemoryConversationStore
+import com.hopa.stores.sessions.ChatMessage
+import com.hopa.stores.sessions.Conversation
+import com.hopa.stores.sessions.InMemoryConversationStore
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject

@@ -15,7 +15,7 @@ application {
 dependencies {
     implementation(project(":engine"))
     implementation(project(":net"))
-    implementation(project(":state"))
+    implementation(project(":stores"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

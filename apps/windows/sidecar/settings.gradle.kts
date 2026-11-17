@@ -29,5 +29,5 @@ project(":engine").projectDir = file("../../../packages/engine")
 include(":net")
 project(":net").projectDir = file("../../../packages/net")
 
-include(":state")
-project(":state").projectDir = file("../../../packages/state")
+include(":stores")
+project(":stores").projectDir = file("../../../packages/stores")

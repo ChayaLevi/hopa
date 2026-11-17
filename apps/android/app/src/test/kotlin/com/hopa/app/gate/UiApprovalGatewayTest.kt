@@ -2,7 +2,7 @@ package com.hopa.app.gate
 
 import com.hopa.engine.contracts.Action
 import com.hopa.engine.gate.ApprovalRequest
-import com.hopa.state.approvals.PendingApprovalStore
+import com.hopa.stores.approvals.PendingApprovalStore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield

@@ -1,7 +1,7 @@
 package com.hopa.app.feature.runningapps
 
 import com.hopa.app.feature.settings.SettingsUiState
-import com.hopa.state.settings.AppSettings
+import com.hopa.stores.settings.AppSettings
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
