@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased - packages
+
+- `packages/capabilities` is now `packages/remote`: the module holds the bridge
+  and model clients, and `com.hopa.capabilities.*` now belongs only to the
+  Android adapters, so one name means one thing.
+- New `packages/know`: the generated catalog, approval policy data and prompt
+  rules moved out of `packages/core` (`com.hopa.know.*`). The engine no longer
+  carries 1,600 lines of generated data, and the build scripts own that module.
+- `tools/checks/check-android-structure.py` now rejects `com.hopa.capabilities.*`
+  inside `packages/`, so the collision cannot come back.
+
 ## Unreleased - apps / services / evals
 
 - The repository is split by deployable: `apps/`, `services/`, `evals/`,

@@ -14,7 +14,7 @@ application {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":capabilities"))
+    implementation(project(":remote"))
     implementation(project(":data"))
 
     implementation(libs.kotlinx.coroutines.core)

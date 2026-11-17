@@ -1,6 +1,6 @@
 package com.hopa.app.feature.settings
 
-import com.hopa.capabilities.llm.ProviderState
+import com.hopa.remote.llm.ProviderState
 
 /** One plain word for the answers tile. */
 fun providerSummary(state: SettingsUiState): String = when (state.providerState) {

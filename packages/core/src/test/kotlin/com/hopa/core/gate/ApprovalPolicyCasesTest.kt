@@ -2,7 +2,7 @@ package com.hopa.core.gate
 
 import com.hopa.core.contracts.Action
 import com.hopa.core.contracts.RiskLevel
-import com.hopa.policy.ApprovalPolicyData
+import com.hopa.know.policy.ApprovalPolicyData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

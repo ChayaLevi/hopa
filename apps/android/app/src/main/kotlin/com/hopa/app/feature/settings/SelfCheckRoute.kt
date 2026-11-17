@@ -10,9 +10,9 @@ import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import com.hopa.capabilities.bridge.BridgeClient
-import com.hopa.capabilities.llm.ProviderState
-import com.hopa.capabilities.llm.ProviderStateResolver
+import com.hopa.remote.bridge.BridgeClient
+import com.hopa.remote.llm.ProviderState
+import com.hopa.remote.llm.ProviderStateResolver
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 

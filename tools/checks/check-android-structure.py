@@ -7,6 +7,8 @@ Rules:
   * no ``Utils``/``Helpers``/``Common``/``Manager`` file names;
   * everything under ``packages/`` (the client engine) imports no ``android.*``
     or ``androidx.*``;
+  * everything under ``packages/`` stays out of ``com.hopa.capabilities.*``,
+    which names the Android platform adapters only;
   * only ``CatalogRoutes`` picks a catalog platform target, so no client can
     read another platform's identifier by accident.
 
@@ -102,6 +104,13 @@ def check() -> list[str]:
                 if stripped.startswith("import android.") or stripped.startswith("import androidx."):
                     problems.append(
                         f"{relative}:{number}: a client package imports Android"
+                    )
+                # com.hopa.capabilities.* belongs to the platform adapters in
+                # apps/android; the shared engine must not claim that name again.
+                if "com.hopa.capabilities." in line:
+                    problems.append(
+                        f"{relative}:{number}: a client package uses the platform adapter "
+                        "namespace com.hopa.capabilities"
                     )
     return problems
 

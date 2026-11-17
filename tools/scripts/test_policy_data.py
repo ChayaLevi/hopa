@@ -90,7 +90,7 @@ def test_kotlin_rendering_uses_the_same_values() -> None:
     module = _module()
     data = _data()
     output = module.render_kotlin(data)
-    assert "package com.hopa.policy" in output
+    assert "package com.hopa.know.policy" in output
     assert "object ApprovalPolicyData" in output
     for kind in data["paymentKinds"]:
         assert module.kotlin_string(kind) in output

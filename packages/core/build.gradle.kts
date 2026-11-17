@@ -16,6 +16,7 @@ sourceSets {
 }
 
 dependencies {
+    implementation(project(":know"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)
 

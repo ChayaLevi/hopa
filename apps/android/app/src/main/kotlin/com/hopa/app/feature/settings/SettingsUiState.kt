@@ -1,6 +1,6 @@
 package com.hopa.app.feature.settings
 
-import com.hopa.capabilities.llm.ProviderState
+import com.hopa.remote.llm.ProviderState
 import com.hopa.data.settings.AppSettings
 
 data class SettingsUiState(

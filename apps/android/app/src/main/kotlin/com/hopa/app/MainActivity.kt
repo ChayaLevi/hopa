@@ -15,7 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.hopa.app.di.AppContainer
 import com.hopa.app.service.ScreenCaptureRequester
 import com.hopa.app.service.ScreenCaptureService
-import com.hopa.capabilities.bridge.BridgeClient
+import com.hopa.remote.bridge.BridgeClient
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {

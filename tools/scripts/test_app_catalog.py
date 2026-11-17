@@ -50,7 +50,7 @@ def test_list_parsing_handles_empty() -> None:
 def test_catalogue_counts_and_status() -> None:
     module = _module()
     data = module.document(module.collect_apps(), module.collect_sites())
-    assert len(data["apps"]) == 54
+    assert len(data["apps"]) == 55
     assert len(data["sites"]) == 21
     harmony = [app["platforms"]["harmonyos"] for app in data["apps"]]
     assert sum(1 for item in harmony if item["verified"]) == 26
@@ -97,7 +97,7 @@ def test_kotlin_rendering_matches_the_same_entries() -> None:
     module = _module()
     data = module.document(module.collect_apps(), module.collect_sites())
     output = module.render_kotlin(data)
-    assert "package com.hopa.catalog" in output
+    assert "package com.hopa.know.catalog" in output
     assert 'id = "alipay"' in output
     for app in data["apps"]:
         assert f'id = "{app["id"]}"' in output
