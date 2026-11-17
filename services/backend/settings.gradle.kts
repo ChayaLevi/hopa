@@ -25,5 +25,5 @@ project(":know").projectDir = file("../../packages/know")
 include(":core")
 project(":core").projectDir = file("../../packages/core")
 
-include(":data")
-project(":data").projectDir = file("../../packages/data")
+include(":state")
+project(":state").projectDir = file("../../packages/state")

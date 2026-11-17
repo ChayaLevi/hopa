@@ -23,8 +23,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.data.sessions.Attachment
-import com.hopa.data.sessions.AttachmentRules
+import com.hopa.state.sessions.Attachment
+import com.hopa.state.sessions.AttachmentRules
 
 /** The attachment waiting in the composer; nothing is sent until the user taps send. */
 @Composable

@@ -12,7 +12,7 @@ import com.hopa.app.feature.capabilities.CapabilitiesRoute
 import com.hopa.app.feature.chat.ChatRoute
 import com.hopa.app.feature.conversations.EasyHistoryRoute
 import com.hopa.app.feature.power.PowerHomeRoute
-import com.hopa.data.settings.AppSettings
+import com.hopa.state.settings.AppSettings
 
 /**
  * The three top-level pages from Index.ets. The tab state lives here, not in

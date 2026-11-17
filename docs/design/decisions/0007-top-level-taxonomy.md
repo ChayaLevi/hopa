@@ -76,7 +76,7 @@ import the Android app. The engine moved out of `apps/`:
 | Folder | What it holds | Who may import it |
 |---|---|---|
 | `packages/core` | contracts, loop, gate, records, ports | clients |
-| `packages/data` | storage interfaces and models | clients |
+| `packages/state` | storage interfaces and models (renamed from `packages/data`; the package name `com.hopa.data.*` stays with the Android stores) | clients |
 | `packages/remote` | bridge and model clients (renamed from `packages/capabilities`; the package name `com.hopa.capabilities.*` stays with the Android adapters) | clients |
 | `packages/know` | generated catalog, policy data and prompt rules, written by the build scripts | clients |
 

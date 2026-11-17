@@ -72,7 +72,7 @@ import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import com.hopa.data.sessions.ChatMessage
+import com.hopa.state.sessions.ChatMessage
 
 /** Two checks, four seconds: one dip is a rebind, two are a real outage. */
 private const val ACCESS_MISSES_BEFORE_OFF = 2

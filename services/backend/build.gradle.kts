@@ -21,7 +21,7 @@ sourceSets {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":data"))
+    implementation(project(":state"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

@@ -1,7 +1,7 @@
 package com.hopa.sidecar
 
-import com.hopa.data.sessions.Attachment
-import com.hopa.data.sessions.AttachmentRules
+import com.hopa.state.sessions.Attachment
+import com.hopa.state.sessions.AttachmentRules
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption

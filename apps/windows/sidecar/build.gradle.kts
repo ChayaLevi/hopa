@@ -15,7 +15,7 @@ application {
 dependencies {
     implementation(project(":core"))
     implementation(project(":remote"))
-    implementation(project(":data"))
+    implementation(project(":state"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

@@ -12,7 +12,7 @@ import com.hopa.core.model.ModelPort
 import com.hopa.core.ports.DevicePort
 import com.hopa.core.ports.InstalledApp
 import com.hopa.core.router.CatalogRoutes
-import com.hopa.data.sessions.Attachment
+import com.hopa.state.sessions.Attachment
 import com.hopa.core.records.InMemoryRunRecorder
 import com.hopa.core.records.RunChain
 import com.hopa.core.records.RunRecordFactory

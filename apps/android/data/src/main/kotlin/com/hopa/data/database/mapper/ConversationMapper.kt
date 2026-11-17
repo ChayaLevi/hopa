@@ -2,10 +2,10 @@ package com.hopa.data.database.mapper
 
 import com.hopa.data.database.entity.SessionEntity
 import com.hopa.data.database.entity.TurnEntity
-import com.hopa.data.sessions.Attachment
-import com.hopa.data.sessions.ChatMessage
-import com.hopa.data.sessions.Conversation
-import com.hopa.data.sessions.MessageProof
+import com.hopa.state.sessions.Attachment
+import com.hopa.state.sessions.ChatMessage
+import com.hopa.state.sessions.Conversation
+import com.hopa.state.sessions.MessageProof
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
