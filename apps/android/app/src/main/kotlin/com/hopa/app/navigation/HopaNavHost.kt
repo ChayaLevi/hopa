@@ -10,6 +10,7 @@ import com.hopa.app.di.AppContainer
 import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.app.feature.memory.MemoryRoute
+import com.hopa.app.feature.memory.SkillsRoute
 import com.hopa.app.feature.runningapps.ComputerRoute
 import com.hopa.app.feature.runningapps.RunningAppsRoute
 import com.hopa.app.feature.browser.BrowserRoute
@@ -32,8 +33,8 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onOpenSettings = { navController.navigate(HopaDestination.SETTINGS) },
                 onOpenRuns = { navController.navigate(HopaDestination.RUNS) },
                 onOpenUsage = { navController.navigate(HopaDestination.USAGE) },
-                onOpenMemory = { navController.navigate(HopaDestination.memory("facts")) },
-                onOpenSkills = { navController.navigate(HopaDestination.memory("skills")) },
+                onOpenMemory = { navController.navigate(HopaDestination.MEMORY) },
+                onOpenSkills = { navController.navigate(HopaDestination.SKILLS) },
                 onOpenRunningApps = { navController.navigate(HopaDestination.RUNNING_APPS) },
                 onOpenBrowser = {
                     navController.navigate(HopaDestination.BROWSER + "?url=")
@@ -47,14 +48,16 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(
-            route = HopaDestination.MEMORY + "?section={section}",
-            arguments = listOf(navArgument("section") { defaultValue = "facts" }),
-        ) { entry ->
+        composable(HopaDestination.MEMORY) {
             MemoryRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                section = entry.arguments?.getString("section") ?: "facts",
+            )
+        }
+        composable(HopaDestination.SKILLS) {
+            SkillsRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
             )
         }
         composable(

@@ -53,9 +53,15 @@ class MemoryViewModel(
         }
     }
 
-    fun clearAll() {
+    fun clearFacts() {
         viewModelScope.launch {
             container.memory.clear()
+            load()
+        }
+    }
+
+    fun clearSkills() {
+        viewModelScope.launch {
             container.skills.clear()
             load()
         }

@@ -210,16 +210,21 @@ private fun ProofReceipt(
                 }
                 if (saved) {
                     Text(
-                        "Saved as a skill",
+                        "Saved to Skills",
                         fontSize = 12.sp,
                         color = HopaColor.Success,
                     )
                 } else if (goal.isNotBlank()) {
+                    Text(
+                        "Adds this phrase and these steps to Skills, so the model can reuse them.",
+                        fontSize = 11.sp,
+                        color = HopaColor.TextHint,
+                    )
                     TextButton(
                         onClick = { onSaveSkill(goal, proof.steps) },
                         contentPadding = PaddingValues(0.dp),
                     ) {
-                        Text("Save as a skill", fontSize = 12.sp)
+                        Text("Teach this as a skill", fontSize = 12.sp)
                     }
                 }
             }
