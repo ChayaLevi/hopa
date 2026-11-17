@@ -69,7 +69,11 @@ fun RunSetupScreen(
                 Column {
                     SetupRow(
                         "Screen access",
-                        if (state.phoneAccess) "On" else "Off",
+                        when {
+                            !state.settings.accessibilityAllowed -> "Paused in HOPA"
+                            state.phoneAccess -> "On"
+                            else -> "Off"
+                        },
                         state.phoneAccess,
                         onOpenScreenAccess,
                     )

@@ -64,12 +64,16 @@ fun AccessibilityScreen(
                     HopaStatusPill(
                         text = when {
                             live -> "On"
-                            serviceEnabled -> "Reconnecting"
+                            // The switch is the app's own kill switch: nothing is
+                            // reconnecting, the person paused it here.
+                            !allowed && serviceEnabled -> "Paused by you"
+                            serviceEnabled && !connected -> "Connecting"
                             else -> "Off"
                         },
                         color = when {
                             live -> HopaColor.Success
-                            serviceEnabled -> HopaColor.Warning
+                            !allowed && serviceEnabled -> HopaColor.Warning
+                            serviceEnabled && !connected -> HopaColor.Warning
                             else -> HopaColor.TextHint
                         },
                     )

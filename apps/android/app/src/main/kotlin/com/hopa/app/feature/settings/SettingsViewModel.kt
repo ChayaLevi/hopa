@@ -511,7 +511,8 @@ class SettingsViewModel(
                 bridgeKey = bridgeKey,
                 backgroundRunning = background,
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),
-                phoneAccess = AccessibilityState.isEnabled(container.context) &&
+                phoneAccess = settings.accessibilityAllowed &&
+                    AccessibilityState.isEnabled(container.context) &&
                     HopaAccessibilityService.instance != null,
                 error = if (keySaved && key.isBlank()) {
                     "The saved key cannot be read on this phone; paste it again"

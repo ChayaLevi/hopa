@@ -1,7 +1,6 @@
-package com.hopa.app.feature.runningapps
+﻿package com.hopa.app.feature.runningapps
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,14 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,14 +29,13 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.feature.settings.BackgroundSetupDialog
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.ui.component.HopaPageHeader
-import com.hopa.app.ui.component.HopaStatusPill
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * The one home for everything HOPA can act on: where it acts, which apps and
- * sites it can open, and the setup and preferences behind that. The lists and
- * the switches live on their own pages; this page answers "where does HOPA
- * work right now, and what can it reach".
+ * The one home for everything HOPA can act on. Two questions, in order:
+ * which machine (this phone or the computer), and — on the phone — whether
+ * HOPA works out of sight or on the screen the person is watching. The computer
+ * is never picked behind the person's back.
  */
 @Composable
 fun RunningAppsScreen(
@@ -61,28 +58,12 @@ fun RunningAppsScreen(
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = state.settings.screenPath
     val bridgeReady = state.settings.bridgeUrl.isNotBlank()
-    val hiddenForced = mode == "background" && !state.backgroundRunning
-    val needsScreen = !state.phoneAccess
-    val needsComputer = mode == "bridge" && !bridgeReady
-    val problem: Pair<String, androidx.compose.ui.graphics.Color>? = when {
-        needsScreen -> "Needs screen access" to HopaColor.Warning
-        hiddenForced -> "Hidden screen is off" to HopaColor.Warning
-        needsComputer -> "Computer not set up" to HopaColor.Warning
-        else -> null
-    }
-    val statusContent: (@Composable () -> Unit)? = problem?.let { (text, color) ->
-        { HopaStatusPill(text = text, color = color) }
-    }
+    val computer = mode == "bridge"
+    val hidden = !computer && mode != "onscreen"
 
     Scaffold(
         containerColor = HopaColor.Bg,
-        topBar = {
-            HopaPageHeader(
-                title = "Act",
-                onBack = onBack,
-                status = statusContent,
-            )
-        },
+        topBar = { HopaPageHeader(title = "Act", onBack = onBack) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -90,29 +71,73 @@ fun RunningAppsScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Text("Where HOPA acts", fontSize = 12.sp, color = HopaColor.TextHint)
-            SurfaceChoice(mode = mode, onPick = onScreenPath)
-            Text(
-                when (mode) {
-                    "background" -> "HOPA uses the hidden screen."
-                    "bridge" -> "HOPA uses your computer."
-                    "onscreen" -> "HOPA uses this phone's screen."
-                    else -> "Hidden first, then computer, then this screen."
+            Text("Where HOPA works", fontSize = 12.sp, color = HopaColor.TextHint)
+            Segmented(
+                options = listOf(true to "This phone", false to "My computer"),
+                selected = !computer,
+                onPick = { phone ->
+                    if (phone && computer) {
+                        onScreenPath("background")
+                    } else if (!phone) {
+                        onScreenPath("bridge")
+                    }
                 },
-                fontSize = 13.sp,
-                color = HopaColor.TextSecondary,
-                minLines = 2,
-                maxLines = 2,
             )
 
-            when {
-                needsScreen -> FixButton("Turn on screen access", state.busy, onOpenScreenAccess)
-                hiddenForced && (state.backgroundRunning || bridgeReady) ->
-                    FixButton("Start the hidden screen", state.busy, onStartBackgroundHelper)
+            if (!computer) {
+                Text("On this phone", fontSize = 12.sp, color = HopaColor.TextHint)
+                Segmented(
+                    options = listOf(true to "Hidden screen", false to "Your screen"),
+                    selected = hidden,
+                    onPick = { wantsHidden ->
+                        onScreenPath(if (wantsHidden) "background" else "onscreen")
+                    },
+                )
+            }
 
-                hiddenForced -> FixButton("Set up the hidden screen", state.busy) { setup = true }
+            Column(modifier = Modifier.height(64.dp)) {
+                Text(
+                    when {
+                        computer && !bridgeReady -> "Your computer is not set up."
+                        computer -> "HOPA works on your computer."
+                        hidden && !state.backgroundRunning -> "The hidden screen is not running."
+                        hidden -> "HOPA works out of sight."
+                        !state.phoneAccess -> "Screen access is off."
+                        else -> "HOPA works on the screen you see."
+                    },
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = HopaColor.TextPrimary,
+                    maxLines = 1,
+                )
+                Text(
+                    when {
+                        computer -> "You can watch it on the PC."
+                        hidden -> "You keep using your phone; the work happens on a screen you cannot see."
+                        else -> "You watch every tap on this screen."
+                    },
+                    fontSize = 12.sp,
+                    color = HopaColor.TextHint,
+                    minLines = 2,
+                    maxLines = 2,
+                )
+            }
+
+            when {
+                computer && !bridgeReady ->
+                    TextButton(onClick = onOpenComputer) { Text("Pair your computer") }
+
+                !computer && hidden && !state.backgroundRunning && bridgeReady ->
+                    TextButton(onClick = onStartBackgroundHelper) { Text("Start the hidden screen") }
+
+                !computer && hidden && !state.backgroundRunning ->
+                    TextButton(onClick = { setup = true }) { Text("Set up the hidden screen") }
+
+                !computer && !hidden && !state.phoneAccess ->
+                    TextButton(onClick = onOpenScreenAccess) { Text("Allow screen access") }
+
                 else -> Unit
             }
 
@@ -130,7 +155,7 @@ fun RunningAppsScreen(
                 HubRow(
                     title = "Setup & test",
                     subtitle = when {
-                        needsScreen -> "Screen access is off"
+                        !state.phoneAccess -> "Screen access is paused"
                         state.backgroundRunning -> "Screen access on, hidden screen running"
                         else -> "Screen access on"
                     },
@@ -177,16 +202,39 @@ fun RunningAppsScreen(
     }
 }
 
+/** Two-way choice that reads as a sentence, not as a control panel. */
 @Composable
-private fun FixButton(label: String, busy: Boolean, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        enabled = !busy,
+private fun <T> Segmented(
+    options: List<Pair<T, String>>,
+    selected: T,
+    onPick: (T) -> Unit,
+) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(46.dp),
+            .padding(bottom = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(if (busy) "Working\u2026" else label)
+        options.forEach { (value, label) ->
+            val active = value == selected
+            Surface(
+                color = if (active) HopaColor.PrimarySoft else HopaColor.Surface,
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, if (active) HopaColor.Primary else HopaColor.Divider),
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onPick(value) },
+            ) {
+                Text(
+                    label,
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    fontSize = 14.sp,
+                    fontWeight = if (active) FontWeight.Medium else FontWeight.Normal,
+                    color = if (active) HopaColor.Primary else HopaColor.TextSecondary,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+            }
+        }
     }
 }
 
@@ -209,43 +257,6 @@ private fun HubRow(title: String, subtitle: String, onClick: () -> Unit) {
                 Text(subtitle, fontSize = 12.sp, color = HopaColor.TextHint)
             }
             Text("\u203A", fontSize = 18.sp, color = HopaColor.TextHint)
-        }
-    }
-}
-
-@Composable
-private fun SurfaceChoice(mode: String, onPick: (String) -> Unit) {
-    val options = listOf(
-        "auto" to "Auto",
-        "background" to "Hidden",
-        "onscreen" to "Phone",
-        "bridge" to "Computer",
-    )
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(HopaColor.SurfaceMuted, RoundedCornerShape(100.dp))
-            .padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        options.forEach { (key, label) ->
-            val selected = mode == key
-            Surface(
-                color = if (selected) HopaColor.Surface else androidx.compose.ui.graphics.Color.Transparent,
-                shape = RoundedCornerShape(100.dp),
-                border = if (selected) BorderStroke(1.dp, HopaColor.Primary) else null,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { onPick(key) },
-            ) {
-                Text(
-                    label,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    fontSize = 13.sp,
-                    color = if (selected) HopaColor.Primary else HopaColor.TextSecondary,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-            }
         }
     }
 }
