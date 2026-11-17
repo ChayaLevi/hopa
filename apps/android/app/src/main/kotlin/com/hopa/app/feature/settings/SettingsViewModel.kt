@@ -229,9 +229,23 @@ class SettingsViewModel(
     /** auto, background, onscreen or bridge; the same words the core enum uses. */
     fun setScreenPath(value: String) {
         viewModelScope.launch {
-            container.settings.update { it.copy(screenPath = value) }
+            _state.update { it.copy(bridgeStatus = null, screenCheck = emptyList()) }
+            container.settings.update {
+                it.copy(
+                    screenPath = value,
+                    // Selecting the computer turns the bridge on. Going back to
+                    // the phone leaves the bridge configured: chat sync and voice
+                    // still use it, and only the tap driver changes.
+                    useBridge = if (value == "bridge") true else it.useBridge,
+                )
+            }
             reload()
         }
+    }
+
+    /** Re-read access, the helper and the saved mode after another page changed them. */
+    fun refresh() {
+        viewModelScope.launch { reload() }
     }
 
     fun setChattiness(value: String) {
@@ -268,33 +282,80 @@ class SettingsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(busy = true, screenCheck = emptyList()) }
             val checks = mutableListOf<ScreenCheck>()
+            val current = container.settings.settings.first()
+            val path = current.screenPath
+            val onBridge = path == "bridge"
             val service = HopaAccessibilityService.instance
             val enabled = AccessibilityState.isEnabled(container.context)
-            checks += if (enabled && service != null) {
-                ScreenCheck("screen", "HOPA can see your screen", ok = true)
-            } else if (enabled) {
-                ScreenCheck(
+
+            checks += when {
+                onBridge -> ScreenCheck(
                     "screen",
-                    "Screen control is on but not answering - tap Fix to open it",
+                    "Screen access is not needed with My computer",
+                    ok = true,
+                    info = true,
+                )
+
+                !current.accessibilityAllowed -> ScreenCheck(
+                    "screen",
+                    "Screen access is paused by you - tap Fix to resume it",
                     ok = false,
                     action = "Fix",
                 )
-            } else {
-                ScreenCheck(
+
+                enabled && service != null -> ScreenCheck(
                     "screen",
-                    "Screen control is off - tap Fix, then turn on HOPA",
+                    "HOPA can see your screen",
+                    ok = true,
+                )
+
+                enabled -> ScreenCheck(
+                    "screen",
+                    "Screen access is on but not answering - tap Fix to open it",
+                    ok = false,
+                    action = "Fix",
+                )
+
+                else -> ScreenCheck(
+                    "screen",
+                    "Screen access is off - tap Fix, then turn on HOPA",
                     ok = false,
                     action = "Fix",
                 )
             }
 
-            val socket = withContext(Dispatchers.IO) { container.shell.connect() }
-            checks += if (socket) {
-                ScreenCheck("background", "Background mode is on", ok = true)
+            val socket = if (onBridge || path == "onscreen") {
+                false
             } else {
-                ScreenCheck(
+                withContext(Dispatchers.IO) { container.shell.connect() }
+            }
+            checks += when {
+                onBridge -> ScreenCheck(
                     "background",
-                    "Background mode is off - tap Set up, then pair once",
+                    "Hidden screen is not used with My computer",
+                    ok = true,
+                    info = true,
+                )
+
+                path == "onscreen" -> ScreenCheck(
+                    "background",
+                    "Hidden screen is not used with Your screen",
+                    ok = true,
+                    info = true,
+                )
+
+                socket -> ScreenCheck("background", "Hidden screen is ready", ok = true)
+
+                path == "auto" -> ScreenCheck(
+                    "background",
+                    "Hidden screen isn't running; your screen will be used",
+                    ok = true,
+                    info = true,
+                )
+
+                else -> ScreenCheck(
+                    "background",
+                    "Hidden screen isn't running - tap Set up, then pair once",
                     ok = false,
                     action = "Set up",
                 )
@@ -307,26 +368,14 @@ class SettingsViewModel(
                     runCatching { container.shell.appFunctions("com.android.settings") }
                         .getOrNull()
                 }
-                checks += when {
-                    listing == null -> ScreenCheck(
-                        "appfn",
-                        "App functions: could not be checked",
-                        ok = true,
-                    )
-
+                val appFunctions = when {
+                    listing == null -> "App functions: could not be checked"
                     listing.second.contains("Can't find service") ||
-                        listing.second.contains("Unknown command") -> ScreenCheck(
-                        "appfn",
-                        "App functions: this Android does not offer them (needs 16)",
-                        ok = true,
-                    )
-
-                    else -> ScreenCheck(
-                        "appfn",
-                        "App functions: this Android supports them",
-                        ok = true,
-                    )
+                        listing.second.contains("Unknown command") ->
+                        "App functions: this Android does not offer them (needs 16)"
+                    else -> "App functions: this Android supports them"
                 }
+                checks += ScreenCheck("appfn", appFunctions, ok = true, info = true)
 
                 val device = runCatching { container.backgroundDevice() }.getOrNull()
                 if (device == null) {
@@ -340,10 +389,9 @@ class SettingsViewModel(
                     val opened = withContext(Dispatchers.IO) {
                         runCatching { device.launch("com.android.settings") }
                     }
-                    val observation = withContext(Dispatchers.IO) {
+                    withContext(Dispatchers.IO) {
                         runCatching { device.observe() }.getOrNull()
                     }
-                    val elements = observation?.tree?.children?.size ?: 0
                     checks += if (opened.isSuccess) {
                         ScreenCheck("tried", "Tested it: Settings opened out of sight", ok = true)
                     } else {
@@ -359,33 +407,51 @@ class SettingsViewModel(
                 }
             }
 
-            val current = container.settings.settings.first()
-            if (current.bridgeUrl.isNotBlank()) {
-                val token = container.settings.bridgeToken()
+            val token = container.settings.bridgeToken()
+            val bridgeConfigured = current.bridgeUrl.isNotBlank() && token.isNotBlank()
+            if (bridgeConfigured) {
                 val health = withContext(Dispatchers.IO) {
                     runCatching {
                         com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token).health()
                         true
                     }.getOrDefault(false)
                 }
-                checks += if (health) {
-                    ScreenCheck("computer", "Your computer is connected", ok = true)
-                } else {
-                    ScreenCheck(
+                checks += when {
+                    health -> ScreenCheck("computer", "HOPA bridge is connected", ok = true)
+                    onBridge -> ScreenCheck(
                         "computer",
-                        "Your computer is not answering - tap Fix",
+                        "HOPA bridge is not answering - tap Fix",
                         ok = false,
                         action = "Fix",
                     )
+                    else -> ScreenCheck(
+                        "computer",
+                        "HOPA bridge is not answering (not needed for This phone)",
+                        ok = true,
+                        info = true,
+                    )
                 }
+            } else if (onBridge) {
+                checks += ScreenCheck(
+                    "computer",
+                    "HOPA bridge isn't set up - tap Fix",
+                    ok = false,
+                    action = "Fix",
+                )
             } else {
-                checks += ScreenCheck("computer", "Your computer is not set up (optional)", ok = true)
+                checks += ScreenCheck(
+                    "computer",
+                    "HOPA bridge isn't set up (not needed for This phone)",
+                    ok = true,
+                    info = true,
+                )
             }
 
             checks += ScreenCheck(
                 "mode",
-                "Apps will open: ${pathLabel(current.screenPath).lowercase()}",
+                "Apps will open: ${pathLabel(path).lowercase()}",
                 ok = true,
+                info = true,
             )
             _state.update { it.copy(busy = false, screenCheck = checks) }
         }.invokeOnCompletion { _state.update { it.copy(busy = false) } }
@@ -396,7 +462,17 @@ class SettingsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(busy = true, bridgeStatus = null) }
             val message = container.pairWireless(address, code)
-            _state.update { it.copy(busy = false, bridgeStatus = message) }
+            _state.update {
+                it.copy(
+                    busy = false,
+                    bridgeStatus = message,
+                    backgroundRunning = if (message.contains("is ready", ignoreCase = true)) {
+                        true
+                    } else {
+                        it.backgroundRunning
+                    },
+                )
+            }
         }
     }
 
@@ -430,13 +506,23 @@ class SettingsViewModel(
                         .startHelper(token = container.displayToken.value)
                     container.shell.close()
                     if (container.shell.connect()) {
-                        "Background screen is ready"
+                        "Hidden screen is ready"
                     } else {
                         "Helper started but did not answer: ${output.take(120)}"
                     }
-                }.getOrElse { error -> "Background: ${error.message}" }
+                }.getOrElse { error -> "Hidden screen: ${error.message}" }
             }
-            _state.update { it.copy(busy = false, bridgeStatus = message) }
+            _state.update {
+                it.copy(
+                    busy = false,
+                    bridgeStatus = message,
+                    backgroundRunning = if (message == "Hidden screen is ready") {
+                        true
+                    } else {
+                        it.backgroundRunning
+                    },
+                )
+            }
         }
     }
 

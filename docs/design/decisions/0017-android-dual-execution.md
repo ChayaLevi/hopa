@@ -56,10 +56,12 @@ The owner wants both, to show both to colleagues.
   an APK that runs the loop itself.
 - **Root/ADB shell on device.** Rejected: not shippable to normal users.
 
-## Update 2026-11-16
+## Update 2026-11-17
 
 The priority in this decision ("bridge first, then accessibility") was replaced
-by a setting with four surfaces: **Auto** (hidden, then computer, then this
-screen), **Hidden**, **Here**, **Computer**. `ScreenPathOrder` is the pure
-function that decides, and the run records which surface answered. The seam this
-ADR describes - one `DevicePort`, several adapters - is unchanged.
+by a phone-first setting. The person chooses **This phone** or **My computer**;
+on the phone they choose **Hidden screen** or **Your screen**. `Auto` is the
+phone's fallback only (hidden, then this screen) and never picks the computer.
+`ScreenPathOrder` is the pure function that decides, and the run records which
+surface answered. The seam this ADR describes - one `DevicePort`, several
+adapters - is unchanged.

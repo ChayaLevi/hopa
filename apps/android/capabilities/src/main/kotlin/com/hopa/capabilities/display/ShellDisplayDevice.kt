@@ -149,7 +149,7 @@ class ShellDisplayDevice(
         val node = ref?.let { refs[it] }
             ?: service.windows.firstOrNull { it.displayId == displayId }?.root
                 ?.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
-            ?: throw IllegalStateException("no text field is focused on the background screen")
+            ?: throw IllegalStateException("no text field is focused on the hidden screen")
         node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
         val arguments = android.os.Bundle().apply {
             putCharSequence(

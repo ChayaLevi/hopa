@@ -16,13 +16,15 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * Screen access is the local way to see and tap other apps. The hidden screen and
- * a paired computer do not need it, so the banner says what is missing without
- * claiming nothing can run; the one tap that fixes it belongs above the field.
+ * Screen access is the local way to see and tap other apps. The hidden screen
+ * needs it too, to read the app's tree; only the computer does not. The banner
+ * opens Act, where the person sees whether the Android service or HOPA's own
+ * switch is the missing piece.
  */
 @Composable
 fun AccessibilityBanner(
-    onOpenSettings: () -> Unit,
+    onOpenAct: () -> Unit,
+    allowed: Boolean,
     enabled: Boolean,
     connected: Boolean,
     modifier: Modifier = Modifier,
@@ -30,7 +32,7 @@ fun AccessibilityBanner(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onOpenSettings),
+            .clickable(onClick = onOpenAct),
         color = HopaColor.SurfaceAlt,
         shape = RoundedCornerShape(12.dp),
     ) {
@@ -42,8 +44,9 @@ fun AccessibilityBanner(
         ) {
             Text(
                 when {
-                    !enabled -> "Screen access is off. Hidden mode or a paired computer can still act."
-                    !connected -> "Screen access is on but not connected; turn it off and on again."
+                    !allowed -> "Screen access is paused in HOPA. Open Act to resume it."
+                    !enabled -> "Screen access is off. Open Act to turn it on."
+                    !connected -> "Screen access is on but not connected; open Act to fix it."
                     else -> ""
                 },
                 fontSize = 12.sp,
@@ -51,7 +54,7 @@ fun AccessibilityBanner(
                 modifier = Modifier.weight(1f),
             )
             Text(
-                if (enabled) "Check" else "Turn on",
+                "Open Act",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 color = HopaColor.Primary,

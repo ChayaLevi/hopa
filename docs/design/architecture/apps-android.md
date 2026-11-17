@@ -2,7 +2,7 @@
 
 Status: the active client. The loop runs **in the app** (ADR-0016), execution has
 several surfaces behind one port (ADR-0017, extended by `ScreenPathOrder`), and
-everything about opening another app lives on the Running apps page.
+everything about opening another app lives on the Act page.
 
 ## Modules
 
@@ -40,18 +40,23 @@ recorded on a surface that is not there.
 
 ## Where a person changes it
 
-Capabilities has one card at the top, **Running apps**:
+Capabilities has one card at the top, **Act**:
 
-- state pill, one primary action (allow screen access, or check that it works);
+- a summary card: This phone / My computer, and Hidden screen / Your screen;
 - the apps the catalog knows, with See all into the Launchpad;
-- the surface: Auto / Hidden / Here / Computer;
 - what a run needs: screen access, hidden screen, my computer;
 - three run switches: plan first, look at the screen, repeat what worked.
+
+The summary opens **How HOPA acts**, which asks two questions: who sends the
+taps (This phone or My computer), and — on this phone — whether the app opens on
+the hidden screen or on your screen. Apps always stay on this phone; the
+computer is only another driver for this phone's visible screen.
 
 Settings no longer shows anything about other apps. The Launchpad is the catalog
 (two sections, search, status per row); a row opens the app card, which carries
 the status, the surface, the trust switch, the catalog's guardrails and the
-Play Store fallback. Screen access and My computer are reached from Running apps.
+Play Store fallback. Screen access, the hidden screen and My computer are
+reached from Act.
 
 ## Model and keys
 

@@ -1,32 +1,39 @@
 # Screen paths: which surface a run drives
 
-One turn can reach another app in four ways. The client picks one order and uses
-the first that answers; the choice is a setting, and the run records which path
-was used.
+One turn can reach another app on the phone's visible screen or on a hidden
+display. The computer is not a host for another set of apps: it is another
+driver for this phone's visible screen. The client picks one path and uses it
+for the whole turn; the run records which path answered.
+
+The person sees four names: **This phone**, **My computer**, **Hidden screen**
+and **Your screen**. `auto`, `background`, `bridge` and `accessibility` are
+implementation words and do not appear in the main UI.
 
 | path | surface | needs | leaves the phone's screen alone |
 |---|---|---|---|
 | `background` | a hidden virtual display owned by a helper | helper running as shell + phone access | yes |
-| `bridge` | the phone's real screen, driven from a PC over adb | paired bridge + adb | no |
-| `accessibility` | the phone's real screen, driven on device | phone access | no |
+| `bridge` | the phone's visible screen, driven from a PC over adb | paired bridge + adb | no |
+| `accessibility` | the phone's visible screen, driven on device | phone access | no |
 | `none` | no surface: the turn refuses with the reason | — | — |
 
 ## Order
 
 ```
-AUTO           background → bridge → accessibility
+AUTO           background → accessibility
 BACKGROUND     background only
-BRIDGE         bridge only
+BRIDGE         bridge only (the computer)
 ONSCREEN       accessibility only
 ```
 
-`AUTO` is the only path a user needs. A forced path is tried alone so that a
+`AUTO` is the phone's best mode: the hidden display when it is up, otherwise
+the visible screen. It never picks the computer. The computer is used only when
+the person chooses **My computer**. A forced path is tried alone so that a
 comparison is honest; `ScreenPathOrder` is pure and unit-tested.
 
 ## The background display
 
 ```
-Capabilities → Running apps ──"Start the background screen"──► bridge /helper
+Capabilities → Act → How HOPA acts ──"Start the hidden screen"──► bridge /helper
                                               │ adb shell
                                               ▼
                           app_process …ShellMain  (uid 2000)
@@ -101,11 +108,12 @@ adb shell sh /data/local/tmp/hopa_display.sh
 
 ## Pairing inside the app
 
-Capabilities → Running apps → *Pair this phone* takes the address and
-six-digit code Android shows under Wireless debugging, calls `adb pair` through
-`libadb-android` (SPAKE2, Apache-2.0), then connects over TLS to the port adbd
-advertises and runs the helper with `shell:`. After that the phone needs no PC;
-the key and certificate live in the app's private storage and are reused.
+Capabilities → Act → How HOPA acts → *Set up the hidden screen* takes the
+address and six-digit code Android shows under Wireless debugging, calls `adb
+pair` through `libadb-android` (SPAKE2, Apache-2.0), then connects over TLS to
+the port adbd advertises and runs the helper with `shell:`. After that the phone
+needs no PC; the key and certificate live in the app's private storage and are
+reused.
 
 **Measured on a Galaxy S24 with Android 17:** the pairing port refuses
 connections as soon as the settings dialog loses window focus (switching apps

@@ -14,4 +14,6 @@ data class MessageProof(
     val tokens: Int = 0,
     val millis: Long = 0,
     val steps: List<String> = emptyList(),
+    /** True when the phone fell back from the hidden screen to the visible one. */
+    val fellBack: Boolean = false,
 )

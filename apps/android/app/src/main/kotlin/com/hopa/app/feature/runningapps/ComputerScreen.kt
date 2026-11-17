@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +16,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -38,9 +35,9 @@ import com.hopa.app.ui.component.HopaStatusPill
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * The computer as a surface: pair once with a code, test it, and switch it on.
- * The address is the only field a person normally needs; a token is a fold-out
- * for people who already have one.
+ * The computer as a driver: pair once with a code, then choose it on "How HOPA
+ * acts". The address is the only field a person normally needs; a token is a
+ * fold-out for people who already have one.
  */
 @Composable
 fun ComputerScreen(
@@ -54,13 +51,13 @@ fun ComputerScreen(
     var code by rememberSaveable { mutableStateOf("") }
     var token by rememberSaveable { mutableStateOf("") }
     var advanced by rememberSaveable { mutableStateOf(false) }
-    val paired = state.settings.bridgeUrl.isNotBlank()
+    val paired = state.settings.bridgeUrl.isNotBlank() && state.bridgeKey.isNotBlank()
 
     LaunchedEffect(state.settings) {
         url = state.settings.bridgeUrl
     }
 
-    fun persist(useBridge: Boolean = state.settings.useBridge) {
+    fun persist() {
         onSave(
             state.settings.provider,
             state.settings.endpoint,
@@ -70,7 +67,7 @@ fun ComputerScreen(
             state.settings.webEnabled,
             url,
             token,
-            useBridge,
+            state.settings.useBridge,
         )
         token = ""
     }
@@ -109,19 +106,25 @@ fun ComputerScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        if (paired) "Your computer is paired" else "Let your PC do the tapping",
+                        if (paired) "Your computer is paired" else "Let your computer send the taps",
                         fontSize = 19.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = HopaColor.TextPrimary,
                     )
                     Text(
                         if (paired) {
-                            "It acts on this phone over adb while the bridge runs."
+                            "The HOPA bridge on your computer sends the taps to this phone. " +
+                                "Apps stay on this phone."
                         } else {
-                            "Start the bridge on the PC, then type the address and the " +
-                                "code it prints."
+                            "Start the HOPA bridge on the PC, then type the address and the " +
+                                "code it prints. Apps stay on this phone."
                         },
                         fontSize = 12.sp,
+                        color = HopaColor.TextHint,
+                    )
+                    Text(
+                        "It doesn't need screen access on this phone.",
+                        fontSize = 11.sp,
                         color = HopaColor.TextHint,
                     )
                     if (paired) {
@@ -129,7 +132,7 @@ fun ComputerScreen(
                             onClick = { onTestBridge(url, "") },
                             enabled = !state.busy,
                         ) {
-                            Text(if (state.busy) "Testing\u2026" else "Test connection")
+                            Text(if (state.busy) "Testing\u2026" else "Test bridge")
                         }
                     }
                 }
@@ -193,45 +196,25 @@ fun ComputerScreen(
                 Text(
                     message,
                     fontSize = 12.sp,
-                    color = if (message.contains("ok", ignoreCase = true)) {
+                    color = if (message.startsWith("Bridge ok") ||
+                        message.startsWith("Bridge paired") ||
+                        message.contains("is ready", ignoreCase = true)
+                    ) {
                         HopaColor.Success
                     } else {
-                        HopaColor.TextSecondary
+                        HopaColor.Warning
                     },
                 )
             }
 
-            Surface(
-                color = HopaColor.Surface,
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, HopaColor.Divider),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Use my computer for taps", fontSize = 14.sp, color = HopaColor.TextPrimary)
-                        Text(
-                            "Off means this phone acts on its own.",
-                            fontSize = 11.sp,
-                            color = HopaColor.TextHint,
-                        )
-                    }
-                    Switch(
-                        checked = state.settings.useBridge,
-                        onCheckedChange = { persist(useBridge = it) },
-                    )
-                }
-            }
-
             Text(
-                "Without a computer the phone still works: pick Hidden or Here on " +
-                    "Running apps.",
+                if (paired) {
+                    "Choose My computer on How HOPA acts to use it. Without it, HOPA still " +
+                        "works on this phone."
+                } else {
+                    "After pairing, choose My computer on How HOPA acts. Without a computer, " +
+                        "HOPA still works on this phone."
+                },
                 fontSize = 11.sp,
                 color = HopaColor.TextHint,
             )

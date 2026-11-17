@@ -126,7 +126,7 @@ fun CapabilitiesScreen(
                         )
                         Text(
                             text = if (ready) {
-                                "Ready on this phone"
+                                "Screen access on"
                             } else {
                                 "Needs screen access"
                             },
@@ -135,7 +135,7 @@ fun CapabilitiesScreen(
                         )
                     }
                     Text(
-                        text = "Where HOPA works, the apps and sites it can open, " +
+                        text = "How HOPA acts, the apps and sites it can open, " +
                             "and the setup behind them.",
                         fontSize = 11.sp,
                         color = HopaColor.TextHint,

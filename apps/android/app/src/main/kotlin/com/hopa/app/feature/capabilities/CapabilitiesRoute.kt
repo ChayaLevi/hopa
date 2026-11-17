@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.HopaAccessibilityService
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun CapabilitiesRoute(
@@ -34,13 +36,17 @@ fun CapabilitiesRoute(
         records = container.recorder.all().size
         facts = container.memory.all().size
         skills = container.skills.all().size
-        accessibilityEnabled = AccessibilityState.isEnabled(container.context)
+        accessibilityEnabled = AccessibilityState.isEnabled(container.context) &&
+            HopaAccessibilityService.instance != null &&
+            container.settings.settings.first().accessibilityAllowed
     }
     // The tab is the place a person checks, so the status is re-read when they
     // come back to it instead of showing what was true when the app started.
     LaunchedEffect(activeTab) {
         if (activeTab == "capabilities") {
-            accessibilityEnabled = AccessibilityState.isEnabled(container.context)
+            accessibilityEnabled = AccessibilityState.isEnabled(container.context) &&
+                HopaAccessibilityService.instance != null &&
+                container.settings.settings.first().accessibilityAllowed
         }
     }
 

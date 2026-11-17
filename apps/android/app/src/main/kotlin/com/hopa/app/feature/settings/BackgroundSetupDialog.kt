@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
 
 /**
- * The one place the background mode gets set up: the one-tap pairing, then the
+ * The one place the hidden screen gets set up: the one-tap pairing, then the
  * manual address and code for a phone where the screen cannot be read.
  */
 @Composable
@@ -35,13 +35,13 @@ fun BackgroundSetupDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Turn on background mode", fontSize = 18.sp) },
+        title = { Text("Hidden screen setup", fontSize = 18.sp) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    "HOPA opens Android's Wireless debugging, presses " +
-                        "\"Pair device with pairing code\", reads the code from that dialog " +
-                        "and pairs. Screen access has to be on.",
+                    "HOPA opens apps on a screen you can't see. Android doesn't " +
+                        "give apps this access directly, so HOPA uses Wireless debugging " +
+                        "for shell access. Screen access has to be on.",
                     fontSize = 13.sp,
                     color = HopaColor.TextSecondary,
                 )

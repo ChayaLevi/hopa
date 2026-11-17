@@ -6,4 +6,6 @@ data class ScreenCheck(
     val text: String,
     val ok: Boolean,
     val action: String = "",
+    /** True for a neutral note that is not a pass or a failure. */
+    val info: Boolean = false,
 )

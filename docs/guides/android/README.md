@@ -1,15 +1,18 @@
 # HOPA on Android
 
 Android runs the whole assistant: its own agent loop, its own model calls, its own
-records. It is not a thin client (ADR-0016). It can act on the device in two ways
-(ADR-0017):
+records. It is not a thin client (ADR-0016). It can act on this phone in two
+families of choice (ADR-0017):
 
-1. **through the bridge (`adb`)**, the same shape as `hdc` on Harmony — works on a
-   lab device or a phone with USB/Wi-Fi debugging;
-2. **on-device `AccessibilityService`**, when the user grants it and no bridge is
-   available.
+1. **on this phone** — the hidden display when it is ready, otherwise the
+   visible screen through `AccessibilityService`;
+2. **through the computer** — the PC bridge over `adb`, when the person chooses
+   **My computer**. The apps stay on this phone; the computer only sends the
+   taps.
 
 Neither the loop nor the UI knows which one runs; both sit behind `DevicePort`.
+
+Full, self-contained setup paths for every run mode: [run-modes.md](run-modes.md).
 
 ## Prerequisites
 
@@ -24,7 +27,22 @@ Full walkthrough for a new machine: [setup.md](setup.md).
 
 ## Two execution paths
 
-### Bridge (`adb`) — primary
+### On this phone — default
+
+The phone runs the loop and drives its own apps. The hidden display leaves the
+person's screen alone; the visible screen uses `AccessibilityService` after an
+explicit disclosure screen.
+
+- `AccessibilityService` observes the window tree and performs clicks/gestures.
+- The screen is captured through `takeScreenshot` (API 30+) or the media
+  projection; the tree is the primary observation, as on Harmony.
+- The user can revoke it at any time; the app then says it cannot act.
+
+**Distribution note:** Google Play restricts `AccessibilityService` to apps whose
+primary purpose is accessibility. Plan for sideload/enterprise first, or a Play
+submission with the accessibility declaration; do not assume Play approval.
+
+### Bridge (`adb`) — explicit choice
 
 The PC runs `hopa-bridge` with an Android adapter; the app points at it the way the
 Harmony app points at the `hdc` bridge. This path gives the same features as
@@ -35,19 +53,6 @@ is what the evaluation suite exercises first.
 - Bridge side: `adb` transport, `uiautomator dump` parsing, `am start`, `input`,
   `screencap`; `platform: android` in `/health`.
 - No accessibility permission needed.
-
-### On-device accessibility — fallback
-
-Works without a PC, after an explicit disclosure screen.
-
-- `AccessibilityService` observes the window tree and performs clicks/gestures.
-- The screen is captured through `takeScreenshot` (API 30+) or the media
-  projection; the tree is the primary observation, as on Harmony.
-- The user can revoke it at any time; the app then says it cannot act.
-
-**Distribution note:** Google Play restricts `AccessibilityService` to apps whose
-primary purpose is accessibility. Plan for sideload/enterprise first, or a Play
-submission with the accessibility declaration; do not assume Play approval.
 
 ## Project shape
 

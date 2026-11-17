@@ -113,9 +113,9 @@ fun AppCardRoute(
 
 private fun surfaceLabel(path: String): String = when (path) {
     "background" -> "the hidden screen"
-    "onscreen" -> "this screen"
-    "bridge" -> "your computer"
-    else -> "the best surface"
+    "onscreen" -> "your screen"
+    "bridge" -> "your computer to send the taps"
+    else -> "the hidden screen or your screen"
 }
 
 /** Open the store page, and say what happened either way. */

@@ -12,6 +12,7 @@ import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.app.feature.memory.MemoryRoute
 import com.hopa.app.feature.memory.SkillsRoute
 import com.hopa.app.feature.runningapps.ComputerRoute
+import com.hopa.app.feature.runningapps.HowHopaActsRoute
 import com.hopa.app.feature.runningapps.RunningAppsRoute
 import com.hopa.app.feature.runningapps.RunPrefsRoute
 import com.hopa.app.feature.runningapps.RunSetupRoute
@@ -38,6 +39,7 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onOpenMemory = { navController.navigate(HopaDestination.MEMORY) },
                 onOpenSkills = { navController.navigate(HopaDestination.SKILLS) },
                 onOpenRunningApps = { navController.navigate(HopaDestination.RUNNING_APPS) },
+                onOpenActMode = { navController.navigate(HopaDestination.ACT_MODE) },
                 onOpenBrowser = {
                     navController.navigate(HopaDestination.BROWSER + "?url=")
                 },
@@ -90,12 +92,20 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             RunningAppsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
+                onOpenHowHopaActs = { navController.navigate(HopaDestination.ACT_MODE) },
                 onOpenAllApps = { navController.navigate(HopaDestination.launchpad("apps")) },
                 onOpenSites = { navController.navigate(HopaDestination.launchpad("sites")) },
                 onOpenSetup = { navController.navigate(HopaDestination.RUN_SETUP) },
                 onOpenRunPrefs = { navController.navigate(HopaDestination.RUN_PREFS) },
+            )
+        }
+        composable(HopaDestination.ACT_MODE) {
+            HowHopaActsRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
                 onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
                 onOpenComputer = { navController.navigate(HopaDestination.COMPUTER) },
+                onOpenSetup = { navController.navigate(HopaDestination.RUN_SETUP) },
             )
         }
         composable(HopaDestination.RUN_SETUP) {

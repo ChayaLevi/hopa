@@ -20,9 +20,9 @@ Next: A5/A6 (bridge `adb`), then A12 (voice/FGS) and A10 (profile homes), then
 A14 (cross-path QA).
 
 Builds an Android client with the **whole agent loop inside the APK** (ADR-0016)
-that acts through **two paths** (ADR-0017): the PC bridge over `adb` (primary) and
-an on-device `AccessibilityService` (fallback). Behaviour is defined by
-`contracts/schemas` and `contracts/fixtures`.
+that acts through **two families** (ADR-0017): on this phone (hidden display or
+visible screen) and the PC bridge over `adb` as an explicit choice. Behaviour is
+defined by `contracts/schemas` and `contracts/fixtures`.
 
 Count it with:
 
@@ -64,7 +64,7 @@ stated target, and the artifact exists.
 | Shared data (catalogue, policy, prompt rules, routing, hash) lives once | ADR-0018 |
 | Offline means shell + LAN model; on-device model is a spike | ADR-0019 |
 | Android is the active client; Windows is next; Harmony is frozen | ADR-0020 |
-| Bridge/adb first, accessibility fallback | ADR-0017 |
+| This phone or My computer; hidden or visible on the phone | ADR-0017 |
 | Kotlin + Compose, `apps/android`, minSdk 30 / target 35 | this plan |
 | BYOK; key only in Keystore | ADR-0016 |
 | Sideload/internal first | ADR-0017 |
@@ -272,7 +272,7 @@ apps/android/
 - [x] `AppRouter` ported from `AppRouter.ets`; run `contracts/fixtures/routing.json` and reproduce every case. (evidence: AppRouterTest reproduces all 12 routing fixtures)
 - [x] `ContextBudget`: 24 000 chars, keep last 6, 400-char old lines, hard trim. (evidence: core/.../prompt/ContextBudget.kt; AgentLoop calls budget.fit)
 - [x] `RunNarrator`: per-step sentences, tap grouping, failure phrasing. (evidence: RunNarrator.lines folds consecutive taps, keeps five taps bounded, breaks on failure; RunNarratorTest, 6 cases)
-- [x] `ObservationProducer` behind `ScreenSource`: bridge first, accessibility with a 4 s guard, one source per turn. (evidence: ScreenSourceDevice; ScreenSourceDeviceTest covers precedence, timeout, failure, action routing, fallback; ChatViewModel builds bridge + accessibility sources)
+- [x] `ObservationProducer` behind `ScreenSource`: the chosen path (hidden, visible, or computer) with a timeout, one source per turn. (evidence: ScreenSourceDevice; ScreenSourceDeviceTest covers precedence, timeout, failure, action routing, fallback; ChatViewModel builds the sources from the setting)
 - [ ] Browser text as the third source. (blocked: BrowserPort has no implementation yet; A11 browser)
 - [x] Loop tests: payment stops at first step, cancel, token accounting, launch dedupe, 14-step cap, parser cases (from `ActionParser.test`), budget cases. (evidence: AgentLoopTest covers all listed cases; ContextBudgetTest covers the budget)
 - [x] Evidence: stub-model turn produces outcomes and an answer; tests mirror the Harmony core suite. (evidence: AgentLoopTest with a scripted model; docs/project/evidence/A2-loop.md)

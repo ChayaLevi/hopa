@@ -25,7 +25,7 @@ import com.hopa.app.ui.theme.HopaColor
 
 /**
  * The scene: where the window of the app you asked for actually appears. A phone
- * for "this screen", a window beside it for "without showing", a laptop for the
+ * for "your screen", a window beside it for the "hidden screen", a laptop for the
  * computer, both for automatic. Switching modes cross-fades between the two.
  */
 @Composable
