@@ -39,7 +39,7 @@ function Install-Staged {
     if ($remote -ne $md5) {
         throw "$Name did not survive the transfer: local $md5, phone $remote"
     }
-    $create = & $adb shell pm install-create -r -t 2>&1
+    $create = & $adb shell pm install-create -r -t --user 0 2>&1
     $session = ([regex]::Match(($create -join " "), "\[(\d+)\]")).Groups[1].Value
     if (-not $session) { throw "no install session: $($create -join ' ')" }
     & $adb shell pm install-write $session base $Remote | Out-Null
