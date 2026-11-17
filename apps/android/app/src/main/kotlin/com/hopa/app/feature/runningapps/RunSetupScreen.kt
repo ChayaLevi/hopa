@@ -35,6 +35,7 @@ import com.hopa.app.ui.theme.HopaColor
 @Composable
 fun RunSetupScreen(
     state: SettingsUiState,
+    pairingStatus: String?,
     onBack: () -> Unit,
     onOpenScreenAccess: () -> Unit,
     onStartBackgroundHelper: () -> Unit,
@@ -82,7 +83,10 @@ fun RunSetupScreen(
                         },
                         state.backgroundRunning,
                         {
-                            if (state.backgroundRunning || bridgeReady) {
+                            // Running without a bridge cannot be restarted by the
+                            // app, so the row opens pairing instead of doing
+                            // nothing; an unpaired phone gets the same dialog.
+                            if (!state.backgroundRunning && bridgeReady) {
                                 onStartBackgroundHelper()
                             } else {
                                 setup = true
@@ -124,6 +128,30 @@ fun RunSetupScreen(
                         "computer" -> onOpenComputer()
                     }
                 }
+            }
+            state.bridgeStatus?.let { message ->
+                Text(
+                    message,
+                    fontSize = 12.sp,
+                    color = if (message.contains("ready", ignoreCase = true) ||
+                        message.startsWith("Paired")
+                    ) {
+                        HopaColor.Success
+                    } else {
+                        HopaColor.Warning
+                    },
+                )
+            }
+            pairingStatus?.let { message ->
+                Text(
+                    message,
+                    fontSize = 12.sp,
+                    color = if (message.startsWith("Wireless shell") || message.startsWith("Paired")) {
+                        HopaColor.Success
+                    } else {
+                        HopaColor.Warning
+                    },
+                )
             }
         }
     }

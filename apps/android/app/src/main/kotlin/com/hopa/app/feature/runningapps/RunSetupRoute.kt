@@ -18,6 +18,7 @@ fun RunSetupRoute(
 ) {
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pairing by container.pairingStatus.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -28,6 +29,7 @@ fun RunSetupRoute(
 
     RunSetupScreen(
         state = state,
+        pairingStatus = pairing,
         onBack = onBack,
         onOpenScreenAccess = onOpenScreenAccess,
         onStartBackgroundHelper = viewModel::startBackgroundHelper,
