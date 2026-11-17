@@ -9,7 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
 import com.hopa.app.feature.conversations.ChatsSheet
-import com.hopa.stores.settings.AppSettings
+import com.hopa.stores.AppSettings
 
 @Composable
 fun ChatRoute(

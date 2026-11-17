@@ -10,7 +10,7 @@ import com.hopa.net.llm.ProviderState
 import com.hopa.net.llm.ProviderStateResolver
 import com.hopa.engine.model.ModelMessage
 import com.hopa.engine.model.ModelRequest
-import com.hopa.stores.settings.AppSettings
+import com.hopa.stores.AppSettings
 import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

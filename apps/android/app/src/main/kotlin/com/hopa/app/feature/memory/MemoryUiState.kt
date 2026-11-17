@@ -1,6 +1,6 @@
 package com.hopa.app.feature.memory
 
-import com.hopa.stores.skills.Skill
+import com.hopa.stores.Skill
 
 data class MemoryUiState(
     val facts: List<String> = emptyList(),

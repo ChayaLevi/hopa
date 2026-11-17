@@ -6,9 +6,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.hopa.stores.secrets.SecretStore
-import com.hopa.stores.settings.AppSettings
-import com.hopa.stores.settings.SettingsRepository
+import com.hopa.stores.SecretStore
+import com.hopa.stores.AppSettings
+import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

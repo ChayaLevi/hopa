@@ -15,9 +15,9 @@ import com.hopa.engine.observation.ScreenPath
 import com.hopa.engine.observation.ScreenPathOrder
 import com.hopa.engine.observation.ScreenSource
 import com.hopa.engine.observation.ScreenSourceDevice
-import com.hopa.stores.sessions.Attachment
-import com.hopa.stores.sessions.AttachmentRules
-import com.hopa.stores.sessions.ChatMessage
+import com.hopa.stores.Attachment
+import com.hopa.stores.AttachmentRules
+import com.hopa.stores.ChatMessage
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -472,7 +472,7 @@ class ChatViewModel(
                                 role = "assistant",
                                 text = answer,
                                 timestamp = System.currentTimeMillis(),
-                                proof = com.hopa.stores.sessions.MessageProof(
+                                proof = com.hopa.stores.MessageProof(
                                     path = device.sourceName,
                                     executed = replayed,
                                     verified = replayed,
@@ -540,7 +540,7 @@ class ChatViewModel(
                 val suffix = if (target.isBlank()) "" else " $target"
                 "${record.step}. ${record.action.kind}$suffix"
             }
-            val proof = com.hopa.stores.sessions.MessageProof(
+            val proof = com.hopa.stores.MessageProof(
                 path = device.sourceName,
                 executed = result?.records?.count { it.executed } ?: 0,
                 verified = result?.records?.count { it.verified } ?: 0,

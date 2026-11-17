@@ -6,7 +6,7 @@ import com.hopa.net.llm.ProviderChoiceRules
 import com.hopa.engine.model.ModelPort
 import com.hopa.engine.model.ModelReply
 import com.hopa.engine.model.ModelRequest
-import com.hopa.stores.settings.SettingsRepository
+import com.hopa.stores.SettingsRepository
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 

@@ -38,6 +38,11 @@ apps/windows ─┘      ↑
    `apps/android`.
 7. **No client imports another client.** Both import `packages/`.
 8. **Generated files are committed**, and `--check` fails when they drift.
+9. **One class per file, contracts may share.** A file of interfaces, enums,
+   sealed or data classes carries no behaviour, so those can live together
+   (`contracts/Observation.kt` holds the observation, its tree and the screen
+   size). A plain class, an object or top-level functions keep their own file,
+   named after it.
 
 ## What a client supplies
 

@@ -1,4 +1,4 @@
-package com.hopa.stores.settings
+package com.hopa.stores
 
 data class AppSettings(
     val provider: String = "stub",

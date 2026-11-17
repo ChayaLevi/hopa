@@ -2,6 +2,16 @@
 
 ## Unreleased - packages
 
+- The stores module is one package now: `com.hopa.stores` instead of
+  `com.hopa.stores.sessions`, `.settings`, `.approvals`, `.memory`, `.skills`,
+  `.secrets`. Six packages with one or two files each became one.
+- `engine/validation` folded into `engine/parser` and `engine/narration` into
+  `engine/loop`: the rules live with the parser that calls them, the narrator
+  with the loop that narrates.
+- `ActionKind` shares `Action.kt`; `ObservationNode` and `ScreenSize` share
+  `Observation.kt`. The structure check now allows a file of contracts to hold
+  several declarations, and still refuses that for classes, objects and functions.
+
 - Module names now say what they hold: `core` is `engine`, `know` is
   `knowledge`, `remote` is `net` (`com.hopa.engine.*`, `com.hopa.knowledge.*`,
   `com.hopa.net.*`). `state` keeps its name. A local model runtime is not part

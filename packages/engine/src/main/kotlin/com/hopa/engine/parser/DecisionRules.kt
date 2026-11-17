@@ -1,4 +1,4 @@
-package com.hopa.engine.validation
+package com.hopa.engine.parser
 
 import com.hopa.engine.contracts.ActionKind
 import com.hopa.engine.contracts.Decision

@@ -1,4 +1,4 @@
-package com.hopa.stores.sessions
+package com.hopa.stores
 
 interface ConversationStore {
     suspend fun all(): List<Conversation>
