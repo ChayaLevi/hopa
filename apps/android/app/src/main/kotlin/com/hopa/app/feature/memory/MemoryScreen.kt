@@ -25,12 +25,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -38,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.data.skills.Skill
+import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,10 +55,22 @@ fun MemoryScreen(
     onDeleteSkill: (String) -> Unit,
     onClearAll: () -> Unit,
     onExport: () -> Unit,
+    section: String = "facts",
 ) {
     var fact by remember { mutableStateOf("") }
     var trigger by remember { mutableStateOf("") }
     var action by remember { mutableStateOf("") }
+    val scroll = rememberScrollState()
+    var skillsOffset by remember { mutableStateOf(0) }
+
+    // The Skills card promises the Skills part; scroll there once it is measured.
+    LaunchedEffect(section) {
+        if (section != "skills") {
+            return@LaunchedEffect
+        }
+        val target = snapshotFlow { skillsOffset }.first { it > 0 }
+        scroll.animateScrollTo(target)
+    }
 
     Scaffold(
         containerColor = HopaColor.Bg,
@@ -84,7 +101,7 @@ fun MemoryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -152,7 +169,12 @@ fun MemoryScreen(
                 }
             }
 
-            Section("SKILLS")
+            Section(
+                "SKILLS",
+                modifier = Modifier.onGloballyPositioned {
+                    skillsOffset = it.positionInParent().y.toInt()
+                },
+            )
             Text(
                 "A phrase and what it should do; both go into the prompt.",
                 fontSize = 12.sp,
@@ -225,12 +247,12 @@ fun MemoryScreen(
 }
 
 @Composable
-private fun Section(label: String) {
+private fun Section(label: String, modifier: Modifier = Modifier) {
     Text(
         label,
         fontSize = 10.sp,
         color = HopaColor.TextHint,
         letterSpacing = 0.6.sp,
-        modifier = Modifier.padding(top = 6.dp),
+        modifier = modifier.padding(top = 6.dp),
     )
 }

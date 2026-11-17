@@ -32,7 +32,8 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onOpenSettings = { navController.navigate(HopaDestination.SETTINGS) },
                 onOpenRuns = { navController.navigate(HopaDestination.RUNS) },
                 onOpenUsage = { navController.navigate(HopaDestination.USAGE) },
-                onOpenMemory = { navController.navigate(HopaDestination.MEMORY) },
+                onOpenMemory = { navController.navigate(HopaDestination.memory("facts")) },
+                onOpenSkills = { navController.navigate(HopaDestination.memory("skills")) },
                 onOpenRunningApps = { navController.navigate(HopaDestination.RUNNING_APPS) },
                 onOpenBrowser = {
                     navController.navigate(HopaDestination.BROWSER + "?url=")
@@ -46,10 +47,14 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.MEMORY) {
+        composable(
+            route = HopaDestination.MEMORY + "?section={section}",
+            arguments = listOf(navArgument("section") { defaultValue = "facts" }),
+        ) { entry ->
             MemoryRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
+                section = entry.arguments?.getString("section") ?: "facts",
             )
         }
         composable(

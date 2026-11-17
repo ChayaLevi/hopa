@@ -12,6 +12,7 @@ import com.hopa.app.di.AppContainer
 fun MemoryRoute(
     container: AppContainer,
     onBack: () -> Unit,
+    section: String = "facts",
 ) {
     val viewModel: MemoryViewModel = viewModel(factory = MemoryViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -25,8 +26,7 @@ fun MemoryRoute(
         onAddSkill = viewModel::addSkill,
         onDeleteSkill = viewModel::deleteSkill,
         onClearAll = viewModel::clearAll,
-        onExport = {
-            val text = buildString {
+        onExport = {            val text = buildString {
                 appendLine("HOPA memory")
                 state.facts.forEach { appendLine("- $it") }
                 appendLine()
@@ -39,5 +39,6 @@ fun MemoryRoute(
             }
             context.startActivity(Intent.createChooser(send, "Export memory"))
         },
+        section = section,
     )
 }

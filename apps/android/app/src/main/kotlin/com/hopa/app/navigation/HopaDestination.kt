@@ -7,6 +7,9 @@ object HopaDestination {
     const val RUNS = "runs"
     const val USAGE = "usage"
     const val MEMORY = "memory"
+
+    /** The Memory and Skills page, opened on the part the card promised. */
+    fun memory(section: String): String = "$MEMORY?section=$section"
     const val RUNNING_APPS = "runningapps"
     const val COMPUTER = "computer"
     const val BROWSER = "browser"
