@@ -37,8 +37,8 @@ class SystemPromptBuilder {
                 "the text. Never open and close the same field twice.",
             "Use element refs from ELEMENTS. Never invent coordinates.",
             webRule,
-            "After every action the next turn carries SCREEN with the visible text and " +
-                "ELEMENTS: read the answer from there.",
+            "After every action the next turn carries SCREEN TREE with the visible " +
+                "text and ELEMENTS: read the answer from there.",
             "For a question that needs no action, reply with plain text only, never JSON.",
             "Answer in plain, conversational text. No Markdown, no bold, no headings.",
             "Keep it short unless the user asks for detail.",

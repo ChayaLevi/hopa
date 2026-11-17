@@ -20,9 +20,9 @@ export class PromptBuilder {
       'Use element refs from ELEMENTS. Never invent coordinates. ' +
       'There is no web capability: web.navigate, web.read, web.click and web.type ' +
       'do not exist, so a site must be reached through its app. ' +
-      'After every action the next turn carries SCREEN with the visible text and ' +
+      'After every action the next turn carries SCREEN TREE with the visible text and ' +
       'ELEMENTS: read the answer from there. Never say you cannot read a screen; ' +
-      'if SCREEN is empty, act once and read it again. ' +
+      'if SCREEN TREE is empty, act once and read it again. ' +
       'For a question that needs no action, reply with plain text only, never JSON. ' +
       'Answer in plain, conversational text. No Markdown, no bold, no headings. ' +
       'Keep it short unless the user asks for detail. ' +

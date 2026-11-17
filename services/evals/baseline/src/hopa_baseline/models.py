@@ -182,7 +182,7 @@ class OpenAIClient:
 
         user = (
             f"GOAL: {goal}\nSTEP: {step}\n\n"
-            + "SCREEN:\n"
+            + "SCREEN TREE:\n"
             + "\n".join(screen)
             + "\n\nHISTORY:\n"
             + ("\n".join(history_lines) or "(none)")

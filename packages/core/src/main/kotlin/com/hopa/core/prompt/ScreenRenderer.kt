@@ -7,7 +7,7 @@ class ScreenRenderer(
     private val maxLines: Int = 120,
 ) {
     fun render(observation: Observation): String {
-        val lines = mutableListOf("SCREEN:", observation.text, "", "ELEMENTS:")
+        val lines = mutableListOf("SCREEN TREE:", observation.text, "", "ELEMENTS:")
         append(observation.tree, lines)
         return lines.joinToString("\n")
     }
