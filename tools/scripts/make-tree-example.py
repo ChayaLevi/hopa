@@ -12,7 +12,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 SCALE = 2
-W, H = 1660, 1140
+W, H = 1660, 1180
 
 BG = "#faf8f3"
 INK = "#1d1d1f"
@@ -136,8 +136,18 @@ d.line([s(104), s(222), s(112), s(230)], fill="#1d1d1f", width=s(1.6))
 d.line([s(112), s(230), s(104), s(238)], fill="#1d1d1f", width=s(1.6))
 d.text((s(130), s(218)), "Transfer money", font=F_UI_TITLE, fill=INK, anchor="la")
 
-d.ellipse([s(100), s(266), s(152), s(318)], fill="#dfe7f5")
-d.text((s(126), s(292)), "A", font=F_UI_BIG, fill="#2b4a7d", anchor="mm")
+size = s(52)
+av = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+ad = ImageDraw.Draw(av)
+ad.ellipse([0, 0, size - 1, size - 1], fill=(219, 231, 243, 255))
+ad.ellipse([size * 0.08, size * 0.60, size * 0.92, size * 1.30], fill=(111, 143, 181, 255))
+ad.ellipse([size * 0.30, size * 0.16, size * 0.70, size * 0.56], fill=(232, 195, 158, 255))
+ad.chord([size * 0.26, size * 0.10, size * 0.74, size * 0.52], 180, 360, fill=(74, 58, 47, 255))
+mask = Image.new("L", (size, size), 0)
+ImageDraw.Draw(mask).ellipse([0, 0, size - 1, size - 1], fill=255)
+img.paste(av, (s(100), s(266)), mask)
+d.ellipse([s(96), s(262), s(156), s(322)], outline="#b7cbe8", width=max(1, s(2)))
+d.text((s(126), s(332)), "e6", font=font(MONO, 8), fill="#2b6cb0", anchor="mm")
 d.text((s(166), s(268)), "Anna Petrova", font=F_UI_SEMI, fill=INK, anchor="la")
 d.text((s(166), s(292)), "Sberbank", font=F_UI, fill=HINT, anchor="la")
 
@@ -172,11 +182,12 @@ d.text((s(516), s(558)), "read", font=font(REG, 9), fill=HINT, anchor="mm")
 d.text((s(516), s(598)), "screen", font=font(REG, 9), fill=HINT, anchor="mm")
 
 # â”€â”€ payload â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-rounded(d, 556, 138, 1064, 862, 14, fill="#fcfbf7", outline=BORDER, width=1.2)
+rounded(d, 556, 138, 1064, 914, 14, fill="#fcfbf7", outline=BORDER, width=1.2)
 
 section(1, 162, "SCREEN TREE", "every visible text, already redacted")
 screen_lines = [
     "Transfer money",
+    "Photo of Anna Petrova",
     "Anna Petrova",
     "Sberbank",
     "Card number",
@@ -204,7 +215,7 @@ tree_lines = [
     (2, "e3 ViewGroup"),
     (3, "e4 ImageButton Back"),
     (3, "e5 TextView Transfer money"),
-    (2, "e6 ImageView"),
+    (2, "e6 ImageView Photo of Anna Petrova"),
     (2, "e9 TextView Card number"),
     (3, "e10 TextView [card]"),
 ]
@@ -212,6 +223,8 @@ y = 470
 for depth, line_text in tree_lines:
     if line_text.startswith("e10"):
         d.rounded_rectangle([s(574), s(y - 9), s(900), s(y + 9)], radius=s(4), fill="#fbf3dc")
+    elif line_text.startswith("e6 "):
+        d.rounded_rectangle([s(574), s(y - 9), s(900), s(y + 9)], radius=s(4), fill="#e7f0fb")
     code_line(d, 580 + depth * 16, y, line_text)
     y += 17
 
@@ -221,25 +234,27 @@ elements = [
     ("e1 FrameLayout", "[0,0,1080,2340]"),
     ("e2 LinearLayout", "[0,0,1080,2340]"),
     ("e3 ViewGroup", "[0,0,1080,220]"),
-    ("e4 ImageButton Back", "[24,60][120,156]"),
-    ("e5 TextView Transfer money", "[150,84][760,132]"),
-    ("e6 ImageView", "[60,250][190,380]"),
-    ("e7 TextView Anna Petrova", "[210,262][760,310]"),
-    ("e8 TextView Sberbank", "[210,320][760,364]"),
-    ("e9 TextView Card number", "[60,430][500,476]"),
-    ("e10 TextView [card]", "[60,490][940,546]"),
-    ("e11 TextView Amount", "[60,610][500,656]"),
-    ("e12 TextView 12 500.00", "[60,670][940,726]"),
-    ("e13 TextView Phone", "[60,790][500,836]"),
-    ("e14 TextView [phone]", "[60,850][940,906]"),
-    ("e15 TextView Email", "[60,970][500,1016]"),
-    ("e16 TextView [email]", "[60,1030][940,1086]"),
-    ("e19 Button Confirm payment", "[60,1980][1020,2090]"),
+    ("e4 ImageButton Back", "[24,60,120,156]"),
+    ("e5 TextView Transfer money", "[150,84,760,132]"),
+    ("e6 ImageView Photo of Anna Petrova", "[60,250,190,380]"),
+    ("e7 TextView Anna Petrova", "[210,262,760,310]"),
+    ("e8 TextView Sberbank", "[210,320,760,364]"),
+    ("e9 TextView Card number", "[60,430,500,476]"),
+    ("e10 TextView [card]", "[60,490,940,546]"),
+    ("e11 TextView Amount", "[60,610,500,656]"),
+    ("e12 TextView 12 500.00", "[60,670,940,726]"),
+    ("e13 TextView Phone", "[60,790,500,836]"),
+    ("e14 TextView [phone]", "[60,850,940,906]"),
+    ("e15 TextView Email", "[60,970,500,1016]"),
+    ("e16 TextView [email]", "[60,1030,940,1086]"),
+    ("e19 Button Confirm payment", "[60,1980,1020,2090]"),
 ]
 y = 642
 for left, right in elements:
     if left.startswith("e10"):
         d.rounded_rectangle([s(574), s(y - 9), s(1600), s(y + 9)], radius=s(4), fill="#fbf3dc")
+    elif left.startswith("e6 "):
+        d.rounded_rectangle([s(574), s(y - 9), s(1600), s(y + 9)], radius=s(4), fill="#e7f0fb")
     code_line(d, 580, y, left)
     d.text((s(1290), s(y)), right, font=F_CODE, fill="#8a9096", anchor="lm")
     y += 17
@@ -248,6 +263,9 @@ rounded(d, 580, 924, 1016, 34, 8, outline="#d9d5cc", width=1.2, dash=(5, 4))
 d.text((s(596), s(941)), "no e17 or e18: the code field was dropped, with its label and its children", font=font(REG, 9), fill=HINT, anchor="lm")
 d.text((s(580), s(972)), "the label still shows in the text list, but there is no element left to tap", font=font(REG, 9), fill=HINT, anchor="la")
 d.text((s(580), s(990)), "the model gets the flat list; the nesting stays on the phone", font=font(REG, 9), fill=HINT, anchor="la")
+d.text((s(580), s(1004)), "a picture is one node, and the pixels never travel:", font=font(REG, 9), fill=HINT, anchor="la")
+d.text((s(592), s(1020)), "with a description:  ImageView Photo of Anna Petrova [60,250,190,380]", font=font(MONO, 8), fill="#8a9096", anchor="la")
+d.text((s(592), s(1034)), "without one:         ImageView [60,250,190,380]", font=font(MONO, 8), fill="#8a9096", anchor="la")
 
 # â”€â”€ chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 chips = [
@@ -259,19 +277,19 @@ chips = [
 x = 60
 for raw, token, why in chips:
     w = 300
-    rounded(d, x, 1020, w, 56, 10, fill="#ffffff", outline=BORDER, width=1.1)
-    d.text((s(x + 14), s(1036)), raw, font=F_CHIP, fill="#1d1d1f", anchor="la")
-    d.text((s(x + 14), s(1056)), "\u2192", font=font(MONO, 9.5), fill=HINT, anchor="la")
-    d.text((s(x + 32), s(1056)), token, font=F_CHIP, fill=RED, anchor="la")
-    d.text((s(x + 98), s(1056)), why, font=F_NOTE, fill=HINT, anchor="la")
+    rounded(d, x, 1074, w, 56, 10, fill="#ffffff", outline=BORDER, width=1.1)
+    d.text((s(x + 14), s(1090)), raw, font=F_CHIP, fill="#1d1d1f", anchor="la")
+    d.text((s(x + 14), s(1110)), "\u2192", font=font(MONO, 9.5), fill=HINT, anchor="la")
+    d.text((s(x + 32), s(1110)), token, font=F_CHIP, fill=RED, anchor="la")
+    d.text((s(x + 98), s(1110)), why, font=F_NOTE, fill=HINT, anchor="la")
     x += w + 16
 
-rounded(d, x, 1020, 1584 - x, 56, 10, fill="#ffffff", outline=BORDER, width=1.1)
-d.text((s(x + 14), s(1036)), "the code field", font=font(SEMI, 9.5), fill="#1d1d1f", anchor="la")
-d.text((s(x + 14), s(1056)), "dropped, with its label", font=F_NOTE, fill=HINT, anchor="la")
+rounded(d, x, 1074, 1584 - x, 56, 10, fill="#ffffff", outline=BORDER, width=1.1)
+d.text((s(x + 14), s(1090)), "the code field", font=font(SEMI, 9.5), fill="#1d1d1f", anchor="la")
+d.text((s(x + 14), s(1110)), "dropped, with its label", font=F_NOTE, fill=HINT, anchor="la")
 
-d.text((s(40), s(1096)), "The tree is the structure on the phone. The text list is for reading. The elements are for acting: one line, one ref, one rectangle.", font=font(REG, 9.5), fill=MUTED, anchor="la")
-d.text((s(40), s(1114)), "Everything here is text - no image, no colour, no fonts.", font=font(REG, 9.5), fill=HINT, anchor="la")
+d.text((s(40), s(1146)), "The tree is the structure on the phone. The text list is for reading. The elements are for acting: one line, one ref, one rectangle.", font=font(REG, 9.5), fill=MUTED, anchor="la")
+d.text((s(40), s(1164)), "Everything here is text - no image, no colour, no fonts.", font=font(REG, 9.5), fill=HINT, anchor="la")
 
 img = img.resize((W, H), Image.Resampling.LANCZOS)
 out = Path("docs/media/hopa-tree-example.png")

@@ -311,6 +311,17 @@ export const APP_CATALOG: CatalogApp[] = [
     actions: ["Buying, bidding, making an offer and confirming receipt involve money: always ask, show item, price and seller.", "Publishing a listing is public: ask first."],
   },
   {
+    name: "aliexpress",
+    display: "AliExpress",
+    bundle: "",
+    aliases: ["AliExpress", "Ali Express", "aliexpress"],
+    confirmed: false,
+    verified: false,
+    ability: "",
+    purpose: "Marketplace: search, product cards, cart, orders, tracking.",
+    actions: ["Looking is safe; buying, confirming an order or changing an address is a payment: always ask.", "Never type a card number, a CVV or a one-time code; hand checkout to the person.", "A sign-in wall, a country picker or a currency change means stop and ask.", "Web fallback: https://www.aliexpress.com"],
+  },
+  {
     name: "baijiahao",
     display: "Baidu Baijiahao",
     bundle: "",

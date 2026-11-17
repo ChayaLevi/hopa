@@ -36,10 +36,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Alipay",
         aliases = listOf("Alipay", "支付宝", "alipay"),
         purpose = "Payments, transfers, bills and mini programs.",
-        actions = listOf(
-            "Sending money or paying a bill is a payment: always ask, show the amount and recipient.",
-            "Never read a password or verification code; hand login to the user.",
-        ),
+        actions = listOf("Sending money or paying a bill is a payment: always ask, show the amount and recipient.", "Never read a password or verification code; hand login to the user."),
         harmonyos = CatalogTarget(
             id = "com.alipay.mobile.client",
             detail = "EntryAbility",
@@ -61,10 +58,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "AppGallery",
         aliases = listOf("应用市场", "app store"),
         purpose = "Open AppGallery. Search for an app by name.",
-        actions = listOf(
-            "Install with the Install button; review permissions first.",
-            "Updates are under Me > Updates.",
-        ),
+        actions = listOf("Install with the Install button; review permissions first.", "Updates are under Me > Updates."),
         harmonyos = CatalogTarget(
             id = "com.huawei.hmsapp.appgallery",
             detail = "MainAbility",
@@ -108,10 +102,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Bilibili",
         aliases = listOf("Bilibili", "B站", "哔哩哔哩", "bili"),
         purpose = "Video, search, comments, favourites, downloads.",
-        actions = listOf(
-            "Watching is safe; posting, commenting and following are public actions: ask.",
-            "If the app is absent, use https://www.bilibili.com in the built-in browser.",
-        ),
+        actions = listOf("Watching is safe; posting, commenting and following are public actions: ask.", "If the app is absent, use https://www.bilibili.com in the built-in browser."),
         harmonyos = CatalogTarget(
             id = "yylx.danmaku.bili",
             detail = "EntryAbility",
@@ -133,10 +124,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Browser",
         aliases = listOf("浏览器"),
         purpose = "Open Browser. The address bar accepts a URL or a search.",
-        actions = listOf(
-            "Search results open in the same tab unless opened long-press.",
-            "Tabs are managed from the tab counter.",
-        ),
+        actions = listOf("Search results open in the same tab unless opened long-press.", "Tabs are managed from the tab counter."),
         harmonyos = CatalogTarget(
             id = "com.huawei.hmos.browser",
             detail = "MainAbility",
@@ -202,10 +190,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Clock",
         aliases = listOf("闹钟", "时钟", "alarm"),
         purpose = "Open Clock. The Alarm tab lists alarms.",
-        actions = listOf(
-            "Add an alarm with the + button; set the time and repeat days.",
-            "Delete an alarm with a long press.",
-        ),
+        actions = listOf("Add an alarm with the + button; set the time and repeat days.", "Delete an alarm with a long press."),
         harmonyos = CatalogTarget(
             id = "com.huawei.hmos.clock",
             detail = "com.huawei.hmos.clock.phone",
@@ -249,11 +234,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Douyin",
         aliases = listOf("Douyin", "抖音", "TikTok China"),
         purpose = "Feed, search, profile, messages, shopping.",
-        actions = listOf(
-            "Liking, commenting, following, posting and buying are public or paid actions: ask first.",
-            "Purchases inside Douyin are payments: always ask, show the total.",
-            "Web fallback: https://www.douyin.com.",
-        ),
+        actions = listOf("Liking, commenting, following, posting and buying are public or paid actions: ask first.", "Purchases inside Douyin are payments: always ask, show the total.", "Web fallback: https://www.douyin.com."),
         harmonyos = CatalogTarget(
             id = "com.ss.hm.ugc.aweme",
             detail = "MainAbility",
@@ -319,10 +300,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "JD",
         aliases = listOf("JD", "京东", "jd"),
         purpose = "Shopping, search, cart and orders.",
-        actions = listOf(
-            "Checkout is a payment: always ask, show the item and total.",
-            "Publishing a review is public: ask first.",
-        ),
+        actions = listOf("Checkout is a payment: always ask, show the item and total.", "Publishing a review is public: ask first."),
         harmonyos = CatalogTarget(
             id = "com.jd.hm.mall",
             detail = "EntryAbility",
@@ -344,10 +322,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Kuaishou",
         aliases = listOf("Kuaishou", "快手", "Kwai"),
         purpose = "Short video, live, messages, shop.",
-        actions = listOf(
-            "Liking, commenting, following, posting and buying: ask first.",
-            "Live gifts and shop purchases are payments: always ask.",
-        ),
+        actions = listOf("Liking, commenting, following, posting and buying: ask first.", "Live gifts and shop purchases are payments: always ask."),
         harmonyos = CatalogTarget(
             id = "com.kuaishou.hmapp",
             detail = "EntryAbility",
@@ -369,10 +344,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Music",
         aliases = listOf("音乐", "播放器"),
         purpose = "Open Music. Search or browse the library.",
-        actions = listOf(
-            "Tap a track to play; the mini player controls pause and next.",
-            "Playlists are under My Music.",
-        ),
+        actions = listOf("Tap a track to play; the mini player controls pause and next.", "Playlists are under My Music."),
         harmonyos = CatalogTarget(
             id = "com.huawei.hmsapp.music",
             detail = "MainAbility",
@@ -482,11 +454,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Settings",
         aliases = listOf("设置", "settings"),
         purpose = "Open Settings to change Wi-Fi, Bluetooth, Display or Battery.",
-        actions = listOf(
-            "Wi-Fi: Settings > WLAN. Toggle the switch.",
-            "Bluetooth: Settings > Bluetooth. Toggle the switch.",
-            "Display: Settings > Display & brightness.",
-        ),
+        actions = listOf("Wi-Fi: Settings > WLAN. Toggle the switch.", "Bluetooth: Settings > Bluetooth. Toggle the switch.", "Display: Settings > Display & brightness."),
         harmonyos = CatalogTarget(
             id = "com.huawei.hmos.settings",
             detail = "com.huawei.hmos.settings.MainAbility",
@@ -508,10 +476,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Taobao",
         aliases = listOf("Taobao", "淘宝", "taobao"),
         purpose = "Shopping, search, cart, orders and reviews.",
-        actions = listOf(
-            "Checkout is a payment: always ask, show the item and total.",
-            "Publishing a review is public: ask first.",
-        ),
+        actions = listOf("Checkout is a payment: always ask, show the item and total.", "Publishing a review is public: ask first."),
         harmonyos = CatalogTarget(
             id = "com.taobao.taobao4hmos",
             detail = "Taobao_mainAbility",
@@ -555,11 +520,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "WeChat",
         aliases = listOf("WeChat", "微信", "weixin", "wechat"),
         purpose = "Chats, contacts, search, Moments, Pay, mini programs.",
-        actions = listOf(
-            "Sending a message is public and effectively irreversible: show recipient and text, then ask.",
-            "WeChat Pay is a payment: always ask, show amount and merchant if visible.",
-            "Never read a verification code or password; hand login to the user.",
-        ),
+        actions = listOf("Sending a message is public and effectively irreversible: show recipient and text, then ask.", "WeChat Pay is a payment: always ask, show amount and merchant if visible.", "Never read a verification code or password; hand login to the user."),
         harmonyos = CatalogTarget(
             id = "com.tencent.wechat",
             detail = "EntryAbility",
@@ -581,12 +542,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Weibo",
         aliases = listOf("Weibo", "微博", "sina weibo"),
         purpose = "Feed, search, profile, comments, direct messages.",
-        actions = listOf(
-            "To post: tap Skip if an ad shows, then tap Home. The orange + exists only on the Home feed, top-right near 1210,200.",
-            "The + has no label. Tap it, choose 写微博 (not Album), then type and tap Send. Send greys out until there is text.",
-            "Posting, reposting, commenting and following are public: ask first.",
-            "Web fallback: https://weibo.com.",
-        ),
+        actions = listOf("To post: tap Skip if an ad shows, then tap Home. The orange + exists only on the Home feed, top-right near 1210,200.", "The + has no label. Tap it, choose 写微博 (not Album), then type and tap Send. Send greys out until there is text.", "Posting, reposting, commenting and following are public: ask first.", "Web fallback: https://weibo.com."),
         harmonyos = CatalogTarget(
             id = "com.sina.weibo.stage",
             detail = "EntryAbility",
@@ -630,10 +586,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Xianyu",
         aliases = listOf("Xianyu", "闲鱼", "idlefish"),
         purpose = "Marketplace listings, search, chat with sellers, orders.",
-        actions = listOf(
-            "Buying, bidding, making an offer and confirming receipt involve money: always ask, show item, price and seller.",
-            "Publishing a listing is public: ask first.",
-        ),
+        actions = listOf("Buying, bidding, making an offer and confirming receipt involve money: always ask, show item, price and seller.", "Publishing a listing is public: ask first."),
         harmonyos = CatalogTarget(
             id = "com.taobao.idlefish4ohos",
             detail = "EntryAbility",
@@ -641,6 +594,28 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         ),
         android = CatalogTarget(
             id = "com.taobao.idlefish",
+            detail = "",
+            verified = false,
+        ),
+        windows = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+    ),
+    CatalogApp(
+        id = "aliexpress",
+        display = "AliExpress",
+        aliases = listOf("AliExpress", "Ali Express", "aliexpress"),
+        purpose = "Marketplace: search, product cards, cart, orders, tracking.",
+        actions = listOf("Looking is safe; buying, confirming an order or changing an address is a payment: always ask.", "Never type a card number, a CVV or a one-time code; hand checkout to the person.", "A sign-in wall, a country picker or a currency change means stop and ask.", "Web fallback: https://www.aliexpress.com"),
+        harmonyos = CatalogTarget(
+            id = "",
+            detail = "",
+            verified = false,
+        ),
+        android = CatalogTarget(
+            id = "com.alibaba.aliexpresshd",
             detail = "",
             verified = false,
         ),
@@ -677,11 +652,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "BOSS Zhipin",
         aliases = listOf("BOSS", "BOSS直聘", "boss zhipin", "zhipin"),
         purpose = "Jobs, search, recruiter chat, resume.",
-        actions = listOf(
-            "Sending a message to a recruiter is public and hard to undo: ask first.",
-            "Uploading or replacing a resume changes what employers see: ask first.",
-            "Web fallback: https://www.zhipin.com.",
-        ),
+        actions = listOf("Sending a message to a recruiter is public and hard to undo: ask first.", "Uploading or replacing a resume changes what employers see: ask first.", "Web fallback: https://www.zhipin.com."),
         harmonyos = CatalogTarget(
             id = "",
             detail = "",
@@ -857,10 +828,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Feishu",
         aliases = listOf("Feishu", "Lark", "飞书"),
         purpose = "Chats, docs, calendar, meetings.",
-        actions = listOf(
-            "Sending a message or creating a meeting invites other people: ask first.",
-            "Documents can be edited collaboratively; check before overwriting content.",
-        ),
+        actions = listOf("Sending a message or creating a meeting invites other people: ask first.", "Documents can be edited collaboratively; check before overwriting content."),
         harmonyos = CatalogTarget(
             id = "",
             detail = "",
@@ -1014,10 +982,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Play Store",
         aliases = listOf("Play Store", "play store", "app store", "google play"),
         purpose = "Find and install apps.",
-        actions = listOf(
-            "Installing an app is a change to the phone: ask.",
-            "Never accept a payment inside the store.",
-        ),
+        actions = listOf("Installing an app is a change to the phone: ask.", "Never accept a payment inside the store."),
         harmonyos = CatalogTarget(
             id = "",
             detail = "",
@@ -1039,10 +1004,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "QQ Mail",
         aliases = listOf("QQ Mail", "QQ邮箱", "qqmail", "foxmail"),
         purpose = "Inbox, search, read, compose, attachments.",
-        actions = listOf(
-            "Sending mail is irreversible: show recipients, subject and body, then ask.",
-            "Never read a password or one-time code aloud; hand login over to the user.",
-        ),
+        actions = listOf("Sending mail is irreversible: show recipients, subject and body, then ask.", "Never read a password or one-time code aloud; hand login over to the user."),
         harmonyos = CatalogTarget(
             id = "",
             detail = "",
@@ -1218,11 +1180,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Xiaohongshu",
         aliases = listOf("Xiaohongshu", "小红书", "RED", "xhs"),
         purpose = "Feed, search, notes, comments, messages, shop.",
-        actions = listOf(
-            "Liking, collecting, commenting, following and posting: ask first.",
-            "Shop checkout is a payment: always ask, show the total.",
-            "Web fallback: https://www.xiaohongshu.com.",
-        ),
+        actions = listOf("Liking, collecting, commenting, following and posting: ask first.", "Shop checkout is a payment: always ask, show the total.", "Web fallback: https://www.xiaohongshu.com."),
         harmonyos = CatalogTarget(
             id = "",
             detail = "",
@@ -1266,10 +1224,7 @@ val APP_CATALOG: List<CatalogApp> = listOf(
         display = "Zhihu",
         aliases = listOf("Zhihu", "知乎"),
         purpose = "Feed, search, questions, answers, comments, messages.",
-        actions = listOf(
-            "Publishing an answer, comment or message is public: ask first.",
-            "Web fallback: https://www.zhihu.com.",
-        ),
+        actions = listOf("Publishing an answer, comment or message is public: ask first.", "Web fallback: https://www.zhihu.com."),
         harmonyos = CatalogTarget(
             id = "",
             detail = "",
@@ -1296,11 +1251,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Amazon", "亚马逊"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://amazon.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://amazon.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "zhipin.com",
@@ -1309,11 +1260,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("BOSS直聘", "Boss直聘", "boss直聘", "BOSS直聘网页版", "直聘", "zhipin"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://zhipin.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://zhipin.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "mail.google.com",
@@ -1322,11 +1269,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Gmail", "Google Mail", "谷歌邮箱"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://mail.google.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://mail.google.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "calendar.google.com",
@@ -1335,11 +1278,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Google Calendar", "谷歌日历"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://calendar.google.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://calendar.google.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "maps.google.com",
@@ -1348,11 +1287,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Google Maps", "谷歌地图"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://maps.google.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://maps.google.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "instagram.com",
@@ -1361,11 +1296,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Instagram", "IG", "照片墙"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://instagram.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://instagram.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "linkedin.com",
@@ -1374,12 +1305,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("LinkedIn", "linked in"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://www.linkedin.com in the built-in browser.",
-            "Read the page and use the visible text on links and buttons; never invent coordinates.",
-            "Signing in is handed to the user. HOPA never types a password or a one-time code.",
-            "Do not post, message, connect or apply without approval.",
-        ),
+        actions = listOf("Open https://www.linkedin.com in the built-in browser.", "Read the page and use the visible text on links and buttons; never invent coordinates.", "Signing in is handed to the user. HOPA never types a password or a one-time code.", "Do not post, message, connect or apply without approval."),
     ),
     CatalogSite(
         id = "telegram.org",
@@ -1388,11 +1314,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Telegram", "电报", "TG"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://telegram.org in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://telegram.org in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "uber.com",
@@ -1401,12 +1323,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Uber", "uber ride"),
         validated = "pending",
         purpose = "1. Set pickup. 2. Set destination. 3. Compare ride types and prices. 4. Request the ride — approval required.",
-        actions = listOf(
-            "Open https://m.uber.com in the built-in browser.",
-            "Read the page and use the visible text on links and buttons; never invent coordinates.",
-            "Signing in is handed to the user.",
-            "**Any ride request is a payment-classified action: always ask before confirming.** Show the pickup, destination, ride t…",
-        ),
+        actions = listOf("Open https://m.uber.com in the built-in browser.", "Read the page and use the visible text on links and buttons; never invent coordinates.", "Signing in is handed to the user.", "**Any ride request is a payment-classified action: always ask before confirming.** Show the pickup, destination, ride t…"),
     ),
     CatalogSite(
         id = "ubereats.com",
@@ -1415,12 +1332,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("Uber Eats", "ubereats", "food delivery"),
         validated = "pending",
         purpose = "1. Choose a delivery address. 2. Search a restaurant or a dish. 3. Add items to the cart. 4. Review the total, then ask before placing the order.",
-        actions = listOf(
-            "Open https://www.ubereats.com in the built-in browser.",
-            "Read the page and use the visible text on links and buttons; never invent coordinates.",
-            "Signing in and the delivery address are handed to the user.",
-            "**Checkout is a payment-classified action: always ask before placing the order.** Show the restaurant, items, fees and…",
-        ),
+        actions = listOf("Open https://www.ubereats.com in the built-in browser.", "Read the page and use the visible text on links and buttons; never invent coordinates.", "Signing in and the delivery address are handed to the user.", "**Checkout is a payment-classified action: always ask before placing the order.** Show the restaurant, items, fees and…"),
     ),
     CatalogSite(
         id = "whatsapp.com",
@@ -1429,11 +1341,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("WhatsApp", "Whats App", "whatsapp", "WA"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://whatsapp.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://whatsapp.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "youtube.com",
@@ -1442,11 +1350,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("YouTube", "油管"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://youtube.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://youtube.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "bilibili.com",
@@ -1455,11 +1359,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("B站", "哔哩哔哩", "bilibili", "b站"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://bilibili.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://bilibili.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "xiaoyuzhoufm.com",
@@ -1468,11 +1368,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("小宇宙", "Xiaoyuzhou"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://xiaoyuzhoufm.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://xiaoyuzhoufm.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "xiaohongshu.com",
@@ -1481,11 +1377,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("小红书", "Xiaohongshu", "XHS", "xiaohongshu", "xhs"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://xiaohongshu.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://xiaohongshu.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "weibo.com",
@@ -1494,11 +1386,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("微博", "Weibo", "weibo"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://weibo.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://weibo.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "douyin.com",
@@ -1507,11 +1395,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("抖音", "抖音商城", "抖音电商", "douyin", "douyinshop"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://douyin.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://douyin.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "weixin.sogou.com",
@@ -1520,11 +1404,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("搜狗微信", "Sogou Weixin"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://weixin.sogou.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://weixin.sogou.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "tieba.baidu.com",
@@ -1533,11 +1413,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("贴吧", "百度贴吧"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://tieba.baidu.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://tieba.baidu.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "zhihu.com",
@@ -1546,11 +1422,7 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("知乎", "Zhihu", "zhihu"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://zhihu.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://zhihu.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
     CatalogSite(
         id = "douban.com",
@@ -1559,10 +1431,6 @@ val SITE_CATALOG: List<CatalogSite> = listOf(
         aliases = listOf("豆瓣", "Douban"),
         validated = "pending",
         purpose = "",
-        actions = listOf(
-            "Open https://douban.com in Browser.",
-            "Read the page and use element refs; never invent coordinates.",
-            "Do not submit an order, form or message without approval.",
-        ),
+        actions = listOf("Open https://douban.com in Browser.", "Read the page and use element refs; never invent coordinates.", "Do not submit an order, form or message without approval."),
     ),
 )
