@@ -52,6 +52,7 @@ fun CapabilitiesScreen(
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
     onOpenMemory: () -> Unit,
+    onOpenSkills: () -> Unit,
     onUnavailable: (String) -> Unit,
 ) {
     val ready = accessibilityEnabled
@@ -167,7 +168,7 @@ fun CapabilitiesScreen(
                 Tile(
                     title = "Skills",
                     subtitle = if (skills == 1) "1 trigger" else "$skills triggers",
-                    onClick = onOpenMemory,
+                    onClick = onOpenSkills,
                     modifier = Modifier.weight(1f),
                 )
             }

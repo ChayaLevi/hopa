@@ -1,4 +1,4 @@
-package com.hopa.core.loop
+﻿package com.hopa.core.loop
 
 import com.hopa.core.contracts.ErrorCodes
 import com.hopa.core.contracts.HopaError
@@ -125,13 +125,13 @@ class AgentLoop(
                 )
             }
             outcome.text?.let { text ->
-                return TurnResult(text, records, narration, usage = usage)
+                return TurnResult(ModelReplyText.clean(text), records, narration, usage = usage)
             }
             val decision = outcome.decision
                 ?: return TurnResult("I did not understand the answer.", records, narration, usage = usage)
             if (decision.done) {
                 return TurnResult(
-                    answer = decision.say.ifBlank { "Done." },
+                    answer = ModelReplyText.clean(decision.say.ifBlank { "Done." }),
                     records = records,
                     narration = narration,
                     usage = usage,
@@ -139,7 +139,7 @@ class AgentLoop(
             }
             if (decision.needUser) {
                 return TurnResult(
-                    answer = decision.say,
+                    answer = ModelReplyText.clean(decision.say),
                     records = records,
                     narration = narration,
                     options = decision.options.orEmpty(),
@@ -147,7 +147,12 @@ class AgentLoop(
                 )
             }
             val action = decision.action
-                ?: return TurnResult(decision.say.ifBlank { "Done." }, records, narration, usage = usage)
+                ?: return TurnResult(
+                    ModelReplyText.clean(decision.say.ifBlank { "Done." }),
+                    records,
+                    narration,
+                    usage = usage,
+                )
 
             if (action.kind == "ui.launch") {
                 val app = action.app.orEmpty()

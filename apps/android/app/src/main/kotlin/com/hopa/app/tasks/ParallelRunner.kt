@@ -57,6 +57,8 @@ class ParallelRunner(
         }
         patch(id) { it.copy(conversationId = conversation.id) }
 
+        val started = System.currentTimeMillis()
+
         val client = ShellClient(container.displayToken.value)
         val device = ShellDisplayDevice(client, container.context)
         val metrics = container.context.resources.displayMetrics
@@ -71,6 +73,45 @@ class ParallelRunner(
         try {
             val settings = container.settings.settings.first()
             container.policy.setTrustedApps(settings.trustedApps.toList())
+
+            // A goal that worked before runs from its recipe here too: the
+            // parallel run gets the cheap path, not just the main one.
+            if (settings.replaySkills) {
+                val recipe = runCatching { container.recipes.find(goal) }.getOrNull()
+                if (recipe != null) {
+                    val replayed = runCatching {
+                        com.hopa.app.skills.Replayer(container).replay(recipe, device)
+                    }.getOrDefault(0)
+                    if (replayed == recipe.steps.size) {
+                        val answer = "Done - repeated the $replayed steps that worked last time."
+                        val steps = recipe.steps.mapIndexed { index, action ->
+                            "${index + 1}. ${action.kind}"
+                        }
+                        append(
+                            conversation.id,
+                            answer,
+                            com.hopa.data.sessions.MessageProof(
+                                path = "background",
+                                executed = replayed,
+                                verified = replayed,
+                                tokens = 0,
+                                steps = steps,
+                            ),
+                        )
+                        record(goal, conversation.id, replayed, 0)
+                        finish(id, "done", answer.take(80))
+                        return
+                    }
+                }
+            }
+
+            // The hidden display has its own foreground app; its typed functions
+            // must come from that display, not from the phone's own screen.
+            val functions = runCatching {
+                val foreground = device.foreground()
+                if (foreground.isBlank()) "" else client.appFunctions(foreground).second
+            }.getOrDefault("")
+
             val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
             val loop = container.loopFor(
                 ScreenSourceDevice(
@@ -92,6 +133,7 @@ class ParallelRunner(
                         skills = runCatching { container.skills.promptText() }.getOrDefault(""),
                         vision = settings.vision,
                         installedApps = installed,
+                        appFunctions = functions,
                         platform = "android",
                         phoneAccess = settings.accessibilityAllowed,
                     ),
@@ -99,31 +141,66 @@ class ParallelRunner(
                 )
             }
             val answer = result?.answer ?: "Stopped after two minutes."
-            container.conversations.append(
-                conversation.id,
-                ChatMessage(
-                    id = "m-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(6)}",
-                    role = "assistant",
-                    text = answer,
-                    timestamp = System.currentTimeMillis(),
-                ),
-            )
-            runCatching {
-                container.runHistory.record(
-                    at = System.currentTimeMillis(),
-                    goal = goal,
-                    path = "background",
-                    steps = result?.records?.size ?: 0,
-                    tokens = result?.usage?.totalTokens ?: 0,
-                    conversationId = conversation.id,
-                )
+            val steps = result?.records.orEmpty().map { record ->
+                val target = record.action.app
+                    ?: record.action.ref
+                    ?: record.action.url
+                    ?: record.action.text?.take(40)
+                    ?: ""
+                val suffix = if (target.isBlank()) "" else " $target"
+                "${record.step}. ${record.action.kind}$suffix"
             }
+            val proof = com.hopa.data.sessions.MessageProof(
+                path = "background",
+                executed = result?.records?.count { it.executed } ?: 0,
+                verified = result?.records?.count { it.verified } ?: 0,
+                tokens = result?.usage?.totalTokens ?: 0,
+                millis = System.currentTimeMillis() - started,
+                steps = steps,
+            )
+            append(conversation.id, answer, proof.takeIf { it.executed > 0 })
+            if (!result?.records.isNullOrEmpty() && result.records.all { it.executed }) {
+                runCatching { container.recipes.save(goal, result.records.map { it.action }) }
+            }
+            record(goal, conversation.id, result?.records?.size ?: 0, result?.usage?.totalTokens ?: 0)
             finish(id, "done", answer.take(80))
         } catch (error: Exception) {
             finish(id, "failed", error.message ?: "failed")
         } finally {
             runCatching { device.stop() }
             client.close()
+        }
+    }
+
+    private suspend fun append(
+        conversationId: String,
+        text: String,
+        proof: com.hopa.data.sessions.MessageProof? = null,
+    ) {
+        runCatching {
+            container.conversations.append(
+                conversationId,
+                ChatMessage(
+                    id = "m-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(6)}",
+                    role = "assistant",
+                    text = text,
+                    timestamp = System.currentTimeMillis(),
+                    proof = proof,
+                ),
+            )
+        }
+    }
+
+    private suspend fun record(goal: String, conversationId: String, steps: Int, tokens: Int) {
+        runCatching {
+            container.runHistory.record(
+                at = System.currentTimeMillis(),
+                goal = goal,
+                path = "background",
+                steps = steps,
+                tokens = tokens,
+                conversationId = conversationId,
+            )
         }
     }
 

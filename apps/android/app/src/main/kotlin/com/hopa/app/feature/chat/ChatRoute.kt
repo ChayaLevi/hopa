@@ -24,12 +24,13 @@ fun ChatRoute(
     val tasks by container.runner.tasks.collectAsStateWithLifecycle()
     var chatsOpen by remember { mutableStateOf(false) }
 
-    val pendingGoal by container.pendingGoal.collectAsStateWithLifecycle()
-    androidx.compose.runtime.LaunchedEffect(pendingGoal) {
-        val goal = pendingGoal ?: return@LaunchedEffect
-        container.pendingGoal.value = null
-        viewModel.prefill(goal)
-        viewModel.send()
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        for (goal in container.pendingGoals) {
+            viewModel.prefill(goal)
+            // send() marks the app busy before it returns, so the next queued
+            // goal is routed to the parallel runner instead of replacing this one.
+            viewModel.send()
+        }
     }
 
     androidx.compose.runtime.LaunchedEffect(initialGoal) {

@@ -83,6 +83,10 @@
             android:exported="false"
             android:foregroundServiceType="shortService" />
         <service
+            android:name=".service.PairingService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
+        <service
             android:name=".service.ScreenCaptureService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />

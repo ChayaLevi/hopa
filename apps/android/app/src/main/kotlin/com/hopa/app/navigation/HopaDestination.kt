@@ -7,6 +7,7 @@ object HopaDestination {
     const val RUNS = "runs"
     const val USAGE = "usage"
     const val MEMORY = "memory"
+    const val SKILLS = "skills"
     const val RUNNING_APPS = "runningapps"
     const val COMPUTER = "computer"
     const val BROWSER = "browser"

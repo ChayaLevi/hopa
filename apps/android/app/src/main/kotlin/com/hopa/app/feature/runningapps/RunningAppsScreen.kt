@@ -52,6 +52,7 @@ import com.hopa.core.router.RouteTarget
 fun RunningAppsScreen(
     state: SettingsUiState,
     apps: List<RouteTarget>,
+    pairingStatus: String?,
     onBack: () -> Unit,
     onScreenPath: (String) -> Unit,
     onStartBackgroundHelper: () -> Unit,
@@ -233,6 +234,17 @@ fun RunningAppsScreen(
                         message,
                         fontSize = 12.sp,
                         color = if (message.startsWith("Paired")) {
+                            HopaColor.Success
+                        } else {
+                            HopaColor.Warning
+                        },
+                    )
+                }
+                pairingStatus?.let { message ->
+                    Text(
+                        message,
+                        fontSize = 12.sp,
+                        color = if (message.startsWith("Wireless shell") || message.startsWith("Paired")) {
                             HopaColor.Success
                         } else {
                             HopaColor.Warning

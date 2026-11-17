@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 # One command that proves the Android build on a real phone.
 #   .\tools\scripts\android-device-checks.ps1
 #   .\tools\scripts\android-device-checks.ps1 -InstallOnly
@@ -79,7 +79,7 @@ function Install-Apk {
         "#!/system/bin/sh",
         "set -e",
         "apk=$deviceApk",
-        'session=$(pm install-create -r -t | sed -n ''s/.*\[\([0-9][0-9]*\)\].*/\1/p'')',
+        'session=$(pm install-create -r -t --user 0 | sed -n ''s/.*\[\([0-9][0-9]*\)\].*/\1/p'')',
         'if [ -z "$session" ]; then echo "no session"; exit 1; fi',
         'pm install-write "$session" base "$apk"',
         'pm install-commit "$session"'

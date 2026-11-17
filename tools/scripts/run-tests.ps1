@@ -68,6 +68,8 @@ if ($LASTEXITCODE -ne 0) { throw 'routing fixtures failed' }
 if ($LASTEXITCODE -ne 0) { throw 'observation hash vector failed' }
 & $pythonExe @pythonPrefix (Join-Path $root 'tools\checks\check-android-structure.py')
 if ($LASTEXITCODE -ne 0) { throw 'Android structure failed' }
+& $pythonExe @pythonPrefix (Join-Path $root 'tools\checks\check-helper-command.py')
+if ($LASTEXITCODE -ne 0) { throw 'helper start command is out of sync' }
 
 Write-Host '=== brain tests ==='
 if (Test-Path (Join-Path $root '.tools\kotlinc\bin\kotlinc.bat')) {

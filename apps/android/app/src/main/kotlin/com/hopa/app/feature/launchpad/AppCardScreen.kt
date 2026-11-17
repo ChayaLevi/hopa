@@ -46,6 +46,7 @@ fun AppCardScreen(
     screenAccess: Boolean,
     trusted: Boolean,
     status: String,
+    functions: List<String>,
     onBack: () -> Unit,
     onOpen: () -> Unit,
     onInstall: () -> Unit,
@@ -129,6 +130,34 @@ fun AppCardScreen(
                         HopaColor.TextSecondary
                     },
                 )
+            }
+
+            if (functions.isNotEmpty()) {
+                Card {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            "App functions",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = HopaColor.TextPrimary,
+                        )
+                        functions.forEach { function ->
+                            Text(
+                                function,
+                                fontSize = 13.sp,
+                                color = HopaColor.TextSecondary,
+                            )
+                        }
+                        Text(
+                            "A run calls these instead of tapping while this app is open.",
+                            fontSize = 11.sp,
+                            color = HopaColor.TextHint,
+                        )
+                    }
+                }
             }
 
             Card {

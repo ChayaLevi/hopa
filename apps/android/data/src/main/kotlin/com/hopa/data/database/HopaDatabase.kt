@@ -29,7 +29,7 @@ import com.hopa.data.database.entity.TurnEntity
         SkillEntity::class,
         RunHistoryEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = false,
 )
 abstract class HopaDatabase : RoomDatabase() {
@@ -57,6 +57,7 @@ abstract class HopaDatabase : RoomDatabase() {
                     Migrations.MIGRATION_4_5,
         Migrations.MIGRATION_5_6,
                     Migrations.MIGRATION_6_7,
+        Migrations.MIGRATION_7_8,
                 )
                 .build()
     }

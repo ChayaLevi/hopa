@@ -39,7 +39,7 @@ if [ -z "$dex" ]; then
   exit 1
 fi
 CLASSPATH="$dex" setsid app_process / com.hopa.capabilities.display.ShellMain \
-  --token="$token" >"$log" 2>&1 &
+  --token="$token" --verbose >"$log" 2>&1 &
 # The helper prints this line only after the socket is bound; /proc/net/tcp is
 # not readable from shell on every device, so the log is the reliable witness.
 i=0

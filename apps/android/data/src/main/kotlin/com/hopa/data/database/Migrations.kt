@@ -82,4 +82,12 @@ object Migrations {
             )
         }
     }
+
+    val MIGRATION_7_8: Migration = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE turns ADD COLUMN proof TEXT NOT NULL DEFAULT ''",
+            )
+        }
+    }
 }

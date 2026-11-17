@@ -56,7 +56,7 @@ class WirelessShell(
         if (!manager.isConnected) {
             return "adbd did not accept the connection; is Wireless debugging on?"
         }
-        val started = shell(DisplayStart.command(context.packageName, token))
+        val started = shell(DisplayStart.command(context.packageName, token, isDebuggable()))
         return if (started.contains("started")) {
             "Wireless shell connected; the background screen is ready"
         } else {
@@ -87,6 +87,10 @@ class WirelessShell(
         runCatching { manager?.close() }
         manager = null
     }
+
+    /** A debug build keeps the helper's command log; a release build stays quiet. */
+    private fun isDebuggable(): Boolean =
+        (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     private fun manager(): AbsAdbConnectionManager {
         manager?.let { return it }

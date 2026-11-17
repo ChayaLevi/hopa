@@ -27,6 +27,7 @@ fun HomeShell(
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
     onOpenMemory: () -> Unit,
+    onOpenSkills: () -> Unit = onOpenMemory,
     onOpenRunningApps: () -> Unit,
     onOpenBrowser: () -> Unit,
     initialGoal: String = "",
@@ -53,6 +54,7 @@ fun HomeShell(
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
             onOpenMemory = onOpenMemory,
+            onOpenSkills = onOpenSkills,
             onOpenRunningApps = onOpenRunningApps,
             onOpenBrowser = onOpenBrowser,
             initialGoal = initialGoal,
@@ -90,6 +92,7 @@ fun HomeShell(
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
             onOpenMemory = onOpenMemory,
+            onOpenSkills = onOpenSkills,
             onOpenRunningApps = onOpenRunningApps,
             onOpenBrowser = onOpenBrowser,
         )
@@ -152,6 +155,7 @@ private fun PowerShell(
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
     onOpenMemory: () -> Unit,
+    onOpenSkills: () -> Unit,
     onOpenRunningApps: () -> Unit,
     onOpenBrowser: () -> Unit,
     initialGoal: String,
@@ -194,6 +198,7 @@ private fun PowerShell(
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
             onOpenMemory = onOpenMemory,
+            onOpenSkills = onOpenSkills,
             onOpenRunningApps = onOpenRunningApps,
             onOpenBrowser = onOpenBrowser,
         )
@@ -210,7 +215,7 @@ private fun PowerShell(
             active = "chat",
             onSelectTab = select,
             onRun = { goal ->
-                container.pendingGoal.value = goal
+                container.pendingGoals.trySend(goal)
                 chatStarted = true
                 tab = "chat"
             },

@@ -21,6 +21,7 @@ fun CapabilitiesRoute(
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
     onOpenMemory: () -> Unit,
+    onOpenSkills: () -> Unit,
     onOpenBrowser: () -> Unit,
 ) {
     var records by remember { mutableStateOf(0) }
@@ -55,6 +56,7 @@ fun CapabilitiesRoute(
         onOpenRuns = onOpenRuns,
         onOpenUsage = onOpenUsage,
         onOpenMemory = onOpenMemory,
+        onOpenSkills = onOpenSkills,
         onOpenBrowser = onOpenBrowser,
         onUnavailable = { feature ->
             Toast.makeText(

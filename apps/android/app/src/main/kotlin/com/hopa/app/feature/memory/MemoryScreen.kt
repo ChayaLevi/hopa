@@ -2,7 +2,6 @@ package com.hopa.app.feature.memory
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,8 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.data.skills.Skill
 
+/**
+ * The facts HOPA carries with every request. Skills have their own page: a fact
+ * is context, a skill is a procedure, and mixing both on one scroll made two
+ * different cards land on the same wall of text.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemoryScreen(
@@ -46,14 +49,10 @@ fun MemoryScreen(
     onBack: () -> Unit,
     onAddFact: (String) -> Unit,
     onDeleteFact: (String) -> Unit,
-    onAddSkill: (String, String) -> Unit,
-    onDeleteSkill: (String) -> Unit,
-    onClearAll: () -> Unit,
+    onClearFacts: () -> Unit,
     onExport: () -> Unit,
 ) {
     var fact by remember { mutableStateOf("") }
-    var trigger by remember { mutableStateOf("") }
-    var action by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = HopaColor.Bg,
@@ -67,15 +66,15 @@ fun MemoryScreen(
                     )
                 }
                 Text(
-                    "Memory and Skills",
+                    "Memory",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
                     color = HopaColor.TextPrimary,
                     modifier = Modifier.weight(1f),
                 )
-                if (state.facts.isNotEmpty() || state.skills.isNotEmpty()) {
+                if (state.facts.isNotEmpty()) {
                     TextButton(onClick = onExport) { Text("Export") }
-                    TextButton(onClick = onClearAll) { Text("Clear all") }
+                    TextButton(onClick = onClearFacts) { Text("Clear") }
                 }
             }
         },
@@ -88,9 +87,8 @@ fun MemoryScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Section("MEMORY")
             Text(
-                "Facts HOPA keeps with every request. Add one, delete one, or clear all.",
+                "Facts HOPA keeps with every request. Add one, delete one, or clear them all.",
                 fontSize = 12.sp,
                 color = HopaColor.TextHint,
             )
@@ -151,86 +149,6 @@ fun MemoryScreen(
                     }
                 }
             }
-
-            Section("SKILLS")
-            Text(
-                "A phrase and what it should do; both go into the prompt.",
-                fontSize = 12.sp,
-                color = HopaColor.TextHint,
-            )
-            OutlinedTextField(
-                value = trigger,
-                onValueChange = { trigger = it },
-                label = { Text("When I say...") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = action,
-                onValueChange = { action = it },
-                label = { Text("...do this") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Button(
-                onClick = {
-                    onAddSkill(trigger, action)
-                    trigger = ""
-                    action = ""
-                },
-                enabled = trigger.isNotBlank() && action.isNotBlank(),
-            ) { Text("Add skill") }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(HopaColor.Surface, RoundedCornerShape(12.dp))
-                    .border(1.dp, HopaColor.Divider, RoundedCornerShape(12.dp)),
-            ) {
-                if (state.skills.isEmpty()) {
-                    Text(
-                        "No skills yet.",
-                        fontSize = 12.sp,
-                        color = HopaColor.TextHint,
-                        modifier = Modifier.padding(14.dp),
-                    )
-                } else {
-                    state.skills.forEach { skill ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 14.dp, end = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                "\"${skill.trigger}\" \u2192 ${skill.action}",
-                                fontSize = 13.sp,
-                                color = HopaColor.TextPrimary,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(vertical = 10.dp),
-                            )
-                            IconButton(onClick = { onDeleteSkill(skill.trigger) }) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = "Delete skill",
-                                    tint = HopaColor.TextHint,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
-}
-
-@Composable
-private fun Section(label: String) {
-    Text(
-        label,
-        fontSize = 10.sp,
-        color = HopaColor.TextHint,
-        letterSpacing = 0.6.sp,
-        modifier = Modifier.padding(top = 6.dp),
-    )
 }

@@ -25,6 +25,7 @@ object ShellMain {
     @JvmStatic
     fun main(args: Array<String>) {
         val token = args.firstOrNull { it.startsWith(TOKEN_ARG) }?.substringAfter(TOKEN_ARG).orEmpty()
+        val verbose = args.contains(VERBOSE_ARG)
         if (token.length < 16) {
             System.err.println("hopa-display: start it with --token=<token>")
             return
@@ -51,13 +52,13 @@ object ShellMain {
             // One connection owns one display, so several clients can run several
             // tasks at the same time on separate hidden screens.
             Thread {
-                runCatching { serve(client, token, context) }
+                runCatching { serve(client, token, context, verbose) }
                 runCatching { client.close() }
             }.apply { isDaemon = true }.start()
         }
     }
 
-    private fun serve(socket: Socket, token: String, context: Context?) {
+    private fun serve(socket: Socket, token: String, context: Context?, verbose: Boolean) {
         val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
         val out = socket.getOutputStream()
         val hello = reader.readLine() ?: return
@@ -86,8 +87,10 @@ object ShellMain {
 
         while (true) {
             val line = reader.readLine() ?: return
-            System.err.println("cmd: ${line.take(120)}")
-            System.err.flush()
+            if (verbose) {
+                System.err.println("cmd: ${line.take(120)}")
+                System.err.flush()
+            }
             val parts = line.trim().split(' ').filter { it.isNotEmpty() }
             if (parts.isEmpty()) {
                 continue
@@ -284,6 +287,8 @@ object ShellMain {
     }
 
     private const val TOKEN_ARG = "--token="
+    /** Command lines are only printed when the caller asked for them. */
+    private const val VERBOSE_ARG = "--verbose"
 
     private fun systemContext(): Context? = runCatching {
         val activityThread = Class.forName("android.app.ActivityThread")

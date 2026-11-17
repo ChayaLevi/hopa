@@ -1,4 +1,4 @@
-package com.hopa.app.feature.chat
+﻿package com.hopa.app.feature.chat
 
 import android.content.Intent
 import androidx.core.content.ContextCompat
@@ -240,11 +240,18 @@ class ChatViewModel(
             return
         }
         viewModelScope.launch {
-            runCatching {
+            val saved = runCatching {
                 container.skills.add(
                     trigger = goal.take(80),
                     action = steps.joinToString("\n"),
                 )
+            }.isSuccess
+            if (saved) {
+                // The receipt says "Saved" in place; silence here is what made a
+                // successful save look like a dead button.
+                _state.update { it.copy(savedGoals = it.savedGoals + goal) }
+            } else {
+                _state.update { it.copy(error = "Could not save the skill.") }
             }
         }
     }
@@ -447,6 +454,9 @@ class ChatViewModel(
                         (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
                         container.busy.value = false
                         val answer = "Done - repeated the $replayed steps that worked last time."
+                        val steps = recipe.steps.mapIndexed { index, action ->
+                            "${index + 1}. ${action.kind}"
+                        }
                         container.conversations.append(
                             conversation.id,
                             ChatMessage(
@@ -454,26 +464,32 @@ class ChatViewModel(
                                 role = "assistant",
                                 text = answer,
                                 timestamp = System.currentTimeMillis(),
+                                proof = com.hopa.data.sessions.MessageProof(
+                                    path = device.sourceName,
+                                    executed = replayed,
+                                    verified = replayed,
+                                    tokens = 0,
+                                    millis = System.currentTimeMillis() - now,
+                                    steps = steps,
+                                ),
                             ),
                         )
+                        runCatching {
+                            container.runHistory.record(
+                                at = System.currentTimeMillis(),
+                                goal = body,
+                                path = device.sourceName,
+                                steps = replayed,
+                                tokens = 0,
+                                conversationId = conversation.id,
+                            )
+                        }
                         val shown = container.conversations.all()
                         _state.update {
                             it.copy(
                                 current = shown.firstOrNull { item -> item.id == conversation.id },
                                 conversations = shown,
                                 busy = false,
-                                lastPath = device.sourceName,
-                                lastRun = RunSummary(
-                                    goal = body,
-                                    path = device.sourceName,
-                                    steps = recipe.steps.mapIndexed { index, action ->
-                                        "${index + 1}. ${action.kind}"
-                                    },
-                                    executed = replayed,
-                                    verified = replayed,
-                                    tokens = 0,
-                                    millis = System.currentTimeMillis() - now,
-                                ),
                             )
                         }
                         return@launch
@@ -505,17 +521,6 @@ class ChatViewModel(
                 (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
             }
             val answer = result?.answer ?: "I stopped after two minutes."
-            container.conversations.append(
-                conversation.id,
-                ChatMessage(
-                    id = "m-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(6)}",
-                    role = "assistant",
-                    text = answer,
-                    timestamp = System.currentTimeMillis(),
-                ),
-            )
-            val all = container.conversations.all()
-            container.busy.value = false
             val steps = result?.records.orEmpty().map { record ->
                 val target = record.action.app
                     ?: record.action.ref
@@ -525,9 +530,26 @@ class ChatViewModel(
                 val suffix = if (target.isBlank()) "" else " $target"
                 "${record.step}. ${record.action.kind}$suffix"
             }
-            if (!result?.error?.message.isNullOrBlank().not()) {
-                // only a clean run becomes a recipe
-            }
+            val proof = com.hopa.data.sessions.MessageProof(
+                path = device.sourceName,
+                executed = result?.records?.count { it.executed } ?: 0,
+                verified = result?.records?.count { it.verified } ?: 0,
+                tokens = result?.usage?.totalTokens ?: 0,
+                millis = System.currentTimeMillis() - now,
+                steps = steps,
+            )
+            container.conversations.append(
+                conversation.id,
+                ChatMessage(
+                    id = "m-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(6)}",
+                    role = "assistant",
+                    text = answer,
+                    timestamp = System.currentTimeMillis(),
+                    proof = proof.takeIf { it.executed > 0 },
+                ),
+            )
+            val all = container.conversations.all()
+            container.busy.value = false
             if (result != null && result.records.isNotEmpty() &&
                 result.records.all { it.executed }
             ) {
@@ -535,22 +557,13 @@ class ChatViewModel(
                     container.recipes.save(body, result.records.map { it.action })
                 }
             }
-            val summary = RunSummary(
-                goal = body,
-                path = device.sourceName,
-                steps = steps,
-                executed = result?.records?.count { it.executed } ?: 0,
-                verified = result?.records?.count { it.verified } ?: 0,
-                tokens = result?.usage?.totalTokens ?: 0,
-                millis = System.currentTimeMillis() - now,
-            )
             runCatching {
                 container.runHistory.record(
                     at = System.currentTimeMillis(),
                     goal = body,
                     path = device.sourceName,
                     steps = steps.size,
-                    tokens = summary.tokens,
+                    tokens = proof.tokens,
                     conversationId = conversation.id,
                 )
             }
@@ -559,7 +572,7 @@ class ChatViewModel(
                     at = System.currentTimeMillis(),
                     path = device.sourceName,
                     steps = steps.size,
-                    tokens = summary.tokens,
+                    tokens = proof.tokens,
                     charactersSent = history.sumOf { it.content.length } + body.length,
                     goal = body.take(80),
                 ),
@@ -571,8 +584,6 @@ class ChatViewModel(
                     busy = false,
                     error = result?.error?.message,
                     options = result?.options.orEmpty(),
-                    lastPath = device.sourceName,
-                    lastRun = summary,
                 )
             }
             answerOutsideApp(answer)

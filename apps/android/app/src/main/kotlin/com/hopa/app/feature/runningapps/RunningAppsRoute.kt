@@ -28,6 +28,7 @@ fun RunningAppsRoute(
 ) {
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pairing by container.pairingStatus.collectAsStateWithLifecycle()
     var apps by remember { mutableStateOf(emptyList<RouteTarget>()) }
 
     LaunchedEffect(Unit) {
@@ -40,9 +41,17 @@ fun RunningAppsRoute(
             .sortedBy { it.display.lowercase() }
     }
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(3_000)
+            viewModel.refreshBackground()
+        }
+    }
+
     RunningAppsScreen(
         state = state,
         apps = apps,
+        pairingStatus = pairing,
         onBack = onBack,
         onScreenPath = viewModel::setScreenPath,
         onStartBackgroundHelper = viewModel::startBackgroundHelper,

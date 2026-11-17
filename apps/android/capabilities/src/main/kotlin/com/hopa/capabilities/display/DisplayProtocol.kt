@@ -31,6 +31,9 @@ class DisplayProtocol {
 
     fun top(): String = "top"
 
+    /** A round trip that proves the helper is still there. */
+    fun ping(): String = "ping"
+
     /** A run on the hidden display must not be heard on the phone. */
     fun mute(packageName: String): String = "mute $packageName"
 

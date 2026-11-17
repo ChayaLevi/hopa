@@ -1,0 +1,17 @@
+package com.hopa.data.sessions
+
+import kotlinx.serialization.Serializable
+
+/**
+ * What one answer did on the device. It is stored with the message, not in a
+ * screen-level slot, so the receipt survives a chat switch and a restart.
+ */
+@Serializable
+data class MessageProof(
+    val path: String = "",
+    val executed: Int = 0,
+    val verified: Int = 0,
+    val tokens: Int = 0,
+    val millis: Long = 0,
+    val steps: List<String> = emptyList(),
+)
