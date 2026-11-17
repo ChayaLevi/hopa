@@ -2,8 +2,8 @@ package com.hopa.data.skills
 
 import com.hopa.data.database.dao.SkillDao
 import com.hopa.data.database.entity.SkillEntity
-import com.hopa.stores.skills.Skill
-import com.hopa.stores.skills.SkillStore
+import com.hopa.stores.Skill
+import com.hopa.stores.SkillStore
 
 class RoomSkillStore(
     private val dao: SkillDao,

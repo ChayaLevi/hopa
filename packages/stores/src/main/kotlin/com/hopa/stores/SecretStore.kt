@@ -1,4 +1,4 @@
-package com.hopa.stores.secrets
+package com.hopa.stores
 
 interface SecretStore {
     suspend fun get(alias: String): String

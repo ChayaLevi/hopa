@@ -5,14 +5,14 @@ both run. No Android, no network, no UI: a plain JVM module with tests that need
 neither a device nor a provider.
 
 ```
-loop/         AgentLoop, TurnContext, TurnResult, LoopConfig
+loop/         AgentLoop, TurnContext, TurnResult, LoopConfig, RunNarrator
 gate/         ActionExecutor, ApprovalPolicy, ActionClassifier, ApprovalGateway
 prompt/       SystemPromptBuilder, AppCatalogBlock, InstalledAppsBlock, ScreenRenderer, ContextBudget
 observation/  ObservationProducer (refs, redaction, caps, hash), ScreenSourceDevice, ScreenPathOrder
 records/      RunChain, RunRecordFactory, RunRecorder (+ in-memory)
 router/       AppRouter, CatalogRoutes, RouterHint
-parser/       DecisionParser, BalancedObjectScanner
-contracts/    Action, Decision, Observation, RunRecord, errors
+parser/       DecisionParser, BalancedObjectScanner, DecisionRules
+contracts/    Action (+ ActionKind), Decision, Observation (+ the tree and screen size), RunRecord, errors
 ports/        DevicePort, SystemPort, BrowserPort, SandboxPort, Clock, PackageCatalog
 model/        ModelPort, ModelRequest, ModelReply (no HTTP — see packages/net)
 ```

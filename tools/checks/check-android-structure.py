@@ -3,7 +3,10 @@
 
 Rules:
   * a Kotlin package matches its folder under ``src/*/kotlin``;
-  * one public top-level declaration per file, and the file is named after it;
+  * a file carries one public top-level declaration, named after it - except a
+    file of contracts: interfaces, enums, sealed and data classes may share one
+    file, since they carry no behaviour. A plain ``class``, an ``object`` or top
+    level functions never share;
   * no ``Utils``/``Helpers``/``Common``/``Manager`` file names;
   * everything under ``packages/`` (the client engine) imports no ``android.*``
     or ``androidx.*``;
@@ -35,6 +38,16 @@ PACKAGE = re.compile(r"^package ([A-Za-z0-9_.]+)")
 VISIBILITY = re.compile(r"^(?:private |internal |protected )")
 PLATFORM_READ = re.compile(r"\b(?:app|target)\.(harmonyos|android|windows)\b")
 PLATFORM_OWNER = "CatalogRoutes.kt"
+MAX_CONTRACTS = 12
+CONTRACT = re.compile(r"^(?:public |internal )?(?:data |sealed |enum )+(?:class|interface) ")
+
+
+def is_contract(line: str) -> bool:
+    """A declaration that carries no behaviour: interface, enum, sealed or data class."""
+    text = line.strip()
+    if text.startswith("interface ") or " interface " in text:
+        return True
+    return bool(CONTRACT.match(text))
 
 
 def kotlin_files() -> list[Path]:
@@ -79,10 +92,22 @@ def check() -> list[str]:
             declarations.append((match.group(1), match.group(2)))
         if not generated and declarations:
             if len(declarations) > 1:
-                problems.append(
-                    f"{path.relative_to(ROOT)}: {len(declarations)} public declarations "
-                    f"{declarations}"
-                )
+                # Contracts may share a file; behaviour may not.
+                behaviour = [
+                    line.strip()
+                    for line in text.splitlines()
+                    if DECL.match(line) and not is_contract(line)
+                ]
+                if behaviour:
+                    problems.append(
+                        f"{path.relative_to(ROOT)}: {len(declarations)} public declarations, "
+                        f"and {behaviour[0]!r} carries behaviour"
+                    )
+                elif len(declarations) > MAX_CONTRACTS:
+                    problems.append(
+                        f"{path.relative_to(ROOT)}: {len(declarations)} declarations in one "
+                        f"file (limit {MAX_CONTRACTS})"
+                    )
             else:
                 kind, name = declarations[0]
                 if path.stem != name:

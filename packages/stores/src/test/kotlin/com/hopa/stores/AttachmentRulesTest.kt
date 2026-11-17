@@ -1,4 +1,4 @@
-package com.hopa.stores.sessions
+package com.hopa.stores
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

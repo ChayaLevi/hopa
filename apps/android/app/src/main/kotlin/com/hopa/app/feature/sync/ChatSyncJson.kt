@@ -1,7 +1,7 @@
 package com.hopa.app.feature.sync
 
-import com.hopa.stores.sessions.ChatMessage
-import com.hopa.stores.sessions.Conversation
+import com.hopa.stores.ChatMessage
+import com.hopa.stores.Conversation
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject

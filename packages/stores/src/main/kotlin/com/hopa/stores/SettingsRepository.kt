@@ -1,4 +1,4 @@
-package com.hopa.stores.settings
+package com.hopa.stores
 
 import kotlinx.coroutines.flow.Flow
 

@@ -1,4 +1,4 @@
-package com.hopa.stores.skills
+package com.hopa.stores
 
 /** One learned phrase → action pair. */
 data class Skill(

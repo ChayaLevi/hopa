@@ -1,4 +1,4 @@
-package com.hopa.stores.skills
+package com.hopa.stores
 
 /** Triggers the user taught HOPA; they ride along in the system prompt. */
 interface SkillStore {

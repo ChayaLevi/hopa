@@ -1,4 +1,4 @@
-package com.hopa.stores.sessions
+package com.hopa.stores
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals

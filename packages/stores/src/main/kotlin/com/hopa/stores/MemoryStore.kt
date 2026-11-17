@@ -1,4 +1,4 @@
-package com.hopa.stores.memory
+package com.hopa.stores
 
 /** Facts the user asked HOPA to keep; they ride along in the system prompt. */
 interface MemoryStore {

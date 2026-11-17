@@ -1,4 +1,4 @@
-package com.hopa.stores.approvals
+package com.hopa.stores
 
 import com.hopa.engine.gate.ApprovalRequest
 

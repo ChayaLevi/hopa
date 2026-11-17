@@ -1,4 +1,4 @@
-package com.hopa.engine.validation
+package com.hopa.engine.parser
 
 data class ValidationResult(
     val valid: Boolean,
