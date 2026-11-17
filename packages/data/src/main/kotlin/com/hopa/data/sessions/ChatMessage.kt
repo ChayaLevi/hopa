@@ -9,4 +9,5 @@ data class ChatMessage(
     val text: String,
     val timestamp: Long,
     val attachment: Attachment? = null,
+    val proof: MessageProof? = null,
 )

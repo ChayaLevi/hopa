@@ -57,6 +57,8 @@ class ParallelRunner(
         }
         patch(id) { it.copy(conversationId = conversation.id) }
 
+        val started = System.currentTimeMillis()
+
         val client = ShellClient(container.displayToken.value)
         val device = ShellDisplayDevice(client, container.context)
         val metrics = container.context.resources.displayMetrics
@@ -82,7 +84,20 @@ class ParallelRunner(
                     }.getOrDefault(0)
                     if (replayed == recipe.steps.size) {
                         val answer = "Done - repeated the $replayed steps that worked last time."
-                        append(conversation.id, answer)
+                        val steps = recipe.steps.mapIndexed { index, action ->
+                            "${index + 1}. ${action.kind}"
+                        }
+                        append(
+                            conversation.id,
+                            answer,
+                            com.hopa.data.sessions.MessageProof(
+                                path = "background",
+                                executed = replayed,
+                                verified = replayed,
+                                tokens = 0,
+                                steps = steps,
+                            ),
+                        )
                         record(goal, conversation.id, replayed, 0)
                         finish(id, "done", answer.take(80))
                         return
@@ -126,7 +141,24 @@ class ParallelRunner(
                 )
             }
             val answer = result?.answer ?: "Stopped after two minutes."
-            append(conversation.id, answer)
+            val steps = result?.records.orEmpty().map { record ->
+                val target = record.action.app
+                    ?: record.action.ref
+                    ?: record.action.url
+                    ?: record.action.text?.take(40)
+                    ?: ""
+                val suffix = if (target.isBlank()) "" else " $target"
+                "${record.step}. ${record.action.kind}$suffix"
+            }
+            val proof = com.hopa.data.sessions.MessageProof(
+                path = "background",
+                executed = result?.records?.count { it.executed } ?: 0,
+                verified = result?.records?.count { it.verified } ?: 0,
+                tokens = result?.usage?.totalTokens ?: 0,
+                millis = System.currentTimeMillis() - started,
+                steps = steps,
+            )
+            append(conversation.id, answer, proof.takeIf { it.executed > 0 })
             if (!result?.records.isNullOrEmpty() && result.records.all { it.executed }) {
                 runCatching { container.recipes.save(goal, result.records.map { it.action }) }
             }
@@ -140,7 +172,11 @@ class ParallelRunner(
         }
     }
 
-    private suspend fun append(conversationId: String, text: String) {
+    private suspend fun append(
+        conversationId: String,
+        text: String,
+        proof: com.hopa.data.sessions.MessageProof? = null,
+    ) {
         runCatching {
             container.conversations.append(
                 conversationId,
@@ -149,6 +185,7 @@ class ParallelRunner(
                     role = "assistant",
                     text = text,
                     timestamp = System.currentTimeMillis(),
+                    proof = proof,
                 ),
             )
         }

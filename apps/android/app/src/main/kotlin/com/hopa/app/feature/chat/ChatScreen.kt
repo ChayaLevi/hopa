@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -108,7 +108,6 @@ fun ChatScreen(
     onDismissTask: (String) -> Unit = {},
 ) {
     val messages = state.current?.messages.orEmpty()
-    var evidence by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -399,39 +398,6 @@ fun ChatScreen(
                     trackColor = HopaColor.PrimarySoft,
                 )
             }
-            if (messages.isNotEmpty() && state.lastPath.isNotEmpty()) {
-                Text(
-                    "Ran on " + when (state.lastPath) {
-                        "background" -> "the hidden screen"
-                        "bridge" -> "the PC bridge"
-                        else -> "this screen"
-                    },
-                    fontSize = 10.sp,
-                    color = HopaColor.TextHint,
-                    modifier = Modifier.padding(start = 8.dp, top = 2.dp),
-                )
-            }
-            val run = state.lastRun
-            if (run != null && messages.isNotEmpty()) {
-                Text(
-                    "What happened: ${run.executed} steps, ${run.verified} confirmed",
-                    fontSize = 11.sp,
-                    color = HopaColor.Primary,
-                    modifier = Modifier
-                        .padding(start = 8.dp, top = 2.dp)
-                        .clickable { evidence = true },
-                )
-            }
-            if (evidence && run != null) {
-                EvidenceSheet(
-                    run = run,
-                    onSaveSkill = {
-                        onSaveSkill(run.goal, run.steps)
-                        evidence = false
-                    },
-                    onDismiss = { evidence = false },
-                )
-            }
             state.pendingPlan?.let { plan ->
                 PlanSheet(
                     steps = plan,
@@ -448,12 +414,19 @@ fun ChatScreen(
                     contentPadding = PaddingValues(top = 12.dp, bottom = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(messages, key = ChatMessage::id) { message ->
+                    itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
+                        val goal = if (message.role == "assistant") {
+                            messages.take(index).lastOrNull { it.role == "user" }?.text.orEmpty()
+                        } else {
+                            ""
+                        }
                         MessageBubble(
                             message = message,
                             onSpeak = onSpeak,
                             onRetry = onRetry,
                             onUndo = onUndo,
+                            goal = goal,
+                            onSaveSkill = onSaveSkill,
                         )
                     }
                     if (state.busy) {

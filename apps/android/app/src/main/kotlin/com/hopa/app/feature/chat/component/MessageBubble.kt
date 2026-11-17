@@ -2,10 +2,12 @@ package com.hopa.app.feature.chat.component
 
 import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +19,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.data.sessions.ChatMessage
+import com.hopa.data.sessions.MessageProof
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -40,6 +44,8 @@ fun MessageBubble(
     onSpeak: (String) -> Unit = {},
     onRetry: () -> Unit = {},
     onUndo: () -> Unit = {},
+    goal: String = "",
+    onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
 ) {
     val fromUser = message.role == "user"
     val context = LocalContext.current
@@ -86,13 +92,23 @@ fun MessageBubble(
                 }
             } else {
                 HopaMascot(sizeDp = 26.dp, animate = false)
-                Text(
-                    text = message.text,
+                Column(
                     modifier = Modifier.padding(start = 8.dp, top = 2.dp, end = 8.dp),
-                    color = HopaColor.TextPrimary,
-                    fontSize = 15.sp,
-                    lineHeight = 22.sp,
-                )
+                ) {
+                    Text(
+                        text = message.text,
+                        color = HopaColor.TextPrimary,
+                        fontSize = 15.sp,
+                        lineHeight = 22.sp,
+                    )
+                    message.proof?.takeIf { it.executed > 0 }?.let { proof ->
+                        ProofReceipt(
+                            proof = proof,
+                            goal = goal,
+                            onSaveSkill = onSaveSkill,
+                        )
+                    }
+                }
             }
         }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
@@ -139,4 +155,75 @@ fun MessageBubble(
             }
         }
     }
+}
+
+/**
+ * The receipt for one answer: a quiet pill under the bubble, never a permanent
+ * row. It stays with the message, so switching chats does not erase it, and a
+ * plain answer (no steps) has no receipt at all.
+ */
+@Composable
+private fun ProofReceipt(
+    proof: MessageProof,
+    goal: String,
+    onSaveSkill: (String, List<String>) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    Column(modifier = Modifier.padding(top = 6.dp)) {
+        Surface(
+            color = HopaColor.SurfaceAlt,
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.clickable { open = !open },
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    "${proof.executed} steps · ${proof.verified} confirmed · ${tokensText(proof.tokens)}",
+                    fontSize = 11.sp,
+                    color = HopaColor.TextSecondary,
+                )
+                Text(
+                    if (open) "\u25B4" else "\u25BE",
+                    fontSize = 10.sp,
+                    color = HopaColor.TextHint,
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+            }
+        }
+        if (open) {
+            Column(
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    "Ran on ${whereText(proof.path)} · ${proof.millis / 1000} s",
+                    fontSize = 11.sp,
+                    color = HopaColor.TextHint,
+                )
+                proof.steps.forEach { step ->
+                    Text(step, fontSize = 12.sp, color = HopaColor.TextSecondary)
+                }
+                if (goal.isNotBlank()) {
+                    TextButton(
+                        onClick = { onSaveSkill(goal, proof.steps) },
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Text("Save as a skill", fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun tokensText(tokens: Int): String =
+    if (tokens >= 1_000) String.format("%.1fk tokens", tokens / 1000.0) else "$tokens tokens"
+
+private fun whereText(path: String): String = when (path) {
+    "background" -> "the hidden screen"
+    "bridge" -> "the computer"
+    "accessibility" -> "this screen"
+    else -> "no surface"
 }
