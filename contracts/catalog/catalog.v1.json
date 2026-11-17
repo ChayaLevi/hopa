@@ -1035,6 +1035,48 @@
       }
     },
     {
+      "id": "aliexpress",
+      "display": "AliExpress",
+      "aliases": [
+        "AliExpress",
+        "Ali Express",
+        "aliexpress"
+      ],
+      "purpose": "Marketplace: search, product cards, cart, orders, tracking.",
+      "actions": [
+        "Looking is safe; buying, confirming an order or changing an address is a payment: always ask.",
+        "Never type a card number, a CVV or a one-time code; hand checkout to the person.",
+        "A sign-in wall, a country picker or a currency change means stop and ask.",
+        "Web fallback: https://www.aliexpress.com"
+      ],
+      "platforms": {
+        "harmonyos": {
+          "id": "",
+          "detail": "",
+          "confirmed": false,
+          "verified": false,
+          "device": "",
+          "state": "unknown"
+        },
+        "android": {
+          "id": "com.alibaba.aliexpresshd",
+          "detail": "",
+          "confirmed": true,
+          "verified": false,
+          "device": "",
+          "state": "unconfirmed"
+        },
+        "windows": {
+          "id": "",
+          "detail": "",
+          "confirmed": false,
+          "verified": false,
+          "device": "",
+          "state": "unknown"
+        }
+      }
+    },
+    {
       "id": "baijiahao",
       "display": "Baidu Baijiahao",
       "aliases": [
