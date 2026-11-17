@@ -116,7 +116,7 @@ export class AgentLoop {
     }
     const messages: ModelMessage[] = [
       new ModelMessage('system', systemText),
-      new ModelMessage('user', `${goal}\n\nSCREEN:\n${PromptBuilder.screenText(screen)}`)
+      new ModelMessage('user', `${goal}\n\nSCREEN TREE:\n${PromptBuilder.screenText(screen)}`)
     ];
 
     for (let step = 0; step < this.maxSteps; step++) {
@@ -168,7 +168,7 @@ export class AgentLoop {
             'user',
             `Observation: ${repeated.observation.summary}\n` +
               'Do not launch the same app twice; use the ELEMENTS to act.\n' +
-              `SCREEN:\n${PromptBuilder.screenText(screen)}`
+              `SCREEN TREE:\n${PromptBuilder.screenText(screen)}`
           )
         );
         continue;
@@ -201,7 +201,7 @@ export class AgentLoop {
         new ModelMessage(
           'user',
           `Observation: ${outcome.observation.summary} ${outcome.observation.detail}\n` +
-            `SCREEN:\n${PromptBuilder.screenText(screen)}`
+            `SCREEN TREE:\n${PromptBuilder.screenText(screen)}`
         )
       );
 

@@ -38,7 +38,7 @@ val PROMPT_RULES: List<PromptRule> = listOf(
     PromptRule(
         id = "read-the-screen",
         phrases = listOf(
-            "After every action the next turn carries SCREEN",
+            "After every action the next turn carries SCREEN TREE",
         ),
     ),
     PromptRule(

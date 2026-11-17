@@ -160,7 +160,7 @@ class AgentLoop(
                     messages += ModelMessage(
                         "user",
                         "The app $app is already in the foreground. Do not launch it again; " +
-                            "read SCREEN and continue.",
+                            "read SCREEN TREE and continue.",
                     )
                     return@repeat
                 }

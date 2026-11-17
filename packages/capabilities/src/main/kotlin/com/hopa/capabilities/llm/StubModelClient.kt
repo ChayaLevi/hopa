@@ -9,10 +9,10 @@ class StubModelClient : ModelPort {
     override suspend fun complete(request: ModelRequest): ModelReply {
         delay(250)
         val last = request.messages
-            .lastOrNull { it.role == "user" && !it.content.startsWith("SCREEN:") }
+            .lastOrNull { it.role == "user" && !it.content.startsWith("SCREEN TREE:") }
             ?.content
             .orEmpty()
-        val screen = request.messages.lastOrNull { it.content.startsWith("SCREEN:") }?.content
+        val screen = request.messages.lastOrNull { it.content.startsWith("SCREEN TREE:") }?.content
         val seen = screen?.lines()?.drop(1)?.filter { it.isNotBlank() }?.take(2)?.joinToString(" ")
         val answer = when {
             last.contains("bridge demo", ignoreCase = true) -> {

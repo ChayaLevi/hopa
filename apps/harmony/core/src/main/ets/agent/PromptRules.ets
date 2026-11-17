@@ -40,7 +40,7 @@ export const PROMPT_RULES: PromptRule[] = [
   {
     id: "read-the-screen",
     phrases: [
-      "After every action the next turn carries SCREEN",
+      "After every action the next turn carries SCREEN TREE",
     ],
   },
   {
