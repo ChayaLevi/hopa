@@ -18,5 +18,8 @@ object HopaDestination {
     const val CAPABILITIES = "capabilities"
     const val ACCESSIBILITY = "accessibility"
     const val LAUNCHPAD = "launchpad"
+
+    /** The catalog, opened on Apps or Sites. */
+    fun launchpad(section: String): String = "$LAUNCHPAD?section=$section"
     const val APP_CARD = "appcard"
 }

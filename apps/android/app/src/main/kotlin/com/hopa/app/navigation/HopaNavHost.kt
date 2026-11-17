@@ -90,8 +90,8 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             RunningAppsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                onOpenAllApps = { navController.navigate(HopaDestination.LAUNCHPAD) },
-                onOpenSites = { navController.navigate(HopaDestination.LAUNCHPAD) },
+                onOpenAllApps = { navController.navigate(HopaDestination.launchpad("apps")) },
+                onOpenSites = { navController.navigate(HopaDestination.launchpad("sites")) },
                 onOpenSetup = { navController.navigate(HopaDestination.RUN_SETUP) },
                 onOpenRunPrefs = { navController.navigate(HopaDestination.RUN_PREFS) },
                 onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
@@ -145,10 +145,14 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.LAUNCHPAD) {
+        composable(
+            route = HopaDestination.LAUNCHPAD + "?section={section}",
+            arguments = listOf(navArgument("section") { defaultValue = "apps" }),
+        ) { entry ->
             LaunchpadRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
+                section = entry.arguments?.getString("section") ?: "apps",
                 onOpenApp = { name ->
                     navController.navigate(
                         HopaDestination.APP_CARD + "/" + android.net.Uri.encode(name),

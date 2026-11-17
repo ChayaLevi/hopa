@@ -1,4 +1,4 @@
-package com.hopa.app.feature.launchpad
+﻿package com.hopa.app.feature.launchpad
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 fun LaunchpadRoute(
     container: AppContainer,
     onBack: () -> Unit,
+    section: String = "apps",
     onOpenApp: (String) -> Unit,
     onOpenSite: (String) -> Unit,
 ) {
@@ -45,6 +46,7 @@ fun LaunchpadRoute(
         apps = targets.filter { it.kind == "app" },
         sites = targets.filter { it.kind == "site" },
         status = status,
+        initialSection = if (section == "sites") 1 else 0,
         onBack = onBack,
         onOpenApp = { target -> onOpenApp(target.name) },
         onOpenSite = { site ->

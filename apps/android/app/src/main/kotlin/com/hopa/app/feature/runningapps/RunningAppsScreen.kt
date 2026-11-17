@@ -33,7 +33,6 @@ import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.component.HopaStatusPill
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.core.router.RouteTarget
 
 /**
  * The one home for everything HOPA can act on: where it acts, which apps and
@@ -44,7 +43,6 @@ import com.hopa.core.router.RouteTarget
 @Composable
 fun RunningAppsScreen(
     state: SettingsUiState,
-    apps: List<RouteTarget>,
     pairingStatus: String?,
     onBack: () -> Unit,
     onScreenPath: (String) -> Unit,
@@ -65,7 +63,16 @@ fun RunningAppsScreen(
     val bridgeReady = state.settings.bridgeUrl.isNotBlank()
     val hiddenForced = mode == "background" && !state.backgroundRunning
     val needsScreen = !state.phoneAccess
-    val needsHidden = mode == "background" && !state.backgroundRunning
+    val needsComputer = mode == "bridge" && !bridgeReady
+    val problem: Pair<String, androidx.compose.ui.graphics.Color>? = when {
+        needsScreen -> "Needs screen access" to HopaColor.Warning
+        hiddenForced -> "Hidden screen is off" to HopaColor.Warning
+        needsComputer -> "Computer not set up" to HopaColor.Warning
+        else -> null
+    }
+    val statusContent: (@Composable () -> Unit)? = problem?.let { (text, color) ->
+        { HopaStatusPill(text = text, color = color) }
+    }
 
     Scaffold(
         containerColor = HopaColor.Bg,
@@ -73,16 +80,7 @@ fun RunningAppsScreen(
             HopaPageHeader(
                 title = "Act",
                 onBack = onBack,
-                status = {
-                    HopaStatusPill(
-                        text = when {
-                            needsScreen -> "Needs screen access"
-                            hiddenForced -> "Hidden screen is off"
-                            else -> "Ready"
-                        },
-                        color = if (needsScreen || hiddenForced) HopaColor.Warning else HopaColor.Success,
-                    )
-                },
+                status = statusContent,
             )
         },
     ) { padding ->
@@ -101,30 +99,32 @@ fun RunningAppsScreen(
                     "background" -> "HOPA uses the hidden screen."
                     "bridge" -> "HOPA uses your computer."
                     "onscreen" -> "HOPA uses this phone's screen."
-                    else -> "HOPA picks hidden, then computer, then this screen."
+                    else -> "Hidden first, then computer, then this screen."
                 },
                 fontSize = 13.sp,
                 color = HopaColor.TextSecondary,
+                minLines = 2,
+                maxLines = 2,
             )
 
             when {
                 needsScreen -> FixButton("Turn on screen access", state.busy, onOpenScreenAccess)
-                needsHidden && (state.backgroundRunning || bridgeReady) ->
+                hiddenForced && (state.backgroundRunning || bridgeReady) ->
                     FixButton("Start the hidden screen", state.busy, onStartBackgroundHelper)
 
-                needsHidden -> FixButton("Set up the hidden screen", state.busy) { setup = true }
+                hiddenForced -> FixButton("Set up the hidden screen", state.busy) { setup = true }
                 else -> Unit
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 HubRow(
                     title = "Apps",
-                    subtitle = "${apps.size} available",
+                    subtitle = "Installed apps HOPA can open",
                     onClick = onOpenAllApps,
                 )
                 HubRow(
                     title = "Sites",
-                    subtitle = "Browse the catalog",
+                    subtitle = "Websites HOPA can open",
                     onClick = onOpenSites,
                 )
                 HubRow(

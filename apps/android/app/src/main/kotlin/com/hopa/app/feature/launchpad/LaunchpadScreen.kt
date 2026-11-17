@@ -50,11 +50,12 @@ fun LaunchpadScreen(
     apps: List<RouteTarget>,
     sites: List<RouteTarget>,
     status: String,
+    initialSection: Int = 0,
     onBack: () -> Unit,
     onOpenApp: (RouteTarget) -> Unit,
     onOpenSite: (RouteTarget) -> Unit,
 ) {
-    var section by rememberSaveable { mutableStateOf(0) }
+    var section by rememberSaveable { mutableStateOf(initialSection) }
     var query by rememberSaveable { mutableStateOf("") }
     val needle = query.trim().lowercase()
     val shownApps = apps.filter { target -> target.matches(needle) }
