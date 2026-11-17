@@ -3,7 +3,7 @@ package com.hopa.core.gate
 import com.hopa.core.contracts.Action
 import com.hopa.core.contracts.Observation
 import com.hopa.core.contracts.RiskLevel
-import com.hopa.policy.ApprovalPolicyData
+import com.hopa.know.policy.ApprovalPolicyData
 
 class ActionClassifier {
     fun classify(action: Action, observation: Observation?): RiskLevel {

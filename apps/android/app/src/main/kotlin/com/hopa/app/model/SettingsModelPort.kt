@@ -1,8 +1,8 @@
 package com.hopa.app.model
 
-import com.hopa.capabilities.llm.ModelFactory
-import com.hopa.capabilities.llm.ProviderChoice
-import com.hopa.capabilities.llm.ProviderChoiceRules
+import com.hopa.remote.llm.ModelFactory
+import com.hopa.remote.llm.ProviderChoice
+import com.hopa.remote.llm.ProviderChoiceRules
 import com.hopa.core.model.ModelPort
 import com.hopa.core.model.ModelReply
 import com.hopa.core.model.ModelRequest

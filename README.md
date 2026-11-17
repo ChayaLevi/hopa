@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <a href="docs/media/HOPA-demo-2026.mp4"><img src="docs/media/banner-2026-duo.svg" alt="HOPA — Say it. Done. HarmonyOS Personal Assistant." width="100%" /></a>
 
@@ -287,8 +287,10 @@ and a secret/license scan.
 - `apps/harmony/core/` — the ArkTS core: loop, gate, executor, run records.
 - `apps/harmony/phone/` — the phone app (module `entry`).
 - `apps/harmony/laptop/` — the laptop app (module `laptop`); frozen.
-- `packages/core/`, `packages/data/`, `packages/capabilities/` — the Kotlin
-  client engine shared by the Android and Windows clients.
+- `packages/core/`, `packages/data/`, `packages/remote/`, `packages/know/` —
+  the Kotlin client engine shared by the Android and Windows clients: the loop
+  and gate, the storage contracts, the network clients, and the generated
+  catalog and rules.
 - `services/bridge/` — the PC companion and bridge: device control, store,
   images, relay.
 - `services/brain/` — the Kotlin reference brain for routing and knowledge.

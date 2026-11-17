@@ -3,8 +3,8 @@ package com.hopa.app.di
 import android.content.Context
 import com.hopa.app.model.SettingsModelPort
 import com.hopa.capabilities.accessibility.AccessibilityDevice
-import com.hopa.capabilities.llm.ModelFactory
-import com.hopa.capabilities.llm.ProviderChoiceRules
+import com.hopa.remote.llm.ModelFactory
+import com.hopa.remote.llm.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
@@ -158,7 +158,7 @@ class AppContainer(context: Context) {
             return false
         }
         return runCatching {
-            com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token)
+            com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token)
                 .startHelper(token = displayToken.value)
             true
         }.getOrDefault(false)
@@ -186,7 +186,7 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return null
         }
-        val client = com.hopa.capabilities.bridge.BridgeClient(
+        val client = com.hopa.remote.bridge.BridgeClient(
             baseUrl = current.bridgeUrl,
             token = token,
             refresh = {
@@ -195,7 +195,7 @@ class AppContainer(context: Context) {
                     null
                 } else {
                     runCatching {
-                        com.hopa.capabilities.bridge.BridgeClient(
+                        com.hopa.remote.bridge.BridgeClient(
                             current.bridgeUrl,
                             "",
                         ).refreshSession(saved)
@@ -207,7 +207,7 @@ class AppContainer(context: Context) {
                 }
             },
         )
-        return com.hopa.capabilities.bridge.AdbDevice(client, clock)
+        return com.hopa.remote.bridge.AdbDevice(client, clock)
     }
 
     /**
@@ -231,7 +231,7 @@ class AppContainer(context: Context) {
         val token = settings.bridgeToken()
         if (current.bridgeUrl.isNotBlank() && token.isNotBlank()) {
             val wav = runCatching {
-                com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token).speak(text)
+                com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token).speak(text)
             }.getOrNull()
             if (wav != null) {
                 return speaker.play(wav)
@@ -250,7 +250,7 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return null
         }
-        return com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token)
+        return com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token)
             .transcribe(wav)
     }
 
@@ -266,8 +266,8 @@ class AppContainer(context: Context) {
         }
         return com.hopa.app.feature.sync.ChatSync(
             conversations = conversations,
-            transport = com.hopa.capabilities.bridge.BridgeChatTransport(
-                com.hopa.capabilities.bridge.BridgeClient(current.bridgeUrl, token),
+            transport = com.hopa.remote.bridge.BridgeChatTransport(
+                com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token),
             ),
         )
     }

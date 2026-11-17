@@ -1,6 +1,6 @@
 package com.hopa.core.prompt
 
-import com.hopa.prompt.PROMPT_RULES
+import com.hopa.know.prompt.PROMPT_RULES
 import org.junit.Assert.assertTrue
 import org.junit.Test
 

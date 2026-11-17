@@ -1,8 +1,8 @@
 package com.hopa.sidecar
 
-import com.hopa.capabilities.bridge.AdbDevice
-import com.hopa.capabilities.bridge.BridgeClient
-import com.hopa.capabilities.llm.ModelFactory
+import com.hopa.remote.bridge.AdbDevice
+import com.hopa.remote.bridge.BridgeClient
+import com.hopa.remote.llm.ModelFactory
 import com.hopa.core.gate.ActionExecutor
 import com.hopa.core.gate.ApprovalPolicy
 import com.hopa.core.loop.AgentLoop

@@ -1,9 +1,9 @@
 package com.hopa.core.router
 
-import com.hopa.catalog.APP_CATALOG
-import com.hopa.catalog.CatalogApp
-import com.hopa.catalog.CatalogTarget
-import com.hopa.catalog.SITE_CATALOG
+import com.hopa.know.catalog.APP_CATALOG
+import com.hopa.know.catalog.CatalogApp
+import com.hopa.know.catalog.CatalogTarget
+import com.hopa.know.catalog.SITE_CATALOG
 import com.hopa.core.ports.InstalledApp
 
 /**

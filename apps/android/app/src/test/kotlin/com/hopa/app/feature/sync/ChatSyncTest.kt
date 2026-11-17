@@ -1,6 +1,6 @@
 package com.hopa.app.feature.sync
 
-import com.hopa.capabilities.bridge.ChatTransport
+import com.hopa.remote.bridge.ChatTransport
 import com.hopa.data.sessions.ChatMessage
 import com.hopa.data.sessions.Conversation
 import com.hopa.data.sessions.InMemoryConversationStore

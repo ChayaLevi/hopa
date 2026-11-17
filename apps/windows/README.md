@@ -5,7 +5,7 @@ Status: **W0 spike**, the engine seam works; the shell is next
 
 ```
 Hopa.Windows/   WPF app: window, sidecar client, one UIA action (FlaUI)
-sidecar/        Kotlin host for packages/core + packages/capabilities (NDJSON over stdio)
+sidecar/        Kotlin host for packages/core + packages/remote (NDJSON over stdio)
 ```
 
 This folder used to describe a *thin* client that would not run the loop. That
