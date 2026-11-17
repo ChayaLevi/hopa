@@ -45,6 +45,7 @@ fun MessageBubble(
     onRetry: () -> Unit = {},
     onUndo: () -> Unit = {},
     goal: String = "",
+    saved: Boolean = false,
     onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
 ) {
     val fromUser = message.role == "user"
@@ -105,6 +106,7 @@ fun MessageBubble(
                         ProofReceipt(
                             proof = proof,
                             goal = goal,
+                            saved = saved,
                             onSaveSkill = onSaveSkill,
                         )
                     }
@@ -166,6 +168,7 @@ fun MessageBubble(
 private fun ProofReceipt(
     proof: MessageProof,
     goal: String,
+    saved: Boolean,
     onSaveSkill: (String, List<String>) -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
@@ -205,7 +208,13 @@ private fun ProofReceipt(
                 proof.steps.forEach { step ->
                     Text(step, fontSize = 12.sp, color = HopaColor.TextSecondary)
                 }
-                if (goal.isNotBlank()) {
+                if (saved) {
+                    Text(
+                        "Saved as a skill",
+                        fontSize = 12.sp,
+                        color = HopaColor.Success,
+                    )
+                } else if (goal.isNotBlank()) {
                     TextButton(
                         onClick = { onSaveSkill(goal, proof.steps) },
                         contentPadding = PaddingValues(0.dp),

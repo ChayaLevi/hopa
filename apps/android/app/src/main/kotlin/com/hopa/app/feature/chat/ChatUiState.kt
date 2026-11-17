@@ -19,4 +19,6 @@ data class ChatUiState(
     val attachmentNotice: String? = null,
     /** A plan waiting for one approval before it runs. */
     val pendingPlan: List<String>? = null,
+    /** Goals whose proof was saved as a skill in this session. */
+    val savedGoals: Set<String> = emptySet(),
 )

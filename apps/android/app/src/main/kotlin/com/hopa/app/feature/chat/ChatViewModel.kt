@@ -240,11 +240,18 @@ class ChatViewModel(
             return
         }
         viewModelScope.launch {
-            runCatching {
+            val saved = runCatching {
                 container.skills.add(
                     trigger = goal.take(80),
                     action = steps.joinToString("\n"),
                 )
+            }.isSuccess
+            if (saved) {
+                // The receipt says "Saved" in place; silence here is what made a
+                // successful save look like a dead button.
+                _state.update { it.copy(savedGoals = it.savedGoals + goal) }
+            } else {
+                _state.update { it.copy(error = "Could not save the skill.") }
             }
         }
     }

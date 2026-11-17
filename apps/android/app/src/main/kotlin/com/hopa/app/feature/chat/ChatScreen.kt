@@ -426,6 +426,7 @@ fun ChatScreen(
                             onRetry = onRetry,
                             onUndo = onUndo,
                             goal = goal,
+                            saved = goal.isNotBlank() && state.savedGoals.contains(goal),
                             onSaveSkill = onSaveSkill,
                         )
                     }
