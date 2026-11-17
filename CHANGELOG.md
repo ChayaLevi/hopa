@@ -13,9 +13,10 @@
 - New `packages/know`: the generated catalog, approval policy data and prompt
   rules moved out of `packages/core` (`com.hopa.know.*`). The engine no longer
   carries 1,600 lines of generated data, and the build scripts own that module.
-- `packages/data` is now `packages/state` (`com.hopa.state.*`): the module holds
-  the conversation, settings, approval, memory and skill contracts, and the
-  Android stores keep `com.hopa.data.*` for their Room and DataStore classes.
+- `packages/data` is now `packages/stores` (`com.hopa.stores.*`): the module holds
+  the conversation, settings, approval, memory and skill store interfaces, and
+  the Android classes keep `com.hopa.data.*` for Room, DataStore and Keystore.
+  The name went `data` -> `state` -> `stores`; `state` read like UI state.
 - The module has tests now: `InMemoryConversationStore` (titles, dedupe, undo,
   search, delete and restore, pinning) and `AttachmentRules`.
 - `tools/checks/check-android-structure.py` now rejects `com.hopa.capabilities.*`

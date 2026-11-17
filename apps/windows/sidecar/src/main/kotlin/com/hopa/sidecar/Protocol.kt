@@ -2,8 +2,8 @@ package com.hopa.sidecar
 
 import com.hopa.engine.gate.ApprovalRequest
 import com.hopa.engine.contracts.RunRecord
-import com.hopa.state.sessions.Attachment
-import com.hopa.state.sessions.Conversation
+import com.hopa.stores.sessions.Attachment
+import com.hopa.stores.sessions.Conversation
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder

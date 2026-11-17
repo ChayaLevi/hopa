@@ -6,7 +6,7 @@ import com.hopa.capabilities.display.ShellDisplayDevice
 import com.hopa.engine.loop.TurnContext
 import com.hopa.engine.observation.ScreenSource
 import com.hopa.engine.observation.ScreenSourceDevice
-import com.hopa.state.sessions.ChatMessage
+import com.hopa.stores.sessions.ChatMessage
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,7 +90,7 @@ class ParallelRunner(
                         append(
                             conversation.id,
                             answer,
-                            com.hopa.state.sessions.MessageProof(
+                            com.hopa.stores.sessions.MessageProof(
                                 path = "background",
                                 executed = replayed,
                                 verified = replayed,
@@ -150,7 +150,7 @@ class ParallelRunner(
                 val suffix = if (target.isBlank()) "" else " $target"
                 "${record.step}. ${record.action.kind}$suffix"
             }
-            val proof = com.hopa.state.sessions.MessageProof(
+            val proof = com.hopa.stores.sessions.MessageProof(
                 path = "background",
                 executed = result?.records?.count { it.executed } ?: 0,
                 verified = result?.records?.count { it.verified } ?: 0,
@@ -175,7 +175,7 @@ class ParallelRunner(
     private suspend fun append(
         conversationId: String,
         text: String,
-        proof: com.hopa.state.sessions.MessageProof? = null,
+        proof: com.hopa.stores.sessions.MessageProof? = null,
     ) {
         runCatching {
             container.conversations.append(

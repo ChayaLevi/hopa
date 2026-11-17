@@ -5,7 +5,7 @@ import com.hopa.engine.gate.ApprovalRequest
 import com.hopa.engine.json.HopaJson
 import com.hopa.data.database.dao.PendingApprovalDao
 import com.hopa.data.database.entity.PendingApprovalEntity
-import com.hopa.state.approvals.PendingApprovalStore
+import com.hopa.stores.approvals.PendingApprovalStore
 import java.util.UUID
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement

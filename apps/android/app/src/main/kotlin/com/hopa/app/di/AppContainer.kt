@@ -16,10 +16,10 @@ import com.hopa.data.database.HopaDatabase
 import com.hopa.data.records.RoomRunRecorder
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.data.secrets.KeystoreSecretStore
-import com.hopa.state.sessions.ConversationStore
+import com.hopa.stores.sessions.ConversationStore
 import com.hopa.data.sessions.RoomConversationStore
 import com.hopa.data.settings.DataStoreSettingsRepository
-import com.hopa.state.settings.SettingsRepository
+import com.hopa.stores.settings.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 
@@ -51,7 +51,7 @@ class AppContainer(context: Context) {
         kotlinx.coroutines.channels.Channel.UNLIMITED,
     )
     /** A file shared into the app, waiting in the composer. */
-    val pendingAttachment = MutableStateFlow<com.hopa.state.sessions.Attachment?>(null)
+    val pendingAttachment = MutableStateFlow<com.hopa.stores.sessions.Attachment?>(null)
     val pendingNotice = MutableStateFlow<String?>(null)
     val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
