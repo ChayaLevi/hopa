@@ -1,4 +1,4 @@
-package com.hopa.data.history
+package com.hopa.data.store
 
 import com.hopa.data.database.dao.RunHistoryDao
 import com.hopa.data.database.entity.RunHistoryEntity

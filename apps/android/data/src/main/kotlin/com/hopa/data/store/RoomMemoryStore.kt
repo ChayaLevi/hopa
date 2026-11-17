@@ -1,4 +1,4 @@
-package com.hopa.data.memory
+package com.hopa.data.store
 
 import com.hopa.data.database.dao.MemoryDao
 import com.hopa.data.database.entity.MemoryFactEntity

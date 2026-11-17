@@ -1,4 +1,4 @@
-package com.hopa.data.secrets
+package com.hopa.data.store
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec

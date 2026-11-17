@@ -2,6 +2,14 @@
 
 ## Unreleased - packages
 
+- `packages/knowledge` is one package (`com.hopa.knowledge`): the generated
+  catalog, policy data and prompt rules sit side by side, each file keeping the
+  name of the script that writes it.
+- The Android storage adapters are one package now (`com.hopa.data.store`):
+  approvals, history, memory, records, secrets, sessions, settings and skills
+  each held a single file in its own package, which no longer mirrored anything
+  after `com.hopa.stores` went flat. `com.hopa.data.database` stays as it was.
+
 - The stores module is one package now: `com.hopa.stores` instead of
   `com.hopa.stores.sessions`, `.settings`, `.approvals`, `.memory`, `.skills`,
   `.secrets`. Six packages with one or two files each became one.

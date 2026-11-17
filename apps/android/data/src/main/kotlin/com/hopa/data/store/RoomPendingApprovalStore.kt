@@ -1,4 +1,4 @@
-package com.hopa.data.approvals
+package com.hopa.data.store
 
 import com.hopa.engine.contracts.Action
 import com.hopa.engine.gate.ApprovalRequest
