@@ -1,6 +1,6 @@
 package com.hopa.sidecar
 
-import com.hopa.core.gate.ApprovalRequest
+import com.hopa.engine.gate.ApprovalRequest
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlinx.serialization.json.Json

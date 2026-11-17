@@ -20,14 +20,14 @@ dependencyResolutionManagement {
 
 rootProject.name = "hopa-windows-sidecar"
 
-include(":know")
-project(":know").projectDir = file("../../../packages/know")
+include(":knowledge")
+project(":knowledge").projectDir = file("../../../packages/knowledge")
 
-include(":core")
-project(":core").projectDir = file("../../../packages/core")
+include(":engine")
+project(":engine").projectDir = file("../../../packages/engine")
 
-include(":remote")
-project(":remote").projectDir = file("../../../packages/remote")
+include(":net")
+project(":net").projectDir = file("../../../packages/net")
 
 include(":state")
 project(":state").projectDir = file("../../../packages/state")

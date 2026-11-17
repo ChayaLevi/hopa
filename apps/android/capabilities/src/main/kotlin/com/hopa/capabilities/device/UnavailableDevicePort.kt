@@ -1,10 +1,10 @@
 package com.hopa.capabilities.device
 
-import com.hopa.core.contracts.Observation
-import com.hopa.core.contracts.ObservationNode
-import com.hopa.core.contracts.ScreenSize
-import com.hopa.core.ports.DevicePort
-import com.hopa.core.ports.InstalledApp
+import com.hopa.engine.contracts.Observation
+import com.hopa.engine.contracts.ObservationNode
+import com.hopa.engine.contracts.ScreenSize
+import com.hopa.engine.ports.DevicePort
+import com.hopa.engine.ports.InstalledApp
 
 class UnavailableDevicePort : DevicePort {
     override suspend fun observe(): Observation = Observation(

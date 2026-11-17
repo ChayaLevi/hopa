@@ -13,8 +13,8 @@ application {
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":remote"))
+    implementation(project(":engine"))
+    implementation(project(":net"))
     implementation(project(":state"))
 
     implementation(libs.kotlinx.coroutines.core)

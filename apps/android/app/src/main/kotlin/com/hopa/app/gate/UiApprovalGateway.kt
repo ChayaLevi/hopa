@@ -1,7 +1,7 @@
 package com.hopa.app.gate
 
-import com.hopa.core.gate.ApprovalGateway
-import com.hopa.core.gate.ApprovalRequest
+import com.hopa.engine.gate.ApprovalGateway
+import com.hopa.engine.gate.ApprovalRequest
 import com.hopa.state.approvals.PendingApprovalStore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -2,8 +2,8 @@ package com.hopa.capabilities.system
 
 import android.content.Context
 import android.content.Intent
-import com.hopa.core.ports.InstalledApp
-import com.hopa.core.ports.PackageCatalog
+import com.hopa.engine.ports.InstalledApp
+import com.hopa.engine.ports.PackageCatalog
 
 /**
  * The apps this phone can open. Only launcher entries are listed: an app without

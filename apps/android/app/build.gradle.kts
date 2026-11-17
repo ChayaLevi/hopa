@@ -92,7 +92,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":engine"))
     implementation(project(":capabilities-android"))
     implementation(project(":data-android"))
 

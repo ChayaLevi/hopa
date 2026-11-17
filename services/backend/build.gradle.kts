@@ -20,7 +20,7 @@ sourceSets {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":engine"))
     implementation(project(":state"))
 
     implementation(libs.kotlinx.coroutines.core)

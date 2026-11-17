@@ -25,8 +25,8 @@ android {
 dependencies {
     // The client-side capabilities (bridge, model clients) are a plain JVM
     // module in packages/; this module adds the Android-only ones.
-    api(project(":remote"))
-    api(project(":core"))
+    api(project(":net"))
+    api(project(":engine"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)

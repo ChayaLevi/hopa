@@ -7,12 +7,12 @@ import android.view.accessibility.AccessibilityNodeInfo
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.capabilities.accessibility.NodeTreeReader
 import com.hopa.capabilities.accessibility.GestureDispatcher
-import com.hopa.core.contracts.Observation
-import com.hopa.core.contracts.ObservationNode
-import com.hopa.core.contracts.ScreenSize
-import com.hopa.core.observation.ObservationProducer
-import com.hopa.core.ports.DevicePort
-import com.hopa.core.ports.InstalledApp
+import com.hopa.engine.contracts.Observation
+import com.hopa.engine.contracts.ObservationNode
+import com.hopa.engine.contracts.ScreenSize
+import com.hopa.engine.observation.ObservationProducer
+import com.hopa.engine.ports.DevicePort
+import com.hopa.engine.ports.InstalledApp
 import kotlinx.coroutines.delay
 
 /**

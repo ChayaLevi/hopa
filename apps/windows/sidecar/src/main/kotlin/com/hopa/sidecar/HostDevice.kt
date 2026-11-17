@@ -1,10 +1,10 @@
 package com.hopa.sidecar
 
-import com.hopa.core.contracts.Observation
-import com.hopa.core.json.HopaJson
-import com.hopa.core.observation.ObservationProducer
-import com.hopa.core.ports.DevicePort
-import com.hopa.core.ports.InstalledApp
+import com.hopa.engine.contracts.Observation
+import com.hopa.engine.json.HopaJson
+import com.hopa.engine.observation.ObservationProducer
+import com.hopa.engine.ports.DevicePort
+import com.hopa.engine.ports.InstalledApp
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CompletableDeferred

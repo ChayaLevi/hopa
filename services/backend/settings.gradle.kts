@@ -20,10 +20,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "hopa-backend"
 
-include(":know")
-project(":know").projectDir = file("../../packages/know")
-include(":core")
-project(":core").projectDir = file("../../packages/core")
+include(":knowledge")
+project(":knowledge").projectDir = file("../../packages/knowledge")
+include(":engine")
+project(":engine").projectDir = file("../../packages/engine")
 
 include(":state")
 project(":state").projectDir = file("../../packages/state")

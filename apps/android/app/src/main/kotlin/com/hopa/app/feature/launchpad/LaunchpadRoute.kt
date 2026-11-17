@@ -7,8 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
-import com.hopa.core.router.CatalogRoutes
-import com.hopa.core.router.RouteTarget
+import com.hopa.engine.router.CatalogRoutes
+import com.hopa.engine.router.RouteTarget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

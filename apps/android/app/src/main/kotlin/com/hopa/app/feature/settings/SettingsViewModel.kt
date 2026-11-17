@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import com.hopa.remote.bridge.BridgeClient
-import com.hopa.remote.llm.ProviderState
-import com.hopa.remote.llm.ProviderStateResolver
-import com.hopa.core.model.ModelMessage
-import com.hopa.core.model.ModelRequest
+import com.hopa.net.bridge.BridgeClient
+import com.hopa.net.llm.ProviderState
+import com.hopa.net.llm.ProviderStateResolver
+import com.hopa.engine.model.ModelMessage
+import com.hopa.engine.model.ModelRequest
 import com.hopa.state.settings.AppSettings
 import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -412,7 +412,7 @@ class SettingsViewModel(
             if (bridgeConfigured) {
                 val health = withContext(Dispatchers.IO) {
                     runCatching {
-                        com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token).health()
+                        com.hopa.net.bridge.BridgeClient(current.bridgeUrl, token).health()
                         true
                     }.getOrDefault(false)
                 }

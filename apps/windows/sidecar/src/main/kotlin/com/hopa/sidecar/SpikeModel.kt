@@ -1,8 +1,8 @@
 ﻿package com.hopa.sidecar
 
-import com.hopa.core.model.ModelPort
-import com.hopa.core.model.ModelReply
-import com.hopa.core.model.ModelRequest
+import com.hopa.engine.model.ModelPort
+import com.hopa.engine.model.ModelReply
+import com.hopa.engine.model.ModelRequest
 
 /**
  * W0 only: a scripted stand-in for a real model.

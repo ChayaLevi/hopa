@@ -1,6 +1,6 @@
 package com.hopa.state.approvals
 
-import com.hopa.core.gate.ApprovalRequest
+import com.hopa.engine.gate.ApprovalRequest
 
 /** Survives a process death, so a question is never silently lost. */
 interface PendingApprovalStore {
