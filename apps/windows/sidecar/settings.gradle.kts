@@ -29,5 +29,5 @@ project(":core").projectDir = file("../../../packages/core")
 include(":remote")
 project(":remote").projectDir = file("../../../packages/remote")
 
-include(":data")
-project(":data").projectDir = file("../../../packages/data")
+include(":state")
+project(":state").projectDir = file("../../../packages/state")

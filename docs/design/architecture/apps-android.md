@@ -74,7 +74,7 @@ reached from Act.
 
 ## Testing
 
-- JVM: `:core:test`, `:remote:test`, `:data:test`, `:app:testDebugUnitTest`.
+- JVM: `:core:test`, `:remote:test`, `:state:test`, `:app:testDebugUnitTest`.
 - Device: `app/src/androidTest` (background display, certificate, scroll
   geometry), one command in `tools/scripts/android-device-checks.ps1`.
 - Evals and shared fixtures live in `contracts/` and `services/evals`.

@@ -3,6 +3,9 @@ package com.hopa.data.sessions
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.database.entity.SessionEntity
 import com.hopa.data.database.mapper.ConversationMapper
+import com.hopa.state.sessions.ChatMessage
+import com.hopa.state.sessions.Conversation
+import com.hopa.state.sessions.ConversationStore
 import java.util.UUID
 
 class RoomConversationStore(

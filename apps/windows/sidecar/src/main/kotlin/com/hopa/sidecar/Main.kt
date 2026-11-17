@@ -3,7 +3,7 @@ package com.hopa.sidecar
 import com.hopa.sidecar.Protocol.asObject
 import com.hopa.sidecar.Protocol.text
 import com.hopa.sidecar.Protocol.type
-import com.hopa.data.sessions.Attachment
+import com.hopa.state.sessions.Attachment
 import com.hopa.core.json.HopaJson
 import java.nio.file.Path
 import kotlinx.serialization.json.JsonObject

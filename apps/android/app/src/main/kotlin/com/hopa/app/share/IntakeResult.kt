@@ -1,6 +1,6 @@
 package com.hopa.app.share
 
-import com.hopa.data.sessions.Attachment
+import com.hopa.state.sessions.Attachment
 
 /** The outcome of one inbound share: an attachment, or the reason there is none. */
 data class IntakeResult(

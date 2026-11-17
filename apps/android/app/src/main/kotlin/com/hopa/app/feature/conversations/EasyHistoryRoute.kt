@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
-import com.hopa.data.sessions.Conversation
+import com.hopa.state.sessions.Conversation
 
 @Composable
 fun EasyHistoryRoute(

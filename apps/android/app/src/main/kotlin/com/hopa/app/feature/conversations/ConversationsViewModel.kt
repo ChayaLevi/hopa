@@ -3,7 +3,7 @@ package com.hopa.app.feature.conversations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
-import com.hopa.data.sessions.Conversation
+import com.hopa.state.sessions.Conversation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

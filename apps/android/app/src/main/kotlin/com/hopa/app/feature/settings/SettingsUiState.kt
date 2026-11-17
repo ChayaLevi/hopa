@@ -1,7 +1,7 @@
 package com.hopa.app.feature.settings
 
 import com.hopa.remote.llm.ProviderState
-import com.hopa.data.settings.AppSettings
+import com.hopa.state.settings.AppSettings
 
 data class SettingsUiState(
     val settings: AppSettings = AppSettings(),

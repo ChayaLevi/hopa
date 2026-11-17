@@ -2,6 +2,7 @@ package com.hopa.data.memory
 
 import com.hopa.data.database.dao.MemoryDao
 import com.hopa.data.database.entity.MemoryFactEntity
+import com.hopa.state.memory.MemoryStore
 
 class RoomMemoryStore(
     private val dao: MemoryDao,

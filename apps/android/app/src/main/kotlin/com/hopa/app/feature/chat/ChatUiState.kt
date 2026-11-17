@@ -1,8 +1,8 @@
 package com.hopa.app.feature.chat
 
 import com.hopa.core.gate.ApprovalRequest
-import com.hopa.data.sessions.Attachment
-import com.hopa.data.sessions.Conversation
+import com.hopa.state.sessions.Attachment
+import com.hopa.state.sessions.Conversation
 
 data class ChatUiState(
     val conversations: List<Conversation> = emptyList(),
