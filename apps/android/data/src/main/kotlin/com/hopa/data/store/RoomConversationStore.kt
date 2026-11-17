@@ -1,4 +1,4 @@
-package com.hopa.data.sessions
+package com.hopa.data.store
 
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.database.entity.SessionEntity

@@ -1,4 +1,4 @@
-package com.hopa.data.skills
+package com.hopa.data.store
 
 import com.hopa.data.database.dao.SkillDao
 import com.hopa.data.database.entity.SkillEntity

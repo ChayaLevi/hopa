@@ -5,9 +5,9 @@ Do not edit them by hand; edit the source and regenerate.
 
 | File | Source | Script |
 |---|---|---|
-| `com/hopa/knowledge/catalog/AppCatalog.kt` | `services/brain/knowledge/apps/*/APP.md`, `.../sites/*/SITE.md` | `tools/scripts/build-app-catalog.py --kotlin packages/knowledge/src/main/kotlin/com/hopa/knowledge/catalog/AppCatalog.kt` |
-| `com/hopa/knowledge/policy/ApprovalPolicyData.kt` | `contracts/policy/approval.v1.json` | `tools/scripts/build-policy-data.py --kotlin packages/knowledge/src/main/kotlin/com/hopa/knowledge/policy/ApprovalPolicyData.kt` |
-| `com/hopa/knowledge/prompt/PromptRules.kt` | `contracts/prompts/rules.v1.json` | `tools/scripts/build-prompt-rules.py --kotlin packages/knowledge/src/main/kotlin/com/hopa/knowledge/prompt/PromptRules.kt` |
+| `com/hopa/knowledge/AppCatalog.kt` | `services/brain/knowledge/apps/*/APP.md`, `.../sites/*/SITE.md` | `tools/scripts/build-app-catalog.py --kotlin packages/knowledge/src/main/kotlin/com/hopa/knowledge/AppCatalog.kt` |
+| `com/hopa/knowledge/ApprovalPolicyData.kt` | `contracts/policy/approval.v1.json` | `tools/scripts/build-policy-data.py --kotlin packages/knowledge/src/main/kotlin/com/hopa/knowledge/ApprovalPolicyData.kt` |
+| `com/hopa/knowledge/PromptRules.kt` | `contracts/prompts/rules.v1.json` | `tools/scripts/build-prompt-rules.py --kotlin packages/knowledge/src/main/kotlin/com/hopa/knowledge/PromptRules.kt` |
 
 The same scripts also write the ArkTS copies under `apps/harmony`, and `--check`
 fails when either side is stale.

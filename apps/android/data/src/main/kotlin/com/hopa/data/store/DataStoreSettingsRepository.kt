@@ -1,4 +1,4 @@
-package com.hopa.data.settings
+package com.hopa.data.store
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey

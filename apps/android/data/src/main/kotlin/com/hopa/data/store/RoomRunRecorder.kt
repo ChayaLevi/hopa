@@ -1,4 +1,4 @@
-package com.hopa.data.records
+package com.hopa.data.store
 
 import com.hopa.engine.contracts.RunRecord
 import com.hopa.engine.records.RunChain

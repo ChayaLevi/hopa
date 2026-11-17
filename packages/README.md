@@ -70,9 +70,9 @@ or bridge), an `ApprovalGateway` (the sheet), a `RunRecorder` (Room or memory), 
 
 | output | source | command |
 |---|---|---|
-| `knowledge/.../catalog/AppCatalog.kt` | `services/brain/knowledge/apps/*/APP.md`, `.../sites/*` | `build-app-catalog.py --kotlin` |
-| `knowledge/.../policy/ApprovalPolicyData.kt` | `contracts/policy/approval.v1.json` | `build-policy-data.py --kotlin` |
-| `knowledge/.../prompt/PromptRules.kt` | `contracts/prompts/rules.v1.json` | `build-prompt-rules.py --kotlin` |
+| `knowledge/.../AppCatalog.kt` | `services/brain/knowledge/apps/*/APP.md`, `.../sites/*` | `build-app-catalog.py --kotlin` |
+| `knowledge/.../ApprovalPolicyData.kt` | `contracts/policy/approval.v1.json` | `build-policy-data.py --kotlin` |
+| `knowledge/.../PromptRules.kt` | `contracts/prompts/rules.v1.json` | `build-prompt-rules.py --kotlin` |
 
 Each script also writes the ArkTS copy under `apps/harmony`. Add `--check` to any
 of them to verify the committed files instead of writing.

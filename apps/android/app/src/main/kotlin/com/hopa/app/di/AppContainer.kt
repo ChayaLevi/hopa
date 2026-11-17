@@ -13,12 +13,12 @@ import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.engine.loop.AgentLoop
 import com.hopa.data.database.HopaDatabase
-import com.hopa.data.records.RoomRunRecorder
+import com.hopa.data.store.RoomRunRecorder
 import com.hopa.engine.records.RunRecordFactory
-import com.hopa.data.secrets.KeystoreSecretStore
+import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.stores.ConversationStore
-import com.hopa.data.sessions.RoomConversationStore
-import com.hopa.data.settings.DataStoreSettingsRepository
+import com.hopa.data.store.RoomConversationStore
+import com.hopa.data.store.DataStoreSettingsRepository
 import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -56,12 +56,12 @@ class AppContainer(context: Context) {
     val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
     val recorder = RoomRunRecorder(database.runRecordDao())
-    val runHistory = com.hopa.data.history.RoomRunHistory(database.runHistoryDao())
-    val pendingApprovals = com.hopa.data.approvals.RoomPendingApprovalStore(
+    val runHistory = com.hopa.data.store.RoomRunHistory(database.runHistoryDao())
+    val pendingApprovals = com.hopa.data.store.RoomPendingApprovalStore(
         database.pendingApprovalDao(),
     )
-    val memory = com.hopa.data.memory.RoomMemoryStore(database.memoryDao())
-    val skills = com.hopa.data.skills.RoomSkillStore(database.skillDao())
+    val memory = com.hopa.data.store.RoomMemoryStore(database.memoryDao())
+    val skills = com.hopa.data.store.RoomSkillStore(database.skillDao())
     val clock = AndroidClock()
     val policy = ApprovalPolicy()
     val approval = UiApprovalGateway(pendingApprovals)
