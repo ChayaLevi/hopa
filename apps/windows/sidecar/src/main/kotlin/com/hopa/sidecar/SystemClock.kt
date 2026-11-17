@@ -1,6 +1,6 @@
 package com.hopa.sidecar
 
-import com.hopa.core.ports.Clock
+import com.hopa.engine.ports.Clock
 
 class SystemClock : Clock {
     override fun nowMillis(): Long = System.currentTimeMillis()

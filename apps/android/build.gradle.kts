@@ -9,7 +9,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1" apply false
 }
 
-// ktlint lives here, not in packages/core, because the Windows sidecar also
+// ktlint lives here, not in packages/engine, because the Windows sidecar also
 // includes that module and does not have the plugin. :core is the first module
 // held to zero style warnings; the rest follow module by module.
 subprojects {

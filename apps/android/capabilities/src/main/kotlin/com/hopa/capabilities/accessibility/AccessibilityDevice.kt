@@ -11,9 +11,9 @@ import android.os.Bundle
 import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
 import com.hopa.capabilities.display.MediaProjectionCapture
-import com.hopa.core.contracts.Observation
-import com.hopa.core.ports.DevicePort
-import com.hopa.core.ports.InstalledApp
+import com.hopa.engine.contracts.Observation
+import com.hopa.engine.ports.DevicePort
+import com.hopa.engine.ports.InstalledApp
 import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
 import kotlinx.coroutines.delay
@@ -23,7 +23,7 @@ class AccessibilityDevice(
     private val context: Context,
 ) : DevicePort {
     private var refs: Map<String, AccessibilityNodeInfo> = emptyMap()
-    private val producer = com.hopa.core.observation.ObservationProducer()
+    private val producer = com.hopa.engine.observation.ObservationProducer()
     private var lastShot = 0L
 
     override suspend fun observe(): Observation {

@@ -1,0 +1,43 @@
+package com.hopa.engine.ports
+
+import com.hopa.engine.contracts.Observation
+
+interface DevicePort {
+    suspend fun observe(): Observation
+
+    suspend fun tap(ref: String? = null, x: Int? = null, y: Int? = null)
+
+    /** Two presses at the same point; the accessibility adapter dispatches both strokes. */
+    suspend fun doubleTap(ref: String? = null, x: Int? = null, y: Int? = null) {
+        tap(ref, x, y)
+    }
+
+    /** One press held; the accessibility adapter holds it, adb swipes in place. */
+    suspend fun longPress(ref: String? = null, x: Int? = null, y: Int? = null) {
+        tap(ref, x, y)
+    }
+
+    suspend fun type(text: String, ref: String? = null)
+
+    suspend fun swipe(fromX: Int, fromY: Int, toX: Int, toY: Int, velocity: Int = 600)
+
+    suspend fun pressBack()
+
+    suspend fun pressHome()
+
+    suspend fun launch(packageName: String)
+
+    suspend fun stop(packageName: String)
+
+    suspend fun foreground(): String
+
+    suspend fun screenshot(): ByteArray?
+
+    /** Call a typed function an app publishes (Android 16 AppFunctions). */
+    suspend fun appFunction(packageName: String, function: String, parameters: String): String =
+        throw UnsupportedOperationException(
+            "this device does not offer app functions",
+        )
+
+    suspend fun apps(): List<InstalledApp>
+}

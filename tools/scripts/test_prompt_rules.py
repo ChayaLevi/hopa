@@ -50,7 +50,7 @@ def test_kotlin_rendering_uses_the_same_rules() -> None:
     module = _module()
     data = json.loads(SOURCE.read_text(encoding="utf-8"))
     output = module.render_kotlin(data)
-    assert "package com.hopa.know.prompt" in output
+    assert "package com.hopa.knowledge.prompt" in output
     assert "data class PromptRule" in output
     for rule in data["rules"]:
         assert module.kotlin_string(rule["id"]) in output

@@ -3,9 +3,9 @@ package com.hopa.app.tasks
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.display.ShellClient
 import com.hopa.capabilities.display.ShellDisplayDevice
-import com.hopa.core.loop.TurnContext
-import com.hopa.core.observation.ScreenSource
-import com.hopa.core.observation.ScreenSourceDevice
+import com.hopa.engine.loop.TurnContext
+import com.hopa.engine.observation.ScreenSource
+import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.state.sessions.ChatMessage
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope

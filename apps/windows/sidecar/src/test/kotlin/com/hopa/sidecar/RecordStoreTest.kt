@@ -1,8 +1,8 @@
 package com.hopa.sidecar
 
-import com.hopa.core.contracts.Action
-import com.hopa.core.contracts.RunRecord
-import com.hopa.core.records.RunChain
+import com.hopa.engine.contracts.Action
+import com.hopa.engine.contracts.RunRecord
+import com.hopa.engine.records.RunChain
 import java.nio.file.Files
 import org.junit.Assert.assertEquals
 import org.junit.Test

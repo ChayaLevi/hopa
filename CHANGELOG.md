@@ -2,6 +2,11 @@
 
 ## Unreleased - packages
 
+- Module names now say what they hold: `core` is `engine`, `know` is
+  `knowledge`, `remote` is `net` (`com.hopa.engine.*`, `com.hopa.knowledge.*`,
+  `com.hopa.net.*`). `state` keeps its name. A local model runtime is not part
+  of `net`: it will be its own adapter behind `ModelPort`.
+
 - `packages/capabilities` is now `packages/remote`: the module holds the bridge
   and model clients, and `com.hopa.capabilities.*` now belongs only to the
   Android adapters, so one name means one thing.

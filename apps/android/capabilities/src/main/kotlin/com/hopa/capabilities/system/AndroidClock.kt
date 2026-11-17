@@ -1,6 +1,6 @@
 package com.hopa.capabilities.system
 
-import com.hopa.core.ports.Clock
+import com.hopa.engine.ports.Clock
 import kotlinx.coroutines.delay
 
 class AndroidClock : Clock {

@@ -1,11 +1,11 @@
 package com.hopa.app.model
 
-import com.hopa.remote.llm.ModelFactory
-import com.hopa.remote.llm.ProviderChoice
-import com.hopa.remote.llm.ProviderChoiceRules
-import com.hopa.core.model.ModelPort
-import com.hopa.core.model.ModelReply
-import com.hopa.core.model.ModelRequest
+import com.hopa.net.llm.ModelFactory
+import com.hopa.net.llm.ProviderChoice
+import com.hopa.net.llm.ProviderChoiceRules
+import com.hopa.engine.model.ModelPort
+import com.hopa.engine.model.ModelReply
+import com.hopa.engine.model.ModelRequest
 import com.hopa.state.settings.SettingsRepository
 import java.io.IOException
 import kotlinx.coroutines.flow.first

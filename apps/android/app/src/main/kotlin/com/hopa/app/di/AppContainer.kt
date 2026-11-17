@@ -3,18 +3,18 @@ package com.hopa.app.di
 import android.content.Context
 import com.hopa.app.model.SettingsModelPort
 import com.hopa.capabilities.accessibility.AccessibilityDevice
-import com.hopa.remote.llm.ModelFactory
-import com.hopa.remote.llm.ProviderChoiceRules
+import com.hopa.net.llm.ModelFactory
+import com.hopa.net.llm.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
-import com.hopa.core.gate.ActionExecutor
-import com.hopa.core.gate.ApprovalPolicy
+import com.hopa.engine.gate.ActionExecutor
+import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
-import com.hopa.core.loop.AgentLoop
+import com.hopa.engine.loop.AgentLoop
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.records.RoomRunRecorder
-import com.hopa.core.records.RunRecordFactory
+import com.hopa.engine.records.RunRecordFactory
 import com.hopa.data.secrets.KeystoreSecretStore
 import com.hopa.state.sessions.ConversationStore
 import com.hopa.data.sessions.RoomConversationStore
@@ -102,7 +102,7 @@ class AppContainer(context: Context) {
      * A paired bridge can start the helper itself, so the common case needs no
      * button press; after a reboot the first background run does it.
      */
-    suspend fun backgroundDevice(): com.hopa.core.ports.DevicePort? =
+    suspend fun backgroundDevice(): com.hopa.engine.ports.DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             if (!shell.connect()) {
                 val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
@@ -158,7 +158,7 @@ class AppContainer(context: Context) {
             return false
         }
         return runCatching {
-            com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token)
+            com.hopa.net.bridge.BridgeClient(current.bridgeUrl, token)
                 .startHelper(token = displayToken.value)
             true
         }.getOrDefault(false)
@@ -177,7 +177,7 @@ class AppContainer(context: Context) {
     )
 
     /** A bridge-backed device when Settings has an address and a token. */
-    suspend fun bridgedDevice(): com.hopa.core.ports.DevicePort? {
+    suspend fun bridgedDevice(): com.hopa.engine.ports.DevicePort? {
         val current = settings.settings.first()
         if (!current.useBridge || current.bridgeUrl.isBlank()) {
             return null
@@ -186,7 +186,7 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return null
         }
-        val client = com.hopa.remote.bridge.BridgeClient(
+        val client = com.hopa.net.bridge.BridgeClient(
             baseUrl = current.bridgeUrl,
             token = token,
             refresh = {
@@ -195,7 +195,7 @@ class AppContainer(context: Context) {
                     null
                 } else {
                     runCatching {
-                        com.hopa.remote.bridge.BridgeClient(
+                        com.hopa.net.bridge.BridgeClient(
                             current.bridgeUrl,
                             "",
                         ).refreshSession(saved)
@@ -207,7 +207,7 @@ class AppContainer(context: Context) {
                 }
             },
         )
-        return com.hopa.remote.bridge.AdbDevice(client, clock)
+        return com.hopa.net.bridge.AdbDevice(client, clock)
     }
 
     /**
@@ -231,7 +231,7 @@ class AppContainer(context: Context) {
         val token = settings.bridgeToken()
         if (current.bridgeUrl.isNotBlank() && token.isNotBlank()) {
             val wav = runCatching {
-                com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token).speak(text)
+                com.hopa.net.bridge.BridgeClient(current.bridgeUrl, token).speak(text)
             }.getOrNull()
             if (wav != null) {
                 return speaker.play(wav)
@@ -250,7 +250,7 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return null
         }
-        return com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token)
+        return com.hopa.net.bridge.BridgeClient(current.bridgeUrl, token)
             .transcribe(wav)
     }
 
@@ -266,14 +266,14 @@ class AppContainer(context: Context) {
         }
         return com.hopa.app.feature.sync.ChatSync(
             conversations = conversations,
-            transport = com.hopa.remote.bridge.BridgeChatTransport(
-                com.hopa.remote.bridge.BridgeClient(current.bridgeUrl, token),
+            transport = com.hopa.net.bridge.BridgeChatTransport(
+                com.hopa.net.bridge.BridgeClient(current.bridgeUrl, token),
             ),
         )
     }
 
     /** One executor per device path, sharing the policy, approval and recorder. */
-    fun executorFor(device: com.hopa.core.ports.DevicePort): ActionExecutor = ActionExecutor(
+    fun executorFor(device: com.hopa.engine.ports.DevicePort): ActionExecutor = ActionExecutor(
         device = device,
         browser = null,
         system = AndroidSystemPort(context),
@@ -289,7 +289,7 @@ class AppContainer(context: Context) {
     val recipes by lazy { com.hopa.app.skills.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** One loop per device path, sharing the model, recorder and gate. */
-    fun loopFor(device: com.hopa.core.ports.DevicePort): AgentLoop = AgentLoop(
+    fun loopFor(device: com.hopa.engine.ports.DevicePort): AgentLoop = AgentLoop(
         model = model,
         device = device,
         executor = executorFor(device),

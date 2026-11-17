@@ -1,7 +1,7 @@
 package com.hopa.app.skills
 
 import com.hopa.app.di.AppContainer
-import com.hopa.core.ports.DevicePort
+import com.hopa.engine.ports.DevicePort
 import kotlinx.coroutines.delay
 
 /**

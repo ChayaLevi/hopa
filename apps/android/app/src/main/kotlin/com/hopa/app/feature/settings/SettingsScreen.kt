@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.remote.llm.ProviderState
+import com.hopa.net.llm.ProviderState
 
 /**
  * Settings as one control surface, not a menu: a readiness ring, controls that

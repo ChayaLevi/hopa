@@ -1,6 +1,6 @@
 package com.hopa.sidecar
 
-import com.hopa.core.contracts.RunRecord
+import com.hopa.engine.contracts.RunRecord
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlinx.serialization.json.Json

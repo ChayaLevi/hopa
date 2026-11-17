@@ -7,14 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import com.hopa.core.gate.ApprovalRequest
-import com.hopa.core.loop.TurnContext
-import com.hopa.core.model.ModelMessage
-import com.hopa.core.model.ModelRequest
-import com.hopa.core.observation.ScreenPath
-import com.hopa.core.observation.ScreenPathOrder
-import com.hopa.core.observation.ScreenSource
-import com.hopa.core.observation.ScreenSourceDevice
+import com.hopa.engine.gate.ApprovalRequest
+import com.hopa.engine.loop.TurnContext
+import com.hopa.engine.model.ModelMessage
+import com.hopa.engine.model.ModelRequest
+import com.hopa.engine.observation.ScreenPath
+import com.hopa.engine.observation.ScreenPathOrder
+import com.hopa.engine.observation.ScreenSource
+import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.state.sessions.Attachment
 import com.hopa.state.sessions.AttachmentRules
 import com.hopa.state.sessions.ChatMessage
@@ -623,7 +623,7 @@ class ChatViewModel(
      * typed call over a series of taps. Empty when no shell is available.
      */
     private suspend fun typedFunctions(
-        device: com.hopa.core.observation.ScreenSourceDevice,
+        device: com.hopa.engine.observation.ScreenSourceDevice,
     ): String {
         if (!container.shell.connected) {
             return ""
