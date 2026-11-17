@@ -58,7 +58,7 @@ private fun clock(at: Long): String =
 
 private fun where(path: String): String = when (path) {
     "background" -> "hidden screen"
-    "bridge" -> "computer"
-    "accessibility" -> "this screen"
-    else -> "no surface"
+    "bridge" -> "your computer"
+    "accessibility" -> "your screen"
+    else -> "no screen"
 }

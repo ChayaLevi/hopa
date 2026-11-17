@@ -60,7 +60,7 @@ fun SettingsScreen(
             { onOpenPage(PAGE_PRIVACY) }),
         Searchable("Repeats", "skills, saved, replay", Icons.Filled.List,
             { onOpenPage(PAGE_RECIPES) }),
-        Searchable("History", "runs, surfaces, compare", Icons.Filled.List,
+        Searchable("History", "runs, modes, compare", Icons.Filled.List,
             { onOpenPage(PAGE_HISTORY) }),
         Searchable("About", "version, licences", Icons.Filled.Info, onOpenAbout),
     )
@@ -113,7 +113,7 @@ fun SettingsScreen(
 
         // Apps are not configured here: Settings keeps the model, the words, the
         // alerts and the records. Everything about running another app lives on
-        // Capabilities, Running apps.
+        // Capabilities, Act.
         SettingsPanel {
             Column {
                 StatusLine(

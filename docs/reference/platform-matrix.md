@@ -3,7 +3,7 @@
 What each client can do, and through which mechanism. "Planned" means the
 implementation is on the roadmap, not that it exists.
 
-| Capability | HarmonyOS (today) | Android via bridge (planned) | Android on-device (planned) | Windows (planned) |
+| Capability | HarmonyOS (today) | Android via bridge | Android on-device | Windows (W0) |
 |---|---|---|---|---|
 | Observe screen as text nodes | Accessibility capability | `uiautomator dump` over adb | `AccessibilityService` tree | UI Automation tree |
 | Screen pixels | `snapshot_display` | `screencap` | `takeScreenshot` (API 30+) | `PrintWindow`/DXGI |

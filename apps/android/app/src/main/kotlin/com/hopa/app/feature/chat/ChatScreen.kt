@@ -100,6 +100,8 @@ fun ChatScreen(
     onDismissAttachmentNotice: () -> Unit,
     easy: Boolean = false,
     onOpenSettings: () -> Unit = {},
+    onOpenActMode: () -> Unit = {},
+    accessAllowed: Boolean = true,
     onApprovePlan: () -> Unit = {},
     onCancelPlan: () -> Unit = {},
     onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
@@ -300,9 +302,10 @@ fun ChatScreen(
                         }
                     }
                 }
-                if (!accessEnabled || !accessConnected) {
+                if (!accessAllowed || !accessEnabled || !accessConnected) {
                     AccessibilityBanner(
-                        onOpenSettings = { AccessibilityState.openSettings(context) },
+                        onOpenAct = onOpenActMode,
+                        allowed = accessAllowed,
                         enabled = accessEnabled,
                         connected = accessConnected,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 6.dp),

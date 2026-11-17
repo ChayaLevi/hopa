@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
  * Keeps HOPA alive while Android's pairing dialog is open. A cached app is
  * frozen by the system, so waiting in a view model loses the dialog; a
  * shortService does not. The service reads the code, pairs, and puts the
- * result where the Running apps page shows it.
+ * result where the Act page shows it.
  */
 class PairingService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)

@@ -40,7 +40,7 @@ class AppContainer(context: Context) {
     val selectedConversation = MutableStateFlow<String?>(null)
     val busy = MutableStateFlow(false)
     val cancelRequested = MutableStateFlow(false)
-    /** The last wireless-pairing answer, shown on the Running apps page. */
+    /** The last wireless-pairing answer, shown on the Act page. */
     val pairingStatus = MutableStateFlow<String?>(null)
     /**
      * Goals handed to the chat from outside (a deep link, a profile home).
@@ -141,7 +141,7 @@ class AppContainer(context: Context) {
             }
             val started = wireless.connectAndStartHelper(displayToken.value)
             if (started.contains("ready") && shell.connect()) {
-                "Wireless shell is ready; the background screen can be used"
+                "Wireless shell is ready; the hidden screen can be used"
             } else {
                 started
             }

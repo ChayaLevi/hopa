@@ -169,7 +169,7 @@ fun AppCardScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        "A run opens it on $surface",
+                        "A run uses $surface",
                         fontSize = 14.sp,
                         color = HopaColor.TextPrimary,
                         modifier = Modifier.weight(1f),

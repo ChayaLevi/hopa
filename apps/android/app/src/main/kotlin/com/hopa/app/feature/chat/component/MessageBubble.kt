@@ -173,6 +173,12 @@ private fun ProofReceipt(
 ) {
     var open by remember { mutableStateOf(false) }
     Column(modifier = Modifier.padding(top = 6.dp)) {
+        Text(
+            surfaceLabel(proof.path),
+            fontSize = 11.sp,
+            color = HopaColor.TextHint,
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp),
+        )
         Surface(
             color = HopaColor.SurfaceAlt,
             shape = RoundedCornerShape(10.dp),
@@ -183,7 +189,8 @@ private fun ProofReceipt(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "${proof.executed} steps · ${proof.verified} confirmed · ${tokensText(proof.tokens)}",
+                    "${proof.executed} steps \u00B7 ${proof.verified} confirmed \u00B7 " +
+                        tokensText(proof.tokens),
                     fontSize = 11.sp,
                     color = HopaColor.TextSecondary,
                 )
@@ -195,13 +202,21 @@ private fun ProofReceipt(
                 )
             }
         }
+        if (proof.fellBack) {
+            Text(
+                "Hidden screen wasn't ready; HOPA used your screen.",
+                fontSize = 11.sp,
+                color = HopaColor.TextHint,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
         if (open) {
             Column(
                 modifier = Modifier.padding(start = 6.dp, top = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    "Ran on ${whereText(proof.path)} · ${proof.millis / 1000} s",
+                    "Ran ${whereText(proof.path)} \u00B7 ${proof.millis / 1000} s",
                     fontSize = 11.sp,
                     color = HopaColor.TextHint,
                 )
@@ -235,9 +250,16 @@ private fun ProofReceipt(
 private fun tokensText(tokens: Int): String =
     if (tokens >= 1_000) String.format("%.1fk tokens", tokens / 1000.0) else "$tokens tokens"
 
+private fun surfaceLabel(path: String): String = when (path) {
+    "background" -> "Hidden screen"
+    "bridge" -> "From my computer"
+    "accessibility" -> "Your screen"
+    else -> "No screen"
+}
+
 private fun whereText(path: String): String = when (path) {
-    "background" -> "the hidden screen"
-    "bridge" -> "the computer"
-    "accessibility" -> "this screen"
-    else -> "no surface"
+    "background" -> "on the hidden screen"
+    "bridge" -> "from your computer"
+    "accessibility" -> "on your screen"
+    else -> "with no screen"
 }

@@ -27,8 +27,8 @@ fun SettingsHistoryScreen(
 ) {
     SettingsPage(title = "Run history", onBack = onBack) {
         Text(
-            "Each turn, where it ran and what it cost. Use this to compare surfaces: " +
-                "the same request on the hidden screen and on this one.",
+            "Each turn, where it ran and what it cost. Use this to compare modes: " +
+                "the same request on the hidden screen and on your screen.",
             style = MaterialTheme.typography.bodySmall,
             color = HopaColor.TextHint,
         )
@@ -36,8 +36,8 @@ fun SettingsHistoryScreen(
             options = listOf(
                 "" to "All",
                 "background" to "Hidden",
-                "accessibility" to "Screen",
-                "bridge" to "Computer",
+                "accessibility" to "Your screen",
+                "bridge" to "My computer",
             ),
             selected = selected,
             onSelect = onFilter,
@@ -69,7 +69,7 @@ private fun clock(at: Long): String =
 
 private fun where(path: String): String = when (path) {
     "background" -> "hidden screen"
-    "bridge" -> "computer"
-    "accessibility" -> "this screen"
-    else -> "no surface"
+    "bridge" -> "your computer"
+    "accessibility" -> "your screen"
+    else -> "no screen"
 }

@@ -29,6 +29,7 @@ fun HomeShell(
     onOpenMemory: () -> Unit,
     onOpenSkills: () -> Unit = onOpenMemory,
     onOpenRunningApps: () -> Unit,
+    onOpenActMode: () -> Unit,
     onOpenBrowser: () -> Unit,
     initialGoal: String = "",
 ) {
@@ -42,6 +43,7 @@ fun HomeShell(
         EasyShell(
             container = container,
             onOpenSettings = onOpenSettings,
+            onOpenActMode = onOpenActMode,
             initialGoal = initialGoal,
             shared = incoming,
         )
@@ -56,6 +58,7 @@ fun HomeShell(
             onOpenMemory = onOpenMemory,
             onOpenSkills = onOpenSkills,
             onOpenRunningApps = onOpenRunningApps,
+            onOpenActMode = onOpenActMode,
             onOpenBrowser = onOpenBrowser,
             initialGoal = initialGoal,
             shared = incoming,
@@ -101,6 +104,7 @@ fun HomeShell(
             container = container,
             activeTab = tab,
             onSelectTab = selectTab,
+            onOpenActMode = onOpenActMode,
             initialGoal = initialGoal,
         )
     }
@@ -110,6 +114,7 @@ fun HomeShell(
 private fun EasyShell(
     container: AppContainer,
     onOpenSettings: () -> Unit,
+    onOpenActMode: () -> Unit,
     initialGoal: String,
     shared: Boolean,
 ) {
@@ -141,6 +146,7 @@ private fun EasyShell(
             container = container,
             activeTab = tab,
             onSelectTab = select,
+            onOpenActMode = onOpenActMode,
             initialGoal = initialGoal,
             easy = true,
             onOpenSettings = onOpenSettings,
@@ -157,6 +163,7 @@ private fun PowerShell(
     onOpenMemory: () -> Unit,
     onOpenSkills: () -> Unit,
     onOpenRunningApps: () -> Unit,
+    onOpenActMode: () -> Unit,
     onOpenBrowser: () -> Unit,
     initialGoal: String,
     shared: Boolean,
@@ -207,6 +214,7 @@ private fun PowerShell(
             container = container,
             activeTab = tab,
             onSelectTab = select,
+            onOpenActMode = onOpenActMode,
             initialGoal = initialGoal,
         )
 

@@ -9,18 +9,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
 import com.hopa.app.feature.conversations.ChatsSheet
+import com.hopa.data.settings.AppSettings
 
 @Composable
 fun ChatRoute(
     container: AppContainer,
     activeTab: String,
     onSelectTab: (String) -> Unit,
+    onOpenActMode: () -> Unit = {},
     initialGoal: String = "",
     easy: Boolean = false,
     onOpenSettings: () -> Unit = {},
 ) {
     val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val settings by container.settings.settings.collectAsStateWithLifecycle(
+        initialValue = AppSettings(),
+    )
     val tasks by container.runner.tasks.collectAsStateWithLifecycle()
     var chatsOpen by remember { mutableStateOf(false) }
 
@@ -43,6 +48,7 @@ fun ChatRoute(
         state = state,
         activeTab = activeTab,
         onSelectTab = onSelectTab,
+        onOpenActMode = onOpenActMode,
         onInput = viewModel::onInput,
         onSend = viewModel::send,
         onOption = viewModel::sendOption,
@@ -60,6 +66,7 @@ fun ChatRoute(
         onDismissAttachmentNotice = viewModel::dismissAttachmentNotice,
         easy = easy,
         onOpenSettings = onOpenSettings,
+        accessAllowed = settings.accessibilityAllowed,
         onApprovePlan = viewModel::approvePlan,
         onCancelPlan = viewModel::cancelPlan,
         onSaveSkill = viewModel::saveSkill,

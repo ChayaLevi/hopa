@@ -395,8 +395,8 @@ class ChatViewModel(
             }
             val onscreen = current.accessibilityAllowed &&
                 HopaAccessibilityService.instance != null
-            // The order is a setting: the background display leaves the person's
-            // screen alone, so AUTO tries it first, then the bridge, then the screen.
+            // AUTO is the phone's best mode: the hidden display when it is up,
+            // else this screen. The computer is only used when chosen.
             val ordered = ScreenPathOrder().order(
                 preferred = preferred,
                 background = background != null,
@@ -423,13 +423,21 @@ class ChatViewModel(
                     ChatMessage(
                         id = "m-${System.currentTimeMillis()}-screen",
                         role = "assistant",
-                        // The refusal now comes from the surface that was actually
-                        // tried, so a run on the hidden screen or the computer is not
-                        // blocked by a local permission it does not need.
+                        // The refusal names the surface that was actually
+                        // tried: the hidden screen and the visible screen both
+                        // need screen access, while the computer does not.
                         text = "I cannot reach your apps: " +
                             device.lastError.take(180).ifBlank { "no screen answered" } +
-                            ". Open Running apps: turn on screen access, start the " +
-                            "hidden screen, or pair your computer.",
+                            ". " +
+                            when (preferred) {
+                                ScreenPath.BRIDGE ->
+                                    "Open Act and set up My computer, or choose This phone."
+                                ScreenPath.BACKGROUND ->
+                                    "Open Act: start the hidden screen or turn on screen access."
+                                else ->
+                                    "Open Act: turn on screen access, start the hidden " +
+                                        "screen, or choose My computer."
+                            },
                         timestamp = System.currentTimeMillis(),
                     ),
                 )
@@ -471,6 +479,8 @@ class ChatViewModel(
                                     tokens = 0,
                                     millis = System.currentTimeMillis() - now,
                                     steps = steps,
+                                    fellBack = preferred == ScreenPath.AUTO &&
+                                        device.sourceName == "accessibility",
                                 ),
                             ),
                         )
@@ -537,6 +547,7 @@ class ChatViewModel(
                 tokens = result?.usage?.totalTokens ?: 0,
                 millis = System.currentTimeMillis() - now,
                 steps = steps,
+                fellBack = preferred == ScreenPath.AUTO && device.sourceName == "accessibility",
             )
             container.conversations.append(
                 conversation.id,

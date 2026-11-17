@@ -2,7 +2,7 @@ package com.hopa.core.observation
 
 /** How a run can reach the phone's screen, slowest to fastest by trust. */
 enum class ScreenPath(val wire: String) {
-    /** Use the background display when it is paired, else the bridge, else accessibility. */
+    /** The phone's best mode: the background display when it is up, else accessibility. */
     AUTO("auto"),
 
     /** A hidden virtual display driven through a shell helper. */

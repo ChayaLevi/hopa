@@ -58,7 +58,7 @@ class WirelessShell(
         }
         val started = shell(DisplayStart.command(context.packageName, token, isDebuggable()))
         return if (started.contains("started")) {
-            "Wireless shell connected; the background screen is ready"
+            "Wireless shell connected; the hidden screen is ready"
         } else {
             "Helper did not start: ${started.take(120)}"
         }
