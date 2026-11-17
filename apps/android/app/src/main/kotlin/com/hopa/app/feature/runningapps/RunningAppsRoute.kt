@@ -16,13 +16,15 @@ import com.hopa.core.router.RouteTarget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** The running-apps page shares the settings store, and lists the apps it can open. */
+/** The Act hub: where HOPA works, and the ways into apps, setup and preferences. */
 @Composable
 fun RunningAppsRoute(
     container: AppContainer,
     onBack: () -> Unit,
-    onOpenApp: (String) -> Unit,
     onOpenAllApps: () -> Unit,
+    onOpenSites: () -> Unit,
+    onOpenSetup: () -> Unit,
+    onOpenRunPrefs: () -> Unit,
     onOpenScreenAccess: () -> Unit,
     onOpenComputer: () -> Unit,
 ) {
@@ -59,11 +61,10 @@ fun RunningAppsRoute(
         onPairWirelessFromScreen = viewModel::pairWirelessFromScreen,
         onPairWirelessWaiting = viewModel::pairWirelessWaiting,
         onRunCheck = viewModel::runScreenCheck,
-        onPlanFirst = viewModel::setPlanFirst,
-        onVision = viewModel::setVision,
-        onReplaySkills = viewModel::setReplaySkills,
-        onOpenApp = onOpenApp,
+        onOpenSetup = onOpenSetup,
+        onOpenRunPrefs = onOpenRunPrefs,
         onOpenAllApps = onOpenAllApps,
+        onOpenSites = onOpenSites,
         onOpenScreenAccess = onOpenScreenAccess,
         onOpenComputer = onOpenComputer,
     )

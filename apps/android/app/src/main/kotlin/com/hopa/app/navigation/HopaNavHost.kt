@@ -13,6 +13,8 @@ import com.hopa.app.feature.memory.MemoryRoute
 import com.hopa.app.feature.memory.SkillsRoute
 import com.hopa.app.feature.runningapps.ComputerRoute
 import com.hopa.app.feature.runningapps.RunningAppsRoute
+import com.hopa.app.feature.runningapps.RunPrefsRoute
+import com.hopa.app.feature.runningapps.RunSetupRoute
 import com.hopa.app.feature.browser.BrowserRoute
 import com.hopa.app.feature.profiles.ProfilesRoute
 import com.hopa.app.feature.runs.RunsRoute
@@ -88,14 +90,26 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             RunningAppsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                onOpenApp = { name ->
-                    navController.navigate(
-                        HopaDestination.APP_CARD + "/" + android.net.Uri.encode(name),
-                    )
-                },
                 onOpenAllApps = { navController.navigate(HopaDestination.LAUNCHPAD) },
+                onOpenSites = { navController.navigate(HopaDestination.LAUNCHPAD) },
+                onOpenSetup = { navController.navigate(HopaDestination.RUN_SETUP) },
+                onOpenRunPrefs = { navController.navigate(HopaDestination.RUN_PREFS) },
                 onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
                 onOpenComputer = { navController.navigate(HopaDestination.COMPUTER) },
+            )
+        }
+        composable(HopaDestination.RUN_SETUP) {
+            RunSetupRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
+                onOpenComputer = { navController.navigate(HopaDestination.COMPUTER) },
+            )
+        }
+        composable(HopaDestination.RUN_PREFS) {
+            RunPrefsRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
             )
         }
         composable(HopaDestination.COMPUTER) {

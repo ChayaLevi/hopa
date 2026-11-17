@@ -107,7 +107,7 @@ fun CapabilitiesScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(
-                        text = "Running apps",
+                        text = "Act",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Medium,
                         color = HopaColor.TextPrimary,
@@ -135,8 +135,8 @@ fun CapabilitiesScreen(
                         )
                     }
                     Text(
-                        text = "Open, tap and type in other apps: the surface, the setup " +
-                            "and the apps themselves.",
+                        text = "Where HOPA works, the apps and sites it can open, " +
+                            "and the setup behind them.",
                         fontSize = 11.sp,
                         color = HopaColor.TextHint,
                     )

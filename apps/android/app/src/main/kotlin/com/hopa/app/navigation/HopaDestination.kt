@@ -9,6 +9,8 @@ object HopaDestination {
     const val MEMORY = "memory"
     const val SKILLS = "skills"
     const val RUNNING_APPS = "runningapps"
+    const val RUN_SETUP = "runsetup"
+    const val RUN_PREFS = "runprefs"
     const val COMPUTER = "computer"
     const val BROWSER = "browser"
     const val SELF_CHECK = "selfcheck"
