@@ -34,8 +34,17 @@ Rules that must hold:
 
 Green at `c98f746`: `:app:assembleDebug`, `:app:testDebugUnitTest`,
 `:engine:test` (108), `:engine:check`, `:turn:test` (20), `:turn:check`,
-`:contracts:check`, `:stores:test`, sidecar `test`, all python checks. The live
-phone turn is still owed.
+`:contracts:check`, `:stores:test`, sidecar `test`, all python checks.
+
+Live gate, 2026-11-18, Galaxy S926B, build `0.1.0-261118-1347`, path
+"This phone / Your screen", accessibility on:
+
+- first ask showed the plan sheet ("Here is the plan", 4 steps, "Nothing has
+  been tapped yet."); after **Do it** the turn launched Settings and answered
+  from the real screen - receipt `1 step, 1 confirmed, 9.7k tokens`;
+- the same ask again ran the stored recipe: same answer from the final screen,
+  **2.3k tokens**, no loop;
+- the receipt said "1 steps"; fixed after the build in `73d6a93`.
 
 ## Done: slice 7, `TurnRunner` (no Android)
 
@@ -91,8 +100,7 @@ One deliberate fix: the turn's goal is the body - the attachment description
 when there is no text - so an attachment-only message no longer starts a turn
 with an empty goal.
 
-Still owed before a merge: a live turn on the phone (hidden screen, recipe
-replay with an answer, accessibility banner truthful).
+The live gate above has run; the branch is ready to merge when wanted.
 
 ## Next: the remaining modernisation, in this order
 
