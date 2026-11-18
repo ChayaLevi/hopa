@@ -1,6 +1,5 @@
-package com.hopa.app.display
+package com.hopa.capabilities.display
 
-import com.hopa.capabilities.display.DerCertificate
 import java.security.KeyPairGenerator
 import org.junit.Assert.assertTrue
 import org.junit.Test

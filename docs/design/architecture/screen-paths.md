@@ -91,7 +91,7 @@ Capabilities → Act → How HOPA acts ──"Start the hidden screen"──► 
 ## Tests
 
 - JVM: `ScreenPathOrderTest`.
-- Device: `app/src/androidTest/.../BackgroundDisplayTest` — the display is not
+- Device: `capabilities/src/androidTest/.../BackgroundDisplayTest` — the display is not
   the phone's own, it draws a frame, Settings starts on it, a tap changes the
   frame, and the phone's own screen is pixel-identical before and after a launch
   on the background display. Without a running helper the cases are skipped with

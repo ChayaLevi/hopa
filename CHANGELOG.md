@@ -12,6 +12,15 @@
   backend build failed without it.
 - The engine's conformance tests move to `com.hopa.engine.conformance`; the old
   package name described types that had left.
+- The Android tests follow the packages they test: `ActModeTest` sits in
+  `feature.execution`, `DerCertificateTest` and `BackgroundDisplayTest` moved to
+  `apps/android/capabilities` with the display code they drive, and the app's
+  copies of `AttachmentRulesTest` and the drop-last-exchange case are gone
+  (identical cases already live in `packages/stores`). The renamed tests had
+  stopped compiling, and `:app:testDebugUnitTest` failed before it ran anything.
+- `tools/checks/check-android-structure.py` now rejects a test package that
+  production code does not ship and that is not listed as test support, which is
+  what those leftovers were.
 - `packages/knowledge` is one package (`com.hopa.knowledge`): the generated
   catalog, policy data and prompt rules sit side by side, each file keeping the
   name of the script that writes it.

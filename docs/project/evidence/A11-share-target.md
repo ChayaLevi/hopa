@@ -42,7 +42,7 @@ pending one and deletes the older copy, so no orphan bytes accumulate.
 
 ## Where the attachment lives
 
-- `data/sessions/Attachment.kt`: name, mime, bytes, path.
+- `packages/stores/src/main/kotlin/com/hopa/stores/Attachment.kt`: name, mime, bytes, path.
 - `ChatMessage.attachment` (nullable) - the turn the user sent.
 - Room v5: `turns` gains `attachmentName`, `attachmentMime`, `attachmentBytes`,
   `attachmentPath`; `MIGRATION_4_5` adds them with defaults.
