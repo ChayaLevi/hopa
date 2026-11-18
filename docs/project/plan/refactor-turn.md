@@ -125,6 +125,23 @@ The live gate above has run; the branch is ready to merge when wanted.
    and Room 2.7.2 (KSP2 needs it), and JUnit 5.14.4 for every test source.
    AGP 9 and Kotlin 2.4 wait for a DSL migration and for KSP to support 2.4.
 
+## Open, for the next session with the phone
+
+- **E2 smoke**: start the hidden screen from the app, `kill` the helper, then run
+  a turn. It must name the failure and start a new helper instead of driving a
+  socket that only looks connected.
+- **D2 smoke**: turn screen access off without touching the app and watch the
+  banner appear, then turn it on and watch it go; a fast off-on cycle must show
+  nothing, because the grace is three seconds.
+- **After the toolchain bump**: build, install and run once. AGP, Kotlin, Room
+  and JUnit all changed under the app; the unit tests say it compiles, a phone
+  says it works.
+- **`fb352f1`** is a broken intermediate commit (staged renames committed with a
+  settings-path fix). The head is correct; rewriting it would force-push over a
+  published branch, so it is recorded here instead.
+- The backend implements `GET /v1/knowledge` but it is not deployed, so a phone
+  still updates from the bootstrap asset.
+
 ## Product constraints that survive the refactor
 
 - No factory, no verification farm, no signed recipes, no 20-task release gate.
