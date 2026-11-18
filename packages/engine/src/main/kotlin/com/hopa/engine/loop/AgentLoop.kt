@@ -12,6 +12,7 @@ import com.hopa.contracts.model.ModelUsage
 import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.engine.gate.ActionExecutor
+import com.hopa.engine.gate.ActionKindRules
 import com.hopa.engine.parser.DecisionParser
 import com.hopa.engine.prompt.AppCatalogBlock
 import com.hopa.engine.prompt.ContextBudget
@@ -165,7 +166,7 @@ class AgentLoop(
             }
 
             val signature = "${action.kind}|${action.ref}|${action.text}|${action.app}|${action.x},${action.y}"
-            if (action.kind !in READ_ONLY_KINDS) {
+            if (action.kindOrNull() !in ActionKindRules.READ_ONLY) {
                 steps += signature
             }
             if (steps.count { it == signature } >= 3) {
@@ -219,8 +220,6 @@ class AgentLoop(
     }
 
     private companion object {
-        /** Reading the screen again is not a loop; acting on it twice is. */
-        val READ_ONLY_KINDS = setOf("ui.observe", "ui.wait", "web.read")
     }
 
     /** A short block for the foreground app's typed functions, when it has any. */

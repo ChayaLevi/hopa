@@ -123,6 +123,11 @@ class ActionExecutor(
     }
 
     private suspend fun executeAction(action: Action, before: Observation): String {
+        // The same table the parser uses: an incomplete step is a mistake, not a
+        // gesture at a guess.
+        action.kindOrNull()?.let { kind ->
+            ActionKindRules.missing(kind, action)?.let { throw IllegalArgumentException(it) }
+        }
         when (action.kind) {
             "ui.observe" -> return ""
             "ui.tap" -> device.tap(action.ref, action.x, action.y)
@@ -151,28 +156,19 @@ class ActionExecutor(
             "ui.back" -> device.pressBack()
             "ui.home" -> device.pressHome()
             "ui.launch" -> {
-                val packageName = action.app?.takeIf { it.isNotBlank() }
-                    ?: throw IllegalArgumentException("ui.launch needs app")
-                device.launch(packageName)
+                device.launch(action.app.orEmpty())
                 return ""
             }
 
             "app.function" -> {
-                val packageName = action.app?.takeIf { it.isNotBlank() }
-                    ?: throw IllegalArgumentException("app.function needs app")
-                val function = action.ref?.takeIf { it.isNotBlank() }
-                    ?: throw IllegalArgumentException("app.function needs ref")
                 return device.appFunction(
-                    packageName,
-                    function,
+                    action.app.orEmpty(),
+                    action.ref.orEmpty(),
                     action.text.orEmpty().ifBlank { "{}" },
                 )
             }
 
-            "ui.stop" -> device.stop(
-                action.app?.takeIf { it.isNotBlank() }
-                    ?: throw IllegalArgumentException("ui.stop needs app"),
-            )
+            "ui.stop" -> device.stop(action.app.orEmpty())
 
             "ui.wait" -> clock.sleep(action.timeoutMs.toLong())
             "web.navigate" -> {
@@ -187,7 +183,7 @@ class ActionExecutor(
 
             "web.click" -> {
                 val port = browser ?: throw UnsupportedOperationException("no browser")
-                port.click(action.ref ?: throw IllegalArgumentException("web.click needs ref"))
+                port.click(action.ref.orEmpty())
             }
 
             "web.type" -> {

@@ -51,7 +51,7 @@ class ActionExecutorTest {
     @Test
     fun an_approved_payment_runs_and_is_recorded_as_payment() = runBlocking {
         val harness = Harness(allow = true)
-        val result = harness.execute(Action(kind = "payment.pay", text = "42.00"))
+        val result = harness.execute(Action(kind = "payment.pay", ref = "e1", text = "42.00"))
 
         assertTrue(result.record.executed)
         assertEquals("payment", result.record.classification)
