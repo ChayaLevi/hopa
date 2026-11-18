@@ -1,7 +1,23 @@
 # Knowledge from the backend
 
-Status: design only. Nothing here is implemented; the current app still ships a
-compiled snapshot of the catalog and policy tables.
+Status: **K1 done** (`ad2396a`). The engine reads a `Knowledge` value and the
+bundled snapshot is the mock source; nothing is downloaded yet. K2 is next.
+
+## K1, done
+
+`packages/knowledge` now has the hand-written `Knowledge`, `KnowledgeSource` and
+`BundledKnowledge`. `CatalogRoutes.targets`, `AgentLoop` and `TurnRunner` take
+the value; `AppContainer.knowledge` comes from `knowledgeSource`, which is
+`BundledKnowledge` today. A test supplies a one-app `Knowledge` and proves the
+whole catalog is replaced, so the source drives the engine rather than decorating
+constants. Behaviour is unchanged.
+
+Deliberate: the approval table stays in the bundled snapshot. A downloaded
+catalog may change which app opens; it must not make the gate less careful.
+
+Still to wire when a real source exists: the launchpad and settings screens call
+`CatalogRoutes` with the bundled default, so they would keep showing the old
+catalog until they take `container.knowledge` too.
 
 ## Why
 
@@ -97,7 +113,7 @@ the app less careful:
 
 | step | what | gates |
 |---|---|---|
-| **K1** | `Knowledge` value and injection into `CatalogRoutes`, `ActionClassifier`, `ApprovalPolicy`, `SystemPromptBuilder`; bundled values assembled once by `TurnRunner` | `:engine:test`, `:turn:test`, `:app:assembleDebug`, sidecar test, one live turn; behaviour unchanged |
+| **K1** | `Knowledge` value and injection into `CatalogRoutes`, `AgentLoop` and `TurnRunner`; bundled values assembled once; **done** (`ad2396a`) | `:engine:test`, `:turn:test`, `:app:assembleDebug`, sidecar test, one live turn; behaviour unchanged |
 | **K2** | `KnowledgeBundle` (kotlinx.serialization) in `contracts`; generators emit and validate the bundle, stop writing Kotlin; `PromptRules` becomes a real input | `:contracts:check`, generator `--check`, a parse test against the committed bundle |
 | **K3** | `KnowledgeStore` port, file implementation, bundled fallback, atomic swap, previous-version rollback | temp-dir tests for accept/reject/rollback; `:app:assembleDebug` |
 | **K4** | `GET /v1/knowledge` in the backend; startup check in the app; `knowledgeVersion` in the receipt and bench results | backend tests (ETag, 304, digest, cap), contract test, live update and rollback on the phone |
