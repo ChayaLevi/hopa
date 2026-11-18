@@ -1,9 +1,9 @@
 # Knowledge from the backend
 
-Status: **K1 done** (`ad2396a`), **K2 format done**. The engine reads a `Knowledge`
-value; the bundled snapshot is the mock source; the wire format
-(`KnowledgeBundle` + `KnowledgeCodec`) round-trips and rejects an unknown schema
-or an empty catalog. Nothing is downloaded yet.
+Status: **K1, the K2 format, K3 and K4 are done**. The engine reads an injected
+`Knowledge`; the app keeps a bundled snapshot, stores a downloaded bundle
+atomically with rollback, and quietly asks `GET /v1/knowledge` once every six
+hours. K5 (stop compiling the catalog into the app) is the remaining step.
 
 ## K2, format done
 
@@ -12,10 +12,23 @@ or an empty catalog. Nothing is downloaded yet.
 types are `@Serializable`. Approval is not in the bundle: a download may change
 which app opens, never how careful the gate is.
 
-Still to do for K2: the Python script that writes the same JSON from the three
-`contracts/` sources, and the committed `contracts/knowledge/knowledge.v1.json`
-that the backend will serve. The Kotlin generators still emit the bundled values;
-they stop only when the asset is the only copy (K5).
+Still to do for K2: nothing on the writer side - `build-knowledge-bundle.py`
+landed with K4 and CI checks it. The Kotlin generators still emit the bundled
+values; they stop only when the asset is the only copy (K5).
+
+## K3 and K4, done
+
+`FileKnowledgeStore` keeps the newest valid bundle, the previous one and the
+bundled fallback, with a temp file, a sync and a rename. `KnowledgeUpdater` asks
+`GET /v1/knowledge` at most once per six hours, from the HTTPS base derived from
+the paired gateway URL, and the backend requires a paired token, answers 304 on
+an unchanged digest and serves the reviewed document. `TurnRunner` reads
+`knowledge()` per turn, so an accepted bundle applies on the next turn.
+
+Not done yet: the receipt and bench results do not show `knowledgeVersion`, and
+the launchpad/settings screens still call `CatalogRoutes` with the bundled
+default instead of `container.knowledge`.
+
 
 ## K1, done
 
@@ -129,8 +142,8 @@ the app less careful:
 |---|---|---|
 | **K1** | `Knowledge` value and injection into `CatalogRoutes`, `AgentLoop` and `TurnRunner`; bundled values assembled once; **done** (`ad2396a`) | `:engine:test`, `:turn:test`, `:app:assembleDebug`, sidecar test, one live turn; behaviour unchanged |
 | **K2** | `KnowledgeBundle` (kotlinx.serialization) + `KnowledgeCodec` + round-trip tests; **format done**. The Python bundle writer and the committed JSON come with the backend | `:knowledge:test`, `:contracts:check`, generator `--check` |
-| **K3** | `KnowledgeStore` port, file implementation, bundled fallback, atomic swap, previous-version rollback | temp-dir tests for accept/reject/rollback; `:app:assembleDebug` |
-| **K4** | `GET /v1/knowledge` in the backend; startup check in the app; `knowledgeVersion` in the receipt and bench results | backend tests (ETag, 304, digest, cap), contract test, live update and rollback on the phone |
+| **K3** | `KnowledgeStore` port, file implementation, bundled fallback, atomic swap, previous-version rollback; **done** (`afbdba3`) | temp-dir tests for accept/reject/rollback; `:app:assembleDebug` |
+| **K4** | `GET /v1/knowledge` in the backend; startup check in the app; `knowledgeVersion` in the receipt and bench results; **endpoint, client and updater done** (`a07ef25`). The version is not yet shown in the receipt | backend tests (ETag, 304, digest, cap), contract test, live update and rollback on the phone |
 | **K5** | Drop the compiled catalog from the APK, keep a minimal bootstrap | offline start, APK size, full CI |
 
 K1 and K2 come before generated wire types (C in the modernisation list): they
