@@ -158,7 +158,7 @@ class AgentLoopTest {
 
     private companion object {
         const val TAP = """{"schemaVersion":"1","kind":"ui.tap","ref":"e1","timeoutMs":3000}"""
-        const val PAY = """{"schemaVersion":"1","kind":"payment.checkout","timeoutMs":3000}"""
+        const val PAY = """{"schemaVersion":"1","kind":"payment.checkout","ref":"e9","timeoutMs":3000}"""
         const val OBSERVE = """{"schemaVersion":"1","kind":"ui.observe","timeoutMs":3000}"""
         const val LAUNCH =
             """{"schemaVersion":"1","kind":"ui.launch","app":"com.example.app","timeoutMs":3000}"""

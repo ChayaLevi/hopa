@@ -1,7 +1,5 @@
 package com.hopa.contracts
 
-import com.hopa.contracts.Observation
-import com.hopa.contracts.ObservationNode
 import com.hopa.contracts.json.CanonicalJson
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -17,8 +15,7 @@ object ObservationHasher {
      * reuses that digest instead of walking the tree again; a hand-built
      * observation (tests, an empty fallback) has no hash yet, so it gets one.
      */
-    fun hashOf(observation: Observation): String =
-        observation.hash.ifBlank { hash(observation) }
+    fun hashOf(observation: Observation): String = observation.hash.ifBlank { hash(observation) }
 
     fun hash(observation: Observation): String {
         val payload = buildJsonObject {

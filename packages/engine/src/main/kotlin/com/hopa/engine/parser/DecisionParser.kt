@@ -102,14 +102,25 @@ class DecisionParser {
             direction = obj["direction"]?.asString(),
             timeoutMs = obj["timeoutMs"]?.asInt() ?: 3000,
         )
-        return ParseOutcome(
-            decision = Decision(
-                action = action,
-                say = obj["say"]?.asString() ?: "",
-                done = false,
-                needUser = false,
-            ),
+        val decision = Decision(
+            action = action,
+            say = obj["say"]?.asString() ?: "",
+            done = false,
+            needUser = false,
         )
+        // The flat `{"kind": ...}` shape skips the Decision decoder, so it must
+        // be checked against the same table as the nested shape. Otherwise a
+        // targetless tap would reach the executor and fail there instead.
+        val validation = DecisionRules.validate(decision)
+        if (!validation.valid) {
+            return ParseOutcome(
+                error = HopaError(
+                    validation.errorCode ?: ErrorCodes.SCHEMA,
+                    validation.message ?: "invalid action",
+                ),
+            )
+        }
+        return ParseOutcome(decision = decision)
     }
 
     /**

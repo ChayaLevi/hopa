@@ -189,7 +189,8 @@ private fun ProofReceipt(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "${proof.executed} steps \u00B7 ${proof.verified} confirmed \u00B7 " +
+                    (if (proof.executed == 1) "1 step" else "${proof.executed} steps") +
+                        " \u00B7 ${proof.verified} confirmed \u00B7 " +
                         tokensText(proof.tokens),
                     fontSize = 11.sp,
                     color = HopaColor.TextSecondary,

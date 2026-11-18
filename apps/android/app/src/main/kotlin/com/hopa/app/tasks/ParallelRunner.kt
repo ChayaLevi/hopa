@@ -3,10 +3,10 @@ package com.hopa.app.tasks
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.display.ShellClient
 import com.hopa.capabilities.display.ShellDisplayDevice
-import com.hopa.engine.loop.TurnContext
 import com.hopa.engine.observation.ScreenSource
 import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.stores.ChatMessage
+import com.hopa.turn.run.TurnSource
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Runs goals side by side, each on its own hidden display. A parallel task never
@@ -74,49 +73,6 @@ class ParallelRunner(
             val settings = container.settings.settings.first()
             container.useGate(settings.trustedApps.toList())
 
-            // A goal that worked before runs from its recipe here too: the
-            // parallel run gets the cheap path, not just the main one.
-            if (settings.replaySkills) {
-                val recipe = runCatching { container.recipes.find(goal) }.getOrNull()
-                if (recipe != null) {
-                    val outcome = runCatching {
-                        com.hopa.app.recipes.Replayer(container).replay(recipe, device)
-                    }.getOrNull()
-                    if (outcome?.trustworthy == true) {
-                        val replayed = outcome.done
-                        val screen = outcome.screen
-                        val spoken = if (screen != null) {
-                            runCatching {
-                                com.hopa.app.recipes.ReplayAnswer(container.model)
-                                    .answer(goal, screen)
-                            }.getOrNull()
-                        } else {
-                            null
-                        }
-                        val answer = spoken?.first
-                            ?: "Repeated the $replayed steps that worked last time."
-                        val tokens = spoken?.second ?: 0
-                        val steps = recipe.steps.mapIndexed { index, action ->
-                            "${index + 1}. ${action.kind}"
-                        }
-                        append(
-                            conversation.id,
-                            answer,
-                            com.hopa.stores.MessageProof(
-                                path = "background",
-                                executed = replayed,
-                                verified = replayed,
-                                tokens = tokens,
-                                steps = steps,
-                            ),
-                        )
-                        record(goal, conversation.id, replayed, tokens)
-                        finish(id, "done", answer.take(80))
-                        return
-                    }
-                }
-            }
-
             // The hidden display has its own foreground app; its typed functions
             // must come from that display, not from the phone's own screen.
             val functions = runCatching {
@@ -124,70 +80,63 @@ class ParallelRunner(
                 if (foreground.isBlank()) "" else client.appFunctions(foreground).second
             }.getOrDefault("")
 
-            val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
-            val loop = container.loopFor(
-                ScreenSourceDevice(
-                    sources = listOf(ScreenSource("background", device, budgetMs = 8_000)),
-                    fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
-                ),
+            // The same turn as chat: recipe first, then the loop, then the same
+            // rule about saving a recipe. Only the surface differs.
+            val shared = ScreenSourceDevice(
+                sources = listOf(ScreenSource("background", device, budgetMs = 8_000)),
+                fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
             )
-            val result = withTimeoutOrNull(120_000) {
-                loop.run(
+            shared.observe()
+            val outcome = container.runs.run(
+                container.runs.request(
+                    goal = goal,
+                    device = shared,
+                    settings = settings,
                     runId = "run-$id",
                     traceId = UUID.randomUUID().toString(),
-                    context = TurnContext(
-                        goal = goal,
-                        history = emptyList(),
-                        memory = listOf(
-                            "A background task. Do not disturb the person's screen.",
-                            runCatching { container.memory.promptText() }.getOrDefault(""),
-                        ).filter { it.isNotBlank() }.joinToString("\n\n"),
-                        skills = runCatching { container.skills.promptText() }.getOrDefault(""),
-                        vision = settings.vision,
-                        installedApps = installed,
-                        appFunctions = functions,
-                        platform = "android",
-                        phoneAccess = settings.accessibilityAllowed,
-                    ),
-                    isCancelled = { false },
+                    extraMemory = "A background task. Do not disturb the person's screen.",
+                    appFunctions = functions,
+                    phoneAccess = settings.accessibilityAllowed,
+                ),
+            )
+            if (outcome.source == TurnSource.UNAVAILABLE) {
+                append(
+                    conversation.id,
+                    "I could not read the hidden screen: " +
+                        outcome.surfaceError.take(120).ifBlank { "no screen answered" },
                 )
+                finish(id, "failed", "The hidden screen did not answer")
+                return
             }
-            val answer = result?.answer ?: "Stopped after two minutes."
-            val steps = result?.records.orEmpty().map { record ->
-                val target = record.action.app
-                    ?: record.action.ref
-                    ?: record.action.url
-                    ?: record.action.text?.take(40)
-                    ?: ""
-                val suffix = if (target.isBlank()) "" else " $target"
-                "${record.step}. ${record.action.kind}$suffix"
+
+            val answer = outcome.answer
+            val steps = outcome.replaySteps.ifEmpty {
+                outcome.records.map { record ->
+                    val target = record.action.app
+                        ?: record.action.ref
+                        ?: record.action.url
+                        ?: record.action.text?.take(40)
+                        ?: ""
+                    val suffix = if (target.isBlank()) "" else " $target"
+                    "${record.step}. ${record.action.kind}$suffix"
+                }
             }
+            val executed = if (outcome.source == TurnSource.RECIPE) {
+                outcome.replaySteps.size
+            } else {
+                outcome.executed
+            }
+            val verified = if (outcome.source == TurnSource.RECIPE) executed else outcome.verified
             val proof = com.hopa.stores.MessageProof(
                 path = "background",
-                executed = result?.records?.count { it.executed } ?: 0,
-                verified = result?.records?.count { it.verified } ?: 0,
-                tokens = result?.usage?.totalTokens ?: 0,
+                executed = executed,
+                verified = verified,
+                tokens = outcome.usage.totalTokens,
                 millis = System.currentTimeMillis() - started,
                 steps = steps,
             )
             append(conversation.id, answer, proof.takeIf { it.executed > 0 })
-            if (
-                result != null &&
-                result.error == null &&
-                result.options.isEmpty() &&
-                result.records.any { it.verified }
-            ) {
-                runCatching {
-                    container.recipes.save(
-                        goal = goal,
-                        steps = result.records.map { it.action },
-                        anchors = result.records.map { it.targetKey.orEmpty() },
-                        screenHash = result.records.first().beforeHash.orEmpty(),
-                        endHash = result.records.last().afterHash.orEmpty(),
-                    )
-                }
-            }
-            record(goal, conversation.id, result?.records?.size ?: 0, result?.usage?.totalTokens ?: 0)
+            record(goal, conversation.id, steps.size, outcome.usage.totalTokens)
             finish(id, "done", answer.take(80))
         } catch (error: Exception) {
             finish(id, "failed", error.message ?: "failed")

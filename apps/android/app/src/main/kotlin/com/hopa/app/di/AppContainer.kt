@@ -25,8 +25,6 @@ import com.hopa.contracts.ports.DevicePort
 import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
-import com.hopa.engine.loop.AgentLoop
-import com.hopa.engine.loop.ModelStepPolicy
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
 import com.hopa.engine.records.RunRecordFactory
@@ -102,17 +100,6 @@ class AppContainer(context: Context) {
     val device = AccessibilityDevice(context)
     val voice = com.hopa.capabilities.voice.VoiceRecorder(context)
     val speaker = com.hopa.capabilities.voice.Speaker(context)
-    val executor = ActionExecutor(
-        device = device,
-        browser = null,
-        system = AndroidSystemPort(context),
-        sandbox = null,
-        policy = { gatePolicy },
-        approval = approval,
-        recorder = recorder,
-        factory = factory,
-        clock = clock,
-    )
     /** Goals that run at the same time, each on its own hidden display. */
     val runner by lazy { com.hopa.app.tasks.ParallelRunner(this) }
 
@@ -276,14 +263,6 @@ class AppContainer(context: Context) {
     val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
     val modelFactory: ModelFactory = ModelFactory()
-    val loop = AgentLoop(
-        stepPolicy = ModelStepPolicy(model),
-        device = device,
-        executor = executor,
-        recorder = recorder,
-        clock = clock,
-        webAvailable = false,
-    )
 
     /** A bridge-backed device when Settings has an address and a token. */
     suspend fun bridgedDevice(): DevicePort? {
@@ -395,15 +374,8 @@ class AppContainer(context: Context) {
     )
 
     /** Recipes that were replayed before; a matching goal runs without the model. */
-    val recipes by lazy { com.hopa.app.recipes.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+    val recipes by lazy { com.hopa.turn.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
-    /** One loop per device path, sharing the model, recorder and gate. */
-    fun loopFor(device: DevicePort): AgentLoop = AgentLoop(
-        stepPolicy = ModelStepPolicy(model),
-        device = device,
-        executor = executorFor(device),
-        recorder = recorder,
-        clock = clock,
-        webAvailable = false,
-    )
+    /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
+    val runs by lazy { com.hopa.app.run.RunCoordinator(this) }
 }

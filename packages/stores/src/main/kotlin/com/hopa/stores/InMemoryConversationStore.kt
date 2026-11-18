@@ -6,12 +6,10 @@ class InMemoryConversationStore : ConversationStore {
     private val rows = linkedMapOf<String, Conversation>()
     private var counter = 0
 
-    override suspend fun all(): List<Conversation> =
-        rows.values.filter { it.deletedAt == 0L && it.archivedAt == 0L }
-            .sortedWith(compareByDescending<Conversation> { it.pinned }.thenByDescending { it.updatedAt })
+    override suspend fun all(): List<Conversation> = rows.values.filter { it.deletedAt == 0L && it.archivedAt == 0L }
+        .sortedWith(compareByDescending<Conversation> { it.pinned }.thenByDescending { it.updatedAt })
 
-    override suspend fun allWithDeleted(): List<Conversation> =
-        rows.values.sortedByDescending { it.updatedAt }
+    override suspend fun allWithDeleted(): List<Conversation> = rows.values.sortedByDescending { it.updatedAt }
 
     override suspend fun dropLastExchange(id: String) {
         val session = rows[id] ?: return

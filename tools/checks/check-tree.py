@@ -33,7 +33,7 @@ TOP_LEVEL = {
     ".github",
 }
 JUNK = {"utils", "helpers", "common", "misc", "shared"}
-ENGINE_PACKAGES = {"contracts", "engine", "knowledge", "stores", "net"}
+ENGINE_PACKAGES = {"contracts", "engine", "knowledge", "stores", "net", "turn"}
 SKIP = {
     "build",
     "oh_modules",

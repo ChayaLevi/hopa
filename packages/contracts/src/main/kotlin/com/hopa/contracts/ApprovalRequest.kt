@@ -1,7 +1,5 @@
 package com.hopa.contracts
 
-import com.hopa.contracts.Action
-
 data class ApprovalRequest(
     val title: String,
     val body: String,
