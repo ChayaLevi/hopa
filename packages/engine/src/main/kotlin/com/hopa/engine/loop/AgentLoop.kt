@@ -23,6 +23,8 @@ import com.hopa.engine.records.RunRecorder
 import com.hopa.engine.router.AppRouter
 import com.hopa.engine.router.CatalogRoutes
 import com.hopa.engine.router.RouterHint
+import com.hopa.knowledge.BUNDLED_KNOWLEDGE
+import com.hopa.knowledge.Knowledge
 
 class AgentLoop(
     private val stepPolicy: StepPolicy,
@@ -36,6 +38,8 @@ class AgentLoop(
     private val screenRenderer: ScreenRenderer = ScreenRenderer(),
     private val config: LoopConfig = LoopConfig(),
     private val webAvailable: Boolean = false,
+    /** The tables this turn routes and prompts with; bundled until a fetch exists. */
+    private val knowledge: Knowledge = BUNDLED_KNOWLEDGE,
 ) {
     suspend fun run(
         runId: String,
@@ -45,7 +49,7 @@ class AgentLoop(
     ): TurnResult {
         var observation = runCatching { device.observe() }.getOrNull()
         val surfaceAvailable = observation != null
-        val targets = CatalogRoutes.targets(context.installedApps, context.platform)
+        val targets = CatalogRoutes.targets(context.installedApps, context.platform, knowledge)
         val route = AppRouter.route(context.goal, targets)
         val known = targets
             .filter { it.bundle.isNotBlank() }

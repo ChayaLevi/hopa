@@ -14,7 +14,7 @@ sourceSets {
 
 dependencies {
     api(project(":contracts"))
-    implementation(project(":knowledge"))
+    api(project(":knowledge"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)
 

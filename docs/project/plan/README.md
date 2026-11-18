@@ -15,6 +15,11 @@ The **turn refactor** is tracked separately:
 path into `packages/turn`, so the Android app, the Windows sidecar and a
 delivered remote task stop carrying their own copies.
 
+**Knowledge from the backend** is designed in
+[`knowledge-remote.md`](knowledge-remote.md): the app keeps a bundled snapshot
+and, when connected, picks up a versioned bundle that it validates, stores
+atomically and rolls back on any failure.
+
 # Refactor plan: apps, services, evals
 
 Status: **revised after critique; execution starts at R0.**

@@ -1,10 +1,10 @@
 package com.hopa.engine.router
 
 import com.hopa.contracts.ports.InstalledApp
-import com.hopa.knowledge.APP_CATALOG
+import com.hopa.knowledge.BUNDLED_KNOWLEDGE
 import com.hopa.knowledge.CatalogApp
 import com.hopa.knowledge.CatalogTarget
-import com.hopa.knowledge.SITE_CATALOG
+import com.hopa.knowledge.Knowledge
 
 /**
  * The catalog is one list for every platform; this is where a client asks for
@@ -18,8 +18,12 @@ import com.hopa.knowledge.SITE_CATALOG
  * somewhere to install it from.
  */
 object CatalogRoutes {
-    fun targets(installed: List<InstalledApp> = emptyList(), platform: String = ""): List<RouteTarget> {
-        val apps = APP_CATALOG.map { app ->
+    fun targets(
+        installed: List<InstalledApp> = emptyList(),
+        platform: String = "",
+        knowledge: Knowledge = BUNDLED_KNOWLEDGE,
+    ): List<RouteTarget> {
+        val apps = knowledge.catalog.map { app ->
             val chosen = platformTarget(app, platform)
             val launch = launchTarget(app, chosen, platform, installed)
             RouteTarget(
@@ -34,7 +38,7 @@ object CatalogRoutes {
                 target = chosen?.id.orEmpty(),
             )
         }
-        val sites = SITE_CATALOG.map { site ->
+        val sites = knowledge.sites.map { site ->
             RouteTarget(
                 name = site.id,
                 display = site.display,

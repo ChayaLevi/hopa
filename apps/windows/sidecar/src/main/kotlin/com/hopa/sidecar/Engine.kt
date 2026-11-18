@@ -13,6 +13,7 @@ import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
 import com.hopa.engine.router.CatalogRoutes
+import com.hopa.knowledge.BundledKnowledge
 import com.hopa.contracts.chat.Attachment
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunChain
@@ -120,6 +121,7 @@ class Engine(
                 recorder = recorder,
                 clock = clock,
                 webAvailable = false,
+                knowledge = BundledKnowledge.current(),
             )
             val outcome = runCatching {
                 loop.run(

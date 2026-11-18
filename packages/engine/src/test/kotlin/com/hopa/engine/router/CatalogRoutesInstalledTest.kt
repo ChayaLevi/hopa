@@ -1,6 +1,10 @@
 package com.hopa.engine.router
 
 import com.hopa.contracts.ports.InstalledApp
+import com.hopa.knowledge.ApprovalPolicyData
+import com.hopa.knowledge.CatalogApp
+import com.hopa.knowledge.CatalogTarget
+import com.hopa.knowledge.Knowledge
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -10,6 +14,34 @@ class CatalogRoutesInstalledTest {
         InstalledApp(packageName = "tv.danmaku.bili", label = "Bilibili"),
         InstalledApp(packageName = "com.android.settings", label = "Settings"),
     )
+
+    @Test
+    fun a_supplied_knowledge_replaces_the_bundled_catalog() {
+        val empty = CatalogTarget(id = "", detail = "", verified = false)
+        val knowledge = Knowledge(
+            version = "test",
+            catalog = listOf(
+                CatalogApp(
+                    id = "tiny",
+                    display = "Tiny",
+                    aliases = emptyList(),
+                    purpose = "",
+                    actions = emptyList(),
+                    harmonyos = empty,
+                    android = CatalogTarget("com.tiny", "", true),
+                    windows = empty,
+                ),
+            ),
+            sites = emptyList(),
+            approval = ApprovalPolicyData,
+            promptRules = emptyList(),
+        )
+
+        val routes = CatalogRoutes.targets(platform = "android", knowledge = knowledge)
+
+        assertEquals(listOf("tiny"), routes.map { it.name })
+        assertEquals("com.tiny", routes.single().bundle)
+    }
 
     @Test
     fun android_uses_the_catalog_package_when_the_phone_has_it() {

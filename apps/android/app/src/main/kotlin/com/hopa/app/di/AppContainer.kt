@@ -50,6 +50,13 @@ class AppContainer(context: Context) {
 
     private val database = HopaDatabase.build(context)
     val conversations: ConversationStore = DbConversationStore(database)
+    /**
+     * The tables this client uses. The bundled snapshot is the mock until the
+     * backend serves a version; the runner already reads this value, not the
+     * generated constants.
+     */
+    val knowledgeSource: com.hopa.knowledge.KnowledgeSource = com.hopa.knowledge.BundledKnowledge
+    val knowledge: com.hopa.knowledge.Knowledge by lazy { knowledgeSource.current() }
     val selectedConversation = MutableStateFlow<String?>(null)
     val busy = MutableStateFlow(false)
     val cancelRequested = MutableStateFlow(false)
