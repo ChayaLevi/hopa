@@ -25,10 +25,10 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class TokenRotationTest {
     private val db = PostgresHarness.appDatabase()
@@ -37,7 +37,7 @@ class TokenRotationTest {
     private lateinit var tokens: TokenIssuer
     private lateinit var pairing: PairingService
 
-    @Before
+    @BeforeEach
     fun setUp() {
         auth = PgAuth(db, clock = clock::get)
         tokens = TokenIssuer(db, clock = clock::get, onRevoke = auth::revoke)

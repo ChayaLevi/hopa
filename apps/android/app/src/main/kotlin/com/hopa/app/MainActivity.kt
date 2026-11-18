@@ -33,7 +33,10 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         com.hopa.app.service.AppVisibility.foreground = true
-        (application as HopaApplication).container.backend.onForeground()
+        val container = (application as HopaApplication).container
+        container.backend.onForeground()
+        // Quietly, in the background: a newer catalog, if the backend has one.
+        lifecycleScope.launch { container.knowledgeUpdater.refresh() }
         ScreenCaptureRequester.launch = {
             val manager = getSystemService(MediaProjectionManager::class.java)
             runCatching { screenCapture.launch(manager.createScreenCaptureIntent()) }
@@ -147,7 +150,7 @@ class MainActivity : ComponentActivity() {
         // test may pair the backend while leaving the PC bridge untouched.
         val backendName = intent.getStringExtra(EXTRA_BACKEND_NAME)
         if (!backendName.isNullOrBlank()) {
-            com.hopa.app.backend.BackendLaunchName.value = backendName.trim()
+            com.hopa.app.gateway.BackendLaunchName.value = backendName.trim()
         }
         if (pairBackend) {
             val backendUrl = intent.getStringExtra(EXTRA_BACKEND_URL)

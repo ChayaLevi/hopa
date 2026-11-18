@@ -1,7 +1,7 @@
 package com.hopa.engine.testing
 
-import com.hopa.contracts.ApprovalGateway
-import com.hopa.contracts.ApprovalRequest
+import com.hopa.contracts.approval.ApprovalGateway
+import com.hopa.contracts.approval.ApprovalRequest
 
 /** Answers every approval the same way and counts the questions. */
 class FakeApproval(

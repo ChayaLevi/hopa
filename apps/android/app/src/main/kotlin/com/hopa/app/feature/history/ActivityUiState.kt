@@ -1,6 +1,6 @@
 package com.hopa.app.feature.history
 
-import com.hopa.contracts.RunRecord
+import com.hopa.contracts.wire.RunRecord
 
 data class ActivityUiState(
     val records: List<RunRecord> = emptyList(),

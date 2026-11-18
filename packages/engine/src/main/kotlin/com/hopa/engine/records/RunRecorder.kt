@@ -1,6 +1,6 @@
 package com.hopa.engine.records
 
-import com.hopa.contracts.RunRecord
+import com.hopa.contracts.wire.RunRecord
 
 interface RunRecorder {
     suspend fun append(draft: RunRecordDraft): RunRecord

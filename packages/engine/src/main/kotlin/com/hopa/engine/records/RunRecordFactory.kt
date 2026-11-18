@@ -1,9 +1,9 @@
 package com.hopa.engine.records
 
-import com.hopa.contracts.Action
-import com.hopa.contracts.Observation
 import com.hopa.contracts.ObservationHasher
 import com.hopa.contracts.ports.Clock
+import com.hopa.contracts.wire.Action
+import com.hopa.contracts.wire.Observation
 import java.time.Instant
 
 class RunRecordFactory(

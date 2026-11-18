@@ -3,14 +3,14 @@ package com.hopa.app.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseApp
-import com.hopa.app.backend.FirebaseToken
-import com.hopa.app.backend.ScreenAccess
+import com.hopa.app.gateway.FirebaseToken
+import com.hopa.app.gateway.ScreenAccess
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
+import com.hopa.capabilities.accessibility.state.AccessibilityState
+import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
 import com.hopa.net.bridge.BridgeClient
-import com.hopa.net.llm.ProviderState
-import com.hopa.net.llm.ProviderStateResolver
+import com.hopa.providers.ProviderState
+import com.hopa.providers.ProviderStateResolver
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.stores.AppSettings
@@ -61,6 +61,35 @@ class SettingsViewModel(
             container.backendNotice.collect { notice ->
                 if (notice != null) {
                     _state.update { it.copy(backendStatus = notice) }
+                }
+            }
+        }
+        // Screen access is an event: the service pushes bind and unbind, so the
+        // phone-access pill follows without a timer. One read first, because the
+        // flow starts empty and must not say "off" about a working service.
+        viewModelScope.launch {
+            AccessibilityState.refresh(container.context)
+            AccessibilityState.state.collect { binding ->
+                _state.update { current ->
+                    current.copy(
+                        phoneAccess = ScreenAccess.available(
+                            allowed = current.settings.accessibilityAllowed,
+                            enabled = binding.enabled,
+                            bound = binding.connected,
+                        ),
+                    )
+                }
+            }
+        }
+        // The helper's life belongs to the supervisor; this screen follows its
+        // state instead of pinging the socket every few seconds.
+        viewModelScope.launch {
+            container.helperStatus.collect { status ->
+                _state.update {
+                    it.copy(
+                        backgroundRunning =
+                            status is com.hopa.capabilities.display.client.HelperStatus.Running,
+                    )
                 }
             }
         }
@@ -208,11 +237,11 @@ class SettingsViewModel(
         // asks for MediaProjection consent once; API 30+ needs no extra grant.
         if (value &&
             android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R &&
-            !com.hopa.capabilities.display.MediaProjectionCapture.isActive
+            !com.hopa.capabilities.display.client.MediaProjectionCapture.isActive
         ) {
             com.hopa.app.service.ScreenCaptureRequester.request()
         } else if (!value &&
-            com.hopa.capabilities.display.MediaProjectionCapture.isActive
+            com.hopa.capabilities.display.client.MediaProjectionCapture.isActive
         ) {
             com.hopa.app.service.ScreenCaptureService.stop(container.context)
         }
@@ -269,6 +298,11 @@ class SettingsViewModel(
                     // still use it, and only the tap driver changes.
                     useBridge = if (value == "bridge") true else it.useBridge,
                 )
+            }
+            // Chosen "Your screen": the helper is no longer wanted, so it goes.
+            // A run that owns the phone keeps it until that run ends.
+            if (value == "onscreen" && !container.runGate.state.value.busy) {
+                withContext(Dispatchers.IO) { container.helper.release() }
             }
             reload()
         }
@@ -433,7 +467,7 @@ class SettingsViewModel(
                         )
                     }
                     runCatching {
-                        (device as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                        (device as? com.hopa.capabilities.display.client.ShellDisplayDevice)?.stop()
                     }
                 }
             }
@@ -532,16 +566,12 @@ class SettingsViewModel(
             val message = when {
                 current.bridgeUrl.isBlank() -> "Bridge: set an address first"
                 token.isBlank() -> "Bridge: pair first, then start the helper"
-                else -> runCatching {
-                    val output = BridgeClient(current.bridgeUrl, token)
-                        .startHelper(token = container.displayToken.value)
-                    container.shell.close()
-                    if (container.shell.connect()) {
-                        "Hidden screen is ready"
-                    } else {
-                        "Helper started but did not answer: ${output.take(120)}"
-                    }
-                }.getOrElse { error -> "Hidden screen: ${error.message}" }
+                else -> when (val status = withContext(Dispatchers.IO) { container.helper.ensure() }) {
+                    is com.hopa.capabilities.display.client.HelperStatus.Running -> "Hidden screen is ready"
+                    is com.hopa.capabilities.display.client.HelperStatus.Failed ->
+                        "Hidden screen: ${status.reason}"
+                    else -> "Hidden screen: not started"
+                }
             }
             _state.update {
                 it.copy(
@@ -614,18 +644,11 @@ class SettingsViewModel(
     }
 
     /**
-     * Android binds the accessibility service a moment after the app resumes.
-     * The pill reads this snapshot, so it is refreshed on resume and polled
-     * instead of staying at the value from when the screen first opened.
+     * Ask Android once, for this screen opening or the app coming back from the
+     * settings page. The service pushes every later change.
      */
     fun refreshScreenAccess() {
-        val current = _state.value.settings
-        val available = ScreenAccess.available(
-            allowed = current.accessibilityAllowed,
-            enabled = AccessibilityState.isEnabled(container.context),
-            bound = HopaAccessibilityService.instance != null,
-        )
-        _state.update { it.copy(phoneAccess = available) }
+        AccessibilityState.refresh(container.context)
     }
 
     fun testBridge(url: String, token: String) {
@@ -655,9 +678,7 @@ class SettingsViewModel(
     fun refreshBackground() {
         viewModelScope.launch {
             val running = withContext(Dispatchers.IO) {
-                runCatching {
-                    container.shell.connect() && container.shell.ping()
-                }.getOrDefault(false)
+                container.helper.health() is com.hopa.capabilities.display.client.HelperStatus.Running
             }
             _state.update {
                 if (it.backgroundRunning == running) it else it.copy(backgroundRunning = running)
@@ -682,7 +703,7 @@ class SettingsViewModel(
                 backgroundRunning = background,
                 backendUrl = settings.backendUrl,
                 backendDeviceId = settings.backendDeviceId,
-                backendName = com.hopa.app.backend.BackendLaunchName.value,
+                backendName = com.hopa.app.gateway.BackendLaunchName.value,
                 backendToken = FirebaseToken.current(),
                 fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),

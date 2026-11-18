@@ -8,11 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
+import com.hopa.capabilities.accessibility.state.AccessibilityState
+import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
 import com.hopa.net.bridge.BridgeClient
-import com.hopa.net.llm.ProviderState
-import com.hopa.net.llm.ProviderStateResolver
+import com.hopa.providers.ProviderState
+import com.hopa.providers.ProviderStateResolver
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 

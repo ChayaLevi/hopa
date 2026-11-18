@@ -1,8 +1,8 @@
 package com.hopa.sidecar
 
-import com.hopa.stores.Attachment
-import com.hopa.stores.ChatMessage
-import com.hopa.stores.Conversation
+import com.hopa.contracts.chat.Attachment
+import com.hopa.contracts.chat.ChatMessage
+import com.hopa.contracts.chat.Conversation
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.UUID

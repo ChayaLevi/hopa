@@ -10,6 +10,16 @@ The **Windows development plan** follows it:
 [`windows/README.md`](windows/README.md) (ADR-0021). It starts at W0 once the
 Android gates close.
 
+The **turn refactor** is tracked separately:
+[`refactor-turn.md`](refactor-turn.md). It moves the "one goal becomes steps"
+path into `packages/turn`, so the Android app, the Windows sidecar and a
+delivered remote task stop carrying their own copies.
+
+**Knowledge from the backend** is designed in
+[`knowledge-remote.md`](knowledge-remote.md): the app keeps a bundled snapshot
+and, when connected, picks up a versioned bundle that it validates, stores
+atomically and rolls back on any failure.
+
 # Refactor plan: apps, services, evals
 
 Status: **revised after critique; execution starts at R0.**

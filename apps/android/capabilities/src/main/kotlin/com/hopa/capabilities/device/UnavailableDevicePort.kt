@@ -1,8 +1,8 @@
 package com.hopa.capabilities.device
 
-import com.hopa.contracts.Observation
-import com.hopa.contracts.ObservationNode
-import com.hopa.contracts.ScreenSize
+import com.hopa.contracts.wire.Observation
+import com.hopa.contracts.wire.ObservationNode
+import com.hopa.contracts.wire.ScreenSize
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
 

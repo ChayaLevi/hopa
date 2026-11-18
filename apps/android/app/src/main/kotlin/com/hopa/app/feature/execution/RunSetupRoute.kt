@@ -25,17 +25,15 @@ fun RunSetupRoute(
     val pairing by container.pairingStatus.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            kotlinx.coroutines.delay(3_000)
-            viewModel.refreshBackground()
-        }
-    }
+    // The supervisor owns the helper's state and publishes it; the page reads it
+    // once when it opens and follows the flow after that.
+    LaunchedEffect(Unit) { viewModel.refreshBackground() }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refresh()
+                viewModel.refreshBackground()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

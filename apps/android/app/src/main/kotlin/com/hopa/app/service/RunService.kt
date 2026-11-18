@@ -28,7 +28,7 @@ class RunService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            (application as HopaApplication).container.cancelRequested.value = true
+            (application as HopaApplication).container.runGate.cancel()
             stopSelf()
             return START_NOT_STICKY
         }
@@ -67,7 +67,7 @@ class RunService : Service() {
         // this is the belt-and-braces stop for a turn that leaked its finally.
         watchdog.removeCallbacksAndMessages(null)
         watchdog.postDelayed({ stopSelf() }, WATCHDOG_MS)
-        val busy = (application as HopaApplication).container.busy.value
+        val busy = (application as HopaApplication).container.runGate.state.value.busy
         if (!busy) {
             // Started for a turn that already finished (or never began).
             stopSelf()

@@ -1,8 +1,8 @@
 package com.hopa.app.feature.sync
 
 import com.hopa.net.bridge.ChatTransport
-import com.hopa.stores.ChatMessage
-import com.hopa.stores.Conversation
+import com.hopa.contracts.chat.ChatMessage
+import com.hopa.contracts.chat.Conversation
 import com.hopa.stores.InMemoryConversationStore
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
@@ -10,9 +10,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class ChatSyncTest {
     @Test

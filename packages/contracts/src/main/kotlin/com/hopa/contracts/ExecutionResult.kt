@@ -1,7 +1,7 @@
 package com.hopa.contracts
 
-import com.hopa.contracts.Observation
-import com.hopa.contracts.RunRecord
+import com.hopa.contracts.wire.Observation
+import com.hopa.contracts.wire.RunRecord
 
 data class ExecutionResult(
     val record: RunRecord,

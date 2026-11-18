@@ -30,7 +30,7 @@ fun SettingsRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf("") }
     val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()
-    var recipes by rememberSaveable { mutableStateOf(emptyList<com.hopa.app.recipes.Recipe>()) }
+    var recipes by rememberSaveable { mutableStateOf(emptyList<com.hopa.turn.recipe.Recipe>()) }
     var history by rememberSaveable {
         mutableStateOf(emptyList<com.hopa.data.database.entity.RunHistoryEntity>())
     }
@@ -44,7 +44,7 @@ fun SettingsRoute(
             recipes = container.recipes.all()
             appNames = runCatching {
                 val installed = container.packages.installed()
-                com.hopa.engine.router.CatalogRoutes.targets(installed, "android")
+                com.hopa.engine.routing.CatalogRoutes.targets(installed, "android", container.knowledge)
                     .filter { it.bundle.isNotBlank() }
                     .associate { it.bundle.lowercase() to it.display }
             }.getOrDefault(emptyMap())

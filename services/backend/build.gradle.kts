@@ -17,7 +17,6 @@ sourceSets {
 
 dependencies {
     implementation(project(":engine"))
-    implementation(project(":stores"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
@@ -43,9 +42,11 @@ dependencies {
 }
 
 tasks.test {
-    useJUnit()
     testLogging {
         events("passed", "failed", "skipped")
+        // A comparison failure must say what it compared: the short format
+        // prints only "ComparisonFailure at Assert.java:117".
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 }
 

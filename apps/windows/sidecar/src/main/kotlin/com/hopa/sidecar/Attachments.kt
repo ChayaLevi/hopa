@@ -1,7 +1,7 @@
 package com.hopa.sidecar
 
-import com.hopa.stores.Attachment
-import com.hopa.stores.AttachmentRules
+import com.hopa.contracts.chat.Attachment
+import com.hopa.contracts.chat.AttachmentRules
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption

@@ -6,9 +6,9 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 
 class FcmSenderTest {
     @Test
@@ -42,7 +42,7 @@ class FcmSenderTest {
             }
             val elapsedMs = (System.nanoTime() - started) / 1_000_000
 
-            assertNotNull("send did not return inside ${elapsedMs}ms", outcome)
+            assertNotNull(outcome, "send did not return inside ${elapsedMs}ms")
             assertEquals(PushOutcome.Retryable, outcome)
         } finally {
             server.stop(0)

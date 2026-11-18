@@ -5,8 +5,8 @@ import android.content.pm.ApplicationInfo
 import android.provider.Settings
 import com.hopa.app.MainActivity
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import com.hopa.capabilities.accessibility.ScreenTree
+import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
+import com.hopa.capabilities.accessibility.tree.ScreenTree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

@@ -1,10 +1,10 @@
 package com.hopa.engine.testing
 
-import com.hopa.contracts.Observation
-import com.hopa.contracts.ObservationNode
-import com.hopa.contracts.ScreenSize
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
+import com.hopa.contracts.wire.Observation
+import com.hopa.contracts.wire.ObservationNode
+import com.hopa.contracts.wire.ScreenSize
 
 /** A device that does nothing but count, with an observation the test controls. */
 class FakeDevice(

@@ -8,12 +8,13 @@
   "properties": {
     "schemaVersion": { "const": "1" },
     "id": { "type": "string", "minLength": 1 },
-    "timestamp": { "type": "integer", "minimum": 0 },
-    "displayId": { "type": "integer", "minimum": 0 },
-    "windowId": { "type": "string" },
-    "rotation": { "type": "integer", "enum": [0, 90, 180, 270] },
-    "density": { "type": "number", "exclusiveMinimum": 0 },
+    "timestamp": { "type": "integer", "minimum": 0, "format": "int64" },
+    "displayId": { "type": "integer", "minimum": 0, "default": 0 },
+    "windowId": { "type": "string", "default": "active" },
+    "rotation": { "type": "integer", "enum": [0, 90, 180, 270], "default": 0 },
+    "density": { "type": "number", "exclusiveMinimum": 0, "format": "float", "default": 1.0 },
     "screenSize": {
+      "title": "ScreenSize",
       "type": "object",
       "required": ["width", "height"],
       "properties": {
@@ -22,13 +23,13 @@
       },
       "additionalProperties": false
     },
-    "focus": { "type": "string" },
-    "text": { "type": "string" },
+    "focus": { "type": "string", "default": "" },
+    "text": { "type": "string", "default": "" },
     "tree": { "$ref": "#/$defs/node" },
-    "screenshotRef": { "type": "string" },
-    "app": { "type": "string" },
-    "hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
-    "truncated": { "type": "boolean" }
+    "screenshotRef": { "type": "string", "default": "" },
+    "app": { "type": "string", "default": "" },
+    "hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$", "default": "" },
+    "truncated": { "type": "boolean", "default": false }
   },
   "additionalProperties": false,
   "$defs": {
@@ -39,24 +40,26 @@
       "items": { "type": "integer" }
     },
     "node": {
+      "title": "ObservationNode",
       "type": "object",
       "required": ["ref", "type", "children"],
       "properties": {
-        "ref": { "type": "string" },
-        "type": { "type": "string" },
-        "text": { "type": "string" },
-        "description": { "type": "string" },
-        "id": { "type": "string" },
+        "ref": { "type": "string", "default": "" },
+        "type": { "type": "string", "default": "" },
+        "text": { "type": "string", "default": "" },
+        "description": { "type": "string", "default": "" },
+        "id": { "type": "string", "default": "" },
         "bounds": { "$ref": "#/$defs/bounds" },
-        "clickable": { "type": "boolean" },
-        "enabled": { "type": "boolean" },
-        "checked": { "type": "boolean" },
-        "scrollable": { "type": "boolean" },
-        "visible": { "type": "boolean" },
-        "focused": { "type": "boolean" },
+        "clickable": { "type": "boolean", "default": false },
+        "enabled": { "type": "boolean", "default": true },
+        "checked": { "type": "boolean", "default": false },
+        "scrollable": { "type": "boolean", "default": false },
+        "visible": { "type": "boolean", "default": true },
+        "focused": { "type": "boolean", "default": false },
         "children": {
           "type": "array",
-          "items": { "$ref": "#/$defs/node" }
+          "items": { "$ref": "#/$defs/node" },
+          "default": []
         }
       },
       "additionalProperties": false

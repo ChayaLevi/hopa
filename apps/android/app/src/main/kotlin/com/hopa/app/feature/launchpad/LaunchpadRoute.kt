@@ -7,8 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
-import com.hopa.engine.router.CatalogRoutes
-import com.hopa.engine.router.RouteTarget
+import com.hopa.engine.routing.CatalogRoutes
+import com.hopa.engine.routing.RouteTarget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -32,7 +32,7 @@ fun LaunchpadRoute(
         val installed = withContext(Dispatchers.IO) {
             runCatching { container.packages.installed() }.getOrDefault(emptyList())
         }
-        targets = runCatching { CatalogRoutes.targets(installed, "android") }
+        targets = runCatching { CatalogRoutes.targets(installed, "android", container.knowledge) }
             .getOrElse {
                 status = "Could not read the catalog: ${it.message ?: "unknown error"}"
                 emptyList()

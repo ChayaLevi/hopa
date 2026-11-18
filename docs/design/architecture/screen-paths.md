@@ -98,8 +98,8 @@ Capabilities → Act → How HOPA acts ──"Start the hidden screen"──► 
   a reason, so a machine with no phone stays green.
 
 ```powershell
-# one-time per boot; the helper class sits in a secondary dex, so the script
-# extracts the right classesN.dex and starts app_process with it
+# one-time per boot; the helper classpath is the installed APK, so nothing is
+# unzipped or staged in shared storage (ADR-0023)
 adb shell sh /data/local/tmp/hopa_display.sh
 # (the same script is pushed by tools/scripts/android-device-checks.ps1)
 

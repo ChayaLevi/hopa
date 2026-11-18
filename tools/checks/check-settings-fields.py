@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SETTINGS = ROOT / "packages" / "stores" / "src" / "main" / "kotlin" / "com" / "hopa" / "stores" / "AppSettings.kt"
+SETTINGS = ROOT / "apps" / "android" / "stores" / "src" / "main" / "kotlin" / "com" / "hopa" / "stores" / "AppSettings.kt"
 STORE = ROOT / "apps" / "android" / "data" / "src" / "main" / "kotlin" / "com" / "hopa" / "data" / "store" / "DataStoreSettingsRepository.kt"
 
 FIELD = re.compile(r"^    val ([A-Za-z][A-Za-z0-9]*):")

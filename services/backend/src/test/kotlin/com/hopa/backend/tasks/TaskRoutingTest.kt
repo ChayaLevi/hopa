@@ -13,8 +13,8 @@ import io.ktor.server.testing.testApplication
 import java.util.UUID
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class TaskRoutingTest {
     private val identities = listOf(

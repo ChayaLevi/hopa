@@ -53,7 +53,7 @@
     "app": { "type": "string" },
     "url": { "type": "string" },
     "direction": { "type": "string", "enum": ["up", "down", "left", "right"] },
-    "timeoutMs": { "type": "integer", "minimum": 0 }
+    "timeoutMs": { "type": "integer", "minimum": 0, "default": 3000 }
   },
   "additionalProperties": false,
   "allOf": [

@@ -45,7 +45,7 @@ launch never reached the person's display.
 ## Defects this run found and fixed
 
 1. **R8 removed the entry class.** Nothing references
-   `com.hopa.capabilities.display.ShellMain`; `app_process` starts it by name, so
+   `com.hopa.capabilities.display.helper.ShellMain`; `app_process` starts it by name, so
    the class was absent from the APK. A keep rule fixes it.
 2. **The wrong dex was named in `CLASSPATH`.** Library classes land in
    `classes2.dex` or later and `app_process` reads only the dex named there. The

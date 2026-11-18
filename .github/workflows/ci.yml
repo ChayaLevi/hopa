@@ -61,6 +61,8 @@ jobs:
         run: python tools/checks/check-conformance.py
       - name: Gateway fixtures
         run: python tools/checks/check-gateway-fixtures.py
+      - name: Wire types match the schemas
+        run: python tools/checks/check-wire-types.py
       - name: Routing fixtures
         run: python tools/checks/check-routing.py
       - name: Android structure
@@ -79,6 +81,8 @@ jobs:
         run: python tools/checks/check-links.py
       - name: Generated app catalogue is current
         run: python tools/scripts/build-app-catalog.py --check
+      - name: Generated knowledge bundle is current
+        run: python tools/scripts/build-knowledge-bundle.py --check
       - name: Generated policy data is current
         run: python tools/scripts/build-policy-data.py --check
       - name: Generated prompt rules are current
@@ -247,6 +251,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # Seconds, not minutes: a structure mistake must fail before the SDK and
+      # the Gradle build pay for it.
+      - name: Android structure
+        run: python3 tools/checks/check-android-structure.py
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -260,12 +268,10 @@ jobs:
           fi
       - name: Core checks and debug APK
         working-directory: apps/android
-        run: ./gradlew :contracts:check :engine:ktlintCheck :engine:check :net:test :capabilities:testDebugUnitTest :stores:test :data:testDebugUnitTest :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :capabilities:compileDebugAndroidTestKotlin :app:assembleDebug --no-daemon
+        run: ./gradlew :contracts:check :turn:test :engine:ktlintCheck :engine:check :knowledge:test :models:test :net:test :capabilities:testDebugUnitTest :stores:test :data:testDebugUnitTest :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :capabilities:compileDebugAndroidTestKotlin :app:assembleDebug --no-daemon
       - name: Windows sidecar tests
         working-directory: apps/android
         run: ./gradlew -p ../windows/sidecar test --no-daemon
-      - name: Android structure
-        run: python3 tools/checks/check-android-structure.py
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:

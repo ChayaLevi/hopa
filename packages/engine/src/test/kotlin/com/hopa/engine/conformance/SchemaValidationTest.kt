@@ -3,18 +3,18 @@ package com.hopa.engine.conformance
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.hopa.contracts.Action
-import com.hopa.contracts.RunRecord
 import com.hopa.contracts.json.HopaJson
+import com.hopa.contracts.wire.Action
+import com.hopa.contracts.wire.RunRecord
 import com.hopa.engine.records.RunChain
 import com.hopa.engine.records.RunRecordDraft
 import com.networknt.schema.JsonSchema
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import kotlinx.serialization.encodeToString
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 /**
  * Schema-only checks. The two fixtures that need the semantic gate
@@ -32,7 +32,7 @@ class SchemaValidationTest {
         for (file in listOf("observation-hash.json", "conformance.json")) {
             for (case in cases(file)) {
                 val messages = schema.validate(case["observation"])
-                assertTrue("${case["name"]!!.asText()}: $messages", messages.isEmpty())
+                assertTrue(messages.isEmpty(), "${case["name"]!!.asText()}: $messages")
             }
         }
     }
@@ -45,11 +45,11 @@ class SchemaValidationTest {
             val name = case["name"]!!.asText()
             val messages = schema.validate(case["modelReply"])
             if (name == "unknown-action-kind-is-rejected") {
-                assertFalse("$name must fail at the action enum", messages.isEmpty())
+                assertFalse(messages.isEmpty(), "$name must fail at the action enum")
             } else if (name in semantic) {
-                assertTrue("$name is rejected by DecisionRules, not the schema", messages.isEmpty())
+                assertTrue(messages.isEmpty(), "$name is rejected by DecisionRules, not the schema")
             } else {
-                assertTrue("$name: $messages", messages.isEmpty())
+                assertTrue(messages.isEmpty(), "$name: $messages")
             }
         }
     }
@@ -72,9 +72,9 @@ class SchemaValidationTest {
         )
         val node = mapper.readTree(HopaJson.element.encodeToString(RunRecord.serializer(), record))
         val messages = schema("run-record.schema.json").validate(node)
-        assertTrue("$messages", messages.isEmpty())
-        assertTrue("approved must be present", node.has("approved"))
-        assertTrue("approved must be null, not omitted", node["approved"]!!.isNull)
+        assertTrue(messages.isEmpty(), "$messages")
+        assertTrue(node.has("approved"), "approved must be present")
+        assertTrue(node["approved"]!!.isNull, "approved must be null, not omitted")
     }
 
     private fun cases(file: String): List<JsonNode> {

@@ -1,9 +1,9 @@
 package com.hopa.engine.observation
 
-import com.hopa.contracts.ObservationNode
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import com.hopa.contracts.wire.ObservationNode
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 
 /**
  * An anchor names a control so a replay can find it again after the tree has

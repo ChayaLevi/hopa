@@ -1,6 +1,6 @@
 package com.hopa.app.feature.conversations
 
-import com.hopa.stores.Conversation
+import com.hopa.contracts.chat.Conversation
 
 data class ConversationsUiState(
     val conversations: List<Conversation> = emptyList(),

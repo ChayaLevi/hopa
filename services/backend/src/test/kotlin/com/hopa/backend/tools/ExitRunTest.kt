@@ -2,6 +2,7 @@ package com.hopa.backend.tools
 
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.harness.PostgresHarness
+import com.hopa.backend.http.RateLimiter
 import com.hopa.backend.module
 import com.hopa.backend.pairing.ClaimRequest
 import com.hopa.backend.pairing.PairingOutcome
@@ -17,8 +18,8 @@ import io.ktor.server.netty.Netty
 import java.util.Base64
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class ExitRunTest {
     private data class Paired(val householdId: String, val access: String)
@@ -59,6 +60,10 @@ class ExitRunTest {
             tasks = PgTaskStore(db, clock::get),
             traces = traces,
             traceQuery = traces,
+            // This test measures round-trips, not the rate limit: 40 messages
+            // per device over two back-to-back runs would hit the default 20/s
+            // and turn into an E_RATE frame instead of a lost one.
+            messageLimit = RateLimiter(limit = 1_000, windowMs = 1_000, clock = clock::get),
         )
         val server = embeddedServer(Netty, port = 0) {
             module(config)

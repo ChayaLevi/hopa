@@ -56,7 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.stores.Conversation
+import com.hopa.contracts.chat.Conversation
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

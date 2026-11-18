@@ -1,6 +1,6 @@
 package com.hopa.contracts.ports
 
-import com.hopa.contracts.Observation
+import com.hopa.contracts.wire.Observation
 
 interface DevicePort {
     suspend fun observe(): Observation

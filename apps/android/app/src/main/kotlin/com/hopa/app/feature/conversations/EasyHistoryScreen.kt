@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaBottomBarEasy
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.stores.Conversation
+import com.hopa.contracts.chat.Conversation
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

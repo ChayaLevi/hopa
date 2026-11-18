@@ -1,6 +1,6 @@
 package com.hopa.sidecar
 
-import com.hopa.contracts.ApprovalRequest
+import com.hopa.contracts.approval.ApprovalRequest
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlinx.serialization.json.Json

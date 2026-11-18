@@ -3,8 +3,8 @@ package com.hopa.data.store
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.database.entity.SessionEntity
 import com.hopa.data.database.mapper.ConversationMapper
-import com.hopa.stores.ChatMessage
-import com.hopa.stores.Conversation
+import com.hopa.contracts.chat.ChatMessage
+import com.hopa.contracts.chat.Conversation
 import com.hopa.stores.ConversationStore
 import java.util.UUID
 

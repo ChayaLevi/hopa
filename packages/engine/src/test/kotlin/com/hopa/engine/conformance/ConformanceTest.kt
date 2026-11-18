@@ -1,18 +1,18 @@
 package com.hopa.engine.conformance
 
-import com.hopa.contracts.Observation
 import com.hopa.contracts.ObservationHasher
 import com.hopa.contracts.json.HopaJson
-import com.hopa.engine.gate.ActionClassifier
-import com.hopa.engine.gate.ApprovalPolicy
-import com.hopa.engine.parser.DecisionParser
+import com.hopa.contracts.wire.Observation
+import com.hopa.engine.execution.ActionClassifier
+import com.hopa.engine.execution.ApprovalPolicy
+import com.hopa.engine.execution.DecisionParser
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 
 class ConformanceTest {
     @Test
@@ -31,34 +31,22 @@ class ConformanceTest {
             val valid = expect["valid"]!!.jsonPrimitive.boolean
             val outcome = DecisionParser().parse(reply)
             if (!valid) {
-                assertNotNull("$name should be invalid", outcome.error)
+                assertNotNull(outcome.error, "$name should be invalid")
                 continue
             }
             val action = outcome.decision?.action
-            assertNotNull("$name should parse an action", action)
+            assertNotNull(action, "$name should parse an action")
             action ?: continue
-            assertEquals(
-                "$name action kind",
-                expect["actionKind"]!!.jsonPrimitive.content,
-                action.kind,
-            )
+            assertEquals(expect["actionKind"]!!.jsonPrimitive.content, action.kind, "$name action kind")
             val classification = ActionClassifier().classify(action, observation)
             assertEquals(
-                "$name classification",
                 expect["classification"]!!.jsonPrimitive.content,
                 classification.name.lowercase(),
+                "$name classification",
             )
             val needsApproval = ApprovalPolicy().requiresApproval(action, observation)
-            assertEquals(
-                "$name needsApproval",
-                expect["needsApproval"]!!.jsonPrimitive.boolean,
-                needsApproval,
-            )
-            assertEquals(
-                "$name executed",
-                expect["executed"]!!.jsonPrimitive.boolean,
-                !needsApproval,
-            )
+            assertEquals(expect["needsApproval"]!!.jsonPrimitive.boolean, needsApproval, "$name needsApproval")
+            assertEquals(expect["executed"]!!.jsonPrimitive.boolean, !needsApproval, "$name executed")
         }
     }
 

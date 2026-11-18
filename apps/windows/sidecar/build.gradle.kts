@@ -10,8 +10,9 @@ application {
 
 dependencies {
     implementation(project(":engine"))
+    implementation(project(":knowledge"))
+    implementation(project(":models"))
     implementation(project(":net"))
-    implementation(project(":stores"))
     implementation(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)

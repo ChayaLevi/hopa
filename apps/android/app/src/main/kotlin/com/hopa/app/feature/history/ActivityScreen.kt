@@ -33,7 +33,7 @@ import com.hopa.app.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.contracts.RunRecord
+import com.hopa.contracts.wire.RunRecord
 import java.time.Instant
 
 /** Activity: what HOPA is doing, what it did and what is scheduled. */

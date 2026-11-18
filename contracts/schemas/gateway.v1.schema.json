@@ -38,6 +38,7 @@
     },
     "ts": {
       "type": "integer",
+      "format": "int64",
       "minimum": 0,
       "description": "Sender clock in milliseconds. Ordering is server-assigned, not trusted."
     },
@@ -57,7 +58,8 @@
     },
     "body": {
       "type": "object",
-      "description": "Type-specific payload. Ciphertext from week 2; the server never renders it."
+      "description": "Type-specific payload. Ciphertext from week 2; the server never renders it.",
+      "default": {}
     }
   },
   "allOf": [

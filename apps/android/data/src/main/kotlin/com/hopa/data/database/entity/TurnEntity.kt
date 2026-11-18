@@ -27,6 +27,6 @@ data class TurnEntity(
     val attachmentMime: String = "",
     val attachmentBytes: Long = 0,
     val attachmentPath: String = "",
-    /** JSON of [com.hopa.stores.MessageProof]; empty for a plain answer. */
+    /** JSON of [com.hopa.contracts.chat.MessageProof]; empty for a plain answer. */
     val proof: String = "",
 )

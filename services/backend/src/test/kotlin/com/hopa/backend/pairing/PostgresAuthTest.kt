@@ -8,9 +8,9 @@ import com.hopa.backend.store.PgDevices
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 
 class PostgresAuthTest {
     private val db = PostgresHarness.appDatabase()
@@ -84,7 +84,7 @@ class PostgresAuthTest {
         db.tenant(household) { connection ->
             connection.createStatement().use { it.executeUpdate("delete from access_tokens") }
         }
-        assertEquals("still cached", device, auth.deviceFor(token)!!.deviceId)
+        assertEquals(device, auth.deviceFor(token)!!.deviceId, "still cached")
 
         now += 5_001
         assertNull(auth.deviceFor(token))

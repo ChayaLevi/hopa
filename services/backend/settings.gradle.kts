@@ -28,5 +28,3 @@ project(":contracts").projectDir = file("../../packages/contracts")
 include(":engine")
 project(":engine").projectDir = file("../../packages/engine")
 
-include(":stores")
-project(":stores").projectDir = file("../../packages/stores")

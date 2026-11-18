@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.stores.ChatMessage
-import com.hopa.stores.MessageProof
+import com.hopa.contracts.chat.ChatMessage
+import com.hopa.contracts.chat.MessageProof
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -189,7 +189,8 @@ private fun ProofReceipt(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "${proof.executed} steps \u00B7 ${proof.verified} confirmed \u00B7 " +
+                    (if (proof.executed == 1) "1 step" else "${proof.executed} steps") +
+                        " \u00B7 ${proof.verified} confirmed \u00B7 " +
                         tokensText(proof.tokens),
                     fontSize = 11.sp,
                     color = HopaColor.TextSecondary,
@@ -220,6 +221,13 @@ private fun ProofReceipt(
                     fontSize = 11.sp,
                     color = HopaColor.TextHint,
                 )
+                if (proof.knowledgeVersion.isNotBlank()) {
+                    Text(
+                        "Knowledge ${proof.knowledgeVersion.removePrefix("sha256:")}",
+                        fontSize = 11.sp,
+                        color = HopaColor.TextHint,
+                    )
+                }
                 proof.steps.forEach { step ->
                     Text(step, fontSize = 12.sp, color = HopaColor.TextSecondary)
                 }

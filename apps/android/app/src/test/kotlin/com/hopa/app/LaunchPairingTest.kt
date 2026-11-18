@@ -1,11 +1,11 @@
 package com.hopa.app
 
-import com.hopa.net.backend.PairingLink
+import com.hopa.net.gateway.PairingLink
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 
 class LaunchPairingTest {
     @Test

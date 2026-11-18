@@ -5,28 +5,26 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
 import com.hopa.app.BuildConfig
-import com.hopa.app.backend.BackendSession
-import com.hopa.app.backend.ProcessedTaskStore
-import com.hopa.app.backend.PushTokenFetch
-import com.hopa.app.backend.RemoteRunRequest
-import com.hopa.app.backend.RemoteTaskRunner
+import com.hopa.app.gateway.BackendSession
+import com.hopa.app.gateway.ProcessedTaskStore
+import com.hopa.app.gateway.PushTokenFetch
+import com.hopa.app.gateway.RemoteRunRequest
+import com.hopa.app.gateway.RemoteTaskRunner
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
 import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
-import com.hopa.capabilities.accessibility.AccessibilityDevice
-import com.hopa.net.llm.ModelFactory
-import com.hopa.net.llm.ProviderChoiceRules
+import com.hopa.capabilities.accessibility.tree.AccessibilityDevice
+import com.hopa.providers.ModelFactory
+import com.hopa.providers.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.engine.gate.ActionExecutor
-import com.hopa.engine.gate.ApprovalPolicy
+import com.hopa.engine.execution.ActionExecutor
+import com.hopa.engine.execution.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
-import com.hopa.engine.loop.AgentLoop
-import com.hopa.engine.loop.ModelStepPolicy
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
 import com.hopa.engine.records.RunRecordFactory
@@ -52,9 +50,21 @@ class AppContainer(context: Context) {
 
     private val database = HopaDatabase.build(context)
     val conversations: ConversationStore = DbConversationStore(database)
+    /**
+     * The tables this client uses. A stored bundle wins over the bundled
+     * snapshot; the file store falls back to it on any problem. `knowledge` is a
+     * getter, so a bundle accepted between turns applies on the next one.
+     */
+    private val bundledKnowledge = com.hopa.app.knowledge.AssetKnowledgeSource(context)
+    val knowledgeStore: com.hopa.knowledge.FileKnowledgeStore =
+        com.hopa.knowledge.FileKnowledgeStore(
+            directory = java.io.File(context.filesDir, "knowledge"),
+            fallback = bundledKnowledge.current(),
+        )
+    val knowledgeSource: com.hopa.knowledge.KnowledgeSource = knowledgeStore
+    val knowledge: com.hopa.knowledge.Knowledge get() = knowledgeSource.current()
     val selectedConversation = MutableStateFlow<String?>(null)
-    val busy = MutableStateFlow(false)
-    val cancelRequested = MutableStateFlow(false)
+    val runGate = com.hopa.app.run.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
     val pairingStatus = MutableStateFlow<String?>(null)
     /**
@@ -66,7 +76,7 @@ class AppContainer(context: Context) {
         kotlinx.coroutines.channels.Channel.UNLIMITED,
     )
     /** A file shared into the app, waiting in the composer. */
-    val pendingAttachment = MutableStateFlow<com.hopa.stores.Attachment?>(null)
+    val pendingAttachment = MutableStateFlow<com.hopa.contracts.chat.Attachment?>(null)
     val pendingNotice = MutableStateFlow<String?>(null)
     /** Work that must outlive an Activity, such as a one-shot launch pairing. */
     val appScope = kotlinx.coroutines.CoroutineScope(
@@ -102,17 +112,6 @@ class AppContainer(context: Context) {
     val device = AccessibilityDevice(context)
     val voice = com.hopa.capabilities.voice.VoiceRecorder(context)
     val speaker = com.hopa.capabilities.voice.Speaker(context)
-    val executor = ActionExecutor(
-        device = device,
-        browser = null,
-        system = AndroidSystemPort(context),
-        sandbox = null,
-        policy = { gatePolicy },
-        approval = approval,
-        recorder = recorder,
-        factory = factory,
-        clock = clock,
-    )
     /** Goals that run at the same time, each on its own hidden display. */
     val runner by lazy { com.hopa.app.tasks.ParallelRunner(this) }
 
@@ -128,9 +127,9 @@ class AppContainer(context: Context) {
     val backend: BackendSession by lazy {
         BackendSession(
             settings = settings,
-            pairingFactory = { url -> com.hopa.net.backend.BackendPairing(url) },
+            pairingFactory = { url -> com.hopa.net.gateway.BackendPairing(url) },
             linkFactory = { credentials, name, version, pushToken, refresh ->
-                com.hopa.net.backend.BackendClient(
+                com.hopa.net.gateway.BackendClient(
                     credentials = { credentials },
                     pushToken = pushToken,
                     refresh = refresh,
@@ -173,8 +172,7 @@ class AppContainer(context: Context) {
             settings = { settings.settings.first() },
             surfaces = { current -> surfaces(current) },
             screen = { current -> Surfaces.state(this, current) },
-            busy = busy,
-            cancel = cancelRequested,
+            runGate = runGate,
             foreground = { AppVisibility.foreground },
             startService = { startRunService() },
             stopService = { stopRunService() },
@@ -197,36 +195,32 @@ class AppContainer(context: Context) {
     }
 
     /** The hidden background display: one helper process, one loopback port. */
-    val displayToken = com.hopa.capabilities.display.DisplayToken(context)
-    val shell = com.hopa.capabilities.display.ShellClient(displayToken.value)
+    val displayToken = com.hopa.capabilities.display.client.DisplayToken(context)
+    val shell = com.hopa.capabilities.display.client.ShellClient(displayToken.value)
 
     /**
      * Wireless debugging inside the app: pair once with the code Android shows,
      * then adbd gives this app shell and no PC is needed.
      */
-    val wireless = com.hopa.capabilities.display.WirelessShell(context)
+    val wireless = com.hopa.capabilities.display.client.WirelessShell(context)
 
     /**
      * A device on the background display, or null when no helper can be reached.
-     * A paired bridge can start the helper itself, so the common case needs no
-     * button press; after a reboot the first background run does it.
+     * The supervisor starts one when nothing answers and reports why when it
+     * cannot, so a turn never drives a socket that only looks connected.
      */
     suspend fun backgroundDevice(): DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            if (!shell.connect()) {
-                val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
-                    .getOrDefault("")
-                    .contains("ready")
-                if (!startedHere) {
-                    startHelperThroughBridge()
-                }
-                kotlinx.coroutines.delay(1_500)
-                if (!shell.connect()) {
-                    return@withContext null
-                }
+            val status = helper.ensure()
+            if (status !is com.hopa.capabilities.display.client.HelperStatus.Running) {
+                lastBackgroundError = (status as? com.hopa.capabilities.display.client.HelperStatus.Failed)
+                    ?.reason
+                    .orEmpty()
+                    .ifBlank { "the hidden screen is not running" }
+                return@withContext null
             }
             val metrics = context.resources.displayMetrics
-            val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
+            val device = com.hopa.capabilities.display.client.ShellDisplayDevice(shell, context)
             if (device.start(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)) {
                 lastBackgroundError = ""
                 device
@@ -235,6 +229,26 @@ class AppContainer(context: Context) {
                 null
             }
         }
+
+    /**
+     * One owner for the helper's life. `connect` heals a stale socket on its own
+     * (it pings first), and `start` asks adbd, then the paired PC.
+     */
+    val helper = com.hopa.capabilities.display.client.HelperSupervisor(
+        ping = { shell.connect() },
+        start = { startHelperOnPhone() },
+        stop = { shell.close() },
+        pause = { kotlinx.coroutines.delay(it) },
+    )
+    val helperStatus = helper.status
+
+    /** Ask the phone's own adbd first; fall back to the paired PC. */
+    private suspend fun startHelperOnPhone(): Boolean {
+        val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
+            .getOrDefault("")
+            .contains("ready")
+        return startedHere || startHelperThroughBridge()
+    }
 
     /** Pair with this phone's own adbd, then start the helper with that shell. */
     suspend fun pairWireless(address: String, code: String): String =
@@ -276,14 +290,6 @@ class AppContainer(context: Context) {
     val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
     val modelFactory: ModelFactory = ModelFactory()
-    val loop = AgentLoop(
-        stepPolicy = ModelStepPolicy(model),
-        device = device,
-        executor = executor,
-        recorder = recorder,
-        clock = clock,
-        webAvailable = false,
-    )
 
     /** A bridge-backed device when Settings has an address and a token. */
     suspend fun bridgedDevice(): DevicePort? {
@@ -395,15 +401,13 @@ class AppContainer(context: Context) {
     )
 
     /** Recipes that were replayed before; a matching goal runs without the model. */
-    val recipes by lazy { com.hopa.app.recipes.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+    val recipes by lazy { com.hopa.turn.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
-    /** One loop per device path, sharing the model, recorder and gate. */
-    fun loopFor(device: DevicePort): AgentLoop = AgentLoop(
-        stepPolicy = ModelStepPolicy(model),
-        device = device,
-        executor = executorFor(device),
-        recorder = recorder,
-        clock = clock,
-        webAvailable = false,
-    )
+    /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
+    val runs by lazy { com.hopa.app.run.RunCoordinator(this) }
+
+    /** Asks the backend for a newer knowledge bundle; a failure keeps the copy. */
+    val knowledgeUpdater by lazy {
+        com.hopa.app.gateway.KnowledgeUpdater(backend, knowledgeStore)
+    }
 }
