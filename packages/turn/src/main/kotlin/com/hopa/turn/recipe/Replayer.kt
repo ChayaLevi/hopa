@@ -18,6 +18,8 @@ import kotlinx.coroutines.delay
 class Replayer(
     private val executorFor: (DevicePort) -> ActionExecutor,
     private val installedApps: suspend () -> List<String>,
+    /** How long the screen gets between steps; a test passes a no-op. */
+    private val settle: suspend (Long) -> Unit = { delay(it) },
 ) {
     suspend fun replay(recipe: Recipe, device: DevicePort): ReplayOutcome {
         if (!recipe.replayable) {
@@ -54,7 +56,7 @@ class Replayer(
             }
             observation = result.observation
             done += 1
-            delay(1_200)
+            settle(1_200)
         }
         return ReplayOutcome(done = done, complete = done == recipe.steps.size, screen = observation)
     }

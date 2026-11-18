@@ -43,6 +43,17 @@ class DecisionParserTest {
     }
 
     @Test
+    fun rejects_a_flat_action_that_is_missing_its_target() {
+        // The flat shape skips the Decision decoder; it must still pass the
+        // same table, or the executor is the first to notice.
+        val outcome = parser.parse("""{"kind":"ui.tap"}""")
+
+        assertNull(outcome.decision)
+        assertEquals(ErrorCodes.SCHEMA, outcome.error?.code)
+        assertEquals("ui.tap needs a ref, or x and y", outcome.error?.message)
+    }
+
+    @Test
     fun plain_text_is_text() {
         val outcome = parser.parse("The answer is 4.")
         assertEquals("The answer is 4.", outcome.text)
