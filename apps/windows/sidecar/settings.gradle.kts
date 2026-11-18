@@ -30,8 +30,8 @@ project(":contracts").projectDir = file("../../../packages/contracts")
 include(":engine")
 project(":engine").projectDir = file("../../../packages/engine")
 
-include(":models")
-project(":models").projectDir = file("../../../packages/models")
+include(":providers")
+project(":providers").projectDir = file("../../../packages/providers")
 include(":net")
 project(":net").projectDir = file("../../../packages/net")
 

@@ -11,7 +11,7 @@ application {
 dependencies {
     implementation(project(":engine"))
     implementation(project(":knowledge"))
-    implementation(project(":models"))
+    implementation(project(":providers"))
     implementation(project(":net"))
     implementation(project(":contracts"))
 
