@@ -5,12 +5,11 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
+import com.hopa.app.di.Surfaces
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.engine.loop.TurnContext
 import com.hopa.engine.observation.ScreenPath
-import com.hopa.engine.observation.ScreenPathOrder
 import com.hopa.engine.observation.ScreenSource
 import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
@@ -311,7 +310,14 @@ class ChatViewModel(
         }
         container.pendingAttachment.value = null
         container.pendingNotice.value = null
-        container.busy.value = true
+        // A task delivered to the other device may hold the phone. Two loops on
+        // one screen would fight over it and cancel each other.
+        if (!container.busy.compareAndSet(expect = false, update = true)) {
+            _state.update {
+                it.copy(error = "HOPA is busy with a task from your other device", busy = false)
+            }
+            return
+        }
         container.cancelRequested.value = false
         startRunService()
         viewModelScope.launch {
@@ -339,7 +345,8 @@ class ChatViewModel(
             val skills = runCatching { container.skills.promptText() }.getOrDefault("")
             val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
 
-            val (device, background, preferred) = resolveDevice(current)
+            val preferred = ScreenPath.of(current.screenPath)
+            val device = container.surfaces(current)
             device.observe()
             if (device.sourceName == "fallback") {
                 handleNoDevice(device, preferred, conversation.id)
@@ -350,7 +357,7 @@ class ChatViewModel(
             if (current.replaySkills) {
                 val replayed = replayIfPossible(body, device, conversation.id, now, preferred)
                 if (replayed) {
-                    (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                    Surfaces.release()
                     return@launch
                 }
             }
@@ -384,45 +391,6 @@ class ChatViewModel(
     }
 
     // ── sendText helpers ──────────────────────────────────────────────────────
-
-    private data class DeviceSetup(
-        val source: ScreenSourceDevice,
-        val background: com.hopa.contracts.ports.DevicePort?,
-        val preferred: ScreenPath,
-    )
-
-    /** Builds the ScreenSourceDevice from the current screen-path preference. */
-    private suspend fun resolveDevice(settings: AppSettings): DeviceSetup {
-        val bridged = runCatching { container.bridgedDevice() }.getOrNull()
-        val preferred = ScreenPath.of(settings.screenPath)
-        val background = if (
-            preferred == ScreenPath.AUTO || preferred == ScreenPath.BACKGROUND
-        ) {
-            runCatching { container.backgroundDevice() }.getOrNull()
-        } else {
-            null
-        }
-        val onscreen = settings.accessibilityAllowed &&
-            HopaAccessibilityService.instance != null
-        val ordered = ScreenPathOrder().order(
-            preferred = preferred,
-            background = background != null,
-            bridge = bridged != null,
-            onscreen = onscreen,
-        )
-        val sources = ordered.mapNotNull { name ->
-            when (name) {
-                "background" -> ScreenSource("background", background!!, budgetMs = 8_000)
-                "bridge" -> ScreenSource("bridge", bridged!!, budgetMs = 15_000)
-                else -> ScreenSource("accessibility", container.device, budgetMs = 8_000)
-            }
-        }
-        val source = ScreenSourceDevice(
-            sources = sources,
-            fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
-        )
-        return DeviceSetup(source, background, preferred)
-    }
 
     /** Posts a system message explaining why the action cannot proceed. */
     private suspend fun handleNoDevice(

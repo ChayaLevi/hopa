@@ -1,6 +1,20 @@
 package com.hopa.app.di
 
 import android.content.Context
+import android.os.Build
+import androidx.core.content.ContextCompat
+import com.google.firebase.FirebaseApp
+import com.hopa.app.BuildConfig
+import com.hopa.app.backend.BackendSession
+import com.hopa.app.backend.ProcessedTaskStore
+import com.hopa.app.backend.PushTokenFetch
+import com.hopa.app.backend.RemoteRunRequest
+import com.hopa.app.backend.RemoteTaskRunner
+import com.hopa.app.service.AppVisibility
+import com.hopa.app.service.Notifier
+import com.hopa.app.service.RunService
+import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.stores.AppSettings
 import com.hopa.capabilities.accessibility.AccessibilityDevice
 import com.hopa.net.llm.ModelFactory
 import com.hopa.net.llm.ProviderChoiceRules
@@ -54,6 +68,12 @@ class AppContainer(context: Context) {
     /** A file shared into the app, waiting in the composer. */
     val pendingAttachment = MutableStateFlow<com.hopa.stores.Attachment?>(null)
     val pendingNotice = MutableStateFlow<String?>(null)
+    /** Work that must outlive an Activity, such as a one-shot launch pairing. */
+    val appScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO,
+    )
+    /** The last launch-pairing outcome, shown on the Backend card. */
+    val backendNotice = MutableStateFlow<String?>(null)
     val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
     val recorder = DbRunRecorder(database.runRecordDao())
@@ -99,6 +119,82 @@ class AppContainer(context: Context) {
     /** Why the last hidden-display start failed; empty when it worked. */
     var lastBackgroundError: String = ""
         private set
+
+
+    /**
+     * The app's one gateway link. Pairing and the activity life cycle reach it
+     * through here; [remoteRunner] is attached below as its delivery handler.
+     */
+    val backend: BackendSession by lazy {
+        BackendSession(
+            settings = settings,
+            pairingFactory = { url -> com.hopa.net.backend.BackendPairing(url) },
+            linkFactory = { credentials, name, version, pushToken, refresh ->
+                com.hopa.net.backend.BackendClient(
+                    credentials = { credentials },
+                    pushToken = pushToken,
+                    refresh = refresh,
+                    deviceName = name,
+                    appVersion = version,
+                )
+            },
+            deviceName = Build.MODEL,
+            appVersion = BuildConfig.VERSION_NAME,
+            // Without google-services.json Firebase is never initialized, so
+            // there is nothing to ask and no token to wait for.
+            pushTokenFetch = {
+                FirebaseApp.getApps(context).isNotEmpty() && PushTokenFetch.load()
+            },
+        )
+    }
+
+    init {
+        // A delivered task runs on the surface the person configured. The
+        // runner answers on the socket the delivery arrived on.
+        backend.onTask = { task -> remoteRunner.handle(task) }
+    }
+
+    /** The surface stack for the person's screenPath setting, shared by chat and remote runs. */
+    val surfaces: suspend (AppSettings) -> ScreenSourceDevice = { Surfaces.resolve(this, it) }
+
+    /** Task ids the gateway delivered, so a redelivery inside a day is skipped. */
+    private val processedTasks by lazy { ProcessedTaskStore.open(context) }
+
+    /**
+     * A task delivered by the gateway runs on the configured surface and answers
+     * on the wake socket. One at a time, so two deliveries never fight over the
+     * screen.
+     */
+    val remoteRunner by lazy {
+        RemoteTaskRunner(
+            deviceId = { backend.deviceId },
+            link = { backend.currentLink() },
+            processed = processedTasks,
+            settings = { settings.settings.first() },
+            surfaces = { current -> surfaces(current) },
+            screen = { current -> Surfaces.state(this, current) },
+            busy = busy,
+            cancel = cancelRequested,
+            foreground = { AppVisibility.foreground },
+            startService = { startRunService() },
+            stopService = { stopRunService() },
+            postApproval = { Notifier.postApproval(context) },
+            releaseSurface = { Surfaces.release() },
+            run = { request: RemoteRunRequest -> RemoteRuns.execute(this, request) },
+            taskStarted = { backend.taskStarted() },
+            taskFinished = { backend.taskFinished() },
+        )
+    }
+
+    private fun startRunService() {
+        val intent = android.content.Intent(context, RunService::class.java)
+        ContextCompat.startForegroundService(context, intent)
+    }
+
+    private fun stopRunService() {
+        val intent = android.content.Intent(context, RunService::class.java)
+        runCatching { context.stopService(intent) }
+    }
 
     /** The hidden background display: one helper process, one loopback port. */
     val displayToken = com.hopa.capabilities.display.DisplayToken(context)

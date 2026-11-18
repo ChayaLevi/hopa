@@ -73,6 +73,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -111,13 +112,23 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockwebserver)
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
     // androidx.test refers to these annotations; R8 needs them on the test
     // classpath or it refuses to minify the instrumentation APK.
     androidTestImplementation("com.google.errorprone:error_prone_annotations:2.27.1")
+}
+
+// A fresh clone has no google-services.json and still has to build; the
+// Firebase config is fetched per machine and never committed.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }

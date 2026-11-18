@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         com.hopa.app.service.AppVisibility.foreground = true
+        (application as HopaApplication).container.backend.onForeground()
         ScreenCaptureRequester.launch = {
             val manager = getSystemService(MediaProjectionManager::class.java)
             runCatching { screenCapture.launch(manager.createScreenCaptureIntent()) }
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         com.hopa.app.service.AppVisibility.foreground = false
+        (application as HopaApplication).container.backend.onBackground()
         ScreenCaptureRequester.launch = null
         super.onStop()
     }
@@ -56,7 +58,10 @@ class MainActivity : ComponentActivity() {
         ) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 41)
         }
-        applyLaunchConfig(intent, container)
+        // A launch pairing claims a one-shot session, so it runs only on a fresh
+        // launch (not a rotation) and on the container's scope, which outlives
+        // this Activity.
+        applyLaunchConfig(intent, container, pairBackend = savedInstanceState == null)
         // A cold-start share must copy its file too; a rotation must not copy it
         // again, because the container already holds the pending attachment.
         if (savedInstanceState == null) {
@@ -130,9 +135,39 @@ class MainActivity : ComponentActivity() {
     /**
      * Automation hooks for E2E: `--es hopa.bridgeUrl ...` (plus an optional
      * token or pair code) configures the bridge without tapping the settings
-     * form. Nothing happens when the extras are absent.
+     * form. `hopa.backendUrl` / `hopa.backendPair` pair the gateway the same
+     * way. Nothing happens when the extras are absent.
      */
-    private fun applyLaunchConfig(intent: Intent, container: AppContainer) {
+    private fun applyLaunchConfig(
+        intent: Intent,
+        container: AppContainer,
+        pairBackend: Boolean = true,
+    ) {
+        // The gateway is handled before the bridge's early return: a device
+        // test may pair the backend while leaving the PC bridge untouched.
+        val backendName = intent.getStringExtra(EXTRA_BACKEND_NAME)
+        if (!backendName.isNullOrBlank()) {
+            com.hopa.app.backend.BackendLaunchName.value = backendName.trim()
+        }
+        if (pairBackend) {
+            val backendUrl = intent.getStringExtra(EXTRA_BACKEND_URL)
+            val backendPair = intent.getStringExtra(EXTRA_BACKEND_PAIR)
+            if (!backendUrl.isNullOrBlank() || !backendPair.isNullOrBlank()) {
+                // The claim runs off the Activity so a rotation cannot cancel a
+                // POST the gateway has already accepted.
+                container.appScope.launch {
+                    LaunchPairing.apply(
+                        backendUrl = backendUrl,
+                        backendPair = backendPair,
+                        notice = container.backendNotice,
+                        storeUrl = { url ->
+                            container.settings.update { it.copy(backendUrl = url) }
+                        },
+                        claim = { link -> container.backend.pair(link) },
+                    )
+                }
+            }
+        }
         val url = intent.getStringExtra(EXTRA_BRIDGE_URL)
         if (url.isNullOrBlank()) {
             return
@@ -158,5 +193,8 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_BRIDGE_URL = "hopa.bridgeUrl"
         const val EXTRA_BRIDGE_TOKEN = "hopa.bridgeToken"
         const val EXTRA_BRIDGE_PAIR = "hopa.bridgePair"
+        const val EXTRA_BACKEND_URL = "hopa.backendUrl"
+        const val EXTRA_BACKEND_PAIR = "hopa.backendPair"
+        const val EXTRA_BACKEND_NAME = "hopa.backendName"
     }
 }
