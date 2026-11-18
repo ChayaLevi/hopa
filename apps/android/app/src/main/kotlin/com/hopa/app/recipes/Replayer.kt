@@ -52,6 +52,6 @@ class Replayer(private val container: AppContainer) {
             done += 1
             delay(1_200)
         }
-        return ReplayOutcome(done = done, complete = done == recipe.steps.size)
+        return ReplayOutcome(done = done, complete = done == recipe.steps.size, screen = observation)
     }
 }

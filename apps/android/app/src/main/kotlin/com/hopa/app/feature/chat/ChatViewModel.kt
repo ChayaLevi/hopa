@@ -481,6 +481,19 @@ class ChatViewModel(
         if (!outcome.trustworthy) return false
         val replayed = outcome.done
 
+        // The recipe knows the taps, not the words: one cheap call reads the
+        // final screen and answers, so the person gets "Wi-Fi" and not
+        // "repeated 2 steps".
+        val screen = outcome.screen
+        val spoken = if (screen != null) {
+            runCatching { com.hopa.app.recipes.ReplayAnswer(container.model).answer(body, screen) }
+                .getOrNull()
+        } else {
+            null
+        }
+        val answer = spoken?.first ?: "Repeated the $replayed steps that worked last time."
+        val tokens = spoken?.second ?: 0
+
         container.busy.value = false
         val steps = recipe.steps.mapIndexed { index, action -> "${index + 1}. ${action.kind}" }
         container.conversations.append(
@@ -488,13 +501,13 @@ class ChatViewModel(
             ChatMessage(
                 id = "m-${System.currentTimeMillis()}-replay",
                 role = "assistant",
-                text = "Repeated the $replayed steps that worked last time.",
+                text = answer,
                 timestamp = System.currentTimeMillis(),
                 proof = com.hopa.stores.MessageProof(
                     path = device.sourceName,
                     executed = replayed,
                     verified = replayed,
-                    tokens = 0,
+                    tokens = tokens,
                     millis = System.currentTimeMillis() - now,
                     steps = steps,
                     fellBack = preferred == ScreenPath.AUTO &&
@@ -508,7 +521,7 @@ class ChatViewModel(
                 goal = body,
                 path = device.sourceName,
                 steps = replayed,
-                tokens = 0,
+                tokens = tokens,
                 conversationId = conversationId,
             )
         }

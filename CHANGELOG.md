@@ -26,6 +26,13 @@
   start/end hashes and the steps; `Replayer` re-resolves every `ref` through its
   anchor and stops before a tap it cannot place. A step without an anchor makes
   the recipe unreplayable, so the model runs instead of a positional tap.
+- A replay now answers: `ReplayAnswer` takes the tree the replay ended on and
+  asks the model once, in plain text, so "repeated 2 steps" became "The first
+  row is Wi-Fi" for about 2k tokens instead of 16k. If that call fails the plain
+  sentence stays; no action can come out of it.
+- `DisplayLauncher` starts an app with `am start -W` and treats a non-`ok`
+  status, or "Activity not started", as a failure, so a launch that did not land
+  on the hidden display is reported instead of read as an empty screen.
 
 - `AgentLoop` asks a `StepPolicy` for the next step and `ModelStepPolicy` wraps
   a `ModelPort`, so the seam a playbook policy needs is in the loop and not in
