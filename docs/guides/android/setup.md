@@ -56,7 +56,7 @@ You do **not** need HOPA's HarmonyOS toolchain (DevEco Studio, `hvigor`,
 ## 3. JDK 17 (and optionally 21)
 
 **JDK 17 is required.** The shared JVM modules (`packages/contracts`,
-`packages/engine`, `packages/net`, `packages/stores`, `packages/knowledge`) pin `jvmToolchain(17)`, and Gradle 8.x
+`packages/engine`, `packages/net`, `packages/turn`, `packages/knowledge`) pin `jvmToolchain(17)`, and Gradle 8.x
 will not satisfy a 17 toolchain with a 21 JDK — it wants an actual JDK 17 on
 disk. CI uses Temurin 17 for the same reason.
 

@@ -17,7 +17,6 @@ sourceSets {
 
 dependencies {
     implementation(project(":engine"))
-    implementation(project(":stores"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

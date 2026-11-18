@@ -82,7 +82,6 @@ import the Android app. The engine moved out of `apps/`:
 |---|---|---|
 | `packages/contracts` | shared data types (`Action`, `Observation`, `RunRecord`, `Decision`), port interfaces (`DevicePort`, `ModelPort`, …), `ApprovalRequest`, `ApprovalGateway`, JSON helpers | clients |
 | `packages/engine` | loop, gate logic, records, observation, parser, prompt, router | clients |
-| `packages/stores` | store interfaces and models (was `data`, then `state`; `com.hopa.data.*` stays with the Android Room, DataStore and Keystore classes) | clients |
 | `packages/net` | model and bridge clients (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
 | `packages/knowledge` | generated catalog, policy data and prompt rules, written by the build scripts | clients |
 | `packages/turn` | one turn for every client: goal and checkpoints, recipes, the plan gate and the playbook policy | clients |
@@ -93,13 +92,19 @@ Dependency chain (one direction only):
 knowledge   (no deps)
 contracts   (no deps)
 engine      → contracts + knowledge
+turn        → contracts + engine
 net         → contracts
-stores      → contracts
 ```
 
-`net` and `stores` depend on `contracts`, not on `engine`. This keeps them
-decoupled from agent loop changes and reduces HAP/APK size for modules that
-only need data types and port interfaces.
+`net` depends on `contracts`, not on `engine`. This keeps it decoupled from agent
+loop changes and reduces HAP/APK size for modules that only need data types and
+port interfaces.
+
+2026-11-18 addendum: `stores` is no longer a shared package. The Windows sidecar
+imported only the chat vocabulary, which now lives in `contracts/chat`; the store
+interfaces and their in-memory implementations moved to `apps/android/stores`,
+next to the Room, DataStore and Keystore classes that implement them. The backend
+also dropped an unused `:stores` dependency.
 
 Rules:
 

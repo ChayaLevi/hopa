@@ -9,7 +9,7 @@ Rules (ADR-0007):
 2. `harness/` must not exist: it was renamed to `evals/`.
 3. No junk drawers anywhere: `utils`, `helpers`, `common`, `misc`, `shared`.
 4. `packages/` holds only the client engine (`contracts`, `engine`,
-   `knowledge`, `stores`, `net`); the old Python `packages/wire` lives in
+   `knowledge`, `net`, `turn`); the old Python `packages/wire` lives in
    `services/wire`.
 
 Generated and vendor directories are skipped, and dot-directories are ignored
@@ -33,7 +33,7 @@ TOP_LEVEL = {
     ".github",
 }
 JUNK = {"utils", "helpers", "common", "misc", "shared"}
-ENGINE_PACKAGES = {"contracts", "engine", "knowledge", "stores", "net", "turn"}
+ENGINE_PACKAGES = {"contracts", "engine", "knowledge", "net", "turn"}
 SKIP = {
     "build",
     "oh_modules",
