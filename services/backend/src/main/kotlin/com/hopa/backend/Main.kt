@@ -1,8 +1,9 @@
-﻿package com.hopa.backend
+package com.hopa.backend
 
 import com.hopa.backend.auth.AuthPort
 import com.hopa.backend.gateway.gatewayRoutes
 import com.hopa.backend.http.healthRoutes
+import com.hopa.backend.http.knowledgeRoutes
 import com.hopa.backend.log.JsonEventLog
 import com.hopa.backend.pairing.PairingService
 import com.hopa.backend.pairing.PgAuth
@@ -37,6 +38,7 @@ fun Application.module(config: ServerConfig) {
         json(Json { explicitNulls = false; encodeDefaults = true })
     }
     healthRoutes(config)
+    knowledgeRoutes(config)
     pairingRoutes(config)
     tokenRoutes(config)
     traceRoutes(config)

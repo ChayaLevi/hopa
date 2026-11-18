@@ -48,8 +48,8 @@ class TurnRunner(
     private val replayAnswer: ReplayAnswer? = null,
     private val plans: PlanSource? = null,
     private val verifier: GoalVerifier = GoalVerifier(),
-    /** The tables this client uses; bundled until the backend serves a version. */
-    private val knowledge: Knowledge = BUNDLED_KNOWLEDGE,
+    /** The tables this client uses; read per turn, so an update applies next time. */
+    private val knowledge: () -> Knowledge = { BUNDLED_KNOWLEDGE },
     /** How long the screen gets between replayed steps; a test passes a no-op. */
     private val settle: suspend (Long) -> Unit = { delay(it) },
 ) {
@@ -134,7 +134,7 @@ class TurnRunner(
             recorder = recorder,
             clock = clock,
             webAvailable = request.webAvailable,
-            knowledge = knowledge,
+            knowledge = knowledge(),
         )
         val result = withTimeoutOrNull(request.timeoutMillis) {
             loop.run(

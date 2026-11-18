@@ -62,6 +62,9 @@ class BackendSession(
 
     /** The live socket, for the runner that answers a delivery on it. */
     fun currentLink(): BackendLink? = link
+
+    /** What pairing saved, or null when this phone has not paired. */
+    suspend fun credentials(): BackendCredentials? = identity.stored()
     @Volatile
     private var link: BackendLink? = null
     private var stateJob: Job? = null

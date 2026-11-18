@@ -2,6 +2,7 @@ package com.hopa.knowledge
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class KnowledgeCodecTest {
@@ -18,6 +19,18 @@ class KnowledgeCodecTest {
             BUNDLED_KNOWLEDGE,
             decoded.toKnowledge(BUNDLED_KNOWLEDGE.approval),
         )
+    }
+
+    @Test
+    fun the_generated_bundle_is_readable_by_the_app() {
+        val text = checkNotNull(javaClass.getResource("/knowledge.v1.json")).readText()
+
+        val bundle = KnowledgeCodec.decode(text)
+
+        assertTrue(bundle.version.startsWith("sha256:"))
+        assertTrue(bundle.catalog.any { it.id == "alipay" })
+        assertTrue(bundle.sites.isNotEmpty())
+        assertTrue(bundle.promptRules.isNotEmpty())
     }
 
     @Test

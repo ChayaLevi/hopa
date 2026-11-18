@@ -52,15 +52,16 @@ class AppContainer(context: Context) {
     val conversations: ConversationStore = DbConversationStore(database)
     /**
      * The tables this client uses. A stored bundle wins over the bundled
-     * snapshot; the file store falls back to it on any problem. Nothing writes
-     * the file yet: that is the backend fetch.
+     * snapshot; the file store falls back to it on any problem. `knowledge` is a
+     * getter, so a bundle accepted between turns applies on the next one.
      */
-    val knowledgeSource: com.hopa.knowledge.KnowledgeSource =
+    val knowledgeStore: com.hopa.knowledge.FileKnowledgeStore =
         com.hopa.knowledge.FileKnowledgeStore(
             directory = java.io.File(context.filesDir, "knowledge"),
             fallback = com.hopa.knowledge.BundledKnowledge.current(),
         )
-    val knowledge: com.hopa.knowledge.Knowledge by lazy { knowledgeSource.current() }
+    val knowledgeSource: com.hopa.knowledge.KnowledgeSource = knowledgeStore
+    val knowledge: com.hopa.knowledge.Knowledge get() = knowledgeSource.current()
     val selectedConversation = MutableStateFlow<String?>(null)
     val busy = MutableStateFlow(false)
     val cancelRequested = MutableStateFlow(false)
@@ -389,4 +390,9 @@ class AppContainer(context: Context) {
 
     /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
     val runs by lazy { com.hopa.app.run.RunCoordinator(this) }
+
+    /** Asks the backend for a newer knowledge bundle; a failure keeps the copy. */
+    val knowledgeUpdater by lazy {
+        com.hopa.app.backend.KnowledgeUpdater(backend, knowledgeStore)
+    }
 }

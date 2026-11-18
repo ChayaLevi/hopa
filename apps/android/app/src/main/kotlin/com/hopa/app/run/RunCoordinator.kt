@@ -34,7 +34,7 @@ class RunCoordinator(
             recipes = container.recipes,
             replayAnswer = ReplayAnswer(container.model),
             plans = ModelPlanSource(container.model),
-            knowledge = container.knowledge,
+            knowledge = { container.knowledge },
         )
     }
 

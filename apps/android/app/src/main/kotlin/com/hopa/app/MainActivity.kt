@@ -33,7 +33,10 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         com.hopa.app.service.AppVisibility.foreground = true
-        (application as HopaApplication).container.backend.onForeground()
+        val container = (application as HopaApplication).container
+        container.backend.onForeground()
+        // Quietly, in the background: a newer catalog, if the backend has one.
+        lifecycleScope.launch { container.knowledgeUpdater.refresh() }
         ScreenCaptureRequester.launch = {
             val manager = getSystemService(MediaProjectionManager::class.java)
             runCatching { screenCapture.launch(manager.createScreenCaptureIntent()) }
