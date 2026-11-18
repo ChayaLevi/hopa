@@ -30,10 +30,12 @@ Rules that must hold:
 | 5 | `746e06d` | `hopa.no-android` convention plugin; every `hopa.kotlin-jvm` module runs `checkNoAndroidImports` |
 | 6 | `c5f774b` | ktlint on `contracts` and `stores` (`knowledge` stays out: generated) |
 | 7 | `142ada2` | `TurnRunner` + `TurnRequest`/`TurnOutcome`, `GoalVerifier`, `ModelPlanSource`; the flat parser shape now asks `DecisionRules` too |
+| 8 | `c98f746` | `RunCoordinator`; chat, parallel and delivery run the same turn; `AppContainer.loop`, `loopFor()` and the duplicate executor removed |
 
-Green at `142ada2`: `:engine:test` (108), `:engine:check`, `:turn:test` (20),
-`:turn:check`, `:contracts:check`, `:stores:test`, sidecar `test`, all python
-checks.
+Green at `c98f746`: `:app:assembleDebug`, `:app:testDebugUnitTest`,
+`:engine:test` (108), `:engine:check`, `:turn:test` (20), `:turn:check`,
+`:contracts:check`, `:stores:test`, sidecar `test`, all python checks. The live
+phone turn is still owed.
 
 ## Done: slice 7, `TurnRunner` (no Android)
 
@@ -65,28 +67,45 @@ Found on the way: `DecisionParser`'s flat `{"kind": ...}` shape bypassed
 now validates against the same table; `AgentLoopTest`'s payment fixture gained
 the target the table rightly demands.
 
-## Next: slice 8, `RunCoordinator` in app
+## Done: slice 8, `RunCoordinator` in app
 
-- `ChatViewModel` keeps the screen state; `TurnRunner` owns plan-first, recipe
-  replay, verify and the answer.
-- `ParallelRunner` and `RemoteTaskRunner` become adapters that call the same
-  runner with their own device.
-- One `RunState` flow instead of `busy`/`cancelRequested`/`pendingGoals`
-  scattered on the container.
+`apps/android/app/src/main/kotlin/com/hopa/app/run/RunCoordinator.kt` builds the
+`TurnRequest` from the person's settings and the resolved surface, and owns the
+one `TurnRunner` instance. The three clients are adapters now:
 
-Gates: `:app:assembleDebug`, `:app:testDebugUnitTest`, sidecar test, and a live
-turn on the phone (hidden screen, recipe replay with an answer, accessibility
-banner truthful).
+- `ChatViewModel` keeps the screen state: a plan becomes `pendingPlan`, a
+  `RECIPE` outcome becomes a receipt with the replay's steps, a `MODEL` outcome
+  becomes the bubble and the run history. Its `replayIfPossible`,
+  `fetchPlanSteps`, `buildMemoryContext` and `typedFunctions` are gone.
+- `ParallelRunner` still opens its hidden display and supplies that display's
+  typed functions, then runs the same turn; its local replay and recipe save are
+  gone.
+- `RemoteRuns` is the coordinator plus `TurnOutcome.asTurnResult()` for the
+  socket. A delivered task now also takes the recipe path.
 
-## After that, in this order
+The plan gate builds a request with no surface (`planRequest`), so asking for a
+plan never opens the hidden display. Dead code removed with the old pipeline:
+`AppContainer.loop`, `loopFor()` and the duplicate `executor`.
 
-1. Generate wire types from `contracts/schemas`; drop the hand-written
+One deliberate fix: the turn's goal is the body - the attachment description
+when there is no text - so an attachment-only message no longer starts a turn
+with an empty goal.
+
+Still owed before a merge: a live turn on the phone (hidden screen, recipe
+replay with an answer, accessibility banner truthful).
+
+## Next: the remaining modernisation, in this order
+
+1. One `RunState` flow instead of `busy`/`cancelRequested`/`pendingGoals`
+   scattered on the container; the coordinator and the ViewModel then share one
+   answer about what is running.
+2. Generate wire types from `contracts/schemas`; drop the hand-written
    `RunRecordSerializer` if the generated one keeps the same API.
-2. Event-driven screen access: a `StateFlow` from the accessibility service
+3. Event-driven screen access: a `StateFlow` from the accessibility service
    instead of polling in `AccessibilityState` and the Act pill.
-3. Hidden screen as a service (`VirtualDisplay` / MediaProjection) instead of
+4. Hidden screen as a service (`VirtualDisplay` / MediaProjection) instead of
    `app_process` plus the dex staged in `/data/local/tmp`.
-4. Versions: Kotlin/AGP/Gradle and JUnit 5, as their own small PR.
+5. Versions: Kotlin/AGP/Gradle and JUnit 5, as their own small PR.
 
 ## Product constraints that survive the refactor
 
