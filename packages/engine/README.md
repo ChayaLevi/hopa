@@ -67,5 +67,5 @@ memory), a `Clock`, and a `ModelPort`.
 ./gradlew :engine:test
 ```
 
-`com.hopa.engine.conformance` reads `contracts/` from the repository, so it
+`com.hopa.engine.conformance` reads `spec/` from the repository, so it
 checks the same JSON the other clients use.

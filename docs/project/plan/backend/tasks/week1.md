@@ -11,7 +11,7 @@ speak the real wire protocol over a real socket.
 **Architecture:** `services/backend` is a single-module Gradle project that
 includes `:core` and `:data` from `packages/` (precedent:
 `apps/windows/sidecar`). Protocol types and their validation live in
-`com.hopa.backend.protocol` and are driven by fixtures in `contracts/`. The
+`com.hopa.backend.protocol` and are driven by fixtures in `spec/`. The
 gateway is a Ktor WebSocket route; the phone and the PC are simulated by
 `FakeDevice`, a Ktor WebSocket **client** in test sources — not a mock of our own
 code, so every assertion travels a real socket.
@@ -51,14 +51,14 @@ Each line has a test in Task 4 or Task 6.
 ### Task 1: Freeze protocol v0 as executable contracts
 
 **Files:**
-- Create: `contracts/schemas/gateway.v1.schema.json`
-- Create: `contracts/fixtures/gateway-v0.json`
-- Create: `contracts/openapi/backend.v1.yaml`
+- Create: `spec/schemas/gateway.v1.schema.json`
+- Create: `spec/fixtures/gateway-v0.json`
+- Create: `spec/openapi/backend.v1.yaml`
 - Create: `docs/design/decisions/0022-backend-kotlin-and-shape.md`
 - Create: `tools/checks/check-gateway-fixtures.py`
 - Create: `tools/scripts/test_gateway_fixtures.py`
 - Modify: `docs/design/decisions/README.md`, `docs/reference/protocols.md`,
-  `contracts/openapi/README.md`, `.github/workflows/ci.yml`
+  `spec/openapi/README.md`, `.github/workflows/ci.yml`
 
 **Interfaces:**
 - Consumes: nothing.
@@ -114,13 +114,13 @@ def test_refusals_name_a_gateway_error():
 - [ ] **Step 2: Run it to watch it fail**
 
 Run: `.venv\Scripts\python.exe -m pytest tools/scripts/test_gateway_fixtures.py -v`
-Expected: FAIL — `FileNotFoundError` for `contracts/fixtures/gateway-v0.json`.
+Expected: FAIL — `FileNotFoundError` for `spec/fixtures/gateway-v0.json`.
 If `pytest` or `jsonschema` is missing: `.venv\Scripts\python.exe -m pip install pytest jsonschema`,
 then re-run and confirm the same failure.
 
 - [ ] **Step 3: Write the schema, the fixtures, the checker and the spec**
 
-`contracts/schemas/gateway.v1.schema.json`: Draft 2020-12, `required`
+`spec/schemas/gateway.v1.schema.json`: Draft 2020-12, `required`
 `["v","id","type","ts"]`, `v` const `1`, `id` UUID, `type` enum of the 12 types
 in `week1.md` §4.3, `trace` matching `^00-[0-9a-f]{32}-[0-9a-f]{16}-01$`,
 `body` an object, `additionalProperties: false`.
@@ -129,12 +129,12 @@ in `week1.md` §4.3, `trace` matching `^00-[0-9a-f]{32}-[0-9a-f]{16}-01$`,
 still be refused by the server, so those cases carry `"ok": true` and an `error`
 code, and the fixture test reads the code independently of `ok`.
 
-`contracts/fixtures/gateway-v0.json`: the 14 vectors in `week1.md` §4.5. Keep at
+`spec/fixtures/gateway-v0.json`: the 14 vectors in `week1.md` §4.5. Keep at
 least four schema-invalid cases (missing `id`, unknown `type`, `v: 2`, a
 `task.create` without `to`) and at least three schema-valid refusals
 (`E_TENANT`, the 65,537-byte body as `E_SCHEMA`, `E_UNSUPPORTED`).
 
-`contracts/openapi/backend.v1.yaml`: OpenAPI 3.0.3 for `/v1/health`,
+`spec/openapi/backend.v1.yaml`: OpenAPI 3.0.3 for `/v1/health`,
 `/v1/version`, `/v1/pair/sessions`, `/v1/pair/claim`, `/v1/token/refresh`,
 `/v1/traces/{traceId}`; bearer auth everywhere except health and version;
 request and response schemas inline.
@@ -147,7 +147,7 @@ recording Kotlin 2.0.21 + Ktor 3.0.3, one Gradle build including `packages/`,
 Postgres queue, RLS, opaque tokens, and the two rejected alternatives (Go,
 Python). Add the row to `docs/design/decisions/README.md`.
 
-`docs/reference/protocols.md` gains a gateway row; `contracts/openapi/README.md`
+`docs/reference/protocols.md` gains a gateway row; `spec/openapi/README.md`
 gains `backend.v1.yaml`. `.github/workflows/ci.yml` adds `jsonschema` to the
 python job's install line and a `Gateway fixtures` step.
 
@@ -268,7 +268,7 @@ git commit -m "feat(backend): Ktor skeleton with health and version"
 - Test: `services/backend/src/test/kotlin/com/hopa/backend/protocol/GatewayCodecTest.kt`
 
 **Interfaces:**
-- Consumes: `contracts/fixtures/gateway-v0.json` on the test classpath as
+- Consumes: `spec/fixtures/gateway-v0.json` on the test classpath as
   `/fixtures/gateway-v0.json`.
 - Produces: `data class Envelope(val v: Int, val id: String, val type: String,
   val ts: Long, val trace: String? = null, val from: String? = null,

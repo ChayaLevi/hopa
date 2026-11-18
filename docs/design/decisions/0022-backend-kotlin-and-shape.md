@@ -51,9 +51,9 @@ not against general taste:
 5. **Opaque access tokens, hashed at rest** (15 min) and rotating refresh tokens
    (30 days), so a revoked device is cut off immediately rather than at JWT
    expiry.
-6. **Contract-first**: `contracts/openapi/backend.v1.yaml`,
-   `contracts/schemas/gateway.v1.schema.json` and
-   `contracts/fixtures/gateway-v0.json` are written and frozen before the first
+6. **Contract-first**: `spec/openapi/backend.v1.yaml`,
+   `spec/schemas/gateway.v1.schema.json` and
+   `spec/fixtures/gateway-v0.json` are written and frozen before the first
    handler, and both the Kotlin codec and a Python checker replay the fixtures.
 7. **The server never sees a device command.** It carries task messages only; no
    `adb`, `hdc`, UI Automation or screen content enters this codebase.

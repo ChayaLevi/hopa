@@ -8,7 +8,7 @@ sourceSets {
     test {
         // Relative to this module, so any build that includes it finds the
         // repository's contracts (the Android build and the Windows sidecar).
-        resources.srcDir(file("../../contracts"))
+        resources.srcDir(file("../../spec"))
     }
 }
 

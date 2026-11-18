@@ -14,7 +14,7 @@ apps/android/
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 packages/
-├─ contracts/      wire types, port interfaces, model types, approval data classes
+├─ spec/      wire types, port interfaces, model types, approval data classes
 ├─ engine/         loop, prompt blocks, router, gate, records
 ├─ net/            model client, bridge client (AdbDevice)
 ├─ stores/         store interfaces and session models
@@ -79,7 +79,7 @@ reached from Act.
 - JVM: `:engine:test`, `:transport:test`, `:stores:test`, `:app:testDebugUnitTest`.
 - Device: `app/src/androidTest` (background display, certificate, scroll
   geometry), one command in `tools/scripts/android-device-checks.ps1`.
-- Evals and shared fixtures live in `contracts/` and `services/evals`.
+- Evals and shared fixtures live in `spec/` and `services/evals`.
 
 ## Minimum version
 

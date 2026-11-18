@@ -129,15 +129,15 @@ a client cannot ask for another household's data even by accident.
 
 ### 4.5 Artifacts to freeze
 
-- `contracts/openapi/backend.v1.yaml`: `/v1/health`, `/v1/version`,
+- `spec/openapi/backend.v1.yaml`: `/v1/health`, `/v1/version`,
   `/v1/pair/sessions`, `/v1/pair/claim`, `/v1/token/refresh`,
   `/v1/traces/{traceId}`.
-- `contracts/schemas/gateway.v1.schema.json`: envelope + `oneOf` body per type.
-- `contracts/fixtures/gateway-v0.json`: 14 vectors — happy path each direction,
+- `spec/schemas/gateway.v1.schema.json`: envelope + `oneOf` body per type.
+- `spec/fixtures/gateway-v0.json`: 14 vectors — happy path each direction,
   duplicate id, unknown version, unknown type, cross-household `to`, offline
   target, expired deadline, oversized frame, bad token, revoked token, cancel
   after result, missing trace, invalid trace, `needs_approval` refusal.
-- `docs/reference/protocols.md`: a row for the gateway; `contracts/openapi/README.md`
+- `docs/reference/protocols.md`: a row for the gateway; `spec/openapi/README.md`
   gains `backend.v1.yaml`.
 
 ## 5. Shape
@@ -266,12 +266,12 @@ Every box is a change, a test or an artifact, not a meeting.
 
 - [ ] `docs/design/decisions/0022-backend-kotlin-and-shape.md` written and indexed
       in `docs/design/decisions/README.md`.
-- [ ] `contracts/openapi/backend.v1.yaml` covers the six `/v1` paths of §4.5.
-- [ ] `contracts/schemas/gateway.v1.schema.json` validates the envelope and each
+- [ ] `spec/openapi/backend.v1.yaml` covers the six `/v1` paths of §4.5.
+- [ ] `spec/schemas/gateway.v1.schema.json` validates the envelope and each
       body variant.
-- [ ] `contracts/fixtures/gateway-v0.json` holds the 14 vectors of §4.5 and a
+- [ ] `spec/fixtures/gateway-v0.json` holds the 14 vectors of §4.5 and a
       runner in `src/test` replays them.
-- [ ] `docs/reference/protocols.md` and `contracts/openapi/README.md` list the new
+- [ ] `docs/reference/protocols.md` and `spec/openapi/README.md` list the new
       artifacts.
 - [ ] Freeze comment on #32 with the commit sha and the list of frozen files.
 

@@ -26,7 +26,7 @@ TOP_LEVEL = {
     "services",
     "packages",
     "evals",
-    "contracts",
+    "spec",
     "build-logic",
     "tools",
     "docs",

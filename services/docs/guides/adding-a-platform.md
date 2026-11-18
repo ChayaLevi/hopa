@@ -37,7 +37,7 @@ Rules that keep the seam honest:
 - [ ] Handler tests run against the fake adapter, not a device.
 - [ ] One hardware proof: `devices`, `observe`, `screenshot`, and one tap, with
       the serial and the date recorded in the PR.
-- [ ] Update `contracts/openapi/bridge.v1.yaml` only if the wire shape changed.
+- [ ] Update `spec/openapi/bridge.v1.yaml` only if the wire shape changed.
 - [ ] Add the platform to `docs/reference/protocols.md` if it introduces a new
       transport.
 
@@ -69,5 +69,5 @@ installed package.
 ## Where the client lives
 
 The app that *uses* the platform is separate: `apps/android` and `apps/windows`
-each own a shell and a client for `contracts/`, and neither may import
+each own a shell and a client for `spec/`, and neither may import
 `services/` internals. See their READMEs.

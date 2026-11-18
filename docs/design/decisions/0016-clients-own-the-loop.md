@@ -19,8 +19,8 @@ That is accepted, but unmanaged duplication would let the three behaviours drift
 - **Each client owns its loop**: HarmonyOS (ArkTS, today), Android (Kotlin), and
   Windows (stack decided separately).
 - The **contract is shared, the loop is not**. The shared artefacts are:
-  - `contracts/schemas/` (observation, action, decision, run-record);
-  - `contracts/fixtures/` (conformance cases every implementation must pass);
+  - `spec/schemas/` (observation, action, decision, run-record);
+  - `spec/fixtures/` (conformance cases every implementation must pass);
   - the policy semantics (what is `read`, `sensitive`, `payment`; when to ask);
   - the bridge protocol for cross-device control and chat sync.
 - A client may be **thin** when it points at a backend; that is a deployment

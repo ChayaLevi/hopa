@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "tools" / "scripts" / "build-prompt-rules.py"
-SOURCE = ROOT / "contracts" / "prompts" / "rules.v1.json"
+SOURCE = ROOT / "spec" / "prompts" / "rules.v1.json"
 GENERATED = ROOT / "apps" / "harmony" / "core" / "src" / "main" / "ets" / "agent" / "PromptRules.ets"
 PROMPT = ROOT / "apps" / "harmony" / "core" / "src" / "main" / "ets" / "agent" / "PromptBuilder.ets"
 TEST = ROOT / "apps" / "harmony" / "core" / "src" / "test" / "PromptContract.test.ets"

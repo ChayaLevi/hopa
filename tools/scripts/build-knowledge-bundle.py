@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Render one knowledge bundle from the shared contracts.
 
-Source of truth: ``contracts/catalog/catalog.v1.json`` and
-``contracts/prompts/rules.v1.json``. The bundle has the same shape as the
+Source of truth: ``spec/catalog/catalog.v1.json`` and
+``spec/prompts/rules.v1.json``. The bundle has the same shape as the
 Kotlin ``KnowledgeBundle``: schemaVersion, version, catalog, sites, promptRules.
-It is written to ``contracts/knowledge`` for review and to the backend resources
+It is written to ``spec/knowledge`` for review and to the backend resources
 so ``GET /v1/knowledge`` serves exactly the reviewed document.
 
 The version is a digest of the data, so an unchanged source keeps its ETag and
@@ -19,10 +19,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-CATALOG = ROOT / "contracts" / "catalog" / "catalog.v1.json"
-RULES = ROOT / "contracts" / "prompts" / "rules.v1.json"
+CATALOG = ROOT / "spec" / "catalog" / "catalog.v1.json"
+RULES = ROOT / "spec" / "prompts" / "rules.v1.json"
 OUTPUTS = [
-    ROOT / "contracts" / "knowledge" / "knowledge.v1.json",
+    ROOT / "spec" / "knowledge" / "knowledge.v1.json",
     ROOT / "services" / "backend" / "src" / "main" / "resources" / "knowledge.v1.json",
     ROOT / "packages" / "knowledge" / "src" / "test" / "resources" / "knowledge.v1.json",
     ROOT / "packages" / "engine" / "src" / "test" / "resources" / "knowledge.v1.json",

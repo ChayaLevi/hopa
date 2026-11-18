@@ -8,7 +8,7 @@ disagree.
 ## What the spike did
 
 A throwaway generator (`spike.py`, 266 lines, kept out of the repo) read the
-five documents in `contracts/schemas` and emitted `@Serializable` Kotlin in two
+five documents in `spec/schemas` and emitted `@Serializable` Kotlin in two
 passes:
 
 - **raw** - the schemas exactly as they are today;

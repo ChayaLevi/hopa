@@ -17,7 +17,7 @@ python tools/checks/check-android-structure.py -> 0 problems
   `ConformanceTest.every_fixture_matches_the_contract`.
 - The observation hash vector matches byte for byte:
   `ConformanceTest.the_observation_hash_vector_matches` against
-  `contracts/fixtures/observation-hash.json`.
+  `spec/fixtures/observation-hash.json`.
 - `ui.teleport` fails with `E_SCHEMA`:
   `DecisionParserTest.rejects_an_unknown_kind`.
 - The catalogue Kotlin file is generated, not hand-written:

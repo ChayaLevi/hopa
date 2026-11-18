@@ -8,8 +8,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = ROOT / "contracts" / "fixtures" / "gateway-v0.json"
-SCHEMA = ROOT / "contracts" / "schemas" / "gateway.v1.schema.json"
+FIXTURES = ROOT / "spec" / "fixtures" / "gateway-v0.json"
+SCHEMA = ROOT / "spec" / "schemas" / "gateway.v1.schema.json"
 
 
 def load():

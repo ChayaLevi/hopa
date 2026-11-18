@@ -119,7 +119,7 @@ returns allow at once for a kind the policy does not mark sensitive or payment.
   plan; it stays the target state.
 - `state` is one of running, waiting for approval, done, failed.
 - the step history is **not** in the task. It is the append-only `RunRecord`
-  chain for that `runId` (`contracts/schemas/run-record.schema.json`), written by
+  chain for that `runId` (`spec/schemas/run-record.schema.json`), written by
   2 Execution after each action and read back by the next decision. That chain
   is also what makes a run auditable afterwards.
 
@@ -160,8 +160,8 @@ The app is resolved at decision time, on the phone, from data already there:
 
 | Input | Where | What it contributes |
 |---|---|---|
-| catalogue | `contracts/catalog/catalog.v1.json`, written at onboarding | app ids, names, aliases, purposes, actions, per-platform launch details |
-| routing cases | `contracts/fixtures/routing.json` | lexical cases that pin "internet bill" to the right app |
+| catalogue | `spec/catalog/catalog.v1.json`, written at onboarding | app ids, names, aliases, purposes, actions, per-platform launch details |
+| routing cases | `spec/fixtures/routing.json` | lexical cases that pin "internet bill" to the right app |
 | recipes | installed package (brick 5) | the steps inside each app, and the app each step belongs to |
 | the chosen action | `Action` | `ui.launch` and `ui.stop` require `app`; the executor refuses without it |
 
@@ -189,7 +189,7 @@ just makes the match exact.
 
 #### How execution is told what to do
 
-Decision emits an `Action` (`contracts/schemas/action.schema.json`):
+Decision emits an `Action` (`spec/schemas/action.schema.json`):
 
 | Field | Required for | Meaning |
 |---|---|---|
@@ -221,14 +221,14 @@ What it takes:
 | Input | Source | Notes |
 |---|---|---|
 | goal and progress | 3 Tasks | the sentence and the step count |
-| observation | 2 Execution | visible nodes with refs, hash, capped by `contracts/observation/limits.v1.json` |
+| observation | 2 Execution | visible nodes with refs, hash, capped by `spec/observation/limits.v1.json` |
 | history | the loop | last actions and their results |
 | candidates | catalogue + brick 5 recipes | what it may choose from |
-| policy | `contracts/policy/approval.v1.json` | which kinds are interactive, sensitive, payment |
+| policy | `spec/policy/approval.v1.json` | which kinds are interactive, sensitive, payment |
 
 One model call per iteration: the client sends the rules, the goal, the
 observation digest and the candidates. The reply must validate against
-`contracts/schemas/decision.schema.json`; anything else is rejected as a failed
+`spec/schemas/decision.schema.json`; anything else is rejected as a failed
 iteration.
 
 | `Decision` field | Meaning |
@@ -347,7 +347,7 @@ task resuming elsewhere. Folders: `services/bridge`, `services/relay`,
 **12 Architecture and contracts** ships no feature. Its week is: keep both
 client pipelines green, review and merge every contract change, cut and sign a
 release, check signing keys and manifest permissions, and sit in a seam review
-whenever two teams change a contract at once. Folders: `contracts/`,
+whenever two teams change a contract at once. Folders: `spec/`,
 `.github/workflows`, the release checklist. A shared role with a veto, because
 the alternative is two teams editing the same contract in parallel.
 
@@ -410,7 +410,7 @@ to a few devices, and rollback in one command. Three to four weeks for the first
 version.
 
 Today nothing is delivered this way: recipes are compiled into each client from
-`contracts/catalog` at build time (ADR-0018), which is why an app update
+`spec/catalog` at build time (ADR-0018), which is why an app update
 currently needs a new build. 7 starts the day a recipe has to change without one.
 Without 7, a recipe stays in the factory and costs a release to reach a phone.
 
@@ -550,14 +550,14 @@ split later.
 | | `services/backend` | Reserved for the server phase; README only until then |
 | | `services/brain` | The routing and prompt service. Prompts and target-app knowledge arrive as pull requests from Target-app knowledge |
 | | `services/tasks` *(new)*<br>[Tasks and notifications] | Durable tasks, approvals pending, resume. Moves to its own team when the hire lands |
-| | `contracts/tasks` *(new)* | The task contract, reviewed with Integration |
-| **Target-app knowledge** | `contracts/recipes`, `services/mapping` *(new)* | The recipe contract, the factory, publishing, rollout and rollback |
+| | `spec/tasks` *(new)* | The task contract, reviewed with Integration |
+| **Target-app knowledge** | `spec/recipes`, `services/mapping` *(new)* | The recipe contract, the factory, publishing, rollout and rollback |
 | **Algorithms and measurement**<br>[Algorithms and measurement] | `packages/decision` *(new, after the LAIX port)* | The decision contract and policies |
 | | `services/evals/bench`, `services/evals/baseline` | HOPA-Bench with its task set and results; the reference loop used by the bench |
 | **Integration, release and quality**<br>[Verification farm, brick 8] | `.github/workflows` | Every CI job, Android and Windows; the release job that publishes the APK |
 | | `services/tools`, `tools/` | Repository checks, scripts, the smoke runner |
 | | `docs/project/evidence` | The failure list and the proof for each plan tick |
-| **Architecture and contracts** (shared) | `contracts/` (recipes and tasks excepted) | Shared contracts and their review |
+| **Architecture and contracts** (shared) | `spec/` (recipes and tasks excepted) | Shared contracts and their review |
 | | `docs/design/decisions` | ADRs and the release veto |
 | **Every team** | `services/docs`, its own service README | The team that owns the service writes its docs; Architecture edits only the index |
 
@@ -625,10 +625,10 @@ has its own service already, and the farm is a folder.
 |---|---|---|---|---|---|
 | **Clients** | 1, 2, 4 | Michael | Chaya | `apps/android`, `apps/windows`, `apps/harmony` (frozen), `packages/core`, `packages/data`, `packages/capabilities` | Screens and flows, the share target, settings, the approval gate, visual parity with Harmony; the APK and the MSI shell |
 | **Platform and services** | 3, 9, 11 | Amir | Batya | `services/backend`, `services/bridge`, `services/relay`, `services/wire`, `services/brain` (the service); `services/tasks` until the hire | The pairing code, tokens, the phone-to-PC tunnel, the wire protocol, the brain service, the notification reader |
-| **Target-app knowledge** | 5, 6, 7 | Nizzan | Shira | `contracts/recipes`, `services/mapping` | A recipe per target app: steps, selectors, the check that it worked, the app version it is pinned to |
+| **Target-app knowledge** | 5, 6, 7 | Nizzan | Shira | `spec/recipes`, `services/mapping` | A recipe per target app: steps, selectors, the check that it worked, the app version it is pinned to |
 | **Algorithms and measurement** | 10, 13 | Sefi | - | `packages/decision` (after the LAIX port), `services/evals/bench`, `services/evals/baseline` | The HOPA-Bench task set and its score per release; the decision policy and its record; four numbers read from journals |
 | **Integration, release and quality** | 8 | Yoni | - | `.github/workflows`, `docs/project/evidence`, the release checklist | Green CI, the release APK and MSI, the farm, the failure list, the signing and permission review |
-| **Architecture and contracts** (shared role) | 12 | Michael + Amir + Yoni | - | `contracts/` | Contract text, seam reviews, release veto |
+| **Architecture and contracts** (shared role) | 12 | Michael + Amir + Yoni | - | `spec/` | Contract text, seam reviews, release veto |
 | **Design** (shared role) | part of 1 | open | - | theme files in `packages/` | One visual language for every client |
 
 ### The words that were doing too much work
@@ -662,11 +662,11 @@ to ask, and is the one to use when a pull request is stuck.
 | `services/backend`, `services/bridge`, `services/relay`, `services/wire` | Amir (Batya) |
 | `services/brain` | Amir owns the service; knowledge and prompts arrive from Nizzan |
 | `services/tasks` (new) | Amir (Batya) |
-| `contracts/tasks` | Amir + Yoni |
-| `contracts/recipes`, `services/mapping` (new) | Nizzan (Shira) |
+| `spec/tasks` | Amir + Yoni |
+| `spec/recipes`, `services/mapping` (new) | Nizzan (Shira) |
 | `services/evals/bench`, `services/evals/baseline`, `services/evals/replay` | Sefi; replay is run in CI by Yoni |
 | `.github/workflows`, `services/tools`, `tools/`, `docs/project/evidence` | Yoni |
-| `contracts/*` (other than tasks and recipes) | Michael + Amir review |
+| `spec/*` (other than tasks and recipes) | Michael + Amir review |
 | `docs/design/decisions` | Michael + Amir + Yoni |
 | `services/docs` | the owner of each service; Architecture edits the index |
 
@@ -713,8 +713,8 @@ to ask, and is the one to use when a pull request is stuck.
 | Who | Finishes |
 |---|---|
 | Michael + Chaya | the Windows gates (W3-W5) and the Android gates; Windows visual parity (W6) |
-| Amir + Batya | `contracts/tasks` and the `services/tasks` skeleton; token rotation; bridge and relay |
-| Nizzan + Shira | the first system app: analysis -> `contracts/recipes` -> one recipe end to end |
+| Amir + Batya | `spec/tasks` and the `services/tasks` skeleton; token rotation; bridge and relay |
+| Nizzan + Shira | the first system app: analysis -> `spec/recipes` -> one recipe end to end |
 | Sefi | the LAIX pilot on HOPA episodes; the decision contract; a HOPA-Bench score for the current release; the four journal numbers |
 | Yoni | Windows and Android CI jobs, the farm on the runners, the release checklist, the failure list, the signing review |
 

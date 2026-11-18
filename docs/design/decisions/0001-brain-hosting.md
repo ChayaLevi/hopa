@@ -17,7 +17,7 @@ HarmonyOS app cannot host a JVM, but the PC evaluation rig can.
 2. **M3+:** port the same contract to ArkTS in `apps/harmony/core`. The JVM service
    becomes optional behind a feature flag.
 3. Both implementations share one JSON contract and one golden-file corpus
-   (`contracts/schemas/`, `contracts/schemas/fixtures/`).
+   (`spec/schemas/`, `spec/schemas/fixtures/`).
 
 ## Consequences
 

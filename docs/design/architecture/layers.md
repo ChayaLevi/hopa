@@ -71,13 +71,13 @@ Start with the top-level question, then the layer below it (ADR-0007):
 | a screen, a widget, a device adapter for a platform | `apps/` | `harmony|android|windows/` |
 | a long-running thing that answers requests or drives a device | `services/` | `backend/`, `bridge/`, `relay/`, `brain/` |
 | a task, a score, a reference driver | `services/evals/` | `bench/`, `baseline/` |
-| a wire format both sides must agree on | `contracts/` | `openapi/`, `schemas/` |
+| a wire format both sides must agree on | `spec/` | `openapi/`, `schemas/` |
 | code the services both import | `services/wire/` | shared, not deployed (ADR-0012) |
 | a build, sign or check step | `tools/` | `scripts/`, `checks/`, `signing/` |
 | the reason something is the way it is | `docs/` | `adr/`, `architecture/`, `guides/` |
 
 `apps/` ships, `services/` runs and carries its evaluation and tools
-(`services/evals`, `services/tools`), `contracts/` binds, `tools/` builds the
+(`services/evals`, `services/tools`), `spec/` binds, `tools/` builds the
 app, `docs/` explains (service docs live in `services/docs`). **`agent` is a product word**; evaluation code is a
 baseline or a driver.
 

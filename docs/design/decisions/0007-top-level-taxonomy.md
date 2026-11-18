@@ -22,7 +22,7 @@ Three problems motivated this record:
 
 ## Decision
 
-- Top level is: `apps/`, `services/`, `evals/`, `contracts/`, `tools/`, `docs/`.
+- Top level is: `apps/`, `services/`, `evals/`, `spec/`, `tools/`, `docs/`.
   Each answers one question before it is opened:
 
   | Folder | Answers | Ships? |
@@ -30,7 +30,7 @@ Three problems motivated this record:
   | `apps/` | what a person holds | yes |
   | `services/` | what runs with nobody watching | deployable, not shipped to a device |
   | `evals/` | how we know it got better | never |
-  | `contracts/` | what both sides may share | data only |
+  | `spec/` | what both sides may share | data only |
   | `tools/` | how we build and check | never |
   | `docs/` | why it is like this | never |
 
@@ -103,7 +103,7 @@ decoupled from agent loop changes and reduces HAP/APK size for modules that only
 need data types and port interfaces.
 
 2026-11-18 addendum: `stores` is no longer a shared package. The Windows sidecar
-imported only the chat vocabulary, which now lives in `contracts/chat`; the store
+imported only the chat vocabulary, which now lives in `spec/chat`; the store
 interfaces and their in-memory implementations moved to `apps/android/stores`,
 next to the Room, DataStore and Keystore classes that implement them. The backend
 also dropped an unused `:stores` dependency.

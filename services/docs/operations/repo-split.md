@@ -11,7 +11,7 @@ Status: **runbook, not executed.** The tree is already split by deployable
 | `hopa` (stays) | `apps/harmony`, later `apps/android`, `apps/windows`; app-side `tools/` | the client apps |
 | `hopa-services` | all of `services/` (`bridge`, `relay`, `wire`, `brain`, later `backend`) | device plane, relay, loop |
 | `hopa-backend` (later, from `services/backend`) | the loop, accounts, keys, memory, schedules | the backend |
-| `hopa-contracts` (data) | `contracts/` | versioned OpenAPI + schemas, generated clients |
+| `hopa-contracts` (data) | `spec/` | versioned OpenAPI + schemas, generated clients |
 
 Start with **one** services repository, not four: the pieces share `services/wire`
 and are easier to keep honest together. Split `backend` out later if its release
@@ -22,7 +22,7 @@ cadence differs.
 | Folder | Goes to | Note |
 |---|---|---|
 | `services/` | services repo | one path now carries bridge, relay, wire, brain, evals and the service tools |
-| `contracts/` | artifact + both repos | published (or tagged) and consumed by version; never copied |
+| `spec/` | artifact + both repos | published (or tagged) and consumed by version; never copied |
 | `apps/` | stays | client code only |
 | `tools/scripts` | split (done) | app: `build`, `deploy`, `install-to-device`, `build-app-catalog`, `plan-status`. services: `services/tools/scripts/*` |
 | `tools/checks` | split (done) | `check-tree`/`check-structure`/`check-links` stay; `services/tools/checks/` holds openapi and render |
@@ -44,7 +44,7 @@ cadence differs.
 - **`docs/` is split by subject.** Service docs (bridge, relay, wire, protocols,
   operations, data-flow, service ADRs) move; product, UX, setup, signing and the
   app ADRs stay.
-- **`contracts/` is shared by version**, not copied and not owned by either side.
+- **`spec/` is shared by version**, not copied and not owned by either side.
 
 ## The tools decision (same rule)
 
@@ -65,8 +65,8 @@ not part of this runbook.
 - [ ] `tools/scripts` and `tools/checks` are split, with no script in the app
       repository referencing `services/`.
 - [x] Service docs are in `services/docs/`; the app repo keeps product, setup,
-      signing and the shared architecture/contracts/policy docs.
-- [ ] `contracts/` is consumed as a versioned artifact; clients are generated
+      signing and the shared architecture/spec/policy docs.
+- [ ] `spec/` is consumed as a versioned artifact; clients are generated
       from it.
 - [ ] No service imports another by path: `check-structure.py` already rejects
       `hdc` outside the adapter; add an import rule for sibling packages.
@@ -82,7 +82,7 @@ not part of this runbook.
 2. **Wire**: publish first; both services depend on it.
 3. **Bridge** and **Relay**: independent after wire; the relay is one deployable
    (see `render.yaml`).
-4. **Apps**: last; they only need `contracts/` and a backend URL.
+4. **Apps**: last; they only need `spec/` and a backend URL.
 
 Do not split the apps repository while the Harmony app still hosts the loop; that
 would leave the loop in a client repo, which ADR-0011 forbids.
@@ -105,7 +105,7 @@ For `services/wire`, filter on `services/wire` and add the package's own
 git filter-repo --path services/wire --path-relative-to=services/wire
 ```
 
-Keep `contracts/` in a repository of its own **only when a client ships on its
+Keep `spec/` in a repository of its own **only when a client ships on its
 own schedule**; until then a tag in `hopa-backend` is enough.
 
 ## Per-repository CI
@@ -121,7 +121,7 @@ own schedule**; until then a tag in `hopa-backend` is enough.
 
 ## What keeps the pieces honest
 
-- `contracts/openapi/*.yaml` is the only cross-repo truth; a path change is a
+- `spec/openapi/*.yaml` is the only cross-repo truth; a path change is a
   versioned change.
 - `hopa-wire` owns framing; a change there is a version bump.
 - `check-openapi.py` and `check-tree.py` stay in `hopa` and run against the

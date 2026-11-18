@@ -76,7 +76,7 @@ hopa/
 ├─ evals/
 │  ├─ agent/                   # hopa_baseline reference loop (today: agent/)
 │  └─ bench/                   # hopa_bench (today: bench/)
-├─ contracts/
+├─ spec/
 │  └─ schemas/                 # today: schemas/
 ├─ tools/
 │  ├─ scripts/                 # today: scripts/
@@ -276,7 +276,7 @@ docs/
 │  ├─ layers.md                    # the dependency rules, with the import lint
 │  ├─ data-flow.md                 # observation -> model -> gate -> action -> record
 ├─ adr/                            # one decision per file (kept, already good)
-├─ contracts/                      # observation/action/error contracts (kept)
+├─ spec/                      # observation/action/error contracts (kept)
 ├─ guides/
 │  ├─ setup.md                     # from setup.md
 │  ├─ build-and-sign.md            # from signing.md + setup build part
@@ -399,7 +399,7 @@ behaviour changes in phases 1-8.
 | 0 | Safety net | add `tools/checks/check-structure.py`, file budgets, ADR template | low | S |
 | 1 | Docs | create tree, `git mv` files, split rebuild-plan, fix links, add link check | low | M |
 | 2 | Tooling | move `scripts/` + `signing/` to `tools/`, update CI and docs | low | S |
-| 3 | Contracts | move `schemas/` to `contracts/schemas/`, update references | low | S |
+| 3 | Contracts | move `schemas/` to `spec/schemas/`, update references | low | S |
 | 4 | Python packages | move `agent/`, `hopa-bridge/`, `bench/` under `evals/` and `services/`, update pyprojects + CI | medium | M |
 | 5 | Brain packages | group Kotlin files into packages, update tests | low | S |
 | 6 | Harmony root | move `app/` -> `apps/harmony/`, update scripts + CI + docs | medium | M |

@@ -33,8 +33,8 @@ download, keeps a downloaded copy atomically with rollback, and asks
 ```
 
 `tools/scripts/build-knowledge-bundle.py` writes it from
-`contracts/catalog/catalog.v1.json` and `contracts/prompts/rules.v1.json` to
-`contracts/knowledge`, the backend resources, both clients and the test
+`spec/catalog/catalog.v1.json` and `spec/prompts/rules.v1.json` to
+`spec/knowledge`, the backend resources, both clients and the test
 resources; CI fails when any copy drifts. A Kotlin test decodes the generated
 document with the app codec, so the writer and the reader cannot diverge.
 

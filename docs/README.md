@@ -50,7 +50,7 @@ Service documentation lives with the services: [`services/docs/`](../services/do
 
 | File | Question |
 |---|---|
-| [contracts/](reference/contracts/observation.md) | Observation, action and error contracts |
+| [spec/](reference/contracts/observation.md) | Observation, action and error contracts |
 | [bundles.md](reference/bundles.md) | Which HarmonyOS bundle is which app? |
 | [glossary.md](reference/glossary.md) | What do the words mean? |
 | [safety.md](reference/safety.md) | What is the approval model? |

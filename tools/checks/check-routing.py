@@ -22,7 +22,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = ROOT / "contracts" / "fixtures" / "routing.json"
+FIXTURES = ROOT / "spec" / "fixtures" / "routing.json"
 
 
 def is_ascii_alnum(value: str) -> bool:

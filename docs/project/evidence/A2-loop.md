@@ -27,7 +27,7 @@ messages untouched, trim older lines to 400 chars, then drop from the front.
 - No duplicate-launch short-circuit and no cancellation checkpoints.
 - The prompt is hand-written prose; `PROMPT_RULES` is generated but the builder
   does not consume it and no test asserts the phrases.
-- `AppRouter` has no test over `contracts/fixtures/routing.json`.
+- `AppRouter` has no test over `spec/fixtures/routing.json`.
 - `RunNarrator` has no tap grouping.
 - There is no `ObservationProducer`/`ScreenSource`, so bridge → accessibility →
   browser precedence does not exist.
@@ -42,7 +42,7 @@ messages untouched, trim older lines to 400 chars, then drop from the front.
 - `AgentLoopTest` (6 cases) drives a scripted model: read action, refused
   payment, the 14-step cap plus the final call, duplicate launch, cancellation
   and usage totals.
-- `SystemPromptTest` asserts every phrase in `contracts/prompts/rules.v1.json`
+- `SystemPromptTest` asserts every phrase in `spec/prompts/rules.v1.json`
   through the generated `PROMPT_RULES`, plus the web and no-surface branches.
 - `AppRouterTest` reproduces all 12 routing fixtures including score and term.
 - Still open: tap grouping in `RunNarrator`, and `ScreenSource` (bridge →

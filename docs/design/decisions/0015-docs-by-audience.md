@@ -19,7 +19,7 @@ Five top-level folders, each answering one question:
 |---|---|
 | `design/` | what is it and why: `architecture/`, `decisions/` (ADR), `product/` |
 | `guides/` | how to do it, per platform: `harmony/` today, `android/`, `windows/` later |
-| `reference/` | what a thing is called: `contracts/`, bundles, glossary, policy |
+| `reference/` | what a thing is called: `spec/`, bundles, glossary, policy |
 | `project/` | how we run it: `plan/`, `status.md`, `operations/`, `releases/`, `archive/` |
 | `media/` | pictures and clips |
 

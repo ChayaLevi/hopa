@@ -92,7 +92,7 @@ every later team will use.
 
 **How it joins:** it is the front door. Everything else plugs in here.
 
-**Lives in:** `apps/android`, `apps/windows`, `packages/`, `contracts/`.
+**Lives in:** `apps/android`, `apps/windows`, `packages/`, `spec/`.
 
 ```
   +--------------------------------------+
@@ -140,7 +140,7 @@ receipt book that cannot be quietly edited.
 
 **How it joins:** everything that reaches a device now passes the rules first.
 
-**Lives in:** `packages/core` (the gate and the records), `contracts/policy`.
+**Lives in:** `packages/core` (the gate and the records), `spec/policy`.
 
 ```
   +--------------------------------------+
@@ -166,7 +166,7 @@ notification can become a to-do.
 **How it joins:** the app shows the list; safety and hands work on one item at a
 time.
 
-**Lives in:** `contracts/tasks`, `services/tasks` (new).
+**Lives in:** `spec/tasks`, `services/tasks` (new).
 
 ```
   +--------------------------------------+
@@ -193,8 +193,8 @@ are still open, and how many interruptions a person can take today.
 **How it joins:** the safety rules ask this part what to do instead of using one
 fixed rule; the to-do list carries the promises.
 
-**Lives in:** `packages/decision` (new, from LAIX), `contracts/decision`,
-`contracts/family`.
+**Lives in:** `packages/decision` (new, from LAIX), `spec/decision`,
+`spec/family`.
 
 ```
   +--------------------------------------+
@@ -223,7 +223,7 @@ phones catches it and the previous working version is put back.
 **How it joins:** the hands part follows the instructions; the to-do list asks
 for the right one.
 
-**Lives in:** `contracts/recipes`, `services/mapping` (new), the test rack.
+**Lives in:** `spec/recipes`, `services/mapping` (new), the test rack.
 
 ```
   +--------------------------------------+

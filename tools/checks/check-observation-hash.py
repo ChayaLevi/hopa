@@ -15,8 +15,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = ROOT / "contracts" / "fixtures" / "observation-hash.json"
-SCHEMAS = ROOT / "contracts" / "schemas"
+FIXTURES = ROOT / "spec" / "fixtures" / "observation-hash.json"
+SCHEMAS = ROOT / "spec" / "schemas"
 
 
 def _validator():

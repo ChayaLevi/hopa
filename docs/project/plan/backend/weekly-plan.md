@@ -19,7 +19,7 @@ The repo has a working device plane and a public relay, but no backend: `service
 | `services/relay` (933 lines, Python stdlib) | Phones call it; a PC dials out over WebSocket; it queues and forwards requests to that PC. `/pair`, `/refresh`, `/link/poll`, `/link/result`, `/tunnel` | One owner: tokens come from env vars (`HOPA_BRIDGE_TOKEN`, `HOPA_LINK_TOKEN`), a fixed pair code, an in-memory queue of 200, free tier in Singapore (`render.yaml`) |
 | `services/bridge` (4,042 lines) | Device plane: observe, tap, type, launch over `hdc` or `adb` behind `DevicePort`; voice; the **only conversation store** (`/chats`, `/sessions`, `/images`) | The store is one JSON file on one PC: no users, no households, gone if the PC is off |
 | `services/wire` | WebSocket and tunnel framing shared by bridge and relay (ADR-0010) | Framing only; no message schema or versioning for tasks |
-| `contracts/openapi` | `relay.v1.yaml`, `bridge.v1.yaml` | No task protocol, accounts or sync contract yet |
+| `spec/openapi` | `relay.v1.yaml`, `bridge.v1.yaml` | No task protocol, accounts or sync contract yet |
 | `apps/android`, `apps/windows` | Clients own the loop (ADR-0016); Windows runs the Kotlin engine in a sidecar (ADR-0021) | They expect a bridge on the LAN or the single-owner relay |
 
 The chat store's rules are worth keeping: turns are deduplicated by id, titles are last-writer-wins, deletes are tombstones, and a `rev` counter grows on each change. The backend's sync should keep those semantics and add users, devices and encryption around them.
@@ -66,7 +66,7 @@ Where today’s pieces go:
 - **Relay** → the gateway. Keep its ideas: dial-out sockets, pairing rate limits, a queue until the ack. Replace its env-var tokens with per-device keys.
 - **Bridge chat store and images** → conversation sync and object storage, with the same dedupe, title and tombstone rules.
 - **Bridge device plane** (`hdc`, `adb`, voice) → stays a separate tool for development, evals and the verification farm. It never moves into the backend.
-- **`services/wire`** → keeps framing; the task protocol v0 becomes a versioned schema in `contracts/`, next to a new `backend.v1.yaml`.
+- **`services/wire`** → keeps framing; the task protocol v0 becomes a versioned schema in `spec/`, next to a new `backend.v1.yaml`.
 
 The **operations console** is a web app for the team only, behind an admin role, reading the same Postgres through the backend’s admin API. It shows health, connected devices, queue depth, a task’s path by trace id, and later alerts and recipe rollout. It never shows conversation contents, which it could not decrypt anyway.
 

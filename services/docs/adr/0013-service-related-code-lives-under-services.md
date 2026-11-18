@@ -23,7 +23,7 @@ the split is one path.
   - evaluation: `evals/bench`, `evals/baseline`;
   - service tools: `tools/scripts` (bridges, run-agent, run-bench, run-on-device,
     port-watch, repair-chats) and `tools/checks` (openapi, render).
-- Top level is `apps/`, `services/`, `contracts/`, `tools/`, `docs/` (plus
+- Top level is `apps/`, `services/`, `spec/`, `tools/`, `docs/` (plus
   `.github`). A returning top-level `evals/` is a violation.
 - `tools/` keeps only app tooling: build, deploy, install, catalog, plan status,
   tests for those checks, shots, signing.

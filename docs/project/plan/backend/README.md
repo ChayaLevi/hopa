@@ -27,7 +27,7 @@ Rules, unchanged from the other plans:
 
 - A box is ticked only when the behaviour exists **and** an artifact proves it
   (PR, CI run, test name, deployed trace id). No evidence, no tick.
-- `contracts/` changes and their handlers land in the same pull request.
+- `spec/` changes and their handlers land in the same pull request.
 - A week that misses its exit check carries the gap into the next week instead
   of lowering the check.
 
