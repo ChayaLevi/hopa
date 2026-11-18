@@ -1,4 +1,4 @@
-package com.hopa.engine.contracts
+package com.hopa.engine.conformance
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper

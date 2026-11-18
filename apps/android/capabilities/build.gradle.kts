@@ -27,6 +27,7 @@ dependencies {
     // module in packages/; this module adds the Android-only ones.
     api(project(":net"))
     api(project(":engine"))
+    api(project(":contracts"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)

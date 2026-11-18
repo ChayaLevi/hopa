@@ -1,12 +1,12 @@
 package com.hopa.engine.loop
 
-import com.hopa.engine.gate.ActionExecutor
-import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.contracts.model.ModelUsage
 import com.hopa.contracts.ports.InstalledApp
+import com.hopa.engine.gate.ActionExecutor
+import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.testing.FakeApproval

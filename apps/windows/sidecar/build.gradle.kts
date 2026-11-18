@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":engine"))
     implementation(project(":net"))
     implementation(project(":stores"))
+    implementation(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

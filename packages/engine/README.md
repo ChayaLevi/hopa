@@ -6,26 +6,26 @@ neither a device nor a provider.
 
 ```
 loop/         AgentLoop, TurnContext, TurnResult, LoopConfig, RunNarrator
-gate/         ActionExecutor, ApprovalPolicy, ActionClassifier, ApprovalGateway
+gate/         ActionExecutor, ApprovalPolicy, ActionClassifier
 prompt/       SystemPromptBuilder, AppCatalogBlock, InstalledAppsBlock, ScreenRenderer, ContextBudget
 observation/  ObservationProducer (refs, redaction, caps, hash), ScreenSourceDevice, ScreenPathOrder
 records/      RunChain, RunRecordFactory, RunRecorder (+ in-memory)
 router/       AppRouter, CatalogRoutes, RouterHint
 parser/       DecisionParser, BalancedObjectScanner, DecisionRules
-contracts/    Action (+ ActionKind), Decision, Observation (+ the tree and screen size), RunRecord, errors
-ports/        DevicePort, SystemPort, BrowserPort, SandboxPort, Clock, PackageCatalog
-model/        ModelPort, ModelRequest, ModelReply (no HTTP — see packages/net)
 ```
+
+The types these use live in `packages/contracts`: `Action`, `Decision`,
+`Observation`, `RunRecord`, the ports, `ModelPort` and the JSON helpers.
 
 ## Rules
 
 - **No Android imports.** `checkNoAndroidImports` (Gradle) and
   `tools/checks/check-android-structure.py` both fail the build if one appears.
 - **No network.** The model and bridge clients live in `packages/net`; this
-  module only defines `ModelPort`.
+  module only consumes `ModelPort`.
 - **Generated data lives elsewhere.** The catalog, the policy data and the prompt
   rules are in `packages/knowledge`.
-- **One public declaration per file**, named after the file.
+- **One class per file**, named after it; contracts may share a file.
 
 ## Where the decision comes from
 
@@ -59,5 +59,5 @@ memory), a `Clock`, and a `ModelPort`.
 ./gradlew :engine:test
 ```
 
-Conformance tests read `contracts/` from the repository, so they check the same
-JSON the other clients use.
+`com.hopa.engine.conformance` reads `contracts/` from the repository, so it
+checks the same JSON the other clients use.

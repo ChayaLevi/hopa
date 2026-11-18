@@ -95,6 +95,9 @@ dependencies {
     implementation(project(":engine"))
     implementation(project(":capabilities"))
     implementation(project(":data"))
+    implementation(project(":contracts"))
+    implementation(project(":net"))
+    implementation(project(":stores"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

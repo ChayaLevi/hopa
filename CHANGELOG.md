@@ -2,6 +2,16 @@
 
 ## Unreleased - packages
 
+- New `packages/contracts` (`com.hopa.contracts`): the wire types, port
+  interfaces, model types, approval data classes and JSON helpers left
+  `packages/engine`, which now depends on them. `net` and `stores` depend on
+  `contracts` too, so the graph has one leaf instead of three.
+- `packages/README.md` and `packages/engine/README.md` describe five modules
+  again; `packages/contracts/README.md` is new.
+- `services/backend` includes `:contracts`: `engine` depends on it, and the
+  backend build failed without it.
+- The engine's conformance tests move to `com.hopa.engine.conformance`; the old
+  package name described types that had left.
 - `packages/knowledge` is one package (`com.hopa.knowledge`): the generated
   catalog, policy data and prompt rules sit side by side, each file keeping the
   name of the script that writes it.
