@@ -297,6 +297,8 @@ and a secret/license scan.
   images, relay.
 - `services/brain/` — the Kotlin reference brain for routing and knowledge.
 - `services/evals/` — the reference loop and HOPA-Bench.
+- `build-logic/` — the Gradle convention plugins that the Android, Windows and
+  backend builds share, since all three include `packages/`.
 - `docs/` — setup, architecture, contracts and the status.
 
 **Links**

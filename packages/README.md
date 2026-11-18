@@ -63,6 +63,12 @@ or bridge), an `ApprovalGateway` (the sheet), a `RunRecorder` (Room or memory), 
 
 ## Build and test
 
+The modules apply two convention plugins from `build-logic/`: `hopa.kotlin-jvm`
+(a plain JVM module on JDK 17) and, where a module is held to it,
+`hopa.ktlint`. The Android app, the Windows sidecar and the backend all
+`includeBuild` that composite build, so the module files stay the same in all
+three.
+
 ```
 ./gradlew :contracts:compileKotlin :engine:test :knowledge:compileKotlin :stores:test :net:test
 ./gradlew :app:compileDebugKotlin

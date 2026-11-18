@@ -4,8 +4,8 @@
 Rules (ADR-0007):
 
 1. Top level is exactly `apps`, `services`, `packages`, `evals`, `contracts`,
-   `tools`, `docs` plus `.github`. A new top-level folder is a decision, not an
-   accident, so it has to be added here and in the ADR.
+   `build-logic`, `tools`, `docs` plus `.github`. A new top-level folder is a
+   decision, not an accident, so it has to be added here and in the ADR.
 2. `harness/` must not exist: it was renamed to `evals/`.
 3. No junk drawers anywhere: `utils`, `helpers`, `common`, `misc`, `shared`.
 4. `packages/` holds only the client engine (`contracts`, `engine`,
@@ -27,6 +27,7 @@ TOP_LEVEL = {
     "packages",
     "evals",
     "contracts",
+    "build-logic",
     "tools",
     "docs",
     ".github",

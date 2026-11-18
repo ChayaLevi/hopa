@@ -1,9 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-}
-
-kotlin {
-    jvmToolchain(17)
+    id("hopa.kotlin-jvm")
 }
 
 // Generated knowledge only: the app catalog, the approval policy data and the

@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased - build
+
+- `build-logic/` is a composite build of Gradle convention plugins. A module
+  opts in (`id("hopa.kotlin-jvm")`, `id("hopa.ktlint")`) instead of every module
+  repeating the Kotlin plugins and `jvmToolchain(17)`, and instead of the root
+  build deciding by module *name* (`subprojects { if (name == "engine") ... }`),
+  which is how the ktlint gate silently stopped applying when `core` became
+  `engine`. The Android, Windows sidecar and backend builds each
+  `includeBuild` it, because all three include `packages/`. The ktlint version
+  moved into the version catalog.
+- `build-logic` joins the top-level folders in ADR-0007 and
+  `tools/checks/check-tree.py`; `README.md` and `CONTRIBUTING.md` name the five
+  modules instead of the old three.
+
 ## Unreleased - engine
 
 - `AgentLoop` asks a `StepPolicy` for the next step and `ModelStepPolicy` wraps

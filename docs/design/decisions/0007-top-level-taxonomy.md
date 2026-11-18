@@ -34,6 +34,11 @@ Three problems motivated this record:
   | `tools/` | how we build and check | never |
   | `docs/` | why it is like this | never |
 
+- `build-logic/` holds the Gradle convention plugins (addendum 2026-11-18).
+  It is a composite build, not a module: the Android app, the Windows sidecar
+  and the backend each `includeBuild` it, because all three include `packages/`
+  and the module files cannot belong to one of them. It ships nothing.
+
 - **`agent` is a product word**: `apps/harmony/core/agent`, and later
   `services/backend/runtime`. Evaluation code is a *baseline* or a *driver*.
 - `evals/` replaces `harness/`. The evaluation driver lives in

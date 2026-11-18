@@ -20,6 +20,7 @@ flyway = "11.20.3"
 hikari = "6.3.3"
 postgresql = "42.7.14"
 testcontainers = "1.21.4"
+ktlint = "12.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
