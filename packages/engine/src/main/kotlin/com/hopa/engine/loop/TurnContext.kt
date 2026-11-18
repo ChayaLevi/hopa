@@ -1,7 +1,7 @@
 package com.hopa.engine.loop
 
-import com.hopa.engine.model.ModelMessage
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.model.ModelMessage
+import com.hopa.contracts.ports.InstalledApp
 
 data class TurnContext(
     val goal: String,

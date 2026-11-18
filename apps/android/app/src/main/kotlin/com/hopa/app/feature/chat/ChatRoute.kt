@@ -9,6 +9,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
 import com.hopa.app.feature.conversations.ChatsSheet
+import com.hopa.app.feature.conversations.ConversationsViewModel
+import com.hopa.app.feature.conversations.ConversationsViewModelFactory
 import com.hopa.stores.AppSettings
 
 @Composable
@@ -22,6 +24,8 @@ fun ChatRoute(
     onOpenSettings: () -> Unit = {},
 ) {
     val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(container))
+    val conversationsViewModel: ConversationsViewModel =
+        viewModel(factory = ConversationsViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by container.settings.settings.collectAsStateWithLifecycle(
         initialValue = AppSettings(),
@@ -70,7 +74,7 @@ fun ChatRoute(
         onCancelPlan = viewModel::cancelPlan,
         onSaveSkill = viewModel::saveSkill,
         tasks = tasks,
-        onOpenTask = { viewModel.select(it.conversationId) },
+        onOpenTask = { conversationsViewModel.select(it.conversationId) },
         onDismissTask = { container.runner.dismiss(it) },
     )
 
@@ -80,7 +84,7 @@ fun ChatRoute(
             currentId = state.current?.id,
             onDismiss = { chatsOpen = false },
             onSelect = { id ->
-                viewModel.select(id)
+                conversationsViewModel.select(id)
                 chatsOpen = false
             },
             onNewChat = { chatsOpen = false },

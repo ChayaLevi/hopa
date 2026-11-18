@@ -1,9 +1,9 @@
 package com.hopa.net.bridge
 
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.ports.Clock
-import com.hopa.engine.ports.DevicePort
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ports.Clock
+import com.hopa.contracts.ports.DevicePort
+import com.hopa.contracts.ports.InstalledApp
 
 /**
  * `DevicePort` over the PC bridge: the phone is driven by adb on the PC, which

@@ -72,18 +72,30 @@ class ParallelRunner(
 
         try {
             val settings = container.settings.settings.first()
-            container.policy.setTrustedApps(settings.trustedApps.toList())
+            container.useGate(settings.trustedApps.toList())
 
             // A goal that worked before runs from its recipe here too: the
             // parallel run gets the cheap path, not just the main one.
             if (settings.replaySkills) {
                 val recipe = runCatching { container.recipes.find(goal) }.getOrNull()
                 if (recipe != null) {
-                    val replayed = runCatching {
-                        com.hopa.app.skills.Replayer(container).replay(recipe, device)
-                    }.getOrDefault(0)
-                    if (replayed == recipe.steps.size) {
-                        val answer = "Done - repeated the $replayed steps that worked last time."
+                    val outcome = runCatching {
+                        com.hopa.app.recipes.Replayer(container).replay(recipe, device)
+                    }.getOrNull()
+                    if (outcome?.trustworthy == true) {
+                        val replayed = outcome.done
+                        val screen = outcome.screen
+                        val spoken = if (screen != null) {
+                            runCatching {
+                                com.hopa.app.recipes.ReplayAnswer(container.model)
+                                    .answer(goal, screen)
+                            }.getOrNull()
+                        } else {
+                            null
+                        }
+                        val answer = spoken?.first
+                            ?: "Repeated the $replayed steps that worked last time."
+                        val tokens = spoken?.second ?: 0
                         val steps = recipe.steps.mapIndexed { index, action ->
                             "${index + 1}. ${action.kind}"
                         }
@@ -94,11 +106,11 @@ class ParallelRunner(
                                 path = "background",
                                 executed = replayed,
                                 verified = replayed,
-                                tokens = 0,
+                                tokens = tokens,
                                 steps = steps,
                             ),
                         )
-                        record(goal, conversation.id, replayed, 0)
+                        record(goal, conversation.id, replayed, tokens)
                         finish(id, "done", answer.take(80))
                         return
                     }
@@ -159,8 +171,21 @@ class ParallelRunner(
                 steps = steps,
             )
             append(conversation.id, answer, proof.takeIf { it.executed > 0 })
-            if (!result?.records.isNullOrEmpty() && result.records.all { it.executed }) {
-                runCatching { container.recipes.save(goal, result.records.map { it.action }) }
+            if (
+                result != null &&
+                result.error == null &&
+                result.options.isEmpty() &&
+                result.records.any { it.verified }
+            ) {
+                runCatching {
+                    container.recipes.save(
+                        goal = goal,
+                        steps = result.records.map { it.action },
+                        anchors = result.records.map { it.targetKey.orEmpty() },
+                        screenHash = result.records.first().beforeHash.orEmpty(),
+                        endHash = result.records.last().afterHash.orEmpty(),
+                    )
+                }
             }
             record(goal, conversation.id, result?.records?.size ?: 0, result?.usage?.totalTokens ?: 0)
             finish(id, "done", answer.take(80))

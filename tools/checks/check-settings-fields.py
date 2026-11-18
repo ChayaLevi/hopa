@@ -26,6 +26,15 @@ def fields() -> list[str]:
 
 
 def check() -> list[str]:
+    # A moved file is the failure this check exists to catch, so name it instead
+    # of raising a traceback.
+    missing = [
+        f"{path.relative_to(ROOT)}: not found"
+        for path in (SETTINGS, STORE)
+        if not path.exists()
+    ]
+    if missing:
+        return missing
     names = fields()
     store = STORE.read_text(encoding="utf-8")
     read_block = store[store.index("AppSettings(") : store.index("override suspend fun update")]

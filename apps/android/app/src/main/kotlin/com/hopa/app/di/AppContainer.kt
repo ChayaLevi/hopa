@@ -10,29 +10,30 @@ import com.hopa.app.backend.ProcessedTaskStore
 import com.hopa.app.backend.PushTokenFetch
 import com.hopa.app.backend.RemoteRunRequest
 import com.hopa.app.backend.RemoteTaskRunner
-import com.hopa.app.model.SettingsModelPort
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
+import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.stores.AppSettings
 import com.hopa.capabilities.accessibility.AccessibilityDevice
 import com.hopa.net.llm.ModelFactory
 import com.hopa.net.llm.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
+import com.hopa.contracts.ports.DevicePort
 import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.engine.loop.AgentLoop
-import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.engine.loop.ModelStepPolicy
 import com.hopa.data.database.HopaDatabase
-import com.hopa.data.store.RoomRunRecorder
+import com.hopa.data.store.DbRunRecorder
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.stores.ConversationStore
-import com.hopa.data.store.RoomConversationStore
+import com.hopa.data.store.DbConversationStore
 import com.hopa.data.store.DataStoreSettingsRepository
-import com.hopa.stores.AppSettings
 import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -50,7 +51,7 @@ class AppContainer(context: Context) {
     }
 
     private val database = HopaDatabase.build(context)
-    val conversations: ConversationStore = RoomConversationStore(database)
+    val conversations: ConversationStore = DbConversationStore(database)
     val selectedConversation = MutableStateFlow<String?>(null)
     val busy = MutableStateFlow(false)
     val cancelRequested = MutableStateFlow(false)
@@ -75,15 +76,27 @@ class AppContainer(context: Context) {
     val backendNotice = MutableStateFlow<String?>(null)
     val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
-    val recorder = RoomRunRecorder(database.runRecordDao())
-    val runHistory = com.hopa.data.store.RoomRunHistory(database.runHistoryDao())
-    val pendingApprovals = com.hopa.data.store.RoomPendingApprovalStore(
+    val recorder = DbRunRecorder(database.runRecordDao())
+    val runHistory = com.hopa.data.store.DbRunHistory(database.runHistoryDao())
+    val pendingApprovals = com.hopa.data.store.DbPendingApprovalStore(
         database.pendingApprovalDao(),
     )
-    val memory = com.hopa.data.store.RoomMemoryStore(database.memoryDao())
-    val skills = com.hopa.data.store.RoomSkillStore(database.skillDao())
+    val memory = com.hopa.data.store.DbMemoryStore(database.memoryDao())
+    val skills = com.hopa.data.store.DbSkillStore(database.skillDao())
     val clock = AndroidClock()
-    val policy = ApprovalPolicy()
+    /**
+     * The gate settings, replaced as a whole when they change. The executor
+     * reads one snapshot per step, so a turn that starts while Settings is being
+     * saved cannot see half of the new list.
+     */
+    @Volatile
+    private var gatePolicy = ApprovalPolicy()
+
+    /** Use these settings for the turns that start now. */
+    fun useGate(trustedApps: Collection<String>, autonomous: Boolean = false) {
+        gatePolicy = ApprovalPolicy(autonomous = autonomous, trustedApps = trustedApps)
+    }
+
     val approval = UiApprovalGateway(pendingApprovals)
     val factory = RunRecordFactory(clock)
     val device = AccessibilityDevice(context)
@@ -94,7 +107,7 @@ class AppContainer(context: Context) {
         browser = null,
         system = AndroidSystemPort(context),
         sandbox = null,
-        policy = policy,
+        policy = { gatePolicy },
         approval = approval,
         recorder = recorder,
         factory = factory,
@@ -106,6 +119,7 @@ class AppContainer(context: Context) {
     /** Why the last hidden-display start failed; empty when it worked. */
     var lastBackgroundError: String = ""
         private set
+
 
     /**
      * The app's one gateway link. Pairing and the activity life cycle reach it
@@ -133,10 +147,6 @@ class AppContainer(context: Context) {
             },
         )
     }
-
-    /** The hidden background display: one helper process, one loopback port. */
-    val displayToken = com.hopa.capabilities.display.DisplayToken(context)
-    val shell = com.hopa.capabilities.display.ShellClient(displayToken.value)
 
     init {
         // A delivered task runs on the surface the person configured. The
@@ -186,6 +196,10 @@ class AppContainer(context: Context) {
         runCatching { context.stopService(intent) }
     }
 
+    /** The hidden background display: one helper process, one loopback port. */
+    val displayToken = com.hopa.capabilities.display.DisplayToken(context)
+    val shell = com.hopa.capabilities.display.ShellClient(displayToken.value)
+
     /**
      * Wireless debugging inside the app: pair once with the code Android shows,
      * then adbd gives this app shell and no PC is needed.
@@ -197,40 +211,30 @@ class AppContainer(context: Context) {
      * A paired bridge can start the helper itself, so the common case needs no
      * button press; after a reboot the first background run does it.
      */
-    suspend fun backgroundDevice(): com.hopa.engine.ports.DevicePort? {
-        var started: com.hopa.capabilities.display.ShellDisplayDevice? = null
-        return try {
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                if (!shell.connect()) {
-                    val startedHere = quiet {
-                        wireless.connectAndStartHelper(displayToken.value).contains("ready")
-                    }
-                    if (!startedHere) {
-                        startHelperThroughBridge()
-                    }
-                    kotlinx.coroutines.delay(1_500)
-                    if (!shell.connect()) {
-                        return@withContext null
-                    }
+    suspend fun backgroundDevice(): DevicePort? =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            if (!shell.connect()) {
+                val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
+                    .getOrDefault("")
+                    .contains("ready")
+                if (!startedHere) {
+                    startHelperThroughBridge()
                 }
-                val metrics = context.resources.displayMetrics
-                val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
-                if (device.start(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)) {
-                    lastBackgroundError = ""
-                    started = device
-                    device
-                } else {
-                    lastBackgroundError = device.error.ifBlank { "the helper refused a display" }
-                    null
+                kotlinx.coroutines.delay(1_500)
+                if (!shell.connect()) {
+                    return@withContext null
                 }
             }
-        } catch (cancelled: kotlinx.coroutines.CancellationException) {
-            // The display is live before withContext's cancellation check; stop
-            // it here because the caller never received the device to release.
-            runCatching { started?.stop() }
-            throw cancelled
+            val metrics = context.resources.displayMetrics
+            val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
+            if (device.start(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)) {
+                lastBackgroundError = ""
+                device
+            } else {
+                lastBackgroundError = device.error.ifBlank { "the helper refused a display" }
+                null
+            }
         }
-    }
 
     /** Pair with this phone's own adbd, then start the helper with that shell. */
     suspend fun pairWireless(address: String, code: String): String =
@@ -262,27 +266,18 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return false
         }
-        return quiet {
+        return runCatching {
             com.hopa.net.bridge.BridgeClient(current.bridgeUrl, token)
                 .startHelper(token = displayToken.value)
             true
-        }
-    }
-
-    /** A failed optional step is false; cancellation still belongs to the caller. */
-    private suspend fun quiet(block: suspend () -> Boolean): Boolean = try {
-        block()
-    } catch (cancelled: kotlinx.coroutines.CancellationException) {
-        throw cancelled
-    } catch (error: Exception) {
-        false
+        }.getOrDefault(false)
     }
 
     val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
     val modelFactory: ModelFactory = ModelFactory()
     val loop = AgentLoop(
-        model = model,
+        stepPolicy = ModelStepPolicy(model),
         device = device,
         executor = executor,
         recorder = recorder,
@@ -291,7 +286,7 @@ class AppContainer(context: Context) {
     )
 
     /** A bridge-backed device when Settings has an address and a token. */
-    suspend fun bridgedDevice(): com.hopa.engine.ports.DevicePort? {
+    suspend fun bridgedDevice(): DevicePort? {
         val current = settings.settings.first()
         if (!current.useBridge || current.bridgeUrl.isBlank()) {
             return null
@@ -386,13 +381,13 @@ class AppContainer(context: Context) {
         )
     }
 
-    /** One executor per device path, sharing the policy, approval and recorder. */
-    fun executorFor(device: com.hopa.engine.ports.DevicePort): ActionExecutor = ActionExecutor(
+    /** One executor per device path, sharing the gate snapshot, approval and recorder. */
+    fun executorFor(device: DevicePort): ActionExecutor = ActionExecutor(
         device = device,
         browser = null,
         system = AndroidSystemPort(context),
         sandbox = null,
-        policy = policy,
+        policy = { gatePolicy },
         approval = approval,
         recorder = recorder,
         factory = factory,
@@ -400,11 +395,11 @@ class AppContainer(context: Context) {
     )
 
     /** Recipes that were replayed before; a matching goal runs without the model. */
-    val recipes by lazy { com.hopa.app.skills.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+    val recipes by lazy { com.hopa.app.recipes.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** One loop per device path, sharing the model, recorder and gate. */
-    fun loopFor(device: com.hopa.engine.ports.DevicePort): AgentLoop = AgentLoop(
-        model = model,
+    fun loopFor(device: DevicePort): AgentLoop = AgentLoop(
+        stepPolicy = ModelStepPolicy(model),
         device = device,
         executor = executorFor(device),
         recorder = recorder,

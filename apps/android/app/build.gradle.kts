@@ -94,8 +94,11 @@ android {
 
 dependencies {
     implementation(project(":engine"))
-    implementation(project(":capabilities-android"))
-    implementation(project(":data-android"))
+    implementation(project(":capabilities"))
+    implementation(project(":data"))
+    implementation(project(":contracts"))
+    implementation(project(":net"))
+    implementation(project(":stores"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -121,8 +124,7 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.6.2")
     // androidx.test refers to these annotations; R8 needs them on the test
     // classpath or it refuses to minify the instrumentation APK.
-    androidTestImplementation("com.google.errorprone:error_prone_annotations:2.27.1")
-    testImplementation(project(":testing"))
+    androidTestImplementation("com.google.errorprone:error_prone_annotations:2.26.0")
 }
 
 // A fresh clone has no google-services.json and still has to build; the

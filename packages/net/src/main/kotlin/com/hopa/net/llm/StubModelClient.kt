@@ -1,8 +1,8 @@
 package com.hopa.net.llm
 
-import com.hopa.engine.model.ModelPort
-import com.hopa.engine.model.ModelReply
-import com.hopa.engine.model.ModelRequest
+import com.hopa.contracts.model.ModelPort
+import com.hopa.contracts.model.ModelReply
+import com.hopa.contracts.model.ModelRequest
 import kotlinx.coroutines.delay
 
 class StubModelClient : ModelPort {

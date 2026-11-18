@@ -14,7 +14,7 @@ import com.hopa.engine.observation.ScreenSourceDevice
 object RemoteRuns {
     suspend fun execute(container: AppContainer, request: RemoteRunRequest): TurnResult {
         val settings = request.settings
-        container.policy.setTrustedApps(settings.trustedApps.toList())
+        container.useGate(settings.trustedApps.toList())
         val facts = runCatching { container.memory.promptText() }.getOrDefault("")
         val character = "Character: ${settings.tone} tone, ${settings.chattiness} length."
         val memory = listOf(facts, character).filter { it.isNotBlank() }

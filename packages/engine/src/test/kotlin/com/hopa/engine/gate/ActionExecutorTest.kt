@@ -1,7 +1,8 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.ErrorCodes
+import com.hopa.contracts.Action
+import com.hopa.contracts.ErrorCodes
+import com.hopa.contracts.ExecutionResult
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.testing.FakeApproval
@@ -98,7 +99,7 @@ class ActionExecutorTest {
             browser = null,
             system = null,
             sandbox = null,
-            policy = ApprovalPolicy(),
+            policy = { ApprovalPolicy() },
             approval = approval,
             recorder = recorder,
             factory = RunRecordFactory(clock),

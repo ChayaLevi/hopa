@@ -1,6 +1,6 @@
 package com.hopa.engine.testing
 
-import com.hopa.engine.ports.Clock
+import com.hopa.contracts.ports.Clock
 
 /** Deterministic time; records how long the loop waited. */
 class FakeClock(

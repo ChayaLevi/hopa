@@ -1,7 +1,82 @@
 # Changelog
 
+## Unreleased - build
+
+- `build-logic/` is a composite build of Gradle convention plugins. A module
+  opts in (`id("hopa.kotlin-jvm")`, `id("hopa.ktlint")`) instead of every module
+  repeating the Kotlin plugins and `jvmToolchain(17)`, and instead of the root
+  build deciding by module *name* (`subprojects { if (name == "engine") ... }`),
+  which is how the ktlint gate silently stopped applying when `core` became
+  `engine`. The Android, Windows sidecar and backend builds each
+  `includeBuild` it, because all three include `packages/`. The ktlint version
+  moved into the version catalog.
+- `build-logic` joins the top-level folders in ADR-0007 and
+  `tools/checks/check-tree.py`; `README.md` and `CONTRIBUTING.md` name the five
+  modules instead of the old three.
+
+## Unreleased - engine
+
+- `RunRecord` carries an optional `targetKey`: what the step's `ref` pointed at
+  (`type|text=…|desc=…|id=…`), not where it sat in the tree. `ActionExecutor`
+  resolves it against the observation the step saw, and the schema, serializer
+  and docs describe it. This is what lets a recipe find a control again after a
+  redraw; a node with no text, description or id has no key, and a step on it
+  stays positional.
+- Recipes use that key: `RecipeStore` writes a `v2` line with the anchors, the
+  start/end hashes and the steps; `Replayer` re-resolves every `ref` through its
+  anchor and stops before a tap it cannot place. A step without an anchor makes
+  the recipe unreplayable, so the model runs instead of a positional tap.
+- A replay now answers: `ReplayAnswer` takes the tree the replay ended on and
+  asks the model once, in plain text, so "repeated 2 steps" became "The first
+  row is Wi-Fi" for about 2k tokens instead of 16k. If that call fails the plain
+  sentence stays; no action can come out of it.
+- `DisplayLauncher` starts an app with `am start -W` and treats a non-`ok`
+  status, or "Activity not started", as a failure, so a launch that did not land
+  on the hidden display is reported instead of read as an empty screen.
+
+- `AgentLoop` asks a `StepPolicy` for the next step and `ModelStepPolicy` wraps
+  a `ModelPort`, so the seam a playbook policy needs is in the loop and not in
+  the client. Nothing in the loop knows whether a model wrote the reply.
+- `ApprovalPolicy` is an immutable snapshot now: `withTrustedApps` and
+  `withAutonomous` return a new one, and `ActionExecutor` takes a supplier and
+  reads one snapshot per step. Two runs in flight can no longer see each other's
+  trust list half-applied.
+- `DecisionRules` checks the fields a kind needs: a tap has a ref or a point, a
+  swipe has the whole gesture, `ui.launch` names an app, `app.function` has its
+  function name. A step that cannot work stops the model instead of reaching the
+  device and gesturing at a guess.
+- `RunRecordFactory` reuses `observation.hash` (`ObservationHasher.hashOf`)
+  rather than hashing the tree again, and the executor compares the same
+  digests.
+- `SessionApprovalGateway`, `ActionParser` and `VoicePort` are removed: nothing
+  referenced them. `VoicePort` comes back with the voice work.
+
 ## Unreleased - packages
 
+- New `packages/contracts` (`com.hopa.contracts`): the wire types, port
+  interfaces, model types, approval data classes and JSON helpers left
+  `packages/engine`, which now depends on them. `net` and `stores` depend on
+  `contracts` too, so the graph has one leaf instead of three.
+- `packages/README.md` and `packages/engine/README.md` describe five modules
+  again; `packages/contracts/README.md` is new.
+- `services/backend` includes `:contracts`: `engine` depends on it, and the
+  backend build failed without it.
+- The engine's conformance tests move to `com.hopa.engine.conformance`; the old
+  package name described types that had left.
+- The Android tests follow the packages they test: `ActModeTest` sits in
+  `feature.execution`, `DerCertificateTest` and `BackgroundDisplayTest` moved to
+  `apps/android/capabilities` with the display code they drive, and the app's
+  copies of `AttachmentRulesTest` and the drop-last-exchange case are gone
+  (identical cases already live in `packages/stores`). The renamed tests had
+  stopped compiling, and `:app:testDebugUnitTest` failed before it ran anything.
+- `tools/checks/check-android-structure.py` now rejects a test package that
+  production code does not ship and that is not listed as test support, which is
+  what those leftovers were.
+- The remaining checks follow the tree instead of a remembered one:
+  `check-tree.py` allows the five module names, `check-settings-fields.py` reads
+  `AppSettings` from `packages/stores` and the repository from
+  `com.hopa.data.store`, and the two catalogue tests count `APP.md` files rather
+  than pinning 54 apps. Three CI jobs were red on `main` because of these.
 - `packages/knowledge` is one package (`com.hopa.knowledge`): the generated
   catalog, policy data and prompt rules sit side by side, each file keeping the
   name of the script that writes it.

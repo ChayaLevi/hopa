@@ -1,6 +1,6 @@
 package com.hopa.net.backend
 
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.json.HopaJson
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers

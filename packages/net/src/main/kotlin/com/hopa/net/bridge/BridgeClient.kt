@@ -1,7 +1,7 @@
 package com.hopa.net.bridge
 
-import com.hopa.engine.json.HopaJson
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.json.HopaJson
+import com.hopa.contracts.ports.InstalledApp
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers

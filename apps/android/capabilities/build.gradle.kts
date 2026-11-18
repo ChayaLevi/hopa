@@ -27,6 +27,7 @@ dependencies {
     // module in packages/; this module adds the Android-only ones.
     api(project(":net"))
     api(project(":engine"))
+    api(project(":contracts"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
@@ -42,4 +43,12 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.core)
+
+    // BackgroundDisplayTest drives the helper on a real phone from this module,
+    // where ShellClient and the display code live.
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    // androidx.test refers to these annotations; R8 needs them on the test
+    // classpath or it refuses to minify the instrumentation APK.
+    androidTestImplementation("com.google.errorprone:error_prone_annotations:2.27.1")
 }

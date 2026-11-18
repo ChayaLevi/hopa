@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.engine.gate.ApprovalRequest
+import com.hopa.contracts.ApprovalRequest
 
 @Composable
 fun ApprovalSheet(

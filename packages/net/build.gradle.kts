@@ -1,14 +1,10 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    id("hopa.kotlin-jvm")
     alias(libs.plugins.kotlin.serialization)
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
 dependencies {
-    api(project(":engine"))
+    api(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

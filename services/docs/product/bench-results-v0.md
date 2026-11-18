@@ -1,4 +1,4 @@
-﻿# HOPA-Bench v0
+# HOPA-Bench v0
 
 The first benchmark slice: twenty task definitions, four success predicates and a stable
 failure taxonomy. It validates the task format and the runner. A device run is
@@ -34,7 +34,7 @@ max_steps: 10
 | `node_exists` | A node with the id or text exists | `id`, `any` or `all` |
 | `app_foreground` | The bundle is the foreground app | `bundle` (or task bundle) |
 | `screen_hash` | The visible-text hash matches | `hash` |
-| `always` | Unconditional (used to test the runner) | â€” |
+| `always` | Unconditional (used to test the runner) | — |
 
 `screen_hash` is `sha256` of the visible text joined by newlines. It is stable
 across refs and timestamps, so it is safe for fixtures.
@@ -58,11 +58,11 @@ Every `TaskResult` carries `success`, `failure`, `steps`, `latency_ms` per step,
 
 The directory now holds **20 task definitions**:
 
-1. `settings-wlan` â€” reach Bluetooth
-2. `clock-open-alarm` â€” open the Alarm tab
-3. `calendar-new-event` â€” create an event
-4. `browser-search-harmonyos` â€” search in the browser
-5. `notes-create-note` â€” create a note
+1. `settings-wlan` — reach Bluetooth
+2. `clock-open-alarm` — open the Alarm tab
+3. `calendar-new-event` — create an event
+4. `browser-search-harmonyos` — search in the browser
+5. `notes-create-note` — create a note
 6. `clock-alarm-tab`
 7. `clock-create-alarm-0730`
 8. `calendar-event-tomorrow`

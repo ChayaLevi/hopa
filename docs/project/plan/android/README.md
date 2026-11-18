@@ -43,7 +43,7 @@ stated target, and the artifact exists.
 2. Two execution paths behind one seam, selectable, with an honest status line.
 3. Offline core: loop, model, sessions and records work without a PC; the bridge
    adds device control, voice and sync.
-4. `core` free of Android imports, proven by the conformance fixtures on the JVM.
+4. `engine` free of Android imports, proven by the conformance fixtures on the JVM.
 5. Sideload-first release: signed APK, no store dependency at the start.
 
 ## 2. Non-goals
@@ -172,7 +172,7 @@ apps/android/
 └─ androidTest/    conformance runner, Compose tests, emulator/device suites
 ```
 
-### 5.1 Ports (`core` owns the interfaces)
+### 5.1 Ports (`contracts` owns the interfaces)
 
 | Port | Answers | Android implementations |
 |---|---|---|
@@ -180,14 +180,14 @@ apps/android/
 | `SystemPort` | `system.*` (alarm, event, link, share, call, message, delete, uninstall, reset) | platform services / bridge shell |
 | `BrowserPort` | `web.*` | WebView + JS bridge (no browser over the bridge; say so) |
 | `SandboxPort` | `sandbox.run` | WebView JS only |
-| `VoicePort` | record, transcribe, speak | `AudioRecord` + bridge, TTS fallback |
+| `VoicePort` | record, transcribe, speak — not in `contracts` until the voice work starts | `AudioRecord` + bridge, TTS fallback |
 | `Clock` | now, settle, timeouts | injected; makes loop tests deterministic |
 | `PackageCatalog` | installed apps, verified flags, launch intent | `PackageManager` + a new Android catalogue |
 | `ObservationProducer` | screen → observation (refs, redaction, caps, hash) | one implementation, used by **both** device adapters |
 | `ScreenSource` | choose bridge / accessibility / browser text | a composition with an explicit precedence |
 | `RunRecorder`, `ApprovalGateway` | record, ask | Room recorder, service-owned approval |
 
-`core` has no `android.*`; the composition root is `app`.
+`engine` has no `android.*`; the composition root is `app`.
 
 ### 5.2 Execution planner
 
@@ -230,7 +230,7 @@ apps/android/
 - No `Utils.kt`, `Helpers.kt`, `Common.kt`, `Manager.kt`, `Misc.kt`.
 - Implementations are named by technology, not `Impl`: `RoomConversationStore`,
   `KeystoreSecretStore`, `BridgeDevice`.
-- `core` is a JVM module with no `android.*`/`androidx.*` imports.
+- `engine` is a JVM module with no `android.*`/`androidx.*` imports.
 - Features in `app` repeat `XRoute -> XScreen -> XViewModel -> XUiState`, with
   components in `feature/<name>/component/`.
 - Tests mirror main packages.
@@ -243,23 +243,23 @@ apps/android/
 ### A0. Project, toolchain and Android prerequisites (5 d)
 
 - [x] Gradle project with version catalog, JDK 17, AGP/Kotlin/Compose; `minSdk 30`, `targetSdk 35`. (evidence: docs/project/evidence/A0-android-running.md)
-- [x] Modules `app`, `core`, `capabilities`, `data`; a Gradle check rejects `android.*` in `core`. (evidence: settings.gradle.kts; :core:check runs checkNoAndroidImports)
-- [x] ktlint + Android source rules: zero warnings on `core`. (evidence: org.jlleitschuh.gradle.ktlint on :core; `:core:ktlintCheck` green; CI runs it; generated AppCatalog excluded)
+- [x] Modules `app`, `capabilities`, `data`, plus the shared `packages/` modules (`contracts`, `engine`, `knowledge`, `stores`, `net`); a Gradle check rejects `android.*` in `engine`. (evidence: settings.gradle.kts; `:engine:check` runs `checkNoAndroidImports`)
+- [x] ktlint + Android source rules: zero warnings on `engine`. (evidence: the module applies `hopa.ktlint` from `build-logic/`; `:engine:ktlintCheck` green; CI runs it)
 - [x] Wrapper committed; `.gitignore` for SDK/keystores/build. (evidence: gradle/wrapper/*; root .gitignore)
 - [x] **Cleartext policy**: `networkSecurityConfig` allowing private ranges only (bridge on LAN/loopback); no global cleartext. (evidence: app/src/main/res/xml/network_security_config.xml, referenced from the manifest)
 - [x] **Package visibility**: `<queries>` for the catalogue and `getLaunchIntentForPackage`; no `QUERY_ALL_PACKAGES`. (evidence: app/src/main/AndroidManifest.xml <queries>)
 - [x] **FGS type**: `shortService` + `FOREGROUND_SERVICE` permission, `POST_NOTIFICATIONS` request and denied path. (evidence: manifest foregroundServiceType="shortService"; MainActivity requests POST_NOTIFICATIONS; Notifier checks it)
 - [x] `FileProvider` and SAF (`ACTION_CREATE_DOCUMENT`) wiring; no `file://` sharing. (evidence: manifest provider + res/xml/file_paths.xml; Activity "Save" writes the week through CreateDocument)
 - [x] Permission matrix in the manifest: INTERNET, RECORD_AUDIO, POST_NOTIFICATIONS, FGS, accessibility service declaration (disabled until A7). (evidence: AndroidManifest.xml permissions; HopaAccessibilityService declared and off until the person enables it)
-- [x] CI: assemble debug, `:core:test`, unit tests, APK artifact, Gradle cache. (evidence: ci.yml run ":core:check ... :app:assembleDebug" and APK upload; lint not configured)
+- [x] CI: assemble debug, `:engine:check`, unit tests, APK artifact, Gradle cache. (evidence: ci.yml runs `:contracts:check :engine:ktlintCheck :engine:check … :app:assembleDebug` and uploads the APK)
 - [ ] Evidence: CI green, APK installs on an emulator, cleartext config proven by connecting to a LAN fixture.
 
 ### A1. Contracts and schema validation (5 d)
 
-- [x] `core/contracts`: serializable `Observation`, `Action`, `Decision`, `RunRecord` matching the schemas exactly (names, nullability, unknown fields rejected). (evidence: ConformanceTest decodes every fixture with ignoreUnknownKeys = false)
+- [x] `packages/contracts`: serializable `Observation`, `Action`, `Decision`, `RunRecord` matching the schemas exactly (names, nullability, unknown fields rejected). (evidence: ConformanceTest decodes every fixture with ignoreUnknownKeys = false)
 - [x] JSON-Schema validation with `networknt/json-schema-validator` (draft 2020-12), including `action` `$ref` inside `decision`; pin the version. (evidence: SchemaValidationTest validates every fixture observation and decision)
 - [x] `ObservationProducer` contract tests: pre-order refs, redaction cases, limits from `contracts/observation/limits.v1.json`, and the exact hash from `contracts/fixtures/observation-hash.json`. (evidence: ObservationProducerTest: refs, redaction, caps, limits, hash fixtures)
-- [x] Catalogue: generate the Kotlin file from `contracts/catalog/catalog.v1.json` (`build-app-catalog.py --kotlin`). (evidence: packages/core/.../catalog/AppCatalog.kt header; CI runs build-app-catalog.py --check); no hand-written list. Fill the `android` platform map (package, activity) from `PackageManager`.
+- [x] Catalogue: generate the Kotlin file from `services/brain/knowledge` (`build-app-catalog.py --kotlin`). (evidence: `packages/knowledge/src/main/kotlin/com/hopa/knowledge/AppCatalog.kt` header; CI runs build-app-catalog.py --check); no hand-written list. Fill the `android` platform map (package, activity) from `PackageManager`.
 - [x] Schema-only conformance: every fixture's observation and decision validates or fails as declared; no semantic gate yet. (evidence: SchemaValidationTest, with the two semantic rejections named)
 - [x] A named negative case: `ui.teleport` must fail with `E_SCHEMA`. (evidence: DecisionParserTest.rejects_an_unknown_kind)
 - [x] Evidence: JVM tests; the hash vector matches; an intentionally invalid fixture fails with the schema error. (evidence: docs/project/evidence/A1-contracts.md)
@@ -267,10 +267,10 @@ apps/android/
 ### A2. The loop (10 d)
 
 - [x] `AgentLoop`: initial capture, system prompt, **up to 14 steps**, 1500 ms settle, duplicate-launch short-circuit, cancel at three checkpoints, final text-only call, `summarize`. (evidence: AgentLoopTest (6 cases); settle, cancel, dedupe, usage)
-- [x] `ActionParser`/`DecisionParser`: fenced and last-object parsing, the **schema's** kinds (not Harmony's 19), reject `finish`/`done`, ignore model payment flags, unknown kind → `E_SCHEMA` (see A1). (evidence: core/src/test/kotlin/com/hopa/core/parser/DecisionParserTest.kt)
+- [x] `DecisionParser`/`DecisionRules`: fenced and last-object parsing, the **schema's** kinds (not Harmony's 19), reject `finish`/`done`, ignore model payment flags, unknown kind → `E_SCHEMA`, and the fields each kind needs (see A1). (evidence: packages/engine/src/test/kotlin/com/hopa/engine/parser/DecisionParserTest.kt, DecisionRulesTest.kt)
 - [x] `PromptBuilder`: system text carrying every rule in `contracts/prompts/rules.v1.json` (generate Kotlin with `build-prompt-rules.py --kotlin` and assert the phrases in a test), memory/skill/app-catalogue blocks, router hint, screen rendering with 120 element lines. (evidence: SystemPromptTest asserts every generated PROMPT_RULES phrase)
 - [x] `AppRouter` ported from `AppRouter.ets`; run `contracts/fixtures/routing.json` and reproduce every case. (evidence: AppRouterTest reproduces all 12 routing fixtures)
-- [x] `ContextBudget`: 24 000 chars, keep last 6, 400-char old lines, hard trim. (evidence: core/.../prompt/ContextBudget.kt; AgentLoop calls budget.fit)
+- [x] `ContextBudget`: 24 000 chars, keep last 6, 400-char old lines, hard trim. (evidence: packages/engine/.../prompt/ContextBudget.kt; AgentLoop calls budget.fit)
 - [x] `RunNarrator`: per-step sentences, tap grouping, failure phrasing. (evidence: RunNarrator.lines folds consecutive taps, keeps five taps bounded, breaks on failure; RunNarratorTest, 6 cases)
 - [x] `ObservationProducer` behind `ScreenSource`: the chosen path (hidden, visible, or computer) with a timeout, one source per turn. (evidence: ScreenSourceDevice; ScreenSourceDeviceTest covers precedence, timeout, failure, action routing, fallback; ChatViewModel builds the sources from the setting)
 - [ ] Browser text as the third source. (blocked: BrowserPort has no implementation yet; A11 browser)
@@ -285,7 +285,7 @@ apps/android/
 - [x] Room `RunStore` (last 100, atomic), one run id per turn. (evidence: RunRecordDao.insertAndPrune runs insert+prune in a transaction; RoomRunRecorder prunes to 100; ChatViewModel passes a fresh run id into the loop)
 - [x] Approval content: title/body, amount/merchant, highlight bounds, payment flag, remember-app for messages. (evidence: ApprovalRequest.highlight and .rememberPackage; ApprovalPolicy finds the amount bounds; stored with migration 5->6)
 - [x] **Full conformance runner** (the six fixtures) with a fake capability per classification; a broken client fails the fixture name. (evidence: ConformanceExecutionTest executes all six fixtures by name)
-- [x] 17 policy and executor cases: kinds, autonomy, trust, denied, unsupported, approved payment, screen-diff verify. (evidence: 17 tests in com.hopa.core.gate; the approved-payment case found that payment kinds never executed and fixed it)
+- [x] 17 policy and executor cases: kinds, autonomy, trust, denied, unsupported, approved payment, screen-diff verify. (evidence: 17 tests in com.hopa.engine.gate; the approved-payment case found that payment kinds never executed and fixed it)
 - [x] Evidence: policy/executor/chain tests green; a tampered record fails; all six fixtures pass. (evidence: docs/project/evidence/A3-gate.md; RunChainTest tamper case)
 
 ### A4. Model, keys, settings core (8 d)
@@ -398,7 +398,7 @@ apps/android/
 ### A13. Evaluation, hardening, release (9 d)
 
 - [ ] `services/evals`: task `platform` field, Android bundle map, one Android task through the adb bridge.
-- [x] `build-app-catalog.py --kotlin packages/core/.../AppCatalog.kt`: commit the generated Kotlin catalogue; CI `--check` keeps it current. (evidence: AppCatalog.kt generated; CI --check)
+- [x] `build-app-catalog.py --kotlin packages/knowledge/.../AppCatalog.kt`: commit the generated Kotlin catalogue; CI `--check` keeps it current. (evidence: AppCatalog.kt generated; CI --check)
 - [ ] Launch-config hooks for automation (provider/endpoint/model/key/bridge URL/token) as `adb`-set extras, documented.
 - [ ] Emulator E2E per path; device E2E ("open Douyin and tell me what you see") on a real Android phone.
 - [ ] Conformance green on JVM and on-device.

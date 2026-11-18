@@ -1,7 +1,7 @@
 package com.hopa.engine.loop
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.RunRecord
+import com.hopa.contracts.Action
+import com.hopa.contracts.RunRecord
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

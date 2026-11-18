@@ -1,6 +1,6 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.ScreenSize
+import com.hopa.contracts.ScreenSize
 
 /**
  * Where a scroll gesture starts and ends. The screen decides the distance, so a

@@ -1,6 +1,6 @@
 package com.hopa.engine.records
 
-import com.hopa.engine.contracts.Action
+import com.hopa.contracts.Action
 
 data class RunRecordDraft(
     val runId: String,
@@ -13,6 +13,7 @@ data class RunRecordDraft(
     val observationHash: String,
     val beforeHash: String? = null,
     val afterHash: String? = null,
+    val targetKey: String? = null,
     val verified: Boolean,
     val executed: Boolean,
     val error: String? = null,

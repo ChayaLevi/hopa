@@ -1,6 +1,6 @@
 package com.hopa.engine.parser
 
-import com.hopa.engine.contracts.ErrorCodes
+import com.hopa.contracts.ErrorCodes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull

@@ -1,11 +1,11 @@
 package com.hopa.engine.parser
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.ActionKind
-import com.hopa.engine.contracts.Decision
-import com.hopa.engine.contracts.ErrorCodes
-import com.hopa.engine.contracts.HopaError
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.Action
+import com.hopa.contracts.ActionKind
+import com.hopa.contracts.Decision
+import com.hopa.contracts.ErrorCodes
+import com.hopa.contracts.HopaError
+import com.hopa.contracts.json.HopaJson
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull

@@ -16,9 +16,28 @@ class DisplayLauncher(
             .map { it.trim() }
             .lastOrNull { it.contains('/') }
             ?: return "err no launchable activity for $packageName"
-        val start = run("am start --display $displayId -n $component")
-        return if (start.contains("Error") || start.contains("Exception")) {
-            "err ${start.lineSequence().firstOrNull { it.isNotBlank() } ?: start}"
+        // -W waits for the launch to report, so "ok" means the activity really
+        // started on this display; without it a slow or refused launch looked
+        // like success and the next read found an empty screen.
+        val start = run("am start -W --display $displayId -n $component")
+        // "Warning: Activity not started, its current task has been brought to
+        // the front" means the app did not open here, even though am exits 0.
+        val refusal = start.lineSequence()
+            .map { it.trim() }
+            .firstOrNull {
+                it.startsWith("Error") ||
+                    it.contains("Exception") ||
+                    it.contains("Warning: Activity not started")
+            }
+        if (refusal != null) {
+            return "err $refusal"
+        }
+        val status = start.lineSequence()
+            .firstOrNull { it.startsWith("Status:") }
+            ?.substringAfter("Status:")
+            ?.trim()
+        return if (status != null && !status.equals("ok", ignoreCase = true)) {
+            "err launch status $status"
         } else {
             "ok $component"
         }

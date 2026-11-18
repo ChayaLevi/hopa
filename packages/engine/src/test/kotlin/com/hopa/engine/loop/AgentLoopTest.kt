@@ -1,12 +1,12 @@
 package com.hopa.engine.loop
 
+import com.hopa.contracts.model.ModelPort
+import com.hopa.contracts.model.ModelReply
+import com.hopa.contracts.model.ModelRequest
+import com.hopa.contracts.model.ModelUsage
+import com.hopa.contracts.ports.InstalledApp
 import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
-import com.hopa.engine.model.ModelPort
-import com.hopa.engine.model.ModelReply
-import com.hopa.engine.model.ModelRequest
-import com.hopa.engine.model.ModelUsage
-import com.hopa.engine.ports.InstalledApp
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.testing.FakeApproval
@@ -125,14 +125,14 @@ class AgentLoopTest {
         val model = ScriptedModel(replies)
         val clock = FakeClock()
         val loop = AgentLoop(
-            model = model,
+            stepPolicy = ModelStepPolicy(model),
             device = device,
             executor = ActionExecutor(
                 device = device,
                 browser = null,
                 system = null,
                 sandbox = null,
-                policy = ApprovalPolicy(),
+                policy = { ApprovalPolicy() },
                 approval = approval,
                 recorder = recorder,
                 factory = RunRecordFactory(clock),

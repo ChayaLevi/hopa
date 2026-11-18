@@ -1,10 +1,10 @@
 package com.hopa.net.llm
 
-import com.hopa.engine.json.HopaJson
-import com.hopa.engine.model.ModelPort
-import com.hopa.engine.model.ModelReply
-import com.hopa.engine.model.ModelRequest
-import com.hopa.engine.model.ModelUsage
+import com.hopa.contracts.json.HopaJson
+import com.hopa.contracts.model.ModelPort
+import com.hopa.contracts.model.ModelReply
+import com.hopa.contracts.model.ModelRequest
+import com.hopa.contracts.model.ModelUsage
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers

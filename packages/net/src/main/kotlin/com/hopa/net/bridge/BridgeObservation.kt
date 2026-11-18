@@ -1,9 +1,9 @@
 package com.hopa.net.bridge
 
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.ObservationNode
-import com.hopa.engine.contracts.ScreenSize
-import com.hopa.engine.observation.ObservationHasher
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.ScreenSize
+import com.hopa.contracts.ObservationHasher
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull

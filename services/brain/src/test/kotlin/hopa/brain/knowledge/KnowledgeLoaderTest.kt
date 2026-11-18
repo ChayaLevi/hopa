@@ -1,5 +1,6 @@
 package hopa.brain.knowledge
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 private var passed = 0
@@ -69,7 +70,12 @@ fun main(args: Array<String>) {
         Path.of("brain/knowledge/apps")
     }
     val loaded = KnowledgeLoader.load(directory)
-    check(loaded.size == 54, "54 app files")
+    // Count the files the loader is meant to read instead of pinning a number:
+    // adding an app should not fail this test, missing one still should.
+    val appFiles = Files.walk(directory).use { stream ->
+        stream.filter { it.fileName.toString() == "APP.md" }.count()
+    }
+    check(loaded.size.toLong() == appFiles, "every APP.md loads ($appFiles files)")
     check(loaded.all { it.platform == "harmonyos" }, "all harmonyos")
     check(loaded.all { it.pace.isNotEmpty() }, "all have a pace")
     check(loaded.any { it.entry.name == "clock" }, "clock present")
@@ -92,10 +98,20 @@ fun main(args: Array<String>) {
             .entry.packages.contains("com.sina.weibo.stage"),
         "weibo uses the stage-model bundle",
     )
-    check(loaded.count { it.entry.packages.isEmpty() } == 28, "28 apps have no HarmonyOS build")
+    // The catalog is one file per app for every platform, so a missing HarmonyOS
+    // build is normal: what matters is that such an entry loads with nothing to
+    // launch instead of failing.
+    check(
+        loaded.count { it.entry.packages.isEmpty() } > 0,
+        "apps without a HarmonyOS build are still catalogued",
+    )
     check(
         loaded.first { it.entry.name == "chrome" }.entry.packages.isEmpty(),
         "chrome has no HarmonyOS build yet",
+    )
+    check(
+        loaded.first { it.entry.name == "aliexpress" }.entry.packages.isEmpty(),
+        "an Android-only app has no HarmonyOS bundle to launch",
     )
 
     println("KnowledgeLoaderTest: $passed assertions passed")

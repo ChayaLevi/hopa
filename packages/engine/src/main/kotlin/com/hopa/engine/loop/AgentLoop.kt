@@ -1,19 +1,18 @@
-﻿package com.hopa.engine.loop
+package com.hopa.engine.loop
 
-import com.hopa.engine.contracts.ErrorCodes
-import com.hopa.engine.contracts.HopaError
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.ObservationNode
-import com.hopa.engine.contracts.RunRecord
-import com.hopa.engine.contracts.ScreenSize
+import com.hopa.contracts.ErrorCodes
+import com.hopa.contracts.HopaError
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.RunRecord
+import com.hopa.contracts.ScreenSize
+import com.hopa.contracts.model.ModelMessage
+import com.hopa.contracts.model.ModelRequest
+import com.hopa.contracts.model.ModelUsage
+import com.hopa.contracts.ports.Clock
+import com.hopa.contracts.ports.DevicePort
 import com.hopa.engine.gate.ActionExecutor
-import com.hopa.engine.model.ModelMessage
-import com.hopa.engine.model.ModelPort
-import com.hopa.engine.model.ModelRequest
-import com.hopa.engine.model.ModelUsage
 import com.hopa.engine.parser.DecisionParser
-import com.hopa.engine.ports.Clock
-import com.hopa.engine.ports.DevicePort
 import com.hopa.engine.prompt.AppCatalogBlock
 import com.hopa.engine.prompt.ContextBudget
 import com.hopa.engine.prompt.InstalledAppsBlock
@@ -25,7 +24,7 @@ import com.hopa.engine.router.CatalogRoutes
 import com.hopa.engine.router.RouterHint
 
 class AgentLoop(
-    private val model: ModelPort,
+    private val stepPolicy: StepPolicy,
     private val device: DevicePort,
     private val executor: ActionExecutor,
     private val recorder: RunRecorder,
@@ -100,7 +99,7 @@ class AgentLoop(
             } else {
                 emptyList()
             }
-            val reply = runCatching { model.complete(ModelRequest(messages, images = frames)) }
+            val reply = runCatching { stepPolicy.next(ModelRequest(messages, images = frames)) }
                 .getOrElse { error ->
                     return TurnResult(
                         answer = "I could not reach the model. Check the provider and network.",
@@ -208,7 +207,7 @@ class AgentLoop(
             "user",
             "You have reached the step limit. Summarize what happened and answer in plain text.",
         )
-        val final = runCatching { model.complete(ModelRequest(messages)) }
+        val final = runCatching { stepPolicy.next(ModelRequest(messages)) }
         final.getOrNull()?.let { usage = usage.plus(it.usage) }
         return TurnResult(
             answer = final.map { it.text }.getOrElse { "I stopped after ${config.maxSteps} steps." },

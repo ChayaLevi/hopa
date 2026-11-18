@@ -30,6 +30,7 @@
     "observationHash": { "type": "string" },
     "beforeHash": { "type": "string" },
     "afterHash": { "type": "string" },
+    "targetKey": { "type": "string" },
     "verified": { "type": "boolean" },
     "executed": { "type": "boolean" },
     "error": { "type": ["string", "null"] },

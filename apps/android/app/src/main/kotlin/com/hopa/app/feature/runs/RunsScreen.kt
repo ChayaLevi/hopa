@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.engine.contracts.RunRecord
+import com.hopa.contracts.RunRecord
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

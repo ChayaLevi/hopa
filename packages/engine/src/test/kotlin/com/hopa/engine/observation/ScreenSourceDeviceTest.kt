@@ -1,10 +1,10 @@
 package com.hopa.engine.observation
 
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.ObservationNode
-import com.hopa.engine.contracts.ScreenSize
-import com.hopa.engine.ports.DevicePort
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.ScreenSize
+import com.hopa.contracts.ports.DevicePort
+import com.hopa.contracts.ports.InstalledApp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals

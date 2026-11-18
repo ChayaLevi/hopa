@@ -1,6 +1,6 @@
 package com.hopa.net.backend
 
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.json.HopaJson
 import java.util.UUID
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject

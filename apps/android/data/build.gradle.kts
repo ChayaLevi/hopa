@@ -28,6 +28,7 @@ dependencies {
     // and DataStore implementations.
     api(project(":stores"))
     api(project(":engine"))
+    api(project(":contracts"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.datastore.preferences)

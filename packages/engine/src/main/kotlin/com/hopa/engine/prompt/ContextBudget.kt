@@ -1,6 +1,6 @@
 package com.hopa.engine.prompt
 
-import com.hopa.engine.model.ModelMessage
+import com.hopa.contracts.model.ModelMessage
 
 class ContextBudget(
     private val maxChars: Int = 24_000,

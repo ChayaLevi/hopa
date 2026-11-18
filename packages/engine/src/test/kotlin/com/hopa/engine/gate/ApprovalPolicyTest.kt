@@ -1,10 +1,10 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.ObservationNode
-import com.hopa.engine.contracts.RiskLevel
-import com.hopa.engine.contracts.ScreenSize
+import com.hopa.contracts.Action
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.RiskLevel
+import com.hopa.contracts.ScreenSize
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -52,7 +52,7 @@ class ApprovalPolicyTest {
 
     @Test
     fun a_trusted_app_skips_the_message_prompt() {
-        policy.setTrustedApps(listOf("com.example.chat"))
+        val policy = ApprovalPolicy().withTrustedApps(listOf("com.example.chat"))
         val action = Action(kind = "system.sendMessage", app = "com.example.chat")
         assertEquals(RiskLevel.READ, policy.classify(action))
         assertFalse(policy.requiresApproval(action))
@@ -60,7 +60,7 @@ class ApprovalPolicyTest {
 
     @Test
     fun trust_covers_typed_calls_and_closing_but_never_payments() {
-        policy.setTrustedApps(listOf("com.example.maps"))
+        val policy = ApprovalPolicy().withTrustedApps(listOf("com.example.maps"))
         assertFalse(
             policy.requiresApproval(
                 Action(kind = "app.function", app = "com.example.maps"),

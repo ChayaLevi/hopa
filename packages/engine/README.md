@@ -6,39 +6,47 @@ neither a device nor a provider.
 
 ```
 loop/         AgentLoop, TurnContext, TurnResult, LoopConfig, RunNarrator
-gate/         ActionExecutor, ApprovalPolicy, ActionClassifier, ApprovalGateway
+gate/         ActionExecutor, ApprovalPolicy, ActionClassifier
 prompt/       SystemPromptBuilder, AppCatalogBlock, InstalledAppsBlock, ScreenRenderer, ContextBudget
 observation/  ObservationProducer (refs, redaction, caps, hash), ScreenSourceDevice, ScreenPathOrder
 records/      RunChain, RunRecordFactory, RunRecorder (+ in-memory)
 router/       AppRouter, CatalogRoutes, RouterHint
 parser/       DecisionParser, BalancedObjectScanner, DecisionRules
-contracts/    Action (+ ActionKind), Decision, Observation (+ the tree and screen size), RunRecord, errors
-ports/        DevicePort, SystemPort, BrowserPort, SandboxPort, Clock, PackageCatalog
-model/        ModelPort, ModelRequest, ModelReply (no HTTP — see packages/net)
 ```
+
+The types these use live in `packages/contracts`: `Action`, `Decision`,
+`Observation`, `RunRecord`, the ports, `ModelPort` and the JSON helpers.
 
 ## Rules
 
 - **No Android imports.** `checkNoAndroidImports` (Gradle) and
   `tools/checks/check-android-structure.py` both fail the build if one appears.
 - **No network.** The model and bridge clients live in `packages/net`; this
-  module only defines `ModelPort`.
+  module only consumes `ModelPort`.
 - **Generated data lives elsewhere.** The catalog, the policy data and the prompt
   rules are in `packages/knowledge`.
-- **One public declaration per file**, named after the file.
+- **One class per file**, named after it; contracts may share a file.
 
 ## Where the decision comes from
 
-`AgentLoop` asks a `ModelPort` for the next step. That port is the seam:
+`AgentLoop` asks a `StepPolicy` for the next step, and parses the reply. That
+interface is the seam; `ModelStepPolicy` is the one implementation today and it
+wraps a `ModelPort`:
 
 | implementation | module | when |
 |---|---|---|
-| `OpenAiClient` | `packages/net` | a provider over HTTP today |
-| `StubModelClient` | `packages/net` | no key, demo answers |
-| local runtime | its own module | on-device inference, once it exists |
-| playbook policy | planned | no model at all: anchors instead of reasoning |
+| `ModelStepPolicy` over `OpenAiClient` | `packages/net` | a provider over HTTP today |
+| `ModelStepPolicy` over `StubModelClient` | `packages/net` | no key, demo answers |
+| `ModelStepPolicy` over a local runtime | its own module | on-device inference, once it exists |
+| playbook policy | planned, implements `StepPolicy` | no model at all: anchors instead of reasoning |
 
-Nothing in this module knows which of them is in use.
+Nothing in this module knows which of them is in use. A policy that never calls
+out is the point of the interface: it can answer from a recipe, or stop and ask
+when the screen does not match.
+
+The loop reads the gate settings one step at a time (`ActionExecutor` takes a
+supplier), so a `ApprovalPolicy` is an immutable snapshot: trust and autonomy
+are fixed when the run starts and two runs in flight never share a mutable list.
 
 ## What a client must supply
 
@@ -59,5 +67,5 @@ memory), a `Clock`, and a `ModelPort`.
 ./gradlew :engine:test
 ```
 
-Conformance tests read `contracts/` from the repository, so they check the same
-JSON the other clients use.
+`com.hopa.engine.conformance` reads `contracts/` from the repository, so it
+checks the same JSON the other clients use.

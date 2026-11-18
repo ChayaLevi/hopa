@@ -1,6 +1,6 @@
 package com.hopa.engine.records
 
-import com.hopa.engine.contracts.RunRecord
+import com.hopa.contracts.RunRecord
 
 class InMemoryRunRecorder : RunRecorder {
     private val runs = mutableMapOf<String, MutableList<RunRecord>>()

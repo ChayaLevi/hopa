@@ -1,6 +1,6 @@
 package com.hopa.engine.prompt
 
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.ports.InstalledApp
 
 /**
  * Apps on this device that the catalog does not describe. The catalog block

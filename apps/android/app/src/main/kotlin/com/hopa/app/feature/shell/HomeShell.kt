@@ -7,7 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.app.di.AppContainer
-import com.hopa.app.feature.activity.ActivityRoute
+import com.hopa.app.feature.history.ActivityRoute
 import com.hopa.app.feature.capabilities.CapabilitiesRoute
 import com.hopa.app.feature.chat.ChatRoute
 import com.hopa.app.feature.conversations.EasyHistoryRoute

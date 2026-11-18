@@ -1,9 +1,9 @@
 package com.hopa.engine.records
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.observation.ObservationHasher
-import com.hopa.engine.ports.Clock
+import com.hopa.contracts.Action
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationHasher
+import com.hopa.contracts.ports.Clock
 import java.time.Instant
 
 class RunRecordFactory(
@@ -21,6 +21,7 @@ class RunRecordFactory(
         afterHash: String?,
         verified: Boolean,
         executed: Boolean,
+        targetKey: String? = null,
         error: String? = null,
     ): RunRecordDraft = RunRecordDraft(
         runId = runId,
@@ -30,9 +31,10 @@ class RunRecordFactory(
         action = action,
         classification = classification,
         approved = approved,
-        observationHash = ObservationHasher.hash(observation),
+        observationHash = ObservationHasher.hashOf(observation),
         beforeHash = beforeHash,
         afterHash = afterHash,
+        targetKey = targetKey,
         verified = verified,
         executed = executed,
         error = error,

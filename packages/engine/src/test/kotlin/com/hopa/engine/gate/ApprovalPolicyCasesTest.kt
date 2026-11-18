@@ -1,7 +1,7 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.RiskLevel
+import com.hopa.contracts.Action
+import com.hopa.contracts.RiskLevel
 import com.hopa.knowledge.ApprovalPolicyData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -23,8 +23,7 @@ class ApprovalPolicyCasesTest {
 
     @Test
     fun an_autonomous_run_still_asks_for_a_payment() {
-        val autonomous = ApprovalPolicy()
-        autonomous.setAutonomous(true)
+        val autonomous = ApprovalPolicy(autonomous = true)
         val payment = Action(kind = ApprovalPolicyData.PAYMENT_KINDS.first())
         assertTrue(autonomous.requiresApproval(payment))
         val allowed = Action(kind = ApprovalPolicyData.ALLOWED_KINDS.first())

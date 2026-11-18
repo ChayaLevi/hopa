@@ -1,15 +1,18 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.ErrorCodes
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.RiskLevel
-import com.hopa.engine.observation.ObservationHasher
-import com.hopa.engine.ports.BrowserPort
-import com.hopa.engine.ports.Clock
-import com.hopa.engine.ports.DevicePort
-import com.hopa.engine.ports.SandboxPort
-import com.hopa.engine.ports.SystemPort
+import com.hopa.contracts.Action
+import com.hopa.contracts.ApprovalGateway
+import com.hopa.contracts.ErrorCodes
+import com.hopa.contracts.ExecutionResult
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationHasher
+import com.hopa.contracts.RiskLevel
+import com.hopa.contracts.ports.BrowserPort
+import com.hopa.contracts.ports.Clock
+import com.hopa.contracts.ports.DevicePort
+import com.hopa.contracts.ports.SandboxPort
+import com.hopa.contracts.ports.SystemPort
+import com.hopa.engine.observation.NodeAnchor
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.records.RunRecorder
 
@@ -18,7 +21,13 @@ class ActionExecutor(
     private val browser: BrowserPort?,
     private val system: SystemPort?,
     private val sandbox: SandboxPort?,
-    private val policy: ApprovalPolicy,
+    /**
+     * The gate settings to use for this step. A supplier, because a setting can
+     * change between steps while a run is in flight, and because one executor
+     * serves the main turn and the parallel runs; each step reads one immutable
+     * snapshot instead of sharing a mutable list.
+     */
+    private val policy: () -> ApprovalPolicy,
     private val approval: ApprovalGateway,
     private val recorder: RunRecorder,
     private val factory: RunRecordFactory,
@@ -32,14 +41,19 @@ class ActionExecutor(
         action: Action,
         before: Observation,
     ): ExecutionResult {
-        val classification = policy.classify(action, before)
-        val needsApproval = policy.requiresApproval(action, before)
+        val gate = policy()
+        // What the ref points at, kept so a recipe can find the same control
+        // after the tree has been redrawn.
+        val targetKey = action.ref?.takeIf { it.isNotBlank() }
+            ?.let { ref -> NodeAnchor.find(before.tree, ref)?.let(NodeAnchor::key) }
+        val classification = gate.classify(action, before)
+        val needsApproval = gate.requiresApproval(action, before)
         val approved = if (needsApproval) {
-            approval.approve(policy.request(action, before))
+            approval.approve(gate.request(action, before))
         } else {
             null
         }
-        val beforeHash = ObservationHasher.hash(before)
+        val beforeHash = ObservationHasher.hashOf(before)
 
         if (needsApproval && approved != true) {
             val record = factory.draft(
@@ -54,6 +68,7 @@ class ActionExecutor(
                 afterHash = beforeHash,
                 verified = false,
                 executed = false,
+                targetKey = targetKey,
                 error = ErrorCodes.REFUSED,
             ).let { recorder.append(it) }
             return ExecutionResult(record, before, "I did not run that.")
@@ -62,7 +77,8 @@ class ActionExecutor(
         return runCatching {
             val text = executeAction(action, before)
             val after = runCatching { device.observe() }.getOrDefault(before)
-            val changed = ObservationHasher.hash(after) != beforeHash
+            val afterHash = ObservationHasher.hashOf(after)
+            val changed = afterHash != beforeHash
             val verified = text.isNotEmpty() || action.kind in setOf(
                 "ui.observe", "ui.wait", "ui.back", "ui.home", "ui.stop",
             ) || changed
@@ -75,9 +91,10 @@ class ActionExecutor(
                 approved = approved,
                 observation = after,
                 beforeHash = beforeHash,
-                afterHash = ObservationHasher.hash(after),
+                afterHash = afterHash,
                 verified = verified,
                 executed = true,
+                targetKey = targetKey,
             ).let { recorder.append(it) }
             ExecutionResult(record, after, text)
         }.getOrElse { error ->
@@ -98,6 +115,7 @@ class ActionExecutor(
                 afterHash = beforeHash,
                 verified = false,
                 executed = false,
+                targetKey = targetKey,
                 error = code,
             ).let { recorder.append(it) }
             ExecutionResult(record, before, "I could not do that: ${error.message ?: code}")
@@ -121,12 +139,9 @@ class ActionExecutor(
 
             "ui.scroll" -> {
                 val points = if (action.x != null && action.y != null) {
-                    intArrayOf(
-                        action.x,
-                        action.y,
-                        action.toX ?: action.x,
-                        action.toY ?: action.y,
-                    )
+                    val x = action.x!!
+                    val y = action.y!!
+                    intArrayOf(x, y, action.toX ?: x, action.toY ?: y)
                 } else {
                     scrollGeometry.swipe(before.screenSize, action.direction.orEmpty())
                 }

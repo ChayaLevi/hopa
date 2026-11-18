@@ -4,12 +4,13 @@
 Rules (ADR-0007):
 
 1. Top level is exactly `apps`, `services`, `packages`, `evals`, `contracts`,
-   `tools`, `docs` plus `.github`. A new top-level folder is a decision, not an
-   accident, so it has to be added here and in the ADR.
+   `build-logic`, `tools`, `docs` plus `.github`. A new top-level folder is a
+   decision, not an accident, so it has to be added here and in the ADR.
 2. `harness/` must not exist: it was renamed to `evals/`.
 3. No junk drawers anywhere: `utils`, `helpers`, `common`, `misc`, `shared`.
-4. `packages/` holds only the client engine (`core`, `data`, `capabilities`);
-   the old Python `packages/wire` lives in `services/wire`.
+4. `packages/` holds only the client engine (`contracts`, `engine`,
+   `knowledge`, `stores`, `net`); the old Python `packages/wire` lives in
+   `services/wire`.
 
 Generated and vendor directories are skipped, and dot-directories are ignored
 except `.github`, so a local `.venv`, `.idea` or `.pytest_cache` cannot fail CI.
@@ -26,11 +27,13 @@ TOP_LEVEL = {
     "packages",
     "evals",
     "contracts",
+    "build-logic",
     "tools",
     "docs",
     ".github",
 }
 JUNK = {"utils", "helpers", "common", "misc", "shared"}
+ENGINE_PACKAGES = {"contracts", "engine", "knowledge", "stores", "net"}
 SKIP = {
     "build",
     "oh_modules",
@@ -84,10 +87,10 @@ def check(base: Path = ROOT) -> list[str]:
     engine = base / "packages"
     if engine.exists():
         for child in sorted(engine.iterdir()):
-            if child.is_dir() and child.name not in {"core", "data", "capabilities"}:
+            if child.is_dir() and child.name not in ENGINE_PACKAGES:
                 problems.append(
                     f"packages/{child.name}/ is not a client engine package "
-                    "(core, data, capabilities)"
+                    f"({', '.join(sorted(ENGINE_PACKAGES))})"
                 )
 
     if (base / "evals").exists():
