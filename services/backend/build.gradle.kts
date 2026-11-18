@@ -42,7 +42,6 @@ dependencies {
 }
 
 tasks.test {
-    useJUnit()
     testLogging {
         events("passed", "failed", "skipped")
         // A comparison failure must say what it compared: the short format

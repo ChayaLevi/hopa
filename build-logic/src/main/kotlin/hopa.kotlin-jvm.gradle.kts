@@ -1,3 +1,5 @@
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 // A plain JVM module: the client engine and the services that include it. No
@@ -10,4 +12,17 @@ plugins {
 
 extensions.configure<KotlinJvmProjectExtension> {
     jvmToolchain(17)
+}
+
+// Tests are JUnit 5; the catalog alias points at junit-jupiter. Gradle does
+// not add the Platform launcher itself, so the convention does.
+val junit = extensions.getByType<VersionCatalogsExtension>().named("libs")
+    .findLibrary("junit-platform-launcher")
+    .get()
+dependencies {
+    "testRuntimeOnly"(junit)
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }

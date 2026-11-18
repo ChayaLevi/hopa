@@ -1,8 +1,8 @@
 package com.hopa.engine.prompt
 
 import com.hopa.engine.testing.TestKnowledge
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class SystemPromptTest {
     @Test
@@ -10,7 +10,7 @@ class SystemPromptTest {
         val prompt = SystemPromptBuilder().build()
         for (rule in TestKnowledge.value.promptRules) {
             for (phrase in rule.phrases) {
-                assertTrue("${rule.id} is missing: $phrase", prompt.contains(phrase))
+                assertTrue(prompt.contains(phrase), "${rule.id} is missing: $phrase")
             }
         }
     }

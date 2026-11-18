@@ -2,9 +2,9 @@ package com.hopa.stores
 
 import com.hopa.contracts.chat.ChatMessage
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class InMemoryConversationStoreTest {
     private fun message(id: String, role: String, text: String, at: Long) =

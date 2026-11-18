@@ -22,7 +22,3 @@ dependencies {
     testImplementation(libs.json.schema.validator)
     testImplementation(libs.slf4j.nop)
 }
-
-tasks.test {
-    useJUnit()
-}

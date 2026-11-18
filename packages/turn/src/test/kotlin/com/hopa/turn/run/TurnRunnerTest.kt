@@ -24,20 +24,19 @@ import com.hopa.turn.goal.Checkpoint
 import com.hopa.turn.plan.PlanSource
 import com.hopa.turn.recipe.RecipeStore
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 private const val SETTINGS = "com.android.settings"
 
 class TurnRunnerTest {
-    @get:Rule
-    val folder = TemporaryFolder()
+    @TempDir
+    lateinit var folder: File
 
     // ── Fakes ─────────────────────────────────────────────────────────────────
 
@@ -187,7 +186,7 @@ class TurnRunnerTest {
         tree = ObservationNode(type = "root", children = nodes.toList()),
     )
 
-    private fun store(): RecipeStore = RecipeStore(File(folder.root, "recipes.txt"))
+    private fun store(): RecipeStore = RecipeStore(File(folder, "recipes.txt"))
 
     // ── Tests ─────────────────────────────────────────────────────────────────
 

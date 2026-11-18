@@ -3,8 +3,8 @@ package com.hopa.sidecar
 import com.hopa.contracts.Action
 import com.hopa.contracts.ApprovalRequest
 import java.nio.file.Files
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class PendingApprovalsTest {
     private val request = ApprovalRequest(

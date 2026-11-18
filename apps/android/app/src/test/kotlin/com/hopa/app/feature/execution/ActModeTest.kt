@@ -2,9 +2,9 @@ package com.hopa.app.feature.execution
 
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.stores.AppSettings
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class ActModeTest {
     @Test

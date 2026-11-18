@@ -1,9 +1,9 @@
 package com.hopa.engine.gate
 
 import com.hopa.contracts.ScreenSize
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class ScrollGeometryTest {
     private val geometry = ScrollGeometry()
@@ -12,8 +12,8 @@ class ScrollGeometryTest {
     @Test
     fun scrolling_down_moves_the_finger_up() {
         val points = geometry.swipe(screen, "down")
-        assertTrue("start below centre", points[1] > screen.height / 2)
-        assertTrue("end above centre", points[3] < screen.height / 2)
+        assertTrue(points[1] > screen.height / 2, "start below centre")
+        assertTrue(points[3] < screen.height / 2, "end above centre")
         assertEquals(points[0], points[2])
     }
 

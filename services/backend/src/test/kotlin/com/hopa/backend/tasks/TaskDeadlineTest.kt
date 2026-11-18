@@ -7,8 +7,8 @@ import com.hopa.backend.protocol.Envelope
 import java.util.UUID
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class TaskDeadlineTest {
     private val now = 1_800_000_000_000L

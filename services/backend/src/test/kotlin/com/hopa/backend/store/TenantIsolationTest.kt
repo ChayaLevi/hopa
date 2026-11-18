@@ -5,8 +5,8 @@ import com.hopa.backend.harness.newDevice
 import com.hopa.backend.harness.newHousehold
 import com.hopa.backend.harness.seedHousehold
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class TenantIsolationTest {
     private val db = PostgresHarness.appDatabase()

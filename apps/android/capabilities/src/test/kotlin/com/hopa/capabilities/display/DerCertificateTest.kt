@@ -1,8 +1,8 @@
 package com.hopa.capabilities.display
 
 import java.security.KeyPairGenerator
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class DerCertificateTest {
     @Test
@@ -14,13 +14,10 @@ class DerCertificateTest {
         val certificate = DerCertificate().selfSigned(pair)
 
         assertTrue(
-            "subject is ${certificate.subjectX500Principal.name}",
             certificate.subjectX500Principal.name.contains("CN=HOPA"),
+            "subject is ${certificate.subjectX500Principal.name}",
         )
-        assertTrue(
-            "the certificate must be signed by the same key",
-            certificate.publicKey == pair.public,
-        )
+        assertTrue(certificate.publicKey == pair.public, "the certificate must be signed by the same key")
         certificate.verify(pair.public)
     }
 }

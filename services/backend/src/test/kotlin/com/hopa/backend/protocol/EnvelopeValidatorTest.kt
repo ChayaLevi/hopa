@@ -7,10 +7,10 @@ import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class EnvelopeValidatorTest {
     private fun envelope() = Envelope(
@@ -119,8 +119,8 @@ class EnvelopeValidatorTest {
                 is DecodeResult.Failed -> decoded.error.code
                 is DecodeResult.Ok -> EnvelopeValidator.validate(message, decoded.envelope)?.code
             }
-            assertEquals(case["name"]!!.jsonPrimitive.content, expected, actual)
+            assertEquals(expected, actual, case["name"]!!.jsonPrimitive.content)
         }
-        assertTrue("expected at least four validator-level fixtures", checked >= 4)
+        assertTrue(checked >= 4, "expected at least four validator-level fixtures")
     }
 }

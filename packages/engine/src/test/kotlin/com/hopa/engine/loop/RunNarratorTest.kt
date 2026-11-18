@@ -2,8 +2,8 @@ package com.hopa.engine.loop
 
 import com.hopa.contracts.Action
 import com.hopa.contracts.RunRecord
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class RunNarratorTest {
     private fun action(kind: String, ref: String? = null, app: String? = null) = Action(

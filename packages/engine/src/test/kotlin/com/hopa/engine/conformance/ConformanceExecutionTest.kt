@@ -17,8 +17,8 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 /**
  * The six fixtures executed for real: a fake device does nothing and the
@@ -43,7 +43,7 @@ class ConformanceExecutionTest {
             val expect = item["expect"]!!.jsonObject
             val valid = expect["valid"]!!.jsonPrimitive.boolean
             if (!valid || action == null) {
-                assertEquals("$name should be rejected", false, valid)
+                assertEquals(false, valid, "$name should be rejected")
                 continue
             }
             val clock = FakeClock()
@@ -66,20 +66,16 @@ class ConformanceExecutionTest {
                 action = action,
                 before = observation,
             )
+            assertEquals(expect["executed"]!!.jsonPrimitive.boolean, result.record.executed, "$name executed")
             assertEquals(
-                "$name executed",
-                expect["executed"]!!.jsonPrimitive.boolean,
-                result.record.executed,
-            )
-            assertEquals(
-                "$name classification",
                 expect["classification"]!!.jsonPrimitive.contentOrNull,
                 result.record.classification,
+                "$name classification",
             )
             assertEquals(
-                "$name approval",
                 expect["needsApproval"]!!.jsonPrimitive.boolean,
                 result.record.approved != null,
+                "$name approval",
             )
         }
     }

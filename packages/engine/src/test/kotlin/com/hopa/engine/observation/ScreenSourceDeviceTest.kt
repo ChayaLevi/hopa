@@ -7,9 +7,9 @@ import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class ScreenSourceDeviceTest {
     private fun observation(id: String) = Observation(

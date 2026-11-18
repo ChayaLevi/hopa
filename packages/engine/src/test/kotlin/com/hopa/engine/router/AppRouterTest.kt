@@ -7,8 +7,8 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class AppRouterTest {
     @Test
@@ -37,13 +37,13 @@ class AppRouterTest {
             val match = AppRouter.route(item["goal"]!!.jsonPrimitive.content, targets)
             val expect = item["expect"]!!.jsonObject
             val matched = expect["matched"]!!.jsonPrimitive.boolean
-            assertEquals("$name matched", matched, match.target != null)
+            assertEquals(matched, match.target != null, "$name matched")
             if (!matched) {
                 continue
             }
-            assertEquals("$name target", expect["name"]!!.jsonPrimitive.content, match.target?.name)
-            assertEquals("$name score", expect["score"]!!.jsonPrimitive.int, match.score)
-            assertEquals("$name term", expect["term"]!!.jsonPrimitive.content, match.term)
+            assertEquals(expect["name"]!!.jsonPrimitive.content, match.target?.name, "$name target")
+            assertEquals(expect["score"]!!.jsonPrimitive.int, match.score, "$name score")
+            assertEquals(expect["term"]!!.jsonPrimitive.content, match.term, "$name term")
         }
     }
 

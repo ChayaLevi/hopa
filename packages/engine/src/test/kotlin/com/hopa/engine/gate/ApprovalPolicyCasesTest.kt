@@ -3,10 +3,10 @@ package com.hopa.engine.gate
 import com.hopa.contracts.Action
 import com.hopa.contracts.RiskLevel
 import com.hopa.knowledge.ApprovalPolicyData
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 /** One assertion per policy list, so a generated list cannot drift unnoticed. */
 class ApprovalPolicyCasesTest {
@@ -16,8 +16,8 @@ class ApprovalPolicyCasesTest {
     fun every_payment_kind_is_a_payment_and_always_asks() {
         for (kind in ApprovalPolicyData.PAYMENT_KINDS) {
             val action = Action(kind = kind)
-            assertEquals(kind, RiskLevel.PAYMENT, policy.classify(action))
-            assertTrue(kind, policy.requiresApproval(action))
+            assertEquals(RiskLevel.PAYMENT, policy.classify(action), kind)
+            assertTrue(policy.requiresApproval(action), kind)
         }
     }
 
@@ -33,15 +33,15 @@ class ApprovalPolicyCasesTest {
     @Test
     fun every_sensitive_kind_asks() {
         for (kind in ApprovalPolicyData.SENSITIVE_KINDS) {
-            assertTrue(kind, policy.requiresApproval(Action(kind = kind)))
-            assertTrue(kind, policy.classify(Action(kind = kind)) != RiskLevel.READ)
+            assertTrue(policy.requiresApproval(Action(kind = kind)), kind)
+            assertTrue(policy.classify(Action(kind = kind)) != RiskLevel.READ, kind)
         }
     }
 
     @Test
     fun every_allowed_kind_runs_without_asking() {
         for (kind in ApprovalPolicyData.ALLOWED_KINDS) {
-            assertFalse(kind, policy.requiresApproval(Action(kind = kind)))
+            assertFalse(policy.requiresApproval(Action(kind = kind)), kind)
         }
     }
 

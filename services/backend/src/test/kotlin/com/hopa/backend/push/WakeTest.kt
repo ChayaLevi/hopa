@@ -30,12 +30,12 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class WakeTest {
     private val db = PostgresHarness.appDatabase()
@@ -45,7 +45,7 @@ class WakeTest {
     private lateinit var pairing: PairingService
     private lateinit var devices: PgDevices
 
-    @Before
+    @BeforeEach
     fun setUp() {
         auth = PgAuth(db, clock = clock::get)
         tokens = TokenIssuer(db, clock = clock::get, onRevoke = auth::revoke)

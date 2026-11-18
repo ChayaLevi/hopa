@@ -4,8 +4,8 @@ import com.hopa.contracts.Action
 import com.hopa.contracts.RunRecord
 import com.hopa.engine.records.RunChain
 import java.nio.file.Files
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class RecordStoreTest {
     private fun record(): RunRecord = RunRecord(

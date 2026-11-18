@@ -1,9 +1,9 @@
 package com.hopa.engine.prompt
 
 import com.hopa.contracts.model.ModelMessage
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class ContextBudgetTest {
     private val budget = ContextBudget()

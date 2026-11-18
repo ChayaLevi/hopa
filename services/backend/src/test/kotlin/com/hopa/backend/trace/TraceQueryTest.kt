@@ -33,10 +33,10 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class TraceQueryTest {
     private val db = PostgresHarness.appDatabase()
@@ -47,7 +47,7 @@ class TraceQueryTest {
     private lateinit var devices: PgDevices
     private lateinit var traces: PgTraceStore
 
-    @Before
+    @BeforeEach
     fun setUp() {
         auth = PgAuth(db, clock = clock::get)
         tokens = TokenIssuer(db, clock = clock::get, onRevoke = auth::revoke)
@@ -166,9 +166,10 @@ class TraceQueryTest {
         val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
         val spans = body["spans"]!!.jsonArray.map { it.jsonObject }
         val operations = spans.map { it["operation"]!!.jsonPrimitive.content }.toSet()
-        assertTrue("expected accept/route/deliver/ack, got $operations", operations.containsAll(
-            setOf("accept", "route", "deliver", "ack"),
-        ))
+        assertTrue(
+            operations.containsAll(setOf("accept", "route", "deliver", "ack")),
+            "expected accept/route/deliver/ack, got $operations",
+        )
         assertTrue(spans.all { it["status"]!!.jsonPrimitive.content == "ok" })
     }
 
@@ -260,9 +261,10 @@ class TraceQueryTest {
             .map { it.jsonObject["operation"]!!.jsonPrimitive.content }
             .toSet()
 
-        assertTrue("expected accept and route under $traceId, got $spans", spans.containsAll(
-            setOf("accept", "route", "deliver"),
-        ))
+        assertTrue(
+            spans.containsAll(setOf("accept", "route", "deliver")),
+            "expected accept and route under $traceId, got $spans",
+        )
     }
 
     @Test

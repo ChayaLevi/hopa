@@ -5,10 +5,10 @@ import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 private data class FixtureCase(
     val name: String,
@@ -34,17 +34,17 @@ class GatewayCodecTest {
     @Test
     fun `every accepted fixture decodes and re-decodes identically`() {
         val accepted = cases().filter { it.accepted }
-        assertTrue("expected at least ten accepted vectors", accepted.size >= 10)
+        assertTrue(accepted.size >= 10, "expected at least ten accepted vectors")
 
         for (case in accepted) {
             val first = GatewayCodec.decode(case.message)
-            assertTrue(case.name, first is DecodeResult.Ok)
+            assertTrue(first is DecodeResult.Ok, case.name)
 
             val envelope = (first as DecodeResult.Ok).envelope
-            assertTrue(case.name, envelope.id.isNotEmpty())
+            assertTrue(envelope.id.isNotEmpty(), case.name)
 
             val again = GatewayCodec.decode(GatewayCodec.encode(envelope))
-            assertEquals(case.name, envelope, (again as DecodeResult.Ok).envelope)
+            assertEquals(envelope, (again as DecodeResult.Ok).envelope, case.name)
         }
     }
 

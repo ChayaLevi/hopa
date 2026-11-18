@@ -4,10 +4,10 @@ import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class ModelPlanSourceTest {
     @Test
@@ -19,8 +19,8 @@ class ModelPlanSourceTest {
 
         assertEquals(listOf("Open Settings", "Tap Network"), steps)
         val system = model.system()
-        assertTrue(system, system.contains("This is an Android phone."))
-        assertTrue(system, system.contains("You are planning, not acting."))
+        assertTrue(system.contains("This is an Android phone."), system)
+        assertTrue(system.contains("You are planning, not acting."), system)
     }
 
     @Test

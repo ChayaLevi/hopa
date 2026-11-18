@@ -12,6 +12,10 @@ android {
         minSdk = 29
     }
 
+    testOptions {
+        unitTests.all { it.useJUnitPlatform() }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -42,6 +46,7 @@ dependencies {
     implementation("org.conscrypt:conscrypt-android:2.9.0")
 
     testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.core)
 
     // BackgroundDisplayTest drives the helper on a real phone from this module,

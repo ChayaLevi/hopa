@@ -3,10 +3,10 @@ package com.hopa.engine.parser
 import com.hopa.contracts.Action
 import com.hopa.contracts.Decision
 import com.hopa.contracts.ErrorCodes
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 /**
  * The rules that run before the gate: a step the device cannot carry out is a

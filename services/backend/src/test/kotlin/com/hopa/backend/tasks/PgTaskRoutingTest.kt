@@ -39,12 +39,12 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class PgTaskRoutingTest {
     private val db = PostgresHarness.appDatabase()
@@ -56,7 +56,7 @@ class PgTaskRoutingTest {
     private lateinit var store: PgTaskStore
     private val events = mutableListOf<Pair<String, Map<String, String>>>()
 
-    @Before
+    @BeforeEach
     fun setUp() {
         auth = PgAuth(db, clock = clock::get)
         tokens = TokenIssuer(db, clock = clock::get, onRevoke = auth::revoke)
@@ -354,7 +354,7 @@ class PgTaskRoutingTest {
         assertNull(tasks.recall(household, messageId))
 
         val second = task.copy(id = UUID.randomUUID().toString())
-        assertTrue("an expired key must accept a new task", tasks.remember(household, messageId, second))
+        assertTrue(tasks.remember(household, messageId, second), "an expired key must accept a new task")
         assertEquals(second.id, tasks.recall(household, messageId)?.id)
         assertEquals(2, taskCountForMessage(household, messageId))
     }

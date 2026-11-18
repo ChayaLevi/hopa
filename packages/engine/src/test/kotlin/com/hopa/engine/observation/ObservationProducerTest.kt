@@ -9,10 +9,10 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class ObservationProducerTest {
     private val producer = ObservationProducer()
@@ -75,10 +75,10 @@ class ObservationProducerTest {
         val produced = producer.produce(
             observation(tree = ObservationNode(type = "root", children = children)),
         )
-        assertTrue("count was ${count(produced.tree)}", count(produced.tree) <= 400)
+        assertTrue(count(produced.tree) <= 400, "count was ${count(produced.tree)}")
         val ids = mutableListOf<String>()
         collectIds(produced.tree, ids)
-        assertTrue("the focused row must survive the cap", ids.contains("n450"))
+        assertTrue(ids.contains("n450"), "the focused row must survive the cap")
     }
 
     @Test
@@ -100,9 +100,9 @@ class ObservationProducerTest {
                 item["observation"]!!,
             )
             assertEquals(
-                item["name"]!!.jsonPrimitive.content,
                 item["hash"]!!.jsonPrimitive.content,
                 producer.produce(observation).hash,
+                item["name"]!!.jsonPrimitive.content,
             )
         }
     }

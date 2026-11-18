@@ -18,8 +18,8 @@ import io.ktor.server.netty.Netty
 import java.util.Base64
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class ExitRunTest {
     private data class Paired(val householdId: String, val access: String)

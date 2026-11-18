@@ -1,20 +1,19 @@
 package com.hopa.turn.recipe
 
 import com.hopa.contracts.Action
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class RecipeStoreTest {
-    @get:Rule
-    val folder = TemporaryFolder()
+    @TempDir
+    lateinit var folder: File
 
-    private fun store(): RecipeStore = RecipeStore(File(folder.root, "recipes.txt"))
+    private fun store(): RecipeStore = RecipeStore(File(folder, "recipes.txt"))
 
     private val launch = Action(kind = "ui.launch", app = "com.android.settings")
     private val tap = Action(kind = "ui.tap", ref = "e21")
@@ -48,7 +47,7 @@ class RecipeStoreTest {
         ).joinToString("\u001f")
         val line = listOf("1700000000000", "Tap Connections", "sha256:a", "sha256:b", step)
             .joinToString("\u001f")
-        File(folder.root, "recipes.txt").writeText(line + "\n")
+        File(folder, "recipes.txt").writeText(line + "\n")
 
         val recipe = store().find("Tap Connections")
         assertEquals(1, recipe?.steps?.size)
@@ -62,7 +61,7 @@ class RecipeStoreTest {
             "ui.launch", "com.android.settings", "", "", "", "", "", "", "", "3000",
         ).joinToString("\u001f")
         val line = listOf("1700000000000", "Open Settings", step).joinToString("\u001f")
-        File(folder.root, "recipes.txt").writeText(line + "\n")
+        File(folder, "recipes.txt").writeText(line + "\n")
 
         val recipe = store().find("Open Settings")
         assertEquals(1, recipe?.steps?.size)

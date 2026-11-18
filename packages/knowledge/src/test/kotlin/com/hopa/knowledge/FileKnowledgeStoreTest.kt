@@ -1,16 +1,15 @@
 package com.hopa.knowledge
 
 import java.io.File
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 
 class FileKnowledgeStoreTest {
-    @get:Rule
-    val folder = TemporaryFolder()
+    @TempDir
+    lateinit var folder: File
 
     private val bundled = TestBundles.bundled
 
@@ -38,7 +37,7 @@ class FileKnowledgeStoreTest {
     private fun json(knowledge: Knowledge): String =
         KnowledgeCodec.encode(KnowledgeBundle.from(knowledge))
 
-    private fun store(): FileKnowledgeStore = FileKnowledgeStore(folder.root, bundled)
+    private fun store(): FileKnowledgeStore = FileKnowledgeStore(folder, bundled)
 
     @Test
     fun an_empty_directory_uses_the_bundled_snapshot() {
@@ -77,7 +76,7 @@ class FileKnowledgeStoreTest {
         first.accept(json(tiny("tiny-1", "Tiny")))
         first.accept(json(tiny("tiny-2", "Tiny two")))
 
-        File(folder.root, "knowledge.json").writeText("broken", Charsets.UTF_8)
+        File(folder, "knowledge.json").writeText("broken", Charsets.UTF_8)
 
         assertEquals("tiny-1", store().current().version)
     }

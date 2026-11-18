@@ -121,7 +121,9 @@ The live gate above has run; the branch is ready to merge when wanted.
    installed APK (`ADR-0023`) - and `HelperSupervisor` owns its life instead of a
    fire-and-forget start. The helper stays a shell process: a normal app cannot
    host another app's UI off-screen, and `MediaProjection` only captures.
-5. Versions: Kotlin/AGP/Gradle and JUnit 5, as their own small PR.
+5. **Done (F)**: Gradle 8.13, AGP 8.13.2, Kotlin 2.2.21 with KSP 2.2.21-2.0.5
+   and Room 2.7.2 (KSP2 needs it), and JUnit 5.14.4 for every test source.
+   AGP 9 and Kotlin 2.4 wait for a DSL migration and for KSP to support 2.4.
 
 ## Product constraints that survive the refactor
 
