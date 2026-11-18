@@ -40,7 +40,10 @@ def test_front_matter_and_catalogue() -> None:
     fields = module.parse_front_matter(sample)
     assert fields["bundle"] == "com.huawei.hmos.settings"
     apps = module.load_apps()
-    assert len(apps) == 54
+    # The count comes from the files, so adding an APP.md does not fail the
+    # test while a file the script skips still does.
+    files = list(module.APPS.glob("*/APP.md"))
+    assert len(apps) == len(files)
     settings = next(app for app in apps if app["name"] == "settings")
     assert settings["bundle"] == "com.huawei.hmos.settings"
     assert settings["verified"]
