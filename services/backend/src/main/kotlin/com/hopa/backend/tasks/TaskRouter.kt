@@ -199,7 +199,8 @@ class TaskRouter(
         }
 
         val other = if (identity.deviceId == task.from) task.to else task.from
-        registry.sessionFor(other)?.outgoing?.trySend(
+        val target = registry.sessionFor(other)
+        val relayed = target?.outgoing?.trySend(
             GatewayCodec.encode(
                 envelope.copy(
                     task = task.id,
@@ -210,7 +211,12 @@ class TaskRouter(
                     trace = task.trace,
                 ),
             ),
-        )
+        )?.isSuccess == true
+        if (!relayed && target != null) {
+            // The socket is gone but still marked online; drop it so the next
+            // create queues instead of vanishing into a closed channel.
+            registry.leave(target)
+        }
 
         val next = when (envelope.type) {
             "task.ack" -> task.copy(state = "acked")
@@ -251,7 +257,12 @@ class TaskRouter(
                     ),
                 ),
             ).isSuccess
-            if (!sent) return@span task
+            if (!sent) {
+                // A closed socket must not stay "online": the task is still
+                // queued, but the next hello is what will deliver it.
+                registry.leave(session)
+                return@span task
+            }
             store.markDelivered(task.id, task.householdId)
             store.event(task.id, task.householdId, "deliver", JsonObject(emptyMap()), now())
             task.copy(state = "delivered")

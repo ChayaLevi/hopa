@@ -13,6 +13,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -46,18 +47,28 @@ class FakeDevice(
     /** The next frame of [type]; non-matching frames are buffered for later. */
     suspend fun expect(type: String, timeoutMs: Long = 2_000): Envelope {
         take(type)?.let { return it }
-        return withTimeout(timeoutMs) {
-            while (true) {
-                val frame = session.incoming.receive()
-                if (frame !is Frame.Text) continue
-                val decoded = GatewayCodec.decode(frame.readText())
-                if (decoded is DecodeResult.Ok) {
-                    if (decoded.envelope.type == type) return@withTimeout decoded.envelope
-                    pending += decoded.envelope
+        return try {
+            withTimeout(timeoutMs) {
+                while (true) {
+                    val frame = session.incoming.receive()
+                    if (frame !is Frame.Text) continue
+                    val decoded = GatewayCodec.decode(frame.readText())
+                    if (decoded is DecodeResult.Ok) {
+                        if (decoded.envelope.type == type) return@withTimeout decoded.envelope
+                        pending += decoded.envelope
+                    }
                 }
+                @Suppress("UNREACHABLE_CODE")
+                error("the socket closed before a $type frame arrived")
             }
-            @Suppress("UNREACHABLE_CODE")
-            error("the socket closed before a $type frame arrived")
+        } catch (timeout: TimeoutCancellationException) {
+            // A bare timeout says nothing about which frame was lost; name the
+            // device, the expectation and what did arrive.
+            val buffered = pending.joinToString { it.type }.ifBlank { "nothing" }
+            throw AssertionError(
+                "$deviceId: no $type within $timeoutMs ms; buffered: $buffered",
+                timeout,
+            )
         }
     }
 
