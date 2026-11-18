@@ -42,11 +42,7 @@ object NodeAnchor {
         firstMatch(tree, anchor) { node -> node.visible && node.enabled }
             ?: firstMatch(tree, anchor) { true }
 
-    private fun firstMatch(
-        node: ObservationNode,
-        anchor: String,
-        usable: (ObservationNode) -> Boolean,
-    ): String? {
+    private fun firstMatch(node: ObservationNode, anchor: String, usable: (ObservationNode) -> Boolean): String? {
         if (node.ref.isNotBlank() && usable(node) && key(node) == anchor) {
             return node.ref
         }
@@ -56,6 +52,5 @@ object NodeAnchor {
         return null
     }
 
-    private fun normalize(value: String): String =
-        value.trim().replace(Regex("\\s+"), " ").lowercase()
+    private fun normalize(value: String): String = value.trim().replace(Regex("\\s+"), " ").lowercase()
 }
