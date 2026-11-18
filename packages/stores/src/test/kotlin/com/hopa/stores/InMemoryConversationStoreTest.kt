@@ -1,5 +1,6 @@
 package com.hopa.stores
 
+import com.hopa.contracts.chat.ChatMessage
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

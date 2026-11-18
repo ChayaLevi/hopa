@@ -13,7 +13,7 @@ import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
 import com.hopa.engine.router.CatalogRoutes
-import com.hopa.stores.Attachment
+import com.hopa.contracts.chat.Attachment
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunChain
 import com.hopa.engine.records.RunRecordFactory

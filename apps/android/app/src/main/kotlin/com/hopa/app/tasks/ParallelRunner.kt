@@ -5,7 +5,7 @@ import com.hopa.capabilities.display.ShellClient
 import com.hopa.capabilities.display.ShellDisplayDevice
 import com.hopa.engine.observation.ScreenSource
 import com.hopa.engine.observation.ScreenSourceDevice
-import com.hopa.stores.ChatMessage
+import com.hopa.contracts.chat.ChatMessage
 import com.hopa.turn.run.TurnSource
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -127,7 +127,7 @@ class ParallelRunner(
                 outcome.executed
             }
             val verified = if (outcome.source == TurnSource.RECIPE) executed else outcome.verified
-            val proof = com.hopa.stores.MessageProof(
+            val proof = com.hopa.contracts.chat.MessageProof(
                 path = "background",
                 executed = executed,
                 verified = verified,
@@ -149,7 +149,7 @@ class ParallelRunner(
     private suspend fun append(
         conversationId: String,
         text: String,
-        proof: com.hopa.stores.MessageProof? = null,
+        proof: com.hopa.contracts.chat.MessageProof? = null,
     ) {
         runCatching {
             container.conversations.append(

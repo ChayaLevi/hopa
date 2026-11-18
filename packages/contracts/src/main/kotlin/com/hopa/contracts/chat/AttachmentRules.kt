@@ -1,4 +1,4 @@
-package com.hopa.stores
+package com.hopa.contracts.chat
 
 import java.util.Locale
 

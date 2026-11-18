@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.stores.Attachment
-import com.hopa.stores.AttachmentRules
+import com.hopa.contracts.chat.Attachment
+import com.hopa.contracts.chat.AttachmentRules
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

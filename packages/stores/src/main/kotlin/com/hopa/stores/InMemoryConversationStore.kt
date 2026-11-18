@@ -1,5 +1,7 @@
 package com.hopa.stores
 
+import com.hopa.contracts.chat.ChatMessage
+import com.hopa.contracts.chat.Conversation
 import java.util.UUID
 
 class InMemoryConversationStore : ConversationStore {

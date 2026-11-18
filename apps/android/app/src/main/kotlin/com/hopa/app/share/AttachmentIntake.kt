@@ -3,8 +3,8 @@ package com.hopa.app.share
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import com.hopa.stores.Attachment
-import com.hopa.stores.AttachmentRules
+import com.hopa.contracts.chat.Attachment
+import com.hopa.contracts.chat.AttachmentRules
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

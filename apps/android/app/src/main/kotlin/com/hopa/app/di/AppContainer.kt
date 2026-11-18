@@ -64,7 +64,7 @@ class AppContainer(context: Context) {
         kotlinx.coroutines.channels.Channel.UNLIMITED,
     )
     /** A file shared into the app, waiting in the composer. */
-    val pendingAttachment = MutableStateFlow<com.hopa.stores.Attachment?>(null)
+    val pendingAttachment = MutableStateFlow<com.hopa.contracts.chat.Attachment?>(null)
     val pendingNotice = MutableStateFlow<String?>(null)
     /** Work that must outlive an Activity, such as a one-shot launch pairing. */
     val appScope = kotlinx.coroutines.CoroutineScope(

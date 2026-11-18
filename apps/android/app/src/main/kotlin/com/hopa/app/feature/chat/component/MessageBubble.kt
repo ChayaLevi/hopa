@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.stores.ChatMessage
-import com.hopa.stores.MessageProof
+import com.hopa.contracts.chat.ChatMessage
+import com.hopa.contracts.chat.MessageProof
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

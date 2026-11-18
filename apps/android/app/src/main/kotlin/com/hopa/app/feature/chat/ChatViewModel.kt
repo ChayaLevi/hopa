@@ -8,9 +8,9 @@ import com.hopa.app.di.AppContainer
 import com.hopa.app.di.Surfaces
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.engine.observation.ScreenPath
-import com.hopa.stores.Attachment
-import com.hopa.stores.AttachmentRules
-import com.hopa.stores.ChatMessage
+import com.hopa.contracts.chat.Attachment
+import com.hopa.contracts.chat.AttachmentRules
+import com.hopa.contracts.chat.ChatMessage
 import com.hopa.turn.run.TurnOutcome
 import com.hopa.turn.run.TurnSource
 import java.util.UUID
@@ -430,7 +430,7 @@ class ChatViewModel(
                 role = "assistant",
                 text = outcome.answer,
                 timestamp = System.currentTimeMillis(),
-                proof = com.hopa.stores.MessageProof(
+                proof = com.hopa.contracts.chat.MessageProof(
                     path = outcome.surfaceName,
                     executed = replayed,
                     verified = replayed,
@@ -508,7 +508,7 @@ class ChatViewModel(
                 ?: ""
             "${record.step}. ${record.action.kind}${if (target.isBlank()) "" else " $target"}"
         }
-        val proof = com.hopa.stores.MessageProof(
+        val proof = com.hopa.contracts.chat.MessageProof(
             path = result.surfaceName,
             executed = result.executed,
             verified = result.verified,

@@ -2,8 +2,8 @@ package com.hopa.sidecar
 
 import com.hopa.contracts.ApprovalRequest
 import com.hopa.contracts.RunRecord
-import com.hopa.stores.Attachment
-import com.hopa.stores.Conversation
+import com.hopa.contracts.chat.Attachment
+import com.hopa.contracts.chat.Conversation
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder

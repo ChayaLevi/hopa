@@ -33,5 +33,3 @@ project(":engine").projectDir = file("../../../packages/engine")
 include(":net")
 project(":net").projectDir = file("../../../packages/net")
 
-include(":stores")
-project(":stores").projectDir = file("../../../packages/stores")
