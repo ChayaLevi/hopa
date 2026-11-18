@@ -247,6 +247,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # Seconds, not minutes: a structure mistake must fail before the SDK and
+      # the Gradle build pay for it.
+      - name: Android structure
+        run: python3 tools/checks/check-android-structure.py
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -264,8 +268,6 @@ jobs:
       - name: Windows sidecar tests
         working-directory: apps/android
         run: ./gradlew -p ../windows/sidecar test --no-daemon
-      - name: Android structure
-        run: python3 tools/checks/check-android-structure.py
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
