@@ -4,6 +4,7 @@ import com.hopa.contracts.HopaError
 import com.hopa.contracts.Observation
 import com.hopa.contracts.RunRecord
 import com.hopa.contracts.model.ModelUsage
+import com.hopa.engine.loop.TurnResult
 import com.hopa.turn.goal.GoalVerification
 
 /** How the turn was answered, and therefore what the receipt can claim. */
@@ -55,3 +56,16 @@ data class TurnOutcome(
     /** No error and no question: the turn finished on its own terms. */
     val clean: Boolean get() = error == null && options.isEmpty()
 }
+
+/**
+ * The engine's loop result, for clients that still speak that type (the remote
+ * delivery path does). Same answer, records, narration, options, error, usage.
+ */
+fun TurnOutcome.asTurnResult(): TurnResult = TurnResult(
+    answer = answer,
+    records = records,
+    narration = narration,
+    options = options,
+    error = error,
+    usage = usage,
+)
