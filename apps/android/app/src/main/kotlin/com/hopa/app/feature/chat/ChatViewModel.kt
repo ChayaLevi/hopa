@@ -384,7 +384,7 @@ class ChatViewModel(
                 }
             } finally {
                 stopRunService()
-                (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                Surfaces.release()
             }
             recordTurn(result, body, device, conversation.id, now, preferred, history)
         }.invokeOnCompletion { container.busy.value = false }

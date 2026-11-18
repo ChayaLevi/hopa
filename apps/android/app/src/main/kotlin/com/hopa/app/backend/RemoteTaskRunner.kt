@@ -4,8 +4,8 @@ import com.hopa.net.backend.BackendEnvelope
 import com.hopa.net.backend.BackendLink
 import com.hopa.net.backend.BackendReplies
 import com.hopa.net.backend.ProcessedTaskLog
-import com.hopa.engine.contracts.ErrorCodes
-import com.hopa.engine.contracts.HopaError
+import com.hopa.contracts.ErrorCodes
+import com.hopa.contracts.HopaError
 import com.hopa.engine.loop.TurnResult
 import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
