@@ -61,6 +61,8 @@ jobs:
         run: python tools/checks/check-conformance.py
       - name: Gateway fixtures
         run: python tools/checks/check-gateway-fixtures.py
+      - name: Wire types match the schemas
+        run: python tools/checks/check-wire-types.py
       - name: Routing fixtures
         run: python tools/checks/check-routing.py
       - name: Android structure

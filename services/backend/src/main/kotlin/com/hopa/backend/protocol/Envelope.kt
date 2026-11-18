@@ -13,7 +13,7 @@ import kotlinx.serialization.json.JsonObject
  */
 @Serializable
 data class Envelope(
-    val v: Int,
+    val v: Int = 1,
     val id: String,
     val type: String,
     val ts: Long,

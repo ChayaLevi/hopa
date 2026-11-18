@@ -108,11 +108,10 @@ The live gate above has run; the branch is ready to merge when wanted.
 1. **Done (D1, `fab7be1`)**: one `RunGate`/`RunState` instead of `busy` and
    `cancelRequested`, claimed atomically by chat or by a delivery.
    `pendingGoals` stays a channel: that is a queue, not state.
-2. **Spiked and dropped**: generating the wire types from `contracts/schemas`.
-   It compiles and passes ktlint, but everything the schemas cannot say
-   (the explicit-null record, `ActionKind`, per-class strictness) stays
-   hand-written anyway. The follow-up is a drift check, not a generator;
-   `docs/project/plan/wire-types.md` has the evidence.
+2. **Done (C1/C2)**: the wire types stay hand-written, and
+   `tools/checks/check-wire-types.py` keeps them equal to `contracts/schemas`.
+   Generation was spiked and dropped; `docs/project/plan/wire-types.md` has the
+   evidence.
 3. Event-driven screen access: a `StateFlow` from the accessibility service
    instead of polling in `AccessibilityState` and the Act pill.
 4. Hidden screen as a service (`VirtualDisplay` / MediaProjection) instead of

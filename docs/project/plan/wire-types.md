@@ -1,7 +1,9 @@
 # Wire types from the schemas
 
-Status: **spike done, generation dropped.** A generator works, but it does not
-pay for itself here. The cheaper step is a drift check.
+Status: **the spike is done and generation is dropped; C1 and C2 landed.** The
+schemas now carry the defaults and formats the Kotlin always assumed, and
+`tools/checks/check-wire-types.py` fails when a `data class` and its schema
+disagree.
 
 ## What the spike did
 
@@ -33,8 +35,9 @@ The as-is pass does not. Without help the schemas produce:
 | `data class HOPA gateway envelope v1(` | the title is prose, not an identifier |
 | `Observation.kt` holds `ObservationNode` | a `$defs` entry has no name of its own |
 
-Matching the hand-written types took **32 schema keys**: 26 `default`, 2
-`format`, 3 `title`, 1 name.
+Matching the hand-written types took **32 schema keys** in the spike: 26
+`default`, 2 `format`, 3 `title`, 1 name. C1 landed 24, 3 and 2 - the `= null`
+defaults needed no schema change, and `bounds` stayed an inline list.
 
 ## What a generator cannot reproduce
 
@@ -68,17 +71,26 @@ be two sources of truth - with one more program to maintain.
 
 Instead, in this order:
 
-1. **C1 - put the missing keywords into the schemas.** `default` on the 26
-   properties, `format: int64` on the millisecond clock, `format: float` on
-   density, `title` on the nested `$defs`. No code changes; the schema stops
-   being less specific than the code it describes.
-2. **C2 - a drift check.** `tools/checks/check-wire-types.py` reads the
-   `data class` declarations (uniform after ktlint) and compares name, type,
-   nullability and default against the schema, failing on any difference. It
-   would have caught the `v` default divergence between the two envelope
-   copies.
+1. **C1, done.** The schemas carry the 24 `default` values the Kotlin had by
+   hand, `format: int64` on both millisecond clocks, `format: float` on density,
+   and a `title` on the two nested objects that are classes (`ScreenSize`,
+   `ObservationNode`). No Kotlin behaviour changed.
+2. **C2, done.** `tools/checks/check-wire-types.py` reads the eight `data class`
+   declarations and the five documents, and compares names, types, nullability
+   and defaults in both directions. CI runs it next to the gateway fixtures; its
+   own tests live in `tools/scripts/test_check_wire_types.py`.
 3. Revisit generation only if C2 keeps reporting drift a generator would have
    prevented. It has not so far.
+
+## What C2 found on the first run
+
+One real drift, in the duplicate frame: `backend.Envelope` had no default for
+`v` while `net.BackendEnvelope` and the schema's `const: 1` both say `1`. One
+line fixed it. Everything else agreed, which is the answer we wanted: the
+hand-written types were already correct, they just had nothing checking them.
+
+C2 also fails when a mapped class is declared twice, so the duplicate frame
+cannot quietly become three copies.
 
 ## Numbers
 
