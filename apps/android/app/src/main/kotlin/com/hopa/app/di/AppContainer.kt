@@ -206,22 +206,18 @@ class AppContainer(context: Context) {
 
     /**
      * A device on the background display, or null when no helper can be reached.
-     * A paired bridge can start the helper itself, so the common case needs no
-     * button press; after a reboot the first background run does it.
+     * The supervisor starts one when nothing answers and reports why when it
+     * cannot, so a turn never drives a socket that only looks connected.
      */
     suspend fun backgroundDevice(): DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            if (!shell.connect()) {
-                val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
-                    .getOrDefault("")
-                    .contains("ready")
-                if (!startedHere) {
-                    startHelperThroughBridge()
-                }
-                kotlinx.coroutines.delay(1_500)
-                if (!shell.connect()) {
-                    return@withContext null
-                }
+            val status = helper.ensure()
+            if (status !is com.hopa.capabilities.display.HelperStatus.Running) {
+                lastBackgroundError = (status as? com.hopa.capabilities.display.HelperStatus.Failed)
+                    ?.reason
+                    .orEmpty()
+                    .ifBlank { "the hidden screen is not running" }
+                return@withContext null
             }
             val metrics = context.resources.displayMetrics
             val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
@@ -233,6 +229,26 @@ class AppContainer(context: Context) {
                 null
             }
         }
+
+    /**
+     * One owner for the helper's life. `connect` heals a stale socket on its own
+     * (it pings first), and `start` asks adbd, then the paired PC.
+     */
+    val helper = com.hopa.capabilities.display.HelperSupervisor(
+        ping = { shell.connect() },
+        start = { startHelperOnPhone() },
+        stop = { shell.close() },
+        pause = { kotlinx.coroutines.delay(it) },
+    )
+    val helperStatus = helper.status
+
+    /** Ask the phone's own adbd first; fall back to the paired PC. */
+    private suspend fun startHelperOnPhone(): Boolean {
+        val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
+            .getOrDefault("")
+            .contains("ready")
+        return startedHere || startHelperThroughBridge()
+    }
 
     /** Pair with this phone's own adbd, then start the helper with that shell. */
     suspend fun pairWireless(address: String, code: String): String =

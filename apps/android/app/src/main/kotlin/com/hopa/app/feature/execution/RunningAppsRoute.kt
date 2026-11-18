@@ -28,12 +28,9 @@ fun RunningAppsRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            kotlinx.coroutines.delay(3_000)
-            viewModel.refreshBackground()
-        }
-    }
+    // The supervisor owns the helper's state and publishes it; the page reads it
+    // once when it opens and follows the flow after that.
+    LaunchedEffect(Unit) { viewModel.refreshBackground() }
 
     // Screen access is granted in Android settings; the service pushes the
     // change, so only the resume is read explicitly.

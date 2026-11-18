@@ -70,10 +70,13 @@ public, trusted display); no app can drive another app's UI off-screen without
   the app) or the PC bridge. That is the price of hosting another app's UI, and
   it does not change here.
 - A helper started from the old APK keeps running after an app update; the next
-  start reads `pm path` again. Supervision - start, health, restart on death,
-  stop - is the next slice: a helper left behind by a previous install was
-  observed as `ppid=1` on this phone while the app considered the display
-  stopped.
+  start reads `pm path` again.
+- **Supervision landed with `HelperSupervisor`**: one owner starts the helper
+  when nothing answers, says whether it is alive, and stops it when the person
+  chooses "Your screen". A start that never binds is a named failure instead of
+  a socket that only looks connected. A helper left behind by a previous
+  install was observed as `ppid=1` while the app believed the display was
+  stopped; that is the state the supervisor makes visible.
 
 ## Alternatives considered
 

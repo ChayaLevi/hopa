@@ -81,6 +81,18 @@ class SettingsViewModel(
                 }
             }
         }
+        // The helper's life belongs to the supervisor; this screen follows its
+        // state instead of pinging the socket every few seconds.
+        viewModelScope.launch {
+            container.helperStatus.collect { status ->
+                _state.update {
+                    it.copy(
+                        backgroundRunning =
+                            status is com.hopa.capabilities.display.HelperStatus.Running,
+                    )
+                }
+            }
+        }
     }
 
     fun save(
@@ -286,6 +298,11 @@ class SettingsViewModel(
                     // still use it, and only the tap driver changes.
                     useBridge = if (value == "bridge") true else it.useBridge,
                 )
+            }
+            // Chosen "Your screen": the helper is no longer wanted, so it goes.
+            // A run that owns the phone keeps it until that run ends.
+            if (value == "onscreen" && !container.runGate.state.value.busy) {
+                withContext(Dispatchers.IO) { container.helper.release() }
             }
             reload()
         }
@@ -549,16 +566,12 @@ class SettingsViewModel(
             val message = when {
                 current.bridgeUrl.isBlank() -> "Bridge: set an address first"
                 token.isBlank() -> "Bridge: pair first, then start the helper"
-                else -> runCatching {
-                    val output = BridgeClient(current.bridgeUrl, token)
-                        .startHelper(token = container.displayToken.value)
-                    container.shell.close()
-                    if (container.shell.connect()) {
-                        "Hidden screen is ready"
-                    } else {
-                        "Helper started but did not answer: ${output.take(120)}"
-                    }
-                }.getOrElse { error -> "Hidden screen: ${error.message}" }
+                else -> when (val status = withContext(Dispatchers.IO) { container.helper.ensure() }) {
+                    is com.hopa.capabilities.display.HelperStatus.Running -> "Hidden screen is ready"
+                    is com.hopa.capabilities.display.HelperStatus.Failed ->
+                        "Hidden screen: ${status.reason}"
+                    else -> "Hidden screen: not started"
+                }
             }
             _state.update {
                 it.copy(
@@ -665,9 +678,7 @@ class SettingsViewModel(
     fun refreshBackground() {
         viewModelScope.launch {
             val running = withContext(Dispatchers.IO) {
-                runCatching {
-                    container.shell.connect() && container.shell.ping()
-                }.getOrDefault(false)
+                container.helper.health() is com.hopa.capabilities.display.HelperStatus.Running
             }
             _state.update {
                 if (it.backgroundRunning == running) it else it.copy(backgroundRunning = running)

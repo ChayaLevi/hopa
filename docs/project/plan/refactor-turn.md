@@ -117,8 +117,10 @@ The live gate above has run; the branch is ready to merge when wanted.
    resume reads Android once, and a disconnect is held for three seconds so a
    rebind does not blink the banner. The chat banner, the settings pill, the Act
    page and the Capabilities tab collect it; nothing polls.
-4. Hidden screen as a service (`VirtualDisplay` / MediaProjection) instead of
-   `app_process` plus the dex staged in `/data/local/tmp`.
+4. **Partly done (E)**: the dex is no longer staged - the helper starts from the
+   installed APK (`ADR-0023`) - and `HelperSupervisor` owns its life instead of a
+   fire-and-forget start. The helper stays a shell process: a normal app cannot
+   host another app's UI off-screen, and `MediaProjection` only captures.
 5. Versions: Kotlin/AGP/Gradle and JUnit 5, as their own small PR.
 
 ## Product constraints that survive the refactor
