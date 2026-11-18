@@ -85,6 +85,7 @@ import the Android app. The engine moved out of `apps/`:
 | `packages/stores` | store interfaces and models (was `data`, then `state`; `com.hopa.data.*` stays with the Android Room, DataStore and Keystore classes) | clients |
 | `packages/net` | model and bridge clients (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
 | `packages/knowledge` | generated catalog, policy data and prompt rules, written by the build scripts | clients |
+| `packages/turn` | one turn for every client: goal and checkpoints, recipes, the plan gate and the playbook policy | clients |
 
 Dependency chain (one direction only):
 
