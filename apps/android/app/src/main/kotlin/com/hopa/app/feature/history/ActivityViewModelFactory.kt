@@ -1,4 +1,4 @@
-package com.hopa.app.feature.activity
+package com.hopa.app.feature.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

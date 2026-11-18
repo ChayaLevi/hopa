@@ -1,4 +1,4 @@
-﻿package com.hopa.app.feature.runningapps
+﻿package com.hopa.app.feature.execution
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

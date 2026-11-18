@@ -1,4 +1,4 @@
-package com.hopa.app.feature.activity
+package com.hopa.app.feature.history
 
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult

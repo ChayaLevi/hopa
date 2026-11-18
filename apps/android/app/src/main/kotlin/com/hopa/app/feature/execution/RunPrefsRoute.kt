@@ -1,4 +1,4 @@
-package com.hopa.app.feature.runningapps
+package com.hopa.app.feature.execution
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

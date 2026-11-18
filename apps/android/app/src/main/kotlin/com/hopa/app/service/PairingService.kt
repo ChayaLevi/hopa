@@ -17,7 +17,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.hopa.app.HopaApplication
 import com.hopa.app.MainActivity
-import com.hopa.app.feature.runningapps.WirelessSetup
+import com.hopa.app.feature.execution.WirelessSetup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

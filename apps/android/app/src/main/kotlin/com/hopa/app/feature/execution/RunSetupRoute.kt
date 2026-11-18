@@ -1,4 +1,4 @@
-package com.hopa.app.feature.runningapps
+package com.hopa.app.feature.execution
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -14,12 +14,11 @@ import com.hopa.app.feature.settings.SettingsViewModel
 import com.hopa.app.feature.settings.SettingsViewModelFactory
 
 @Composable
-fun HowHopaActsRoute(
+fun RunSetupRoute(
     container: AppContainer,
     onBack: () -> Unit,
     onOpenScreenAccess: () -> Unit,
     onOpenComputer: () -> Unit,
-    onOpenSetup: () -> Unit,
 ) {
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -43,18 +42,16 @@ fun HowHopaActsRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    HowHopaActsScreen(
+    RunSetupScreen(
         state = state,
         pairingStatus = pairing,
         onBack = onBack,
-        onScreenPath = viewModel::setScreenPath,
+        onOpenScreenAccess = onOpenScreenAccess,
         onStartBackgroundHelper = viewModel::startBackgroundHelper,
-        onTestBridge = viewModel::testBridge,
+        onOpenComputer = onOpenComputer,
+        onRunCheck = viewModel::runScreenCheck,
         onPairWireless = viewModel::pairWireless,
         onPairWirelessFromScreen = viewModel::pairWirelessFromScreen,
         onPairWirelessWaiting = viewModel::pairWirelessWaiting,
-        onOpenScreenAccess = onOpenScreenAccess,
-        onOpenComputer = onOpenComputer,
-        onOpenSetup = onOpenSetup,
     )
 }

@@ -1,4 +1,4 @@
-package com.hopa.app.feature.memory
+package com.hopa.app.feature.recipes
 
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -7,6 +7,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
+import com.hopa.app.feature.memory.MemoryViewModel
+import com.hopa.app.feature.memory.MemoryViewModelFactory
 
 @Composable
 fun SkillsRoute(

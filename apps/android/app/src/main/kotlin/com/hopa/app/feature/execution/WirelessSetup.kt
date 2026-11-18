@@ -1,4 +1,4 @@
-﻿package com.hopa.app.feature.runningapps
+﻿package com.hopa.app.feature.execution
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
