@@ -14,12 +14,11 @@ object AttachmentRules {
     fun isImage(mime: String): Boolean = mime.startsWith("image/")
 
     /** The text a message carries when the user sent a file without a caption. */
-    fun describe(attachment: Attachment): String =
-        if (isImage(attachment.mime)) {
-            "Shared an image: ${attachment.name}"
-        } else {
-            "Shared a file: ${attachment.name}"
-        }
+    fun describe(attachment: Attachment): String = if (isImage(attachment.mime)) {
+        "Shared an image: ${attachment.name}"
+    } else {
+        "Shared a file: ${attachment.name}"
+    }
 
     fun humanSize(bytes: Long): String = when {
         bytes >= 1024L * 1024L ->
