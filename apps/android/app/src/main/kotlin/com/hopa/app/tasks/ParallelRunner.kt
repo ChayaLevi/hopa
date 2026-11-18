@@ -79,10 +79,11 @@ class ParallelRunner(
             if (settings.replaySkills) {
                 val recipe = runCatching { container.recipes.find(goal) }.getOrNull()
                 if (recipe != null) {
-                    val replayed = runCatching {
+                    val outcome = runCatching {
                         com.hopa.app.recipes.Replayer(container).replay(recipe, device)
-                    }.getOrDefault(0)
-                    if (replayed == recipe.steps.size) {
+                    }.getOrNull()
+                    if (outcome?.trustworthy == true) {
+                        val replayed = outcome.done
                         val answer = "Repeated the $replayed steps that worked last time."
                         val steps = recipe.steps.mapIndexed { index, action ->
                             "${index + 1}. ${action.kind}"
@@ -165,7 +166,14 @@ class ParallelRunner(
                 result.options.isEmpty() &&
                 result.records.any { it.verified }
             ) {
-                runCatching { container.recipes.save(goal, result.records.map { it.action }) }
+                runCatching {
+                    container.recipes.save(
+                        goal = goal,
+                        steps = result.records.map { it.action },
+                        screenHash = result.records.first().beforeHash.orEmpty(),
+                        endHash = result.records.last().afterHash.orEmpty(),
+                    )
+                }
             }
             record(goal, conversation.id, result?.records?.size ?: 0, result?.usage?.totalTokens ?: 0)
             finish(id, "done", answer.take(80))

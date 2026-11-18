@@ -11,12 +11,15 @@ class RecipeStore(file: File) {
     private val file = file
     private val separator = "\u001f"
 
-    fun save(goal: String, steps: List<Action>) {
+    fun save(goal: String, steps: List<Action>, screenHash: String = "", endHash: String = "") {
         if (goal.isBlank() || steps.isEmpty()) {
             return
         }
         val existing = all().filterNot { normalise(it.goal) == normalise(goal) }
-        val lines = (existing.takeLast(MAX) + Recipe(goal, steps, System.currentTimeMillis()))
+        val lines = (
+            existing.takeLast(MAX) +
+                Recipe(goal, steps, System.currentTimeMillis(), screenHash, endHash)
+            )
             .map(::encode)
         runCatching { file.writeText(lines.joinToString("\n") + "\n") }
     }
@@ -50,6 +53,8 @@ class RecipeStore(file: File) {
     private fun encode(recipe: Recipe): String =
         recipe.at.toString() + separator +
             recipe.goal.replace('\n', ' ') + separator +
+            recipe.screenHash + separator +
+            recipe.endHash + separator +
             recipe.steps.joinToString(ACTION_SEP) { action ->
                 listOf(
                     action.kind,
@@ -72,7 +77,11 @@ class RecipeStore(file: File) {
         }
         val at = parts[0].toLongOrNull() ?: return null
         val goal = parts[1]
-        val steps = parts.drop(2).joinToString(separator)
+        // Before hashes existed a line went straight from the goal to the steps.
+        val hasHashes = parts.size >= 5 && parts[2].startsWith(HASH_PREFIX)
+        val screenHash = if (hasHashes) parts[2] else ""
+        val endHash = if (hasHashes) parts[3] else ""
+        val steps = parts.drop(if (hasHashes) 4 else 2).joinToString(separator)
             .split(ACTION_SEP)
             .mapNotNull { raw ->
                 val f = raw.split(separator)
@@ -92,11 +101,12 @@ class RecipeStore(file: File) {
                     timeoutMs = f[9].toIntOrNull() ?: 3000,
                 )
             }
-        return if (steps.isEmpty()) null else Recipe(goal, steps, at)
+        return if (steps.isEmpty()) null else Recipe(goal, steps, at, screenHash, endHash)
     }
 
     private companion object {
         const val MAX = 30
         const val ACTION_SEP = "\u001e"
+        const val HASH_PREFIX = "sha256:"
     }
 }

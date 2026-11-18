@@ -463,8 +463,9 @@ class ChatViewModel(
     }
 
     /**
-     * Tries to replay the last matching recipe. Returns true when every step
-     * succeeded — the caller should return early in that case.
+     * Tries to replay the last matching recipe. Returns true only when the whole
+     * recipe ran and the screen ended where it ended last time; otherwise the
+     * caller falls through to the model with the screen as it is now.
      */
     private suspend fun replayIfPossible(
         body: String,
@@ -474,10 +475,11 @@ class ChatViewModel(
         preferred: ScreenPath,
     ): Boolean {
         val recipe = runCatching { container.recipes.find(body) }.getOrNull() ?: return false
-        val replayed = runCatching {
+        val outcome = runCatching {
             com.hopa.app.recipes.Replayer(container).replay(recipe, device)
-        }.getOrDefault(0)
-        if (replayed != recipe.steps.size) return false
+        }.getOrNull() ?: return false
+        if (!outcome.trustworthy) return false
+        val replayed = outcome.done
 
         container.busy.value = false
         val steps = recipe.steps.mapIndexed { index, action -> "${index + 1}. ${action.kind}" }
@@ -635,7 +637,14 @@ class ChatViewModel(
             result.options.isEmpty() &&
             result.records.any { it.verified }
         ) {
-            runCatching { container.recipes.save(body, result.records.map { it.action }) }
+            runCatching {
+                container.recipes.save(
+                    goal = body,
+                    steps = result.records.map { it.action },
+                    screenHash = result.records.first().beforeHash.orEmpty(),
+                    endHash = result.records.last().afterHash.orEmpty(),
+                )
+            }
         }
         runCatching {
             container.runHistory.record(
