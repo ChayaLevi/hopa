@@ -1,7 +1,7 @@
 package com.hopa.engine.observation
 
-import com.hopa.contracts.Observation
 import com.hopa.contracts.ports.DevicePort
+import com.hopa.contracts.wire.Observation
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**

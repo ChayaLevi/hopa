@@ -1,7 +1,7 @@
 package com.hopa.sidecar
 
-import com.hopa.contracts.ApprovalGateway
-import com.hopa.contracts.ApprovalRequest
+import com.hopa.contracts.approval.ApprovalGateway
+import com.hopa.contracts.approval.ApprovalRequest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CompletableDeferred

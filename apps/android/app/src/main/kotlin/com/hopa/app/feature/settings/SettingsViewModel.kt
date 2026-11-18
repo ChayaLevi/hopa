@@ -3,14 +3,14 @@ package com.hopa.app.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseApp
-import com.hopa.app.backend.FirebaseToken
-import com.hopa.app.backend.ScreenAccess
+import com.hopa.app.gateway.FirebaseToken
+import com.hopa.app.gateway.ScreenAccess
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
+import com.hopa.capabilities.accessibility.state.AccessibilityState
+import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
 import com.hopa.net.bridge.BridgeClient
-import com.hopa.models.ProviderState
-import com.hopa.models.ProviderStateResolver
+import com.hopa.providers.ProviderState
+import com.hopa.providers.ProviderStateResolver
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.stores.AppSettings
@@ -88,7 +88,7 @@ class SettingsViewModel(
                 _state.update {
                     it.copy(
                         backgroundRunning =
-                            status is com.hopa.capabilities.display.HelperStatus.Running,
+                            status is com.hopa.capabilities.display.client.HelperStatus.Running,
                     )
                 }
             }
@@ -237,11 +237,11 @@ class SettingsViewModel(
         // asks for MediaProjection consent once; API 30+ needs no extra grant.
         if (value &&
             android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R &&
-            !com.hopa.capabilities.display.MediaProjectionCapture.isActive
+            !com.hopa.capabilities.display.client.MediaProjectionCapture.isActive
         ) {
             com.hopa.app.service.ScreenCaptureRequester.request()
         } else if (!value &&
-            com.hopa.capabilities.display.MediaProjectionCapture.isActive
+            com.hopa.capabilities.display.client.MediaProjectionCapture.isActive
         ) {
             com.hopa.app.service.ScreenCaptureService.stop(container.context)
         }
@@ -467,7 +467,7 @@ class SettingsViewModel(
                         )
                     }
                     runCatching {
-                        (device as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                        (device as? com.hopa.capabilities.display.client.ShellDisplayDevice)?.stop()
                     }
                 }
             }
@@ -567,8 +567,8 @@ class SettingsViewModel(
                 current.bridgeUrl.isBlank() -> "Bridge: set an address first"
                 token.isBlank() -> "Bridge: pair first, then start the helper"
                 else -> when (val status = withContext(Dispatchers.IO) { container.helper.ensure() }) {
-                    is com.hopa.capabilities.display.HelperStatus.Running -> "Hidden screen is ready"
-                    is com.hopa.capabilities.display.HelperStatus.Failed ->
+                    is com.hopa.capabilities.display.client.HelperStatus.Running -> "Hidden screen is ready"
+                    is com.hopa.capabilities.display.client.HelperStatus.Failed ->
                         "Hidden screen: ${status.reason}"
                     else -> "Hidden screen: not started"
                 }
@@ -678,7 +678,7 @@ class SettingsViewModel(
     fun refreshBackground() {
         viewModelScope.launch {
             val running = withContext(Dispatchers.IO) {
-                container.helper.health() is com.hopa.capabilities.display.HelperStatus.Running
+                container.helper.health() is com.hopa.capabilities.display.client.HelperStatus.Running
             }
             _state.update {
                 if (it.backgroundRunning == running) it else it.copy(backgroundRunning = running)
@@ -703,7 +703,7 @@ class SettingsViewModel(
                 backgroundRunning = background,
                 backendUrl = settings.backendUrl,
                 backendDeviceId = settings.backendDeviceId,
-                backendName = com.hopa.app.backend.BackendLaunchName.value,
+                backendName = com.hopa.app.gateway.BackendLaunchName.value,
                 backendToken = FirebaseToken.current(),
                 fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),

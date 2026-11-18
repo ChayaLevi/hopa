@@ -9,12 +9,12 @@ The "hidden screen" runs another app's UI on a display the person cannot see, so
 a turn can work without taking over the phone. Today it is a helper process:
 
 - `ShellMain` is started as uid 2000 (`shell`) with
-  `setsid app_process / com.hopa.capabilities.display.ShellMain --token=…`,
+  `setsid app_process / com.hopa.capabilities.display.helper.ShellMain --token=…`,
   owns a virtual display through `DisplayManager`, injects input, and answers
   the app on loopback with a token as the guard.
 - To get the class onto that classpath the app unzips `classes*.dex` from the
   installed APK into `/data/local/tmp/hopa-dex`, greps them for
-  `com/hopa/capabilities/display/ShellMain`, and points `CLASSPATH` at the file
+  `com/hopa/capabilities/display/helper/ShellMain`, and points `CLASSPATH` at the file
   that matched. The comment that justified it said `app_process` reads only the
   dex named in `CLASSPATH`, and library classes land in `classes2.dex` or later.
 - That 50 MB copy is recreated on every start, and the same one-liner exists
@@ -35,7 +35,7 @@ APK itself**.
 
 ```sh
 apk=$(pm path <package> | cut -d: -f2)
-CLASSPATH="$apk" setsid app_process / com.hopa.capabilities.display.ShellMain --token=<token>
+CLASSPATH="$apk" setsid app_process / com.hopa.capabilities.display.helper.ShellMain --token=<token>
 ```
 
 Verified on the Galaxy S8 (Android 17): the class lives in `classes2.dex`

@@ -5,11 +5,11 @@ import com.hopa.contracts.HopaError
 import com.hopa.contracts.model.ModelUsage
 import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.engine.gate.ActionExecutor
-import com.hopa.engine.loop.AgentLoop
-import com.hopa.engine.loop.StepPolicy
-import com.hopa.engine.loop.TurnContext
-import com.hopa.engine.loop.TurnResult
+import com.hopa.engine.execution.ActionExecutor
+import com.hopa.engine.execution.AgentLoop
+import com.hopa.engine.execution.StepPolicy
+import com.hopa.engine.execution.TurnContext
+import com.hopa.engine.execution.TurnResult
 import com.hopa.engine.records.RunRecorder
 import com.hopa.knowledge.Knowledge
 import com.hopa.turn.goal.GoalVerification

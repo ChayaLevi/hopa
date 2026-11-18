@@ -5,25 +5,25 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
 import com.hopa.app.BuildConfig
-import com.hopa.app.backend.BackendSession
-import com.hopa.app.backend.ProcessedTaskStore
-import com.hopa.app.backend.PushTokenFetch
-import com.hopa.app.backend.RemoteRunRequest
-import com.hopa.app.backend.RemoteTaskRunner
+import com.hopa.app.gateway.BackendSession
+import com.hopa.app.gateway.ProcessedTaskStore
+import com.hopa.app.gateway.PushTokenFetch
+import com.hopa.app.gateway.RemoteRunRequest
+import com.hopa.app.gateway.RemoteTaskRunner
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
 import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
-import com.hopa.capabilities.accessibility.AccessibilityDevice
-import com.hopa.models.ModelFactory
-import com.hopa.models.ProviderChoiceRules
+import com.hopa.capabilities.accessibility.tree.AccessibilityDevice
+import com.hopa.providers.ModelFactory
+import com.hopa.providers.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.engine.gate.ActionExecutor
-import com.hopa.engine.gate.ApprovalPolicy
+import com.hopa.engine.execution.ActionExecutor
+import com.hopa.engine.execution.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
@@ -127,9 +127,9 @@ class AppContainer(context: Context) {
     val backend: BackendSession by lazy {
         BackendSession(
             settings = settings,
-            pairingFactory = { url -> com.hopa.net.backend.BackendPairing(url) },
+            pairingFactory = { url -> com.hopa.net.gateway.BackendPairing(url) },
             linkFactory = { credentials, name, version, pushToken, refresh ->
-                com.hopa.net.backend.BackendClient(
+                com.hopa.net.gateway.BackendClient(
                     credentials = { credentials },
                     pushToken = pushToken,
                     refresh = refresh,
@@ -195,14 +195,14 @@ class AppContainer(context: Context) {
     }
 
     /** The hidden background display: one helper process, one loopback port. */
-    val displayToken = com.hopa.capabilities.display.DisplayToken(context)
-    val shell = com.hopa.capabilities.display.ShellClient(displayToken.value)
+    val displayToken = com.hopa.capabilities.display.client.DisplayToken(context)
+    val shell = com.hopa.capabilities.display.client.ShellClient(displayToken.value)
 
     /**
      * Wireless debugging inside the app: pair once with the code Android shows,
      * then adbd gives this app shell and no PC is needed.
      */
-    val wireless = com.hopa.capabilities.display.WirelessShell(context)
+    val wireless = com.hopa.capabilities.display.client.WirelessShell(context)
 
     /**
      * A device on the background display, or null when no helper can be reached.
@@ -212,15 +212,15 @@ class AppContainer(context: Context) {
     suspend fun backgroundDevice(): DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val status = helper.ensure()
-            if (status !is com.hopa.capabilities.display.HelperStatus.Running) {
-                lastBackgroundError = (status as? com.hopa.capabilities.display.HelperStatus.Failed)
+            if (status !is com.hopa.capabilities.display.client.HelperStatus.Running) {
+                lastBackgroundError = (status as? com.hopa.capabilities.display.client.HelperStatus.Failed)
                     ?.reason
                     .orEmpty()
                     .ifBlank { "the hidden screen is not running" }
                 return@withContext null
             }
             val metrics = context.resources.displayMetrics
-            val device = com.hopa.capabilities.display.ShellDisplayDevice(shell, context)
+            val device = com.hopa.capabilities.display.client.ShellDisplayDevice(shell, context)
             if (device.start(metrics.widthPixels, metrics.heightPixels, metrics.densityDpi)) {
                 lastBackgroundError = ""
                 device
@@ -234,7 +234,7 @@ class AppContainer(context: Context) {
      * One owner for the helper's life. `connect` heals a stale socket on its own
      * (it pings first), and `start` asks adbd, then the paired PC.
      */
-    val helper = com.hopa.capabilities.display.HelperSupervisor(
+    val helper = com.hopa.capabilities.display.client.HelperSupervisor(
         ping = { shell.connect() },
         start = { startHelperOnPhone() },
         stop = { shell.close() },
@@ -408,6 +408,6 @@ class AppContainer(context: Context) {
 
     /** Asks the backend for a newer knowledge bundle; a failure keeps the copy. */
     val knowledgeUpdater by lazy {
-        com.hopa.app.backend.KnowledgeUpdater(backend, knowledgeStore)
+        com.hopa.app.gateway.KnowledgeUpdater(backend, knowledgeStore)
     }
 }

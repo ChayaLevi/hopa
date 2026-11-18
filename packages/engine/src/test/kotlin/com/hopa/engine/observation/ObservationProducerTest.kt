@@ -1,9 +1,9 @@
 package com.hopa.engine.observation
 
-import com.hopa.contracts.Observation
-import com.hopa.contracts.ObservationNode
-import com.hopa.contracts.ScreenSize
 import com.hopa.contracts.json.HopaJson
+import com.hopa.contracts.wire.Observation
+import com.hopa.contracts.wire.ObservationNode
+import com.hopa.contracts.wire.ScreenSize
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray

@@ -1,7 +1,7 @@
 package com.hopa.sidecar
 
-import com.hopa.contracts.Action
-import com.hopa.contracts.ApprovalRequest
+import com.hopa.contracts.wire.Action
+import com.hopa.contracts.approval.ApprovalRequest
 import java.nio.file.Files
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

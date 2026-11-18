@@ -1,6 +1,6 @@
 package com.hopa.turn.recipe
 
-import com.hopa.contracts.Action
+import com.hopa.contracts.wire.Action
 
 /**
  * A goal, the actions that satisfied it once, and what each action acted on.

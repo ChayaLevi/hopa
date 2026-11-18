@@ -1,6 +1,6 @@
 package com.hopa.net.bridge
 
-import com.hopa.contracts.Observation
+import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp

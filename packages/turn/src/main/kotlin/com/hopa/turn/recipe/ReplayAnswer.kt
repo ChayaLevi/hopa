@@ -1,10 +1,10 @@
 package com.hopa.turn.recipe
 
-import com.hopa.contracts.Observation
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelRequest
-import com.hopa.engine.loop.ModelReplyText
+import com.hopa.contracts.wire.Observation
+import com.hopa.engine.execution.ModelReplyText
 import com.hopa.engine.prompt.ScreenRenderer
 
 /**

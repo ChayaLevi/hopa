@@ -1,6 +1,6 @@
 package com.hopa.app
 
-import com.hopa.net.backend.PairingLink
+import com.hopa.net.gateway.PairingLink
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals

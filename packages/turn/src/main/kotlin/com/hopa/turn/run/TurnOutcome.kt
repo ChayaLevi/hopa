@@ -1,9 +1,9 @@
 package com.hopa.turn.run
 
 import com.hopa.contracts.HopaError
-import com.hopa.contracts.Observation
-import com.hopa.contracts.RunRecord
 import com.hopa.contracts.model.ModelUsage
+import com.hopa.contracts.wire.Observation
+import com.hopa.contracts.wire.RunRecord
 import com.hopa.turn.goal.GoalVerification
 
 /**

@@ -2,12 +2,12 @@ package com.hopa.app.di
 
 import android.app.KeyguardManager
 import android.os.PowerManager
-import com.hopa.app.backend.RemoteScreenState
-import com.hopa.app.backend.ScreenAccess
-import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
+import com.hopa.app.gateway.RemoteScreenState
+import com.hopa.app.gateway.ScreenAccess
+import com.hopa.capabilities.accessibility.state.AccessibilityState
+import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
 import com.hopa.capabilities.device.UnavailableDevicePort
-import com.hopa.capabilities.display.ShellDisplayDevice
+import com.hopa.capabilities.display.client.ShellDisplayDevice
 import com.hopa.engine.observation.ScreenPath
 import com.hopa.engine.observation.ScreenPathOrder
 import com.hopa.engine.observation.ScreenSource

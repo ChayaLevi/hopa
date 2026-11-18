@@ -66,7 +66,7 @@
             android:resource="@xml/shortcuts" />
 
         <service
-            android:name="com.hopa.capabilities.accessibility.HopaAccessibilityService"
+            android:name="com.hopa.capabilities.accessibility.state.HopaAccessibilityService"
             android:exported="true"
             android:label="@string/accessibility_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">

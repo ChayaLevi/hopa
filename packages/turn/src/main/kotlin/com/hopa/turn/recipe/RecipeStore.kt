@@ -1,6 +1,6 @@
 package com.hopa.turn.recipe
 
-import com.hopa.contracts.Action
+import com.hopa.contracts.wire.Action
 import java.io.File
 
 /**

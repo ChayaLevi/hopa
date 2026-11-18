@@ -1,10 +1,10 @@
 package com.hopa.engine.conformance
 
-import com.hopa.contracts.Observation
 import com.hopa.contracts.json.HopaJson
-import com.hopa.engine.gate.ActionExecutor
-import com.hopa.engine.gate.ApprovalPolicy
-import com.hopa.engine.parser.DecisionParser
+import com.hopa.contracts.wire.Observation
+import com.hopa.engine.execution.ActionExecutor
+import com.hopa.engine.execution.ApprovalPolicy
+import com.hopa.engine.execution.DecisionParser
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.testing.FakeApproval

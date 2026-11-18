@@ -1,7 +1,7 @@
 package com.hopa.turn.goal
 
-import com.hopa.contracts.Observation
-import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.wire.Observation
+import com.hopa.contracts.wire.ObservationNode
 import com.hopa.engine.observation.NodeAnchor
 
 /**

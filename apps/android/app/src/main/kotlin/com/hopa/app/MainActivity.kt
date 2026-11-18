@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
         // test may pair the backend while leaving the PC bridge untouched.
         val backendName = intent.getStringExtra(EXTRA_BACKEND_NAME)
         if (!backendName.isNullOrBlank()) {
-            com.hopa.app.backend.BackendLaunchName.value = backendName.trim()
+            com.hopa.app.gateway.BackendLaunchName.value = backendName.trim()
         }
         if (pairBackend) {
             val backendUrl = intent.getStringExtra(EXTRA_BACKEND_URL)

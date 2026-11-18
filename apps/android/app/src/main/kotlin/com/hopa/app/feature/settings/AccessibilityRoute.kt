@@ -14,7 +14,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.state.AccessibilityState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 

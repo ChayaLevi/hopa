@@ -1,6 +1,6 @@
 package com.hopa.engine.observation
 
-import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.wire.ObservationNode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

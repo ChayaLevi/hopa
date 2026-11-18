@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 KOTLIN = (
     ROOT
-    / "apps/android/capabilities/src/main/kotlin/com/hopa/capabilities/display/DisplayStart.kt"
+    / "apps/android/capabilities/src/main/kotlin/com/hopa/capabilities/display/client/DisplayStart.kt"
 )
 PYTHON = ROOT / "services/bridge/src/hopa_bridge/device_android.py"
 
@@ -24,7 +24,7 @@ FRAGMENTS = (
     "pm path",
     "CLASSPATH=",
     "setsid app_process",
-    "com.hopa.capabilities.display.ShellMain",
+    "com.hopa.capabilities.display.helper.ShellMain",
     "--token=",
     "echo started",
 )

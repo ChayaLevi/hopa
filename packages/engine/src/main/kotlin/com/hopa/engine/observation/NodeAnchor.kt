@@ -1,6 +1,6 @@
 package com.hopa.engine.observation
 
-import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.wire.ObservationNode
 
 /**
  * What a node *is*, not where it sits. A ref (`e21`) is a position in one tree,

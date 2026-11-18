@@ -23,7 +23,7 @@ if [ -z "$apk" ]; then
   echo "no apk for $pkg"
   exit 1
 fi
-CLASSPATH="$apk" setsid app_process / com.hopa.capabilities.display.ShellMain \
+CLASSPATH="$apk" setsid app_process / com.hopa.capabilities.display.helper.ShellMain \
   --token="$token" --verbose >"$log" 2>&1 &
 # The helper prints this line only after the socket is bound; /proc/net/tcp is
 # not readable from shell on every device, so the log is the reliable witness.

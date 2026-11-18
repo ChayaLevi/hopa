@@ -1,8 +1,8 @@
 package com.hopa.turn.goal
 
-import com.hopa.contracts.Observation
-import com.hopa.contracts.ObservationNode
-import com.hopa.contracts.ScreenSize
+import com.hopa.contracts.wire.Observation
+import com.hopa.contracts.wire.ObservationNode
+import com.hopa.contracts.wire.ScreenSize
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

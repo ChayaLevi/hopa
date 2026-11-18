@@ -285,7 +285,7 @@ apps/android/
 - [x] Room `RunStore` (last 100, atomic), one run id per turn. (evidence: RunRecordDao.insertAndPrune runs insert+prune in a transaction; RoomRunRecorder prunes to 100; ChatViewModel passes a fresh run id into the loop)
 - [x] Approval content: title/body, amount/merchant, highlight bounds, payment flag, remember-app for messages. (evidence: ApprovalRequest.highlight and .rememberPackage; ApprovalPolicy finds the amount bounds; stored with migration 5->6)
 - [x] **Full conformance runner** (the six fixtures) with a fake capability per classification; a broken client fails the fixture name. (evidence: ConformanceExecutionTest executes all six fixtures by name)
-- [x] 17 policy and executor cases: kinds, autonomy, trust, denied, unsupported, approved payment, screen-diff verify. (evidence: 17 tests in com.hopa.engine.gate; the approved-payment case found that payment kinds never executed and fixed it)
+- [x] 17 policy and executor cases: kinds, autonomy, trust, denied, unsupported, approved payment, screen-diff verify. (evidence: 17 tests in com.hopa.engine.execution; the approved-payment case found that payment kinds never executed and fixed it)
 - [x] Evidence: policy/executor/chain tests green; a tampered record fails; all six fixtures pass. (evidence: docs/project/evidence/A3-gate.md; RunChainTest tamper case)
 
 ### A4. Model, keys, settings core (8 d)

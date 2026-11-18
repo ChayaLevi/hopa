@@ -145,7 +145,7 @@ class AndroidDevice:
         command = (
             f"apk=$(pm path {package} | cut -d: -f2); "
             'CLASSPATH="$apk" setsid app_process '
-            "/ com.hopa.capabilities.display.ShellMain "
+            "/ com.hopa.capabilities.display.helper.ShellMain "
             f"--token={token} >/dev/null 2>&1 & echo started"
         )
         return {"ok": True, "output": self._adb.shell(command)}

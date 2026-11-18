@@ -1,6 +1,6 @@
 package com.hopa.turn.recipe
 
-import com.hopa.contracts.Observation
+import com.hopa.contracts.wire.Observation
 
 /**
  * What a replay managed to do. [done] steps ran; [complete] means every step of

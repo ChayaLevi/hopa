@@ -70,7 +70,7 @@ import com.hopa.app.ui.component.HopaBottomBarEasy
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.capabilities.accessibility.AccessibilityState
+import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.contracts.chat.ChatMessage
 
 /** Screen access arrives from the service; the banner above the composer. */

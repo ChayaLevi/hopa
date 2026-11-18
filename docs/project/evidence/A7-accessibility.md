@@ -31,7 +31,7 @@ Date: 2026-11-14. Host: Windows; `emulator-5554`, API 35.
 
 ```
 adb shell settings put secure enabled_accessibility_services \
-  com.hopa.android/com.hopa.capabilities.accessibility.HopaAccessibilityService
+  com.hopa.android/com.hopa.capabilities.accessibility.state.HopaAccessibilityService
 adb shell settings put secure accessibility_enabled 1
 ```
 

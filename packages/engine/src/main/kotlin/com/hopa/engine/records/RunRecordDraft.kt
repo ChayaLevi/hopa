@@ -1,6 +1,6 @@
 package com.hopa.engine.records
 
-import com.hopa.contracts.Action
+import com.hopa.contracts.wire.Action
 
 data class RunRecordDraft(
     val runId: String,

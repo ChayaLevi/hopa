@@ -89,7 +89,7 @@ server half is proven; this is the missing client half, on a Xiaomi 15T Pro
 
 ### 1. Client package (pure JVM, testable)
 
-New package `com.hopa.net.backend` in `:net`, beside
+New package `com.hopa.net.gateway` in `:net`, beside
 `bridge/`. It has no Android imports, so `:net:test` covers it with
 MockWebServer.
 

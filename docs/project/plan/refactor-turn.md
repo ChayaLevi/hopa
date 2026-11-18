@@ -141,6 +141,9 @@ The live gate above has run; the branch is ready to merge when wanted.
   published branch, so it is recorded here instead.
 - The backend implements `GET /v1/knowledge` but it is not deployed, so a phone
   still updates from the bootstrap asset.
+- The accessibility service moved to
+  `com.hopa.capabilities.accessibility.state.HopaAccessibilityService`; after the
+  next install it has to be enabled again with that component name.
 
 ## Product constraints that survive the refactor
 

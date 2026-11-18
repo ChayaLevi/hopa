@@ -9,7 +9,7 @@ Six Kotlin modules that the Android app and the Windows sidecar both build. No
 | `engine` | loop, gate, prompt, observation, records, router, parser | `com.hopa.engine.*` | `contracts`, `knowledge` |
 | `turn` | one turn for every client: goal, checkpoints, recipes, plan gate, playbooks | `com.hopa.turn.*` | `contracts`, `engine` |
 | `knowledge` | generated catalog, approval policy data, prompt rules | `com.hopa.knowledge.*` | nothing |
-| `models` | the adapters behind `ModelPort`: provider choice and state, the OpenAI-compatible client, the stub | `com.hopa.models.*` | `contracts` |
+| `models` | the adapters behind `ModelPort`: provider choice and state, the OpenAI-compatible client, the stub | `com.hopa.providers.*` | `contracts` |
 | `net` | device and backend transport: the PC bridge client and the gateway client | `com.hopa.net.*` | `contracts` |
 
 ```
@@ -39,7 +39,7 @@ apps/windows ─┘      │        └──> contracts
 6. **A local model is not `models`.** An on-device runtime is a separate adapter
    behind the same `ModelPort`; it never travels through `models`.
 7. **One name, one module.** `com.hopa.contracts`, `com.hopa.engine`,
-   `com.hopa.knowledge`, `com.hopa.models`, `com.hopa.net` and `com.hopa.turn`
+   `com.hopa.knowledge`, `com.hopa.providers`, `com.hopa.net` and `com.hopa.turn`
    belong to these six modules. `com.hopa.capabilities`, `com.hopa.data` and
    `com.hopa.stores` belong to the Android app: only the app implements those
    stores, and the chat vocabulary they share lives in `contracts/chat`.

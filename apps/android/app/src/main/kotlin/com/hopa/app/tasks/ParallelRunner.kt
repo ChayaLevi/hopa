@@ -1,8 +1,8 @@
 package com.hopa.app.tasks
 
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.display.ShellClient
-import com.hopa.capabilities.display.ShellDisplayDevice
+import com.hopa.capabilities.display.client.ShellClient
+import com.hopa.capabilities.display.client.ShellDisplayDevice
 import com.hopa.engine.observation.ScreenSource
 import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.contracts.chat.ChatMessage

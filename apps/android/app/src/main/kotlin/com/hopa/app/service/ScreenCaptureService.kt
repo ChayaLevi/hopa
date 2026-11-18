@@ -13,7 +13,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.hopa.app.MainActivity
-import com.hopa.capabilities.display.MediaProjectionCapture
+import com.hopa.capabilities.display.client.MediaProjectionCapture
 
 /**
  * Holds the MediaProjection for screen capture on Android 10. The projection may

@@ -8,9 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.engine.router.CatalogRoutes
-import com.hopa.engine.router.RouteTarget
+import com.hopa.capabilities.accessibility.state.AccessibilityState
+import com.hopa.engine.routing.CatalogRoutes
+import com.hopa.engine.routing.RouteTarget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -50,7 +50,7 @@ fun AppCardRoute(
                     emptyList()
                 } else {
                     val (ok, json) = container.shell.appFunctions(packageName)
-                    if (ok) com.hopa.capabilities.display.AppFunctions.names(json) else emptyList()
+                    if (ok) com.hopa.capabilities.display.client.AppFunctions.names(json) else emptyList()
                 }
             }.getOrDefault(emptyList())
         }

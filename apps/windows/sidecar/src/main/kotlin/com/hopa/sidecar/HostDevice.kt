@@ -1,6 +1,6 @@
 package com.hopa.sidecar
 
-import com.hopa.contracts.Observation
+import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.json.HopaJson
 import com.hopa.engine.observation.ObservationProducer
 import com.hopa.contracts.ports.DevicePort

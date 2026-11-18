@@ -1,7 +1,7 @@
 package com.hopa.sidecar
 
-import com.hopa.contracts.ApprovalRequest
-import com.hopa.contracts.RunRecord
+import com.hopa.contracts.approval.ApprovalRequest
+import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.chat.Conversation
 import kotlinx.serialization.json.Json

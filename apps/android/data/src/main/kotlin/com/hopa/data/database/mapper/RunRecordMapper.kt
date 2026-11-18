@@ -1,7 +1,7 @@
 package com.hopa.data.database.mapper
 
-import com.hopa.contracts.Action
-import com.hopa.contracts.RunRecord
+import com.hopa.contracts.wire.Action
+import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.json.HopaJson
 import com.hopa.data.database.entity.RunRecordEntity
 
