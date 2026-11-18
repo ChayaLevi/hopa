@@ -2,6 +2,9 @@
 // Source: contracts/prompts/rules.v1.json
 package com.hopa.knowledge
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PromptRule(val id: String, val phrases: List<String>)
 
 val PROMPT_RULES: List<PromptRule> = listOf(

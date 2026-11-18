@@ -1,7 +1,21 @@
 # Knowledge from the backend
 
-Status: **K1 done** (`ad2396a`). The engine reads a `Knowledge` value and the
-bundled snapshot is the mock source; nothing is downloaded yet. K2 is next.
+Status: **K1 done** (`ad2396a`), **K2 format done**. The engine reads a `Knowledge`
+value; the bundled snapshot is the mock source; the wire format
+(`KnowledgeBundle` + `KnowledgeCodec`) round-trips and rejects an unknown schema
+or an empty catalog. Nothing is downloaded yet.
+
+## K2, format done
+
+`KnowledgeBundle` (schemaVersion, version, catalog, sites, promptRules) and
+`KnowledgeCodec` live in `packages/knowledge`; the generated catalog and prompt
+types are `@Serializable`. Approval is not in the bundle: a download may change
+which app opens, never how careful the gate is.
+
+Still to do for K2: the Python script that writes the same JSON from the three
+`contracts/` sources, and the committed `contracts/knowledge/knowledge.v1.json`
+that the backend will serve. The Kotlin generators still emit the bundled values;
+they stop only when the asset is the only copy (K5).
 
 ## K1, done
 
@@ -114,7 +128,7 @@ the app less careful:
 | step | what | gates |
 |---|---|---|
 | **K1** | `Knowledge` value and injection into `CatalogRoutes`, `AgentLoop` and `TurnRunner`; bundled values assembled once; **done** (`ad2396a`) | `:engine:test`, `:turn:test`, `:app:assembleDebug`, sidecar test, one live turn; behaviour unchanged |
-| **K2** | `KnowledgeBundle` (kotlinx.serialization) in `contracts`; generators emit and validate the bundle, stop writing Kotlin; `PromptRules` becomes a real input | `:contracts:check`, generator `--check`, a parse test against the committed bundle |
+| **K2** | `KnowledgeBundle` (kotlinx.serialization) + `KnowledgeCodec` + round-trip tests; **format done**. The Python bundle writer and the committed JSON come with the backend | `:knowledge:test`, `:contracts:check`, generator `--check` |
 | **K3** | `KnowledgeStore` port, file implementation, bundled fallback, atomic swap, previous-version rollback | temp-dir tests for accept/reject/rollback; `:app:assembleDebug` |
 | **K4** | `GET /v1/knowledge` in the backend; startup check in the app; `knowledgeVersion` in the receipt and bench results | backend tests (ETag, 304, digest, cap), contract test, live update and rollback on the phone |
 | **K5** | Drop the compiled catalog from the APK, keep a minimal bootstrap | offline start, APK size, full CI |

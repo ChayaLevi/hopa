@@ -2,6 +2,9 @@
 // Source: contracts/catalog/catalog.v1.json
 package com.hopa.knowledge
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class CatalogApp(
     val id: String,
     val display: String,
@@ -14,12 +17,14 @@ data class CatalogApp(
 )
 
 /** One platform's launch target; the same shape on every platform. */
+@Serializable
 data class CatalogTarget(
     val id: String,
     val detail: String,
     val verified: Boolean,
 )
 
+@Serializable
 data class CatalogSite(
     val id: String,
     val display: String,
