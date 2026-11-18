@@ -18,6 +18,7 @@ import com.hopa.stores.Attachment
 import com.hopa.stores.AttachmentRules
 import com.hopa.stores.ChatMessage
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 class ChatViewModel(
@@ -252,7 +254,8 @@ class ChatViewModel(
         }
         planApprovedFor = goal
         _state.update { it.copy(pendingPlan = null) }
-        sendText(goal)
+        // The message is already in the chat: the plan was read above it.
+        sendText(goal, appendUser = false)
     }
 
     fun cancelPlan() {
@@ -483,7 +486,7 @@ class ChatViewModel(
             ChatMessage(
                 id = "m-${System.currentTimeMillis()}-replay",
                 role = "assistant",
-                text = "Done - repeated the $replayed steps that worked last time.",
+                text = "Repeated the $replayed steps that worked last time.",
                 timestamp = System.currentTimeMillis(),
                 proof = com.hopa.stores.MessageProof(
                     path = device.sourceName,
@@ -623,7 +626,15 @@ class ChatViewModel(
         )
         val all = container.conversations.all()
         container.busy.value = false
-        if (result != null && result.records.isNotEmpty() && result.records.all { it.executed }) {
+        // A recipe is only worth replaying when the turn both finished cleanly and
+        // verified something: a launch that ended in "I cannot read the screen"
+        // used to be saved, and the next ask then claimed "done" after one step.
+        if (
+            result != null &&
+            result.error == null &&
+            result.options.isEmpty() &&
+            result.records.any { it.verified }
+        ) {
             runCatching { container.recipes.save(body, result.records.map { it.action }) }
         }
         runCatching {
@@ -683,16 +694,16 @@ class ChatViewModel(
      */
     private suspend fun typedFunctions(
         device: com.hopa.engine.observation.ScreenSourceDevice,
-    ): String {
+    ): String = withContext(Dispatchers.IO) {
+        // The helper is reached over a local socket: never from the main thread.
         if (!container.shell.connected) {
-            return ""
+            return@withContext ""
         }
         val foreground = runCatching { device.foreground() }.getOrDefault("")
         if (foreground.isBlank()) {
-            return ""
+            return@withContext ""
         }
-        return runCatching { container.shell.appFunctions(foreground).second }
-            .getOrDefault("")
+        runCatching { container.shell.appFunctions(foreground).second }.getOrDefault("")
     }
 
     private fun startRunService() {
