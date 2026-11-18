@@ -1,6 +1,7 @@
 package com.hopa.app.feature.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,10 +9,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -22,19 +25,26 @@ fun AccessibilityRoute(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
     var allowed by remember { mutableStateOf(true) }
-    var serviceEnabled by remember { mutableStateOf(false) }
-    var connected by remember { mutableStateOf(false) }
+    val access by AccessibilityState.state.collectAsStateWithLifecycle()
+    val serviceEnabled = access.enabled
+    val connected = access.connected
 
     LaunchedEffect(Unit) {
         allowed = container.settings.settings.first().accessibilityAllowed
+        AccessibilityState.refresh(context)
     }
-    LaunchedEffect(Unit) {
-        while (true) {
-            serviceEnabled = AccessibilityState.isEnabled(context)
-            connected = HopaAccessibilityService.instance != null
-            delay(1_500)
+    // Turning the service on happens in Android settings, which sends no event
+    // to this app; coming back to the foreground is the moment to ask again.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                AccessibilityState.refresh(context)
+            }
         }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val installedAt = remember {

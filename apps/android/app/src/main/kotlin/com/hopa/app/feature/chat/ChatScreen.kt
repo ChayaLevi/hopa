@@ -58,6 +58,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.app.feature.chat.component.AccessibilityBanner
 import com.hopa.app.feature.chat.component.ChatEmptyState
 import com.hopa.app.feature.chat.component.Composer
@@ -70,12 +71,9 @@ import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.contracts.chat.ChatMessage
 
-/** Two checks, four seconds: one dip is a rebind, two are a real outage. */
-private const val ACCESS_MISSES_BEFORE_OFF = 2
-
+/** Screen access arrives from the service; the banner above the composer. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -113,43 +111,19 @@ fun ChatScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
-    // Phone access is granted in Android settings, so it is re-read every time
-    // the app comes back; a stale "off" banner would hide the only real fix.
-    var accessEnabled by remember { mutableStateOf(AccessibilityState.isEnabled(context)) }
-    var accessConnected by remember { mutableStateOf(HopaAccessibilityService.instance != null) }
-    var accessMisses by remember { mutableStateOf(0) }
-    // Android turns the service off on every reinstall and the binding can come
-    // back a moment later, so the state is re-read on resume and then polled.
+    // Screen access arrives from the service as an event; resume is the one
+    // moment the app asks Android again, because a toggle there sends none.
+    val access by AccessibilityState.state.collectAsStateWithLifecycle()
+    val accessEnabled = access.enabled
+    val accessConnected = access.connected
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                accessMisses = 0
-                accessEnabled = AccessibilityState.isEnabled(context)
-                accessConnected = HopaAccessibilityService.instance != null
+                AccessibilityState.refresh(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-    LaunchedEffect(Unit) {
-        while (true) {
-            kotlinx.coroutines.delay(2_000)
-            val enabled = AccessibilityState.isEnabled(context)
-            val connected = HopaAccessibilityService.instance != null
-            if (enabled && connected) {
-                accessMisses = 0
-                accessEnabled = true
-                accessConnected = true
-            } else {
-                // Samsung rebinds the service for a second or two after a run
-                // closes its display; a one-check dip is not worth a banner.
-                accessMisses = (accessMisses + 1).coerceAtMost(ACCESS_MISSES_BEFORE_OFF)
-                if (accessMisses >= ACCESS_MISSES_BEFORE_OFF) {
-                    accessEnabled = enabled
-                    accessConnected = connected
-                }
-            }
-        }
     }
     val micPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),

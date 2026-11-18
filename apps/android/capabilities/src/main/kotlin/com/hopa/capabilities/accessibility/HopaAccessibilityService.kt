@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 class HopaAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         instance = this
+        AccessibilityState.connected()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -45,6 +46,7 @@ class HopaAccessibilityService : AccessibilityService() {
         // the instance that is still current may clear the handle.
         if (instance === this) {
             instance = null
+            AccessibilityState.disconnected(this)
         }
         return super.onUnbind(intent)
     }
@@ -52,6 +54,7 @@ class HopaAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         if (instance === this) {
             instance = null
+            AccessibilityState.disconnected(this)
         }
         super.onDestroy()
     }

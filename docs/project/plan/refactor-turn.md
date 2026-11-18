@@ -112,8 +112,11 @@ The live gate above has run; the branch is ready to merge when wanted.
    `tools/checks/check-wire-types.py` keeps them equal to `contracts/schemas`.
    Generation was spiked and dropped; `docs/project/plan/wire-types.md` has the
    evidence.
-3. Event-driven screen access: a `StateFlow` from the accessibility service
-   instead of polling in `AccessibilityState` and the Act pill.
+3. **Done (D2)**: screen access is an event. `AccessibilityMonitor` holds one
+   `StateFlow<AccessibilityBinding>`; the service pushes bind and unbind, a
+   resume reads Android once, and a disconnect is held for three seconds so a
+   rebind does not blink the banner. The chat banner, the settings pill, the Act
+   page and the Capabilities tab collect it; nothing polls.
 4. Hidden screen as a service (`VirtualDisplay` / MediaProjection) instead of
    `app_process` plus the dex staged in `/data/local/tmp`.
 5. Versions: Kotlin/AGP/Gradle and JUnit 5, as their own small PR.

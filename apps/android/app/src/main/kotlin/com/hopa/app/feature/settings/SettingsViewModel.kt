@@ -64,6 +64,23 @@ class SettingsViewModel(
                 }
             }
         }
+        // Screen access is an event: the service pushes bind and unbind, so the
+        // phone-access pill follows without a timer. One read first, because the
+        // flow starts empty and must not say "off" about a working service.
+        viewModelScope.launch {
+            AccessibilityState.refresh(container.context)
+            AccessibilityState.state.collect { binding ->
+                _state.update { current ->
+                    current.copy(
+                        phoneAccess = ScreenAccess.available(
+                            allowed = current.settings.accessibilityAllowed,
+                            enabled = binding.enabled,
+                            bound = binding.connected,
+                        ),
+                    )
+                }
+            }
+        }
     }
 
     fun save(
@@ -614,18 +631,11 @@ class SettingsViewModel(
     }
 
     /**
-     * Android binds the accessibility service a moment after the app resumes.
-     * The pill reads this snapshot, so it is refreshed on resume and polled
-     * instead of staying at the value from when the screen first opened.
+     * Ask Android once, for this screen opening or the app coming back from the
+     * settings page. The service pushes every later change.
      */
     fun refreshScreenAccess() {
-        val current = _state.value.settings
-        val available = ScreenAccess.available(
-            allowed = current.accessibilityAllowed,
-            enabled = AccessibilityState.isEnabled(container.context),
-            bound = HopaAccessibilityService.instance != null,
-        )
-        _state.update { it.copy(phoneAccess = available) }
+        AccessibilityState.refresh(container.context)
     }
 
     fun testBridge(url: String, token: String) {

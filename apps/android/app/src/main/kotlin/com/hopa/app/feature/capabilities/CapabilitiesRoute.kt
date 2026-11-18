@@ -8,9 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
-import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import kotlinx.coroutines.flow.first
 
 @Composable
@@ -29,24 +29,23 @@ fun CapabilitiesRoute(
     var records by remember { mutableStateOf(0) }
     var facts by remember { mutableStateOf(0) }
     var skills by remember { mutableStateOf(0) }
-    var accessibilityEnabled by remember { mutableStateOf(false) }
+    var allowed by remember { mutableStateOf(true) }
     val context = LocalContext.current
+    val access by AccessibilityState.state.collectAsStateWithLifecycle()
+    val accessibilityEnabled = allowed && access.ready
 
     LaunchedEffect(Unit) {
         records = container.recorder.all().size
         facts = container.memory.all().size
         skills = container.skills.all().size
-        accessibilityEnabled = AccessibilityState.isEnabled(container.context) &&
-            HopaAccessibilityService.instance != null &&
-            container.settings.settings.first().accessibilityAllowed
+        allowed = container.settings.settings.first().accessibilityAllowed
+        AccessibilityState.refresh(container.context)
     }
-    // The tab is the place a person checks, so the status is re-read when they
-    // come back to it instead of showing what was true when the app started.
+    // The tab is the place a person checks after changing something in Android
+    // settings, which sends this app no event; ask again when they come back.
     LaunchedEffect(activeTab) {
         if (activeTab == "capabilities") {
-            accessibilityEnabled = AccessibilityState.isEnabled(container.context) &&
-                HopaAccessibilityService.instance != null &&
-                container.settings.settings.first().accessibilityAllowed
+            AccessibilityState.refresh(container.context)
         }
     }
 
