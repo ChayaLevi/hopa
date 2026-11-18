@@ -30,8 +30,7 @@ class RecipeStore(file: File) {
         runCatching { file.writeText(lines.joinToString("\n") + "\n") }
     }
 
-    fun find(goal: String): Recipe? =
-        all().firstOrNull { normalise(it.goal) == normalise(goal) }
+    fun find(goal: String): Recipe? = all().firstOrNull { normalise(it.goal) == normalise(goal) }
 
     fun all(): List<Recipe> {
         if (!file.exists()) {
@@ -53,30 +52,28 @@ class RecipeStore(file: File) {
         runCatching { file.delete() }
     }
 
-    private fun normalise(value: String): String =
-        value.lowercase().replace(Regex("\\s+"), " ").trim()
+    private fun normalise(value: String): String = value.lowercase().replace(Regex("\\s+"), " ").trim()
 
-    private fun encode(recipe: Recipe): String =
-        VERSION + separator +
-            recipe.at.toString() + separator +
-            recipe.goal.replace('\n', ' ') + separator +
-            recipe.screenHash + separator +
-            recipe.endHash + separator +
-            recipe.steps.mapIndexed { index, action ->
-                listOf(
-                    action.kind,
-                    action.app.orEmpty(),
-                    action.ref.orEmpty(),
-                    action.text.orEmpty(),
-                    action.url.orEmpty(),
-                    action.x?.toString().orEmpty(),
-                    action.y?.toString().orEmpty(),
-                    action.toX?.toString().orEmpty(),
-                    action.toY?.toString().orEmpty(),
-                    action.timeoutMs.toString(),
-                    recipe.anchorAt(index),
-                ).joinToString(separator)
-            }.joinToString(ACTION_SEP)
+    private fun encode(recipe: Recipe): String = VERSION + separator +
+        recipe.at.toString() + separator +
+        recipe.goal.replace('\n', ' ') + separator +
+        recipe.screenHash + separator +
+        recipe.endHash + separator +
+        recipe.steps.mapIndexed { index, action ->
+            listOf(
+                action.kind,
+                action.app.orEmpty(),
+                action.ref.orEmpty(),
+                action.text.orEmpty(),
+                action.url.orEmpty(),
+                action.x?.toString().orEmpty(),
+                action.y?.toString().orEmpty(),
+                action.toX?.toString().orEmpty(),
+                action.toY?.toString().orEmpty(),
+                action.timeoutMs.toString(),
+                recipe.anchorAt(index),
+            ).joinToString(separator)
+        }.joinToString(ACTION_SEP)
 
     private fun decode(line: String): Recipe? {
         var parts = line.split(separator)

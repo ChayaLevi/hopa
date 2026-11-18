@@ -1,5 +1,6 @@
 plugins {
     id("hopa.kotlin-jvm")
+    id("hopa.ktlint")
 }
 
 dependencies {
