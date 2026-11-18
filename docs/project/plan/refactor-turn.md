@@ -136,6 +136,13 @@ The live gate above has run; the branch is ready to merge when wanted.
 - **After the toolchain bump**: build, install and run once. AGP, Kotlin, Room
   and JUnit all changed under the app; the unit tests say it compiles, a phone
   says it works.
+- **E2 restart**: the supervisor's health path has run on the phone, but
+  `ensure()` starting a dead helper needs wireless debugging paired with the app
+  again - the stored key is no longer accepted. Until then a hidden-screen turn
+  falls back to the visible screen and says so.
+- **The local gate should compile androidTest**, as CI does:
+  `:capabilities:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin`.
+  A renamed class broke an instrumented test while every local task was green.
 - **`fb352f1`** is a broken intermediate commit (staged renames committed with a
   settings-path fix). The head is correct; rewriting it would force-push over a
   published branch, so it is recorded here instead.
