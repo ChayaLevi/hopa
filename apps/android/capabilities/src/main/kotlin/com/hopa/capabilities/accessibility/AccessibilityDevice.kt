@@ -11,9 +11,9 @@ import android.os.Bundle
 import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
 import com.hopa.capabilities.display.MediaProjectionCapture
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.ports.DevicePort
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ports.DevicePort
+import com.hopa.contracts.ports.InstalledApp
 import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
 import kotlinx.coroutines.delay

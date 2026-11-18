@@ -1,7 +1,7 @@
 package com.hopa.engine.parser
 
-import com.hopa.engine.contracts.Decision
-import com.hopa.engine.contracts.HopaError
+import com.hopa.contracts.Decision
+import com.hopa.contracts.HopaError
 
 data class ParseOutcome(
     val decision: Decision? = null,

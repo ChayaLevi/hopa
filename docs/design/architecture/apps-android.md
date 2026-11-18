@@ -14,14 +14,16 @@ apps/android/
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 packages/
-├─ core/           loop, prompt blocks, router, gate, records, contracts
-├─ capabilities/   model client, bridge client (AdbDevice), browser scripts
-└─ data/           shared settings shape and session models
+├─ contracts/      wire types, port interfaces, model types, approval data classes
+├─ engine/         loop, prompt blocks, router, gate, records
+├─ net/            model client, bridge client (AdbDevice)
+├─ stores/         store interfaces and session models
+└─ knowledge/      generated catalog, policy data and prompt rules
 ```
 
-`core` has no Android imports, so it is unit-testable on the JVM and reusable by
-the Windows sidecar. `capabilities` and `data` keep Android and Room behind their
-edges.
+`contracts` and `engine` have no Android imports, so they are unit-testable on
+the JVM and reusable by the Windows sidecar. `capabilities` and `data` keep
+Android and Room behind their edges.
 
 ## What runs where
 

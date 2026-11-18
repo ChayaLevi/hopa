@@ -287,6 +287,8 @@ and a secret/license scan.
 - `apps/harmony/core/` — the ArkTS core: loop, gate, executor, run records.
 - `apps/harmony/phone/` — the phone app (module `entry`).
 - `apps/harmony/laptop/` — the laptop app (module `laptop`); frozen.
+- `packages/contracts/` — shared wire types, port interfaces, model types and
+  approval data classes; no logic, no Android imports.
 - `packages/engine/`, `packages/stores/`, `packages/net/`, `packages/knowledge/` —
   the Kotlin client engine shared by the Android and Windows clients: the loop
   and gate, the storage contracts, the network clients, and the generated

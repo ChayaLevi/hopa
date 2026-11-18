@@ -1,6 +1,6 @@
 package com.hopa.app.skills
 
-import com.hopa.engine.contracts.Action
+import com.hopa.contracts.Action
 import java.io.File
 
 /**

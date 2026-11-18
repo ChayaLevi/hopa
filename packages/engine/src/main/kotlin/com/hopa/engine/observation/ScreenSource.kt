@@ -1,6 +1,6 @@
 package com.hopa.engine.observation
 
-import com.hopa.engine.ports.DevicePort
+import com.hopa.contracts.ports.DevicePort
 
 /**
  * One place a screen can be read from: the bridge, accessibility, or the

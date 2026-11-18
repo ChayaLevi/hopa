@@ -1,7 +1,7 @@
 package com.hopa.net.llm
 
-import com.hopa.engine.model.ModelMessage
-import com.hopa.engine.model.ModelRequest
+import com.hopa.contracts.model.ModelMessage
+import com.hopa.contracts.model.ModelRequest
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

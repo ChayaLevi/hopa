@@ -3,7 +3,9 @@ package com.hopa.engine.contracts
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.Action
+import com.hopa.contracts.RunRecord
+import com.hopa.contracts.json.HopaJson
 import com.hopa.engine.records.RunChain
 import com.hopa.engine.records.RunRecordDraft
 import com.networknt.schema.JsonSchema

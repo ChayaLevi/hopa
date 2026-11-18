@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import com.hopa.engine.gate.ApprovalRequest
+import com.hopa.contracts.ApprovalRequest
 import com.hopa.engine.loop.TurnContext
-import com.hopa.engine.model.ModelMessage
-import com.hopa.engine.model.ModelRequest
+import com.hopa.contracts.model.ModelMessage
+import com.hopa.contracts.model.ModelRequest
 import com.hopa.engine.observation.ScreenPath
 import com.hopa.engine.observation.ScreenPathOrder
 import com.hopa.engine.observation.ScreenSource

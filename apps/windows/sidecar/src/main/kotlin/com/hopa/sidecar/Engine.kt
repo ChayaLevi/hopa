@@ -7,10 +7,10 @@ import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.engine.loop.AgentLoop
 import com.hopa.engine.loop.TurnContext
-import com.hopa.engine.model.ModelMessage
-import com.hopa.engine.model.ModelPort
-import com.hopa.engine.ports.DevicePort
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.model.ModelMessage
+import com.hopa.contracts.model.ModelPort
+import com.hopa.contracts.ports.DevicePort
+import com.hopa.contracts.ports.InstalledApp
 import com.hopa.engine.router.CatalogRoutes
 import com.hopa.stores.Attachment
 import com.hopa.engine.records.InMemoryRunRecorder

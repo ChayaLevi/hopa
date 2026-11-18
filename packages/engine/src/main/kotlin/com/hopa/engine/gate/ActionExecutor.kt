@@ -1,15 +1,17 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.ErrorCodes
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.RiskLevel
-import com.hopa.engine.observation.ObservationHasher
-import com.hopa.engine.ports.BrowserPort
-import com.hopa.engine.ports.Clock
-import com.hopa.engine.ports.DevicePort
-import com.hopa.engine.ports.SandboxPort
-import com.hopa.engine.ports.SystemPort
+import com.hopa.contracts.Action
+import com.hopa.contracts.ApprovalGateway
+import com.hopa.contracts.ErrorCodes
+import com.hopa.contracts.ExecutionResult
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationHasher
+import com.hopa.contracts.RiskLevel
+import com.hopa.contracts.ports.BrowserPort
+import com.hopa.contracts.ports.Clock
+import com.hopa.contracts.ports.DevicePort
+import com.hopa.contracts.ports.SandboxPort
+import com.hopa.contracts.ports.SystemPort
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.records.RunRecorder
 
@@ -121,12 +123,9 @@ class ActionExecutor(
 
             "ui.scroll" -> {
                 val points = if (action.x != null && action.y != null) {
-                    intArrayOf(
-                        action.x,
-                        action.y,
-                        action.toX ?: action.x,
-                        action.toY ?: action.y,
-                    )
+                    val x = action.x!!
+                    val y = action.y!!
+                    intArrayOf(x, y, action.toX ?: x, action.toY ?: y)
                 } else {
                     scrollGeometry.swipe(before.screenSize, action.direction.orEmpty())
                 }

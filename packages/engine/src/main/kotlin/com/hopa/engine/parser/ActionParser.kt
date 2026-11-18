@@ -1,6 +1,6 @@
 package com.hopa.engine.parser
 
-import com.hopa.engine.contracts.Action
+import com.hopa.contracts.Action
 
 class ActionParser(
     private val decisionParser: DecisionParser = DecisionParser(),

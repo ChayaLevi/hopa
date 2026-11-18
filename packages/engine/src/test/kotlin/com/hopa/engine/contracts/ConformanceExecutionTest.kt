@@ -2,7 +2,8 @@ package com.hopa.engine.contracts
 
 import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.Observation
+import com.hopa.contracts.json.HopaJson
 import com.hopa.engine.parser.DecisionParser
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunRecordFactory

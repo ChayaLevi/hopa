@@ -1,6 +1,6 @@
 package com.hopa.engine.router
 
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.json.HopaJson
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int

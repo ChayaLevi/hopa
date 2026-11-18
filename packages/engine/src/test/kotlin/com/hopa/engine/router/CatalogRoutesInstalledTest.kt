@@ -1,6 +1,6 @@
 package com.hopa.engine.router
 
-import com.hopa.engine.ports.InstalledApp
+import com.hopa.contracts.ports.InstalledApp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

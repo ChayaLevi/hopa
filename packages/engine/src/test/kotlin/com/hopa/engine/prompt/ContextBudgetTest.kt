@@ -1,6 +1,6 @@
 package com.hopa.engine.prompt
 
-import com.hopa.engine.model.ModelMessage
+import com.hopa.contracts.model.ModelMessage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

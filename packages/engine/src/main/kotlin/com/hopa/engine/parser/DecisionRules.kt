@@ -1,8 +1,8 @@
 package com.hopa.engine.parser
 
-import com.hopa.engine.contracts.ActionKind
-import com.hopa.engine.contracts.Decision
-import com.hopa.engine.contracts.ErrorCodes
+import com.hopa.contracts.ActionKind
+import com.hopa.contracts.Decision
+import com.hopa.contracts.ErrorCodes
 
 object DecisionRules {
     fun validate(decision: Decision): ValidationResult {

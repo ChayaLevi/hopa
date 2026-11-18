@@ -8,6 +8,7 @@ import com.hopa.net.llm.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
+import com.hopa.contracts.ports.DevicePort
 import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
@@ -102,7 +103,7 @@ class AppContainer(context: Context) {
      * A paired bridge can start the helper itself, so the common case needs no
      * button press; after a reboot the first background run does it.
      */
-    suspend fun backgroundDevice(): com.hopa.engine.ports.DevicePort? =
+    suspend fun backgroundDevice(): DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             if (!shell.connect()) {
                 val startedHere = runCatching { wireless.connectAndStartHelper(displayToken.value) }
@@ -177,7 +178,7 @@ class AppContainer(context: Context) {
     )
 
     /** A bridge-backed device when Settings has an address and a token. */
-    suspend fun bridgedDevice(): com.hopa.engine.ports.DevicePort? {
+    suspend fun bridgedDevice(): DevicePort? {
         val current = settings.settings.first()
         if (!current.useBridge || current.bridgeUrl.isBlank()) {
             return null
@@ -273,7 +274,7 @@ class AppContainer(context: Context) {
     }
 
     /** One executor per device path, sharing the policy, approval and recorder. */
-    fun executorFor(device: com.hopa.engine.ports.DevicePort): ActionExecutor = ActionExecutor(
+    fun executorFor(device: DevicePort): ActionExecutor = ActionExecutor(
         device = device,
         browser = null,
         system = AndroidSystemPort(context),
@@ -289,7 +290,7 @@ class AppContainer(context: Context) {
     val recipes by lazy { com.hopa.app.skills.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** One loop per device path, sharing the model, recorder and gate. */
-    fun loopFor(device: com.hopa.engine.ports.DevicePort): AgentLoop = AgentLoop(
+    fun loopFor(device: DevicePort): AgentLoop = AgentLoop(
         model = model,
         device = device,
         executor = executorFor(device),

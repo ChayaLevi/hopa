@@ -1,6 +1,6 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.ScreenSize
+import com.hopa.contracts.ScreenSize
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

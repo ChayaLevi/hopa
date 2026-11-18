@@ -1,6 +1,6 @@
 package com.hopa.net.llm
 
-import com.hopa.engine.model.ModelPort
+import com.hopa.contracts.model.ModelPort
 
 class ModelFactory(
     private val rules: ProviderChoiceRules = ProviderChoiceRules(),

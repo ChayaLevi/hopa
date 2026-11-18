@@ -1,6 +1,6 @@
 package com.hopa.app.feature.activity
 
-import com.hopa.engine.contracts.RunRecord
+import com.hopa.contracts.RunRecord
 
 data class ActivityUiState(
     val records: List<RunRecord> = emptyList(),

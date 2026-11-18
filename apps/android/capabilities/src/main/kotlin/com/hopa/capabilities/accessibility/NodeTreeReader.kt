@@ -3,10 +3,10 @@ package com.hopa.capabilities.accessibility
 import android.hardware.display.DisplayManager
 import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.ObservationNode
-import com.hopa.engine.contracts.ScreenSize
-import com.hopa.engine.observation.ObservationHasher
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.ScreenSize
+import com.hopa.contracts.ObservationHasher
 
 class NodeTreeReader(
     private val service: HopaAccessibilityService,

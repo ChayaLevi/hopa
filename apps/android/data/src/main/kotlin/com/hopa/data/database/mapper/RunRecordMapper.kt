@@ -1,8 +1,8 @@
 package com.hopa.data.database.mapper
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.RunRecord
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.Action
+import com.hopa.contracts.RunRecord
+import com.hopa.contracts.json.HopaJson
 import com.hopa.data.database.entity.RunRecordEntity
 
 object RunRecordMapper {

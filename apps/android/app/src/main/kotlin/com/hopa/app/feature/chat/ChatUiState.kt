@@ -1,6 +1,6 @@
 package com.hopa.app.feature.chat
 
-import com.hopa.engine.gate.ApprovalRequest
+import com.hopa.contracts.ApprovalRequest
 import com.hopa.stores.Attachment
 import com.hopa.stores.Conversation
 

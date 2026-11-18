@@ -1,6 +1,6 @@
 package com.hopa.engine.records
 
-import com.hopa.engine.contracts.Action
+import com.hopa.contracts.Action
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

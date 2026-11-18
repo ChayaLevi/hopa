@@ -1,8 +1,10 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.RiskLevel
+import com.hopa.contracts.Action
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.PaymentContext
+import com.hopa.contracts.RiskLevel
 import com.hopa.knowledge.ApprovalPolicyData
 
 class ActionClassifier {
@@ -76,7 +78,7 @@ class ActionClassifier {
             return observation.text
         }
         val lines = mutableListOf<String>()
-        fun walk(node: com.hopa.engine.contracts.ObservationNode) {
+        fun walk(node: ObservationNode) {
             if (node.text.isNotEmpty()) {
                 lines += node.text
             }

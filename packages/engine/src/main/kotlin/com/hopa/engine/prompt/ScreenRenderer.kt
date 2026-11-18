@@ -1,7 +1,7 @@
 package com.hopa.engine.prompt
 
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.ObservationNode
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
 
 class ScreenRenderer(
     private val maxLines: Int = 120,

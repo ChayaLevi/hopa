@@ -8,7 +8,7 @@ kotlin {
 }
 
 dependencies {
-    api(project(":engine"))
+    api(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

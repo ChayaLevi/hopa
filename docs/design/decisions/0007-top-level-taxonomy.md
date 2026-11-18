@@ -75,10 +75,25 @@ import the Android app. The engine moved out of `apps/`:
 
 | Folder | What it holds | Who may import it |
 |---|---|---|
-| `packages/engine` | contracts, loop, gate, records, ports | clients |
+| `packages/contracts` | shared data types (`Action`, `Observation`, `RunRecord`, `Decision`), port interfaces (`DevicePort`, `ModelPort`, …), `ApprovalRequest`, `ApprovalGateway`, JSON helpers | clients |
+| `packages/engine` | loop, gate logic, records, observation, parser, prompt, router | clients |
 | `packages/stores` | store interfaces and models (was `data`, then `state`; `com.hopa.data.*` stays with the Android Room, DataStore and Keystore classes) | clients |
 | `packages/net` | model and bridge clients (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
 | `packages/knowledge` | generated catalog, policy data and prompt rules, written by the build scripts | clients |
+
+Dependency chain (one direction only):
+
+```
+knowledge   (no deps)
+contracts   (no deps)
+engine      → contracts + knowledge
+net         → contracts
+stores      → contracts
+```
+
+`net` and `stores` depend on `contracts`, not on `engine`. This keeps them
+decoupled from agent loop changes and reduces HAP/APK size for modules that
+only need data types and port interfaces.
 
 Rules:
 

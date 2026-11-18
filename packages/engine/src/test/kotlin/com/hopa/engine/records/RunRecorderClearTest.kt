@@ -1,9 +1,9 @@
 package com.hopa.engine.records
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.ObservationNode
-import com.hopa.engine.contracts.ScreenSize
+import com.hopa.contracts.Action
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.ScreenSize
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test

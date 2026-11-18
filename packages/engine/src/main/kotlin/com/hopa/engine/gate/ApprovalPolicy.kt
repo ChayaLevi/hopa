@@ -1,8 +1,11 @@
 package com.hopa.engine.gate
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.contracts.Observation
-import com.hopa.engine.contracts.RiskLevel
+import com.hopa.contracts.Action
+import com.hopa.contracts.ApprovalRequest
+import com.hopa.contracts.Observation
+import com.hopa.contracts.ObservationNode
+import com.hopa.contracts.PaymentContext
+import com.hopa.contracts.RiskLevel
 import com.hopa.knowledge.ApprovalPolicyData
 
 class ApprovalPolicy(
@@ -79,7 +82,7 @@ class ApprovalPolicy(
             return null
         }
 
-        fun visit(node: com.hopa.engine.contracts.ObservationNode): List<Int>? {
+        fun visit(node: ObservationNode): List<Int>? {
             val bounds = node.bounds
             if (bounds != null && bounds.size == 4 && node.text.contains(amount, ignoreCase = true)) {
                 return bounds

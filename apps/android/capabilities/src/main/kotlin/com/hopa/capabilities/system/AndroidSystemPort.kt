@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.AlarmClock
 import android.provider.CalendarContract
-import com.hopa.engine.ports.SystemPort
+import com.hopa.contracts.ports.SystemPort
 
 class AndroidSystemPort(
     private val context: Context,

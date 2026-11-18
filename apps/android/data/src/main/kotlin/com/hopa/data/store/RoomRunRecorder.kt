@@ -1,6 +1,6 @@
 package com.hopa.data.store
 
-import com.hopa.engine.contracts.RunRecord
+import com.hopa.contracts.RunRecord
 import com.hopa.engine.records.RunChain
 import com.hopa.engine.records.RunRecordDraft
 import com.hopa.engine.records.RunRecorder

@@ -1,8 +1,8 @@
 package com.hopa.data.store
 
-import com.hopa.engine.contracts.Action
-import com.hopa.engine.gate.ApprovalRequest
-import com.hopa.engine.json.HopaJson
+import com.hopa.contracts.Action
+import com.hopa.contracts.ApprovalRequest
+import com.hopa.contracts.json.HopaJson
 import com.hopa.data.database.dao.PendingApprovalDao
 import com.hopa.data.database.entity.PendingApprovalEntity
 import com.hopa.stores.PendingApprovalStore
