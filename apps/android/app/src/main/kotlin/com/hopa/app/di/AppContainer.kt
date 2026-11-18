@@ -51,11 +51,15 @@ class AppContainer(context: Context) {
     private val database = HopaDatabase.build(context)
     val conversations: ConversationStore = DbConversationStore(database)
     /**
-     * The tables this client uses. The bundled snapshot is the mock until the
-     * backend serves a version; the runner already reads this value, not the
-     * generated constants.
+     * The tables this client uses. A stored bundle wins over the bundled
+     * snapshot; the file store falls back to it on any problem. Nothing writes
+     * the file yet: that is the backend fetch.
      */
-    val knowledgeSource: com.hopa.knowledge.KnowledgeSource = com.hopa.knowledge.BundledKnowledge
+    val knowledgeSource: com.hopa.knowledge.KnowledgeSource =
+        com.hopa.knowledge.FileKnowledgeStore(
+            directory = java.io.File(context.filesDir, "knowledge"),
+            fallback = com.hopa.knowledge.BundledKnowledge.current(),
+        )
     val knowledge: com.hopa.knowledge.Knowledge by lazy { knowledgeSource.current() }
     val selectedConversation = MutableStateFlow<String?>(null)
     val busy = MutableStateFlow(false)
