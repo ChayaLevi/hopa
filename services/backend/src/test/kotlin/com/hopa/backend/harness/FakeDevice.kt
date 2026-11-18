@@ -15,6 +15,7 @@ import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
@@ -64,12 +65,18 @@ class FakeDevice(
         } catch (timeout: TimeoutCancellationException) {
             // A bare timeout says nothing about which frame was lost; name the
             // device, the expectation and what did arrive.
-            val buffered = pending.joinToString { it.type }.ifBlank { "nothing" }
+            val buffered = pending.joinToString { summary(it) }.ifBlank { "nothing" }
             throw AssertionError(
                 "$deviceId: no $type within $timeoutMs ms; buffered: $buffered",
                 timeout,
             )
         }
+    }
+
+    /** `error(E_RATE)` is more useful in a failure than plain `error`. */
+    private fun summary(envelope: Envelope): String {
+        val code = envelope.body["code"]?.jsonPrimitive?.contentOrNull
+        return if (code == null) envelope.type else "${envelope.type}($code)"
     }
 
     private fun take(type: String): Envelope? {
@@ -82,6 +89,10 @@ class FakeDevice(
     suspend fun expectNothing(type: String, withinMs: Long = 300) {
         try {
             expect(type, withinMs)
+        } catch (_: AssertionError) {
+            // expect() reports its timeout as an AssertionError; here it is the
+            // expected outcome.
+            return
         } catch (_: Exception) {
             return
         }
