@@ -1,11 +1,11 @@
 package com.hopa.engine.router
 
 import com.hopa.contracts.ports.InstalledApp
+import com.hopa.engine.testing.TestKnowledge
 import com.hopa.knowledge.ApprovalPolicyData
 import com.hopa.knowledge.CatalogApp
 import com.hopa.knowledge.CatalogTarget
 import com.hopa.knowledge.Knowledge
-import com.hopa.engine.testing.TestKnowledge
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
