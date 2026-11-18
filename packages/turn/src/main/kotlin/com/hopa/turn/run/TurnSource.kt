@@ -1,0 +1,16 @@
+package com.hopa.turn.run
+
+/** How the turn was answered, and therefore what the receipt can claim. */
+enum class TurnSource {
+    /** A stored recipe ran; no plan, no loop, at most one cheap model call. */
+    RECIPE,
+
+    /** The step loop ran, with the model choosing each step. */
+    MODEL,
+
+    /** The plan gate answered; nothing was tapped and the person decides next. */
+    PLAN,
+
+    /** No surface could see the screen, so the turn did not start. */
+    UNAVAILABLE,
+}

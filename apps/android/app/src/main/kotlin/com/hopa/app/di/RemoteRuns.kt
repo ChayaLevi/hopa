@@ -2,7 +2,6 @@ package com.hopa.app.di
 
 import com.hopa.app.backend.RemoteRunRequest
 import com.hopa.engine.loop.TurnResult
-import com.hopa.turn.run.asTurnResult
 
 /**
  * A delivered task takes the same turn as chat: plan-free (the sender already
@@ -22,6 +21,13 @@ object RemoteRuns {
             ),
             request.isCancelled,
         )
-        return outcome.asTurnResult()
+        return TurnResult(
+            answer = outcome.answer,
+            records = outcome.records,
+            narration = outcome.narration,
+            options = outcome.options,
+            error = outcome.error,
+            usage = outcome.usage,
+        )
     }
 }

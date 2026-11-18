@@ -34,7 +34,7 @@ PACKAGES = ROOT / "packages"
 BANNED = {"Utils", "Helpers", "Common", "Manager", "Misc"}
 DECL = re.compile(
     r"^(?:public |internal |private |protected )?"
-    r"(?:data |sealed |enum |abstract |open |annotation )?"
+    r"(?:data |sealed |enum |abstract |open |annotation |fun )?"
     r"(class|interface|object|fun) ([A-Za-z_][A-Za-z0-9_]*)",
 )
 PACKAGE = re.compile(r"^package ([A-Za-z0-9_.]+)")

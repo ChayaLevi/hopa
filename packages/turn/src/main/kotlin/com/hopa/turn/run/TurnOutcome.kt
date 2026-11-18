@@ -4,23 +4,7 @@ import com.hopa.contracts.HopaError
 import com.hopa.contracts.Observation
 import com.hopa.contracts.RunRecord
 import com.hopa.contracts.model.ModelUsage
-import com.hopa.engine.loop.TurnResult
 import com.hopa.turn.goal.GoalVerification
-
-/** How the turn was answered, and therefore what the receipt can claim. */
-enum class TurnSource {
-    /** A stored recipe ran; no plan, no loop, at most one cheap model call. */
-    RECIPE,
-
-    /** The step loop ran, with the model choosing each step. */
-    MODEL,
-
-    /** The plan gate answered; nothing was tapped and the person decides next. */
-    PLAN,
-
-    /** No surface could see the screen, so the turn did not start. */
-    UNAVAILABLE,
-}
 
 /**
  * What one turn produced. The caller turns this into bubbles, receipts and
@@ -56,16 +40,3 @@ data class TurnOutcome(
     /** No error and no question: the turn finished on its own terms. */
     val clean: Boolean get() = error == null && options.isEmpty()
 }
-
-/**
- * The engine's loop result, for clients that still speak that type (the remote
- * delivery path does). Same answer, records, narration, options, error, usage.
- */
-fun TurnOutcome.asTurnResult(): TurnResult = TurnResult(
-    answer = answer,
-    records = records,
-    narration = narration,
-    options = options,
-    error = error,
-    usage = usage,
-)
