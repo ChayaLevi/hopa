@@ -97,6 +97,53 @@ switch off and on rebinds it; a reboot is the reliable reset. Check both
 `dumpsys accessibility` ("Bound services") and the app's Screen access page
 ("Android service: On", "Connection: Live") before sending a task.
 
+## Re-verification on main (2026-11-18)
+
+After PR #52 merged, `week1-test` was cut from `6b53280` (main plus the engine
+seams refactor). Build `0.1.0-261118-1523` was installed with
+`android-device-checks.ps1 -InstallOnly`, screen access was re-enabled from adb,
+and the phone was paired into household `8d21f337-c740-4425-b990-741f584fda85`
+as device `ee658779-16b0-4e2e-b1a9-c4444f671da8`.
+
+| Run | Sender saw | Trace |
+|---|---|---|
+| awake, visible screen | `ack state=delivered`, then `result` (stub model's answer) | `9d7530b1b70650c4e6521b36c03b16bb`: `accept, route, deliver, accept, route, ack` |
+| backgrounded, dozing | `ack state=queued`, then `E_DEVICE phone is locked`, as designed | `5d58b9522bb3ee3522712893def48cd3`: `**wake 3424 ms**`, `deliver 16 ms`, `ack 1 ms` |
+
+The wake is the real FCM path again on the merged tree: the phone was off the
+socket for longer than the 30 s grace and dozing, the push brought it back, and
+the locked phone refused honestly. No provider key is configured, so the awake
+run proves delivery and the terminal frame, not model-driven taps.
+
+One testing gotcha worth keeping: the pairing link contains `&`, so it must be
+quoted *inside* the `adb shell` command. Without that the device shell splits it
+at the first `&`, the app only sees `hopa://pair?v=1`, and the phone keeps its
+old identity while looking unpaired:
+
+```powershell
+$link = .\tools\scripts\pair-device.ps1 -HouseholdId <household> -LinkOnly
+adb shell "am start -n com.hopa.android/com.hopa.app.MainActivity --es hopa.backendPair '$link'"
+```
+
+### The 15-minute silent outage (fixed)
+
+A paired phone stopped receiving tasks about 15 minutes after pairing while
+the FCM wake notification still appeared. A probe with the phone's expired
+access token showed the gateway's real shape: `101`, then an `error` frame
+with code `E_AUTH`, then a close that OkHttp reports as `EOFException`. The
+client only refreshed on a `1008 E_AUTH` close, so it ignored the frame and
+retried the dead token forever.
+
+`9097b96` treats the `E_AUTH` error frame as the auth signal, and the
+regression test covers the frame plus the abrupt close. Verified on the phone
+with an already-expired token: it refreshed by itself and went `Live`. Runs
+after the fix:
+
+| Run | Result | Trace |
+|---|---|---|
+| foreground | `ack state=delivered`, result "Settings is open" | `9abe7e1c62f2e96fae25752a7df37aad`: accept, route, deliver, ack |
+| background wake | `ack state=queued`, result "Settings is open on your phone" | `3116c9b012f56dffc3a8db4783987633`: **wake 103 ms**, deliver 9 ms, ack 1 ms |
+
 ## Carried out of week 1
 
 | Item | Why it left this slice | Where it is picked up |
