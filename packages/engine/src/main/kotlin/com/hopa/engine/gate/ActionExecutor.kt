@@ -20,7 +20,13 @@ class ActionExecutor(
     private val browser: BrowserPort?,
     private val system: SystemPort?,
     private val sandbox: SandboxPort?,
-    private val policy: ApprovalPolicy,
+    /**
+     * The gate settings to use for this step. A supplier, because a setting can
+     * change between steps while a run is in flight, and because one executor
+     * serves the main turn and the parallel runs; each step reads one immutable
+     * snapshot instead of sharing a mutable list.
+     */
+    private val policy: () -> ApprovalPolicy,
     private val approval: ApprovalGateway,
     private val recorder: RunRecorder,
     private val factory: RunRecordFactory,
@@ -34,14 +40,15 @@ class ActionExecutor(
         action: Action,
         before: Observation,
     ): ExecutionResult {
-        val classification = policy.classify(action, before)
-        val needsApproval = policy.requiresApproval(action, before)
+        val gate = policy()
+        val classification = gate.classify(action, before)
+        val needsApproval = gate.requiresApproval(action, before)
         val approved = if (needsApproval) {
-            approval.approve(policy.request(action, before))
+            approval.approve(gate.request(action, before))
         } else {
             null
         }
-        val beforeHash = ObservationHasher.hash(before)
+        val beforeHash = ObservationHasher.hashOf(before)
 
         if (needsApproval && approved != true) {
             val record = factory.draft(
@@ -64,7 +71,8 @@ class ActionExecutor(
         return runCatching {
             val text = executeAction(action, before)
             val after = runCatching { device.observe() }.getOrDefault(before)
-            val changed = ObservationHasher.hash(after) != beforeHash
+            val afterHash = ObservationHasher.hashOf(after)
+            val changed = afterHash != beforeHash
             val verified = text.isNotEmpty() || action.kind in setOf(
                 "ui.observe", "ui.wait", "ui.back", "ui.home", "ui.stop",
             ) || changed
@@ -77,7 +85,7 @@ class ActionExecutor(
                 approved = approved,
                 observation = after,
                 beforeHash = beforeHash,
-                afterHash = ObservationHasher.hash(after),
+                afterHash = afterHash,
                 verified = verified,
                 executed = true,
             ).let { recorder.append(it) }

@@ -29,16 +29,24 @@ The types these use live in `packages/contracts`: `Action`, `Decision`,
 
 ## Where the decision comes from
 
-`AgentLoop` asks a `ModelPort` for the next step. That port is the seam:
+`AgentLoop` asks a `StepPolicy` for the next step, and parses the reply. That
+interface is the seam; `ModelStepPolicy` is the one implementation today and it
+wraps a `ModelPort`:
 
 | implementation | module | when |
 |---|---|---|
-| `OpenAiClient` | `packages/net` | a provider over HTTP today |
-| `StubModelClient` | `packages/net` | no key, demo answers |
-| local runtime | its own module | on-device inference, once it exists |
-| playbook policy | planned | no model at all: anchors instead of reasoning |
+| `ModelStepPolicy` over `OpenAiClient` | `packages/net` | a provider over HTTP today |
+| `ModelStepPolicy` over `StubModelClient` | `packages/net` | no key, demo answers |
+| `ModelStepPolicy` over a local runtime | its own module | on-device inference, once it exists |
+| playbook policy | planned, implements `StepPolicy` | no model at all: anchors instead of reasoning |
 
-Nothing in this module knows which of them is in use.
+Nothing in this module knows which of them is in use. A policy that never calls
+out is the point of the interface: it can answer from a recipe, or stop and ask
+when the screen does not match.
+
+The loop reads the gate settings one step at a time (`ActionExecutor` takes a
+supplier), so a `ApprovalPolicy` is an immutable snapshot: trust and autonomy
+are fixed when the run starts and two runs in flight never share a mutable list.
 
 ## What a client must supply
 

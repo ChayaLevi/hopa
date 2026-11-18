@@ -11,6 +11,15 @@ import kotlinx.serialization.json.put
 import java.security.MessageDigest
 
 object ObservationHasher {
+    /**
+     * The producer's hash when it is there, and a fresh one when it is not.
+     * `ObservationProducer` seals every observation it returns, so a record
+     * reuses that digest instead of walking the tree again; a hand-built
+     * observation (tests, an empty fallback) has no hash yet, so it gets one.
+     */
+    fun hashOf(observation: Observation): String =
+        observation.hash.ifBlank { hash(observation) }
+
     fun hash(observation: Observation): String {
         val payload = buildJsonObject {
             put("displayId", observation.displayId)

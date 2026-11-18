@@ -180,7 +180,7 @@ apps/android/
 | `SystemPort` | `system.*` (alarm, event, link, share, call, message, delete, uninstall, reset) | platform services / bridge shell |
 | `BrowserPort` | `web.*` | WebView + JS bridge (no browser over the bridge; say so) |
 | `SandboxPort` | `sandbox.run` | WebView JS only |
-| `VoicePort` | record, transcribe, speak | `AudioRecord` + bridge, TTS fallback |
+| `VoicePort` | record, transcribe, speak — not in `contracts` until the voice work starts | `AudioRecord` + bridge, TTS fallback |
 | `Clock` | now, settle, timeouts | injected; makes loop tests deterministic |
 | `PackageCatalog` | installed apps, verified flags, launch intent | `PackageManager` + a new Android catalogue |
 | `ObservationProducer` | screen → observation (refs, redaction, caps, hash) | one implementation, used by **both** device adapters |

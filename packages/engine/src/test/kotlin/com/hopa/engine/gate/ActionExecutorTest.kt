@@ -99,7 +99,7 @@ class ActionExecutorTest {
             browser = null,
             system = null,
             sandbox = null,
-            policy = ApprovalPolicy(),
+            policy = { ApprovalPolicy() },
             approval = approval,
             recorder = recorder,
             factory = RunRecordFactory(clock),

@@ -30,7 +30,7 @@ class RunRecordFactory(
         action = action,
         classification = classification,
         approved = approved,
-        observationHash = ObservationHasher.hash(observation),
+        observationHash = ObservationHasher.hashOf(observation),
         beforeHash = beforeHash,
         afterHash = afterHash,
         verified = verified,

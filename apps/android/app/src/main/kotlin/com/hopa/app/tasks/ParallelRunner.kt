@@ -72,7 +72,7 @@ class ParallelRunner(
 
         try {
             val settings = container.settings.settings.first()
-            container.policy.setTrustedApps(settings.trustedApps.toList())
+            container.useGate(settings.trustedApps.toList())
 
             // A goal that worked before runs from its recipe here too: the
             // parallel run gets the cheap path, not just the main one.

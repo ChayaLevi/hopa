@@ -125,14 +125,14 @@ class AgentLoopTest {
         val model = ScriptedModel(replies)
         val clock = FakeClock()
         val loop = AgentLoop(
-            model = model,
+            stepPolicy = ModelStepPolicy(model),
             device = device,
             executor = ActionExecutor(
                 device = device,
                 browser = null,
                 system = null,
                 sandbox = null,
-                policy = ApprovalPolicy(),
+                policy = { ApprovalPolicy() },
                 approval = approval,
                 recorder = recorder,
                 factory = RunRecordFactory(clock),

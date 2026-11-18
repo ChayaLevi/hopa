@@ -13,7 +13,7 @@ RunRecord.kt     RunRecord (+ the serializer)
 HopaError.kt     HopaError, ErrorCodes
 RiskLevel.kt
 ApprovalRequest.kt, ApprovalGateway.kt, PaymentContext.kt, ExecutionResult.kt
-ports/           DevicePort, SystemPort, BrowserPort, SandboxPort, Clock, PackageCatalog, VoicePort, InstalledApp
+ports/           DevicePort, SystemPort, BrowserPort, SandboxPort, Clock, PackageCatalog, InstalledApp
 model/           ModelPort, ModelRequest, ModelReply, ModelMessage, ModelUsage
 json/            HopaJson, CanonicalJson
 ```

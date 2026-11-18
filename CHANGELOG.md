@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased - engine
+
+- `AgentLoop` asks a `StepPolicy` for the next step and `ModelStepPolicy` wraps
+  a `ModelPort`, so the seam a playbook policy needs is in the loop and not in
+  the client. Nothing in the loop knows whether a model wrote the reply.
+- `ApprovalPolicy` is an immutable snapshot now: `withTrustedApps` and
+  `withAutonomous` return a new one, and `ActionExecutor` takes a supplier and
+  reads one snapshot per step. Two runs in flight can no longer see each other's
+  trust list half-applied.
+- `DecisionRules` checks the fields a kind needs: a tap has a ref or a point, a
+  swipe has the whole gesture, `ui.launch` names an app, `app.function` has its
+  function name. A step that cannot work stops the model instead of reaching the
+  device and gesturing at a guess.
+- `RunRecordFactory` reuses `observation.hash` (`ObservationHasher.hashOf`)
+  rather than hashing the tree again, and the executor compares the same
+  digests.
+- `SessionApprovalGateway`, `ActionParser` and `VoicePort` are removed: nothing
+  referenced them. `VoicePort` comes back with the voice work.
+
 ## Unreleased - packages
 
 - New `packages/contracts` (`com.hopa.contracts`): the wire types, port

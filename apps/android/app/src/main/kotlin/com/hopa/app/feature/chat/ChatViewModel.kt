@@ -316,7 +316,7 @@ class ChatViewModel(
             if (appendUser) appendUserMessage(conversation.id, body, attachment, now)
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
-            container.policy.setTrustedApps(current.trustedApps.toList())
+            container.useGate(current.trustedApps.toList())
 
             // Plan-first gate: show the plan before anything is tapped.
             if (current.planFirst && planApprovedFor != body) {

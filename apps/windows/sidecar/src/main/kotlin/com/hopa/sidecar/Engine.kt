@@ -6,6 +6,7 @@ import com.hopa.net.llm.ModelFactory
 import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.engine.loop.AgentLoop
+import com.hopa.engine.loop.ModelStepPolicy
 import com.hopa.engine.loop.TurnContext
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
@@ -106,14 +107,14 @@ class Engine(
                 browser = null,
                 system = null,
                 sandbox = null,
-                policy = ApprovalPolicy(),
+                policy = { ApprovalPolicy() },
                 approval = approval,
                 recorder = recorder,
                 factory = RunRecordFactory(clock),
                 clock = clock,
             )
             val loop = AgentLoop(
-                model = model,
+                stepPolicy = ModelStepPolicy(model),
                 device = device,
                 executor = executor,
                 recorder = recorder,

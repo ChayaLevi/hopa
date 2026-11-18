@@ -12,6 +12,7 @@ import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.engine.loop.AgentLoop
+import com.hopa.engine.loop.ModelStepPolicy
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
 import com.hopa.engine.records.RunRecordFactory
@@ -63,7 +64,19 @@ class AppContainer(context: Context) {
     val memory = com.hopa.data.store.DbMemoryStore(database.memoryDao())
     val skills = com.hopa.data.store.DbSkillStore(database.skillDao())
     val clock = AndroidClock()
-    val policy = ApprovalPolicy()
+    /**
+     * The gate settings, replaced as a whole when they change. The executor
+     * reads one snapshot per step, so a turn that starts while Settings is being
+     * saved cannot see half of the new list.
+     */
+    @Volatile
+    private var gatePolicy = ApprovalPolicy()
+
+    /** Use these settings for the turns that start now. */
+    fun useGate(trustedApps: Collection<String>, autonomous: Boolean = false) {
+        gatePolicy = ApprovalPolicy(autonomous = autonomous, trustedApps = trustedApps)
+    }
+
     val approval = UiApprovalGateway(pendingApprovals)
     val factory = RunRecordFactory(clock)
     val device = AccessibilityDevice(context)
@@ -74,7 +87,7 @@ class AppContainer(context: Context) {
         browser = null,
         system = AndroidSystemPort(context),
         sandbox = null,
-        policy = policy,
+        policy = { gatePolicy },
         approval = approval,
         recorder = recorder,
         factory = factory,
@@ -168,7 +181,7 @@ class AppContainer(context: Context) {
     /** Shared by the settings screen's "Test the model" button. */
     val modelFactory: ModelFactory = ModelFactory()
     val loop = AgentLoop(
-        model = model,
+        stepPolicy = ModelStepPolicy(model),
         device = device,
         executor = executor,
         recorder = recorder,
@@ -272,13 +285,13 @@ class AppContainer(context: Context) {
         )
     }
 
-    /** One executor per device path, sharing the policy, approval and recorder. */
+    /** One executor per device path, sharing the gate snapshot, approval and recorder. */
     fun executorFor(device: DevicePort): ActionExecutor = ActionExecutor(
         device = device,
         browser = null,
         system = AndroidSystemPort(context),
         sandbox = null,
-        policy = policy,
+        policy = { gatePolicy },
         approval = approval,
         recorder = recorder,
         factory = factory,
@@ -290,7 +303,7 @@ class AppContainer(context: Context) {
 
     /** One loop per device path, sharing the model, recorder and gate. */
     fun loopFor(device: DevicePort): AgentLoop = AgentLoop(
-        model = model,
+        stepPolicy = ModelStepPolicy(model),
         device = device,
         executor = executorFor(device),
         recorder = recorder,

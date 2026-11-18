@@ -23,8 +23,7 @@ class ApprovalPolicyCasesTest {
 
     @Test
     fun an_autonomous_run_still_asks_for_a_payment() {
-        val autonomous = ApprovalPolicy()
-        autonomous.setAutonomous(true)
+        val autonomous = ApprovalPolicy(autonomous = true)
         val payment = Action(kind = ApprovalPolicyData.PAYMENT_KINDS.first())
         assertTrue(autonomous.requiresApproval(payment))
         val allowed = Action(kind = ApprovalPolicyData.ALLOWED_KINDS.first())

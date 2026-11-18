@@ -52,7 +52,7 @@ class ApprovalPolicyTest {
 
     @Test
     fun a_trusted_app_skips_the_message_prompt() {
-        policy.setTrustedApps(listOf("com.example.chat"))
+        val policy = ApprovalPolicy().withTrustedApps(listOf("com.example.chat"))
         val action = Action(kind = "system.sendMessage", app = "com.example.chat")
         assertEquals(RiskLevel.READ, policy.classify(action))
         assertFalse(policy.requiresApproval(action))
@@ -60,7 +60,7 @@ class ApprovalPolicyTest {
 
     @Test
     fun trust_covers_typed_calls_and_closing_but_never_payments() {
-        policy.setTrustedApps(listOf("com.example.maps"))
+        val policy = ApprovalPolicy().withTrustedApps(listOf("com.example.maps"))
         assertFalse(
             policy.requiresApproval(
                 Action(kind = "app.function", app = "com.example.maps"),

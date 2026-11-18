@@ -8,33 +8,41 @@ import com.hopa.contracts.PaymentContext
 import com.hopa.contracts.RiskLevel
 import com.hopa.knowledge.ApprovalPolicyData
 
+/**
+ * The gate's settings for one run: whether the person turned autonomy on, and
+ * which apps they trust.
+ *
+ * Both list and flag are fixed when the object is built. A turn reads a
+ * snapshot; changing a setting builds a new one, so two runs in flight cannot
+ * see each other's list half-applied. `withTrustedApps` and `withAutonomous`
+ * are the way to change it.
+ */
 class ApprovalPolicy(
     private val classifier: ActionClassifier = ActionClassifier(),
+    private val autonomous: Boolean = false,
+    trustedApps: Collection<String> = emptyList(),
 ) {
-    private var autonomous: Boolean = false
-    private val trustedApps = mutableSetOf<String>()
+    private val trusted: Set<String> = trustedApps
+        .map { it.trim().lowercase() }
+        .filter { it.isNotEmpty() }
+        .toSet()
 
-    fun setAutonomous(value: Boolean) {
-        autonomous = value
-    }
+    fun withAutonomous(value: Boolean): ApprovalPolicy = ApprovalPolicy(classifier, value, trusted)
+
+    fun withTrustedApps(apps: Collection<String>): ApprovalPolicy = ApprovalPolicy(classifier, autonomous, apps)
 
     fun isAutonomous(): Boolean = autonomous
 
-    fun setTrustedApps(apps: List<String>) {
-        trustedApps.clear()
-        apps.map { it.trim().lowercase() }
-            .filter { it.isNotEmpty() }
-            .forEach { trustedApps += it }
-    }
+    fun trustedApps(): Set<String> = trusted
 
-    fun isTrustedApp(packageName: String): Boolean = trustedApps.contains(packageName.trim().lowercase())
+    fun isTrustedApp(packageName: String): Boolean = trusted.contains(packageName.trim().lowercase())
 
     fun classify(action: Action, observation: Observation? = null): RiskLevel {
         val app = action.app?.trim()?.lowercase().orEmpty()
         if (
             action.kind in ApprovalPolicyData.TRUSTED_APP_KINDS &&
             app.isNotEmpty() &&
-            trustedApps.contains(app)
+            trusted.contains(app)
         ) {
             return RiskLevel.READ
         }

@@ -53,7 +53,7 @@ class ConformanceExecutionTest {
                 browser = null,
                 system = null,
                 sandbox = null,
-                policy = ApprovalPolicy(),
+                policy = { ApprovalPolicy() },
                 approval = FakeApproval(allow = false),
                 recorder = recorder,
                 factory = RunRecordFactory(clock),
