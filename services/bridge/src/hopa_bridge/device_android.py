@@ -135,22 +135,18 @@ class AndroidDevice:
         """Start the app's background-display helper as shell (uid 2000).
 
         The helper listens on loopback and requires the token the app keeps in
-        its private files; the class sits in a secondary dex, so the command
-        finds the classesN.dex that carries it (app_process reads only the dex
-        named in CLASSPATH).
+        its private files. Its class sits in a secondary dex, and that is fine:
+        a zip on the classpath goes through a PathClassLoader, which loads every
+        dex in it, so CLASSPATH points at the installed APK and nothing is
+        copied to /data/local/tmp (ADR-0023).
         """
         if not _HELPER_TOKEN.fullmatch(token):
             raise ValueError("bad helper token")
-        work = "/data/local/tmp/hopa-dex"
         command = (
             f"apk=$(pm path {package} | cut -d: -f2); "
-            f"rm -rf {work}; mkdir -p {work}; cd {work}; "
-            "unzip -o -q \"$apk\" 'classes*.dex'; "
-            "for f in classes*.dex; do "
-            'if grep -q com/hopa/capabilities/display/ShellMain "$f"; then '
-            f"CLASSPATH={work}/$f setsid app_process "
-            f"/ com.hopa.capabilities.display.ShellMain --token={token} "
-            ">/dev/null 2>&1 & echo started; break; fi; done"
+            'CLASSPATH="$apk" setsid app_process '
+            "/ com.hopa.capabilities.display.ShellMain "
+            f"--token={token} >/dev/null 2>&1 & echo started"
         )
         return {"ok": True, "output": self._adb.shell(command)}
 
