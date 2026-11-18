@@ -138,8 +138,13 @@ The live gate above has run; the branch is ready to merge when wanted.
   says it works.
 - **E2 restart**: the supervisor's health path has run on the phone, but
   `ensure()` starting a dead helper needs wireless debugging paired with the app
-  again - the stored key is no longer accepted. Until then a hidden-screen turn
-  falls back to the visible screen and says so.
+  again. The pairing was attempted and failed on two Samsung specifics, both in
+  `WirelessSetup`: the automatic path scrolls the list 18 times and never presses
+  "Wireless debugging" (the text sits on a child, the pressable node is the
+  parent row), and the wait path did not see an open pairing dialog (it reads the
+  Settings window under it, not the topmost one). Typing the code by hand cannot
+  work: the port stops listening as soon as the dialog loses focus. Fix those two
+  before the restart path can be exercised.
 - **The local gate should compile androidTest**, as CI does:
   `:capabilities:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin`.
   A renamed class broke an instrumented test while every local task was green.
