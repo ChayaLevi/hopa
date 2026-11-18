@@ -16,7 +16,8 @@ Rules that must hold:
 - `apps/windows` changes stay at zero. The guard is
   `./gradlew -p ../windows/sidecar test` after every slice; `DevicePort` is not
   removed until a later decision.
-- Generated wire types keep the same Kotlin API when item 4 lands.
+- Wire types stay hand-written, and a drift check keeps them equal to
+  `contracts/schemas`; see `docs/project/plan/wire-types.md`.
 - No feature work rides along. One slice per commit, gates before the next.
 
 ## Done
@@ -104,11 +105,14 @@ The live gate above has run; the branch is ready to merge when wanted.
 
 ## Next: the remaining modernisation, in this order
 
-1. One `RunState` flow instead of `busy`/`cancelRequested`/`pendingGoals`
-   scattered on the container; the coordinator and the ViewModel then share one
-   answer about what is running.
-2. Generate wire types from `contracts/schemas`; drop the hand-written
-   `RunRecordSerializer` if the generated one keeps the same API.
+1. **Done (D1, `fab7be1`)**: one `RunGate`/`RunState` instead of `busy` and
+   `cancelRequested`, claimed atomically by chat or by a delivery.
+   `pendingGoals` stays a channel: that is a queue, not state.
+2. **Spiked and dropped**: generating the wire types from `contracts/schemas`.
+   It compiles and passes ktlint, but everything the schemas cannot say
+   (the explicit-null record, `ActionKind`, per-class strictness) stays
+   hand-written anyway. The follow-up is a drift check, not a generator;
+   `docs/project/plan/wire-types.md` has the evidence.
 3. Event-driven screen access: a `StateFlow` from the accessibility service
    instead of polling in `AccessibilityState` and the Act pill.
 4. Hidden screen as a service (`VirtualDisplay` / MediaProjection) instead of
