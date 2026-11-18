@@ -2,6 +2,9 @@ package com.hopa.app.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.FirebaseApp
+import com.hopa.app.backend.FirebaseToken
+import com.hopa.app.backend.ScreenAccess
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
@@ -15,6 +18,7 @@ import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,6 +37,33 @@ class SettingsViewModel(
 
     init {
         viewModelScope.launch { reload() }
+        // The gateway link and the last delivered task change while this screen
+        // is open, so the card reads them live instead of on a hidden refresh.
+        viewModelScope.launch {
+            container.backend.state.collect { backend ->
+                _state.update {
+                    it.copy(
+                        backendState = backend,
+                        backendToken = FirebaseToken.current(),
+                        fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
+                    )
+                }
+            }
+        }
+        viewModelScope.launch {
+            container.backend.task.collect { task ->
+                _state.update { it.copy(backendTask = task) }
+            }
+        }
+        // A launch pairing runs without this screen; its refusal or failure is
+        // left in the container for the card to show here.
+        viewModelScope.launch {
+            container.backendNotice.collect { notice ->
+                if (notice != null) {
+                    _state.update { it.copy(backendStatus = notice) }
+                }
+            }
+        }
     }
 
     fun save(
@@ -544,6 +575,59 @@ class SettingsViewModel(
         }
     }
 
+    /**
+     * Pair the gateway. The field takes the whole `hopa://pair…` link or a bare
+     * session next to the address on screen; nothing is guessed when both are
+     * missing.
+     */
+    fun pair(url: String, text: String) {
+        viewModelScope.launch {
+            val link = PairInput.normalise(text, url.trim())
+            if (link == null) {
+                _state.update {
+                    it.copy(backendStatus = "Gateway: paste a pairing link or a session with an address")
+                }
+                return@launch
+            }
+            _state.update { it.copy(busy = true, backendStatus = null) }
+            val message = container.backend.pair(link).fold(
+                onSuccess = { "Gateway paired; this phone can receive tasks" },
+                onFailure = { error ->
+                    "Gateway: ${error.message ?: error::class.simpleName}"
+                },
+            )
+            reload()
+            _state.update { it.copy(busy = false, backendStatus = message) }
+        }
+    }
+
+    /** Close the socket but keep the stored identity, so the next open reconnects. */
+    fun disconnectBackend() {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, backendStatus = null) }
+            runCatching { container.backend.disconnect() }
+            reload()
+            _state.update {
+                it.copy(busy = false, backendStatus = "Disconnected; the pairing is kept")
+            }
+        }
+    }
+
+    /**
+     * Android binds the accessibility service a moment after the app resumes.
+     * The pill reads this snapshot, so it is refreshed on resume and polled
+     * instead of staying at the value from when the screen first opened.
+     */
+    fun refreshScreenAccess() {
+        val current = _state.value.settings
+        val available = ScreenAccess.available(
+            allowed = current.accessibilityAllowed,
+            enabled = AccessibilityState.isEnabled(container.context),
+            bound = HopaAccessibilityService.instance != null,
+        )
+        _state.update { it.copy(phoneAccess = available) }
+    }
+
     fun testBridge(url: String, token: String) {
         viewModelScope.launch {
             if (url.isBlank()) {
@@ -596,10 +680,17 @@ class SettingsViewModel(
                 keySaved = keySaved,
                 bridgeKey = bridgeKey,
                 backgroundRunning = background,
+                backendUrl = settings.backendUrl,
+                backendDeviceId = settings.backendDeviceId,
+                backendName = com.hopa.app.backend.BackendLaunchName.value,
+                backendToken = FirebaseToken.current(),
+                fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),
-                phoneAccess = settings.accessibilityAllowed &&
-                    AccessibilityState.isEnabled(container.context) &&
-                    HopaAccessibilityService.instance != null,
+                phoneAccess = ScreenAccess.available(
+                    allowed = settings.accessibilityAllowed,
+                    enabled = AccessibilityState.isEnabled(container.context),
+                    bound = HopaAccessibilityService.instance != null,
+                ),
                 error = if (keySaved && key.isBlank()) {
                     "The saved key cannot be read on this phone; paste it again"
                 } else {
