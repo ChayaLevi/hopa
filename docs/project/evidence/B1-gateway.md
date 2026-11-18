@@ -1,4 +1,4 @@
-﻿# B1 â€” week-1 gateway evidence
+# B1 — week-1 gateway evidence
 
 Date: 2026-11-15. Spec: [`../plan/backend/week1.md`](../plan/backend/week1.md)
 section 8. Slice plan: [`../plan/backend/tasks/week1b.md`](../plan/backend/tasks/week1b.md).
