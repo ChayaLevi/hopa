@@ -16,6 +16,17 @@
 
 ## Unreleased - engine
 
+- `RunRecord` carries an optional `targetKey`: what the step's `ref` pointed at
+  (`type|text=…|desc=…|id=…`), not where it sat in the tree. `ActionExecutor`
+  resolves it against the observation the step saw, and the schema, serializer
+  and docs describe it. This is what lets a recipe find a control again after a
+  redraw; a node with no text, description or id has no key, and a step on it
+  stays positional.
+- Recipes use that key: `RecipeStore` writes a `v2` line with the anchors, the
+  start/end hashes and the steps; `Replayer` re-resolves every `ref` through its
+  anchor and stops before a tap it cannot place. A step without an anchor makes
+  the recipe unreplayable, so the model runs instead of a positional tap.
+
 - `AgentLoop` asks a `StepPolicy` for the next step and `ModelStepPolicy` wraps
   a `ModelPort`, so the seam a playbook policy needs is in the loop and not in
   the client. Nothing in the loop knows whether a model wrote the reply.

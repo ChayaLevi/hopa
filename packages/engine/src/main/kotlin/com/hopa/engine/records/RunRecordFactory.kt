@@ -21,6 +21,7 @@ class RunRecordFactory(
         afterHash: String?,
         verified: Boolean,
         executed: Boolean,
+        targetKey: String? = null,
         error: String? = null,
     ): RunRecordDraft = RunRecordDraft(
         runId = runId,
@@ -33,6 +34,7 @@ class RunRecordFactory(
         observationHash = ObservationHasher.hashOf(observation),
         beforeHash = beforeHash,
         afterHash = afterHash,
+        targetKey = targetKey,
         verified = verified,
         executed = executed,
         error = error,

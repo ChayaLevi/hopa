@@ -21,6 +21,7 @@ action auditable after the fact.
 | `approved` | boolean or `null` | `null` when no approval was needed |
 | `observationHash` | string | hash of the observation the step saw |
 | `beforeHash` / `afterHash` | string | optional screen hashes around the action |
+| `targetKey` | string | optional; what the `ref` pointed at (type, text, description, id), so a recipe can find the same control after a redraw |
 | `verified` | boolean | the post-condition check passed |
 | `executed` | boolean | false for refused or unsupported actions |
 | `error` | string or `null` | the error code when the step failed |

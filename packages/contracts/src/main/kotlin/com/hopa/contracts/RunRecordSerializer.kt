@@ -45,6 +45,7 @@ internal object RunRecordSerializer : KSerializer<RunRecord> {
                 put("observationHash", value.observationHash)
                 value.beforeHash?.let { put("beforeHash", it) }
                 value.afterHash?.let { put("afterHash", it) }
+                value.targetKey?.let { put("targetKey", it) }
                 put("verified", value.verified)
                 put("executed", value.executed)
                 put("error", value.error?.let { JsonPrimitive(it) } ?: JsonNull)
@@ -76,6 +77,7 @@ internal object RunRecordSerializer : KSerializer<RunRecord> {
             observationHash = text("observationHash").orEmpty(),
             beforeHash = text("beforeHash"),
             afterHash = text("afterHash"),
+            targetKey = text("targetKey"),
             verified = flag("verified") ?: false,
             executed = flag("executed") ?: false,
             error = text("error"),

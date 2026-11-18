@@ -16,6 +16,11 @@ data class RunRecord(
     @SerialName("observationHash") val observationHash: String,
     @SerialName("beforeHash") val beforeHash: String? = null,
     @SerialName("afterHash") val afterHash: String? = null,
+    /**
+     * What the tapped node was, not where it was: text, description, id and type,
+     * so a recipe can find the same control after the tree has moved.
+     */
+    @SerialName("targetKey") val targetKey: String? = null,
     val verified: Boolean,
     val executed: Boolean,
     val error: String? = null,

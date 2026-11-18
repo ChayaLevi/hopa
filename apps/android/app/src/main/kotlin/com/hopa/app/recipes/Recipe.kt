@@ -3,31 +3,32 @@ package com.hopa.app.recipes
 import com.hopa.contracts.Action
 
 /**
- * A goal and the actions that satisfied it once, so it can be replayed.
+ * A goal, the actions that satisfied it once, and what each action acted on.
  *
- * The two hashes are the honest guard around a replay: [screenHash] is the tree
- * the recipe started from, [endHash] the one it ended on. Positions in a tree
- * are not stable between runs, so replaying a tap by its old `ref` is only safe
- * when the screen is the same screen.
- */
-/**
- * A step that acts on a `ref` depends on the tree it was recorded in. Replaying
- * it by position would tap whatever now sits at that position, so the replayer
- * refuses ref-based recipes until each step records what it pointed at.
+ * A ref (`e21`) is a position in one tree; [anchors] holds the text/description/id
+ * of the control each step touched, so a replay can find the same control after
+ * the tree has been redrawn. A step without an anchor is positional and must not
+ * be replayed.
+ *
+ * [screenHash] and [endHash] are the trees the run started and ended on. They are
+ * kept as evidence; the anchors, not the hashes, are what a replay trusts,
+ * because a framework window id changes between launches.
  */
 data class Recipe(
     val goal: String,
     val steps: List<Action>,
     val at: Long,
+    val anchors: List<String> = emptyList(),
     val screenHash: String = "",
     val endHash: String = "",
 ) {
     /** The app this recipe opens first; empty when it works on whatever is on screen. */
     val app: String = steps.firstOrNull { it.kind == "ui.launch" }?.app.orEmpty()
 
-    /**
-     * A step that acts on a `ref` depends on the tree it was recorded in. Until
-     * the recipe records what that ref pointed at, it must not be replayed.
-     */
-    val needsStableScreen: Boolean = steps.any { it.ref?.isNotBlank() == true }
+    fun anchorAt(index: Int): String = anchors.getOrElse(index) { "" }
+
+    /** Every step either names no ref, or records what its ref pointed at. */
+    val replayable: Boolean = steps.indices.all { index ->
+        steps[index].ref.isNullOrBlank() || anchorAt(index).isNotBlank()
+    }
 }

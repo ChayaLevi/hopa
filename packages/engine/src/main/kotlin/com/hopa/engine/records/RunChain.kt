@@ -23,6 +23,7 @@ object RunChain {
             observationHash = draft.observationHash,
             beforeHash = draft.beforeHash,
             afterHash = draft.afterHash,
+            targetKey = draft.targetKey,
             verified = draft.verified,
             executed = draft.executed,
             error = draft.error,

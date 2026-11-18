@@ -11,14 +11,20 @@ class RecipeStore(file: File) {
     private val file = file
     private val separator = "\u001f"
 
-    fun save(goal: String, steps: List<Action>, screenHash: String = "", endHash: String = "") {
+    fun save(
+        goal: String,
+        steps: List<Action>,
+        anchors: List<String> = emptyList(),
+        screenHash: String = "",
+        endHash: String = "",
+    ) {
         if (goal.isBlank() || steps.isEmpty()) {
             return
         }
         val existing = all().filterNot { normalise(it.goal) == normalise(goal) }
         val lines = (
             existing.takeLast(MAX) +
-                Recipe(goal, steps, System.currentTimeMillis(), screenHash, endHash)
+                Recipe(goal, steps, System.currentTimeMillis(), anchors, screenHash, endHash)
             )
             .map(::encode)
         runCatching { file.writeText(lines.joinToString("\n") + "\n") }
@@ -51,11 +57,12 @@ class RecipeStore(file: File) {
         value.lowercase().replace(Regex("\\s+"), " ").trim()
 
     private fun encode(recipe: Recipe): String =
-        recipe.at.toString() + separator +
+        VERSION + separator +
+            recipe.at.toString() + separator +
             recipe.goal.replace('\n', ' ') + separator +
             recipe.screenHash + separator +
             recipe.endHash + separator +
-            recipe.steps.joinToString(ACTION_SEP) { action ->
+            recipe.steps.mapIndexed { index, action ->
                 listOf(
                     action.kind,
                     action.app.orEmpty(),
@@ -67,20 +74,27 @@ class RecipeStore(file: File) {
                     action.toX?.toString().orEmpty(),
                     action.toY?.toString().orEmpty(),
                     action.timeoutMs.toString(),
+                    recipe.anchorAt(index),
                 ).joinToString(separator)
-            }
+            }.joinToString(ACTION_SEP)
 
     private fun decode(line: String): Recipe? {
-        val parts = line.split(separator)
+        var parts = line.split(separator)
+        // A version marker makes the hash fields unambiguous: without it a line
+        // with an empty hash looks like the oldest format.
+        val versioned = parts.firstOrNull() == VERSION
+        if (versioned) {
+            parts = parts.drop(1)
+        }
         if (parts.size < 3) {
             return null
         }
         val at = parts[0].toLongOrNull() ?: return null
         val goal = parts[1]
-        // Before hashes existed a line went straight from the goal to the steps.
-        val hasHashes = parts.size >= 5 && parts[2].startsWith(HASH_PREFIX)
+        // Two older shapes: hashes but no anchors, and steps straight after the goal.
+        val hasHashes = versioned || (parts.size >= 5 && parts[2].startsWith(HASH_PREFIX))
         val screenHash = if (hasHashes) parts[2] else ""
-        val endHash = if (hasHashes) parts[3] else ""
+        val endHash = if (hasHashes) parts.getOrNull(3).orEmpty() else ""
         val steps = parts.drop(if (hasHashes) 4 else 2).joinToString(separator)
             .split(ACTION_SEP)
             .mapNotNull { raw ->
@@ -99,14 +113,26 @@ class RecipeStore(file: File) {
                     toX = f[7].toIntOrNull(),
                     toY = f[8].toIntOrNull(),
                     timeoutMs = f[9].toIntOrNull() ?: 3000,
-                )
+                ) to f.getOrNull(10).orEmpty()
             }
-        return if (steps.isEmpty()) null else Recipe(goal, steps, at, screenHash, endHash)
+        return if (steps.isEmpty()) {
+            null
+        } else {
+            Recipe(
+                goal = goal,
+                steps = steps.map { it.first },
+                at = at,
+                anchors = steps.map { it.second },
+                screenHash = screenHash,
+                endHash = endHash,
+            )
+        }
     }
 
     private companion object {
         const val MAX = 30
         const val ACTION_SEP = "\u001e"
         const val HASH_PREFIX = "sha256:"
+        const val VERSION = "v2"
     }
 }

@@ -641,6 +641,7 @@ class ChatViewModel(
                 container.recipes.save(
                     goal = body,
                     steps = result.records.map { it.action },
+                    anchors = result.records.map { it.targetKey.orEmpty() },
                     screenHash = result.records.first().beforeHash.orEmpty(),
                     endHash = result.records.last().afterHash.orEmpty(),
                 )

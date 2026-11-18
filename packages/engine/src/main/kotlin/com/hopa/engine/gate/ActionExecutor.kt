@@ -12,6 +12,7 @@ import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.SandboxPort
 import com.hopa.contracts.ports.SystemPort
+import com.hopa.engine.observation.NodeAnchor
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.records.RunRecorder
 
@@ -41,6 +42,10 @@ class ActionExecutor(
         before: Observation,
     ): ExecutionResult {
         val gate = policy()
+        // What the ref points at, kept so a recipe can find the same control
+        // after the tree has been redrawn.
+        val targetKey = action.ref?.takeIf { it.isNotBlank() }
+            ?.let { ref -> NodeAnchor.find(before.tree, ref)?.let(NodeAnchor::key) }
         val classification = gate.classify(action, before)
         val needsApproval = gate.requiresApproval(action, before)
         val approved = if (needsApproval) {
@@ -63,6 +68,7 @@ class ActionExecutor(
                 afterHash = beforeHash,
                 verified = false,
                 executed = false,
+                targetKey = targetKey,
                 error = ErrorCodes.REFUSED,
             ).let { recorder.append(it) }
             return ExecutionResult(record, before, "I did not run that.")
@@ -88,6 +94,7 @@ class ActionExecutor(
                 afterHash = afterHash,
                 verified = verified,
                 executed = true,
+                targetKey = targetKey,
             ).let { recorder.append(it) }
             ExecutionResult(record, after, text)
         }.getOrElse { error ->
@@ -108,6 +115,7 @@ class ActionExecutor(
                 afterHash = beforeHash,
                 verified = false,
                 executed = false,
+                targetKey = targetKey,
                 error = code,
             ).let { recorder.append(it) }
             ExecutionResult(record, before, "I could not do that: ${error.message ?: code}")

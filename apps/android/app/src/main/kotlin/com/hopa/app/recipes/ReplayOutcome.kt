@@ -1,16 +1,17 @@
 package com.hopa.app.recipes
 
 /**
- * What a replay managed to do, so the caller can decide whether it may stop
- * here. [complete] means every step ran; [endMatched] means the screen ended
- * where the recorded run ended, which is the closest this format comes to
- * "the goal was met".
+ * What a replay managed to do. [done] steps ran; [complete] means every step of
+ * the recipe ran **and** every ref was found again through its anchor. Anything
+ * less is not the cheap path: the caller falls back to the model.
+ *
+ * The recipe also stores the hash of the screen it ended on, but a framework
+ * window id changes between launches, so that hash is evidence rather than a
+ * gate; the anchors are what a replay trusts.
  */
 data class ReplayOutcome(
     val done: Int,
     val complete: Boolean,
-    val endMatched: Boolean,
 ) {
-    /** The cheap path only counts when the whole recipe ran and the screen agrees. */
-    val trustworthy: Boolean get() = complete && endMatched
+    val trustworthy: Boolean get() = complete
 }
