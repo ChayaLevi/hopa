@@ -21,6 +21,11 @@
 - `tools/checks/check-android-structure.py` now rejects a test package that
   production code does not ship and that is not listed as test support, which is
   what those leftovers were.
+- The remaining checks follow the tree instead of a remembered one:
+  `check-tree.py` allows the five module names, `check-settings-fields.py` reads
+  `AppSettings` from `packages/stores` and the repository from
+  `com.hopa.data.store`, and the two catalogue tests count `APP.md` files rather
+  than pinning 54 apps. Three CI jobs were red on `main` because of these.
 - `packages/knowledge` is one package (`com.hopa.knowledge`): the generated
   catalog, policy data and prompt rules sit side by side, each file keeping the
   name of the script that writes it.
