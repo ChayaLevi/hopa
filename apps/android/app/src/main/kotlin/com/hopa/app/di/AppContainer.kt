@@ -16,8 +16,8 @@ import com.hopa.app.service.RunService
 import com.hopa.engine.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 import com.hopa.capabilities.accessibility.AccessibilityDevice
-import com.hopa.net.llm.ModelFactory
-import com.hopa.net.llm.ProviderChoiceRules
+import com.hopa.models.ModelFactory
+import com.hopa.models.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort

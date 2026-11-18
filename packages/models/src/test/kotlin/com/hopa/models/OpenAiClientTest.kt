@@ -1,4 +1,4 @@
-package com.hopa.net.llm
+package com.hopa.models
 
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest

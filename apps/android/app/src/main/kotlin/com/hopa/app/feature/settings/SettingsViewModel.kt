@@ -9,8 +9,8 @@ import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.net.bridge.BridgeClient
-import com.hopa.net.llm.ProviderState
-import com.hopa.net.llm.ProviderStateResolver
+import com.hopa.models.ProviderState
+import com.hopa.models.ProviderStateResolver
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.stores.AppSettings

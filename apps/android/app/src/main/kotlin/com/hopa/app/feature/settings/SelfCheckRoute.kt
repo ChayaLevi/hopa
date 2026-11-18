@@ -11,8 +11,8 @@ import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
 import com.hopa.net.bridge.BridgeClient
-import com.hopa.net.llm.ProviderState
-import com.hopa.net.llm.ProviderStateResolver
+import com.hopa.models.ProviderState
+import com.hopa.models.ProviderStateResolver
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 

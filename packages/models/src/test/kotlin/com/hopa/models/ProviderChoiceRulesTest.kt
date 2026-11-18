@@ -1,4 +1,4 @@
-package com.hopa.net.llm
+package com.hopa.models
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

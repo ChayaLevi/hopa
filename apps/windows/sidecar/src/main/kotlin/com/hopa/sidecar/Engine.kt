@@ -2,7 +2,7 @@ package com.hopa.sidecar
 
 import com.hopa.net.bridge.AdbDevice
 import com.hopa.net.bridge.BridgeClient
-import com.hopa.net.llm.ModelFactory
+import com.hopa.models.ModelFactory
 import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.engine.loop.AgentLoop

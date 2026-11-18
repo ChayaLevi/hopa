@@ -1,4 +1,4 @@
-package com.hopa.net.llm
+package com.hopa.models
 
 /**
  * The state a screen shows. It is derived from the same [ProviderChoiceRules]

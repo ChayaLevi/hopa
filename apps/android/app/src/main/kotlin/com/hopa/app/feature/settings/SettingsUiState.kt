@@ -2,7 +2,7 @@ package com.hopa.app.feature.settings
 
 import com.hopa.app.backend.BackendTaskState
 import com.hopa.net.backend.BackendState
-import com.hopa.net.llm.ProviderState
+import com.hopa.models.ProviderState
 import com.hopa.stores.AppSettings
 
 data class SettingsUiState(

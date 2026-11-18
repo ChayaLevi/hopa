@@ -1,4 +1,4 @@
-package com.hopa.net.llm
+package com.hopa.models
 
 enum class ProviderState {
     CLOUD,

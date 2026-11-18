@@ -10,6 +10,7 @@ application {
 
 dependencies {
     implementation(project(":engine"))
+    implementation(project(":models"))
     implementation(project(":net"))
     implementation(project(":contracts"))
 

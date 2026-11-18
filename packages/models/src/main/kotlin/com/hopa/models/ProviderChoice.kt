@@ -1,4 +1,4 @@
-package com.hopa.net.llm
+package com.hopa.models
 
 /** What the settings add up to before a model client is built. */
 enum class ProviderChoice {

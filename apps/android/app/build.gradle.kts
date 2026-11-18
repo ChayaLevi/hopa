@@ -98,6 +98,7 @@ dependencies {
     implementation(project(":capabilities"))
     implementation(project(":data"))
     implementation(project(":contracts"))
+    implementation(project(":models"))
     implementation(project(":net"))
     implementation(project(":stores"))
 

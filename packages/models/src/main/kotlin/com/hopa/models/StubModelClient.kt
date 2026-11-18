@@ -1,4 +1,4 @@
-package com.hopa.net.llm
+package com.hopa.models
 
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
@@ -26,8 +26,9 @@ class StubModelClient : ModelPort {
             last.contains("look", ignoreCase = true) && !seen.isNullOrBlank() ->
                 "I can see: $seen"
             last.contains("2 plus 2", ignoreCase = true) -> "2 plus 2 is 4."
-            last.contains("hello", ignoreCase = true) -> "Hello. This is the local demo model. " +
-                "Add a provider key in Settings to use a real model."
+            last.contains("hello", ignoreCase = true) ->
+                "Hello. This is the local demo model. " +
+                    "Add a provider key in Settings to use a real model."
             last.contains("share", ignoreCase = true) ->
                 """{"schemaVersion":"1","kind":"system.share","text":"Hello from HOPA","timeoutMs":3000}"""
 

@@ -1,4 +1,4 @@
-package com.hopa.net.llm
+package com.hopa.models
 
 /**
  * One decision for every reader of the model settings: the factory that builds
