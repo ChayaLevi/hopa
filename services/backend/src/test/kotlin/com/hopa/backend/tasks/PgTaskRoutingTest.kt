@@ -147,6 +147,17 @@ class PgTaskRoutingTest {
         return device
     }
 
+    /** A frame can arrive before the durable marker; wait for the row. */
+    private fun awaitState(taskId: String, household: String, expected: String): String? {
+        val deadline = System.currentTimeMillis() + 2_000
+        var state = taskState(taskId, household)
+        while (state != expected && System.currentTimeMillis() < deadline) {
+            Thread.sleep(20)
+            state = taskState(taskId, household)
+        }
+        return state
+    }
+
     private fun taskState(taskId: String, household: String): String? =
         db.tenant(household) { connection ->
             connection.prepareStatement("select state from tasks where id = ?::uuid").use {
@@ -194,7 +205,7 @@ class PgTaskRoutingTest {
         assertEquals(message.id, delivered.id)
         assertEquals(taskId, delivered.task)
         assertEquals(message.body, delivered.body)
-        assertEquals("delivered", taskState(taskId, phone.householdId))
+        assertEquals("delivered", awaitState(taskId, phone.householdId, "delivered"))
         assertTrue(eventCount(taskId, phone.householdId, "create") >= 1)
     }
 
@@ -254,7 +265,7 @@ class PgTaskRoutingTest {
 
         val delivered = pcWs.expect("task.create")
         assertEquals(taskId, delivered.task)
-        assertEquals("delivered", taskState(taskId, phone.householdId))
+        assertEquals("delivered", awaitState(taskId, phone.householdId, "delivered"))
     }
 
     @Test
