@@ -28,8 +28,8 @@ manager and the hypervisor (Apple's Hypervisor.framework replaces WHP).
 | Command-line Tools | **23.0.0** (`cmdline-tools/latest`) | `sdkmanager`, `avdmanager` |
 | System image | `system-images;android-37.0;google_apis_playstore;x86_64` | Play Store image, no `adb root` |
 | AVD | `Medium_Phone_API_37.0` (`medium_phone`, 1080×2400) | |
-| Gradle | **8.11.1** (wrapper in `apps/android`) | nothing to install |
-| AGP / Kotlin | **8.7.3** / **2.0.21** | in `gradle/libs.versions.toml` |
+| Gradle | **8.13** (wrapper in `apps/android`) | nothing to install |
+| AGP / Kotlin | **8.13.2** / **2.2.21** | in `gradle/libs.versions.toml` |
 | Compose BOM | 2024.12.01 | |
 | JVM target | 17 — bytecode and toolchain | |
 
@@ -90,13 +90,13 @@ Verify in a **new** shell:
 java -version    # openjdk version "17.0.21" ... Temurin-17.0.21+9
 ```
 
-If you keep `JAVA_HOME` on 21 instead, that is fine: Gradle 8.11.1 runs on it and
+If you keep `JAVA_HOME` on 21 instead, that is fine: Gradle 8.13 runs on it and
 still finds the 17 toolchain, because it auto-detects installs under
 `C:\Program Files\Eclipse Adoptium`. This combination was verified on the
 reference machine. When in doubt, prefer 17 — fewer moving parts, and it is the
 version the repo is tested with.
 
-Gradle 8.11.1 accepts Java 8–23; AGP 8.7.3 requires 17+. Java 25 (Studio's
+Gradle 8.13 accepts Java 8–23; AGP 8.13.2 requires 17+. Java 25 (Studio's
 bundled JBR) is rejected by Gradle 8.9 and below.
 
 ## 4. Android Studio
@@ -148,7 +148,7 @@ Notes:
 - Package IDs for API 37 use a dot: `platforms;android-37.0`, not `android-37`.
 - API 35 has no dot: `platforms;android-35`.
 - `sources;android-37.0` is optional (IDE navigation into the framework).
-- AGP 8.7.3 will also install a missing platform or build-tools by itself on the
+- AGP 8.13.2 will also install a missing platform or build-tools by itself on the
   first build: on the reference machine it fetched `build-tools;34.0.0` and
   `platforms;android-35` before compiling. Installing them explicitly keeps the
   first build predictable and works offline.
@@ -269,7 +269,7 @@ cd apps\android
 .\gradlew.bat :app:assembleDebug
 ```
 
-The wrapper downloads Gradle 8.11.1 on first use. The daemon runs on
+The wrapper downloads Gradle 8.13 on first use. The daemon runs on
 `JAVA_HOME`; the shared modules compile with the JDK 17 toolchain. The first build
 also resolves dependencies and may install a missing SDK package, so allow a few
 minutes. Cold timings on the reference machine (i7-1355U, 32 GB): ~4.5 min for
@@ -296,8 +296,7 @@ Useful tasks:
 
 ### Gradle JDK in Android Studio
 
-Studio 2026.2.2 runs on **JBR 25**, which Gradle 8.11.1 accepts but older
-projects do not. For each project, pin the Gradle JDK explicitly: **17** for
+Studio 2026.2.2 runs on **JBR 25**. Do not leave the Gradle JDK on it: For each project, pin the Gradle JDK explicitly: **17** for
 `apps/android` (matches the toolchain and CI), **21** for projects already on a
 JDK 21 toolchain.
 
@@ -361,7 +360,7 @@ Windows sidecar and by CI, which use 17.
 | Gradle: `SDK location not found` | Set `ANDROID_HOME`, or add `sdk.dir` to `apps/android/local.properties` (gitignored). |
 | Gradle: `Failed to find target android-35` | Install `platforms;android-35` (§ 5). The emulator's API 37 is not a substitute. |
 | `Cannot find a Java installation ... {languageVersion=17}` | No JDK 17 on disk. `jvmToolchain(17)` in `packages/*` needs one (§ 3); the daemon JDK is irrelevant. |
-| `This version only understands SDK XML versions up to 3 but ... version 4 was encountered` | AGP 8.7.3 reading metadata written by newer tools. Benign; the build continues and installs the platform. |
+| `This version only understands SDK XML versions up to 3 but ... version 4 was encountered` | AGP 8.13.2 reading metadata written by newer tools. Benign; the build continues and installs the platform. |
 | Studio still uses JBR 25 after the change | **File → Invalidate Caches… → Restart**, then sync again; a stale Gradle daemon can hold the old JVM. |
 | `emulator -accel-check` hangs | Use `emulator-check.exe accel` instead. |
 | `[Vulkan Loader] WARNING ... VK_LAYER_OBS_HOOK` | OBS Studio's Vulkan layer; the emulator disables it on purpose. Noise. |
