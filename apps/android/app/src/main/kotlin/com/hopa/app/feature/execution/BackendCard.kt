@@ -31,7 +31,7 @@ import com.hopa.app.feature.settings.PairInput
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.feature.settings.pathLabel
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.net.gateway.BackendState
+import com.hopa.transport.gateway.BackendState
 
 /**
  * The gateway card: the address, the one pairing field, and what this phone is

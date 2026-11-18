@@ -103,7 +103,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":contracts"))
     implementation(project(":providers"))
-    implementation(project(":net"))
+    implementation(project(":transport"))
     implementation(project(":stores"))
 
     implementation(platform(libs.androidx.compose.bom))

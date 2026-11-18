@@ -1,7 +1,7 @@
 package com.hopa.app.feature.settings
 
 import com.hopa.app.gateway.BackendTaskState
-import com.hopa.net.gateway.BackendState
+import com.hopa.transport.gateway.BackendState
 import com.hopa.providers.ProviderState
 import com.hopa.stores.AppSettings
 

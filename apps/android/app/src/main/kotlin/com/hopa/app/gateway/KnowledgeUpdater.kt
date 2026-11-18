@@ -1,7 +1,7 @@
 package com.hopa.app.gateway
 
 import com.hopa.knowledge.FileKnowledgeStore
-import com.hopa.net.gateway.KnowledgeClient
+import com.hopa.transport.gateway.KnowledgeClient
 
 /**
  * Asks the backend for a newer knowledge bundle, at most once per [intervalMs].

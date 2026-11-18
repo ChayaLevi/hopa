@@ -21,7 +21,7 @@ The types these use live in `packages/contracts`: `Action`, `Decision`,
 
 - **No Android imports.** `checkNoAndroidImports` (Gradle) and
   `tools/checks/check-android-structure.py` both fail the build if one appears.
-- **No network.** The model and bridge clients live in `packages/net`; this
+- **No network.** The model and bridge clients live in `packages/transport`; this
   module only consumes `ModelPort`.
 - **Generated data lives elsewhere.** The catalog, the policy data and the prompt
   rules are in `packages/knowledge`.
@@ -35,8 +35,8 @@ wraps a `ModelPort`:
 
 | implementation | module | when |
 |---|---|---|
-| `ModelStepPolicy` over `OpenAiClient` | `packages/net` | a provider over HTTP today |
-| `ModelStepPolicy` over `StubModelClient` | `packages/net` | no key, demo answers |
+| `ModelStepPolicy` over `OpenAiClient` | `packages/transport` | a provider over HTTP today |
+| `ModelStepPolicy` over `StubModelClient` | `packages/transport` | no key, demo answers |
 | `ModelStepPolicy` over a local runtime | its own module | on-device inference, once it exists |
 | playbook policy | planned, implements `StepPolicy` | no model at all: anchors instead of reasoning |
 

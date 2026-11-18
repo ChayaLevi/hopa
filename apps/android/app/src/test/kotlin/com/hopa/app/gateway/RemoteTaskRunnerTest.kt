@@ -2,10 +2,10 @@ package com.hopa.app.gateway
 
 import com.hopa.app.run.RunGate
 import com.hopa.app.run.RunSource
-import com.hopa.net.gateway.BackendEnvelope
-import com.hopa.net.gateway.BackendLink
-import com.hopa.net.gateway.BackendState
-import com.hopa.net.gateway.ProcessedTaskLog
+import com.hopa.transport.gateway.BackendEnvelope
+import com.hopa.transport.gateway.BackendLink
+import com.hopa.transport.gateway.BackendState
+import com.hopa.transport.gateway.ProcessedTaskLog
 import com.hopa.capabilities.device.UnavailableDevicePort
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.ErrorCodes

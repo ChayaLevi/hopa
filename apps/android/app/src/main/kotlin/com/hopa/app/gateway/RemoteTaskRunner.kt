@@ -1,9 +1,9 @@
 package com.hopa.app.gateway
 
-import com.hopa.net.gateway.BackendEnvelope
-import com.hopa.net.gateway.BackendLink
-import com.hopa.net.gateway.BackendReplies
-import com.hopa.net.gateway.ProcessedTaskLog
+import com.hopa.transport.gateway.BackendEnvelope
+import com.hopa.transport.gateway.BackendLink
+import com.hopa.transport.gateway.BackendReplies
+import com.hopa.transport.gateway.ProcessedTaskLog
 import com.hopa.contracts.ErrorCodes
 import com.hopa.contracts.HopaError
 import com.hopa.engine.execution.TurnResult

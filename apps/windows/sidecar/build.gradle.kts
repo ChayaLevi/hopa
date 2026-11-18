@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":engine"))
     implementation(project(":knowledge"))
     implementation(project(":providers"))
-    implementation(project(":net"))
+    implementation(project(":transport"))
     implementation(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)

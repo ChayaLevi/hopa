@@ -1,7 +1,7 @@
 package com.hopa.app
 
 import com.hopa.app.feature.settings.PairInput
-import com.hopa.net.gateway.PairingLink
+import com.hopa.transport.gateway.PairingLink
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**

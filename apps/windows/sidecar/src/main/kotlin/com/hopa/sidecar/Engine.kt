@@ -1,7 +1,7 @@
 package com.hopa.sidecar
 
-import com.hopa.net.bridge.AdbDevice
-import com.hopa.net.bridge.BridgeClient
+import com.hopa.transport.bridge.AdbDevice
+import com.hopa.transport.bridge.BridgeClient
 import com.hopa.providers.ModelFactory
 import com.hopa.engine.execution.ActionExecutor
 import com.hopa.engine.execution.ApprovalPolicy
