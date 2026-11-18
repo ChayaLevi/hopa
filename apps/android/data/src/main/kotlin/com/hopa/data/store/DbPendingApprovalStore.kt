@@ -10,7 +10,7 @@ import java.util.UUID
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
-class RoomPendingApprovalStore(
+class DbPendingApprovalStore(
     private val dao: PendingApprovalDao,
 ) : PendingApprovalStore {
     private var current: String? = null

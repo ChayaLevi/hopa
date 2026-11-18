@@ -8,7 +8,7 @@ import com.hopa.stores.Conversation
 import com.hopa.stores.ConversationStore
 import java.util.UUID
 
-class RoomConversationStore(
+class DbConversationStore(
     database: HopaDatabase,
 ) : ConversationStore {
     private val sessions = database.sessionDao()

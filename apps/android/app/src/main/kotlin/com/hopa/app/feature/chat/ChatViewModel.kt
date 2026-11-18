@@ -1,20 +1,19 @@
-﻿package com.hopa.app.feature.chat
+package com.hopa.app.feature.chat
 
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
-import com.hopa.capabilities.accessibility.AccessibilityState
 import com.hopa.capabilities.accessibility.HopaAccessibilityService
-import com.hopa.contracts.ApprovalRequest
-import com.hopa.engine.loop.TurnContext
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
+import com.hopa.engine.loop.TurnContext
 import com.hopa.engine.observation.ScreenPath
 import com.hopa.engine.observation.ScreenPathOrder
 import com.hopa.engine.observation.ScreenSource
 import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.stores.AppSettings
 import com.hopa.stores.Attachment
 import com.hopa.stores.AttachmentRules
 import com.hopa.stores.ChatMessage
@@ -76,6 +75,8 @@ class ChatViewModel(
         _state.update { it.copy(input = text.trim()) }
     }
 
+    // ── Voice ─────────────────────────────────────────────────────────────────
+
     fun startVoice() {
         if (_state.value.busy || _state.value.recording) {
             return
@@ -131,6 +132,8 @@ class ChatViewModel(
         viewModelScope.launch { container.speak(text) }
     }
 
+    // ── Conversation management ───────────────────────────────────────────────
+
     fun newChat() {
         viewModelScope.launch {
             val created = container.conversations.create()
@@ -148,16 +151,6 @@ class ChatViewModel(
         }
     }
 
-    fun select(id: String) {
-        viewModelScope.launch {
-            val all = container.conversations.all()
-            val selected = all.firstOrNull { it.id == id } ?: return@launch
-            container.selectedConversation.value = id
-            container.settings.update { it.copy(selectedConversation = id) }
-            _state.update { it.copy(current = selected, conversations = all, options = emptyList()) }
-        }
-    }
-
     fun delete(id: String) {
         viewModelScope.launch {
             container.conversations.delete(id)
@@ -171,6 +164,39 @@ class ChatViewModel(
             load()
         }
     }
+
+    /** Remove the last exchange from the thread. */
+    fun undoLast() {
+        if (_state.value.busy) {
+            return
+        }
+        val conversation = _state.value.current ?: return
+        if (conversation.messages.size < 2) {
+            return
+        }
+        viewModelScope.launch {
+            container.conversations.dropLastExchange(conversation.id)
+            val all = container.conversations.all()
+            _state.update {
+                it.copy(
+                    current = all.firstOrNull { item -> item.id == conversation.id },
+                    conversations = all,
+                )
+            }
+        }
+    }
+
+    /** Re-run the last user goal without appending the message twice. */
+    fun retryLast() {
+        if (_state.value.busy) {
+            return
+        }
+        val conversation = _state.value.current ?: return
+        val lastUser = conversation.messages.lastOrNull { it.role == "user" } ?: return
+        sendText(lastUser.text, appendUser = false)
+    }
+
+    // ── Send dispatch ─────────────────────────────────────────────────────────
 
     fun send() {
         val text = _state.value.input.trim()
@@ -247,8 +273,6 @@ class ChatViewModel(
                 )
             }.isSuccess
             if (saved) {
-                // The receipt says "Saved" in place; silence here is what made a
-                // successful save look like a dead button.
                 _state.update { it.copy(savedGoals = it.savedGoals + goal) }
             } else {
                 _state.update { it.copy(error = "Could not save the skill.") }
@@ -256,40 +280,11 @@ class ChatViewModel(
         }
     }
 
-    /** Remove the last exchange from the thread. */
-    fun undoLast() {
-        if (_state.value.busy) {
-            return
-        }
-        val conversation = _state.value.current ?: return
-        if (conversation.messages.size < 2) {
-            return
-        }
-        viewModelScope.launch {
-            container.conversations.dropLastExchange(conversation.id)
-            val all = container.conversations.all()
-            _state.update {
-                it.copy(
-                    current = all.firstOrNull { item -> item.id == conversation.id },
-                    conversations = all,
-                )
-            }
-        }
-    }
-
-    /** Re-run the last user goal without appending the message twice. */
-    fun retryLast() {
-        if (_state.value.busy) {
-            return
-        }
-        val conversation = _state.value.current ?: return
-        val lastUser = conversation.messages.lastOrNull { it.role == "user" } ?: return
-        sendText(lastUser.text, appendUser = false)
-    }
-
     fun resolveApproval(allow: Boolean) {
         container.approval.resolve(allow)
     }
+
+    // ── Core send loop ────────────────────────────────────────────────────────
 
     private fun sendText(
         text: String,
@@ -318,59 +313,17 @@ class ChatViewModel(
         startRunService()
         viewModelScope.launch {
             val now = System.currentTimeMillis()
-            if (appendUser) {
-                container.conversations.append(
-                    conversation.id,
-                    ChatMessage(
-                        id = "m-$now-${UUID.randomUUID().toString().take(6)}",
-                        role = "user",
-                        text = body,
-                        timestamp = now,
-                        attachment = attachment,
-                    ),
-                )
-                // The store is the source of truth, but the screen reads the state,
-                // so the bubble has to be published now or it waits for the answer.
-                val shown = container.conversations.all()
-                _state.update {
-                    it.copy(
-                        current = shown.firstOrNull { item -> item.id == conversation.id },
-                        conversations = shown,
-                    )
-                }
-            }
+            if (appendUser) appendUserMessage(conversation.id, body, attachment, now)
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
             container.policy.setTrustedApps(current.trustedApps.toList())
+
+            // Plan-first gate: show the plan before anything is tapped.
             if (current.planFirst && planApprovedFor != body) {
-                // One approval for the whole chain: the model writes the plan, the
-                // person reads it, and only then does anything get tapped.
-                val plan = runCatching {
-                    container.model.complete(
-                        ModelRequest(
-                            messages = listOf(
-                                ModelMessage(
-                                    "system",
-                                    "You are planning, not acting. Reply with a numbered " +
-                                        "plan of at most six short steps, one per line, " +
-                                        "no other text.",
-                                ),
-                                ModelMessage("user", body),
-                            ),
-                            maxTokens = 400,
-                        ),
-                    ).text
-                }.getOrNull()
-                val steps = plan.orEmpty()
-                    .lineSequence()
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .map { it.replaceFirst(Regex("^\\d+[.)]\\s*"), "") }
-                    .take(6)
-                    .toList()
+                val steps = fetchPlanSteps(body)
                 container.busy.value = false
                 stopRunService()
-                if (steps.isEmpty()) {
+                if (steps.isNullOrEmpty()) {
                     _state.update { it.copy(busy = false, error = "No plan came back") }
                 } else {
                     pendingGoal = body
@@ -378,134 +331,27 @@ class ChatViewModel(
                 }
                 return@launch
             }
-            val facts = runCatching { container.memory.promptText() }.getOrDefault("")
-            val character = "Character: ${current.tone} tone, ${current.chattiness} length."
-            val memory = listOf(facts, character).filter { it.isNotBlank() }
-                .joinToString("\n\n")
+
+            val memory = buildMemoryContext(current)
             val skills = runCatching { container.skills.promptText() }.getOrDefault("")
             val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
-            val bridged = runCatching { container.bridgedDevice() }.getOrNull()
-            val preferred = ScreenPath.of(current.screenPath)
-            val background = if (
-                preferred == ScreenPath.AUTO || preferred == ScreenPath.BACKGROUND
-            ) {
-                runCatching { container.backgroundDevice() }.getOrNull()
-            } else {
-                null
-            }
-            val onscreen = current.accessibilityAllowed &&
-                HopaAccessibilityService.instance != null
-            // AUTO is the phone's best mode: the hidden display when it is up,
-            // else this screen. The computer is only used when chosen.
-            val ordered = ScreenPathOrder().order(
-                preferred = preferred,
-                background = background != null,
-                bridge = bridged != null,
-                onscreen = onscreen,
-            )
-            val sources = ordered.mapNotNull { name ->
-                when (name) {
-                    "background" -> ScreenSource("background", background!!, budgetMs = 8_000)
-                    "bridge" -> ScreenSource("bridge", bridged!!, budgetMs = 15_000)
-                    else -> ScreenSource("accessibility", container.device, budgetMs = 8_000)
-                }
-            }
-            val device = ScreenSourceDevice(
-                sources = sources,
-                fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
-            )
+
+            val (device, background, preferred) = resolveDevice(current)
             device.observe()
             if (device.sourceName == "fallback") {
-                container.busy.value = false
-                stopRunService()
-                container.conversations.append(
-                    conversation.id,
-                    ChatMessage(
-                        id = "m-${System.currentTimeMillis()}-screen",
-                        role = "assistant",
-                        // The refusal names the surface that was actually
-                        // tried: the hidden screen and the visible screen both
-                        // need screen access, while the computer does not.
-                        text = "I cannot reach your apps: " +
-                            device.lastError.take(180).ifBlank { "no screen answered" } +
-                            ". " +
-                            when (preferred) {
-                                ScreenPath.BRIDGE ->
-                                    "Open Act and set up My computer, or choose This phone."
-                                ScreenPath.BACKGROUND ->
-                                    "Open Act: start the hidden screen or turn on screen access."
-                                else ->
-                                    "Open Act: turn on screen access, start the hidden " +
-                                        "screen, or choose My computer."
-                            },
-                        timestamp = System.currentTimeMillis(),
-                    ),
-                )
-                val all = container.conversations.all()
-                _state.update {
-                    it.copy(
-                        current = all.firstOrNull { item -> item.id == conversation.id },
-                        conversations = all,
-                        busy = false,
-                    )
-                }
+                handleNoDevice(device, preferred, conversation.id)
                 return@launch
             }
+
             // A goal that worked before runs from its recipe: no model, no tokens.
             if (current.replaySkills) {
-                val recipe = runCatching { container.recipes.find(body) }.getOrNull()
-                if (recipe != null) {
-                    val replayed = runCatching {
-                        com.hopa.app.skills.Replayer(container).replay(recipe, device)
-                    }.getOrDefault(0)
-                    if (replayed == recipe.steps.size) {
-                        (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
-                        container.busy.value = false
-                        val answer = "Done - repeated the $replayed steps that worked last time."
-                        val steps = recipe.steps.mapIndexed { index, action ->
-                            "${index + 1}. ${action.kind}"
-                        }
-                        container.conversations.append(
-                            conversation.id,
-                            ChatMessage(
-                                id = "m-${System.currentTimeMillis()}-replay",
-                                role = "assistant",
-                                text = answer,
-                                timestamp = System.currentTimeMillis(),
-                                proof = com.hopa.stores.MessageProof(
-                                    path = device.sourceName,
-                                    executed = replayed,
-                                    verified = replayed,
-                                    tokens = 0,
-                                    millis = System.currentTimeMillis() - now,
-                                    steps = steps,
-                                    fellBack = preferred == ScreenPath.AUTO &&
-                                        device.sourceName == "accessibility",
-                                ),
-                            ),
-                        )
-                        runCatching {
-                            container.runHistory.record(
-                                at = System.currentTimeMillis(),
-                                goal = body,
-                                path = device.sourceName,
-                                steps = replayed,
-                                tokens = 0,
-                                conversationId = conversation.id,
-                            )
-                        }
-                        val shown = container.conversations.all()
-                        _state.update {
-                            it.copy(
-                                current = shown.firstOrNull { item -> item.id == conversation.id },
-                                conversations = shown,
-                                busy = false,
-                            )
-                        }
-                        return@launch
-                    }
+                val replayed = replayIfPossible(body, device, conversation.id, now, preferred)
+                if (replayed) {
+                    (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
+                    return@launch
                 }
             }
+
             val loop = container.loopFor(device)
             val result = try {
                 withTimeoutOrNull(120_000) {
@@ -530,76 +376,289 @@ class ChatViewModel(
                 stopRunService()
                 (background as? com.hopa.capabilities.display.ShellDisplayDevice)?.stop()
             }
-            val answer = result?.answer ?: "I stopped after two minutes."
-            val steps = result?.records.orEmpty().map { record ->
-                val target = record.action.app
-                    ?: record.action.ref
-                    ?: record.action.url
-                    ?: record.action.text?.take(40)
-                    ?: ""
-                val suffix = if (target.isBlank()) "" else " $target"
-                "${record.step}. ${record.action.kind}$suffix"
-            }
-            val proof = com.hopa.stores.MessageProof(
-                path = device.sourceName,
-                executed = result?.records?.count { it.executed } ?: 0,
-                verified = result?.records?.count { it.verified } ?: 0,
-                tokens = result?.usage?.totalTokens ?: 0,
-                millis = System.currentTimeMillis() - now,
-                steps = steps,
-                fellBack = preferred == ScreenPath.AUTO && device.sourceName == "accessibility",
-            )
-            container.conversations.append(
-                conversation.id,
-                ChatMessage(
-                    id = "m-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(6)}",
-                    role = "assistant",
-                    text = answer,
-                    timestamp = System.currentTimeMillis(),
-                    proof = proof.takeIf { it.executed > 0 },
-                ),
-            )
-            val all = container.conversations.all()
-            container.busy.value = false
-            if (result != null && result.records.isNotEmpty() &&
-                result.records.all { it.executed }
-            ) {
-                runCatching {
-                    container.recipes.save(body, result.records.map { it.action })
-                }
-            }
-            runCatching {
-                container.runHistory.record(
-                    at = System.currentTimeMillis(),
-                    goal = body,
-                    path = device.sourceName,
-                    steps = steps.size,
-                    tokens = proof.tokens,
-                    conversationId = conversation.id,
-                )
-            }
-            com.hopa.app.privacy.TurnLog.add(
-                com.hopa.app.privacy.TurnLogEntry(
-                    at = System.currentTimeMillis(),
-                    path = device.sourceName,
-                    steps = steps.size,
-                    tokens = proof.tokens,
-                    charactersSent = history.sumOf { it.content.length } + body.length,
-                    goal = body.take(80),
-                ),
-            )
-            _state.update {
-                it.copy(
-                    current = all.firstOrNull { item -> item.id == conversation.id },
-                    conversations = all,
-                    busy = false,
-                    error = result?.error?.message,
-                    options = result?.options.orEmpty(),
-                )
-            }
-            answerOutsideApp(answer)
+            recordTurn(result, body, device, conversation.id, now, preferred, history)
         }.invokeOnCompletion { container.busy.value = false }
     }
+
+    // ── sendText helpers ──────────────────────────────────────────────────────
+
+    private data class DeviceSetup(
+        val source: ScreenSourceDevice,
+        val background: com.hopa.contracts.ports.DevicePort?,
+        val preferred: ScreenPath,
+    )
+
+    /** Builds the ScreenSourceDevice from the current screen-path preference. */
+    private suspend fun resolveDevice(settings: AppSettings): DeviceSetup {
+        val bridged = runCatching { container.bridgedDevice() }.getOrNull()
+        val preferred = ScreenPath.of(settings.screenPath)
+        val background = if (
+            preferred == ScreenPath.AUTO || preferred == ScreenPath.BACKGROUND
+        ) {
+            runCatching { container.backgroundDevice() }.getOrNull()
+        } else {
+            null
+        }
+        val onscreen = settings.accessibilityAllowed &&
+            HopaAccessibilityService.instance != null
+        val ordered = ScreenPathOrder().order(
+            preferred = preferred,
+            background = background != null,
+            bridge = bridged != null,
+            onscreen = onscreen,
+        )
+        val sources = ordered.mapNotNull { name ->
+            when (name) {
+                "background" -> ScreenSource("background", background!!, budgetMs = 8_000)
+                "bridge" -> ScreenSource("bridge", bridged!!, budgetMs = 15_000)
+                else -> ScreenSource("accessibility", container.device, budgetMs = 8_000)
+            }
+        }
+        val source = ScreenSourceDevice(
+            sources = sources,
+            fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
+        )
+        return DeviceSetup(source, background, preferred)
+    }
+
+    /** Posts a system message explaining why the action cannot proceed. */
+    private suspend fun handleNoDevice(
+        device: ScreenSourceDevice,
+        preferred: ScreenPath,
+        conversationId: String,
+    ) {
+        container.busy.value = false
+        stopRunService()
+        container.conversations.append(
+            conversationId,
+            ChatMessage(
+                id = "m-${System.currentTimeMillis()}-screen",
+                role = "assistant",
+                text = "I cannot reach your apps: " +
+                    device.lastError.take(180).ifBlank { "no screen answered" } +
+                    ". " +
+                    when (preferred) {
+                        ScreenPath.BRIDGE ->
+                            "Open Act and set up My computer, or choose This phone."
+                        ScreenPath.BACKGROUND ->
+                            "Open Act: start the hidden screen or turn on screen access."
+                        else ->
+                            "Open Act: turn on screen access, start the hidden " +
+                                "screen, or choose My computer."
+                    },
+                timestamp = System.currentTimeMillis(),
+            ),
+        )
+        val all = container.conversations.all()
+        _state.update {
+            it.copy(
+                current = all.firstOrNull { item -> item.id == conversationId },
+                conversations = all,
+                busy = false,
+            )
+        }
+    }
+
+    /**
+     * Tries to replay the last matching recipe. Returns true when every step
+     * succeeded — the caller should return early in that case.
+     */
+    private suspend fun replayIfPossible(
+        body: String,
+        device: ScreenSourceDevice,
+        conversationId: String,
+        now: Long,
+        preferred: ScreenPath,
+    ): Boolean {
+        val recipe = runCatching { container.recipes.find(body) }.getOrNull() ?: return false
+        val replayed = runCatching {
+            com.hopa.app.skills.Replayer(container).replay(recipe, device)
+        }.getOrDefault(0)
+        if (replayed != recipe.steps.size) return false
+
+        container.busy.value = false
+        val steps = recipe.steps.mapIndexed { index, action -> "${index + 1}. ${action.kind}" }
+        container.conversations.append(
+            conversationId,
+            ChatMessage(
+                id = "m-${System.currentTimeMillis()}-replay",
+                role = "assistant",
+                text = "Done - repeated the $replayed steps that worked last time.",
+                timestamp = System.currentTimeMillis(),
+                proof = com.hopa.stores.MessageProof(
+                    path = device.sourceName,
+                    executed = replayed,
+                    verified = replayed,
+                    tokens = 0,
+                    millis = System.currentTimeMillis() - now,
+                    steps = steps,
+                    fellBack = preferred == ScreenPath.AUTO &&
+                        device.sourceName == "accessibility",
+                ),
+            ),
+        )
+        runCatching {
+            container.runHistory.record(
+                at = System.currentTimeMillis(),
+                goal = body,
+                path = device.sourceName,
+                steps = replayed,
+                tokens = 0,
+                conversationId = conversationId,
+            )
+        }
+        val shown = container.conversations.all()
+        _state.update {
+            it.copy(
+                current = shown.firstOrNull { item -> item.id == conversationId },
+                conversations = shown,
+                busy = false,
+            )
+        }
+        return true
+    }
+
+    /**
+     * Asks the model for a numbered plan. Returns steps, or null when the model
+     * did not respond or produced an empty list.
+     */
+    private suspend fun fetchPlanSteps(body: String): List<String>? =
+        runCatching {
+            container.model.complete(
+                ModelRequest(
+                    messages = listOf(
+                        ModelMessage(
+                            "system",
+                            "You are planning, not acting. Reply with a numbered " +
+                                "plan of at most six short steps, one per line, " +
+                                "no other text.",
+                        ),
+                        ModelMessage("user", body),
+                    ),
+                    maxTokens = 400,
+                ),
+            ).text
+        }.getOrNull()
+            .orEmpty()
+            .lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .map { it.replaceFirst(Regex("^\\d+[.)]\\s*"), "") }
+            .take(6)
+            .toList()
+            .takeIf { it.isNotEmpty() }
+
+    /** Merges memory facts and character tone into a single prompt block. */
+    private suspend fun buildMemoryContext(settings: AppSettings): String {
+        val facts = runCatching { container.memory.promptText() }.getOrDefault("")
+        val character = "Character: ${settings.tone} tone, ${settings.chattiness} length."
+        return listOf(facts, character).filter { it.isNotBlank() }.joinToString("\n\n")
+    }
+
+    /** Appends the user message to the DB and immediately reflects it in state. */
+    private suspend fun appendUserMessage(
+        conversationId: String,
+        body: String,
+        attachment: Attachment?,
+        now: Long,
+    ) {
+        container.conversations.append(
+            conversationId,
+            ChatMessage(
+                id = "m-$now-${UUID.randomUUID().toString().take(6)}",
+                role = "user",
+                text = body,
+                timestamp = now,
+                attachment = attachment,
+            ),
+        )
+        // The store is the source of truth, but the screen reads state, so the
+        // bubble must be published now or it waits until the answer arrives.
+        val shown = container.conversations.all()
+        _state.update {
+            it.copy(
+                current = shown.firstOrNull { item -> item.id == conversationId },
+                conversations = shown,
+            )
+        }
+    }
+
+    /** Persists the loop result and publishes the final state to the UI. */
+    private suspend fun recordTurn(
+        result: com.hopa.engine.loop.TurnResult?,
+        body: String,
+        device: ScreenSourceDevice,
+        conversationId: String,
+        now: Long,
+        preferred: ScreenPath,
+        history: List<ModelMessage>,
+    ) {
+        val answer = result?.answer ?: "I stopped after two minutes."
+        val steps = result?.records.orEmpty().map { record ->
+            val target = record.action.app
+                ?: record.action.ref
+                ?: record.action.url
+                ?: record.action.text?.take(40)
+                ?: ""
+            "${record.step}. ${record.action.kind}${if (target.isBlank()) "" else " $target"}"
+        }
+        val proof = com.hopa.stores.MessageProof(
+            path = device.sourceName,
+            executed = result?.records?.count { it.executed } ?: 0,
+            verified = result?.records?.count { it.verified } ?: 0,
+            tokens = result?.usage?.totalTokens ?: 0,
+            millis = System.currentTimeMillis() - now,
+            steps = steps,
+            fellBack = preferred == ScreenPath.AUTO && device.sourceName == "accessibility",
+        )
+        container.conversations.append(
+            conversationId,
+            ChatMessage(
+                id = "m-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(6)}",
+                role = "assistant",
+                text = answer,
+                timestamp = System.currentTimeMillis(),
+                proof = proof.takeIf { it.executed > 0 },
+            ),
+        )
+        val all = container.conversations.all()
+        container.busy.value = false
+        if (result != null && result.records.isNotEmpty() && result.records.all { it.executed }) {
+            runCatching { container.recipes.save(body, result.records.map { it.action }) }
+        }
+        runCatching {
+            container.runHistory.record(
+                at = System.currentTimeMillis(),
+                goal = body,
+                path = device.sourceName,
+                steps = steps.size,
+                tokens = proof.tokens,
+                conversationId = conversationId,
+            )
+        }
+        com.hopa.app.privacy.TurnLog.add(
+            com.hopa.app.privacy.TurnLogEntry(
+                at = System.currentTimeMillis(),
+                path = device.sourceName,
+                steps = steps.size,
+                tokens = proof.tokens,
+                charactersSent = history.sumOf { it.content.length } + body.length,
+                goal = body.take(80),
+            ),
+        )
+        _state.update {
+            it.copy(
+                current = all.firstOrNull { item -> item.id == conversationId },
+                conversations = all,
+                busy = false,
+                error = result?.error?.message,
+                options = result?.options.orEmpty(),
+            )
+        }
+        answerOutsideApp(answer)
+    }
+
+    // ── Misc helpers ──────────────────────────────────────────────────────────
 
     /**
      * A run happens inside another app, so the answer is invisible until the
@@ -638,9 +697,7 @@ class ChatViewModel(
 
     private fun startRunService() {
         val intent = Intent(container.context, com.hopa.app.service.RunService::class.java)
-        runCatching {
-            ContextCompat.startForegroundService(container.context, intent)
-        }
+        runCatching { ContextCompat.startForegroundService(container.context, intent) }
     }
 
     private fun stopRunService() {

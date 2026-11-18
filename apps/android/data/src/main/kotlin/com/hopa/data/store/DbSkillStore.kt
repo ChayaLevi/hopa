@@ -5,7 +5,7 @@ import com.hopa.data.database.entity.SkillEntity
 import com.hopa.stores.Skill
 import com.hopa.stores.SkillStore
 
-class RoomSkillStore(
+class DbSkillStore(
     private val dao: SkillDao,
 ) : SkillStore {
     override suspend fun all(): List<Skill> =

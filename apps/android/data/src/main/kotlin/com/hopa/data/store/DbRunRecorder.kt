@@ -7,7 +7,7 @@ import com.hopa.engine.records.RunRecorder
 import com.hopa.data.database.dao.RunRecordDao
 import com.hopa.data.database.mapper.RunRecordMapper
 
-class RoomRunRecorder(
+class DbRunRecorder(
     private val dao: RunRecordDao,
 ) : RunRecorder {
     override suspend fun append(draft: RunRecordDraft): RunRecord {

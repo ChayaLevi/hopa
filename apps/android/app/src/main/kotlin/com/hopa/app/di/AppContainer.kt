@@ -14,11 +14,11 @@ import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.engine.loop.AgentLoop
 import com.hopa.data.database.HopaDatabase
-import com.hopa.data.store.RoomRunRecorder
+import com.hopa.data.store.DbRunRecorder
 import com.hopa.engine.records.RunRecordFactory
 import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.stores.ConversationStore
-import com.hopa.data.store.RoomConversationStore
+import com.hopa.data.store.DbConversationStore
 import com.hopa.data.store.DataStoreSettingsRepository
 import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +37,7 @@ class AppContainer(context: Context) {
     }
 
     private val database = HopaDatabase.build(context)
-    val conversations: ConversationStore = RoomConversationStore(database)
+    val conversations: ConversationStore = DbConversationStore(database)
     val selectedConversation = MutableStateFlow<String?>(null)
     val busy = MutableStateFlow(false)
     val cancelRequested = MutableStateFlow(false)
@@ -56,13 +56,13 @@ class AppContainer(context: Context) {
     val pendingNotice = MutableStateFlow<String?>(null)
     val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
-    val recorder = RoomRunRecorder(database.runRecordDao())
-    val runHistory = com.hopa.data.store.RoomRunHistory(database.runHistoryDao())
-    val pendingApprovals = com.hopa.data.store.RoomPendingApprovalStore(
+    val recorder = DbRunRecorder(database.runRecordDao())
+    val runHistory = com.hopa.data.store.DbRunHistory(database.runHistoryDao())
+    val pendingApprovals = com.hopa.data.store.DbPendingApprovalStore(
         database.pendingApprovalDao(),
     )
-    val memory = com.hopa.data.store.RoomMemoryStore(database.memoryDao())
-    val skills = com.hopa.data.store.RoomSkillStore(database.skillDao())
+    val memory = com.hopa.data.store.DbMemoryStore(database.memoryDao())
+    val skills = com.hopa.data.store.DbSkillStore(database.skillDao())
     val clock = AndroidClock()
     val policy = ApprovalPolicy()
     val approval = UiApprovalGateway(pendingApprovals)

@@ -4,7 +4,7 @@ import com.hopa.data.database.dao.MemoryDao
 import com.hopa.data.database.entity.MemoryFactEntity
 import com.hopa.stores.MemoryStore
 
-class RoomMemoryStore(
+class DbMemoryStore(
     private val dao: MemoryDao,
 ) : MemoryStore {
     override suspend fun all(): List<String> = dao.all().map { it.text }

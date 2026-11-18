@@ -93,8 +93,8 @@ android {
 
 dependencies {
     implementation(project(":engine"))
-    implementation(project(":capabilities-android"))
-    implementation(project(":data-android"))
+    implementation(project(":capabilities"))
+    implementation(project(":data"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -117,5 +117,4 @@ dependencies {
     // androidx.test refers to these annotations; R8 needs them on the test
     // classpath or it refuses to minify the instrumentation APK.
     androidTestImplementation("com.google.errorprone:error_prone_annotations:2.27.1")
-    testImplementation(project(":testing"))
 }

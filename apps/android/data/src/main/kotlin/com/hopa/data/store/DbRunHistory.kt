@@ -5,7 +5,7 @@ import com.hopa.data.database.entity.RunHistoryEntity
 import java.util.UUID
 
 /** Run history: one row per finished turn, so surfaces can be compared later. */
-class RoomRunHistory(private val dao: RunHistoryDao) {
+class DbRunHistory(private val dao: RunHistoryDao) {
     suspend fun record(
         at: Long,
         goal: String,
