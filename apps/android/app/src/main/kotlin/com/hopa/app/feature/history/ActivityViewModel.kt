@@ -21,8 +21,8 @@ class ActivityViewModel(
 
     init {
         viewModelScope.launch {
-            container.busy.collect { busy ->
-                _state.update { it.copy(busy = busy) }
+            container.runGate.state.collect { run ->
+                _state.update { it.copy(busy = run.busy) }
             }
         }
         refresh()

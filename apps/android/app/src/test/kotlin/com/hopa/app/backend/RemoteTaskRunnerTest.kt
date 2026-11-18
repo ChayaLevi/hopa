@@ -1,5 +1,7 @@
 package com.hopa.app.backend
 
+import com.hopa.app.run.RunGate
+import com.hopa.app.run.RunSource
 import com.hopa.net.backend.BackendEnvelope
 import com.hopa.net.backend.BackendLink
 import com.hopa.net.backend.BackendState
@@ -55,7 +57,7 @@ class RemoteTaskRunnerTest {
         assertEquals(0, fixture.approvals)
         // A refusal never claims the id, so the advised resend can run.
         assertTrue(fixture.log.claim("t-locked"))
-        assertFalse(fixture.busyFlow.value)
+        assertFalse(fixture.runGate.state.value.busy)
         assertEquals(0, fixture.runs)
     }
 
@@ -89,7 +91,7 @@ class RemoteTaskRunnerTest {
         assertEquals(0, fixture.resolutions)
         assertEquals(0, fixture.runs)
         // The flag belongs to the turn that was already running, not to this one.
-        assertTrue(fixture.busyFlow.value)
+        assertTrue(fixture.runGate.state.value.busy)
     }
 
     @Test
@@ -108,7 +110,7 @@ class RemoteTaskRunnerTest {
         assertEquals(1, fixture.finished)
         assertEquals(1, fixture.services)
         assertTrue(fixture.busySeen)
-        assertFalse(fixture.busyFlow.value)
+        assertFalse(fixture.runGate.state.value.busy)
     }
 
     @Test
@@ -198,7 +200,7 @@ class RemoteTaskRunnerTest {
         assertEquals(1, fixture.finished)
         assertEquals(0, fixture.runs)
         assertEquals(0, fixture.approvals)
-        assertFalse(fixture.busyFlow.value)
+        assertFalse(fixture.runGate.state.value.busy)
         // The id stays unclaimed, so the advised resend may run.
         assertTrue(fixture.log.claim("t-stall"))
     }
@@ -227,7 +229,7 @@ class RemoteTaskRunnerTest {
             listOf("task.ack", "task.error", "task.ack", "task.progress", "task.result"),
             fixture.link.frames.map { it.type },
         )
-        assertFalse(fixture.busyFlow.value)
+        assertFalse(fixture.runGate.state.value.busy)
     }
 
     @Test
@@ -304,7 +306,7 @@ class RemoteTaskRunnerTest {
         job.cancelAndJoin()
 
         assertTrue(fixture.log.claim("t-cancel"))
-        assertFalse(fixture.busyFlow.value)
+        assertFalse(fixture.runGate.state.value.busy)
         assertEquals(1, fixture.runs)
     }
 }
@@ -346,7 +348,11 @@ private class Fixture(
 ) {
     val link = RecordingLink()
     val log = log()
-    val busyFlow = MutableStateFlow(busy)
+    val runGate = RunGate().apply {
+        if (busy) {
+            claim("pre-existing", RunSource.CHAT)
+        }
+    }
     val events = mutableListOf<String>()
     var runs = 0
     var resolutions = 0
@@ -374,8 +380,7 @@ private class Fixture(
                 accessibilityBound = true,
             )
         },
-        busy = busyFlow,
-        cancel = MutableStateFlow(false),
+        runGate = runGate,
         foreground = { foreground },
         startService = {
             services += 1
@@ -386,7 +391,7 @@ private class Fixture(
         releaseSurface = {},
         run = {
             runs += 1
-            busySeen = busyFlow.value
+            busySeen = runGate.state.value.busy
             events += "run"
             runOverride?.invoke() ?: result
         },

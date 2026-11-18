@@ -64,8 +64,7 @@ class AppContainer(context: Context) {
     val knowledgeSource: com.hopa.knowledge.KnowledgeSource = knowledgeStore
     val knowledge: com.hopa.knowledge.Knowledge get() = knowledgeSource.current()
     val selectedConversation = MutableStateFlow<String?>(null)
-    val busy = MutableStateFlow(false)
-    val cancelRequested = MutableStateFlow(false)
+    val runGate = com.hopa.app.run.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
     val pairingStatus = MutableStateFlow<String?>(null)
     /**
@@ -173,8 +172,7 @@ class AppContainer(context: Context) {
             settings = { settings.settings.first() },
             surfaces = { current -> surfaces(current) },
             screen = { current -> Surfaces.state(this, current) },
-            busy = busy,
-            cancel = cancelRequested,
+            runGate = runGate,
             foreground = { AppVisibility.foreground },
             startService = { startRunService() },
             stopService = { stopRunService() },

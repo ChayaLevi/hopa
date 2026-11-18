@@ -306,13 +306,12 @@ class ChatViewModel(
         container.pendingNotice.value = null
         // A task delivered to the other device may hold the phone. Two loops on
         // one screen would fight over it and cancel each other.
-        if (!container.busy.compareAndSet(expect = false, update = true)) {
+        if (!container.runGate.claim(body, com.hopa.app.run.RunSource.CHAT)) {
             _state.update {
                 it.copy(error = "HOPA is busy with a task from your other device", busy = false)
             }
             return
         }
-        container.cancelRequested.value = false
         startRunService()
         viewModelScope.launch {
             val now = System.currentTimeMillis()
@@ -332,7 +331,7 @@ class ChatViewModel(
                         traceId = UUID.randomUUID().toString(),
                     ),
                 )
-                container.busy.value = false
+                container.runGate.finish()
                 stopRunService()
                 if (outcome.pendingPlan.isEmpty()) {
                     _state.update {
@@ -356,7 +355,7 @@ class ChatViewModel(
                 traceId = UUID.randomUUID().toString(),
             )
             val outcome = try {
-                container.runs.run(request) { container.cancelRequested.value }
+                container.runs.run(request) { container.runGate.isCancelled() }
             } finally {
                 stopRunService()
                 Surfaces.release()
@@ -370,7 +369,7 @@ class ChatViewModel(
                 TurnSource.MODEL ->
                     recordTurn(outcome, body, conversation.id, now, preferred, history)
             }
-        }.invokeOnCompletion { container.busy.value = false }
+        }.invokeOnCompletion { container.runGate.finish() }
     }
 
     // ── sendText helpers ──────────────────────────────────────────────────────
@@ -381,7 +380,7 @@ class ChatViewModel(
         preferred: ScreenPath,
         conversationId: String,
     ) {
-        container.busy.value = false
+        container.runGate.finish()
         stopRunService()
         container.conversations.append(
             conversationId,
@@ -421,7 +420,7 @@ class ChatViewModel(
         now: Long,
         preferred: ScreenPath,
     ) {
-        container.busy.value = false
+        container.runGate.finish()
         val replayed = outcome.replaySteps.size
         container.conversations.append(
             conversationId,
@@ -528,7 +527,7 @@ class ChatViewModel(
             ),
         )
         val all = container.conversations.all()
-        container.busy.value = false
+        container.runGate.finish()
         runCatching {
             container.runHistory.record(
                 at = System.currentTimeMillis(),
