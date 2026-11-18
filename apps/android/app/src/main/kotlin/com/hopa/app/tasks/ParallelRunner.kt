@@ -80,14 +80,17 @@ class ParallelRunner(
                 val recipe = runCatching { container.recipes.find(goal) }.getOrNull()
                 if (recipe != null) {
                     val outcome = runCatching {
-                        com.hopa.app.recipes.Replayer(container).replay(recipe, device)
+                        com.hopa.turn.recipe.Replayer(
+                            executorFor = container::executorFor,
+                            installedApps = { container.packages.installed().map { it.packageName } },
+                        ).replay(recipe, device)
                     }.getOrNull()
                     if (outcome?.trustworthy == true) {
                         val replayed = outcome.done
                         val screen = outcome.screen
                         val spoken = if (screen != null) {
                             runCatching {
-                                com.hopa.app.recipes.ReplayAnswer(container.model)
+                                com.hopa.turn.recipe.ReplayAnswer(container.model)
                                     .answer(goal, screen)
                             }.getOrNull()
                         } else {

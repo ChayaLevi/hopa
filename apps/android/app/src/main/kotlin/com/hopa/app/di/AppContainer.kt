@@ -395,7 +395,7 @@ class AppContainer(context: Context) {
     )
 
     /** Recipes that were replayed before; a matching goal runs without the model. */
-    val recipes by lazy { com.hopa.app.recipes.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+    val recipes by lazy { com.hopa.turn.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** One loop per device path, sharing the model, recorder and gate. */
     fun loopFor(device: DevicePort): AgentLoop = AgentLoop(

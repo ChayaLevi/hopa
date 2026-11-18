@@ -1,34 +1,39 @@
-package com.hopa.app.recipes
+package com.hopa.turn.recipe
 
-import com.hopa.app.di.AppContainer
+import com.hopa.contracts.Action
 import com.hopa.contracts.ports.DevicePort
+import com.hopa.engine.gate.ActionExecutor
 import com.hopa.engine.observation.NodeAnchor
 import kotlinx.coroutines.delay
 
 /**
- * Replays a recipe on the current device.
+ * Replays a recipe on a device. The step machinery comes from the client as two
+ * functions, so this file needs no Android: an executor for one action and the
+ * list of installed apps.
  *
  * A step that carries a `ref` is re-resolved through the anchor recorded with
  * it: the text, description or id of the control, not its position in the tree.
  * If the anchor is missing, or is not on the screen any more, the replay stops
- * before that tap and the caller falls back to the model. A wrong tap is worse
- * than a slower answer.
+ * before that tap and the caller falls back to the model.
  */
-class Replayer(private val container: AppContainer) {
+class Replayer(
+    private val executorFor: (DevicePort) -> ActionExecutor,
+    private val installedApps: suspend () -> List<String>,
+) {
     suspend fun replay(recipe: Recipe, device: DevicePort): ReplayOutcome {
         if (!recipe.replayable) {
             return ReplayOutcome(0, complete = false)
         }
         if (recipe.app.isNotBlank()) {
-            val installed = runCatching { container.packages.installed() }.getOrDefault(emptyList())
-            if (installed.none { it.packageName.equals(recipe.app, ignoreCase = true) }) {
+            val installed = runCatching { installedApps() }.getOrDefault(emptyList())
+            if (installed.none { it.equals(recipe.app, ignoreCase = true) }) {
                 // The app the recipe was recorded in is gone; let the model plan again.
                 return ReplayOutcome(0, complete = false)
             }
         }
         var observation = runCatching { device.observe() }.getOrNull()
             ?: return ReplayOutcome(0, complete = false)
-        val executor = container.executorFor(device)
+        val executor = executorFor(device)
         var done = 0
         for ((index, step) in recipe.steps.withIndex()) {
             val anchored = if (step.ref.isNullOrBlank()) {

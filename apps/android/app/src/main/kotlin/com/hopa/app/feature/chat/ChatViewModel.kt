@@ -444,7 +444,10 @@ class ChatViewModel(
     ): Boolean {
         val recipe = runCatching { container.recipes.find(body) }.getOrNull() ?: return false
         val outcome = runCatching {
-            com.hopa.app.recipes.Replayer(container).replay(recipe, device)
+            com.hopa.turn.recipe.Replayer(
+                executorFor = container::executorFor,
+                installedApps = { container.packages.installed().map { it.packageName } },
+            ).replay(recipe, device)
         }.getOrNull() ?: return false
         if (!outcome.trustworthy) return false
         val replayed = outcome.done
@@ -454,7 +457,7 @@ class ChatViewModel(
         // "repeated 2 steps".
         val screen = outcome.screen
         val spoken = if (screen != null) {
-            runCatching { com.hopa.app.recipes.ReplayAnswer(container.model).answer(body, screen) }
+            runCatching { com.hopa.turn.recipe.ReplayAnswer(container.model).answer(body, screen) }
                 .getOrNull()
         } else {
             null

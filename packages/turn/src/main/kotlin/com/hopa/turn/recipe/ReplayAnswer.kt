@@ -1,4 +1,4 @@
-package com.hopa.app.recipes
+package com.hopa.turn.recipe
 
 import com.hopa.contracts.Observation
 import com.hopa.contracts.model.ModelMessage

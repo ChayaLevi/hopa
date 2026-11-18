@@ -94,6 +94,7 @@ android {
 
 dependencies {
     implementation(project(":engine"))
+    implementation(project(":turn"))
     implementation(project(":capabilities"))
     implementation(project(":data"))
     implementation(project(":contracts"))
