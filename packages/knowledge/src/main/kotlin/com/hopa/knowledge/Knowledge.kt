@@ -3,7 +3,7 @@ package com.hopa.knowledge
 /**
  * The tables the engine reads, as one value.
  *
- * Today [BundledKnowledge] returns this snapshot, compiled into the app. When
+ * Today the client loads this from the bootstrap asset. When
  * the backend serves a newer catalog, a different [KnowledgeSource] will return
  * it instead and the engine will not change: it already reads the value it is
  * given, not the constants.

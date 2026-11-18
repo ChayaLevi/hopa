@@ -25,6 +25,9 @@ OUTPUTS = [
     ROOT / "contracts" / "knowledge" / "knowledge.v1.json",
     ROOT / "services" / "backend" / "src" / "main" / "resources" / "knowledge.v1.json",
     ROOT / "packages" / "knowledge" / "src" / "test" / "resources" / "knowledge.v1.json",
+    ROOT / "packages" / "engine" / "src" / "test" / "resources" / "knowledge.v1.json",
+    ROOT / "apps" / "android" / "app" / "src" / "main" / "assets" / "knowledge.v1.json",
+    ROOT / "apps" / "windows" / "sidecar" / "src" / "main" / "resources" / "knowledge.v1.json",
 ]
 
 

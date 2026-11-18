@@ -12,6 +12,7 @@ import com.hopa.engine.records.RunRecordFactory
 import com.hopa.engine.testing.FakeApproval
 import com.hopa.engine.testing.FakeClock
 import com.hopa.engine.testing.FakeDevice
+import com.hopa.engine.testing.TestKnowledge
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -140,6 +141,7 @@ class AgentLoopTest {
             ),
             recorder = recorder,
             clock = clock,
+            knowledge = TestKnowledge.value,
         )
     }
 

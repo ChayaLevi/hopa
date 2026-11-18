@@ -6,18 +6,20 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class KnowledgeCodecTest {
+    private val bundled = TestBundles.bundled
+
     @Test
     fun the_bundled_snapshot_round_trips_through_the_wire_format() {
-        val bundle = KnowledgeBundle.from(BUNDLED_KNOWLEDGE)
+        val bundle = KnowledgeBundle.from(bundled)
 
         val decoded = KnowledgeCodec.decode(KnowledgeCodec.encode(bundle))
 
-        assertEquals(BUNDLED_KNOWLEDGE.catalog, decoded.catalog)
-        assertEquals(BUNDLED_KNOWLEDGE.sites, decoded.sites)
-        assertEquals(BUNDLED_KNOWLEDGE.promptRules, decoded.promptRules)
+        assertEquals(bundled.catalog, decoded.catalog)
+        assertEquals(bundled.sites, decoded.sites)
+        assertEquals(bundled.promptRules, decoded.promptRules)
         assertEquals(
-            BUNDLED_KNOWLEDGE,
-            decoded.toKnowledge(BUNDLED_KNOWLEDGE.approval),
+            bundled,
+            decoded.toKnowledge(bundled.approval),
         )
     }
 
@@ -35,7 +37,7 @@ class KnowledgeCodecTest {
 
     @Test
     fun an_unknown_schema_is_refused() {
-        val bundle = KnowledgeBundle.from(BUNDLED_KNOWLEDGE)
+        val bundle = KnowledgeBundle.from(bundled)
         val text = KnowledgeCodec.encode(bundle).replace("\"schemaVersion\":1", "\"schemaVersion\":99")
 
         assertThrows(IllegalArgumentException::class.java) {
@@ -45,7 +47,7 @@ class KnowledgeCodecTest {
 
     @Test
     fun a_bundle_without_a_catalog_is_refused() {
-        val text = KnowledgeCodec.encode(KnowledgeBundle.from(BUNDLED_KNOWLEDGE))
+        val text = KnowledgeCodec.encode(KnowledgeBundle.from(bundled))
             .replaceFirst(Regex("\"catalog\":\\[.*?],\"sites\""), "\"catalog\":[],\"sites\"")
 
         assertThrows(IllegalArgumentException::class.java) {

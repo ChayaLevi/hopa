@@ -12,6 +12,8 @@ class FileKnowledgeStoreTest {
     @get:Rule
     val folder = TemporaryFolder()
 
+    private val bundled = TestBundles.bundled
+
     private val empty = CatalogTarget(id = "", detail = "", verified = false)
 
     private fun tiny(version: String, display: String): Knowledge = Knowledge(
@@ -36,11 +38,11 @@ class FileKnowledgeStoreTest {
     private fun json(knowledge: Knowledge): String =
         KnowledgeCodec.encode(KnowledgeBundle.from(knowledge))
 
-    private fun store(): FileKnowledgeStore = FileKnowledgeStore(folder.root, BUNDLED_KNOWLEDGE)
+    private fun store(): FileKnowledgeStore = FileKnowledgeStore(folder.root, bundled)
 
     @Test
     fun an_empty_directory_uses_the_bundled_snapshot() {
-        assertEquals(BUNDLED_KNOWLEDGE, store().current())
+        assertEquals(bundled, store().current())
     }
 
     @Test
@@ -87,6 +89,6 @@ class FileKnowledgeStoreTest {
 
         store.clear()
 
-        assertEquals(BUNDLED_KNOWLEDGE, store.current())
+        assertEquals(bundled, store.current())
     }
 }

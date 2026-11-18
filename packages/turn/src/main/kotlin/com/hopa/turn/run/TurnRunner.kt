@@ -11,7 +11,6 @@ import com.hopa.engine.loop.StepPolicy
 import com.hopa.engine.loop.TurnContext
 import com.hopa.engine.loop.TurnResult
 import com.hopa.engine.records.RunRecorder
-import com.hopa.knowledge.BUNDLED_KNOWLEDGE
 import com.hopa.knowledge.Knowledge
 import com.hopa.turn.goal.GoalVerification
 import com.hopa.turn.goal.GoalVerifier
@@ -49,7 +48,7 @@ class TurnRunner(
     private val plans: PlanSource? = null,
     private val verifier: GoalVerifier = GoalVerifier(),
     /** The tables this client uses; read per turn, so an update applies next time. */
-    private val knowledge: () -> Knowledge = { BUNDLED_KNOWLEDGE },
+    private val knowledge: () -> Knowledge,
     /** How long the screen gets between replayed steps; a test passes a no-op. */
     private val settle: suspend (Long) -> Unit = { delay(it) },
 ) {

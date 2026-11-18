@@ -36,7 +36,7 @@ fun AppCardRoute(
         val installed = withContext(Dispatchers.IO) {
             runCatching { container.packages.installed() }.getOrDefault(emptyList())
         }
-        target = CatalogRoutes.targets(installed, "android")
+        target = CatalogRoutes.targets(installed, "android", container.knowledge)
             .firstOrNull { it.kind == "app" && it.name == name }
         val settings = runCatching { container.settings.settings.first() }.getOrNull()
         surface = surfaceLabel(settings?.screenPath.orEmpty())

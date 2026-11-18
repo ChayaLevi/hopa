@@ -44,7 +44,7 @@ fun SettingsRoute(
             recipes = container.recipes.all()
             appNames = runCatching {
                 val installed = container.packages.installed()
-                com.hopa.engine.router.CatalogRoutes.targets(installed, "android")
+                com.hopa.engine.router.CatalogRoutes.targets(installed, "android", container.knowledge)
                     .filter { it.bundle.isNotBlank() }
                     .associate { it.bundle.lowercase() to it.display }
             }.getOrDefault(emptyMap())

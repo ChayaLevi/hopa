@@ -32,7 +32,7 @@ fun LaunchpadRoute(
         val installed = withContext(Dispatchers.IO) {
             runCatching { container.packages.installed() }.getOrDefault(emptyList())
         }
-        targets = runCatching { CatalogRoutes.targets(installed, "android") }
+        targets = runCatching { CatalogRoutes.targets(installed, "android", container.knowledge) }
             .getOrElse {
                 status = "Could not read the catalog: ${it.message ?: "unknown error"}"
                 emptyList()

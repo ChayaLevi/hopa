@@ -1,7 +1,6 @@
 package com.hopa.engine.router
 
 import com.hopa.contracts.ports.InstalledApp
-import com.hopa.knowledge.BUNDLED_KNOWLEDGE
 import com.hopa.knowledge.CatalogApp
 import com.hopa.knowledge.CatalogTarget
 import com.hopa.knowledge.Knowledge
@@ -21,7 +20,7 @@ object CatalogRoutes {
     fun targets(
         installed: List<InstalledApp> = emptyList(),
         platform: String = "",
-        knowledge: Knowledge = BUNDLED_KNOWLEDGE,
+        knowledge: Knowledge,
     ): List<RouteTarget> {
         val apps = knowledge.catalog.map { app ->
             val chosen = platformTarget(app, platform)

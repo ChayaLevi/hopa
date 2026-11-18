@@ -18,6 +18,8 @@ import com.hopa.engine.gate.ApprovalPolicy
 import com.hopa.engine.loop.StepPolicy
 import com.hopa.engine.records.InMemoryRunRecorder
 import com.hopa.engine.records.RunRecordFactory
+import com.hopa.knowledge.ApprovalPolicyData
+import com.hopa.knowledge.Knowledge
 import com.hopa.turn.goal.Checkpoint
 import com.hopa.turn.plan.PlanSource
 import com.hopa.turn.recipe.RecipeStore
@@ -115,6 +117,13 @@ class TurnRunnerTest {
     ) {
         val device = FakeDevice(screens)
         val policy = ScriptedPolicy(replies)
+        private val knowledge = Knowledge(
+            version = "test",
+            catalog = emptyList(),
+            sites = emptyList(),
+            approval = ApprovalPolicyData,
+            promptRules = emptyList(),
+        )
         private val clock = FakeClock()
         private val recorder = InMemoryRunRecorder()
         private val executor = ActionExecutor(
@@ -135,6 +144,7 @@ class TurnRunnerTest {
             clock = clock,
             recipes = store,
             plans = plan?.let { planned -> PlanSource { planned } },
+            knowledge = { knowledge },
             settle = {},
         )
 

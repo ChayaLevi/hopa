@@ -23,7 +23,6 @@ import com.hopa.engine.records.RunRecorder
 import com.hopa.engine.router.AppRouter
 import com.hopa.engine.router.CatalogRoutes
 import com.hopa.engine.router.RouterHint
-import com.hopa.knowledge.BUNDLED_KNOWLEDGE
 import com.hopa.knowledge.Knowledge
 
 class AgentLoop(
@@ -38,8 +37,8 @@ class AgentLoop(
     private val screenRenderer: ScreenRenderer = ScreenRenderer(),
     private val config: LoopConfig = LoopConfig(),
     private val webAvailable: Boolean = false,
-    /** The tables this turn routes and prompts with; bundled until a fetch exists. */
-    private val knowledge: Knowledge = BUNDLED_KNOWLEDGE,
+    /** The tables this turn routes and prompts with. */
+    private val knowledge: Knowledge,
 ) {
     suspend fun run(
         runId: String,
