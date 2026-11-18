@@ -14,6 +14,7 @@ import com.hopa.turn.run.TurnOutcome
 import com.hopa.turn.run.TurnRequest
 import com.hopa.turn.run.TurnRunner
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 /**
@@ -33,9 +34,53 @@ class RunCoordinator(
             clock = container.clock,
             recipes = container.recipes,
             replayAnswer = ReplayAnswer(container.model),
-            plans = ModelPlanSource(container.model),
+            plans = ModelPlanSource(container.model) { planEnvironment() },
             knowledge = { container.knowledge },
         )
+    }
+
+    /**
+     * What the planner has to know to write steps a phone can follow. The turn
+     * prompt gets the same facts; the plan prompt used to get none, so it told
+     * the person to identify the device and offered Windows and macOS.
+     */
+    private suspend fun planEnvironment(): String {
+        val current = container.settings.settings.first()
+        val apps = withContext(Dispatchers.IO) {
+            runCatching { container.packages.installed() }.getOrDefault(emptyList())
+        }
+            .map { it.label.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .sorted()
+            .take(MAX_PLAN_APPS)
+        val hidden = current.screenPath == "auto" || current.screenPath == "background"
+        return buildString {
+            append("This is an Android phone. HOPA acts on it; you write the steps it takes.")
+            append("\n")
+            append(
+                if (hidden) {
+                    "The apps open on a hidden screen on this phone, so the person's own screen stays free."
+                } else {
+                    "The apps open on this phone's screen, with the person watching each tap."
+                },
+            )
+            if (apps.isNotEmpty()) {
+                append("\n")
+                append("Apps on this phone: ")
+                append(apps.joinToString(", "))
+                append(".")
+            }
+            append("\nSteps are actions on this phone: open an app, tap a control by its text, ")
+            append("type, scroll, wait, then check the result.")
+            append("\nDo not say you cannot see the screen, and do not mention a computer, ")
+            append("Windows, macOS or any other device.")
+        }
+    }
+
+    private companion object {
+        /** Enough to name the usual apps without turning the prompt into a list. */
+        const val MAX_PLAN_APPS = 40
     }
 
     /** Everything this client can tell the runner about the screen and the person. */
