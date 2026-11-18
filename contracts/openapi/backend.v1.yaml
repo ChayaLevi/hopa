@@ -81,6 +81,42 @@ paths:
                 properties:
                   version: { type: string }
                   protocol: { type: integer, enum: [1] }
+  /v1/knowledge:
+    get:
+      summary: The versioned knowledge bundle
+      description: |
+        The catalog and prompt tables the app may use without a release. The
+        body is the document reviewed at `contracts/knowledge/knowledge.v1.json`.
+        `version` is a digest; `If-None-Match` with that version answers 304.
+        A paired device token is required.
+      parameters:
+        - name: If-None-Match
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: The bundle
+          headers:
+            ETag:
+              schema: { type: string }
+            Cache-Control:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [schemaVersion, version, catalog, sites, promptRules]
+                properties:
+                  schemaVersion: { type: integer, enum: [1] }
+                  version: { type: string }
+                  catalog: { type: array, items: { type: object } }
+                  sites: { type: array, items: { type: object } }
+                  promptRules: { type: array, items: { type: object } }
+        "304":
+          description: The caller's copy is current
+        "401":
+          description: A paired device token is required
   /v1/pair/sessions:
     post:
       summary: Mint a pairing session and its QR payload
