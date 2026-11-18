@@ -29,30 +29,43 @@ Rules that must hold:
 | 4 | `760154c` | `:turn:ktlintCheck` |
 | 5 | `746e06d` | `hopa.no-android` convention plugin; every `hopa.kotlin-jvm` module runs `checkNoAndroidImports` |
 | 6 | `c5f774b` | ktlint on `contracts` and `stores` (`knowledge` stays out: generated) |
+| 7 | `142ada2` | `TurnRunner` + `TurnRequest`/`TurnOutcome`, `GoalVerifier`, `ModelPlanSource`; the flat parser shape now asks `DecisionRules` too |
 
-Green at `c5f774b`: `:engine:test` (107), `:engine:check`, `:turn:test`,
+Green at `142ada2`: `:engine:test` (108), `:engine:check`, `:turn:test` (20),
 `:turn:check`, `:contracts:check`, `:stores:test`, sidecar `test`, all python
 checks.
 
-## Next: slice 7, `TurnRunner` (no Android)
+## Done: slice 7, `TurnRunner` (no Android)
 
-In `packages/turn`:
+`packages/turn/src/main/kotlin/com/hopa/turn/run/`:
 
-- `run/TurnRequest`: goal, history, memory, skills, settings-ish facts the
-  caller decides to pass, `surfaces: suspend () -> ScreenSourceDevice`,
-  `gate`, `approval`, `recorder`, `clock`, budget/limits.
-- `run/TurnOutcome`: records, answer, checkpoints met, tokens, error, the final
-  observation, and whether the answer came from a recipe (cheap) or the model.
-- `run/TurnRunner`: recipe first (with `Replayer` + `ReplayAnswer`), otherwise
-  `AgentLoop` through the caller's `StepPolicy`; one deadline for the whole turn.
-- `goal/GoalVerifier`: given an `Observation` and the goal's anchors, say which
-  checkpoints hold. Anchors come from `NodeAnchor` keys, not screen hashes:
-  the end hash is evidence, not a gate (window ids change between launches).
+- `TurnRequest` carries what the caller decided to pass: goal, device, ids,
+  history, memory, skills, installed apps, platform, vision, typed functions,
+  `phoneAccess`, checkpoints, `planFirst`/`planApproved`, `replay`, one
+  `timeoutMillis`, and what the surfaces answered (`surfaceName`,
+  `surfaceAvailable`, `surfaceError`).
+- `TurnOutcome` carries answer, records, narration, options, error, usage,
+  pending plan, checkpoint verification, final screen, replay steps, whether a
+  recipe was saved, and the source (`RECIPE`, `MODEL`, `PLAN`, `UNAVAILABLE`).
+- `TurnRunner` is the order the app has always used, written once: plan gate,
+  then an unavailable surface, then a recipe, then `AgentLoop` under one
+  deadline, then the final screen against the checkpoints. Recipe saving is a
+  decision of the runner: clean, something verified, checkpoints met, and every
+  ref step anchored.
+- `goal/GoalVerifier` verifies visible labels or full `NodeAnchor` keys, exactly
+  (not substrings); a hidden label does not count.
+- `plan/ModelPlanSource` holds the planning prompt; `PlanSource` is the port a
+  playbook can implement later.
 
-Tests use fake ports: a fake `DevicePort` whose tree is a list of screens, a
-scripted `StepPolicy`, an in-memory recorder. No Android, no model.
+Tests: `TurnRunnerTest` (9) with fake device/policy/clock and a temp
+`RecipeStore`; `GoalVerifierTest` (5). No Android, no provider.
 
-## Then: slice 8, `RunCoordinator` in app
+Found on the way: `DecisionParser`'s flat `{"kind": ...}` shape bypassed
+`DecisionRules`, so a targetless tap reached the executor and failed there. It
+now validates against the same table; `AgentLoopTest`'s payment fixture gained
+the target the table rightly demands.
+
+## Next: slice 8, `RunCoordinator` in app
 
 - `ChatViewModel` keeps the screen state; `TurnRunner` owns plan-first, recipe
   replay, verify and the answer.
