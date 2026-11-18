@@ -280,6 +280,7 @@ class TurnRunnerTest {
         assertEquals(1, outcome.executed)
         assertEquals(1, outcome.verified)
         assertTrue(outcome.recipeSaved)
+        assertEquals("test", outcome.knowledgeVersion)
         val recipe = store.find("Turn on Wi-Fi")
         assertEquals(1, recipe?.steps?.size)
         assertEquals("TextView|text=wi-fi|id=android:id/title", recipe?.anchorAt(0))

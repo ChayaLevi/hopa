@@ -31,6 +31,11 @@ data class TurnOutcome(
     val replaySteps: List<String> = emptyList(),
     /** True when this turn's steps were stored as a recipe for next time. */
     val recipeSaved: Boolean = false,
+    /**
+     * The knowledge bundle this turn routed with. Two runs are only comparable
+     * when both name it, so the receipt carries it. Empty when nothing acted.
+     */
+    val knowledgeVersion: String = "",
     val millis: Long = 0,
 ) {
     val executed: Int get() = records.count { it.executed }

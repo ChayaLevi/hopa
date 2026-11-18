@@ -134,6 +134,7 @@ class ParallelRunner(
                 tokens = outcome.usage.totalTokens,
                 millis = System.currentTimeMillis() - started,
                 steps = steps,
+                knowledgeVersion = outcome.knowledgeVersion,
             )
             append(conversation.id, answer, proof.takeIf { it.executed > 0 })
             record(goal, conversation.id, steps.size, outcome.usage.totalTokens)

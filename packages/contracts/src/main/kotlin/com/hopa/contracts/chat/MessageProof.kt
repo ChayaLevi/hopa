@@ -16,4 +16,6 @@ data class MessageProof(
     val steps: List<String> = emptyList(),
     /** True when the phone fell back from the hidden screen to the visible one. */
     val fellBack: Boolean = false,
+    /** The knowledge bundle the turn routed with, so two runs are comparable. */
+    val knowledgeVersion: String = "",
 )

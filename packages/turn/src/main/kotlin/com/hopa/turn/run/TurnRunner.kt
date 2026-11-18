@@ -54,6 +54,9 @@ class TurnRunner(
 ) {
     suspend fun run(request: TurnRequest, isCancelled: () -> Boolean = { false }): TurnOutcome {
         val started = clock.nowMillis()
+        // Read once per turn: an accepted bundle applies to the next turn, and the
+        // receipt must name the one this turn actually routed with.
+        val tables = knowledge()
 
         if (request.planFirst && !request.planApproved) {
             return plan(request, started)
@@ -73,10 +76,10 @@ class TurnRunner(
         if (request.replay) {
             val recipe = runCatching { recipes?.find(request.goal) }.getOrNull()
             if (recipe != null) {
-                replay(recipe, request, started)?.let { return it }
+                replay(recipe, request, started, tables)?.let { return it }
             }
         }
-        return fromModel(request, started, isCancelled)
+        return fromModel(request, started, isCancelled, tables)
     }
 
     /** Answers with the steps to approve; the person's yes sends a new request. */
@@ -94,7 +97,7 @@ class TurnRunner(
     }
 
     /** Null when the recipe did not run to the end; the caller uses the model. */
-    private suspend fun replay(recipe: Recipe, request: TurnRequest, started: Long): TurnOutcome? {
+    private suspend fun replay(recipe: Recipe, request: TurnRequest, started: Long, tables: Knowledge): TurnOutcome? {
         val installed = request.installedApps.map { it.packageName }
         val outcome = runCatching {
             Replayer(
@@ -116,6 +119,7 @@ class TurnRunner(
         }
         return TurnOutcome(
             source = TurnSource.RECIPE,
+            knowledgeVersion = tables.version,
             answer = spoken?.first ?: "Repeated the ${outcome.done} steps that worked last time.",
             usage = ModelUsage(totalTokens = spoken?.second ?: 0),
             surfaceName = request.surfaceName,
@@ -125,7 +129,12 @@ class TurnRunner(
         )
     }
 
-    private suspend fun fromModel(request: TurnRequest, started: Long, isCancelled: () -> Boolean): TurnOutcome {
+    private suspend fun fromModel(
+        request: TurnRequest,
+        started: Long,
+        isCancelled: () -> Boolean,
+        tables: Knowledge,
+    ): TurnOutcome {
         val loop = AgentLoop(
             stepPolicy = steps,
             device = request.device,
@@ -133,7 +142,7 @@ class TurnRunner(
             recorder = recorder,
             clock = clock,
             webAvailable = request.webAvailable,
-            knowledge = knowledge(),
+            knowledge = tables,
         )
         val result = withTimeoutOrNull(request.timeoutMillis) {
             loop.run(
@@ -157,6 +166,7 @@ class TurnRunner(
         if (result == null) {
             return TurnOutcome(
                 source = TurnSource.MODEL,
+                knowledgeVersion = tables.version,
                 answer = stoppedAfter(request.timeoutMillis),
                 error = HopaError(ErrorCodes.TIMEOUT, "the turn ran out of time"),
                 surfaceName = request.surfaceName,
@@ -179,6 +189,7 @@ class TurnRunner(
 
         return TurnOutcome(
             source = TurnSource.MODEL,
+            knowledgeVersion = tables.version,
             answer = result.answer,
             records = result.records,
             narration = result.narration,

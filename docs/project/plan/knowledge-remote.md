@@ -50,8 +50,10 @@ one megabyte, and keeps the previous version for rollback.
 
 ## Remaining
 
-- `knowledgeVersion` in the receipt and bench results, so two runs can be
-  compared honestly.
+- **Done - the receipt names the bundle.** `TurnOutcome` carries the knowledge
+  version this turn routed with, `MessageProof` stores it, and the expanded
+  receipt shows it, so two runs can be compared honestly. The bench does not
+  route through the catalog, so it has nothing to name yet.
 - Deploy the backend endpoint; until then the updater gets 401/404 and keeps the
   bootstrap, which is the intended failure path.
 - A signature on the bundle is optional; the loader's digest check is the seam.

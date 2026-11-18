@@ -438,6 +438,7 @@ class ChatViewModel(
                     steps = outcome.replaySteps,
                     fellBack = preferred == ScreenPath.AUTO &&
                         outcome.surfaceName == "accessibility",
+                    knowledgeVersion = outcome.knowledgeVersion,
                 ),
             ),
         )
@@ -515,6 +516,7 @@ class ChatViewModel(
             millis = System.currentTimeMillis() - now,
             steps = steps,
             fellBack = preferred == ScreenPath.AUTO && result.surfaceName == "accessibility",
+            knowledgeVersion = result.knowledgeVersion,
         )
         container.conversations.append(
             conversationId,

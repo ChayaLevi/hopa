@@ -221,6 +221,13 @@ private fun ProofReceipt(
                     fontSize = 11.sp,
                     color = HopaColor.TextHint,
                 )
+                if (proof.knowledgeVersion.isNotBlank()) {
+                    Text(
+                        "Knowledge ${proof.knowledgeVersion.removePrefix("sha256:")}",
+                        fontSize = 11.sp,
+                        color = HopaColor.TextHint,
+                    )
+                }
                 proof.steps.forEach { step ->
                     Text(step, fontSize = 12.sp, color = HopaColor.TextSecondary)
                 }
