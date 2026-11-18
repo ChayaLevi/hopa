@@ -1,4 +1,4 @@
-package com.hopa.app.model
+package com.hopa.app.di
 
 import com.hopa.net.llm.ModelFactory
 import com.hopa.net.llm.ProviderChoice

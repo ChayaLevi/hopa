@@ -1,4 +1,4 @@
-package com.hopa.app.skills
+package com.hopa.app.recipes
 
 import com.hopa.contracts.Action
 import java.io.File

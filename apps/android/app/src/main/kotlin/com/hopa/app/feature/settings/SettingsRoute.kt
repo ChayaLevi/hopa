@@ -30,7 +30,7 @@ fun SettingsRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf("") }
     val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()
-    var recipes by rememberSaveable { mutableStateOf(emptyList<com.hopa.app.skills.Recipe>()) }
+    var recipes by rememberSaveable { mutableStateOf(emptyList<com.hopa.app.recipes.Recipe>()) }
     var history by rememberSaveable {
         mutableStateOf(emptyList<com.hopa.data.database.entity.RunHistoryEntity>())
     }

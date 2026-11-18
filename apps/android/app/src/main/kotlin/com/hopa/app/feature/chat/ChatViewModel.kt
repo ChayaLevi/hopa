@@ -472,7 +472,7 @@ class ChatViewModel(
     ): Boolean {
         val recipe = runCatching { container.recipes.find(body) }.getOrNull() ?: return false
         val replayed = runCatching {
-            com.hopa.app.skills.Replayer(container).replay(recipe, device)
+            com.hopa.app.recipes.Replayer(container).replay(recipe, device)
         }.getOrDefault(0)
         if (replayed != recipe.steps.size) return false
 

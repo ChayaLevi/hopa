@@ -80,7 +80,7 @@ class ParallelRunner(
                 val recipe = runCatching { container.recipes.find(goal) }.getOrNull()
                 if (recipe != null) {
                     val replayed = runCatching {
-                        com.hopa.app.skills.Replayer(container).replay(recipe, device)
+                        com.hopa.app.recipes.Replayer(container).replay(recipe, device)
                     }.getOrDefault(0)
                     if (replayed == recipe.steps.size) {
                         val answer = "Done - repeated the $replayed steps that worked last time."

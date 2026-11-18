@@ -1,4 +1,4 @@
-package com.hopa.app.skills
+package com.hopa.app.recipes
 
 import com.hopa.app.di.AppContainer
 import com.hopa.contracts.ports.DevicePort
