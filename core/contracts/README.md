@@ -29,7 +29,7 @@ shared `Json`, and `ObservationHasher` walks wire types. They are one layer.
 |---|---|---|
 | `approval` | `ApprovalRequest`, `ApprovalGateway`, `PaymentContext`, `RiskLevel`: the question a payment asks | wire |
 | `chat` | `Conversation`, `ChatMessage`, `Attachment`, `AttachmentRules`, `MessageProof`: the client's own chat shapes | - |
-| `turn` | `TurnContext`, `TurnResult`, `ExecutionResult`: a client describes a request without depending on `agent` | model, ports, wire |
+| `turn` | `TurnContext`, `TurnResult`, `ExecutionResult`: a client describes a request without depending on `agent` | error, model, ports, wire |
 
 ## Rules
 
