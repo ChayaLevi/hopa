@@ -49,7 +49,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -238,9 +241,9 @@ fun HopaMascot(
             LaunchedEffect(Unit) {
                 appear.animateTo(1f, tween(durationMillis = 120))
             }
-            val width = sizeDp * 1.45f
-            val body = sizeDp * 0.56f
-            val tail = sizeDp * 0.16f
+            val width = sizeDp * 1.58f
+            val body = sizeDp * 0.60f
+            val tail = sizeDp * 0.17f
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -252,21 +255,31 @@ fun HopaMascot(
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val path = bubbleShape(size.width, size.height, body.toPx(), tail.toPx())
-                    drawPath(path, color = BubbleFill)
+                    drawPath(
+                        path = path,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(BubbleTop, BubbleFill),
+                            endY = body.toPx(),
+                        ),
+                    )
                     drawPath(path, color = BubbleRim, style = Stroke(width = 1.dp.toPx()))
+                }
+                val greeting = buildAnnotatedString {
+                    withStyle(SpanStyle(color = BubbleInk)) { append("Hi, I'm ") }
+                    withStyle(SpanStyle(color = BubbleAccent)) { append("HOPA") }
+                    withStyle(SpanStyle(color = BubbleInk)) { append(" \uD83D\uDC4B") }
                 }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(body)
-                        .padding(horizontal = sizeDp * 0.10f),
+                        .padding(horizontal = sizeDp * 0.09f),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "Hi, I'm HOPA",
-                        color = BubbleInk,
+                        greeting,
                         fontSize = (
-                            sizeDp.value * 0.185f /
+                            sizeDp.value * 0.195f /
                                 LocalDensity.current.fontScale.coerceAtLeast(1f)
                             ).sp,
                         fontWeight = FontWeight.Bold,
@@ -325,9 +338,11 @@ private fun SoftShadow(
  * The speech bubble borrows the plush's own orange, deepened so cream text clears
  * contrast; the accent blue-orange pair used elsewhere is too red next to fur.
  */
-private val BubbleFill = Color(0xFFFFF6EC)
+private val BubbleTop = Color(0xFFFFFBF5)
+private val BubbleFill = Color(0xFFFFEFDD)
 private val BubbleInk = Color(0xFF3A2416)
-private val BubbleRim = Color(0xFFE9D3BF)
+private val BubbleRim = Color(0xFFE6C9B0)
+private val BubbleAccent = Color(0xFFC0662E)
 
 private data class IdleMotion(val float: Float, val breathe: Float)
 
