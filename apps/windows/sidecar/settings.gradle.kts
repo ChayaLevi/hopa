@@ -22,24 +22,24 @@ dependencyResolutionManagement {
 rootProject.name = "hopa-windows-sidecar"
 
 include(":catalog")
-project(":catalog").projectDir = file("../../../packages/catalog")
+project(":catalog").projectDir = file("../../../core/catalog")
 
 include(":contracts")
-project(":contracts").projectDir = file("../../../packages/contracts")
+project(":contracts").projectDir = file("../../../core/contracts")
 include(":codec")
-project(":codec").projectDir = file("../../../packages/codec")
+project(":codec").projectDir = file("../../../core/codec")
 
 include(":observation")
-project(":observation").projectDir = file("../../../packages/observation")
+project(":observation").projectDir = file("../../../core/observation")
 include(":records")
-project(":records").projectDir = file("../../../packages/records")
+project(":records").projectDir = file("../../../core/records")
 include(":prompt")
-project(":prompt").projectDir = file("../../../packages/prompt")
+project(":prompt").projectDir = file("../../../core/prompt")
 include(":agent")
-project(":agent").projectDir = file("../../../packages/agent")
+project(":agent").projectDir = file("../../../core/agent")
 
 include(":providers")
-project(":providers").projectDir = file("../../../packages/providers")
+project(":providers").projectDir = file("../../../core/providers")
 include(":transport")
-project(":transport").projectDir = file("../../../packages/transport")
+project(":transport").projectDir = file("../../../core/transport")
 

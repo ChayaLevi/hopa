@@ -268,7 +268,7 @@ jobs:
           fi
       - name: Core checks and debug APK
         working-directory: apps/android
-        run: ./gradlew :contracts:check :turn:test :routing:ktlintCheck :observation:ktlintCheck :records:ktlintCheck :prompt:ktlintCheck :execution:ktlintCheck :routing:check :observation:check :records:check :prompt:check :execution:check :knowledge:test :providers:test :transport:test :routing:test :observation:test :records:test :prompt:test :execution:test :capabilities:testDebugUnitTest :stores:test :data:testDebugUnitTest :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :capabilities:compileDebugAndroidTestKotlin :app:assembleDebug --no-daemon
+        run: ./gradlew :contracts:check :codec:ktlintCheck :codec:check :codec:test :catalog:test :catalog:check :agent:ktlintCheck :agent:check :agent:test :observation:ktlintCheck :observation:check :records:ktlintCheck :records:check :prompt:ktlintCheck :prompt:check :providers:test :transport:test :observation:test :records:test :prompt:test :capabilities:testDebugUnitTest :stores:test :data:testDebugUnitTest :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :capabilities:compileDebugAndroidTestKotlin :app:assembleDebug --no-daemon
       - name: Windows sidecar tests
         working-directory: apps/android
         run: ./gradlew -p ../windows/sidecar test --no-daemon

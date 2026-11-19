@@ -11,9 +11,9 @@ Rules:
     file, since they carry no behaviour. A plain ``class``, an ``object`` or top
     level functions never share;
   * no ``Utils``/``Helpers``/``Common``/``Manager`` file names;
-  * everything under ``packages/`` (the client engine) imports no ``android.*``
+  * everything under ``core/`` (the client engine) imports no ``android.*``
     or ``androidx.*``;
-  * everything under ``packages/`` stays out of ``com.hopa.capabilities.*``,
+  * everything under ``core/`` stays out of ``com.hopa.capabilities.*``,
     which names the Android platform adapters only;
   * only ``CatalogRoutes`` picks a catalog platform target, so no client can
     read another platform's identifier by accident.
@@ -30,7 +30,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ANDROID = ROOT / "apps" / "android"
-PACKAGES = ROOT / "packages"
+PACKAGES = ROOT / "core"
 BANNED = {"Utils", "Helpers", "Common", "Manager", "Misc"}
 DECL = re.compile(
     r"^(?:public |internal |private |protected )?"
@@ -48,8 +48,8 @@ CONTRACT = re.compile(r"^(?:public |internal )?(?:data |sealed |enum )+(?:class|
 # production code ships.
 TEST_SUPPORT = {
     "com.hopa.contracts.testing",
-    "com.hopa.knowledge.testing",
-    "com.hopa.execution.conformance",
+    "com.hopa.catalog.testing",
+    "com.hopa.agent.conformance",
 }
 
 
@@ -159,7 +159,7 @@ def check() -> list[str]:
                         f"{path.relative_to(ROOT)}: file name does not match {kind} {name}"
                     )
         relative = path.relative_to(ROOT)
-        if path.name != PLATFORM_OWNER and relative.parts[0] in {"packages", "apps"}:
+        if path.name != PLATFORM_OWNER and relative.parts[0] in {"core", "apps"}:
             for number, line in enumerate(text.splitlines(), 1):
                 match = PLATFORM_READ.search(line)
                 if match:
@@ -167,7 +167,7 @@ def check() -> list[str]:
                         f"{relative}:{number}: reads a {match.group(1)} target outside "
                         f"{PLATFORM_OWNER}"
                     )
-        if relative.parts[0] == "packages":
+        if relative.parts[0] == "core":
             for number, line in enumerate(text.splitlines(), 1):
                 stripped = line.strip()
                 if stripped.startswith("import android.") or stripped.startswith("import androidx."):

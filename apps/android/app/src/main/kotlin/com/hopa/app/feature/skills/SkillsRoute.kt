@@ -1,4 +1,4 @@
-package com.hopa.app.feature.recipes
+package com.hopa.app.feature.skills
 
 import android.content.Intent
 import androidx.compose.runtime.Composable

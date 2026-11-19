@@ -15,7 +15,7 @@ def markdown_files() -> list[Path]:
     files = list(ROOT.glob("*.md")) + list((ROOT / "docs").rglob("*.md"))
     files += list((ROOT / "spec").rglob("*.md"))
     files += list((ROOT / "services" / "docs").rglob("*.md"))
-    for area in ("apps", "services", "evals", "tools", "packages"):
+    for area in ("apps", "services", "evals", "tools", "core"):
         files += list((ROOT / area).rglob("README.md"))
     return [
         path

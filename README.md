@@ -287,21 +287,19 @@ and a secret/license scan.
 - `apps/harmony/core/` — the ArkTS core: loop, gate, executor, run records.
 - `apps/harmony/phone/` — the phone app (module `entry`).
 - `apps/harmony/laptop/` — the laptop app (module `laptop`); frozen.
-- `packages/contracts/` — shared wire types, port interfaces, model types and
+- `core/contracts/` — shared wire types, port interfaces, model types and
   approval data classes; no logic, no Android imports.
-- `packages/routing/`, `packages/observation/`, `packages/records/`,
-  `packages/prompt/`, `packages/execution/` - the Kotlin client engine shared
-  by the Android and Windows clients: which app answers, the screen model,
-  run records, the prompt, and the loop with its gate and executor.
-- `packages/turn/`, `packages/providers/`, `packages/transport/`,
-  `packages/knowledge/` - the one turn every client runs, the model
-  adapters, the network clients, and the generated catalog and rules.
+- `core/` - the Kotlin client engine shared by the Android and Windows
+  clients: `contracts` (wire types and ports), `codec` (JSON helpers),
+  `catalog` (the generated app catalogue and the router), `observation` (the
+  screen model), `records` (run history), `prompt`, `agent` (the turn and the
+  loop), `providers` (model adapters) and `transport` (bridge and gateway).
 - `services/bridge/` — the PC companion and bridge: device control, store,
   images, relay.
 - `services/brain/` — the Kotlin reference brain for routing and knowledge.
 - `services/evals/` — the reference loop and HOPA-Bench.
 - `build-logic/` — the Gradle convention plugins that the Android, Windows and
-  backend builds share, since all three include `packages/`.
+  backend builds share, since all three include `core/`.
 - `docs/` — setup, architecture, contracts and the status.
 
 **Links**

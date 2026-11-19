@@ -36,7 +36,7 @@ Three problems motivated this record:
 
 - `build-logic/` holds the Gradle convention plugins (addendum 2026-11-18).
   It is a composite build, not a module: the Android app, the Windows sidecar
-  and the backend each `includeBuild` it, because all three include `packages/`
+  and the backend each `includeBuild` it, because all three include `core/`
   and the module files cannot belong to one of them. It ships nothing.
 
 - **`agent` is a product word**: `apps/harmony/core/agent`, and later
@@ -72,7 +72,7 @@ Three problems motivated this record:
 - **Keep a counts inventory in this ADR.** Rejected: counts rot; they live in the
   plan document instead.
 
-## Addendum 2026-11-14: `packages/` for the client engine
+## Addendum 2026-11-14: `core/` for the client engine
 
 The Kotlin clients (Android now, Windows next) share one client engine, and
 `apps/android/core` was the wrong home: the Windows client would have had to
@@ -80,35 +80,34 @@ import the Android app. The engine moved out of `apps/`:
 
 | Folder | What it holds | Who may import it |
 |---|---|---|
-| `packages/contracts` | shared data types (`Action`, `Observation`, `RunRecord`, `Decision`), port interfaces (`DevicePort`, `ModelPort`, …), `ApprovalRequest`, `ApprovalGateway`, JSON helpers | clients |
-| `packages/routing` | which app answers a goal: the catalog routes | clients |
-| `packages/observation` | the screen model: nodes, anchors, the observer, the screen source | clients |
-| `packages/records` | a run as records, and the chain that links them | clients |
-| `packages/prompt` | the system prompt and its blocks | clients |
-| `packages/execution` | loop, gate logic, parser, decisions, the executor | clients |
-| `packages/transport` | device and backend transport: the PC bridge client and the gateway client (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
-| `packages/providers` | the adapters behind `ModelPort`: provider choice and state, the OpenAI-compatible client, the stub (was `net.llm`) | clients |
-| `packages/knowledge` | generated catalog, policy data and prompt rules, written by the build scripts | clients |
-| `packages/turn` | one turn for every client: goal and checkpoints, recipes, the plan gate and the playbook policy | clients |
+| `core/contracts` | shared data types (`Action`, `Observation`, `RunRecord`, `Decision`), port interfaces (`DevicePort`, `ModelPort`, ...), `ApprovalRequest`, `ApprovalGateway`, `TurnContext`, `TurnResult` | clients |
+| `core/codec` | JSON helpers (`HopaJson`, `CanonicalJson`); the leaf every module may use without taking the vocabulary with it | clients |
+| `core/catalog` | the app catalogue, the approval vocabulary, the prompt rules and the router that walks them (was `knowledge` + `routing`) | clients |
+| `core/observation` | the screen model: nodes, anchors, the observer, the screen source | clients |
+| `core/records` | a run as records, and the chain that links them | clients |
+| `core/prompt` | the system prompt and its blocks | clients |
+| `core/agent` | one turn for every client, the loop, the gate, the executor, decisions, recipes (was `execution` + `turn`) | clients |
+| `core/transport` | device and backend transport: the PC bridge client and the gateway client (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
+| `core/providers` | the adapters behind `ModelPort`: provider choice and state, the OpenAI-compatible client, the demo client (was `net.llm`) | clients |
 
 Dependency chain (one direction only):
 
 ```
-knowledge   (no deps)
-contracts   (no deps)
-routing     → contracts + knowledge
+codec       (no deps)
+contracts   → codec
+catalog     → contracts
 observation → contracts
-records     → contracts
-prompt      → contracts + routing
-execution   → the four above + knowledge
-turn        → contracts + the five engine modules
-net         → contracts
-models      → contracts
+records     → contracts + codec
+prompt      → contracts + catalog
+agent       → contracts + catalog + observation + records + prompt
+transport   → contracts + codec
+providers   → contracts + codec
 ```
 
-`models` and `net` depend on `contracts`, not on `engine`. This keeps them
-decoupled from agent loop changes and reduces HAP/APK size for modules that only
-need data types and port interfaces.
+
+`providers` and `transport` depend on `contracts` and `codec`, not on `agent`.
+This keeps them decoupled from loop changes and reduces HAP/APK size for modules
+that only need data types and port interfaces.
 
 2026-11-18 addendum: `stores` is no longer a shared package. The Windows sidecar
 imported only the chat vocabulary, which now lives in `spec/chat`; the store
@@ -116,18 +115,27 @@ interfaces and their in-memory implementations moved to `apps/android/stores`,
 next to the Room, DataStore and Keystore classes that implement them. The backend
 also dropped an unused `:stores` dependency.
 
-2026-11-18 addendum 2: `net.llm` moved to `packages/providers`. It is the adapter
+2026-11-18 addendum 2: `net.llm` moved to `core/providers`. It is the adapter
 layer behind `ModelPort` and changes with provider APIs, while `net` changes with
 device and backend protocols; both are HTTP clients, and the README now says so
 instead of claiming `net` was the only one.
 
 Rules:
 
-- `packages/` is neither an app nor a service: no UI, no `main`, no Android SDK.
+- `core/` is neither an app nor a service: no UI, no `main`, no Android SDK.
 - `apps/android` and `apps/windows` never import each other; both import
-  `packages/`.
-- `apps/harmony` (ArkTS, frozen) does not use `packages/`; its own kit stays in
+  `core/`.
+- `apps/harmony` (ArkTS, frozen) does not use `core/`; its own kit stays in
   `apps/harmony/app`.
 - The folder is `packages`, not `shared`: `shared/` remains rejected as vague,
   and `libs/` would collide with the Gradle version catalog in this repository.
 - Package names stay `com.hopa.*`; the move changes Gradle paths only.
+
+2026-11-19 addendum: the engine is nine modules under `core/`, and the folder is
+not called `packages/` any more - the name said nothing about purpose.
+`knowledge` and `routing` are `catalog` (the router walks the catalogue it
+loads), `execution` and `turn` are `agent` (the inner loop and the outer turn are
+one path no caller used separately), and the JSON helpers (`HopaJson`,
+`CanonicalJson`) are their own leaf, `codec`. `ObservationHasher` stayed in
+`contracts`: it walks wire types, and `contracts` needs `codec` for
+`RunRecordSerializer`, so moving it would make the two modules import each other.

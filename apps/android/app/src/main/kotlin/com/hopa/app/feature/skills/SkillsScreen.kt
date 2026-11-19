@@ -1,4 +1,4 @@
-package com.hopa.app.feature.recipes
+package com.hopa.app.feature.skills
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

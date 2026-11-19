@@ -13,17 +13,16 @@ apps/android/
 │                  wireless shell, system intents, package inventory
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
-packages/
-|-- routing/       which app answers a goal
+core/
+|-- contracts/     wire types and port interfaces
+|-- codec/         JSON helpers
+|-- catalog/       app catalogue, approval data, router
 |-- observation/   the screen model and the source that feeds it
 |-- records/       a run as records and their chain
 |-- prompt/        the system prompt and its blocks
-|-- execution/     loop, gate, executor, decision parser
-|-- turn/          one turn for every client
+|-- agent/         the turn, the loop, the gate, recipes
 |-- providers/     model adapters
-|-- transport/     bridge and gateway clients
-|-- stores/        store interfaces and session models
-`-- knowledge/     generated catalog, policy data and prompt rules
+`-- transport/     bridge and gateway clients
 ```
 
 `contracts` and the five engine modules have no Android imports, so they are

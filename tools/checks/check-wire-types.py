@@ -18,7 +18,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCES = ("apps", "packages", "services")
+SOURCES = ("apps", "core", "services")
 
 # class -> (schema document, path inside it)
 CLASSES = {
