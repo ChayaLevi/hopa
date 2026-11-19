@@ -10,7 +10,7 @@ commands run on that machine.
 |---|---|---|
 | `session` | `BridgeClient`, `BridgeSession`, `BridgeException`: the socket, its frames and its failure | contracts |
 | `chat` | `ChatTransport`, `BridgeChatTransport`: the chat channel over the session | session |
-| `device` | `AdbDevice`, `BridgeObservation`: the phone as a `DevicePort` - actions out, screen back | session |
+| `device` | `AdbDevice`, `BridgeObservation`: the phone as a `DevicePort` - actions out, screen back | contracts, session |
 
 ## Rules
 
