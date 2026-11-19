@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import com.hopa.app.di.AppContainer
+import com.hopa.app.privacy.TurnLog
 
 @Composable
 fun SettingsRoute(

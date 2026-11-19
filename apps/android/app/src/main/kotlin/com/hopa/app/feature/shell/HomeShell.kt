@@ -10,7 +10,7 @@ import com.hopa.app.di.AppContainer
 import com.hopa.app.feature.history.ActivityRoute
 import com.hopa.app.feature.capabilities.CapabilitiesRoute
 import com.hopa.app.feature.chat.ChatRoute
-import com.hopa.app.feature.conversations.EasyHistoryRoute
+import com.hopa.app.feature.easy.EasyHistoryRoute
 import com.hopa.app.feature.power.PowerHomeRoute
 import com.hopa.stores.AppSettings
 

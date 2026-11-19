@@ -91,7 +91,7 @@
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
         <service
-            android:name=".backend.HopaMessagingService"
+            android:name=".link.push.HopaMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

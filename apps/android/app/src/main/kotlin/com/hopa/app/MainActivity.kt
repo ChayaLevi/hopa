@@ -17,6 +17,9 @@ import com.hopa.app.service.ScreenCaptureRequester
 import com.hopa.app.service.ScreenCaptureService
 import com.hopa.bridge.session.BridgeClient
 import kotlinx.coroutines.launch
+import com.hopa.app.link.session.BackendLaunchName
+import com.hopa.app.navigation.LaunchPairing
+import com.hopa.app.service.AppVisibility
 
 class MainActivity : ComponentActivity() {
     // Screen-capture consent (Android 10 screenshots). Only an Activity can ask;
@@ -150,7 +153,7 @@ class MainActivity : ComponentActivity() {
         // test may pair the backend while leaving the PC bridge untouched.
         val backendName = intent.getStringExtra(EXTRA_BACKEND_NAME)
         if (!backendName.isNullOrBlank()) {
-            com.hopa.app.gateway.BackendLaunchName.value = backendName.trim()
+            com.hopa.app.link.session.BackendLaunchName.value = backendName.trim()
         }
         if (pairBackend) {
             val backendUrl = intent.getStringExtra(EXTRA_BACKEND_URL)

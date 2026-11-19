@@ -72,6 +72,7 @@ import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.contracts.chat.ChatMessage
+import com.hopa.app.runtime.TaskItem
 
 /** Screen access arrives from the service; the banner above the composer. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,8 +102,8 @@ fun ChatScreen(
     onApprovePlan: () -> Unit = {},
     onCancelPlan: () -> Unit = {},
     onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
-    tasks: List<com.hopa.app.tasks.TaskItem> = emptyList(),
-    onOpenTask: (com.hopa.app.tasks.TaskItem) -> Unit = {},
+    tasks: List<com.hopa.app.runtime.TaskItem> = emptyList(),
+    onOpenTask: (com.hopa.app.runtime.TaskItem) -> Unit = {},
     onDismissTask: (String) -> Unit = {},
 ) {
     val messages = state.current?.messages.orEmpty()
