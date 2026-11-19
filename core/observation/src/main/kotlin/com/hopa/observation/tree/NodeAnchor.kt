@@ -1,4 +1,4 @@
-package com.hopa.observation
+package com.hopa.observation.tree
 
 import com.hopa.contracts.wire.ObservationNode
 

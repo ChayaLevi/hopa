@@ -1,4 +1,4 @@
-package com.hopa.observation
+package com.hopa.observation.source
 
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp

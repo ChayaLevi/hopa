@@ -1,4 +1,4 @@
-package com.hopa.observation
+package com.hopa.observation.produce
 
 /** How a run can reach the phone's screen, slowest to fastest by trust. */
 enum class ScreenPath(val wire: String) {

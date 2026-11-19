@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.pairing
 
 /**
  * Why a pairing or refresh call failed. A refusal means the gateway answered

@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
 /**
  * Why one socket ended. Only a `1008 E_AUTH` close earns a refresh; every other

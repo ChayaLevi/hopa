@@ -1,9 +1,10 @@
-package com.hopa.observation
+package com.hopa.observation.produce
 
-import com.hopa.contracts.HopaJson
+import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
+import com.hopa.observation.tree.ObservationLimits
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray

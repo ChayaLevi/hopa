@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.wire
 
 import kotlinx.serialization.json.JsonObject
 

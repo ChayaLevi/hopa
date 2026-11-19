@@ -1,8 +1,6 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
+import com.hopa.backend.pairing.BackendCredentials
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -14,6 +12,9 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class BackendReconnectTest {
     @Test
@@ -63,17 +64,24 @@ class BackendReconnectTest {
     fun `a close that is not an auth close reconnects without refreshing`() = runBlocking {
         val refreshes = AtomicInteger()
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.close(1000, "bye")
-            }
-        }))
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send(helloAck())
-            }
-        }))
-        val client = clientFor(server, refresh = { refreshes.incrementAndGet(); null })
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.close(1000, "bye")
+                }
+            }),
+        )
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send(helloAck())
+                }
+            }),
+        )
+        val client = clientFor(server, refresh = {
+            refreshes.incrementAndGet()
+            null
+        })
         client.start(this)
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
         assertEquals(0, refreshes.get())
@@ -108,15 +116,17 @@ class BackendReconnectTest {
     }
 
     private fun enqueueAuthClose(server: MockWebServer, tokens: MutableList<String>) {
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                tokens += response.request.header("Authorization").orEmpty()
-            }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    tokens += response.request.header("Authorization").orEmpty()
+                }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.close(1008, "E_AUTH")
-            }
-        }))
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.close(1008, "E_AUTH")
+                }
+            }),
+        )
     }
 
     /**
@@ -125,48 +135,48 @@ class BackendReconnectTest {
      * reliable signal that the token must be refreshed.
      */
     private fun enqueueAuthFrame(server: MockWebServer, tokens: MutableList<String>) {
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                tokens += response.request.header("Authorization").orEmpty()
-            }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    tokens += response.request.header("Authorization").orEmpty()
+                }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send(
-                    """{"v":1,"id":"e1","type":"error","ts":1,
-                    "body":{"code":"E_AUTH","message":"unknown or expired token"}}""".trimIndent(),
-                )
-                // Let the frame reach the client before the abrupt close: on the
-                // real gateway the frame is followed by a close that OkHttp
-                // reports as a failure, not a 1008.
-                Thread.sleep(200)
-                webSocket.cancel()
-            }
-        }))
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send(
+                        """{"v":1,"id":"e1","type":"error","ts":1,
+                    "body":{"code":"E_AUTH","message":"unknown or expired token"}}
+                        """.trimIndent(),
+                    )
+                    // Let the frame reach the client before the abrupt close: on the
+                    // real gateway the frame is followed by a close that OkHttp
+                    // reports as a failure, not a 1008.
+                    Thread.sleep(200)
+                    webSocket.cancel()
+                }
+            }),
+        )
     }
 
-    private fun clientFor(
-        server: MockWebServer,
-        refresh: suspend () -> BackendCredentials?,
-    ): BackendClient = BackendClient(
-        credentials = { credentials(server) },
-        pushToken = { "tok" },
-        refresh = refresh,
-        deviceName = "Xiaomi 15T Pro",
-        appVersion = "0.1.0",
-        http = OkHttpClient.Builder().readTimeout(0, TimeUnit.MILLISECONDS).build(),
-    )
-
-    private fun credentials(server: MockWebServer, accessToken: String = "a1"): BackendCredentials =
-        BackendCredentials(
-            deviceId = "dev-1",
-            householdId = "h1",
-            accessToken = accessToken,
-            refreshToken = "r1",
-            expiresAt = "2026-11-16T00:00:00Z",
-            gatewayUrl = server.url("/v1/gateway").toString().replace("http://", "ws://"),
+    private fun clientFor(server: MockWebServer, refresh: suspend () -> BackendCredentials?): BackendClient =
+        BackendClient(
+            credentials = { credentials(server) },
+            pushToken = { "tok" },
+            refresh = refresh,
+            deviceName = "Xiaomi 15T Pro",
+            appVersion = "0.1.0",
+            http = OkHttpClient.Builder().readTimeout(0, TimeUnit.MILLISECONDS).build(),
         )
 
-    private fun helloAck(): String =
-        """{"v":1,"id":"a1","type":"device.hello.ack","ts":1,"to":"dev-1",
-        "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":2,"peers":["dev-2"]}}""".trimIndent()
+    private fun credentials(server: MockWebServer, accessToken: String = "a1"): BackendCredentials = BackendCredentials(
+        deviceId = "dev-1",
+        householdId = "h1",
+        accessToken = accessToken,
+        refreshToken = "r1",
+        expiresAt = "2026-11-16T00:00:00Z",
+        gatewayUrl = server.url("/v1/gateway").toString().replace("http://", "ws://"),
+    )
+
+    private fun helloAck(): String = """{"v":1,"id":"a1","type":"device.hello.ack","ts":1,"to":"dev-1",
+        "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":2,"peers":["dev-2"]}}
+    """.trimIndent()
 }

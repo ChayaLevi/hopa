@@ -1,4 +1,4 @@
-package com.hopa.providers
+package com.hopa.inference.client
 
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest

@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient

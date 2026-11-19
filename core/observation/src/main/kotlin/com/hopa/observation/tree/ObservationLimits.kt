@@ -1,4 +1,4 @@
-package com.hopa.observation
+package com.hopa.observation.tree
 
 /** The numbers from `contracts/observation/limits.v1.json`. */
 data class ObservationLimits(

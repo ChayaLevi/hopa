@@ -1,4 +1,4 @@
-package com.hopa.providers
+package com.hopa.inference.choice
 
 /**
  * One decision for every reader of the model settings: the factory that builds

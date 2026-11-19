@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.wire
 
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -10,8 +10,15 @@ import org.junit.jupiter.api.Test
 class BackendCodecTest {
     @Test
     fun `round trip keeps the fields and drops nothing`() {
-        val frame = BackendEnvelope(id = "i1", type = "task.ack", ts = 5, trace = "t1", to = "d2", task = "k1",
-            body = buildJsonObject { put("state", "delivered") })
+        val frame = BackendEnvelope(
+            id = "i1",
+            type = "task.ack",
+            ts = 5,
+            trace = "t1",
+            to = "d2",
+            task = "k1",
+            body = buildJsonObject { put("state", "delivered") },
+        )
         val decoded = BackendCodec.decodeOrNull(BackendCodec.encode(frame))!!
         assertEquals(frame, decoded)
     }

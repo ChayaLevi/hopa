@@ -1,4 +1,4 @@
-package com.hopa.providers
+package com.hopa.inference.choice
 
 enum class ProviderState {
     CLOUD,

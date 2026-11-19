@@ -1,8 +1,6 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.pairing
 
-import com.hopa.contracts.HopaJson
-import java.io.IOException
-import java.util.concurrent.TimeUnit
+import com.hopa.contracts.json.HopaJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -15,6 +13,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
  * The unauthenticated half of the backend: trade a pairing session for device
@@ -27,12 +27,7 @@ class BackendPairing(
 ) {
     private val base = BackendUrls.httpBase(gatewayUrl)
 
-    suspend fun claim(
-        link: PairingLink,
-        name: String,
-        publicKey: String,
-        pushToken: String?,
-    ): BackendCredentials {
+    suspend fun claim(link: PairingLink, name: String, publicKey: String, pushToken: String?): BackendCredentials {
         val body = buildJsonObject {
             put("session", link.session)
             put("platform", "android")

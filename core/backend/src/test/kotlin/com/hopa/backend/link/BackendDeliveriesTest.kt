@@ -1,7 +1,8 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
+import com.hopa.backend.pairing.BackendCredentials
+import com.hopa.backend.wire.BackendEnvelope
+import com.hopa.backend.wire.BackendReplies
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -22,6 +23,8 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class BackendDeliveriesTest {
     @Test
@@ -29,19 +32,24 @@ class BackendDeliveriesTest {
         val received = CompletableDeferred<BackendEnvelope>()
         val acked = CompletableDeferred<JsonObject>()
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                webSocket.send(helloAck(id = "a1", queued = 1))
-                webSocket.send(delivery())
-            }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    webSocket.send(helloAck(id = "a1", queued = 1))
+                    webSocket.send(delivery())
+                }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                val frame = Json.decodeFromString<JsonObject>(text)
-                if (frame["type"]!!.jsonPrimitive.content == "task.ack") runBlocking { acked.complete(frame) }
-            }
-        }))
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    val frame = Json.decodeFromString<JsonObject>(text)
+                    if (frame["type"]!!.jsonPrimitive.content == "task.ack") runBlocking { acked.complete(frame) }
+                }
+            }),
+        )
         val client = clientFor(server)
-        client.onTask = { task -> received.complete(task); client.ack(task) }
+        client.onTask = { task ->
+            received.complete(task)
+            client.ack(task)
+        }
         client.start(this)
         val frame = withTimeout(5_000) { received.await() }
         assertEquals("open settings", frame.body["goal"]!!.jsonPrimitive.content)
@@ -59,17 +67,19 @@ class BackendDeliveriesTest {
     fun `a caller holding only a BackendLink can ack a delivery`() = runBlocking {
         val acked = CompletableDeferred<JsonObject>()
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                webSocket.send(helloAck(id = "a1", queued = 1))
-                webSocket.send(delivery())
-            }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    webSocket.send(helloAck(id = "a1", queued = 1))
+                    webSocket.send(delivery())
+                }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                val frame = Json.decodeFromString<JsonObject>(text)
-                if (frame["type"]!!.jsonPrimitive.content == "task.ack") runBlocking { acked.complete(frame) }
-            }
-        }))
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    val frame = Json.decodeFromString<JsonObject>(text)
+                    if (frame["type"]!!.jsonPrimitive.content == "task.ack") runBlocking { acked.complete(frame) }
+                }
+            }),
+        )
         // The static type is the interface on purpose: Task 7's session and
         // Task 9's runner hold a BackendLink and must ack without a cast.
         val link: BackendLink = clientFor(server)
@@ -87,23 +97,28 @@ class BackendDeliveriesTest {
     fun `a frame that is not a task create is never handed to onTask`() = runBlocking {
         val calls = AtomicInteger()
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send(
-                    """{"v":1,"id":"m1","type":"task.needs_approval","ts":2,"from":"dev-9","to":"dev-1",
-                    "task":"task-1","body":{"goal":"open settings"}}""".trimIndent()
-                )
-                webSocket.send(
-                    """{"v":1,"id":"m2","type":"task.ack","ts":3,"from":"dev-1","to":"dev-9",
-                    "task":"task-2","body":{"state":"delivered"}}""".trimIndent()
-                )
-                webSocket.send(
-                    """{"v":1,"id":"m3","type":"task.result","ts":4,"from":"dev-1","to":"dev-9",
-                    "task":"task-3","body":{"summary":"done"}}""".trimIndent()
-                )
-                webSocket.send(helloAck(id = "a1", queued = 1))
-            }
-        }))
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send(
+                        """{"v":1,"id":"m1","type":"task.needs_approval","ts":2,"from":"dev-9","to":"dev-1",
+                    "task":"task-1","body":{"goal":"open settings"}}
+                        """.trimIndent(),
+                    )
+                    webSocket.send(
+                        """{"v":1,"id":"m2","type":"task.ack","ts":3,"from":"dev-1","to":"dev-9",
+                    "task":"task-2","body":{"state":"delivered"}}
+                        """.trimIndent(),
+                    )
+                    webSocket.send(
+                        """{"v":1,"id":"m3","type":"task.result","ts":4,"from":"dev-1","to":"dev-9",
+                    "task":"task-3","body":{"summary":"done"}}
+                        """.trimIndent(),
+                    )
+                    webSocket.send(helloAck(id = "a1", queued = 1))
+                }
+            }),
+        )
         val client = clientFor(server)
         client.onTask = { calls.incrementAndGet() }
         client.start(this)
@@ -119,15 +134,20 @@ class BackendDeliveriesTest {
         val gate = CompletableDeferred<Unit>()
         val handled = CompletableDeferred<Unit>()
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send(helloAck(id = "a1", queued = 2))
-                webSocket.send(delivery())
-                webSocket.send(helloAck(id = "a2", queued = 7))
-            }
-        }))
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send(helloAck(id = "a1", queued = 2))
+                    webSocket.send(delivery())
+                    webSocket.send(helloAck(id = "a2", queued = 7))
+                }
+            }),
+        )
         val client = clientFor(server)
-        client.onTask = { gate.await(); handled.complete(Unit) }
+        client.onTask = {
+            gate.await()
+            handled.complete(Unit)
+        }
         client.start(this)
         // The second ack is only read if the delivery above it did not block
         // the reader while the handler waited on the gate.
@@ -143,15 +163,17 @@ class BackendDeliveriesTest {
     @Test
     fun `ping completes when the server answers pong`() = runBlocking {
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                val frame = Json.decodeFromString<JsonObject>(text)
-                when (frame["type"]!!.jsonPrimitive.content) {
-                    "ping" -> webSocket.send("""{"v":1,"id":"p1","type":"pong","ts":2,"to":"dev-1"}""")
-                    else -> webSocket.send(helloAck(id = "a1", queued = 0))
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    val frame = Json.decodeFromString<JsonObject>(text)
+                    when (frame["type"]!!.jsonPrimitive.content) {
+                        "ping" -> webSocket.send("""{"v":1,"id":"p1","type":"pong","ts":2,"to":"dev-1"}""")
+                        else -> webSocket.send(helloAck(id = "a1", queued = 0))
+                    }
                 }
-            }
-        }))
+            }),
+        )
         val client = clientFor(server)
         client.start(this)
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
@@ -164,21 +186,26 @@ class BackendDeliveriesTest {
     fun `an inbound ping is answered with a pong under the ping`() = runBlocking {
         val answered = CompletableDeferred<JsonObject>()
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                val frame = Json.decodeFromString<JsonObject>(text)
-                when (frame["type"]!!.jsonPrimitive.content) {
-                    "device.hello" -> {
-                        webSocket.send(helloAck(id = "a1", queued = 0))
-                        webSocket.send(
-                            """{"v":1,"id":"q1","type":"ping","ts":2,"from":"dev-9","trace":"$TRACE"}""".trimIndent()
-                        )
-                    }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    val frame = Json.decodeFromString<JsonObject>(text)
+                    when (frame["type"]!!.jsonPrimitive.content) {
+                        "device.hello" -> {
+                            webSocket.send(helloAck(id = "a1", queued = 0))
+                            webSocket.send(
+                                (
+                                    "{\"v\":1,\"id\":\"q1\",\"type\":\"ping\",\"ts\":2," +
+                                        "\"from\":\"dev-9\",\"trace\":\"$TRACE\"}"
+                                    ).trimIndent(),
+                            )
+                        }
 
-                    "pong" -> runBlocking { answered.complete(frame) }
+                        "pong" -> runBlocking { answered.complete(frame) }
+                    }
                 }
-            }
-        }))
+            }),
+        )
         val client = clientFor(server)
         client.start(this)
         val pong = withTimeout(5_000) { answered.await() }
@@ -218,27 +245,31 @@ class BackendDeliveriesTest {
         val released = CompletableDeferred<Unit>()
         val acked = CompletableDeferred<JsonObject>()
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                webSocket.send(helloAck(id = "a1", queued = 1))
-                webSocket.send(delivery())
-                Thread {
-                    Thread.sleep(200)
-                    webSocket.close(1000, "bye")
-                }.start()
-            }
-        }))
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                webSocket.send(helloAck(id = "a2", queued = 0))
-                reconnected.complete(Unit)
-            }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    webSocket.send(helloAck(id = "a1", queued = 1))
+                    webSocket.send(delivery())
+                    Thread {
+                        Thread.sleep(200)
+                        webSocket.close(1000, "bye")
+                    }.start()
+                }
+            }),
+        )
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    webSocket.send(helloAck(id = "a2", queued = 0))
+                    reconnected.complete(Unit)
+                }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                val frame = Json.decodeFromString<JsonObject>(text)
-                if (frame["type"]!!.jsonPrimitive.content == "task.ack") acked.complete(frame)
-            }
-        }))
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    val frame = Json.decodeFromString<JsonObject>(text)
+                    if (frame["type"]!!.jsonPrimitive.content == "task.ack") acked.complete(frame)
+                }
+            }),
+        )
         val client = clientFor(server)
         client.onTask = { task ->
             started.complete(Unit)
@@ -289,10 +320,12 @@ class BackendDeliveriesTest {
 
     private fun helloAck(id: String, queued: Int): String =
         """{"v":1,"id":"$id","type":"device.hello.ack","ts":1,"to":"dev-1",
-        "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":$queued,"peers":["dev-2"]}}""".trimIndent()
+        "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":$queued,"peers":["dev-2"]}}
+        """.trimIndent()
 
     private fun delivery(): String = """{"v":1,"id":"m1","type":"task.create","ts":2,"from":"dev-9","to":"dev-1",
-        "task":"task-1","trace":"$TRACE","body":{"goal":"open settings"}}""".trimIndent()
+        "task":"task-1","trace":"$TRACE","body":{"goal":"open settings"}}
+    """.trimIndent()
 
     private fun deliveryFrame(): BackendEnvelope = BackendEnvelope(
         id = "m1",

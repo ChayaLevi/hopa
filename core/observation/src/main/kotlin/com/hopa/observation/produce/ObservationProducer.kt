@@ -1,8 +1,9 @@
-package com.hopa.observation
+package com.hopa.observation.produce
 
-import com.hopa.contracts.ObservationHasher
+import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
+import com.hopa.observation.tree.ObservationLimits
 
 /**
  * Turns a raw screen tree into the observation the contract describes: refs in

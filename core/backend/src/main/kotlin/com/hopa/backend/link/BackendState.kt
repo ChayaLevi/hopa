@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
 /**
  * What the app shows about the gateway link. [Live] is only entered after a

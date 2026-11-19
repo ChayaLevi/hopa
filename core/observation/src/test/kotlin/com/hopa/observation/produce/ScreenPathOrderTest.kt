@@ -1,4 +1,4 @@
-package com.hopa.observation
+package com.hopa.observation.produce
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

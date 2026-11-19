@@ -1,9 +1,9 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.wire
 
-import java.util.UUID
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.util.UUID
 
 /**
  * Builds the frames a device sends back for one delivered task. Every reply
@@ -46,19 +46,15 @@ object BackendReplies {
         },
     )
 
-    private fun reply(
-        delivery: BackendEnvelope,
-        deviceId: String,
-        type: String,
-        body: JsonObject,
-    ): BackendEnvelope = BackendEnvelope(
-        id = UUID.randomUUID().toString(),
-        type = type,
-        ts = System.currentTimeMillis(),
-        trace = delivery.trace,
-        from = deviceId,
-        to = requireNotNull(delivery.from) { "a delivered task must name its sender" },
-        task = requireNotNull(delivery.task) { "a delivered task must carry its id" },
-        body = body,
-    )
+    private fun reply(delivery: BackendEnvelope, deviceId: String, type: String, body: JsonObject): BackendEnvelope =
+        BackendEnvelope(
+            id = UUID.randomUUID().toString(),
+            type = type,
+            ts = System.currentTimeMillis(),
+            trace = delivery.trace,
+            from = deviceId,
+            to = requireNotNull(delivery.from) { "a delivered task must name its sender" },
+            task = requireNotNull(delivery.task) { "a delivered task must carry its id" },
+            body = body,
+        )
 }

@@ -1,4 +1,4 @@
-package com.hopa.providers
+package com.hopa.inference.choice
 
 /**
  * The state a screen shows. It is derived from the same [ProviderChoiceRules]

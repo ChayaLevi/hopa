@@ -1,7 +1,9 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
-import java.util.UUID
-import java.util.concurrent.TimeUnit
+import com.hopa.backend.pairing.BackendCredentials
+import com.hopa.backend.pairing.BackendPairingFailure
+import com.hopa.backend.wire.BackendCodec
+import com.hopa.backend.wire.BackendEnvelope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -25,6 +27,8 @@ import kotlinx.serialization.json.put
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 /**
  * Holds one `/v1/gateway` WebSocket: bearer token in the handshake header,
@@ -66,6 +70,7 @@ class BackendClient(
 
     @Volatile
     private var socket: WebSocket? = null
+
     @Volatile
     private var deviceId: String = ""
 
@@ -130,12 +135,15 @@ class BackendClient(
     override suspend fun ack(task: BackendEnvelope) {
         send(
             BackendEnvelope(
-                id = UUID.randomUUID().toString(), type = "task.ack", ts = System.currentTimeMillis(),
-                trace = task.trace, from = deviceId.ifBlank { null },
+                id = UUID.randomUUID().toString(),
+                type = "task.ack",
+                ts = System.currentTimeMillis(),
+                trace = task.trace,
+                from = deviceId.ifBlank { null },
                 to = requireNotNull(task.from) { "a delivered task must name its sender" },
                 task = requireNotNull(task.task) { "a delivered task must carry its id" },
                 body = buildJsonObject { put("state", "delivered") },
-            )
+            ),
         )
     }
 
@@ -198,8 +206,11 @@ class BackendClient(
      */
     private fun answerPing(webSocket: WebSocket, ping: BackendEnvelope) {
         val pong = BackendEnvelope(
-            id = UUID.randomUUID().toString(), type = "pong", ts = System.currentTimeMillis(),
-            trace = ping.trace, to = ping.from,
+            id = UUID.randomUUID().toString(),
+            type = "pong",
+            ts = System.currentTimeMillis(),
+            trace = ping.trace,
+            to = ping.from,
         )
         webSocket.send(BackendCodec.encode(pong))
     }
@@ -231,8 +242,7 @@ class BackendClient(
         const val HELLO_ACK_TIMEOUT_MS = 15_000L
 
         /** 1/2/4/8 s doubling, capped at 30 s. */
-        internal fun backoffMs(attempt: Int): Long =
-            minOf(1_000L shl attempt.coerceIn(0, 5), MAX_BACKOFF_MS)
+        internal fun backoffMs(attempt: Int): Long = minOf(1_000L shl attempt.coerceIn(0, 5), MAX_BACKOFF_MS)
 
         /** 15 s to connect, no read timeout: the gateway's pings keep it alive. */
         fun defaultHttp(): OkHttpClient = OkHttpClient.Builder()

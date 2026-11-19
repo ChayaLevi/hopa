@@ -1,5 +1,7 @@
-package com.hopa.providers
+package com.hopa.inference.choice
 
+import com.hopa.inference.client.DemoModelClient
+import com.hopa.inference.client.ModelFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -1,6 +1,8 @@
-package com.hopa.providers
+package com.hopa.inference.client
 
 import com.hopa.contracts.model.ModelPort
+import com.hopa.inference.choice.ProviderChoice
+import com.hopa.inference.choice.ProviderChoiceRules
 
 class ModelFactory(
     private val rules: ProviderChoiceRules = ProviderChoiceRules(),

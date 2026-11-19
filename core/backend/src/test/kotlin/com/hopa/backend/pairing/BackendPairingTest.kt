@@ -1,9 +1,5 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.pairing
 
-import java.security.KeyFactory
-import java.security.PublicKey
-import java.security.spec.PKCS8EncodedKeySpec
-import java.util.Base64
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -12,6 +8,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.spec.PKCS8EncodedKeySpec
+import java.util.Base64
 
 class BackendPairingTest {
     @Test
@@ -261,8 +261,7 @@ class BackendPairingTest {
 
     /** MockWebServer speaks plain HTTP, so the socket scheme is `ws`; the
      *  `wss` to `https` mapping is pinned by PairingLinksTest. */
-    private fun gateway(server: MockWebServer) =
-        "ws://${server.hostName}:${server.port}/v1/gateway"
+    private fun gateway(server: MockWebServer) = "ws://${server.hostName}:${server.port}/v1/gateway"
 
     private companion object {
         /** X.509 SubjectPublicKeyInfo header for X25519, OID 1.3.101.110. */

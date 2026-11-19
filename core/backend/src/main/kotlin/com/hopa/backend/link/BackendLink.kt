@@ -1,5 +1,7 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
+import com.hopa.backend.wire.BackendEnvelope
+import com.hopa.backend.wire.BackendReplies
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 

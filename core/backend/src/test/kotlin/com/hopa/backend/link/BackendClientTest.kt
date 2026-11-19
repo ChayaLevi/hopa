@@ -1,7 +1,6 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
+import com.hopa.backend.pairing.BackendCredentials
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -22,21 +21,26 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class BackendClientTest {
     @Test
     fun `hello is answered and the client goes live`() = runBlocking {
         val server = MockWebServer()
         val seen = CompletableDeferred<JsonObject>()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                runBlocking { seen.complete(Json.decodeFromString<JsonObject>(text)) }
-                webSocket.send(
-                    """{"v":1,"id":"a1","type":"device.hello.ack","ts":1,"to":"dev-1",
-                    "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":2,"peers":["dev-2"]}}""".trimIndent()
-                )
-            }
-        }))
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    runBlocking { seen.complete(Json.decodeFromString<JsonObject>(text)) }
+                    webSocket.send(
+                        """{"v":1,"id":"a1","type":"device.hello.ack","ts":1,"to":"dev-1",
+                    "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":2,"peers":["dev-2"]}}
+                        """.trimIndent(),
+                    )
+                }
+            }),
+        )
         val client = clientFor(server)
         client.start(this)
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
@@ -51,15 +55,17 @@ class BackendClientTest {
     fun `the access token travels in the authorization header, never the URL`() = runBlocking {
         val server = MockWebServer()
         val handshake = CompletableDeferred<Request>()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                handshake.complete(webSocket.request())
-            }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    handshake.complete(webSocket.request())
+                }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send(helloAck())
-            }
-        }))
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send(helloAck())
+                }
+            }),
+        )
         val client = clientFor(server)
         client.start(this)
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
@@ -73,12 +79,14 @@ class BackendClientTest {
     @Test
     fun `a malformed frame does not close the socket`() = runBlocking {
         val server = MockWebServer()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send("not json")
-                webSocket.send(helloAck())
-            }
-        }))
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send("not json")
+                    webSocket.send(helloAck())
+                }
+            }),
+        )
         val client = clientFor(server)
         client.start(this)
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
@@ -91,20 +99,22 @@ class BackendClientTest {
     fun `a frame that arrives after stop cannot go live again`() = runBlocking {
         val server = MockWebServer()
         val peer = CompletableDeferred<WebSocket>()
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                peer.complete(webSocket)
-            }
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : WebSocketListener() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    peer.complete(webSocket)
+                }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send(helloAck())
-            }
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send(helloAck())
+                }
 
-            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                // Withhold the close reply so the peer stays readable: a frame
-                // sent below must reach the client after stop() has completed.
-            }
-        }))
+                override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                    // Withhold the close reply so the peer stays readable: a frame
+                    // sent below must reach the client after stop() has completed.
+                }
+            }),
+        )
         val client = clientFor(server)
         client.start(this)
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
@@ -126,16 +136,20 @@ class BackendClientTest {
         val opened = AtomicInteger()
         // The first connection stays silent. The second one acks, so reaching
         // Live proves the timeout closed the first socket and the loop retried.
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                opened.incrementAndGet()
-            }
-        }))
-        server.enqueue(MockResponse().withWebSocketUpgrade(object : FakeGateway() {
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                webSocket.send(helloAck())
-            }
-        }))
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    opened.incrementAndGet()
+                }
+            }),
+        )
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    webSocket.send(helloAck())
+                }
+            }),
+        )
         val client = clientFor(server, handshakeTimeoutMs = 100)
         client.start(this)
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
@@ -174,11 +188,11 @@ class BackendClientTest {
         gatewayUrl = server.url("/v1/gateway").toString().replace("http://", "ws://"),
     )
 
-    private fun helloAck(): String =
-        """{"v":1,"id":"a1","type":"device.hello.ack","ts":1,"to":"dev-1",
-        "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":2,"peers":["dev-2"]}}""".trimIndent()
+    private fun helloAck(): String = """{"v":1,"id":"a1","type":"device.hello.ack","ts":1,"to":"dev-1",
+        "body":{"session":"s","serverTime":1,"heartbeatSec":25,"queued":2,"peers":["dev-2"]}}
+    """.trimIndent()
 
-    private fun lateHelloAck(): String =
-        """{"v":1,"id":"a2","type":"device.hello.ack","ts":2,"to":"dev-9",
-        "body":{"session":"s2","serverTime":2,"heartbeatSec":25,"queued":9,"peers":[]}}""".trimIndent()
+    private fun lateHelloAck(): String = """{"v":1,"id":"a2","type":"device.hello.ack","ts":2,"to":"dev-9",
+        "body":{"session":"s2","serverTime":2,"heartbeatSec":25,"queued":9,"peers":[]}}
+    """.trimIndent()
 }

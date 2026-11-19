@@ -1,6 +1,7 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
-import java.util.concurrent.atomic.AtomicBoolean
+import com.hopa.backend.wire.BackendCodec
+import com.hopa.backend.wire.BackendEnvelope
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -11,6 +12,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * One socket's listener, with its own liveness flag so the handshake never
@@ -30,8 +32,10 @@ internal class BackendListener(
     private val onFrame: (BackendEnvelope, WebSocket) -> Unit,
 ) : WebSocketListener() {
     private val active = AtomicBoolean(true)
+
     @Volatile
     private var handshake: Job? = null
+
     @Volatile
     private var acked = false
 

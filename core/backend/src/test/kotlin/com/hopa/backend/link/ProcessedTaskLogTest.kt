@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.link
 
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -49,7 +49,10 @@ class ProcessedTaskLogTest {
         var saves = 0
         val log = ProcessedTaskLog(
             load = { stored },
-            save = { stored = it; saves += 1 },
+            save = {
+                stored = it
+                saves += 1
+            },
             now = { 1_000 },
         )
 

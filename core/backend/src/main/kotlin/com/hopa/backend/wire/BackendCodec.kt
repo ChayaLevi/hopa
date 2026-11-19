@@ -1,7 +1,6 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.wire
 
-import com.hopa.contracts.HopaJson
-import java.util.UUID
+import com.hopa.contracts.json.HopaJson
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -10,6 +9,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
+import java.util.UUID
 
 /**
  * Encodes and decodes the v1 gateway envelope. Unknown fields are ignored on

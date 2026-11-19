@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.pairing
 
 /**
  * The three values a pairing QR carries: the household it joins, the

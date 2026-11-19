@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.pairing
 
 import java.net.URI
 

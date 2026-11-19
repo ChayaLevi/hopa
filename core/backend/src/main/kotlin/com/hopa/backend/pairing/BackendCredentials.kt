@@ -1,4 +1,4 @@
-package com.hopa.transport.gateway
+package com.hopa.backend.pairing
 
 /**
  * What a claimed pairing leaves the phone with. The gateway URL travels with
