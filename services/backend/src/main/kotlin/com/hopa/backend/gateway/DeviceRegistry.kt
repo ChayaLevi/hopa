@@ -14,6 +14,11 @@ class DeviceRegistry {
     data class Session(
         val identity: DeviceIdentity,
         val outgoing: Channel<String>,
+        /**
+         * Task ids already sent on this socket. A reconnect creates a new
+         * session, so a task the client never acked is still redelivered.
+         */
+        val sent: MutableSet<String> = ConcurrentHashMap.newKeySet(),
     )
 
     private val sessions = ConcurrentHashMap<String, Session>()

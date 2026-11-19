@@ -1,4 +1,4 @@
-﻿package com.hopa.backend.tools
+package com.hopa.backend.tools
 
 import com.hopa.backend.harness.FakeDevice
 import com.hopa.backend.harness.bodyString
@@ -17,6 +17,13 @@ import kotlinx.serialization.json.put
  * the server under one trace, and arrived at the target.
  */
 object ExitRun {
+    /**
+     * How long one frame may take. CI runners share a machine, and a 15 s wait
+     * timed out on a single ack under load; 60 s still bounds a hung test
+     * without failing a slow runner.
+     */
+    private const val FRAME_TIMEOUT_MS = 60_000L
+
     fun run(url: String, tokenA: String, tokenB: String, rounds: Int = 20): List<String> =
         runBlocking {
             val http = HttpClient(CIO) { install(WebSockets) }
@@ -37,11 +44,11 @@ object ExitRun {
                     val receiverId = if (aSends) idB else idA
 
                     sender.send(create(receiverId, UUID.randomUUID().toString()))
-                    val accepted = sender.expect("task.ack", 15_000)
+                    val accepted = sender.expect("task.ack", FRAME_TIMEOUT_MS)
                     val taskId = accepted.bodyString("task")
                         ?: error("round ${round + 1}: the ack carried no task")
 
-                    val delivered = receiver.expect("task.create", 15_000)
+                    val delivered = receiver.expect("task.create", FRAME_TIMEOUT_MS)
                     check(delivered.task == taskId) {
                         "round ${round + 1}: delivered ${delivered.task}, expected $taskId"
                     }
@@ -61,11 +68,11 @@ object ExitRun {
                             body = buildJsonObject { put("state", "delivered") },
                         ),
                     )
-                    val relayed = sender.expect("task.ack", 15_000)
+                    val relayed = sender.expect("task.ack", FRAME_TIMEOUT_MS)
                     check(relayed.task == taskId) {
                         "round ${round + 1}: relayed ack carried ${relayed.task}, expected $taskId"
                     }
-                    receiver.expect("task.ack", 15_000)
+                    receiver.expect("task.ack", FRAME_TIMEOUT_MS)
 
                     traces += accepted.trace ?: error("round ${round + 1}: the ack carried no trace")
                 }
@@ -89,7 +96,7 @@ object ExitRun {
                 },
             ),
         )
-        return device.expect("device.hello.ack", 15_000).to
+        return device.expect("device.hello.ack", FRAME_TIMEOUT_MS).to
             ?: error("the hello ack carried no device id")
     }
 
