@@ -1,10 +1,11 @@
-package com.hopa.app.feature.settings
+﻿package com.hopa.app.feature.settings
 
-import com.hopa.app.di.AppContainer
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.inference.choice.ProviderState
 import com.hopa.inference.choice.ProviderStateResolver
+import com.hopa.inference.client.ModelFactory
+import com.hopa.stores.SettingsRepository
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
@@ -15,19 +16,20 @@ import kotlinx.coroutines.withTimeout
  * copies the result into it.
  */
 internal class ModelSettings(
-    private val container: AppContainer,
+    private val settings: SettingsRepository,
+    private val models: ModelFactory,
 ) {
     private val resolver = ProviderStateResolver()
 
     suspend fun snapshot(): ModelSnapshot {
-        val settings = container.settings.settings.first()
-        val key = container.settings.modelKey()
-        val keySaved = container.settings.hasModelKey()
+        val current = settings.settings.first()
+        val key = settings.modelKey()
+        val keySaved = settings.hasModelKey()
         return ModelSnapshot(
-            settings = settings,
+            settings = current,
             key = key,
             keySaved = keySaved,
-            providerState = resolver.resolve(settings.provider, settings.endpoint, key),
+            providerState = resolver.resolve(current.provider, current.endpoint, key),
             error = if (keySaved && key.isBlank()) {
                 "The saved key cannot be read on this phone; paste it again"
             } else {
@@ -60,7 +62,7 @@ internal class ModelSettings(
                 if (trimmedEndpoint.startsWith("http://")) "lan" else "openai"
             else -> trimmedProvider
         }
-        container.settings.update {
+        settings.update {
             it.copy(
                 provider = effectiveProvider,
                 endpoint = trimmedEndpoint,
@@ -72,12 +74,12 @@ internal class ModelSettings(
             )
         }
         if (key.isNotBlank()) {
-            container.settings.setModelKey(key.trim())
+            settings.setModelKey(key.trim())
         }
         if (bridgeKey.isNotBlank()) {
-            container.settings.setBridgeToken(bridgeKey.trim())
+            settings.setBridgeToken(bridgeKey.trim())
         }
-        if (key.isNotBlank() && container.settings.modelKey().isBlank()) {
+        if (key.isNotBlank() && settings.modelKey().isBlank()) {
             throw IOException("the key did not reach the Keystore")
         }
         return if (effectiveProvider != trimmedProvider) {
@@ -104,14 +106,14 @@ internal class ModelSettings(
     ): ModelTestResult {
         val message = runCatching {
             save(provider, endpoint, model, key, notifyAnswers, webEnabled, bridgeUrl, bridgeKey, useBridge)
-            val current = container.settings.settings.first()
-            val storedKey = container.settings.modelKey()
+            val current = settings.settings.first()
+            val storedKey = settings.modelKey()
             val state = ProviderStateResolver()
                 .resolve(current.provider, current.endpoint, storedKey)
             if (state == ProviderState.DEMO) {
                 throw IOException("no key is stored, so this is still the demo model")
             }
-            val client = container.modelFactory.create(
+            val client = models.create(
                 provider = current.provider,
                 endpoint = current.endpoint,
                 apiKey = storedKey,

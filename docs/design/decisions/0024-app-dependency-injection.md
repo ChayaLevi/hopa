@@ -34,5 +34,8 @@ factory. That is a separate project, not a line item in a packaging refactor.
   screen receives.
 - If Hilt is adopted later, the narrow containers map to modules and bindings;
   the ViewModels do not need to change shape.
+- First slice: `ModelSettings` takes `SettingsRepository` and `ModelFactory`, and
+  `PreferencesSettings` takes `SettingsRepository`, so both are tested against a
+  fake instead of the whole container.
 - This decision does not block the type-safe navigation or the Gradle
   modularisation work.
