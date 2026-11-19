@@ -28,7 +28,7 @@ shared `Json`, and `ObservationHasher` walks wire types. They are one layer.
 | package | what lives here | depends on |
 |---|---|---|
 | `approval` | `ApprovalRequest`, `ApprovalGateway`, `PaymentContext`, `RiskLevel`: the question a payment asks | wire |
-| `chat` | `Conversation`, `ChatMessage`, `Attachment`, `AttachmentRules`, `MessageProof`: the client's own chat shapes | wire |
+| `chat` | `Conversation`, `ChatMessage`, `Attachment`, `AttachmentRules`, `MessageProof`: the client's own chat shapes | - |
 | `turn` | `TurnContext`, `TurnResult`, `ExecutionResult`: a client describes a request without depending on `agent` | model, ports, wire |
 
 ## Rules
@@ -51,5 +51,6 @@ shared `Json`, and `ObservationHasher` walks wire types. They are one layer.
 ./gradlew :contracts:test :contracts:check
 ```
 
-`WireSchemaTest` compares every wire class with `spec/schemas`; nothing here needs
-a device.
+`AttachmentRulesTest` covers the attachment rules. The wire classes are checked
+against `spec/schemas` by `tools/checks/check-wire-types.py`, so nothing here
+needs a device.

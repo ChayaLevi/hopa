@@ -1,4 +1,4 @@
-package com.hopa.contracts
+package com.hopa.contracts.turn
 
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.RunRecord

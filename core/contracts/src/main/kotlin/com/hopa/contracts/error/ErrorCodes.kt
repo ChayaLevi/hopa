@@ -1,4 +1,4 @@
-package com.hopa.contracts
+package com.hopa.contracts.error
 
 object ErrorCodes {
     const val SCHEMA = "E_SCHEMA"

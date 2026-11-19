@@ -1,4 +1,4 @@
-package com.hopa.contracts
+package com.hopa.contracts.turn
 
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.ports.InstalledApp

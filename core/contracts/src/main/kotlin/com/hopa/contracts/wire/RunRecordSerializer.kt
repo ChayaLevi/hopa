@@ -1,6 +1,6 @@
 package com.hopa.contracts.wire
 
-import com.hopa.contracts.HopaJson
+import com.hopa.contracts.json.HopaJson
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
