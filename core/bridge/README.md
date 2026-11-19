@@ -9,8 +9,8 @@ commands run on that machine.
 | package | what lives here | depends on |
 |---|---|---|
 | `session` | `BridgeClient`, `BridgeSession`, `BridgeException`: the socket, its frames and its failure | contracts |
-| `chat` | `ChatTransport`, `BridgeChatTransport`: the chat channel over the session | contracts, session |
-| `device` | `AdbDevice`, `BridgeObservation`: the phone as a `DevicePort` - actions out, screen back | contracts, session |
+| `chat` | `ChatTransport`, `BridgeChatTransport`: the chat channel over the session | session |
+| `device` | `AdbDevice`, `BridgeObservation`: the phone as a `DevicePort` - actions out, screen back | session |
 
 ## Rules
 
