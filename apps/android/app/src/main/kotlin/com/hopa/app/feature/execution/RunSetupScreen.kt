@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.feature.settings.BackgroundSetupDialog
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.ui.component.HopaPageHeader
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /** What a run needs, grouped by the machine that provides it. */
 @Composable

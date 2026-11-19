@@ -16,7 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /**
  * The one place the hidden screen gets set up: the one-tap pairing, then the

@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /** One mode as a small tile: a drawn glyph and one word. */
 @Composable

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /** A dot and a word on a soft pill: the state of one thing, at a glance. */
 @Composable

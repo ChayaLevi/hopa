@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /**
  * Screen access is the local way to see and tap other apps. The hidden screen

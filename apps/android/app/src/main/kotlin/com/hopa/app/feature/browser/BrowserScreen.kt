@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.hopa.app.ui.component.HopaTopBar
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 import com.hopa.capabilities.browser.BrowserScripts
 import org.json.JSONTokener
 

@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaPageHeader
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /** Capabilities: what HOPA can use on this phone and what powers it. */
 @OptIn(ExperimentalMaterial3Api::class)

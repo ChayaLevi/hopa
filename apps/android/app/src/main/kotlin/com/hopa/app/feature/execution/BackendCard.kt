@@ -30,7 +30,7 @@ import com.hopa.app.link.session.BackendTaskState
 import com.hopa.app.feature.settings.PairInput
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.feature.settings.pathLabel
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 import com.hopa.backend.link.BackendState
 
 /**

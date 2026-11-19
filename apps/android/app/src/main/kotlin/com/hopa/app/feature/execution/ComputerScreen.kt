@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.component.HopaStatusPill
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /**
  * The computer as a driver: pair once with a code, then choose it on "How HOPA

@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.agent.recipe.Recipe
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.ui.component.HopaPageHeader
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /**
  * The hub for everything HOPA can act on. The current mode gets a hero card

@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.component.HopaStatusPill
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /**
  * Screen access: one switch, two facts, and the long explanations folded away.
