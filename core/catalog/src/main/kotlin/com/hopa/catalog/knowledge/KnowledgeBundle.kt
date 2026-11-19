@@ -1,6 +1,10 @@
-package com.hopa.catalog
+package com.hopa.catalog.knowledge
 
 import kotlinx.serialization.Serializable
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.data.CatalogApp
+import com.hopa.catalog.data.CatalogSite
+import com.hopa.catalog.data.PromptRule
 
 /**
  * The downloadable shape of knowledge: one document the backend can serve and

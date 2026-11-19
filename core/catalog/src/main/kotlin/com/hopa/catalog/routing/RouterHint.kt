@@ -1,4 +1,4 @@
-package com.hopa.catalog
+package com.hopa.catalog.routing
 
 object RouterHint {
     fun text(match: RouteMatch, webAvailable: Boolean = true): String {

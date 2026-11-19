@@ -1,4 +1,5 @@
-package com.hopa.catalog
+package com.hopa.catalog.knowledge
+import com.hopa.catalog.data.ApprovalPolicyData
 
 /** The generated bootstrap bundle, for tests that need the real catalog. */
 internal object TestBundles {

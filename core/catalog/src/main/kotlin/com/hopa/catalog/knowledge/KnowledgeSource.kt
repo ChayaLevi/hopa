@@ -1,4 +1,4 @@
-package com.hopa.catalog
+package com.hopa.catalog.knowledge
 
 /** Where a client gets its tables: the bundled snapshot today, a fetch later. */
 interface KnowledgeSource {

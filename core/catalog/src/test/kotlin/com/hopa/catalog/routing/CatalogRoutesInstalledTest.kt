@@ -1,14 +1,14 @@
-package com.hopa.catalog
+package com.hopa.catalog.routing
 
 import com.hopa.contracts.ports.InstalledApp
-import com.hopa.catalog.ApprovalPolicyData
-import com.hopa.catalog.CatalogApp
-import com.hopa.catalog.CatalogTarget
-import com.hopa.catalog.Knowledge
-import com.hopa.catalog.testing.TestKnowledge
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.data.CatalogApp
+import com.hopa.catalog.data.CatalogTarget
+import com.hopa.catalog.knowledge.Knowledge
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import com.hopa.catalog.testing.knowledge.TestKnowledge
 
 class CatalogRoutesInstalledTest {
     private val installed = listOf(

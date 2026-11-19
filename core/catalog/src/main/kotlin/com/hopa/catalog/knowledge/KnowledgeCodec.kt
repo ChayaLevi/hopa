@@ -1,4 +1,4 @@
-package com.hopa.catalog
+package com.hopa.catalog.knowledge
 
 import kotlinx.serialization.json.Json
 

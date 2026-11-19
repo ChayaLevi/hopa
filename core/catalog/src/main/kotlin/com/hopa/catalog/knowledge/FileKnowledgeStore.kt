@@ -1,4 +1,4 @@
-package com.hopa.catalog
+package com.hopa.catalog.knowledge
 
 import java.io.File
 import java.io.FileOutputStream

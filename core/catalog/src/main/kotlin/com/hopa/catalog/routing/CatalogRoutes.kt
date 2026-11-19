@@ -1,9 +1,9 @@
-package com.hopa.catalog
+package com.hopa.catalog.routing
 
 import com.hopa.contracts.ports.InstalledApp
-import com.hopa.catalog.CatalogApp
-import com.hopa.catalog.CatalogTarget
-import com.hopa.catalog.Knowledge
+import com.hopa.catalog.data.CatalogApp
+import com.hopa.catalog.data.CatalogTarget
+import com.hopa.catalog.knowledge.Knowledge
 
 /**
  * The catalog is one list for every platform; this is where a client asks for

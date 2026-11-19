@@ -1,4 +1,4 @@
-package com.hopa.catalog
+package com.hopa.catalog.routing
 
 object AppRouter {
     private val GENERIC = setOf(

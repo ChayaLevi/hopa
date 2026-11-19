@@ -1,4 +1,8 @@
-package com.hopa.catalog
+package com.hopa.catalog.knowledge
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.data.CatalogApp
+import com.hopa.catalog.data.CatalogSite
+import com.hopa.catalog.data.PromptRule
 
 /**
  * The tables the engine reads, as one value.

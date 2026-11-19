@@ -1,8 +1,8 @@
-package com.hopa.catalog.testing
+package com.hopa.catalog.testing.knowledge
 
-import com.hopa.catalog.ApprovalPolicyData
-import com.hopa.catalog.Knowledge
-import com.hopa.catalog.KnowledgeCodec
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.knowledge.KnowledgeCodec
 
 /** The reviewed bootstrap bundle, for tests that need the real catalog. */
 object TestKnowledge {

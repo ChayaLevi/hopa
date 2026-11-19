@@ -1,4 +1,4 @@
-package com.hopa.catalog
+package com.hopa.catalog.knowledge
 
 import java.io.File
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.data.CatalogApp
+import com.hopa.catalog.data.CatalogTarget
 
 class FileKnowledgeStoreTest {
     @TempDir

@@ -1,6 +1,6 @@
-package com.hopa.catalog
+package com.hopa.catalog.routing
 
-import com.hopa.contracts.HopaJson
+import com.hopa.contracts.json.HopaJson
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int

@@ -1,4 +1,4 @@
-package com.hopa.catalog
+package com.hopa.catalog.routing
 
 data class RouteTarget(
     val name: String,
