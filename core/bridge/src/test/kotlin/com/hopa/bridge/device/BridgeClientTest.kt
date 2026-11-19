@@ -1,5 +1,7 @@
-package com.hopa.transport.bridge
+package com.hopa.bridge.device
 
+import com.hopa.bridge.session.BridgeClient
+import com.hopa.bridge.session.BridgeException
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -81,7 +83,8 @@ class BridgeClientTest {
     }
 
     @Test
-    fun pairing_returns_the_token_pair() = runBlocking {        server.enqueue(
+    fun pairing_returns_the_token_pair() = runBlocking {
+        server.enqueue(
             MockResponse().setBody(
                 """{"token":"t1","refresh":"r1","expires_in":43200}""",
             ),

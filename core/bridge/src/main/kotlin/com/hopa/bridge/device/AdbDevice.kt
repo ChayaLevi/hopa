@@ -1,9 +1,10 @@
-package com.hopa.transport.bridge
+package com.hopa.bridge.device
 
-import com.hopa.contracts.wire.Observation
+import com.hopa.bridge.session.BridgeClient
 import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
+import com.hopa.contracts.wire.Observation
 
 /**
  * `DevicePort` over the PC bridge: the phone is driven by adb on the PC, which
@@ -78,8 +79,7 @@ class AdbDevice(
 
     override suspend fun foreground(): String = client.foreground()
 
-    override suspend fun screenshot(): ByteArray? =
-        runCatching { client.screenshot() }.getOrNull()
+    override suspend fun screenshot(): ByteArray? = runCatching { client.screenshot() }.getOrNull()
 
     override suspend fun apps(): List<InstalledApp> = client.apps()
 

@@ -1,9 +1,9 @@
-package com.hopa.transport.bridge
+package com.hopa.bridge.device
 
+import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.contracts.ObservationHasher
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
@@ -13,12 +13,7 @@ import kotlinx.serialization.json.jsonPrimitive
 
 /** Turns the bridge's flat node list into the shared observation tree. */
 object BridgeObservation {
-    fun fromJson(
-        payload: JsonObject,
-        app: String,
-        timestamp: Long,
-        id: String,
-    ): Observation {
+    fun fromJson(payload: JsonObject, app: String, timestamp: Long, id: String): Observation {
         val width = payload["width"]?.jsonPrimitive?.intOrNull ?: 0
         val height = payload["height"]?.jsonPrimitive?.intOrNull ?: 0
         val nodes = payload["nodes"]?.jsonArray.orEmpty().map { entry ->
@@ -47,6 +42,5 @@ object BridgeObservation {
         return observation.copy(hash = ObservationHasher.hash(observation))
     }
 
-    private fun JsonObject.string(name: String): String =
-        this[name]?.jsonPrimitive?.contentOrNull.orEmpty()
+    private fun JsonObject.string(name: String): String = this[name]?.jsonPrimitive?.contentOrNull.orEmpty()
 }

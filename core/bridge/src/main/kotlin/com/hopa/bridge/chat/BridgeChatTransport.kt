@@ -1,5 +1,6 @@
-package com.hopa.transport.bridge
+package com.hopa.bridge.chat
 
+import com.hopa.bridge.session.BridgeClient
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 

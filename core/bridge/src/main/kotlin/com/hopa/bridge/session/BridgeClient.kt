@@ -1,9 +1,7 @@
-package com.hopa.transport.bridge
+package com.hopa.bridge.session
 
-import com.hopa.contracts.HopaJson
+import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.ports.InstalledApp
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -17,6 +15,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
  * The client half of the bridge contract: one bearer token, per-method
@@ -72,10 +72,7 @@ class BridgeClient(
      * shell. The bridge already speaks adb, so this needs no pairing inside the
      * app; the helper then owns the hidden display itself.
      */
-    suspend fun startHelper(
-        packageName: String = "com.hopa.android",
-        token: String,
-    ): String {
+    suspend fun startHelper(packageName: String = "com.hopa.android", token: String): String {
         val payload = call(
             "POST",
             "/helper",
@@ -85,9 +82,8 @@ class BridgeClient(
         return payload["output"]?.jsonPrimitive?.contentOrNull.orEmpty()
     }
 
-    suspend fun foreground(): String =
-        call("POST", "/foreground", body = "{}", timeout = 20)["bundle"]?.jsonPrimitive
-            ?.contentOrNull.orEmpty()
+    suspend fun foreground(): String = call("POST", "/foreground", body = "{}", timeout = 20)["bundle"]?.jsonPrimitive
+        ?.contentOrNull.orEmpty()
 
     suspend fun tap(x: Int, y: Int) {
         call("POST", "/tap", body = """{"x":$x,"y":$y}""", timeout = 20)
@@ -142,8 +138,7 @@ class BridgeClient(
         }
     }
 
-    suspend fun chats(): kotlinx.serialization.json.JsonObject =
-        call("GET", "/chats", timeout = 45)
+    suspend fun chats(): kotlinx.serialization.json.JsonObject = call("GET", "/chats", timeout = 45)
 
     /** Speech to text through the PC; returns "" when the bridge heard nothing. */
     suspend fun transcribe(wav: ByteArray): String {
@@ -162,9 +157,7 @@ class BridgeClient(
         return runCatching { java.util.Base64.getDecoder().decode(audio) }.getOrNull()
     }
 
-    suspend fun postChats(
-        sessions: kotlinx.serialization.json.JsonArray,
-    ): kotlinx.serialization.json.JsonObject = call(
+    suspend fun postChats(sessions: kotlinx.serialization.json.JsonArray): kotlinx.serialization.json.JsonObject = call(
         method = "POST",
         path = "/chats",
         body = buildJsonObject {
@@ -218,8 +211,7 @@ class BridgeClient(
     }
 
     /** Nothing a bridge error prints may contain the token or a full URL. */
-    private fun scrub(message: String): String =
-        message.replace(token, "<token>").replace(base, "<bridge>")
+    private fun scrub(message: String): String = message.replace(token, "<token>").replace(base, "<bridge>")
 
     private companion object {
         val JSON = "application/json; charset=utf-8".toMediaType()
@@ -233,7 +225,6 @@ class BridgeClient(
             }
         }
 
-        fun quote(value: String): String =
-            "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+        fun quote(value: String): String = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
     }
 }

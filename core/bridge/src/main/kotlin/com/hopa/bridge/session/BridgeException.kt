@@ -1,4 +1,4 @@
-package com.hopa.transport.bridge
+package com.hopa.bridge.session
 
 import java.io.IOException
 

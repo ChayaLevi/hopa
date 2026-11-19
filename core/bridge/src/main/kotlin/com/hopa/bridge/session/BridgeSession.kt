@@ -1,4 +1,4 @@
-package com.hopa.transport.bridge
+package com.hopa.bridge.session
 
 /** What `/pair` and `/refresh` return from the bridge contract. */
 data class BridgeSession(
