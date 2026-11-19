@@ -6,12 +6,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
-/** One dated group in the chats sheet. */
-data class ConversationSection(
-    val title: String,
-    val items: List<Conversation>,
-)
-
 /**
  * Group conversations the way a person scans them: today, yesterday, the last
  * week, then everything older. Pure on purpose - the clock and the zone are
