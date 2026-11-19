@@ -1,51 +1,75 @@
 # core - the client engine
 
-Nine Kotlin modules that the Android app and the Windows sidecar both build. No
-`main`, no UI, no Android SDK.
+Eight Kotlin modules the Android app and the Windows sidecar both build. Plain
+JVM: no UI, no Android SDK, no `main`.
 
-| module | holds | package | depends on |
-|---|---|---|---|
-| `contracts` | wire types, port interfaces, model types, approval data classes | `com.hopa.contracts.*` | `codec` |
-| `codec` | JSON helpers: `HopaJson`, `CanonicalJson` | `com.hopa.codec.*` | nothing |
-| `catalog` | the app catalogue, approval vocabulary, prompt rules, and the router that walks them | `com.hopa.catalog.*` | `contracts`, `codec` |
-| `observation` | the screen model: nodes, anchors, the observer, the screen source | `com.hopa.observation.*` | `contracts` |
-| `records` | a run as records, and the chain that links them | `com.hopa.records.*` | `contracts`, `codec` |
-| `prompt` | the system prompt, catalogue and screen blocks, the context budget | `com.hopa.prompt.*` | `contracts`, `catalog` |
-| `agent` | one turn for every client, the loop, the gate, the executor, recipes | `com.hopa.agent.*` | all of the above |
-| `providers` | the adapters behind `ModelPort`: provider choice, the OpenAI-compatible client, the demo client | `com.hopa.providers.*` | `contracts`, `codec` |
-| `transport` | device and backend transport: the PC bridge client and the gateway client | `com.hopa.transport.*` | `contracts`, `codec` |
+Modules are listed **bottom first, by dependency**. A module only uses the ones
+above it; inside one layer the order is alphabetical.
 
-```
-apps/android --+
-                +--> agent --> prompt --> catalog --> contracts --> codec
-apps/windows ---+      |  \--> records -------^
-                       \--> observation -----^
-                providers --> contracts
-                transport --> contracts
-```
+## Layer 0 - the vocabulary
+
+| module | what it holds | depends on |
+|---|---|---|
+| `contracts` | wire types (`Action`, `Observation`, `RunRecord`, `Decision`), ports (`DevicePort`, `ModelPort`, `Clock`, `ApprovalGateway`), `TurnContext`/`TurnResult`, `ObservationHasher`, JSON helpers | nothing |
+
+## Layer 1 - leaves on top of contracts
+
+| module | what it holds | depends on |
+|---|---|---|
+| `backend` | the backend link: task delivery, pairing, envelope codec, the knowledge fetch | `contracts` |
+| `bridge` | the PC companion link: websocket client, sessions, `AdbDevice`, observation over the bridge | `contracts` |
+| `catalog` | what apps and sites exist, what needs approval, how HOPA should speak, and the router that picks an app for a goal. Mostly generated. | `contracts` |
+| `inference` | model adapters: the OpenAI-compatible client, the demo client, and later a local runtime | `contracts` |
+| `observation` | the screen as a tree with anchors: `ObservationProducer`, `NodeAnchor`, `ScreenPath`, `ScreenSource` | `contracts` |
+| `runlog` | the run journal: build a record per step, chain it, hand it to a recorder | `contracts` |
+
+These six do not import each other. A model API change never touches the bridge;
+a bridge change never touches a record.
+
+## Layer 2 - the engine
+
+| module | what it holds | depends on |
+|---|---|---|
+| `agent` | the turn (`TurnRunner`), the loop (`AgentLoop`), the gate (`ApprovalPolicy`), the executor, the prompt, recipes, and the decision seam | `contracts`, `catalog`, `observation`, `runlog` |
+
+`agent` does not import `inference`: it asks a `DecisionPolicy`, and the client
+passes a model-backed one. That is what lets the model be swapped or removed.
 
 ## Rules
 
-1. **`codec` is the leaf.** JSON helpers only; no types, no logic.
-2. **`contracts` is the vocabulary.** The types every other module passes around;
-   it depends on `codec` because `RunRecordSerializer` is bound to `RunRecord` by
-   annotation and needs the shared `Json`.
-3. **`catalog` is one concern.** The app catalogue, the approval vocabulary and
-   the router that picks a target always change together. Most of it is generated
-   by `tools/scripts/build-*.py`, so the module carries no ktlint.
-4. **`agent` is the only place a goal becomes steps.** Recipes, the plan gate,
-   checkpoints and the loop live here, so chat, a parallel run and a delivered
-   task all take the same path. A client supplies ports, not policy.
-5. **The engine imports no Android, no HTTP.** `checkNoAndroidImports` in Gradle
-   and `tools/checks/check-android-structure.py` fail the build on a violation.
-6. **Only `providers` and `transport` speak HTTP.** `contracts` defines
-   `ModelPort`; `providers` implements it, and changes when a provider's API does.
-   A device reached over the bridge (`AdbDevice`) is a port in `transport`.
-7. **A local model is not `providers`.** An on-device runtime is a separate
-   adapter behind the same `ModelPort`.
+1. `contracts` holds types and pure helpers. No behaviour that reaches out.
+2. No Android and no HTTP in the engine. Only `bridge`, `backend` and
+   `inference` open a socket.
+3. One public class per file, named after it. Contracts may share a file;
+   behaviour never does.
+4. `catalog` is generated: edit `spec/`, run `tools/scripts/build-*.py`, commit.
+   It has no ktlint, because reformatting generated output breaks `--check`.
+5. The gate is in `agent`. Every action goes through `ActionExecutor`, so a
+   model, a recipe and a graph all hit the same approval check.
 
-## Generated data
+## Where a decision comes from
 
-`catalog` is mostly written by scripts from `spec/` and `services/brain/knowledge`.
-Do not edit those files by hand; `build-*.py --check` runs in CI and fails on a
-stale commit. See `catalog/README.md`.
+`AgentLoop` asks a `DecisionPolicy` for one `Decision` per step and never learns
+who answered:
+
+| policy | what it does |
+|---|---|
+| `ModelDecisionPolicy` | builds the prompt, asks the provider, parses the reply |
+| `GraphDecisionPolicy` | takes the best guarded edge from the screen it recognizes |
+| `FallbackDecisionPolicy` | tries the graph, asks the model when there is no path |
+
+Prompt building and parsing live only in `ModelDecisionPolicy`, so a policy that
+never calls a model does not build a prompt and does not need `inference`.
+
+## Commands
+
+```
+./gradlew :contracts:check :catalog:check :observation:check \
+          :runlog:check :inference:check :bridge:check :backend:check \
+          :agent:check :agent:ktlintCheck \
+          :catalog:test :agent:test :observation:test \
+          :runlog:test :inference:test :bridge:test :backend:test
+```
+
+`agent` also runs `com.hopa.agent.conformance`, which validates decisions and
+records against `spec/`.

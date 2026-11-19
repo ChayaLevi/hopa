@@ -1,6 +1,5 @@
 package com.hopa.agent.decision
 
-import com.hopa.agent.decision.model.ModelDecisionPolicy
 import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.model.ModelMessage
@@ -55,7 +54,7 @@ data class DecisionOutcome(
 /**
  * The seam between the loop and whatever decides. Implementations:
  *
- *  - [ModelDecisionPolicy] builds the prompt, asks the provider and parses the reply.
+ *  - ModelDecisionPolicy builds the prompt, asks the provider and parses the reply.
  *  - a graph policy picks an edge from the screen it sees.
  *  - a fallback policy tries one and then the other.
  */
