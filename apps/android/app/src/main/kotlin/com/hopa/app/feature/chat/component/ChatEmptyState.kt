@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.HopaMascot
+import com.hopa.ui.component.HopaMascot
 import com.hopa.ui.theme.HopaColor
 import java.util.Calendar
 

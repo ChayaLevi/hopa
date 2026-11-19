@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.ui.component.HopaBottomBar
-import com.hopa.app.ui.component.HopaMascot
+import com.hopa.ui.component.HopaMascot
 import com.hopa.ui.component.HopaPageHeader
 import com.hopa.ui.theme.HopaColor
 

@@ -67,7 +67,7 @@ import com.hopa.app.feature.chat.component.PendingAttachmentRow
 import com.hopa.app.feature.chat.component.ThinkingIndicator
 import com.hopa.ui.component.HopaBottomBar
 import com.hopa.ui.component.HopaBottomBarEasy
-import com.hopa.app.ui.component.HopaMascot
+import com.hopa.ui.component.HopaMascot
 import com.hopa.ui.component.HopaTopBar
 import com.hopa.ui.theme.HopaColor
 import com.hopa.capabilities.accessibility.state.AccessibilityState
