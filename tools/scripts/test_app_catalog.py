@@ -97,7 +97,7 @@ def test_kotlin_rendering_matches_the_same_entries() -> None:
     module = _module()
     data = module.document(module.collect_apps(), module.collect_sites())
     output = module.render_kotlin(data)
-    assert "package com.hopa.catalog" in output
+    assert "package com.hopa.catalog.data" in output
     assert 'id = "alipay"' in output
     for app in data["apps"]:
         assert f'id = "{app["id"]}"' in output

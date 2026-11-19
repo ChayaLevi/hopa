@@ -13,17 +13,17 @@ import com.hopa.app.gateway.RemoteTaskRunner
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
-import com.hopa.observation.ScreenSourceDevice
+import com.hopa.observation.source.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 import com.hopa.capabilities.accessibility.tree.AccessibilityDevice
-import com.hopa.providers.ModelFactory
-import com.hopa.providers.ProviderChoiceRules
+import com.hopa.inference.client.ModelFactory
+import com.hopa.inference.choice.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.agent.ActionExecutor
-import com.hopa.agent.ApprovalPolicy
+import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
@@ -56,13 +56,13 @@ class AppContainer(context: Context) {
      * getter, so a bundle accepted between turns applies on the next one.
      */
     private val bundledKnowledge = com.hopa.app.knowledge.AssetKnowledgeSource(context)
-    val knowledgeStore: com.hopa.catalog.FileKnowledgeStore =
-        com.hopa.catalog.FileKnowledgeStore(
+    val knowledgeStore: com.hopa.catalog.knowledge.FileKnowledgeStore =
+        com.hopa.catalog.knowledge.FileKnowledgeStore(
             directory = java.io.File(context.filesDir, "knowledge"),
             fallback = bundledKnowledge.current(),
         )
-    val knowledgeSource: com.hopa.catalog.KnowledgeSource = knowledgeStore
-    val knowledge: com.hopa.catalog.Knowledge get() = knowledgeSource.current()
+    val knowledgeSource: com.hopa.catalog.knowledge.KnowledgeSource = knowledgeStore
+    val knowledge: com.hopa.catalog.knowledge.Knowledge get() = knowledgeSource.current()
     val selectedConversation = MutableStateFlow<String?>(null)
     val runGate = com.hopa.app.run.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
@@ -127,9 +127,9 @@ class AppContainer(context: Context) {
     val backend: BackendSession by lazy {
         BackendSession(
             settings = settings,
-            pairingFactory = { url -> com.hopa.transport.gateway.BackendPairing(url) },
+            pairingFactory = { url -> com.hopa.backend.pairing.BackendPairing(url) },
             linkFactory = { credentials, name, version, pushToken, refresh ->
-                com.hopa.transport.gateway.BackendClient(
+                com.hopa.backend.link.BackendClient(
                     credentials = { credentials },
                     pushToken = pushToken,
                     refresh = refresh,
@@ -281,7 +281,7 @@ class AppContainer(context: Context) {
             return false
         }
         return runCatching {
-            com.hopa.transport.bridge.BridgeClient(current.bridgeUrl, token)
+            com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token)
                 .startHelper(token = displayToken.value)
             true
         }.getOrDefault(false)
@@ -301,7 +301,7 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return null
         }
-        val client = com.hopa.transport.bridge.BridgeClient(
+        val client = com.hopa.bridge.session.BridgeClient(
             baseUrl = current.bridgeUrl,
             token = token,
             refresh = {
@@ -310,7 +310,7 @@ class AppContainer(context: Context) {
                     null
                 } else {
                     runCatching {
-                        com.hopa.transport.bridge.BridgeClient(
+                        com.hopa.bridge.session.BridgeClient(
                             current.bridgeUrl,
                             "",
                         ).refreshSession(saved)
@@ -322,7 +322,7 @@ class AppContainer(context: Context) {
                 }
             },
         )
-        return com.hopa.transport.bridge.AdbDevice(client, clock)
+        return com.hopa.bridge.device.AdbDevice(client, clock)
     }
 
     /**
@@ -346,7 +346,7 @@ class AppContainer(context: Context) {
         val token = settings.bridgeToken()
         if (current.bridgeUrl.isNotBlank() && token.isNotBlank()) {
             val wav = runCatching {
-                com.hopa.transport.bridge.BridgeClient(current.bridgeUrl, token).speak(text)
+                com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token).speak(text)
             }.getOrNull()
             if (wav != null) {
                 return speaker.play(wav)
@@ -365,7 +365,7 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return null
         }
-        return com.hopa.transport.bridge.BridgeClient(current.bridgeUrl, token)
+        return com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token)
             .transcribe(wav)
     }
 
@@ -381,8 +381,8 @@ class AppContainer(context: Context) {
         }
         return com.hopa.app.feature.sync.ChatSync(
             conversations = conversations,
-            transport = com.hopa.transport.bridge.BridgeChatTransport(
-                com.hopa.transport.bridge.BridgeClient(current.bridgeUrl, token),
+            transport = com.hopa.bridge.chat.BridgeChatTransport(
+                com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token),
             ),
         )
     }

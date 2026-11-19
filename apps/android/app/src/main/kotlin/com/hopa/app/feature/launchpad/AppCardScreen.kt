@@ -32,7 +32,7 @@ import com.hopa.app.ui.component.AppIcon
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.component.HopaStatusPill
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.catalog.RouteTarget
+import com.hopa.catalog.routing.RouteTarget
 
 /**
  * One app: whether it is here, how a run would reach it, and the few rules the

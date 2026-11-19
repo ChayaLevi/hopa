@@ -1,6 +1,6 @@
 package com.hopa.app.feature.sync
 
-import com.hopa.transport.bridge.ChatTransport
+import com.hopa.bridge.chat.ChatTransport
 import com.hopa.stores.ConversationStore
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.intOrNull

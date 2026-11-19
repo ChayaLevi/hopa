@@ -3,7 +3,7 @@
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.AuthPort
 import com.hopa.backend.auth.DeviceIdentity
-import com.hopa.backend.harness.FakeDevice
+import com.hopa.contracts.testing.FakeDevice
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.bodyString
 import com.hopa.backend.module

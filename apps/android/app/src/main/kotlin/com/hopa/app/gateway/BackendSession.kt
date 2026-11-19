@@ -1,11 +1,11 @@
 package com.hopa.app.gateway
 
-import com.hopa.transport.gateway.BackendCredentials
-import com.hopa.transport.gateway.BackendEnvelope
-import com.hopa.transport.gateway.BackendLink
-import com.hopa.transport.gateway.BackendPairing
-import com.hopa.transport.gateway.BackendState
-import com.hopa.transport.gateway.PairingLink
+import com.hopa.backend.pairing.BackendCredentials
+import com.hopa.backend.wire.BackendEnvelope
+import com.hopa.backend.link.BackendLink
+import com.hopa.backend.pairing.BackendPairing
+import com.hopa.backend.link.BackendState
+import com.hopa.backend.pairing.PairingLink
 import com.hopa.stores.SettingsRepository
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CancellationException

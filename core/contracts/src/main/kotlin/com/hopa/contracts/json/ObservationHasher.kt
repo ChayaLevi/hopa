@@ -1,6 +1,5 @@
 package com.hopa.contracts.json
 
-import com.hopa.contracts.json.CanonicalJson
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import kotlinx.serialization.json.JsonNull

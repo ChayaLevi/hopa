@@ -6,7 +6,7 @@ import com.hopa.app.gateway.SessionFixtures.FakeSettings
 import com.hopa.app.gateway.SessionFixtures.gateway
 import com.hopa.app.gateway.SessionFixtures.pairingServer
 import com.hopa.app.gateway.SessionFixtures.session
-import com.hopa.transport.gateway.PairingLink
+import com.hopa.backend.pairing.PairingLink
 import java.util.Base64
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CompletableDeferred

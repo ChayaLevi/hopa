@@ -4,7 +4,7 @@ import android.hardware.display.DisplayManager
 import android.view.Display
 import android.view.accessibility.AccessibilityNodeInfo
 import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
-import com.hopa.contracts.ObservationHasher
+import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize

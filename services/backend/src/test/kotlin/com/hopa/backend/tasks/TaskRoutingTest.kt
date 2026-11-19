@@ -2,7 +2,7 @@
 
 import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.gateway.DeviceRegistry
-import com.hopa.backend.harness.FakeDevice
+import com.hopa.contracts.testing.FakeDevice
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.MapDirectory
 import com.hopa.backend.harness.bodyString

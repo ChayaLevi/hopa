@@ -1,6 +1,5 @@
 package com.hopa.agent.decision.model
 
-import com.hopa.agent.decision.model.DecisionRules
 import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.json.HopaJson

@@ -1,6 +1,6 @@
 package com.hopa.backend.tools
 
-import com.hopa.backend.harness.FakeDevice
+import com.hopa.contracts.testing.FakeDevice
 import com.hopa.backend.harness.bodyString
 import com.hopa.backend.protocol.Envelope
 import io.ktor.client.HttpClient

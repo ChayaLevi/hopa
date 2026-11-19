@@ -1,18 +1,18 @@
 package com.hopa.sidecar
 
-import com.hopa.transport.bridge.AdbDevice
-import com.hopa.transport.bridge.BridgeClient
-import com.hopa.providers.ModelFactory
-import com.hopa.agent.ActionExecutor
-import com.hopa.agent.ApprovalPolicy
-import com.hopa.agent.AgentLoop
-import com.hopa.agent.ModelStepPolicy
-import com.hopa.contracts.TurnContext
+import com.hopa.bridge.device.AdbDevice
+import com.hopa.bridge.session.BridgeClient
+import com.hopa.inference.client.ModelFactory
+import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.agent.loop.AgentLoop
+import com.hopa.agent.decision.model.ModelStepPolicy
+import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
-import com.hopa.catalog.CatalogRoutes
+import com.hopa.catalog.routing.CatalogRoutes
 import com.hopa.contracts.chat.Attachment
 import com.hopa.records.InMemoryRunRecorder
 import com.hopa.records.RunChain

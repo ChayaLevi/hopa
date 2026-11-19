@@ -15,14 +15,14 @@ apps/android/
 
 core/
 |-- contracts/     wire types and port interfaces
-|-- codec/         JSON helpers
+|-- contracts/         JSON helpers
 |-- catalog/       app catalogue, approval data, router
 |-- observation/   the screen model and the source that feeds it
-|-- records/       a run as records and their chain
+|-- runlog/       a run as records and their chain
 |-- prompt/        the system prompt and its blocks
 |-- agent/         the turn, the loop, the gate, recipes
-|-- providers/     model adapters
-`-- transport/     bridge and gateway clients
+|-- inference/     model adapters
+`-- bridge/     bridge and gateway clients
 ```
 
 `contracts` and the five engine modules have no Android imports, so they are

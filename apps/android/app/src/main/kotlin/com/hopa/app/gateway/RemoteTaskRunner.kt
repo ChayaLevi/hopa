@@ -1,13 +1,13 @@
 package com.hopa.app.gateway
 
-import com.hopa.transport.gateway.BackendEnvelope
-import com.hopa.transport.gateway.BackendLink
-import com.hopa.transport.gateway.BackendReplies
-import com.hopa.transport.gateway.ProcessedTaskLog
-import com.hopa.contracts.ErrorCodes
-import com.hopa.contracts.HopaError
-import com.hopa.contracts.TurnResult
-import com.hopa.observation.ScreenSourceDevice
+import com.hopa.backend.wire.BackendEnvelope
+import com.hopa.backend.link.BackendLink
+import com.hopa.backend.wire.BackendReplies
+import com.hopa.backend.link.ProcessedTaskLog
+import com.hopa.contracts.error.ErrorCodes
+import com.hopa.contracts.error.HopaError
+import com.hopa.contracts.turn.TurnResult
+import com.hopa.observation.source.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable

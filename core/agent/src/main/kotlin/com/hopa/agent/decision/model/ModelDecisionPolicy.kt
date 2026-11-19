@@ -10,9 +10,9 @@ import com.hopa.agent.prompt.ContextBudget
 import com.hopa.agent.prompt.InstalledAppsBlock
 import com.hopa.agent.prompt.ScreenRenderer
 import com.hopa.agent.prompt.SystemPromptBuilder
+import com.hopa.catalog.knowledge.Knowledge
 import com.hopa.catalog.routing.AppRouter
 import com.hopa.catalog.routing.CatalogRoutes
-import com.hopa.catalog.knowledge.Knowledge
 import com.hopa.catalog.routing.RouterHint
 import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.error.HopaError

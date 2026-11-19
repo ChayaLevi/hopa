@@ -1,10 +1,10 @@
 package com.hopa.app.knowledge
 
 import android.content.Context
-import com.hopa.catalog.ApprovalPolicyData
-import com.hopa.catalog.Knowledge
-import com.hopa.catalog.KnowledgeCodec
-import com.hopa.catalog.KnowledgeSource
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.knowledge.KnowledgeCodec
+import com.hopa.catalog.knowledge.KnowledgeSource
 
 /**
  * The bootstrap bundle packaged with the app.

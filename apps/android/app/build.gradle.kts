@@ -107,6 +107,7 @@ dependencies {
     implementation(project(":contracts"))
     implementation(project(":inference"))
     implementation(project(":bridge"))
+    implementation(project(":backend"))
     implementation(project(":stores"))
 
     implementation(platform(libs.androidx.compose.bom))

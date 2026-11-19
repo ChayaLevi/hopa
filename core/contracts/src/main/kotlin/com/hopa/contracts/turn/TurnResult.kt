@@ -1,8 +1,8 @@
 package com.hopa.contracts.turn
 
+import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.model.ModelUsage
 import com.hopa.contracts.wire.RunRecord
-import com.hopa.contracts.error.HopaError
 
 data class TurnResult(
     val answer: String,

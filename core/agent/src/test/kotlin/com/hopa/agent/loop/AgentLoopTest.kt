@@ -4,7 +4,6 @@ import com.hopa.agent.action.ActionExecutor
 import com.hopa.agent.decision.model.ModelStepPolicy
 import com.hopa.agent.gate.ApprovalPolicy
 import com.hopa.catalog.testing.knowledge.TestKnowledge
-import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest
@@ -13,6 +12,7 @@ import com.hopa.contracts.ports.InstalledApp
 import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice
+import com.hopa.contracts.turn.TurnContext
 import com.hopa.records.InMemoryRunRecorder
 import com.hopa.records.RunRecordFactory
 import kotlinx.coroutines.runBlocking

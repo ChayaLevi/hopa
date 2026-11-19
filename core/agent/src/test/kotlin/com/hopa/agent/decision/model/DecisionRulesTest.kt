@@ -1,6 +1,5 @@
 package com.hopa.agent.decision.model
 
-import com.hopa.agent.decision.model.DecisionRules
 import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.wire.Action
 import org.junit.jupiter.api.Assertions.assertEquals

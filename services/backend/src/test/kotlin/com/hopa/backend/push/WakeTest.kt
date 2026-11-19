@@ -1,7 +1,7 @@
 package com.hopa.backend.push
 
 import com.hopa.backend.ServerConfig
-import com.hopa.backend.harness.FakeDevice
+import com.hopa.contracts.testing.FakeDevice
 import com.hopa.backend.harness.FakeFcm
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.harness.bodyString

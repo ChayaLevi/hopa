@@ -1,10 +1,10 @@
 package com.hopa.app.gateway
 
-import com.hopa.transport.gateway.BackendCredentials
-import com.hopa.transport.gateway.BackendPairing
-import com.hopa.transport.gateway.BackendPairingFailure
-import com.hopa.transport.gateway.PairingLink
-import com.hopa.transport.gateway.X25519Keys
+import com.hopa.backend.pairing.BackendCredentials
+import com.hopa.backend.pairing.BackendPairing
+import com.hopa.backend.pairing.BackendPairingFailure
+import com.hopa.backend.pairing.PairingLink
+import com.hopa.backend.pairing.X25519Keys
 import com.hopa.stores.SettingsRepository
 import java.util.Base64
 import kotlinx.coroutines.CancellationException

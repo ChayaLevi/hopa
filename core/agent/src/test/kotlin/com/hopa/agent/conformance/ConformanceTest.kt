@@ -1,8 +1,8 @@
 package com.hopa.agent.conformance
 
-import com.hopa.agent.kinds.ActionClassifier
 import com.hopa.agent.decision.model.DecisionParser
 import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.agent.kinds.ActionClassifier
 import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.wire.Observation

@@ -1,8 +1,8 @@
 package com.hopa.sidecar
 
-import com.hopa.catalog.ApprovalPolicyData
-import com.hopa.catalog.Knowledge
-import com.hopa.catalog.KnowledgeCodec
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.knowledge.KnowledgeCodec
 
 /** The bootstrap bundle packaged with the sidecar; the same document as the app. */
 object SidecarKnowledge {
