@@ -26,7 +26,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.gateway.BackendTaskState
+import com.hopa.app.link.session.BackendTaskState
 import com.hopa.app.feature.settings.PairInput
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.feature.settings.pathLabel

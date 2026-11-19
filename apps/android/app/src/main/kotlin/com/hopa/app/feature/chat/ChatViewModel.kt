@@ -21,6 +21,12 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.hopa.app.privacy.TurnLog
+import com.hopa.app.privacy.TurnLogEntry
+import com.hopa.app.runtime.RunSource
+import com.hopa.app.service.AppVisibility
+import com.hopa.app.service.Notifier
+import com.hopa.app.service.RunService
 
 class ChatViewModel(
     private val container: AppContainer,
@@ -306,7 +312,7 @@ class ChatViewModel(
         container.pendingNotice.value = null
         // A task delivered to the other device may hold the phone. Two loops on
         // one screen would fight over it and cancel each other.
-        if (!container.runGate.claim(body, com.hopa.app.run.RunSource.CHAT)) {
+        if (!container.runGate.claim(body, com.hopa.app.runtime.RunSource.CHAT)) {
             _state.update {
                 it.copy(error = "HOPA is busy with a task from your other device", busy = false)
             }

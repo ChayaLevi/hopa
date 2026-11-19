@@ -5,11 +5,12 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
 import com.hopa.app.BuildConfig
-import com.hopa.app.gateway.BackendSession
-import com.hopa.app.gateway.ProcessedTaskStore
-import com.hopa.app.gateway.PushTokenFetch
-import com.hopa.app.gateway.RemoteRunRequest
-import com.hopa.app.gateway.RemoteTaskRunner
+import com.hopa.app.link.session.BackendSession
+import com.hopa.app.link.remote.ProcessedTaskStore
+import com.hopa.app.link.push.PushTokenFetch
+import com.hopa.app.link.remote.RemoteRunRequest
+import com.hopa.app.link.remote.RemoteTaskRunner
+import com.hopa.app.runtime.RemoteRuns
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
@@ -24,7 +25,7 @@ import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.agent.action.ActionExecutor
 import com.hopa.agent.action.ApprovalPolicy
-import com.hopa.app.gate.UiApprovalGateway
+import com.hopa.app.ui.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
 import com.hopa.runlog.record.RunRecordFactory
@@ -64,7 +65,7 @@ class AppContainer(context: Context) {
     val knowledgeSource: com.hopa.catalog.store.CatalogSource = knowledgeStore
     val knowledge: com.hopa.catalog.store.CatalogSnapshot get() = knowledgeSource.current()
     val selectedConversation = MutableStateFlow<String?>(null)
-    val runGate = com.hopa.app.run.RunGate()
+    val runGate = com.hopa.app.runtime.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
     val pairingStatus = MutableStateFlow<String?>(null)
     /**
@@ -113,7 +114,7 @@ class AppContainer(context: Context) {
     val voice = com.hopa.capabilities.voice.VoiceRecorder(context)
     val speaker = com.hopa.capabilities.voice.Speaker(context)
     /** Goals that run at the same time, each on its own hidden display. */
-    val runner by lazy { com.hopa.app.tasks.ParallelRunner(this) }
+    val runner by lazy { com.hopa.app.runtime.ParallelRunner(this) }
 
     /** Why the last hidden-display start failed; empty when it worked. */
     var lastBackgroundError: String = ""
@@ -370,7 +371,7 @@ class AppContainer(context: Context) {
     }
 
     /** The conversation half of the bridge, when one is configured. */
-    suspend fun chatSync(): com.hopa.app.feature.sync.ChatSync? {
+    suspend fun chatSync(): com.hopa.app.link.sync.ChatSync? {
         val current = settings.settings.first()
         if (!current.useBridge || current.bridgeUrl.isBlank()) {
             return null
@@ -379,7 +380,7 @@ class AppContainer(context: Context) {
         if (token.isBlank()) {
             return null
         }
-        return com.hopa.app.feature.sync.ChatSync(
+        return com.hopa.app.link.sync.ChatSync(
             conversations = conversations,
             transport = com.hopa.bridge.chat.BridgeChatTransport(
                 com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token),
@@ -404,10 +405,10 @@ class AppContainer(context: Context) {
     val recipes by lazy { com.hopa.agent.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
-    val runs by lazy { com.hopa.app.run.RunCoordinator(this) }
+    val runs by lazy { com.hopa.app.runtime.RunCoordinator(this) }
 
     /** Asks the backend for a newer knowledge bundle; a failure keeps the copy. */
     val knowledgeUpdater by lazy {
-        com.hopa.app.gateway.CatalogUpdater(backend, knowledgeStore)
+        com.hopa.app.link.sync.CatalogUpdater(backend, knowledgeStore)
     }
 }

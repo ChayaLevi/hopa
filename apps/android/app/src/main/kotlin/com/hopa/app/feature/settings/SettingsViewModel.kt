@@ -3,8 +3,8 @@ package com.hopa.app.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseApp
-import com.hopa.app.gateway.FirebaseToken
-import com.hopa.app.gateway.ScreenAccess
+import com.hopa.app.link.push.FirebaseToken
+import com.hopa.app.link.remote.ScreenAccess
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
@@ -27,6 +27,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import com.hopa.app.link.session.BackendLaunchName
+import com.hopa.app.service.Notifier
+import com.hopa.app.service.PairingService
+import com.hopa.app.service.ScreenCaptureRequester
+import com.hopa.app.service.ScreenCaptureService
+import com.hopa.app.ui.component.MascotAppearance
 
 class SettingsViewModel(
     private val container: AppContainer,
@@ -711,7 +717,7 @@ class SettingsViewModel(
                 backgroundRunning = background,
                 backendUrl = settings.backendUrl,
                 backendDeviceId = settings.backendDeviceId,
-                backendName = com.hopa.app.gateway.BackendLaunchName.value,
+                backendName = com.hopa.app.link.session.BackendLaunchName.value,
                 backendToken = FirebaseToken.current(),
                 fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
                 providerState = resolver.resolve(settings.provider, settings.endpoint, key),

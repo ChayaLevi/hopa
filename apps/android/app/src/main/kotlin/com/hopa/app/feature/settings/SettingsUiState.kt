@@ -1,6 +1,6 @@
 package com.hopa.app.feature.settings
 
-import com.hopa.app.gateway.BackendTaskState
+import com.hopa.app.link.session.BackendTaskState
 import com.hopa.backend.link.BackendState
 import com.hopa.inference.choice.ProviderState
 import com.hopa.stores.AppSettings
