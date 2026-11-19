@@ -16,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -38,6 +39,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -230,27 +232,41 @@ fun HopaMascot(
         }
 
         if (bubble && sizeDp >= 56.dp) {
+            // A light bubble with a hairline rim: the plush stays the accent, and
+            // cream on cream holds because of the outline, not a drop shadow.
+            val appear = remember { Animatable(0f) }
+            LaunchedEffect(Unit) {
+                appear.animateTo(1f, tween(durationMillis = 120))
+            }
+            val width = sizeDp * 1.45f
+            val body = sizeDp * 0.56f
+            val tail = sizeDp * 0.16f
             Box(
                 modifier = Modifier
-                    .offset(x = sizeDp * 0.50f, y = -sizeDp * 1.02f)
-                    .requiredWidth(sizeDp * 1.70f)
-                    .requiredHeight(sizeDp * 0.99f)
-                    .graphicsLayer(rotationZ = -3f),
+                    .align(Alignment.TopCenter)
+                    .offset(y = -(body + tail) - sizeDp * 0.02f)
+                    .requiredWidth(width)
+                    .requiredHeight(body + tail)
+                    .graphicsLayer(alpha = appear.value, scaleX = 0.94f + 0.06f * appear.value,
+                        scaleY = 0.94f + 0.06f * appear.value),
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawPath(bubblePath(size.width, size.height), color = BubbleFill)
+                    val path = bubbleShape(size.width, size.height, body.toPx(), tail.toPx())
+                    drawPath(path, color = BubbleFill)
+                    drawPath(path, color = BubbleRim, style = Stroke(width = 1.dp.toPx()))
                 }
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = sizeDp * 0.20f, start = sizeDp * 0.14f, end = sizeDp * 0.14f),
-                    contentAlignment = Alignment.TopCenter,
+                        .fillMaxWidth()
+                        .height(body)
+                        .padding(horizontal = sizeDp * 0.10f),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "Hi, I'm HOPA \uD83D\uDC4B",
+                        "Hi, I'm HOPA",
                         color = BubbleInk,
                         fontSize = (
-                            sizeDp.value * 0.19f /
+                            sizeDp.value * 0.185f /
                                 LocalDensity.current.fontScale.coerceAtLeast(1f)
                             ).sp,
                         fontWeight = FontWeight.Bold,
@@ -309,8 +325,9 @@ private fun SoftShadow(
  * The speech bubble borrows the plush's own orange, deepened so cream text clears
  * contrast; the accent blue-orange pair used elsewhere is too red next to fur.
  */
-private val BubbleFill = Color(0xFFB05A28)
-private val BubbleInk = Color(0xFFFFF6EC)
+private val BubbleFill = Color(0xFFFFF6EC)
+private val BubbleInk = Color(0xFF3A2416)
+private val BubbleRim = Color(0xFFE9D3BF)
 
 private data class IdleMotion(val float: Float, val breathe: Float)
 
@@ -378,24 +395,23 @@ private fun label(state: String): String {
     return "HOPA"
 }
 
-private fun bubblePath(w: Float, h: Float): Path {
-    val sx = w / 240f
-    val sy = h / 108f
-    fun x(value: Float) = value * sx
-    fun y(value: Float) = value * sy
+private fun bubbleShape(w: Float, h: Float, body: Float, tail: Float): Path {
+    val r = (body * 0.30f).coerceAtMost(w * 0.18f)
+    val cx = w * 0.5f
+    val base = w * 0.10f
     return Path().apply {
-        moveTo(x(36f), y(2f))
-        lineTo(x(204f), y(2f))
-        arcTo(Rect(x(204f), y(2f), x(238f), y(36f)), -90f, 90f, false)
-        lineTo(x(238f), y(44f))
-        arcTo(Rect(x(204f), y(44f), x(238f), y(78f)), 0f, 90f, false)
-        lineTo(x(118f), y(78f))
-        cubicTo(x(104f), y(90f), x(80f), y(100f), x(44f), y(106f))
-        cubicTo(x(68f), y(94f), x(78f), y(86f), x(80f), y(78f))
-        lineTo(x(36f), y(78f))
-        arcTo(Rect(x(2f), y(44f), x(36f), y(78f)), 90f, 90f, false)
-        lineTo(x(2f), y(36f))
-        arcTo(Rect(x(2f), y(2f), x(36f), y(36f)), 180f, 90f, false)
+        moveTo(r, 0f)
+        lineTo(w - r, 0f)
+        quadraticBezierTo(w, 0f, w, r)
+        lineTo(w, body - r)
+        quadraticBezierTo(w, body, w - r, body)
+        lineTo(cx + base, body)
+        lineTo(cx, h)
+        lineTo(cx - base, body)
+        lineTo(r, body)
+        quadraticBezierTo(0f, body, 0f, body - r)
+        lineTo(0f, r)
+        quadraticBezierTo(0f, 0f, r, 0f)
         close()
     }
 }
