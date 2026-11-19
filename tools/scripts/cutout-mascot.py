@@ -98,8 +98,8 @@ def matte(img: Image.Image) -> Image.Image:
     eroded[:, :-1] = np.minimum(eroded[:, :-1], alpha[:, 1:])
 
     out = img.convert("RGBA")
-    out.putalpha(Image.fromarray(eroded, "L").filter(ImageFilter.GaussianBlur(1.1)))
-    return square(out)
+    out.putalpha(Image.fromarray(eroded, "L").filter(ImageFilter.GaussianBlur(1.8)))
+    return seat(square(out))
 
 
 def square(img: Image.Image) -> Image.Image:
@@ -116,6 +116,32 @@ def square(img: Image.Image) -> Image.Image:
     canvas = Image.new("RGBA", (side, side), (0, 0, 0, 0))
     canvas.alpha_composite(tight, ((side - tight.width) // 2, (side - tight.height) // 2))
     return canvas.resize((512, 512), Image.LANCZOS)
+
+
+SEAT_DEPTH = 0.18  # of the plush's height, measured up from its feet
+SEAT_STRENGTH = 0.08  # how much the bottom edge darkens
+
+
+def seat(img: Image.Image) -> Image.Image:
+    """Darken the last band of the plush a little.
+
+    The cream belly is almost the page colour, so the lower half of the mascot
+    dissolves into it. A soft multiply towards the feet - the same occlusion a
+    real object has where it meets the floor - keeps the shape without a border.
+    """
+    pixels = np.asarray(img).astype(np.float32)
+    box = img.getchannel("A").getbbox()
+    if box is None:
+        return img
+    bottom = box[3]
+    depth = max(1, int((bottom - box[1]) * SEAT_DEPTH))
+    for offset in range(depth):
+        y = bottom - depth + offset
+        if y < 0 or y >= pixels.shape[0]:
+            continue
+        strength = 1.0 - SEAT_STRENGTH * (offset + 1) / depth
+        pixels[y, :, :3] *= strength
+    return Image.fromarray(np.clip(pixels, 0, 255).astype(np.uint8), "RGBA")
 
 
 def main() -> int:

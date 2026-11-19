@@ -148,41 +148,27 @@ fun HopaMascot(
             ),
     ) {
         // The object look: the mascot stands on the page, so it needs a floor.
-        // Two layers, the way light works: a narrow contact patch at the feet
-        // and a wide, very light spread around it. The ink is warm umber, not
-        // black - a neutral shadow on the cream page reads as dirt. Both shrink
-        // and fade as the mascot floats up, so it stands rather than being
-        // pasted on. Small avatars get none: at 26 dp it is a smudge.
+        // One soft ellipse, warm umber rather than black - a neutral shadow on
+        // the cream page reads as dirt. It sits under the feet, overlaps them,
+        // and shrinks and fades as the mascot floats up, so it stands rather
+        // than being pasted on. Two layers were tried at this size and read as
+        // two shadows; the asset's own seating does the rest. Small avatars get
+        // none: at 26 dp it is a smudge.
         if (!MascotAppearance.framed && sizeDp >= 56.dp) {
             val ink = Color(0xFF2A1B10)
             val rise = motion.float
-            val wide = sizeDp >= 72.dp
-            // The plush raises its right arm, so its feet sit left of centre:
-            // -5.5% is measured from the artwork's alpha, not guessed.
-            val under = sizeDp * -0.055f
-            if (wide) {
-                SoftShadow(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .offset(x = under, y = sizeDp * 0.045f - lift),
-                    width = sizeDp * 1.05f,
-                    height = sizeDp * 0.17f,
-                    alpha = 0.12f * (1f - 0.15f * rise),
-                    scaleX = 1f - 0.08f * rise,
-                    ink = ink,
-                )
-            }
             SoftShadow(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = under, y = sizeDp * (if (wide) 0.025f else 0.03f) - lift),
-                width = sizeDp * if (wide) 0.60f else 0.64f,
-                height = sizeDp * if (wide) 0.085f else 0.10f,
-                alpha = (if (wide) 0.22f else 0.20f) * (1f - 0.05f * rise),
-                scaleX = 1f,
+                    .offset(x = sizeDp * -0.03f, y = sizeDp * 0.02f - lift),
+                width = sizeDp * if (sizeDp >= 72.dp) 0.85f else 0.72f,
+                height = sizeDp * if (sizeDp >= 72.dp) 0.13f else 0.11f,
+                alpha = (if (sizeDp >= 72.dp) 0.20f else 0.18f) * (1f - 0.06f * rise),
+                scaleX = 1f - 0.05f * rise,
                 ink = ink,
             )
         }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -316,7 +302,7 @@ private fun SoftShadow(
             brush = Brush.radialGradient(
                 colorStops = arrayOf(
                     0f to ink.copy(alpha = alpha),
-                    0.65f to ink.copy(alpha = alpha * 0.85f),
+                    0.60f to ink.copy(alpha = alpha * 0.90f),
                     1f to Color.Transparent,
                 ),
                 center = center,

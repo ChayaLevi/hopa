@@ -57,12 +57,12 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            HopaMascot(sizeDp = 76.dp)
+            HopaMascot(sizeDp = 104.dp)
             Text(
                 text = greeting(),
                 fontSize = cappedSp(13f),
                 color = HopaColor.TextHint,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 14.dp),
             )
             Text(
                 text = "HOPA",
