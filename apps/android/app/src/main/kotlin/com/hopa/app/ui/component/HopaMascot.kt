@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.translate
@@ -56,9 +57,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * The plush HOPA. The photo is a rounded-square badge; the life comes from the
- * container: a 4.8 s float, breathing squash, a 150 ms blink, the established
- * thinking pulse, listening lean and happy cheer, and a wiggle on tap.
+ * The plush HOPA. Two looks, chosen in Settings: the rounded-square badge the
+ * app shipped (the default) and the cut-out object standing on the page with a
+ * contact shadow. Both share the life: a 4.8 s float, breathing squash, a
+ * 150 ms blink, the established thinking pulse, listening lean and happy cheer,
+ * and a wiggle on tap.
  *
  * Transcript avatars pass <code>animate = false</code>, which creates no
  * infinite transitions and no blink timer, so a long chat costs nothing.
@@ -99,6 +102,12 @@ fun HopaMascot(
     )
     val wiggle = remember { Animatable(0f) }
     val badge = RoundedCornerShape(sizeDp * 0.20f)
+    val art = if (MascotAppearance.framed) R.drawable.hopa_plush else R.drawable.hopa_plush_cut
+    val blinkArt = if (MascotAppearance.framed) {
+        R.drawable.hopa_plush_blink
+    } else {
+        R.drawable.hopa_plush_blink_cut
+    }
 
     LaunchedEffect(motionOn, state) {
         pulse = false
@@ -138,11 +147,52 @@ fun HopaMascot(
                 alpha = alpha,
             ),
     ) {
+        // The object look: the mascot stands on the page, so it needs a floor.
+        // Two layers, the way light works: a narrow contact patch at the feet
+        // and a wide, very light spread around it. The ink is warm umber, not
+        // black - a neutral shadow on the cream page reads as dirt. Both shrink
+        // and fade as the mascot floats up, so it stands rather than being
+        // pasted on. Small avatars get none: at 26 dp it is a smudge.
+        if (!MascotAppearance.framed && sizeDp >= 56.dp) {
+            val ink = Color(0xFF2A1B10)
+            val rise = motion.float
+            val wide = sizeDp >= 72.dp
+            // The plush raises its right arm, so its feet sit left of centre:
+            // -5.5% is measured from the artwork's alpha, not guessed.
+            val under = sizeDp * -0.055f
+            if (wide) {
+                SoftShadow(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset(x = under, y = sizeDp * 0.045f - lift),
+                    width = sizeDp * 1.05f,
+                    height = sizeDp * 0.17f,
+                    alpha = 0.12f * (1f - 0.15f * rise),
+                    scaleX = 1f - 0.08f * rise,
+                    ink = ink,
+                )
+            }
+            SoftShadow(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(x = under, y = sizeDp * (if (wide) 0.025f else 0.03f) - lift),
+                width = sizeDp * if (wide) 0.60f else 0.64f,
+                height = sizeDp * if (wide) 0.085f else 0.10f,
+                alpha = (if (wide) 0.22f else 0.20f) * (1f - 0.05f * rise),
+                scaleX = 1f,
+                ink = ink,
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .shadow(elevation = 3.dp, shape = badge, clip = false)
-                .clip(badge)
+                .then(
+                    if (MascotAppearance.framed) {
+                        Modifier.shadow(elevation = 3.dp, shape = badge, clip = false).clip(badge)
+                    } else {
+                        Modifier
+                    },
+                )
                 .semantics(mergeDescendants = true) {
                     contentDescription = label(state)
                 }
@@ -177,13 +227,13 @@ fun HopaMascot(
                 ),
         ) {
             Image(
-                painter = painterResource(R.drawable.hopa_plush),
+                painter = painterResource(art),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
             Image(
-                painter = painterResource(R.drawable.hopa_plush_blink),
+                painter = painterResource(blinkArt),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alpha = blinkAlpha,
@@ -232,6 +282,47 @@ fun HopaMascot(
                 }
             }
         }
+    }
+}
+
+/**
+ * A soft ellipse of shadow. A circle is drawn and squashed by the layer, so the
+ * gradient stays round while the shape does not: that keeps the edge soft on
+ * all sides instead of ending in a blurred bar.
+ */
+@Composable
+private fun SoftShadow(
+    modifier: Modifier,
+    width: Dp,
+    height: Dp,
+    alpha: Float,
+    scaleX: Float,
+    ink: Color,
+) {
+    Canvas(
+        modifier = modifier
+            // The layer squashes around the canvas centre, so the square has to
+            // move down by half of what it loses: then the ellipse's bottom edge
+            // is the element's bottom edge, and the caller decides where the
+            // floor is.
+            .offset(y = (width - height) / 2)
+            .size(width)
+            .graphicsLayer {
+                this.scaleX = scaleX
+                this.scaleY = height / width
+            },
+    ) {
+        drawCircle(
+            brush = Brush.radialGradient(
+                colorStops = arrayOf(
+                    0f to ink.copy(alpha = alpha),
+                    0.65f to ink.copy(alpha = alpha * 0.85f),
+                    1f to Color.Transparent,
+                ),
+                center = center,
+                radius = size.minDimension / 2f,
+            ),
+        )
     }
 }
 

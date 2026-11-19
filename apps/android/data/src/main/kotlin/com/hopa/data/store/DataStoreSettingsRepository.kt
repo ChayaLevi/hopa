@@ -37,6 +37,7 @@ class DataStoreSettingsRepository(
             planFirst = prefs[PLAN_FIRST] ?: false,
             replaySkills = prefs[REPLAY_SKILLS] ?: true,
             vision = prefs[VISION] ?: false,
+        mascotFramed = prefs[MASCOT_FRAMED] ?: true,
             trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
             backendUrl = prefs[BACKEND_URL] ?: "",
             backendDeviceId = prefs[BACKEND_DEVICE_ID] ?: "",
@@ -63,6 +64,7 @@ class DataStoreSettingsRepository(
             prefs[PLAN_FIRST] = next.planFirst
             prefs[REPLAY_SKILLS] = next.replaySkills
             prefs[VISION] = next.vision
+        prefs[MASCOT_FRAMED] = next.mascotFramed
             prefs[TRUSTED_APPS] = next.trustedApps
             prefs[BACKEND_URL] = next.backendUrl
             prefs[BACKEND_DEVICE_ID] = next.backendDeviceId
@@ -126,6 +128,7 @@ class DataStoreSettingsRepository(
         val PLAN_FIRST = booleanPreferencesKey("plan_first")
         val REPLAY_SKILLS = booleanPreferencesKey("replay_skills")
         val VISION = booleanPreferencesKey("vision")
+    val MASCOT_FRAMED = booleanPreferencesKey("mascot_framed")
         val TRUSTED_APPS = stringSetPreferencesKey("trusted_apps")
         val BACKEND_URL = stringPreferencesKey("backend_url")
         val BACKEND_DEVICE_ID = stringPreferencesKey("backend_device_id")

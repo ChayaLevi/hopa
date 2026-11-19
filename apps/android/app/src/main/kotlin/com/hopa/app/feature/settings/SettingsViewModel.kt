@@ -279,6 +279,14 @@ class SettingsViewModel(
         }
     }
 
+    /** The framed picture or the cut-out object; see MascotAppearance. */
+    fun setMascotFramed(value: Boolean) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(mascotFramed = value) }
+            reload()
+        }
+    }
+
     fun setNotifications(value: Boolean) {
         viewModelScope.launch {
             container.settings.update { it.copy(notifyAnswers = value) }

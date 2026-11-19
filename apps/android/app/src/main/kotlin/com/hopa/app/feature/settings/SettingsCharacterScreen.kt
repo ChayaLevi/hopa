@@ -22,6 +22,7 @@ fun SettingsCharacterScreen(
     onBack: () -> Unit,
     onTone: (String) -> Unit,
     onChattiness: (String) -> Unit,
+    onMascot: (Boolean) -> Unit,
     onOpenProfiles: () -> Unit,
 ) {
     SettingsPage(title = "Tone and length", onBack = onBack) {
@@ -40,6 +41,12 @@ fun SettingsCharacterScreen(
             ),
             selected = state.settings.chattiness,
             onSelect = onChattiness,
+        )
+        Text("Mascot", fontSize = 13.sp, color = HopaColor.TextHint)
+        SettingsSegment(
+            options = listOf("framed" to "Framed", "cutout" to "Cut-out"),
+            selected = if (state.settings.mascotFramed) "framed" else "cutout",
+            onSelect = { onMascot(it == "framed") },
         )
         SettingsRow(
             "Profiles",

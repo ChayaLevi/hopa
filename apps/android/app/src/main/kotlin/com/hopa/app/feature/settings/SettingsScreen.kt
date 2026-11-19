@@ -34,6 +34,7 @@ fun SettingsScreen(
     onOpenPage: (String) -> Unit,
     onTone: (String) -> Unit,
     onChattiness: (String) -> Unit,
+    onMascot: (Boolean) -> Unit,
     onToggleAlerts: (Boolean) -> Unit,
     onOpenCapabilities: () -> Unit,
     onOpenProfiles: () -> Unit,
@@ -158,6 +159,18 @@ fun SettingsScreen(
                     ),
                     selected = settings.chattiness,
                     onSelect = onChattiness,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                Text(
+                    "Mascot",
+                    fontSize = 13.sp,
+                    color = HopaColor.TextSecondary,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+                SettingsSegment(
+                    options = listOf("framed" to "Framed", "cutout" to "Cut-out"),
+                    selected = if (settings.mascotFramed) "framed" else "cutout",
+                    onSelect = { onMascot(it == "framed") },
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }

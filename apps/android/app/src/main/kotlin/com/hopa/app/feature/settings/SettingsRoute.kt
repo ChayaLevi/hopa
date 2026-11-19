@@ -44,7 +44,7 @@ fun SettingsRoute(
             recipes = container.recipes.all()
             appNames = runCatching {
                 val installed = container.packages.installed()
-                com.hopa.engine.routing.CatalogRoutes.targets(installed, "android", container.knowledge)
+                com.hopa.routing.CatalogRoutes.targets(installed, "android", container.knowledge)
                     .filter { it.bundle.isNotBlank() }
                     .associate { it.bundle.lowercase() to it.display }
             }.getOrDefault(emptyMap())
@@ -81,6 +81,7 @@ fun SettingsRoute(
                 onBack = backToHub,
                 onTone = viewModel::setTone,
                 onChattiness = viewModel::setChattiness,
+                onMascot = viewModel::setMascotFramed,
                 onOpenProfiles = onOpenProfiles,
             )
 
@@ -130,6 +131,7 @@ fun SettingsRoute(
                 onOpenPage = { page = it },
                 onTone = viewModel::setTone,
                 onChattiness = viewModel::setChattiness,
+                onMascot = viewModel::setMascotFramed,
                 onToggleAlerts = viewModel::setNotifications,
                 onOpenCapabilities = onOpenCapabilities,
                 onOpenProfiles = onOpenProfiles,
