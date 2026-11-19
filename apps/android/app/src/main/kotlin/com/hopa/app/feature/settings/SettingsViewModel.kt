@@ -2,19 +2,11 @@ package com.hopa.app.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.FirebaseApp
-import com.hopa.app.link.push.FirebaseToken
-import com.hopa.app.link.remote.ScreenAccess
 import com.hopa.app.di.AppContainer
+import com.hopa.app.service.Notifier
 import com.hopa.capabilities.accessibility.state.AccessibilityState
-import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
-import com.hopa.bridge.session.BridgeClient
-import com.hopa.inference.choice.ProviderState
-import com.hopa.inference.choice.ProviderStateResolver
-import com.hopa.contracts.model.ModelMessage
-import com.hopa.contracts.model.ModelRequest
 import com.hopa.stores.AppSettings
-import java.io.IOException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,22 +14,21 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
-import com.hopa.app.link.session.BackendLaunchName
-import com.hopa.app.service.Notifier
-import com.hopa.app.service.PairingService
-import com.hopa.app.service.ScreenCaptureRequester
-import com.hopa.app.service.ScreenCaptureService
-import com.hopa.app.ui.component.MascotAppearance
 
+/**
+ * The screen state for settings. The work lives in four classes that each own
+ * one concern - model, pairing, surface, preferences - so this class only
+ * merges their answers into [SettingsUiState].
+ */
 class SettingsViewModel(
     private val container: AppContainer,
 ) : ViewModel() {
-    private val resolver = ProviderStateResolver()
+    private val modelSettings = ModelSettings(container)
+    private val pairingSettings = PairingSettings(container)
+    private val surfaceSettings = SurfaceSettings(container)
+    private val preferences = PreferencesSettings(container)
+
     private val _state = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
 
@@ -47,13 +38,7 @@ class SettingsViewModel(
         // is open, so the card reads them live instead of on a hidden refresh.
         viewModelScope.launch {
             container.backend.state.collect { backend ->
-                _state.update {
-                    it.copy(
-                        backendState = backend,
-                        backendToken = FirebaseToken.current(),
-                        fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
-                    )
-                }
+                _state.update { it.copy(backendState = backend) }
             }
         }
         viewModelScope.launch {
@@ -78,11 +63,7 @@ class SettingsViewModel(
             AccessibilityState.state.collect { binding ->
                 _state.update { current ->
                     current.copy(
-                        phoneAccess = ScreenAccess.available(
-                            allowed = current.settings.accessibilityAllowed,
-                            enabled = binding.enabled,
-                            bound = binding.connected,
-                        ),
+                        phoneAccess = phoneAccess(current.settings.accessibilityAllowed, binding.enabled, binding.connected),
                     )
                 }
             }
@@ -101,6 +82,9 @@ class SettingsViewModel(
         }
     }
 
+    private fun phoneAccess(allowed: Boolean, enabled: Boolean, bound: Boolean): Boolean =
+        com.hopa.app.link.remote.ScreenAccess.available(allowed = allowed, enabled = enabled, bound = bound)
+
     fun save(
         provider: String,
         endpoint: String,
@@ -115,74 +99,20 @@ class SettingsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(busy = true, saved = false, error = null) }
             runCatching {
-                persist(provider, endpoint, model, key, notifyAnswers, webEnabled, bridgeUrl, bridgeKey, useBridge)
+                modelSettings.save(
+                    provider, endpoint, model, key, notifyAnswers, webEnabled,
+                    bridgeUrl, bridgeKey, useBridge,
+                )
             }.onSuccess { note ->
                 _state.update { it.copy(saved = true, notice = note) }
             }.onFailure { error ->
                 _state.update { it.copy(error = error.message ?: "Could not save") }
             }
+            reload()
             _state.update { it.copy(busy = false) }
         }
     }
 
-    /**
-     * Write every field on the screen, including the key, then read the
-     * settings back. The read-back is the point: a key that only exists in the
-     * text field used to look configured while the next screen saw nothing.
-     */
-    private suspend fun persist(
-        provider: String,
-        endpoint: String,
-        model: String,
-        key: String,
-        notifyAnswers: Boolean,
-        webEnabled: Boolean,
-        bridgeUrl: String,
-        bridgeKey: String,
-        useBridge: Boolean,
-    ): String? {
-        // A key the user just typed turns the demo off. Leaving the provider on
-        // "stub" while a key is present kept chat on the demo model.
-        val trimmedProvider = provider.trim()
-        val trimmedEndpoint = endpoint.trim()
-        val effectiveProvider = when {
-            key.isBlank() -> trimmedProvider.ifBlank { "stub" }
-            trimmedProvider.isBlank() || trimmedProvider.equals("stub", true) ->
-                if (trimmedEndpoint.startsWith("http://")) "lan" else "openai"
-            else -> trimmedProvider
-        }
-        container.settings.update {
-            it.copy(
-                provider = effectiveProvider,
-                endpoint = trimmedEndpoint,
-                model = model.trim(),
-                notifyAnswers = notifyAnswers,
-                webEnabled = webEnabled,
-                bridgeUrl = bridgeUrl.trim(),
-                useBridge = useBridge,
-            )
-        }
-        if (key.isNotBlank()) {
-            container.settings.setModelKey(key.trim())
-        }
-        if (bridgeKey.isNotBlank()) {
-            container.settings.setBridgeToken(bridgeKey.trim())
-        }
-        reload()
-        if (key.isNotBlank() && _state.value.key.isBlank()) {
-            throw IOException("the key did not reach the Keystore")
-        }
-        return if (effectiveProvider != trimmedProvider) {
-            "Saved as $effectiveProvider: a key turns the demo off"
-        } else {
-            null
-        }
-    }
-
-    /**
-     * Save first, then ask the saved model one short question. Testing with the
-     * typed key alone told the user the model worked while nothing was stored.
-     */
     fun testModel(
         provider: String,
         endpoint: String,
@@ -196,91 +126,46 @@ class SettingsViewModel(
     ) {
         viewModelScope.launch {
             _state.update { it.copy(busy = true, modelTest = "Testing\u2026", error = null) }
-            val message = runCatching {
-                persist(provider, endpoint, model, key, notifyAnswers, webEnabled, bridgeUrl, bridgeKey, useBridge)
-                val current = container.settings.settings.first()
-                val storedKey = container.settings.modelKey()
-                val state = ProviderStateResolver()
-                    .resolve(current.provider, current.endpoint, storedKey)
-                if (state == ProviderState.DEMO) {
-                    throw IOException("no key is stored, so this is still the demo model")
-                }
-                val client = container.modelFactory.create(
-                    provider = current.provider,
-                    endpoint = current.endpoint,
-                    apiKey = storedKey,
-                    modelName = current.model,
-                )
-                val reply = withTimeout(30_000) {
-                    client.complete(
-                        ModelRequest(
-                            messages = listOf(ModelMessage("user", "Reply with the single word: ready")),
-                            maxTokens = 32,
-                        ),
-                    )
-                }
-                "Model answered: ${reply.text.trim().take(80)}"
-            }.getOrElse { error ->
-                "Model failed: ${error.message ?: error::class.simpleName}"
-            }
-            _state.update { it.copy(busy = false, modelTest = message, saved = message.startsWith("Model answered")) }
+            val result = modelSettings.test(
+                provider, endpoint, model, key, notifyAnswers, webEnabled,
+                bridgeUrl, bridgeKey, useBridge,
+            )
+            reload()
+            _state.update { it.copy(busy = false, modelTest = result.message, saved = result.ok) }
         }
     }
 
     fun setTone(value: String) {
         viewModelScope.launch {
-            container.settings.update { it.copy(tone = value) }
+            preferences.setTone(value)
             reload()
         }
     }
 
     fun setVision(value: Boolean) {
         viewModelScope.launch {
-            container.settings.update { it.copy(vision = value) }
+            surfaceSettings.setVision(value)
             reload()
-        }
-        // Below API 30 there is no accessibility screenshot, so turning vision on
-        // asks for MediaProjection consent once; API 30+ needs no extra grant.
-        if (value &&
-            android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R &&
-            !com.hopa.capabilities.display.client.MediaProjectionCapture.isActive
-        ) {
-            com.hopa.app.service.ScreenCaptureRequester.request()
-        } else if (!value &&
-            com.hopa.capabilities.display.client.MediaProjectionCapture.isActive
-        ) {
-            com.hopa.app.service.ScreenCaptureService.stop(container.context)
         }
     }
 
     fun setTrusted(packageName: String, trusted: Boolean) {
-        if (packageName.isBlank()) {
-            return
-        }
         viewModelScope.launch {
-            container.settings.update { current ->
-                current.copy(
-                    trustedApps = if (trusted) {
-                        current.trustedApps + packageName
-                    } else {
-                        current.trustedApps - packageName
-                    },
-                )
-            }
+            preferences.setTrusted(packageName, trusted)
             reload()
         }
     }
 
     fun setReplaySkills(value: Boolean) {
         viewModelScope.launch {
-            container.settings.update { it.copy(replaySkills = value) }
+            preferences.setReplaySkills(value)
             reload()
         }
     }
 
     fun setPlanFirst(value: Boolean) {
         viewModelScope.launch {
-            container.settings.update { it.copy(planFirst = value) }
+            preferences.setPlanFirst(value)
             reload()
         }
     }
@@ -288,14 +173,14 @@ class SettingsViewModel(
     /** The framed picture or the cut-out object; see MascotAppearance. */
     fun setMascotFramed(value: Boolean) {
         viewModelScope.launch {
-            container.settings.update { it.copy(mascotFramed = value) }
+            preferences.setMascotFramed(value)
             reload()
         }
     }
 
     fun setNotifications(value: Boolean) {
         viewModelScope.launch {
-            container.settings.update { it.copy(notifyAnswers = value) }
+            preferences.setNotifications(value)
             reload()
         }
     }
@@ -304,20 +189,7 @@ class SettingsViewModel(
     fun setScreenPath(value: String) {
         viewModelScope.launch {
             _state.update { it.copy(bridgeStatus = null, screenCheck = emptyList()) }
-            container.settings.update {
-                it.copy(
-                    screenPath = value,
-                    // Selecting the computer turns the bridge on. Going back to
-                    // the phone leaves the bridge configured: chat sync and voice
-                    // still use it, and only the tap driver changes.
-                    useBridge = if (value == "bridge") true else it.useBridge,
-                )
-            }
-            // Chosen "Your screen": the helper is no longer wanted, so it goes.
-            // A run that owns the phone keeps it until that run ends.
-            if (value == "onscreen" && !container.runGate.state.value.busy) {
-                withContext(Dispatchers.IO) { container.helper.release() }
-            }
+            surfaceSettings.setScreenPath(value)
             reload()
         }
     }
@@ -329,19 +201,19 @@ class SettingsViewModel(
 
     fun setChattiness(value: String) {
         viewModelScope.launch {
-            container.settings.update { it.copy(chattiness = value) }
+            preferences.setChattiness(value)
             reload()
         }
     }
 
     fun testNotification() {
-        if (!com.hopa.app.service.Notifier.permissionGranted(container.context)) {
+        if (!Notifier.permissionGranted(container.context)) {
             _state.update {
                 it.copy(notice = "Notifications are off in Android settings")
             }
             return
         }
-        val sent = com.hopa.app.service.Notifier.postTest(container.context)
+        val sent = Notifier.postTest(container.context)
         _state.update {
             it.copy(
                 notice = if (sent) {
@@ -360,178 +232,7 @@ class SettingsViewModel(
     fun runScreenCheck() {
         viewModelScope.launch {
             _state.update { it.copy(busy = true, screenCheck = emptyList()) }
-            val checks = mutableListOf<ScreenCheck>()
-            val current = container.settings.settings.first()
-            val path = current.screenPath
-            val onBridge = path == "bridge"
-            val service = HopaAccessibilityService.instance
-            val enabled = AccessibilityState.isEnabled(container.context)
-
-            checks += when {
-                onBridge -> ScreenCheck(
-                    "screen",
-                    "Screen access is not needed with My computer",
-                    ok = true,
-                    info = true,
-                )
-
-                !current.accessibilityAllowed -> ScreenCheck(
-                    "screen",
-                    "Screen access is paused by you - tap Fix to resume it",
-                    ok = false,
-                    action = "Fix",
-                )
-
-                enabled && service != null -> ScreenCheck(
-                    "screen",
-                    "HOPA can see your screen",
-                    ok = true,
-                )
-
-                enabled -> ScreenCheck(
-                    "screen",
-                    "Screen access is on but not answering - tap Fix to open it",
-                    ok = false,
-                    action = "Fix",
-                )
-
-                else -> ScreenCheck(
-                    "screen",
-                    "Screen access is off - tap Fix, then turn on HOPA",
-                    ok = false,
-                    action = "Fix",
-                )
-            }
-
-            val socket = if (onBridge || path == "onscreen") {
-                false
-            } else {
-                withContext(Dispatchers.IO) { container.shell.connect() }
-            }
-            checks += when {
-                onBridge -> ScreenCheck(
-                    "background",
-                    "Hidden screen is not used with My computer",
-                    ok = true,
-                    info = true,
-                )
-
-                path == "onscreen" -> ScreenCheck(
-                    "background",
-                    "Hidden screen is not used with Your screen",
-                    ok = true,
-                    info = true,
-                )
-
-                socket -> ScreenCheck("background", "Hidden screen is ready", ok = true)
-
-                path == "auto" -> ScreenCheck(
-                    "background",
-                    "Hidden screen isn't running; your screen will be used",
-                    ok = true,
-                    info = true,
-                )
-
-                else -> ScreenCheck(
-                    "background",
-                    "Hidden screen isn't running - tap Set up, then pair once",
-                    ok = false,
-                    action = "Set up",
-                )
-            }
-
-            if (socket) {
-                // Android 16 lets apps publish typed functions; the shell sees them
-                // through `cmd app_function`, which is a cleaner door than tapping.
-                val listing = withContext(Dispatchers.IO) {
-                    runCatching { container.shell.appFunctions("com.android.settings") }
-                        .getOrNull()
-                }
-                val appFunctions = when {
-                    listing == null -> "App functions: could not be checked"
-                    listing.second.contains("Can't find service") ||
-                        listing.second.contains("Unknown command") ->
-                        "App functions: this Android does not offer them (needs 16)"
-                    else -> "App functions: this Android supports them"
-                }
-                checks += ScreenCheck("appfn", appFunctions, ok = true, info = true)
-
-                val device = runCatching { container.backgroundDevice() }.getOrNull()
-                if (device == null) {
-                    val why = container.lastBackgroundError.ifBlank { "no display" }
-                    checks += ScreenCheck(
-                        "tried",
-                        "Hidden screen failed: $why",
-                        ok = false,
-                    )
-                } else {
-                    val opened = withContext(Dispatchers.IO) {
-                        runCatching { device.launch("com.android.settings") }
-                    }
-                    withContext(Dispatchers.IO) {
-                        runCatching { device.observe() }.getOrNull()
-                    }
-                    checks += if (opened.isSuccess) {
-                        ScreenCheck("tried", "Tested it: Settings opened out of sight", ok = true)
-                    } else {
-                        ScreenCheck(
-                            "tried",
-                            "Test failed: ${opened.exceptionOrNull()?.message}",
-                            ok = false,
-                        )
-                    }
-                    runCatching {
-                        (device as? com.hopa.capabilities.display.client.ShellDisplayDevice)?.stop()
-                    }
-                }
-            }
-
-            val token = container.settings.bridgeToken()
-            val bridgeConfigured = current.bridgeUrl.isNotBlank() && token.isNotBlank()
-            if (bridgeConfigured) {
-                val health = withContext(Dispatchers.IO) {
-                    runCatching {
-                        com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token).health()
-                        true
-                    }.getOrDefault(false)
-                }
-                checks += when {
-                    health -> ScreenCheck("computer", "HOPA bridge is connected", ok = true)
-                    onBridge -> ScreenCheck(
-                        "computer",
-                        "HOPA bridge is not answering - tap Fix",
-                        ok = false,
-                        action = "Fix",
-                    )
-                    else -> ScreenCheck(
-                        "computer",
-                        "HOPA bridge is not answering (not needed for This phone)",
-                        ok = true,
-                        info = true,
-                    )
-                }
-            } else if (onBridge) {
-                checks += ScreenCheck(
-                    "computer",
-                    "HOPA bridge isn't set up - tap Fix",
-                    ok = false,
-                    action = "Fix",
-                )
-            } else {
-                checks += ScreenCheck(
-                    "computer",
-                    "HOPA bridge isn't set up (not needed for This phone)",
-                    ok = true,
-                    info = true,
-                )
-            }
-
-            checks += ScreenCheck(
-                "mode",
-                "Apps will open: ${pathLabel(path).lowercase()}",
-                ok = true,
-                info = true,
-            )
+            val checks = surfaceSettings.runScreenCheck()
             _state.update { it.copy(busy = false, screenCheck = checks) }
         }.invokeOnCompletion { _state.update { it.copy(busy = false) } }
     }
@@ -540,7 +241,7 @@ class SettingsViewModel(
     fun pairWireless(address: String, code: String) {
         viewModelScope.launch {
             _state.update { it.copy(busy = true, bridgeStatus = null) }
-            val message = container.pairWireless(address, code)
+            val message = pairingSettings.pairWireless(address, code)
             _state.update {
                 it.copy(
                     busy = false,
@@ -557,36 +258,19 @@ class SettingsViewModel(
 
     /** Read the code from Android's pairing dialog instead of asking for it. */
     fun pairWirelessFromScreen() {
-        com.hopa.app.service.PairingService.start(
-            container.context,
-            com.hopa.app.service.PairingService.MODE_AUTO,
-        )
+        pairingSettings.pairWirelessFromScreen()
     }
 
     /** Wait for a dialog the person opens, then read its code and pair. */
     fun pairWirelessWaiting() {
-        com.hopa.app.service.PairingService.start(
-            container.context,
-            com.hopa.app.service.PairingService.MODE_WAIT,
-        )
+        pairingSettings.pairWirelessWaiting()
     }
 
     /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
     fun startBackgroundHelper() {
         viewModelScope.launch {
             _state.update { it.copy(busy = true, bridgeStatus = null) }
-            val current = container.settings.settings.first()
-            val token = container.settings.bridgeToken()
-            val message = when {
-                current.bridgeUrl.isBlank() -> "Bridge: set an address first"
-                token.isBlank() -> "Bridge: pair first, then start the helper"
-                else -> when (val status = withContext(Dispatchers.IO) { container.helper.ensure() }) {
-                    is com.hopa.capabilities.display.client.HelperStatus.Running -> "Hidden screen is ready"
-                    is com.hopa.capabilities.display.client.HelperStatus.Failed ->
-                        "Hidden screen: ${status.reason}"
-                    else -> "Hidden screen: not started"
-                }
-            }
+            val message = pairingSettings.startBackgroundHelper()
             _state.update {
                 it.copy(
                     busy = false,
@@ -603,18 +287,11 @@ class SettingsViewModel(
 
     fun pairBridge(url: String, code: String) {
         viewModelScope.launch {
-            if (url.isBlank() || code.isBlank()) {
-                _state.update { it.copy(bridgeStatus = "Bridge: address and pair code first") }
-                return@launch
-            }
             _state.update { it.copy(busy = true, bridgeStatus = null) }
-            val message = runCatching {
-                val session = BridgeClient(url, "").pair(code.trim())
-                container.settings.setBridgeToken(session.token)
-                container.settings.setBridgeRefresh(session.refresh)
+            val message = pairingSettings.pairBridge(url, code)
+            if (message.startsWith("Bridge paired")) {
                 reload()
-                "Bridge paired; the token is in the Keystore"
-            }.getOrElse { error -> "Bridge: ${error.message}" }
+            }
             _state.update { it.copy(busy = false, bridgeStatus = message) }
         }
     }
@@ -626,20 +303,8 @@ class SettingsViewModel(
      */
     fun pair(url: String, text: String) {
         viewModelScope.launch {
-            val link = PairInput.normalise(text, url.trim())
-            if (link == null) {
-                _state.update {
-                    it.copy(backendStatus = "Gateway: paste a pairing link or a session with an address")
-                }
-                return@launch
-            }
             _state.update { it.copy(busy = true, backendStatus = null) }
-            val message = container.backend.pair(link).fold(
-                onSuccess = { "Gateway paired; this phone can receive tasks" },
-                onFailure = { error ->
-                    "Gateway: ${error.message ?: error::class.simpleName}"
-                },
-            )
+            val message = pairingSettings.pair(url, text)
             reload()
             _state.update { it.copy(busy = false, backendStatus = message) }
         }
@@ -649,11 +314,9 @@ class SettingsViewModel(
     fun disconnectBackend() {
         viewModelScope.launch {
             _state.update { it.copy(busy = true, backendStatus = null) }
-            runCatching { container.backend.disconnect() }
+            val message = pairingSettings.disconnectBackend()
             reload()
-            _state.update {
-                it.copy(busy = false, backendStatus = "Disconnected; the pairing is kept")
-            }
+            _state.update { it.copy(busy = false, backendStatus = message) }
         }
     }
 
@@ -662,28 +325,13 @@ class SettingsViewModel(
      * settings page. The service pushes every later change.
      */
     fun refreshScreenAccess() {
-        AccessibilityState.refresh(container.context)
+        surfaceSettings.refreshScreenAccess()
     }
 
     fun testBridge(url: String, token: String) {
         viewModelScope.launch {
-            if (url.isBlank()) {
-                _state.update { it.copy(bridgeStatus = "Bridge: set an address first") }
-                return@launch
-            }
             _state.update { it.copy(busy = true, bridgeStatus = null) }
-            val effective = token.ifBlank {
-                runCatching { container.settings.bridgeToken() }.getOrDefault("")
-            }
-            val message = runCatching {
-                val client = BridgeClient(url, effective)
-                client.health()
-                val who = client.whoami()
-                val devices = who["devices"]?.jsonArray
-                    ?.joinToString { it.jsonPrimitive.content }
-                val nodes = client.observe()["nodes"]?.jsonArray?.size ?: 0
-                "Bridge ok: ${devices ?: "paired"}, $nodes nodes"
-            }.getOrElse { error -> "Bridge: ${error.message}" }
+            val message = pairingSettings.testBridge(url, token)
             _state.update { it.copy(busy = false, bridgeStatus = message) }
         }
     }
@@ -691,9 +339,7 @@ class SettingsViewModel(
     /** Only the helper's liveness; cheap enough to run while the page is open. */
     fun refreshBackground() {
         viewModelScope.launch {
-            val running = withContext(Dispatchers.IO) {
-                container.helper.health() is com.hopa.capabilities.display.client.HelperStatus.Running
-            }
+            val running = surfaceSettings.refreshBackground()
             _state.update {
                 if (it.backgroundRunning == running) it else it.copy(backgroundRunning = running)
             }
@@ -705,32 +351,24 @@ class SettingsViewModel(
         val background = withContext(Dispatchers.IO) {
             runCatching { container.shell.connect() }.getOrDefault(false)
         }
-        val key = container.settings.modelKey()
-        val keySaved = container.settings.hasModelKey()
-        val bridgeKey = container.settings.bridgeToken()
+        val model = modelSettings.snapshot()
+        val pairing = pairingSettings.snapshot(settings)
+        val phoneAccess = surfaceSettings.phoneAccess(settings)
         _state.update {
             it.copy(
                 settings = settings,
-                key = key,
-                keySaved = keySaved,
-                bridgeKey = bridgeKey,
+                key = model.key,
+                keySaved = model.keySaved,
+                bridgeKey = pairing.bridgeKey,
                 backgroundRunning = background,
-                backendUrl = settings.backendUrl,
-                backendDeviceId = settings.backendDeviceId,
-                backendName = com.hopa.app.link.session.BackendLaunchName.value,
-                backendToken = FirebaseToken.current(),
-                fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
-                providerState = resolver.resolve(settings.provider, settings.endpoint, key),
-                phoneAccess = ScreenAccess.available(
-                    allowed = settings.accessibilityAllowed,
-                    enabled = AccessibilityState.isEnabled(container.context),
-                    bound = HopaAccessibilityService.instance != null,
-                ),
-                error = if (keySaved && key.isBlank()) {
-                    "The saved key cannot be read on this phone; paste it again"
-                } else {
-                    it.error
-                },
+                backendUrl = pairing.backendUrl,
+                backendDeviceId = pairing.backendDeviceId,
+                backendName = pairing.backendName,
+                backendToken = pairing.backendToken,
+                fcmAvailable = pairing.fcmAvailable,
+                providerState = model.providerState,
+                phoneAccess = phoneAccess,
+                error = model.error ?: it.error,
             )
         }
     }
