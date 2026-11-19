@@ -2,7 +2,7 @@ package com.hopa.app.feature.memory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.MemoryDependencies
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MemoryViewModel(
-    private val container: AppContainer,
+    private val container: MemoryDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MemoryUiState())
     val state: StateFlow<MemoryUiState> = _state.asStateFlow()

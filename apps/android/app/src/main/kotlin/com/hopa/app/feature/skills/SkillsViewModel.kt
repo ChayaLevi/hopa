@@ -2,7 +2,7 @@ package com.hopa.app.feature.skills
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.SkillsDependencies
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 /** Skills only: adding one no longer reloads the facts on the memory page. */
 class SkillsViewModel(
-    private val container: AppContainer,
+    private val container: SkillsDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SkillsUiState())
     val state: StateFlow<SkillsUiState> = _state.asStateFlow()

@@ -1,7 +1,7 @@
 package com.hopa.app.feature.settings
 
 import com.google.firebase.FirebaseApp
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.PairingDependencies
 import com.hopa.app.link.push.FirebaseToken
 import com.hopa.app.link.session.BackendLaunchName
 import com.hopa.app.service.PairingService
@@ -20,15 +20,15 @@ import kotlinx.serialization.json.jsonPrimitive
  * so the ViewModel only copies it into its state.
  */
 internal class PairingSettings(
-    private val container: AppContainer,
+    private val deps: PairingDependencies,
 ) {
     suspend fun snapshot(settings: AppSettings): PairingSnapshot = PairingSnapshot(
         backendUrl = settings.backendUrl,
         backendDeviceId = settings.backendDeviceId,
         backendName = BackendLaunchName.value,
         backendToken = FirebaseToken.current(),
-        fcmAvailable = FirebaseApp.getApps(container.context).isNotEmpty(),
-        bridgeKey = container.settings.bridgeToken(),
+        fcmAvailable = FirebaseApp.getApps(deps.context).isNotEmpty(),
+        bridgeKey = deps.settings.bridgeToken(),
     )
 
     /**
@@ -39,7 +39,7 @@ internal class PairingSettings(
     suspend fun pair(url: String, text: String): String {
         val link = PairInput.normalise(text, url.trim())
             ?: return "Gateway: paste a pairing link or a session with an address"
-        return container.backend.pair(link).fold(
+        return deps.backend.pair(link).fold(
             onSuccess = { "Gateway paired; this phone can receive tasks" },
             onFailure = { error ->
                 "Gateway: ${error.message ?: error::class.simpleName}"
@@ -49,7 +49,7 @@ internal class PairingSettings(
 
     /** Close the socket but keep the stored identity, so the next open reconnects. */
     suspend fun disconnectBackend(): String {
-        runCatching { container.backend.disconnect() }
+        runCatching { deps.backend.disconnect() }
         return "Disconnected; the pairing is kept"
     }
 
@@ -59,8 +59,8 @@ internal class PairingSettings(
         }
         return runCatching {
             val session = BridgeClient(url, "").pair(code.trim())
-            container.settings.setBridgeToken(session.token)
-            container.settings.setBridgeRefresh(session.refresh)
+            deps.settings.setBridgeToken(session.token)
+            deps.settings.setBridgeRefresh(session.refresh)
             "Bridge paired; the token is in the Keystore"
         }.getOrElse { error -> "Bridge: ${error.message}" }
     }
@@ -70,7 +70,7 @@ internal class PairingSettings(
             return "Bridge: set an address first"
         }
         val effective = token.ifBlank {
-            runCatching { container.settings.bridgeToken() }.getOrDefault("")
+            runCatching { deps.settings.bridgeToken() }.getOrDefault("")
         }
         return runCatching {
             val client = BridgeClient(url, effective)
@@ -85,26 +85,26 @@ internal class PairingSettings(
 
     /** Pair with this phone's own adbd; no PC needed after this succeeds. */
     suspend fun pairWireless(address: String, code: String): String =
-        container.pairWireless(address, code)
+        deps.pairWireless(address, code)
 
     /** Read the code from Android's pairing dialog instead of asking for it. */
     fun pairWirelessFromScreen() {
-        PairingService.start(container.context, PairingService.MODE_AUTO)
+        PairingService.start(deps.context, PairingService.MODE_AUTO)
     }
 
     /** Wait for a dialog the person opens, then read its code and pair. */
     fun pairWirelessWaiting() {
-        PairingService.start(container.context, PairingService.MODE_WAIT)
+        PairingService.start(deps.context, PairingService.MODE_WAIT)
     }
 
     /** Start the hidden-screen helper on the phone, using the paired PC bridge. */
     suspend fun startBackgroundHelper(): String {
-        val current = container.settings.settings.first()
-        val token = container.settings.bridgeToken()
+        val current = deps.settings.settings.first()
+        val token = deps.settings.bridgeToken()
         return when {
             current.bridgeUrl.isBlank() -> "Bridge: set an address first"
             token.isBlank() -> "Bridge: pair first, then start the helper"
-            else -> when (val status = withContext(Dispatchers.IO) { container.helper.ensure() }) {
+            else -> when (val status = withContext(Dispatchers.IO) { deps.helper.ensure() }) {
                 is HelperStatus.Running -> "Hidden screen is ready"
                 is HelperStatus.Failed -> "Hidden screen: ${status.reason}"
                 else -> "Hidden screen: not started"

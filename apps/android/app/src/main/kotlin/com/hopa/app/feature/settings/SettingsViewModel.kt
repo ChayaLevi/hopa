@@ -2,7 +2,9 @@ package com.hopa.app.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.PairingDependencies
+import com.hopa.app.di.SettingsDependencies
+import com.hopa.app.di.SurfaceDependencies
 import com.hopa.app.service.Notifier
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.stores.AppSettings
@@ -22,11 +24,13 @@ import kotlinx.coroutines.withContext
  * merges their answers into [SettingsUiState].
  */
 class SettingsViewModel(
-    private val container: AppContainer,
+    private val container: SettingsDependencies,
+    pairingDependencies: PairingDependencies,
+    surfaceDependencies: SurfaceDependencies,
 ) : ViewModel() {
     private val modelSettings = ModelSettings(container.settings, container.modelFactory)
-    private val pairingSettings = PairingSettings(container)
-    private val surfaceSettings = SurfaceSettings(container)
+    private val pairingSettings = PairingSettings(pairingDependencies)
+    private val surfaceSettings = SurfaceSettings(surfaceDependencies)
     private val preferences = PreferencesSettings(container.settings)
 
     private val _state = MutableStateFlow(SettingsUiState())

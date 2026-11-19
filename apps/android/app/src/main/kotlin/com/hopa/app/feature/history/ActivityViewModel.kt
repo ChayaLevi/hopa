@@ -2,7 +2,7 @@ package com.hopa.app.feature.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.ActivityDependencies
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.contracts.wire.RunRecord
 import java.time.Instant
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ActivityViewModel(
-    private val container: AppContainer,
+    private val container: ActivityDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ActivityUiState())
     val state: StateFlow<ActivityUiState> = _state.asStateFlow()

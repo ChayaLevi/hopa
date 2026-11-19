@@ -9,5 +9,5 @@ class SettingsViewModelFactory(
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-        SettingsViewModel(container) as T
+        SettingsViewModel(container, container, container) as T
 }

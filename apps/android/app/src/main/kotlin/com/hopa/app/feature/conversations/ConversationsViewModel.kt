@@ -2,7 +2,7 @@ package com.hopa.app.feature.conversations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.ConversationsDependencies
 import com.hopa.contracts.chat.Conversation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ConversationsViewModel(
-    private val container: AppContainer,
+    private val container: ConversationsDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ConversationsUiState())
     val state: StateFlow<ConversationsUiState> = _state.asStateFlow()

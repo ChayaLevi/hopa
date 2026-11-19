@@ -1,7 +1,7 @@
 package com.hopa.app.feature.settings
 
 import android.os.Build
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.SurfaceDependencies
 import com.hopa.app.link.remote.ScreenAccess
 import com.hopa.app.service.ScreenCaptureRequester
 import com.hopa.app.service.ScreenCaptureService
@@ -21,11 +21,11 @@ import kotlinx.coroutines.withContext
  * ViewModel; this class performs the checks and the writes.
  */
 internal class SurfaceSettings(
-    private val container: AppContainer,
+    private val deps: SurfaceDependencies,
 ) {
     /** auto, background, onscreen or bridge; the same words the core enum uses. */
     suspend fun setScreenPath(value: String) {
-        container.settings.update {
+        deps.settings.update {
             it.copy(
                 screenPath = value,
                 // Selecting the computer turns the bridge on. Going back to the
@@ -36,13 +36,13 @@ internal class SurfaceSettings(
         }
         // Chosen "Your screen": the helper is no longer wanted, so it goes.
         // A run that owns the phone keeps it until that run ends.
-        if (value == "onscreen" && !container.runGate.state.value.busy) {
-            withContext(Dispatchers.IO) { container.helper.release() }
+        if (value == "onscreen" && !deps.runGate.state.value.busy) {
+            withContext(Dispatchers.IO) { deps.helper.release() }
         }
     }
 
     suspend fun setVision(value: Boolean) {
-        container.settings.update { it.copy(vision = value) }
+        deps.settings.update { it.copy(vision = value) }
         // Below API 30 there is no accessibility screenshot, so turning vision on
         // asks for MediaProjection consent once; API 30+ needs no extra grant.
         if (value &&
@@ -51,25 +51,25 @@ internal class SurfaceSettings(
         ) {
             ScreenCaptureRequester.request()
         } else if (!value && MediaProjectionCapture.isActive) {
-            ScreenCaptureService.stop(container.context)
+            ScreenCaptureService.stop(deps.context)
         }
     }
 
     /** True when the accessibility service is enabled and bound now. */
     fun phoneAccess(settings: com.hopa.stores.AppSettings): Boolean = ScreenAccess.available(
         allowed = settings.accessibilityAllowed,
-        enabled = AccessibilityState.isEnabled(container.context),
+        enabled = AccessibilityState.isEnabled(deps.context),
         bound = HopaAccessibilityService.instance != null,
     )
 
     /** Ask Android once, for this screen opening or the app coming back. */
     fun refreshScreenAccess() {
-        AccessibilityState.refresh(container.context)
+        AccessibilityState.refresh(deps.context)
     }
 
     /** Only the helper's liveness; cheap enough to run while the page is open. */
     suspend fun refreshBackground(): Boolean = withContext(Dispatchers.IO) {
-        container.helper.health() is HelperStatus.Running
+        deps.helper.health() is HelperStatus.Running
     }
 
     /**
@@ -78,11 +78,11 @@ internal class SurfaceSettings(
      */
     suspend fun runScreenCheck(): List<ScreenCheck> {
         val checks = mutableListOf<ScreenCheck>()
-        val current = container.settings.settings.first()
+        val current = deps.settings.settings.first()
         val path = current.screenPath
         val onBridge = path == "bridge"
         val service = HopaAccessibilityService.instance
-        val enabled = AccessibilityState.isEnabled(container.context)
+        val enabled = AccessibilityState.isEnabled(deps.context)
 
         checks += when {
             onBridge -> ScreenCheck(
@@ -123,7 +123,7 @@ internal class SurfaceSettings(
         val socket = if (onBridge || path == "onscreen") {
             false
         } else {
-            withContext(Dispatchers.IO) { container.shell.connect() }
+            withContext(Dispatchers.IO) { deps.shell.connect() }
         }
         checks += when {
             onBridge -> ScreenCheck(
@@ -161,7 +161,7 @@ internal class SurfaceSettings(
             // Android 16 lets apps publish typed functions; the shell sees them
             // through `cmd app_function`, which is a cleaner door than tapping.
             val listing = withContext(Dispatchers.IO) {
-                runCatching { container.shell.appFunctions("com.android.settings") }
+                runCatching { deps.shell.appFunctions("com.android.settings") }
                     .getOrNull()
             }
             val appFunctions = when {
@@ -173,9 +173,9 @@ internal class SurfaceSettings(
             }
             checks += ScreenCheck("appfn", appFunctions, ok = true, info = true)
 
-            val device = runCatching { container.backgroundDevice() }.getOrNull()
+            val device = runCatching { deps.backgroundDevice() }.getOrNull()
             if (device == null) {
-                val why = container.lastBackgroundError.ifBlank { "no display" }
+                val why = deps.lastBackgroundError.ifBlank { "no display" }
                 checks += ScreenCheck(
                     "tried",
                     "Hidden screen failed: $why",
@@ -203,7 +203,7 @@ internal class SurfaceSettings(
             }
         }
 
-        val token = container.settings.bridgeToken()
+        val token = deps.settings.bridgeToken()
         val bridgeConfigured = current.bridgeUrl.isNotBlank() && token.isNotBlank()
         if (bridgeConfigured) {
             val health = withContext(Dispatchers.IO) {

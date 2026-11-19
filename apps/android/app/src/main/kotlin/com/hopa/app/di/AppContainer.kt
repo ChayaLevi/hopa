@@ -37,9 +37,11 @@ import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 
-class AppContainer(context: Context) {
-    val context: Context = context.applicationContext
-    val settings: SettingsRepository = DataStoreSettingsRepository(
+class AppContainer(context: Context) : ChatDependencies, ConversationsDependencies,
+    ActivityDependencies, MemoryDependencies, SkillsDependencies, UsageDependencies,
+    SettingsDependencies, PairingDependencies, SurfaceDependencies {
+    override val context: Context = context.applicationContext
+    override val settings: SettingsRepository = DataStoreSettingsRepository(
         context = context,
         secrets = KeystoreSecretStore(context),
     )
@@ -50,7 +52,7 @@ class AppContainer(context: Context) {
     }
 
     private val database = HopaDatabase.build(context)
-    val conversations: ConversationStore = DbConversationStore(database)
+    override val conversations: ConversationStore = DbConversationStore(database)
     /**
      * The tables this client uses. A stored bundle wins over the bundled
      * snapshot; the file store falls back to it on any problem. `knowledge` is a
@@ -64,8 +66,8 @@ class AppContainer(context: Context) {
         )
     val knowledgeSource: com.hopa.catalog.store.CatalogSource = knowledgeStore
     val knowledge: com.hopa.catalog.store.CatalogSnapshot get() = knowledgeSource.current()
-    val selectedConversation = MutableStateFlow<String?>(null)
-    val runGate = com.hopa.app.runtime.RunGate()
+    override val selectedConversation = MutableStateFlow<String?>(null)
+    override val runGate = com.hopa.app.runtime.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
     val pairingStatus = MutableStateFlow<String?>(null)
     /**
@@ -77,23 +79,23 @@ class AppContainer(context: Context) {
         kotlinx.coroutines.channels.Channel.UNLIMITED,
     )
     /** A file shared into the app, waiting in the composer. */
-    val pendingAttachment = MutableStateFlow<com.hopa.contracts.chat.Attachment?>(null)
-    val pendingNotice = MutableStateFlow<String?>(null)
+    override val pendingAttachment = MutableStateFlow<com.hopa.contracts.chat.Attachment?>(null)
+    override val pendingNotice = MutableStateFlow<String?>(null)
     /** Work that must outlive an Activity, such as a one-shot launch pairing. */
     val appScope = kotlinx.coroutines.CoroutineScope(
         kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO,
     )
     /** The last launch-pairing outcome, shown on the Backend card. */
-    val backendNotice = MutableStateFlow<String?>(null)
-    val intake = com.hopa.app.share.AttachmentIntake(context)
+    override val backendNotice = MutableStateFlow<String?>(null)
+    override val intake = com.hopa.app.share.AttachmentIntake(context)
     val packages = AndroidPackageCatalog(context)
-    val recorder = DbRunRecorder(database.runRecordDao())
-    val runHistory = com.hopa.data.store.DbRunHistory(database.runHistoryDao())
+    override val recorder = DbRunRecorder(database.runRecordDao())
+    override val runHistory = com.hopa.data.store.DbRunHistory(database.runHistoryDao())
     val pendingApprovals = com.hopa.data.store.DbPendingApprovalStore(
         database.pendingApprovalDao(),
     )
-    val memory = com.hopa.data.store.DbMemoryStore(database.memoryDao())
-    val skills = com.hopa.data.store.DbSkillStore(database.skillDao())
+    override val memory = com.hopa.data.store.DbMemoryStore(database.memoryDao())
+    override val skills = com.hopa.data.store.DbSkillStore(database.skillDao())
     val clock = AndroidClock()
     /**
      * The gate settings, replaced as a whole when they change. The executor
@@ -104,20 +106,20 @@ class AppContainer(context: Context) {
     private var gatePolicy = ApprovalPolicy()
 
     /** Use these settings for the turns that start now. */
-    fun useGate(trustedApps: Collection<String>, autonomous: Boolean = false) {
+    override fun useGate(trustedApps: Collection<String>, autonomous: Boolean) {
         gatePolicy = ApprovalPolicy(autonomous = autonomous, trustedApps = trustedApps)
     }
 
-    val approval = UiApprovalGateway(pendingApprovals)
+    override val approval = UiApprovalGateway(pendingApprovals)
     val factory = RunRecordFactory(clock)
     val device = AccessibilityDevice(context)
-    val voice = com.hopa.capabilities.voice.VoiceRecorder(context)
+    override val voice = com.hopa.capabilities.voice.VoiceRecorder(context)
     val speaker = com.hopa.capabilities.voice.Speaker(context)
     /** Goals that run at the same time, each on its own hidden display. */
-    val runner by lazy { com.hopa.app.runtime.ParallelRunner(this) }
+    override val runner by lazy { com.hopa.app.runtime.ParallelRunner(this) }
 
     /** Why the last hidden-display start failed; empty when it worked. */
-    var lastBackgroundError: String = ""
+    override var lastBackgroundError: String = ""
         private set
 
 
@@ -125,7 +127,7 @@ class AppContainer(context: Context) {
      * The app's one gateway link. Pairing and the activity life cycle reach it
      * through here; [remoteRunner] is attached below as its delivery handler.
      */
-    val backend: BackendSession by lazy {
+    override val backend: BackendSession by lazy {
         BackendSession(
             settings = settings,
             pairingFactory = { url -> com.hopa.backend.pairing.BackendPairing(url) },
@@ -155,7 +157,7 @@ class AppContainer(context: Context) {
     }
 
     /** The surface stack for the person's screenPath setting, shared by chat and remote runs. */
-    val surfaces: suspend (AppSettings) -> ScreenSourceDevice = { Surfaces.resolve(this, it) }
+    override val surfaces: suspend (AppSettings) -> ScreenSourceDevice = { Surfaces.resolve(this, it) }
 
     /** Task ids the gateway delivered, so a redelivery inside a day is skipped. */
     private val processedTasks by lazy { ProcessedTaskStore.open(context) }
@@ -197,7 +199,7 @@ class AppContainer(context: Context) {
 
     /** The hidden background display: one helper process, one loopback port. */
     val displayToken = com.hopa.capabilities.display.client.DisplayToken(context)
-    val shell = com.hopa.capabilities.display.client.ShellClient(displayToken.value)
+    override val shell = com.hopa.capabilities.display.client.ShellClient(displayToken.value)
 
     /**
      * Wireless debugging inside the app: pair once with the code Android shows,
@@ -210,7 +212,7 @@ class AppContainer(context: Context) {
      * The supervisor starts one when nothing answers and reports why when it
      * cannot, so a turn never drives a socket that only looks connected.
      */
-    suspend fun backgroundDevice(): DevicePort? =
+    override suspend fun backgroundDevice(): DevicePort? =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val status = helper.ensure()
             if (status !is com.hopa.capabilities.display.client.HelperStatus.Running) {
@@ -235,13 +237,13 @@ class AppContainer(context: Context) {
      * One owner for the helper's life. `connect` heals a stale socket on its own
      * (it pings first), and `start` asks adbd, then the paired PC.
      */
-    val helper = com.hopa.capabilities.display.client.HelperSupervisor(
+    override val helper = com.hopa.capabilities.display.client.HelperSupervisor(
         ping = { shell.connect() },
         start = { startHelperOnPhone() },
         stop = { shell.close() },
         pause = { kotlinx.coroutines.delay(it) },
     )
-    val helperStatus = helper.status
+    override val helperStatus = helper.status
 
     /** Ask the phone's own adbd first; fall back to the paired PC. */
     private suspend fun startHelperOnPhone(): Boolean {
@@ -252,7 +254,7 @@ class AppContainer(context: Context) {
     }
 
     /** Pair with this phone's own adbd, then start the helper with that shell. */
-    suspend fun pairWireless(address: String, code: String): String =
+    override suspend fun pairWireless(address: String, code: String): String =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val host = address.substringBefore(':').trim()
             val port = address.substringAfter(':', "").trim().toIntOrNull()
@@ -290,7 +292,7 @@ class AppContainer(context: Context) {
 
     val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
-    val modelFactory: ModelFactory = ModelFactory()
+    override val modelFactory: ModelFactory = ModelFactory()
 
     /** A bridge-backed device when Settings has an address and a token. */
     suspend fun bridgedDevice(): DevicePort? {
@@ -331,7 +333,7 @@ class AppContainer(context: Context) {
      * refuse a background activity start; the caller posts a notification too, so
      * a refusal still leaves a way in.
      */
-    fun bringToFront() {
+    override fun bringToFront() {
         val intent = android.content.Intent(context, com.hopa.app.MainActivity::class.java)
             .addFlags(
                 android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -342,7 +344,7 @@ class AppContainer(context: Context) {
     }
 
     /** Read a reply aloud: the PC voice when a bridge is configured, else TTS. */
-    suspend fun speak(text: String): Boolean {
+    override suspend fun speak(text: String): Boolean {
         val current = settings.settings.first()
         val token = settings.bridgeToken()
         if (current.bridgeUrl.isNotBlank() && token.isNotBlank()) {
@@ -357,7 +359,7 @@ class AppContainer(context: Context) {
     }
 
     /** Speech to text through the PC bridge; null when no bridge is configured. */
-    suspend fun transcribe(wav: ByteArray): String? {
+    override suspend fun transcribe(wav: ByteArray): String? {
         val current = settings.settings.first()
         if (current.bridgeUrl.isBlank()) {
             return null
@@ -371,7 +373,7 @@ class AppContainer(context: Context) {
     }
 
     /** The conversation half of the bridge, when one is configured. */
-    suspend fun chatSync(): com.hopa.app.link.sync.ChatSync? {
+    override suspend fun chatSync(): com.hopa.app.link.sync.ChatSync? {
         val current = settings.settings.first()
         if (!current.useBridge || current.bridgeUrl.isBlank()) {
             return null
@@ -405,7 +407,7 @@ class AppContainer(context: Context) {
     val recipes by lazy { com.hopa.agent.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
-    val runs by lazy { com.hopa.app.runtime.RunCoordinator(this) }
+    override val runs by lazy { com.hopa.app.runtime.RunCoordinator(this) }
 
     /** Asks the backend for a newer knowledge bundle; a failure keeps the copy. */
     val knowledgeUpdater by lazy {

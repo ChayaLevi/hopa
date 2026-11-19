@@ -4,7 +4,7 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.ChatDependencies
 import com.hopa.app.di.Surfaces
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.observation.produce.ScreenPath
@@ -29,7 +29,7 @@ import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
 
 class ChatViewModel(
-    private val container: AppContainer,
+    private val container: ChatDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ChatUiState())
     val state: StateFlow<ChatUiState> = _state.asStateFlow()
