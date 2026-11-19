@@ -1,191 +1,168 @@
 package com.hopa.app.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.hopa.app.di.AppContainer
+import com.hopa.app.feature.browser.BrowserRoute
+import com.hopa.app.feature.execution.ComputerRoute
+import com.hopa.app.feature.execution.HowHopaActsRoute
+import com.hopa.app.feature.execution.RunPrefsRoute
+import com.hopa.app.feature.execution.RunSetupRoute
+import com.hopa.app.feature.execution.RunningAppsRoute
 import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.app.feature.memory.MemoryRoute
-import com.hopa.app.feature.skills.SkillsRoute
-import com.hopa.app.feature.execution.ComputerRoute
-import com.hopa.app.feature.execution.HowHopaActsRoute
-import com.hopa.app.feature.execution.RunningAppsRoute
-import com.hopa.app.feature.execution.RunPrefsRoute
-import com.hopa.app.feature.execution.RunSetupRoute
-import com.hopa.app.feature.browser.BrowserRoute
 import com.hopa.app.feature.profiles.ProfilesRoute
 import com.hopa.app.feature.runs.RunsRoute
 import com.hopa.app.feature.settings.AboutScreen
 import com.hopa.app.feature.settings.AccessibilityRoute
 import com.hopa.app.feature.settings.SelfCheckRoute
 import com.hopa.app.feature.settings.SettingsRoute
-import com.hopa.app.feature.usage.UsageRoute
 import com.hopa.app.feature.shell.HomeShell
+import com.hopa.app.feature.skills.SkillsRoute
+import com.hopa.app.feature.usage.UsageRoute
 
 @Composable
 fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = HopaDestination.CHAT) {
-        composable(HopaDestination.CHAT) {
+    NavHost(navController = navController, startDestination = HopaDestination.Chat) {
+        composable<HopaDestination.Chat> {
             HomeShell(
                 container = container,
-                onOpenSettings = { navController.navigate(HopaDestination.SETTINGS) },
-                onOpenRuns = { navController.navigate(HopaDestination.RUNS) },
-                onOpenUsage = { navController.navigate(HopaDestination.USAGE) },
-                onOpenMemory = { navController.navigate(HopaDestination.MEMORY) },
-                onOpenSkills = { navController.navigate(HopaDestination.SKILLS) },
-                onOpenRunningApps = { navController.navigate(HopaDestination.RUNNING_APPS) },
-                onOpenActMode = { navController.navigate(HopaDestination.ACT_MODE) },
-                onOpenBrowser = {
-                    navController.navigate(HopaDestination.BROWSER + "?url=")
-                },
+                onOpenSettings = { navController.navigate(HopaDestination.Settings) },
+                onOpenRuns = { navController.navigate(HopaDestination.Runs) },
+                onOpenUsage = { navController.navigate(HopaDestination.Usage) },
+                onOpenMemory = { navController.navigate(HopaDestination.Memory) },
+                onOpenSkills = { navController.navigate(HopaDestination.Skills) },
+                onOpenRunningApps = { navController.navigate(HopaDestination.RunningApps) },
+                onOpenActMode = { navController.navigate(HopaDestination.ActMode) },
+                onOpenBrowser = { navController.navigate(HopaDestination.Browser()) },
                 initialGoal = initialGoal,
             )
         }
-        composable(HopaDestination.USAGE) {
+        composable<HopaDestination.Usage> {
             UsageRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.MEMORY) {
+        composable<HopaDestination.Memory> {
             MemoryRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.SKILLS) {
+        composable<HopaDestination.Skills> {
             SkillsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(
-            route = HopaDestination.BROWSER + "?url={url}",
-            arguments = listOf(
-                navArgument("url") {
-                    type = NavType.StringType
-                    defaultValue = ""
-                },
-            ),
-        ) { entry ->
+        composable<HopaDestination.Browser> { entry ->
             BrowserRoute(
-                initialUrl = entry.arguments?.getString("url").orEmpty(),
+                initialUrl = entry.toRoute<HopaDestination.Browser>().url,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.SETTINGS) {
+        composable<HopaDestination.Settings> {
             SettingsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
                 onOpenCapabilities = { navController.popBackStack() },
-                onOpenProfiles = { navController.navigate(HopaDestination.PROFILES) },
-                onOpenSelfCheck = { navController.navigate(HopaDestination.SELF_CHECK) },
-                onOpenAbout = { navController.navigate(HopaDestination.ABOUT) },
+                onOpenProfiles = { navController.navigate(HopaDestination.Profiles) },
+                onOpenSelfCheck = { navController.navigate(HopaDestination.SelfCheck) },
+                onOpenAbout = { navController.navigate(HopaDestination.About) },
             )
         }
-        composable(HopaDestination.RUNNING_APPS) {
+        composable<HopaDestination.RunningApps> {
             RunningAppsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                onOpenHowHopaActs = { navController.navigate(HopaDestination.ACT_MODE) },
-                onOpenAllApps = { navController.navigate(HopaDestination.launchpad("apps")) },
-                onOpenSites = { navController.navigate(HopaDestination.launchpad("sites")) },
-                onOpenSetup = { navController.navigate(HopaDestination.RUN_SETUP) },
-                onOpenRunPrefs = { navController.navigate(HopaDestination.RUN_PREFS) },
+                onOpenHowHopaActs = { navController.navigate(HopaDestination.ActMode) },
+                onOpenAllApps = { navController.navigate(HopaDestination.Launchpad("apps")) },
+                onOpenSites = { navController.navigate(HopaDestination.Launchpad("sites")) },
+                onOpenSetup = { navController.navigate(HopaDestination.RunSetup) },
+                onOpenRunPrefs = { navController.navigate(HopaDestination.RunPrefs) },
             )
         }
-        composable(HopaDestination.ACT_MODE) {
+        composable<HopaDestination.ActMode> {
             HowHopaActsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
-                onOpenComputer = { navController.navigate(HopaDestination.COMPUTER) },
-                onOpenSetup = { navController.navigate(HopaDestination.RUN_SETUP) },
+                onOpenScreenAccess = { navController.navigate(HopaDestination.Accessibility) },
+                onOpenComputer = { navController.navigate(HopaDestination.Computer) },
+                onOpenSetup = { navController.navigate(HopaDestination.RunSetup) },
             )
         }
-        composable(HopaDestination.RUN_SETUP) {
+        composable<HopaDestination.RunSetup> {
             RunSetupRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
-                onOpenComputer = { navController.navigate(HopaDestination.COMPUTER) },
+                onOpenScreenAccess = { navController.navigate(HopaDestination.Accessibility) },
+                onOpenComputer = { navController.navigate(HopaDestination.Computer) },
             )
         }
-        composable(HopaDestination.RUN_PREFS) {
+        composable<HopaDestination.RunPrefs> {
             RunPrefsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.COMPUTER) {
+        composable<HopaDestination.Computer> {
             ComputerRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.SELF_CHECK) {
+        composable<HopaDestination.SelfCheck> {
             SelfCheckRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.ABOUT) {
+        composable<HopaDestination.About> {
             AboutScreen(onBack = { navController.popBackStack() })
         }
-        composable(HopaDestination.ACCESSIBILITY) {
+        composable<HopaDestination.Accessibility> {
             AccessibilityRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.PROFILES) {
+        composable<HopaDestination.Profiles> {
             ProfilesRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(HopaDestination.RUNS) {
+        composable<HopaDestination.Runs> {
             RunsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(
-            route = HopaDestination.LAUNCHPAD + "?section={section}",
-            arguments = listOf(navArgument("section") { defaultValue = "apps" }),
-        ) { entry ->
+        composable<HopaDestination.Launchpad> { entry ->
             LaunchpadRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                section = entry.arguments?.getString("section") ?: "apps",
+                section = entry.toRoute<HopaDestination.Launchpad>().section,
                 onOpenApp = { name ->
-                    navController.navigate(
-                        HopaDestination.APP_CARD + "/" + android.net.Uri.encode(name),
-                    )
+                    navController.navigate(HopaDestination.AppCard(name))
                 },
                 onOpenSite = { url ->
-                    navController.navigate(
-                        HopaDestination.BROWSER + "?url=" + android.net.Uri.encode(url),
-                    )
+                    navController.navigate(HopaDestination.Browser(url))
                 },
             )
         }
-        composable(
-            route = HopaDestination.APP_CARD + "/{name}",
-            arguments = listOf(
-                navArgument("name") { type = NavType.StringType },
-            ),
-        ) { entry ->
+        composable<HopaDestination.AppCard> { entry ->
             AppCardRoute(
                 container = container,
-                name = entry.arguments?.getString("name").orEmpty(),
+                name = entry.toRoute<HopaDestination.AppCard>().name,
                 onBack = { navController.popBackStack() },
-                onOpenScreenAccess = { navController.navigate(HopaDestination.ACCESSIBILITY) },
+                onOpenScreenAccess = { navController.navigate(HopaDestination.Accessibility) },
             )
         }
     }
