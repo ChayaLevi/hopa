@@ -27,8 +27,11 @@ android {
 }
 
 dependencies {
-    // Colours and type only: Compose, no app resources.
+    // Shared Compose chrome: colours, type, bars and sheets. Still no app resources.
     api(platform(libs.androidx.compose.bom))
     api(libs.androidx.compose.ui)
     api(libs.androidx.compose.material3)
+    api(libs.androidx.compose.material.icons)
+    implementation(libs.androidx.core.ktx)
+    api(project(":contracts"))
 }

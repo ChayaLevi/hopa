@@ -1,4 +1,4 @@
-package com.hopa.app.feature.capabilities
+﻿package com.hopa.app.feature.capabilities
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,9 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.HopaBottomBar
+import com.hopa.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaMascot
-import com.hopa.app.ui.component.HopaPageHeader
+import com.hopa.ui.component.HopaPageHeader
 import com.hopa.ui.theme.HopaColor
 
 /** Capabilities: what HOPA can use on this phone and what powers it. */

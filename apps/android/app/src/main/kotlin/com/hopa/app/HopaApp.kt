@@ -7,8 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.app.di.AppContainer
 import com.hopa.app.navigation.HopaNavHost
-import com.hopa.app.ui.component.ApprovalSheet
-import com.hopa.app.ui.component.MascotAppearance
+import com.hopa.ui.component.ApprovalSheet
+import com.hopa.ui.component.MascotAppearance
 import com.hopa.ui.theme.HopaTheme
 
 @Composable

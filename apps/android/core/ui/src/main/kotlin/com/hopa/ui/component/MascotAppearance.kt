@@ -1,4 +1,4 @@
-package com.hopa.app.ui.component
+package com.hopa.ui.component
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

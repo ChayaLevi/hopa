@@ -35,8 +35,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.AppIcon
-import com.hopa.app.ui.component.HopaPageHeader
+import com.hopa.ui.component.AppIcon
+import com.hopa.ui.component.HopaPageHeader
 import com.hopa.ui.theme.HopaColor
 import com.hopa.catalog.routing.RouteTarget
 

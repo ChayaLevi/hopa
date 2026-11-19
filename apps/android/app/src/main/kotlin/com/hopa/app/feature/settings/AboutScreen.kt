@@ -27,7 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.HopaTopBar
+import com.hopa.ui.component.HopaTopBar
 import com.hopa.ui.theme.HopaColor
 
 @OptIn(ExperimentalMaterial3Api::class)
