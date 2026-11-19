@@ -99,14 +99,14 @@ android {
 dependencies {
     implementation(project(":agent"))
     implementation(project(":observation"))
-    implementation(project(":records"))
+    implementation(project(":runlog"))
     implementation(project(":catalog"))
     implementation(project(":agent"))
     implementation(project(":capabilities"))
     implementation(project(":data"))
     implementation(project(":contracts"))
-    implementation(project(":providers"))
-    implementation(project(":transport"))
+    implementation(project(":inference"))
+    implementation(project(":bridge"))
     implementation(project(":stores"))
 
     implementation(platform(libs.androidx.compose.bom))
