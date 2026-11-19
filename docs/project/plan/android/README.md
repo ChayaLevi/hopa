@@ -1,5 +1,9 @@
 # Android app development plan
 
+> Archived: this records a past state. The module names have changed since
+> (`core/`, `catalog`, `runlog`, `inference`, `bridge`, `backend`); see
+> [../restructure-modules.md](../restructure-modules.md).
+
 Status: **v3, in progress.** Written 2026-11-13 from a full read of the HarmonyOS
 phone code (UI, core, capabilities, shared services, bridge); the checklist was
 reconciled with the code on 2026-11-13.

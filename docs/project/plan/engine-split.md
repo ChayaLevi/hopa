@@ -1,5 +1,9 @@
 # Refactor: the engine becomes five modules
 
+> Archived: this records a past state. The module names have changed since
+> (`core/`, `catalog`, `runlog`, `inference`, `bridge`, `backend`); see
+> [restructure-modules.md](restructure-modules.md).
+
 `core/engine` is one Gradle module with five distinct jobs inside it. The
 module boundary hides nothing: `routing` does not touch `execution`, `records`
 does not touch the screen, and only `execution` needs all four others. Splitting

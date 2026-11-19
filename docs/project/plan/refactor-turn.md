@@ -1,5 +1,9 @@
 # Refactor: one turn for every client
 
+> Archived: this records a past state. The module names have changed since
+> (`core/`, `catalog`, `runlog`, `inference`, `bridge`, `backend`); see
+> [restructure-modules.md](restructure-modules.md).
+
 Branch: `refactor/turn`. Base: `main` = `039f5ad` (mirror of `origin/main`,
 PR #53 squashed). Do not merge this branch until the gates below are green and
 the phone has run a turn.
