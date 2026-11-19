@@ -2,7 +2,7 @@ package com.hopa.app.feature.usage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.AppContainer
+import com.hopa.app.di.UsageDependencies
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UsageViewModel(
-    private val container: AppContainer,
+    private val container: UsageDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(UsageUiState())
     val state: StateFlow<UsageUiState> = _state.asStateFlow()
