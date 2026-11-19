@@ -1,7 +1,7 @@
 package com.hopa.records
 
 import com.hopa.contracts.CanonicalJson
-import com.hopa.contracts.HopaJson
+import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.wire.RunRecord
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement

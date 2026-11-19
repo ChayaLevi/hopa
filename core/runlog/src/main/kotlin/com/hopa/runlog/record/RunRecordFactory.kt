@@ -1,6 +1,6 @@
 package com.hopa.records
 
-import com.hopa.contracts.ObservationHasher
+import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
