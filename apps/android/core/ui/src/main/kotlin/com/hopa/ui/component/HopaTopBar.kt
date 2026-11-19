@@ -1,4 +1,4 @@
-package com.hopa.app.ui.component
+package com.hopa.ui.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope

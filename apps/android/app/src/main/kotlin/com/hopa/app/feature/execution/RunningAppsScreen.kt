@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.feature.settings.SettingsUiState
-import com.hopa.app.ui.component.HopaPageHeader
+import com.hopa.ui.component.HopaPageHeader
 import com.hopa.ui.theme.HopaColor
 
 /**

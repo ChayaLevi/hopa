@@ -1,4 +1,4 @@
-package com.hopa.app.ui.component
+package com.hopa.ui.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size

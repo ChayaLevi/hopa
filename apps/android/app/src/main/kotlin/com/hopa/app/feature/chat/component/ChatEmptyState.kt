@@ -1,4 +1,4 @@
-package com.hopa.app.feature.chat.component
+﻿package com.hopa.app.feature.chat.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.verticalScroll

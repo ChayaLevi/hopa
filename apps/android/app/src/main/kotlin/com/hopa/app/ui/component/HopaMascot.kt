@@ -1,4 +1,4 @@
-package com.hopa.app.ui.component
+﻿package com.hopa.app.ui.component
 
 import android.provider.Settings
 import androidx.compose.animation.core.Animatable
@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.hopa.ui.component.MascotAppearance
 
 /**
  * The plush HOPA. Two looks, chosen in Settings: the rounded-square badge the

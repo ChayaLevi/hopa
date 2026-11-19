@@ -11,7 +11,7 @@ apps/android/
 ├─ app/            Compose UI, navigation, ViewModels, state holders
 ├─ capabilities/   DevicePort adapters: accessibility, hidden display,
 │                  wireless shell, system intents, package inventory
-├─ core/ui/        the Compose theme: colours and type, no resources
+├─ core/ui/        shared Compose chrome: theme, bars, sheets, the mascot switch
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/

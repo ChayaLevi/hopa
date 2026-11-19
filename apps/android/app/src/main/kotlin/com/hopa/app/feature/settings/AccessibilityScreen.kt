@@ -32,8 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.HopaPageHeader
-import com.hopa.app.ui.component.HopaStatusPill
+import com.hopa.ui.component.HopaPageHeader
+import com.hopa.ui.component.HopaStatusPill
 import com.hopa.ui.theme.HopaColor
 
 /**

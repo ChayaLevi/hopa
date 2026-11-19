@@ -28,9 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.AppIcon
-import com.hopa.app.ui.component.HopaPageHeader
-import com.hopa.app.ui.component.HopaStatusPill
+import com.hopa.ui.component.AppIcon
+import com.hopa.ui.component.HopaPageHeader
+import com.hopa.ui.component.HopaStatusPill
 import com.hopa.ui.theme.HopaColor
 import com.hopa.catalog.routing.RouteTarget
 
