@@ -1,4 +1,4 @@
-package com.hopa.prompt
+package com.hopa.agent.prompt
 
 import com.hopa.contracts.model.ModelMessage
 import org.junit.jupiter.api.Assertions.assertEquals

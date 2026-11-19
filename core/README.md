@@ -7,7 +7,7 @@ Nine Kotlin modules that the Android app and the Windows sidecar both build. No
 |---|---|---|---|
 | `contracts` | wire types, port interfaces, model types, approval data classes | `com.hopa.contracts.*` | `codec` |
 | `codec` | JSON helpers: `HopaJson`, `CanonicalJson` | `com.hopa.codec.*` | nothing |
-| `catalog` | the app catalogue, approval vocabulary, prompt rules, and the router that walks them | `com.hopa.catalog.*` | `contracts` |
+| `catalog` | the app catalogue, approval vocabulary, prompt rules, and the router that walks them | `com.hopa.catalog.*` | `contracts`, `codec` |
 | `observation` | the screen model: nodes, anchors, the observer, the screen source | `com.hopa.observation.*` | `contracts` |
 | `records` | a run as records, and the chain that links them | `com.hopa.records.*` | `contracts`, `codec` |
 | `prompt` | the system prompt, catalogue and screen blocks, the context budget | `com.hopa.prompt.*` | `contracts`, `catalog` |

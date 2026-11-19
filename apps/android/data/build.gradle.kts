@@ -28,7 +28,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":codec"))
     // Interfaces and models live in packages/data; this module keeps the Room
     // and DataStore implementations.
     api(project(":stores"))

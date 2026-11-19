@@ -1,6 +1,6 @@
 package com.hopa.providers
 
-import com.hopa.codec.HopaJson
+import com.hopa.contracts.HopaJson
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest

@@ -3,7 +3,7 @@ package com.hopa.agent.conformance
 import com.hopa.agent.ActionExecutor
 import com.hopa.agent.ApprovalPolicy
 import com.hopa.agent.DecisionParser
-import com.hopa.codec.HopaJson
+import com.hopa.contracts.HopaJson
 import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice

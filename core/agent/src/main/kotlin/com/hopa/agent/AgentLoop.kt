@@ -17,11 +17,11 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.prompt.AppCatalogBlock
-import com.hopa.prompt.ContextBudget
-import com.hopa.prompt.InstalledAppsBlock
-import com.hopa.prompt.ScreenRenderer
-import com.hopa.prompt.SystemPromptBuilder
+import com.hopa.agent.prompt.AppCatalogBlock
+import com.hopa.agent.prompt.ContextBudget
+import com.hopa.agent.prompt.InstalledAppsBlock
+import com.hopa.agent.prompt.ScreenRenderer
+import com.hopa.agent.prompt.SystemPromptBuilder
 import com.hopa.records.RunRecorder
 
 class AgentLoop(

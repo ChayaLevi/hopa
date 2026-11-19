@@ -1,6 +1,6 @@
 package com.hopa.agent
 
-import com.hopa.codec.HopaJson
+import com.hopa.contracts.HopaJson
 import com.hopa.contracts.ErrorCodes
 import com.hopa.contracts.HopaError
 import com.hopa.contracts.wire.Action

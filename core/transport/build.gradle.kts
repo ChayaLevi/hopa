@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":codec"))
     api(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)

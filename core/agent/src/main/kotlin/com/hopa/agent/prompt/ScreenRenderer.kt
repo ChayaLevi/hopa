@@ -1,4 +1,4 @@
-package com.hopa.prompt
+package com.hopa.agent.prompt
 
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode

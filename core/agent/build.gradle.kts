@@ -16,9 +16,7 @@ dependencies {
     api(project(":catalog"))
     api(project(":observation"))
     api(project(":records"))
-    api(project(":prompt"))
 
-    implementation(project(":codec"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)
 

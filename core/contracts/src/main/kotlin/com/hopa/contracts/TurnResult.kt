@@ -1,6 +1,5 @@
 package com.hopa.contracts
 
-import com.hopa.contracts.HopaError
 import com.hopa.contracts.model.ModelUsage
 import com.hopa.contracts.wire.RunRecord
 

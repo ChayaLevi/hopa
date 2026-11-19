@@ -1,4 +1,4 @@
-package com.hopa.prompt
+package com.hopa.agent.prompt
 
 class SystemPromptBuilder {
     fun build(

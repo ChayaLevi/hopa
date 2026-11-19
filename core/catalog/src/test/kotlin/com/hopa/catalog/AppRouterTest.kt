@@ -1,6 +1,6 @@
 package com.hopa.catalog
 
-import com.hopa.codec.HopaJson
+import com.hopa.contracts.HopaJson
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int

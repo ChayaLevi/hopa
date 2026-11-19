@@ -3,7 +3,7 @@ package com.hopa.agent.conformance
 import com.hopa.agent.ActionClassifier
 import com.hopa.agent.ApprovalPolicy
 import com.hopa.agent.DecisionParser
-import com.hopa.codec.HopaJson
+import com.hopa.contracts.HopaJson
 import com.hopa.contracts.ObservationHasher
 import com.hopa.contracts.wire.Observation
 import kotlinx.serialization.json.boolean

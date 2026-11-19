@@ -1,6 +1,6 @@
 package com.hopa.transport.bridge
 
-import com.hopa.codec.HopaJson
+import com.hopa.contracts.HopaJson
 import com.hopa.contracts.ports.InstalledApp
 import java.io.IOException
 import java.util.concurrent.TimeUnit

@@ -9,7 +9,6 @@ application {
 }
 
 dependencies {
-    implementation(project(":codec"))
     implementation(project(":agent"))
     implementation(project(":observation"))
     implementation(project(":records"))

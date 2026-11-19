@@ -1,4 +1,4 @@
-package com.hopa.codec
+package com.hopa.contracts
 
 import kotlinx.serialization.json.Json
 
