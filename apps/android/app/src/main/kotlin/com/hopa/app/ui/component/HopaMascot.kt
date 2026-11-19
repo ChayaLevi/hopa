@@ -11,6 +11,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,7 +38,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.R
-import com.hopa.app.ui.theme.HopaColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -160,8 +159,8 @@ fun HopaMascot(
             SoftShadow(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(x = sizeDp * -0.03f, y = sizeDp * 0.02f - lift),
-                width = sizeDp * if (sizeDp >= 72.dp) 0.85f else 0.72f,
+                    .offset(x = sizeDp * -0.01f, y = sizeDp * 0.02f - lift),
+                width = sizeDp * if (sizeDp >= 72.dp) 0.90f else 0.72f,
                 height = sizeDp * if (sizeDp >= 72.dp) 0.13f else 0.11f,
                 alpha = (if (sizeDp >= 72.dp) 0.20f else 0.18f) * (1f - 0.06f * rise),
                 scaleX = 1f - 0.05f * rise,
@@ -184,7 +183,10 @@ fun HopaMascot(
                 }
                 .then(
                     if (interactive) {
-                        Modifier.clickable {
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (motionOn) {
                                 scope.launch {
@@ -236,16 +238,7 @@ fun HopaMascot(
                     .graphicsLayer(rotationZ = -3f),
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    val w = size.width
-                    val h = size.height
-                    val path = bubblePath(w, h)
-                    translate(left = w * 0.01f, top = h * 0.05f) {
-                        drawPath(path, color = Color(0x1A000000))
-                    }
-                    translate(left = w * 0.02f, top = h * 0.09f) {
-                        drawPath(path, color = Color(0x0F000000))
-                    }
-                    drawPath(path, color = HopaColor.Accent)
+                    drawPath(bubblePath(size.width, size.height), color = BubbleFill)
                 }
                 Box(
                     modifier = Modifier
@@ -255,7 +248,7 @@ fun HopaMascot(
                 ) {
                     Text(
                         "Hi, I'm HOPA \uD83D\uDC4B",
-                        color = Color.White,
+                        color = BubbleInk,
                         fontSize = (
                             sizeDp.value * 0.19f /
                                 LocalDensity.current.fontScale.coerceAtLeast(1f)
@@ -311,6 +304,13 @@ private fun SoftShadow(
         )
     }
 }
+
+/**
+ * The speech bubble borrows the plush's own orange, deepened so cream text clears
+ * contrast; the accent blue-orange pair used elsewhere is too red next to fur.
+ */
+private val BubbleFill = Color(0xFFB05A28)
+private val BubbleInk = Color(0xFFFFF6EC)
 
 private data class IdleMotion(val float: Float, val breathe: Float)
 
