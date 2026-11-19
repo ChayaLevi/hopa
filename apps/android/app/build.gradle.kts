@@ -101,7 +101,6 @@ dependencies {
     implementation(project(":observation"))
     implementation(project(":runlog"))
     implementation(project(":catalog"))
-    implementation(project(":agent"))
     implementation(project(":capabilities"))
     implementation(project(":core:ui"))
     implementation(project(":data"))
