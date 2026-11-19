@@ -1,16 +1,17 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
-import com.hopa.contracts.HopaJson
-import com.hopa.contracts.ErrorCodes
-import com.hopa.contracts.HopaError
+import com.hopa.agent.decision.model.DecisionRules
+import com.hopa.contracts.error.ErrorCodes
+import com.hopa.contracts.error.HopaError
+import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.ActionKind
-import com.hopa.contracts.wire.Decision
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import com.hopa.contracts.wire.Decision
 
 private val TOOL_INVOKE = Regex(
     """invoke\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)</[^>]*invoke>""",

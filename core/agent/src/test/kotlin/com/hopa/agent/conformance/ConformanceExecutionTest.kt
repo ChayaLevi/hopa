@@ -1,9 +1,9 @@
 package com.hopa.agent.conformance
 
-import com.hopa.agent.ActionExecutor
-import com.hopa.agent.ApprovalPolicy
-import com.hopa.agent.DecisionParser
-import com.hopa.contracts.HopaJson
+import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.decision.model.DecisionParser
+import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice

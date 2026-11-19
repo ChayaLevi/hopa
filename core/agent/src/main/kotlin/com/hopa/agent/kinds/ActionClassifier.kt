@@ -1,6 +1,6 @@
-package com.hopa.agent
+package com.hopa.agent.kinds
 
-import com.hopa.catalog.ApprovalPolicyData
+import com.hopa.catalog.data.ApprovalPolicyData
 import com.hopa.contracts.approval.PaymentContext
 import com.hopa.contracts.approval.RiskLevel
 import com.hopa.contracts.wire.Action

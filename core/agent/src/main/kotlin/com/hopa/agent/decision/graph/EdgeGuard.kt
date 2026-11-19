@@ -1,8 +1,8 @@
-package com.hopa.agent.graph
+package com.hopa.agent.decision.graph
 
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
-import com.hopa.observation.NodeAnchor
+import com.hopa.observation.tree.NodeAnchor
 
 /**
  * What has to be true on the screen for an edge to be taken. A graph without
@@ -18,17 +18,15 @@ sealed interface EdgeGuard {
 
     /** Some node on the screen carries this text or description. */
     data class TextVisible(val text: String) : EdgeGuard {
-        override fun matches(observation: Observation): Boolean =
-            anyNode(observation.tree) { node ->
-                node.text.contains(text, ignoreCase = true) ||
-                    node.description.contains(text, ignoreCase = true)
-            }
+        override fun matches(observation: Observation): Boolean = anyNode(observation.tree) { node ->
+            node.text.contains(text, ignoreCase = true) ||
+                node.description.contains(text, ignoreCase = true)
+        }
     }
 
     /** The screen still has the node a recipe-style anchor points at. */
     data class AnchorVisible(val anchor: String) : EdgeGuard {
-        override fun matches(observation: Observation): Boolean =
-            NodeAnchor.refOf(observation.tree, anchor) != null
+        override fun matches(observation: Observation): Boolean = NodeAnchor.refOf(observation.tree, anchor) != null
     }
 
     data class All(val guards: List<EdgeGuard>) : EdgeGuard {

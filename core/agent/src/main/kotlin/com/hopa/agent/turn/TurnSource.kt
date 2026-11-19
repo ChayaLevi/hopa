@@ -1,4 +1,4 @@
-package com.hopa.agent.run
+package com.hopa.agent.turn
 
 /** How the turn was answered, and therefore what the receipt can claim. */
 enum class TurnSource {

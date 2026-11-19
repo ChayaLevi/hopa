@@ -1,13 +1,24 @@
-package com.hopa.agent
+package com.hopa.agent.loop
 
-import com.hopa.catalog.AppRouter
-import com.hopa.catalog.CatalogRoutes
-import com.hopa.catalog.Knowledge
-import com.hopa.catalog.RouterHint
-import com.hopa.contracts.ErrorCodes
-import com.hopa.contracts.HopaError
-import com.hopa.contracts.TurnContext
-import com.hopa.contracts.TurnResult
+import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.kinds.ActionKindRules
+import com.hopa.agent.decision.StepPolicy
+import com.hopa.agent.decision.model.DecisionParser
+import com.hopa.agent.decision.model.ModelReplyText
+import com.hopa.agent.narrate.RunNarrator
+import com.hopa.agent.prompt.AppCatalogBlock
+import com.hopa.agent.prompt.ContextBudget
+import com.hopa.agent.prompt.InstalledAppsBlock
+import com.hopa.agent.prompt.ScreenRenderer
+import com.hopa.agent.prompt.SystemPromptBuilder
+import com.hopa.catalog.routing.AppRouter
+import com.hopa.catalog.routing.CatalogRoutes
+import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.routing.RouterHint
+import com.hopa.contracts.error.ErrorCodes
+import com.hopa.contracts.error.HopaError
+import com.hopa.contracts.turn.TurnContext
+import com.hopa.contracts.turn.TurnResult
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.contracts.model.ModelUsage
@@ -17,11 +28,6 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.agent.prompt.AppCatalogBlock
-import com.hopa.agent.prompt.ContextBudget
-import com.hopa.agent.prompt.InstalledAppsBlock
-import com.hopa.agent.prompt.ScreenRenderer
-import com.hopa.agent.prompt.SystemPromptBuilder
 import com.hopa.records.RunRecorder
 
 class AgentLoop(

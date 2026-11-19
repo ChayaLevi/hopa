@@ -1,6 +1,6 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
-import com.hopa.contracts.ErrorCodes
+import com.hopa.contracts.error.ErrorCodes
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

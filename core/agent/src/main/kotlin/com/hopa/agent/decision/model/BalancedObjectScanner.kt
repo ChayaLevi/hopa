@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
 object BalancedObjectScanner {
     fun scan(text: String): List<String> {

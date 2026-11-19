@@ -1,7 +1,10 @@
-package com.hopa.agent
+package com.hopa.agent.loop
 
-import com.hopa.catalog.testing.TestKnowledge
-import com.hopa.contracts.TurnContext
+import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.decision.model.ModelStepPolicy
+import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.catalog.testing.knowledge.TestKnowledge
+import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest

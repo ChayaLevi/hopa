@@ -1,68 +1,100 @@
-# agent - the turn and the loop
+# agent - the turn, the loop and who decides
 
-`TurnRunner` is the outer order (plan gate, recipe, the loop under one deadline,
-the final screen), `AgentLoop` is the inner engine (observe, decide, act),
-`ActionExecutor` performs a step, and the gate decides which steps need a person.
-The two used to be separate modules and every change crossed the boundary; they
-now live together, which is what a caller always treated them as.
+One turn for every client. `TurnRunner` owns the order, `AgentLoop` owns the
+inner cycle, and a `DecisionPolicy` answers "what next" - a model, a navigation
+graph or a rule layer, the loop never learns which.
 
-No Android, no network, no UI: a plain JVM module with tests that need neither a
-device nor a provider.
+No Android, no network, no UI. Plain JVM.
 
-The rest of the engine lives next door: `catalog` picks the app, `observation`
-renders the screen, `prompt` writes the system prompt, `records` keeps the run.
-`packages/README.md` has the dependency order.
+## Packages, bottom first
 
-## Rules
+A package may name only packages in an earlier layer; inside a layer the order is
+alphabetical.
 
-- **No Android imports.** `checkNoAndroidImports` (Gradle) and
-  `tools/checks/check-android-structure.py` both fail the build if one appears.
-- **No network.** The model and bridge clients live in `packages/transport`; this
-  module only consumes `ModelPort`.
-- **Generated data lives elsewhere.** The catalog, the policy data and the prompt
-  rules are in `packages/catalog`.
-- **One class per file**, named after it; contracts may share a file.
+### Layer 0 - no engine package below them
 
-## Where the decision comes from
-
-`AgentLoop` asks a `StepPolicy` for the next step, and parses the reply. That
-interface is the seam; `ModelStepPolicy` is the one implementation today and it
-wraps a `ModelPort`:
-
-| implementation | module | when |
+| package | what lives here | depends on |
 |---|---|---|
-| `ModelStepPolicy` over `OpenAiClient` | `packages/providers` | a provider over HTTP today |
-| `ModelStepPolicy` over `DemoModelClient` | `packages/providers` | no key, demo answers |
-| `ModelStepPolicy` over a local runtime | its own module | on-device inference, once it exists |
-| playbook policy | planned, implements `StepPolicy` | no model at all: anchors instead of reasoning |
+| `gate` | `ApprovalPolicy`: what needs a person before it happens | contracts, catalog |
+| `narrate` | `RunNarrator`: a step said in one human line | contracts |
+| `prompt` | `SystemPromptBuilder`, `AppCatalogBlock`, `InstalledAppsBlock`, `ScreenRenderer`, `ContextBudget`: text for the model | contracts, catalog |
 
-Nothing in this module knows which of them is in use. A policy that never calls
-out is the point of the interface: it can answer from a recipe, or stop and ask
-when the screen does not match.
+### Layer 1 - on top of layer 0
 
-The loop reads the gate settings one step at a time (`ActionExecutor` takes a
-supplier), so an `ApprovalPolicy` is an immutable snapshot: trust and autonomy
-are fixed when the run starts and two runs in flight never share a mutable list.
+| package | what lives here | depends on |
+|---|---|---|
+| `action` | `ActionExecutor`, `ActionKindRules`, `ActionClassifier`, `ValidationResult`, `ScrollGeometry`: what a step can be and how it is performed | contracts, gate |
+| `decision` | `Decision` (`Act`, `Ask`, `Say`, `NoPath`, `Failed`), `DecisionInput`, `DecisionOutcome`, `DecisionPolicy`, `StepPolicy`: the seam | contracts |
+| `goal` | `Checkpoint`, `GoalVerification`, `GoalVerifier`: did the turn arrive | contracts, observation |
 
-## What a client must supply
+### Layer 2 - policies and replay
 
-`TurnContext` and `TurnResult` live in `contracts`, so a client names the request
-without depending on this module:
+| package | what lives here | depends on |
+|---|---|---|
+| `decision/graph` | `ScreenKey`, `EdgeGuard`, `NavGraph`, `NavGraphStore`, `GraphDecisionPolicy`, `FallbackDecisionPolicy`, `GraphBuilder`: navigation without a model | decision, observation |
+| `decision/model` | `ModelDecisionPolicy`, `ModelStepPolicy`, `DecisionParser`, `ParseOutcome`, `ModelReplyText`, `BalancedObjectScanner`: everything model-shaped | decision, prompt |
+| `recipe` | `Recipe`, `RecipeStore`, `Replayer`, `ReplayAnswer`, `ReplayOutcome`: a path that worked, and its replay | action, prompt, observation |
 
+### Layer 3 - the loop
+
+| package | what lives here | depends on |
+|---|---|---|
+| `loop` | `AgentLoop`, `LoopConfig`: observe, decide, execute, record, repeat | decision, action, gate, narrate |
+
+### Layer 4 - the turn
+
+| package | what lives here | depends on |
+|---|---|---|
+| `turn` | `TurnRunner`, `TurnRequest`, `TurnOutcome`, `TurnSource`: the plan gate, the recipe path, one deadline, the final screen check | loop, goal, recipe |
+
+## The decision seam
+
+```kotlin
+interface DecisionPolicy {
+    val name: String
+    suspend fun decide(input: DecisionInput): DecisionOutcome
+}
 ```
-goal, history, memory, skills, installedApps, appFunctions, platform, vision, phoneAccess
-  -> records, answer, options, narration, usage, error
-```
 
-The client also supplies the ports: a `DevicePort` (accessibility, hidden
-display, bridge), an `ApprovalGateway` (the sheet), a `RunRecorder` (Room or
-memory), a `Clock`, and a `ModelPort`.
+`DecisionInput` carries the goal, the observation, the step number, notes from
+earlier steps and one screenshot. It does **not** carry a prompt: a policy that
+never calls a model must not pay for text it will not use.
+
+Three implementations today:
+
+- `ModelDecisionPolicy` - builds the prompt, asks the provider through
+  `StepPolicy`, parses the reply. The only place that knows about models.
+- `GraphDecisionPolicy` - takes the best guarded edge from the screen it
+  recognizes; `NoPath` when the screen is unknown.
+- `FallbackDecisionPolicy` - tries the graph, asks the model when there is no
+  path. This is how a graph is learned app by app without changing the turn.
+
+`NoPath` is a decision, not an error: the loop stops with a question instead of
+guessing a tap.
+
+## The gate
+
+Every action goes through `ActionExecutor`, which consults `ApprovalPolicy` on
+the way. A model, a recipe and a graph all hit the same check, so no path can
+skip a payment prompt.
+
+`ApprovalPolicy` is an immutable snapshot read one step at a time: trust and
+autonomy are fixed when the run starts and two runs in flight never share a
+mutable list.
+
+## What a client supplies
+
+`TurnContext` and `TurnResult` live in `contracts`, so a client describes a
+request without depending on this module. The client also supplies the ports: a
+`DevicePort`, an `ApprovalGateway`, a `RunRecorder`, a `Clock`, and a model
+behind `ModelPort`.
 
 ## Tests
 
 ```
-./gradlew :agent:test
+./gradlew :agent:test :agent:ktlintCheck
 ```
 
-`com.hopa.agent.conformance` reads `spec/` from the repository, so it checks the
-same JSON the other clients use.
+`com.hopa.agent.conformance` reads `spec/` from the repository, so the decisions
+and records of this module are checked against the same JSON as every other
+client.

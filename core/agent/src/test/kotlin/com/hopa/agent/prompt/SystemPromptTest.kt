@@ -1,6 +1,6 @@
 package com.hopa.agent.prompt
 
-import com.hopa.catalog.testing.TestKnowledge
+import com.hopa.catalog.testing.knowledge.TestKnowledge
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 

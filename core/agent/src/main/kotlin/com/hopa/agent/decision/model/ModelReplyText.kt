@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
 /**
  * Some providers prepend a machine-formatted safety verdict to a reply. It is

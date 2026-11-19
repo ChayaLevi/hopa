@@ -1,7 +1,8 @@
-package com.hopa.agent
+package com.hopa.agent.decision
 
-import com.hopa.contracts.HopaError
-import com.hopa.contracts.TurnContext
+import com.hopa.agent.decision.model.ModelDecisionPolicy
+import com.hopa.contracts.error.HopaError
+import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelUsage
 import com.hopa.contracts.wire.Action

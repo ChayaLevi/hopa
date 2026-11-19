@@ -1,4 +1,4 @@
-package com.hopa.agent.graph
+package com.hopa.agent.decision.graph
 
 import com.hopa.contracts.wire.Action
 

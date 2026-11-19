@@ -1,7 +1,7 @@
-package com.hopa.agent.run
+package com.hopa.agent.turn
 
 import com.hopa.agent.goal.GoalVerification
-import com.hopa.contracts.HopaError
+import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.model.ModelUsage
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.RunRecord

@@ -1,4 +1,4 @@
-package com.hopa.agent.run
+package com.hopa.agent.turn
 
 import com.hopa.agent.goal.Checkpoint
 import com.hopa.contracts.model.ModelMessage

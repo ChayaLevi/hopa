@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.narrate
 
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.RunRecord

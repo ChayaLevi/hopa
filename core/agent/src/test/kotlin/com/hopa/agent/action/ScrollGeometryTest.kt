@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.action
 
 import com.hopa.contracts.wire.ScreenSize
 import org.junit.jupiter.api.Assertions.assertEquals

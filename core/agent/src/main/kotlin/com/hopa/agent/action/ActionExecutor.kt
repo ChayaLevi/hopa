@@ -1,8 +1,9 @@
-package com.hopa.agent
+package com.hopa.agent.action
 
-import com.hopa.contracts.ErrorCodes
-import com.hopa.contracts.ExecutionResult
-import com.hopa.contracts.ObservationHasher
+import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.contracts.error.ErrorCodes
+import com.hopa.contracts.turn.ExecutionResult
+import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.approval.ApprovalGateway
 import com.hopa.contracts.approval.RiskLevel
 import com.hopa.contracts.ports.BrowserPort
@@ -12,9 +13,10 @@ import com.hopa.contracts.ports.SandboxPort
 import com.hopa.contracts.ports.SystemPort
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
-import com.hopa.observation.NodeAnchor
+import com.hopa.observation.tree.NodeAnchor
 import com.hopa.records.RunRecordFactory
 import com.hopa.records.RunRecorder
+import com.hopa.agent.kinds.ActionKindRules
 
 class ActionExecutor(
     private val device: DevicePort,

@@ -1,11 +1,11 @@
 package com.hopa.agent.recipe
 
-import com.hopa.agent.ModelReplyText
+import com.hopa.agent.decision.model.ModelReplyText
+import com.hopa.agent.prompt.ScreenRenderer
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.contracts.wire.Observation
-import com.hopa.agent.prompt.ScreenRenderer
 
 /**
  * Answers the person after a replay. The recipe carries the taps, not the words:

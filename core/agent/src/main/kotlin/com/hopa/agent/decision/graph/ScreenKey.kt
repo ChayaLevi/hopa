@@ -1,6 +1,6 @@
-package com.hopa.agent.graph
+package com.hopa.agent.decision.graph
 
-import com.hopa.contracts.ObservationHasher
+import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.wire.Observation
 
 /**
@@ -13,8 +13,7 @@ data class ScreenKey(
     val hash: String,
 ) {
     companion object {
-        fun of(app: String, observation: Observation): ScreenKey =
-            ScreenKey(app, ObservationHasher.hashOf(observation))
+        fun of(app: String, observation: Observation): ScreenKey = ScreenKey(app, ObservationHasher.hashOf(observation))
 
         fun fromHash(app: String, hash: String): ScreenKey = ScreenKey(app, hash)
     }

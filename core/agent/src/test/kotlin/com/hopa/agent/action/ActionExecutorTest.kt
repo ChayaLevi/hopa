@@ -1,7 +1,8 @@
-package com.hopa.agent
+package com.hopa.agent.action
 
-import com.hopa.contracts.ErrorCodes
-import com.hopa.contracts.ExecutionResult
+import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.contracts.error.ErrorCodes
+import com.hopa.contracts.turn.ExecutionResult
 import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice

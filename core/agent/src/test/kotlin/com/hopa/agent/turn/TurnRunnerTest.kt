@@ -1,14 +1,14 @@
-package com.hopa.agent.run
+package com.hopa.agent.turn
 
-import com.hopa.agent.ActionExecutor
-import com.hopa.agent.ApprovalPolicy
-import com.hopa.agent.StepPolicy
+import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.decision.StepPolicy
+import com.hopa.agent.gate.ApprovalPolicy
 import com.hopa.agent.goal.Checkpoint
 import com.hopa.agent.plan.PlanSource
 import com.hopa.agent.recipe.RecipeStore
-import com.hopa.catalog.ApprovalPolicyData
-import com.hopa.catalog.Knowledge
-import com.hopa.contracts.ErrorCodes
+import com.hopa.catalog.data.ApprovalPolicyData
+import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.approval.ApprovalGateway
 import com.hopa.contracts.approval.ApprovalRequest
 import com.hopa.contracts.model.ModelReply

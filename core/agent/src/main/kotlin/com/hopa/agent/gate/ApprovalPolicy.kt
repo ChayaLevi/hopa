@@ -1,6 +1,7 @@
-package com.hopa.agent
+package com.hopa.agent.gate
 
-import com.hopa.catalog.ApprovalPolicyData
+import com.hopa.agent.kinds.ActionClassifier
+import com.hopa.catalog.data.ApprovalPolicyData
 import com.hopa.contracts.approval.ApprovalRequest
 import com.hopa.contracts.approval.PaymentContext
 import com.hopa.contracts.approval.RiskLevel

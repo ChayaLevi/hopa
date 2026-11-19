@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.decision
 
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest

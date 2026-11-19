@@ -1,5 +1,6 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
+import com.hopa.agent.decision.StepPolicy
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest

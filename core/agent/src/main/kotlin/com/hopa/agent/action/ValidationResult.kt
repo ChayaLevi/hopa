@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.action
 
 data class ValidationResult(
     val valid: Boolean,

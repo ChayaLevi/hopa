@@ -1,16 +1,21 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
+import com.hopa.agent.decision.Decision
+import com.hopa.agent.decision.DecisionInput
+import com.hopa.agent.decision.DecisionOutcome
+import com.hopa.agent.decision.DecisionPolicy
+import com.hopa.agent.decision.StepPolicy
 import com.hopa.agent.prompt.AppCatalogBlock
 import com.hopa.agent.prompt.ContextBudget
 import com.hopa.agent.prompt.InstalledAppsBlock
 import com.hopa.agent.prompt.ScreenRenderer
 import com.hopa.agent.prompt.SystemPromptBuilder
-import com.hopa.catalog.AppRouter
-import com.hopa.catalog.CatalogRoutes
-import com.hopa.catalog.Knowledge
-import com.hopa.catalog.RouterHint
-import com.hopa.contracts.ErrorCodes
-import com.hopa.contracts.HopaError
+import com.hopa.catalog.routing.AppRouter
+import com.hopa.catalog.routing.CatalogRoutes
+import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.routing.RouterHint
+import com.hopa.contracts.error.ErrorCodes
+import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 

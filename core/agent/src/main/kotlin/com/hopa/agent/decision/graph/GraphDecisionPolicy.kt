@@ -1,9 +1,8 @@
-package com.hopa.agent.graph
-
-import com.hopa.agent.Decision
-import com.hopa.agent.DecisionInput
-import com.hopa.agent.DecisionOutcome
-import com.hopa.agent.DecisionPolicy
+package com.hopa.agent.decision.graph
+import com.hopa.agent.decision.Decision
+import com.hopa.agent.decision.DecisionInput
+import com.hopa.agent.decision.DecisionOutcome
+import com.hopa.agent.decision.DecisionPolicy
 
 /**
  * The graph policy: on the screen it recognizes, take the best guarded edge. When

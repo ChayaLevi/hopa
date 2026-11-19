@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

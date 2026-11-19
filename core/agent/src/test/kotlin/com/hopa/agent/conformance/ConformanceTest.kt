@@ -1,10 +1,10 @@
 package com.hopa.agent.conformance
 
-import com.hopa.agent.ActionClassifier
-import com.hopa.agent.ApprovalPolicy
-import com.hopa.agent.DecisionParser
-import com.hopa.contracts.HopaJson
-import com.hopa.contracts.ObservationHasher
+import com.hopa.agent.kinds.ActionClassifier
+import com.hopa.agent.decision.model.DecisionParser
+import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.contracts.json.HopaJson
+import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.wire.Observation
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonArray

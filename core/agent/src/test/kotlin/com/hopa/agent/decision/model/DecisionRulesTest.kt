@@ -1,12 +1,13 @@
-package com.hopa.agent
+package com.hopa.agent.decision.model
 
-import com.hopa.contracts.ErrorCodes
+import com.hopa.agent.decision.model.DecisionRules
+import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.wire.Action
-import com.hopa.contracts.wire.Decision
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import com.hopa.contracts.wire.Decision
 
 /**
  * The rules that run before the gate: a step the device cannot carry out is a

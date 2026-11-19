@@ -1,4 +1,4 @@
-package com.hopa.agent
+package com.hopa.agent.loop
 
 data class LoopConfig(
     val maxSteps: Int = 14,
