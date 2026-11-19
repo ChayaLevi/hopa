@@ -37,7 +37,7 @@ class DataStoreSettingsRepository(
             planFirst = prefs[PLAN_FIRST] ?: false,
             replaySkills = prefs[REPLAY_SKILLS] ?: true,
             vision = prefs[VISION] ?: false,
-        mascotFramed = prefs[MASCOT_FRAMED] ?: true,
+        mascotFramed = prefs[MASCOT_FRAMED] ?: false,
             trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
             backendUrl = prefs[BACKEND_URL] ?: "",
             backendDeviceId = prefs[BACKEND_DEVICE_ID] ?: "",

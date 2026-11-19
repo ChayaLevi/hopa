@@ -13,6 +13,6 @@ import androidx.compose.runtime.setValue
  * inside the tree and threading a parameter through every bubble would be worse.
  */
 object MascotAppearance {
-    /** Matches the stored default: the badge is what a person sees first. */
-    var framed: Boolean by mutableStateOf(true)
+    /** Matches the stored default: the cut-out object stands on the page. */
+    var framed: Boolean by mutableStateOf(false)
 }

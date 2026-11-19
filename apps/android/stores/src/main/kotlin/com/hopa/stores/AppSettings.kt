@@ -22,11 +22,10 @@ data class AppSettings(
     /** Attach a screenshot to each model call (needs a model that sees images). */
     val vision: Boolean = false,
     /**
-     * The framed plush picture as the mascot, instead of the cut-out object.
-     * On is the look the app shipped; the cut-out is the choice for anyone who
-     * wants the mascot standing on the page instead of in a badge.
+     * The cut-out mascot on the page is the default. The framed plush picture
+     * stays as the opt-in look for anyone who prefers the badge.
      */
-    val mascotFramed: Boolean = true,
+    val mascotFramed: Boolean = false,
     /** Packages whose typed calls, messages and closing skip the question. */
     val trustedApps: Set<String> = emptySet(),
     /** Address of the gateway this device is paired with. */
