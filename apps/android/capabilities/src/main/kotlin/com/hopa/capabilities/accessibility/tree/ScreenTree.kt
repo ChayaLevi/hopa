@@ -35,6 +35,33 @@ class ScreenTree(
         return fromWindow ?: active
     }
 
+    /**
+     * Every root of [packageName] on screen, focused window first.
+     *
+     * A dialog is its own window, and `rootInActiveWindow` sometimes still
+     * answers with the page behind it - the pairing dialog is exactly that case.
+     * Reading one window missed its code and port.
+     */
+    private fun roots(packageName: String = SETTINGS): List<AccessibilityNodeInfo> {
+        val out = mutableListOf<AccessibilityNodeInfo>()
+        val active = runCatching { service.activeRoot() }
+            .onFailure { android.util.Log.w("HopaScreen", "active root failed", it) }
+            .getOrNull()
+        if (active?.packageName?.toString() == packageName) {
+            out.add(active)
+        }
+        runCatching {
+            service.windows.forEach { window ->
+                val root = window.root ?: return@forEach
+                if (root.packageName?.toString() != packageName) return@forEach
+                if (out.none { it === root }) {
+                    out.add(root)
+                }
+            }
+        }
+        return out
+    }
+
     fun texts(packageName: String = SETTINGS): List<String> {
         val nodes = nodes(packageName)
         return nodes.mapNotNull { it.text?.toString()?.takeIf(String::isNotBlank) }
@@ -45,35 +72,43 @@ class ScreenTree(
 
     /**
      * Click the row that carries [part]. Settings rows are often not clickable in
-     * the tree even though a tap works, so the last resort is a real tap.
+     * the tree even though a tap works, so the last resort is a real tap - at the
+     * centre of the nearest ancestor that has bounds, because a text node inside
+     * a row can report an empty rectangle.
      */
     fun clickText(part: String, packageName: String = SETTINGS): Boolean {
         val target = nodes(packageName)
             .firstOrNull { it.text?.toString()?.contains(part, ignoreCase = true) == true }
             ?: return false
         var node: AccessibilityNodeInfo? = target
-        while (node != null) {
+        var bounds: Rect? = null
+        var depth = 0
+        while (node != null && depth < ANCESTORS) {
+            val current = boundsOf(node)
+            if (bounds == null && !current.isEmpty) {
+                bounds = current
+            }
             if (node.isClickable && node.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                 return true
             }
             node = runCatching { node.parent }.getOrNull()
+            depth += 1
         }
-        val bounds = boundsOf(target)
-        if (bounds.isEmpty) {
-            return false
-        }
+        val tapped = bounds ?: return false
         // A row half under the toolbar or the navigation bar is not tappable.
         val window = boundsOf(root(packageName) ?: return false)
-        if (bounds.centerY() < window.top + TOP_MARGIN || bounds.centerY() > window.bottom - BOTTOM_MARGIN) {
+        if (tapped.centerY() < window.top + TOP_MARGIN ||
+            tapped.centerY() > window.bottom - BOTTOM_MARGIN
+        ) {
             if (verbose) {
                 android.util.Log.d(
                     "HopaScreen",
-                    "\"$part\" sits at ${bounds.centerY()}, window ${window.top}..${window.bottom}",
+                    "\"$part\" sits at ${tapped.centerY()}, window ${window.top}..${window.bottom}",
                 )
             }
             return false
         }
-        gestures.tap(bounds.centerX(), bounds.centerY())
+        gestures.tap(tapped.centerX(), tapped.centerY())
         return true
     }
 
@@ -81,7 +116,12 @@ class ScreenTree(
      * One page of scroll. The list's own action reports success but does not
      * move this Settings list, so the page is moved by a real swipe.
      */
-    fun scrollForward(packageName: String = SETTINGS): Boolean {
+    fun scrollForward(packageName: String = SETTINGS): Boolean = scroll(packageName, forward = true)
+
+    /** The other direction; Settings restores the position the person left. */
+    fun scrollBackward(packageName: String = SETTINGS): Boolean = scroll(packageName, forward = false)
+
+    private fun scroll(packageName: String, forward: Boolean): Boolean {
         val all = nodes(packageName)
         val scrollable = all.filter { it.isScrollable }
             .maxByOrNull { boundsOf(it).let { rect -> rect.width() * rect.height() } }
@@ -90,15 +130,17 @@ class ScreenTree(
             return false
         }
         val x = bounds.centerX()
+        val from = if (forward) 0.6f else 0.4f
+        val to = if (forward) 0.4f else 0.6f
         val swiped = gestures.swipe(
             x,
-            bounds.top + (bounds.height() * 0.6f).toInt(),
+            bounds.top + (bounds.height() * from).toInt(),
             x,
-            bounds.top + (bounds.height() * 0.4f).toInt(),
+            bounds.top + (bounds.height() * to).toInt(),
             900,
         )
         if (verbose) {
-            android.util.Log.d("HopaScreen", "scroll: swipe=$swiped on $bounds")
+            android.util.Log.d("HopaScreen", "scroll ${if (forward) "down" else "up"}: swipe=$swiped on $bounds")
         }
         return swiped
     }
@@ -107,7 +149,7 @@ class ScreenTree(
 
     private fun nodes(packageName: String): List<AccessibilityNodeInfo> {
         val out = mutableListOf<AccessibilityNodeInfo>()
-        collect(root(packageName), out)
+        roots(packageName).forEach { collect(it, out) }
         return out
     }
 
@@ -125,5 +167,7 @@ class ScreenTree(
         const val SETTINGS = "com.android.settings"
         const val TOP_MARGIN = 450
         const val BOTTOM_MARGIN = 250
+        /** A Settings row's text is one or two levels below its pressable ancestor. */
+        const val ANCESTORS = 6
     }
 }

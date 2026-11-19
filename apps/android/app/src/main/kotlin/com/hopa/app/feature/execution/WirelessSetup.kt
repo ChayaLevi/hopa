@@ -110,6 +110,12 @@ class WirelessSetup(
      * separate click runs.
      */
     private suspend fun clickRow(screen: ScreenTree, part: String): Boolean {
+        // Settings restores the scroll position a person left, so the row may be
+        // above the fold even on a page that just opened. Start from the top.
+        repeat(SCROLLS_TO_TOP) {
+            screen.scrollBackward()
+            delay(SETTLE_MS / 2)
+        }
         repeat(SCROLLS) { attempt ->
             if (screen.clickText(part)) {
                 if (verbose) android.util.Log.d("HopaSetup", "pressed \"$part\" on attempt $attempt")
@@ -120,6 +126,12 @@ class WirelessSetup(
             screen.scrollForward()
             delay(SETTLE_MS)
             if (verbose) android.util.Log.d("HopaSetup", "after scroll: ${screen.texts().take(3)}")
+        }
+        // The last scroll can bring the row in; do not spend the attempt on it.
+        if (screen.clickText(part)) {
+            if (verbose) android.util.Log.d("HopaSetup", "pressed \"$part\" after the last scroll")
+            delay(SETTLE_MS)
+            return true
         }
         return false
     }
@@ -154,6 +166,8 @@ class WirelessSetup(
         const val PAIRING_WAIT_MS = 20_000L
         const val WAIT_FOR_DIALOG_MS = 120_000L
         const val SCROLLS = 18
+        /** Enough pages to reach the top of a long Settings list. */
+        const val SCROLLS_TO_TOP = 12
 
         val DEVELOPER_OPTIONS = android.content.ComponentName(
             "com.android.settings",
