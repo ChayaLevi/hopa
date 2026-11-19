@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.feature.memory.MemoryUiState
 import com.hopa.app.ui.component.HopaTopBar
 import com.hopa.app.ui.theme.HopaColor
 
@@ -43,7 +42,7 @@ import com.hopa.app.ui.theme.HopaColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SkillsScreen(
-    state: MemoryUiState,
+    state: SkillsUiState,
     onBack: () -> Unit,
     onAddSkill: (String, String) -> Unit,
     onDeleteSkill: (String) -> Unit,

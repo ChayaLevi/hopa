@@ -1,4 +1,4 @@
-package com.hopa.app.catalog
+﻿package com.hopa.data.catalog
 
 import android.content.Context
 import com.hopa.catalog.data.ApprovalPolicyData

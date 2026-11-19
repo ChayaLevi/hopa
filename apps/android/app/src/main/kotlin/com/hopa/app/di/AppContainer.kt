@@ -56,7 +56,7 @@ class AppContainer(context: Context) {
      * snapshot; the file store falls back to it on any problem. `knowledge` is a
      * getter, so a bundle accepted between turns applies on the next one.
      */
-    private val bundledKnowledge = com.hopa.app.catalog.AssetCatalogSource(context)
+    private val bundledKnowledge = com.hopa.data.catalog.AssetCatalogSource(context)
     val knowledgeStore: com.hopa.catalog.store.FileCatalogStore =
         com.hopa.catalog.store.FileCatalogStore(
             directory = java.io.File(context.filesDir, "knowledge"),
