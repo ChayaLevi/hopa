@@ -14,20 +14,40 @@ apps/android/
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/
-|-- contracts/     wire types and port interfaces
-|-- contracts/         JSON helpers
+|-- contracts/     wire types and port interfaces, JSON helpers
 |-- catalog/       app catalogue, approval data, router
 |-- observation/   the screen model and the source that feeds it
-|-- runlog/       a run as records and their chain
-|-- prompt/        the system prompt and its blocks
-|-- agent/         the turn, the loop, the gate, recipes
+|-- runlog/        a run as records and their chain
 |-- inference/     model adapters
-`-- bridge/     bridge and gateway clients
+|-- bridge/        the PC companion link
+|-- backend/       the backend link: pairing, tasks, catalog fetch
+`-- agent/         the turn, the loop, the approval check, recipes
 ```
 
-`contracts` and the five engine modules have no Android imports, so they are
-unit-testable on the JVM and reusable by the Windows sidecar. `capabilities` and `data` keep
-Android and Room behind their edges.
+The eight core modules and the ports have no Android imports, so they are
+unit-testable on the JVM and reusable by the Windows sidecar. `capabilities` and
+`data` keep Android and Room behind their edges.
+
+## App packages
+
+| package | what lives there |
+|---|---|
+| `navigation/` | destinations, the nav host, launch deep links |
+| `di/` | containers and ViewModel factories |
+| `catalog/` | the bundled catalog and its asset source |
+| `runtime/` | run coordinator, gate, state, parallel runners, remote adapter |
+| `link/session/` | the backend socket and its pairing lifecycle |
+| `link/remote/` | remote run planning and execution, task dedup |
+| `link/push/` | FCM token, messaging service, wake |
+| `link/sync/` | catalog updates and chat sync |
+| `feature/` | one package per feature: screens, routes, ViewModels |
+| `service/` | Android foreground services |
+| `ui/` | shared chrome, theme, and the approval dialog gateway |
+
+A feature package may use `runtime`, `link`, `catalog`, `ui`, `service` and the
+libraries; it never imports another feature, except `feature/shell`, which owns
+the navigation shell. No new package holds a single file (`catalog/` is the
+app-side mirror of the core module and keeps its one adapter).
 
 ## What runs where
 
@@ -80,7 +100,7 @@ reached from Act.
 
 ## Testing
 
-- JVM: `:engine:test`, `:transport:test`, `:stores:test`, `:app:testDebugUnitTest`.
+- JVM: `:catalog:test`, `:agent:test`, `:stores:test`, `:app:testDebugUnitTest`.
 - Device: `app/src/androidTest` (background display, certificate, scroll
   geometry), one command in `tools/scripts/android-device-checks.ps1`.
 - Evals and shared fixtures live in `spec/` and `services/evals`.

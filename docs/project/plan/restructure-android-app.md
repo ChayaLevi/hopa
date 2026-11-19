@@ -136,7 +136,9 @@ the `services/backend` server, and `core/backend` calls its client-facing packag
 ### `gate/` and `gateway/` are one character apart
 
 `gate/` = approval dialog. `gateway/` = backend server. Someone scanning the
-package list will misread one as the other. Rename `gate/` → `approval/`.
+package list will misread one as the other. `gate/` also holds a single file, so
+merge `UiApprovalGateway` into `ui/` rather than creating another one-file
+package.
 
 ### `knowledge/` is already renamed
 
@@ -262,13 +264,11 @@ service/                  ← unchanged
 ui/                       ← unchanged
   component/
   theme/
+  UiApprovalGateway.kt    ← was gate/UiApprovalGateway.kt
 
 privacy/                  ← unchanged
 
 share/                    ← unchanged
-
-approval/                 ← was gate/
-  UiApprovalGateway.kt
 
 catalog/                  ← was knowledge/, already renamed
   AssetCatalogSource.kt
@@ -345,7 +345,7 @@ feature/
 
 ### PR 1 — moves and renames, no behaviour change
 
-1. `gate/` → `approval/`
+1. `gate/UiApprovalGateway.kt` → `ui/` (it was a one-file package)
 2. `gateway/` → `link/` with `session`, `remote`, `push`, `sync` subpackages
 3. `feature/sync/` → `link/sync/`
 4. `LaunchPairing.kt` → `navigation/`
