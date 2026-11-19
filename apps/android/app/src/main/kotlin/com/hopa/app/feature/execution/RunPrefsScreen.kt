@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.feature.settings.SettingsUiState
 import com.hopa.app.ui.component.HopaPageHeader
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 
 /** How a run behaves, apart from where it runs. */
 @Composable

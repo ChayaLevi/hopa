@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.AppIcon
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.component.HopaStatusPill
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 import com.hopa.catalog.routing.RouteTarget
 
 /**

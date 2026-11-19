@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.HopaTopBar
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 import com.hopa.contracts.wire.RunRecord
 import kotlinx.coroutines.launch
 

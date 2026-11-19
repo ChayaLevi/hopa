@@ -103,6 +103,7 @@ dependencies {
     implementation(project(":catalog"))
     implementation(project(":agent"))
     implementation(project(":capabilities"))
+    implementation(project(":core:ui"))
     implementation(project(":data"))
     implementation(project(":contracts"))
     implementation(project(":inference"))

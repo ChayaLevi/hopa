@@ -9,7 +9,7 @@ import com.hopa.app.di.AppContainer
 import com.hopa.app.navigation.HopaNavHost
 import com.hopa.app.ui.component.ApprovalSheet
 import com.hopa.app.ui.component.MascotAppearance
-import com.hopa.app.ui.theme.HopaTheme
+import com.hopa.ui.theme.HopaTheme
 
 @Composable
 fun HopaApp(container: AppContainer, initialGoal: String = "") {

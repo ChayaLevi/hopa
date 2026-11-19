@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.chat.AttachmentRules
 import kotlinx.coroutines.Dispatchers

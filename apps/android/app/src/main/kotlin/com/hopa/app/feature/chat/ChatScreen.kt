@@ -69,7 +69,7 @@ import com.hopa.app.ui.component.HopaBottomBar
 import com.hopa.app.ui.component.HopaBottomBarEasy
 import com.hopa.app.ui.component.HopaMascot
 import com.hopa.app.ui.component.HopaTopBar
-import com.hopa.app.ui.theme.HopaColor
+import com.hopa.ui.theme.HopaColor
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.contracts.chat.ChatMessage
 import com.hopa.app.runtime.TaskItem
