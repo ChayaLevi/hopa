@@ -9,6 +9,7 @@ application {
 }
 
 dependencies {
+    implementation(project(":codec"))
     implementation(project(":execution"))
     implementation(project(":observation"))
     implementation(project(":records"))

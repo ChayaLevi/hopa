@@ -2,7 +2,7 @@ package com.hopa.execution
 
 import com.hopa.contracts.ErrorCodes
 import com.hopa.contracts.HopaError
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.ActionKind
 import com.hopa.contracts.wire.Decision

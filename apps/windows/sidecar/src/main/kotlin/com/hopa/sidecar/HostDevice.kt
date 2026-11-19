@@ -1,7 +1,7 @@
 package com.hopa.sidecar
 
 import com.hopa.contracts.wire.Observation
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import com.hopa.observation.ObservationProducer
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp

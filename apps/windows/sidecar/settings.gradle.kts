@@ -26,6 +26,8 @@ project(":knowledge").projectDir = file("../../../packages/knowledge")
 
 include(":contracts")
 project(":contracts").projectDir = file("../../../packages/contracts")
+include(":codec")
+project(":codec").projectDir = file("../../../packages/codec")
 
 include(":routing")
 project(":routing").projectDir = file("../../../packages/routing")

@@ -1,6 +1,6 @@
 package com.hopa.execution.conformance
 
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice

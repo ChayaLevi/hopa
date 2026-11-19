@@ -13,6 +13,7 @@ sourceSets {
 }
 
 dependencies {
+    implementation(project(":codec"))
     api(project(":contracts"))
     api(project(":knowledge"))
     api(project(":routing"))

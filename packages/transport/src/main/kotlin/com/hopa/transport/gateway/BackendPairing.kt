@@ -1,6 +1,6 @@
 package com.hopa.transport.gateway
 
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers

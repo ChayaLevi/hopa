@@ -11,6 +11,7 @@ sourceSets {
 }
 
 dependencies {
+    testImplementation(project(":codec"))
     api(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)

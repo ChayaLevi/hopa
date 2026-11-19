@@ -2,7 +2,7 @@ package com.hopa.data.store
 
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.approval.ApprovalRequest
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import com.hopa.data.database.dao.PendingApprovalDao
 import com.hopa.data.database.entity.PendingApprovalEntity
 import com.hopa.stores.PendingApprovalStore

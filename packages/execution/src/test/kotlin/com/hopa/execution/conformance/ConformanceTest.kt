@@ -1,7 +1,7 @@
 package com.hopa.execution.conformance
 
 import com.hopa.contracts.ObservationHasher
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import com.hopa.contracts.wire.Observation
 import com.hopa.execution.ActionClassifier
 import com.hopa.execution.ApprovalPolicy

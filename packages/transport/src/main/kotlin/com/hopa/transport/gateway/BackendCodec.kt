@@ -1,6 +1,6 @@
 package com.hopa.transport.gateway
 
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import java.util.UUID
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject

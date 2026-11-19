@@ -3,7 +3,7 @@ package com.hopa.execution.conformance
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.hopa.contracts.json.HopaJson
+import com.hopa.codec.HopaJson
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.records.RunChain
