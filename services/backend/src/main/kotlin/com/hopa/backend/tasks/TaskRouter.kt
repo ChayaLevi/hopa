@@ -246,6 +246,11 @@ class TaskRouter(
             task.id,
         ) {
             val session = registry.sessionFor(task.to) ?: return@span task
+            // The hello catch-up runs after the hello ack, so it can see a task
+            // `create` has just delivered on this same socket. Sending it again
+            // would duplicate the frame; a reconnect gets a fresh session, so an
+            // unacked task is still redelivered then.
+            if (!session.sent.add(task.id)) return@span task
             val sent = session.outgoing.trySend(
                 GatewayCodec.encode(
                     Envelope(

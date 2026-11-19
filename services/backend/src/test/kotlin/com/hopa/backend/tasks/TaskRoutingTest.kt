@@ -11,9 +11,14 @@ import com.hopa.backend.protocol.Envelope
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.server.testing.testApplication
 import java.util.UUID
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class TaskRoutingTest {
@@ -109,6 +114,34 @@ class TaskRoutingTest {
         assertEquals("true", second.bodyString("duplicate"))
         pc.expectNothing("task.create")
     }
+
+    @Test
+    fun `a task already sent on the live socket is not delivered again by the hello catch-up`() =
+        runBlocking {
+            val phone = identities.first { it.deviceId == "dev-phone" }
+            val pc = identities.first { it.deviceId == "dev-pc" }
+            val registry = DeviceRegistry()
+            val frames = Channel<String>(Channel.UNLIMITED)
+            registry.join(DeviceRegistry.Session(pc, frames))
+            val router = TaskRouter(
+                store = InMemoryTaskStore(),
+                registry = registry,
+                devices = MapDirectory(mapOf("dev-pc" to pc)),
+            )
+
+            val routed = router.route(phone, create("dev-pc"))
+            assertFalse((routed as RouteResult.Accepted).duplicate)
+            assertNotNull(frames.tryReceive().getOrNull())
+
+            // The hello catch-up runs after the hello ack, so on a slow runner
+            // it can see the task `delivered` while the client already has the
+            // frame: the same socket must not get a second task.create.
+            router.deliverPending("dev-pc", "hh-1")
+            assertNull(
+                frames.tryReceive().getOrNull(),
+                "the task was delivered twice on one socket",
+            )
+        }
 
     @Test
     fun `a target in another household is refused and never delivered`() = testApplication {
