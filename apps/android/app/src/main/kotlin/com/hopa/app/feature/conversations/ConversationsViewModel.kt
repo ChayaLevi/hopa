@@ -91,6 +91,37 @@ class ConversationsViewModel(
         }
     }
 
+    /** Pull chats through the bridge; the result is one message for the sheet. */
+    fun sync() {
+        if (_state.value.syncing) {
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(syncing = true) }
+            val message = runCatching {
+                val sync = container.chatSync()
+                    ?: return@runCatching "Set a bridge first (Settings > Bridge)"
+                runCatching { sync.run() }.fold(
+                    { report ->
+                        val deleted = if (report.tombstoned > 0) {
+                            ", ${report.tombstoned} deleted"
+                        } else {
+                            ""
+                        }
+                        "Synced: ${report.adopted} chats$deleted"
+                    },
+                    { error -> "Sync failed: ${error.message}" },
+                )
+            }.getOrElse { error -> "Sync failed: ${error.message}" }
+            load()
+            _state.update { it.copy(syncing = false, message = message) }
+        }
+    }
+
+    fun clearMessage() {
+        _state.update { it.copy(message = null) }
+    }
+
     private fun load() {
         viewModelScope.launch {
             _state.update { it.copy(loading = true, error = null) }

@@ -36,33 +36,9 @@ class MemoryViewModel(
         }
     }
 
-    fun addSkill(trigger: String, action: String) {
-        if (trigger.isBlank() || action.isBlank()) {
-            return
-        }
-        viewModelScope.launch {
-            container.skills.add(trigger, action)
-            load()
-        }
-    }
-
-    fun deleteSkill(trigger: String) {
-        viewModelScope.launch {
-            container.skills.delete(trigger)
-            load()
-        }
-    }
-
     fun clearFacts() {
         viewModelScope.launch {
             container.memory.clear()
-            load()
-        }
-    }
-
-    fun clearSkills() {
-        viewModelScope.launch {
-            container.skills.clear()
             load()
         }
     }
@@ -71,7 +47,6 @@ class MemoryViewModel(
         _state.update {
             it.copy(
                 facts = container.memory.all(),
-                skills = container.skills.all(),
                 busy = false,
             )
         }
