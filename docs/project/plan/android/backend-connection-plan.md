@@ -1,5 +1,9 @@
 # Android backend connection and FCM wake — implementation plan
 
+> Archived: this records a past state. The module names have changed since
+> (`core/`, `catalog`, `runlog`, `inference`, `bridge`, `backend`); see
+> [../restructure-modules.md](../restructure-modules.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Pair the HOPA Android app with the deployed backend, connect it to the gateway, run a delivered task on the configured surface, and prove an FCM wake on the Xiaomi 15T Pro.

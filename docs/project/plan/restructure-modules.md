@@ -192,3 +192,30 @@ Net change: 10 modules → 7 modules.
    to `contracts/` if decided in 2b)
 7. Rename `packages/` → `core/` last
 8. Rename Android `feature/recipes/` → `feature/skills/` (Android-only, independent)
+
+---
+
+## Done - 2026-11-19
+
+All of the above landed in one branch (`refactor/modules`), one APK build at the
+end:
+
+| plan item | result |
+|---|---|
+| 2a knowledge + routing | `core/catalog`, package `com.hopa.catalog`; the three generators, the bundle copies and the test helpers moved with it |
+| 2b execution + turn | `core/agent`, package `com.hopa.agent`; the intermediate `loop` rename was skipped - it would have moved the same files twice |
+| 2b TurnContext/TurnResult | `contracts`, where the client boundary belongs |
+| 2c contracts/json | `core/codec`, package `com.hopa.codec` |
+| 3a ObservationHasher | **stayed in `contracts`**: it walks wire types and `contracts` depends on `codec`, so moving it would create a cycle |
+| 3b RunRecordSerializer | left in `contracts/wire` as planned |
+| 3c StubModelClient | `DemoModelClient` |
+| 5a feature/recipes | `feature/skills` |
+| 1 packages -> core | done last, as planned |
+| sidecar strategy | it keeps using `AgentLoop`; only its import lines changed |
+
+Module count: 10 -> **9** (`contracts`, `codec`, `catalog`, `observation`,
+`records`, `prompt`, `agent`, `providers`, `transport`). The earlier estimate of
+7 subtracted two modules per merge; a merge removes one.
+
+`catalog` carries no ktlint: most of it is generated, and reformatting the
+generated files would break `build-*.py --check`.

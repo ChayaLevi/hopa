@@ -1,8 +1,8 @@
 package com.hopa.app.di
 
-import com.hopa.providers.ModelFactory
-import com.hopa.providers.ProviderChoice
-import com.hopa.providers.ProviderChoiceRules
+import com.hopa.inference.client.ModelFactory
+import com.hopa.inference.choice.ProviderChoice
+import com.hopa.inference.choice.ProviderChoiceRules
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest

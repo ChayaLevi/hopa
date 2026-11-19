@@ -7,12 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
 import com.hopa.app.di.Surfaces
 import com.hopa.contracts.model.ModelMessage
-import com.hopa.observation.ScreenPath
+import com.hopa.observation.produce.ScreenPath
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.chat.AttachmentRules
 import com.hopa.contracts.chat.ChatMessage
-import com.hopa.turn.run.TurnOutcome
-import com.hopa.turn.run.TurnSource
+import com.hopa.agent.turn.TurnOutcome
+import com.hopa.agent.turn.TurnSource
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

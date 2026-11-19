@@ -361,3 +361,13 @@ All notable changes are recorded here. Versions follow `docs/versioning.md`.
 - The entry UI is still a shell.
 - No device bench or real-model run has been recorded.
 - API 26 is not installed; the local build uses API 24.
+
+## Unreleased - modules
+
+- `packages/` is `core/`, and the engine is nine modules by role:
+  `contracts`, `codec`, `catalog` (knowledge + routing), `observation`,
+  `records`, `prompt`, `agent` (execution + turn), `providers`, `transport`.
+  Packages follow the module names, `TurnContext`/`TurnResult` moved to
+  `contracts`, `StubModelClient` is `DemoModelClient`, and the Android
+  `feature/recipes` package - which manages skills, not recipes - is
+  `feature/skills`.

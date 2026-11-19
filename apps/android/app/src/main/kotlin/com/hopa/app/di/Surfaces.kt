@@ -8,10 +8,10 @@ import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
 import com.hopa.capabilities.device.UnavailableDevicePort
 import com.hopa.capabilities.display.client.ShellDisplayDevice
-import com.hopa.observation.ScreenPath
-import com.hopa.observation.ScreenPathOrder
-import com.hopa.observation.ScreenSource
-import com.hopa.observation.ScreenSourceDevice
+import com.hopa.observation.produce.ScreenPath
+import com.hopa.observation.produce.ScreenPathOrder
+import com.hopa.observation.source.ScreenSource
+import com.hopa.observation.source.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 import kotlinx.coroutines.CancellationException
 

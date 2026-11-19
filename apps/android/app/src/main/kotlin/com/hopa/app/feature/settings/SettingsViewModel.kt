@@ -8,9 +8,9 @@ import com.hopa.app.gateway.ScreenAccess
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
-import com.hopa.transport.bridge.BridgeClient
-import com.hopa.providers.ProviderState
-import com.hopa.providers.ProviderStateResolver
+import com.hopa.bridge.session.BridgeClient
+import com.hopa.inference.choice.ProviderState
+import com.hopa.inference.choice.ProviderStateResolver
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.stores.AppSettings
@@ -485,7 +485,7 @@ class SettingsViewModel(
             if (bridgeConfigured) {
                 val health = withContext(Dispatchers.IO) {
                     runCatching {
-                        com.hopa.transport.bridge.BridgeClient(current.bridgeUrl, token).health()
+                        com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token).health()
                         true
                     }.getOrDefault(false)
                 }

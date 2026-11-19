@@ -9,13 +9,13 @@ application {
 }
 
 dependencies {
-    implementation(project(":execution"))
+    implementation(project(":agent"))
     implementation(project(":observation"))
-    implementation(project(":records"))
-    implementation(project(":routing"))
-    implementation(project(":knowledge"))
-    implementation(project(":providers"))
-    implementation(project(":transport"))
+    implementation(project(":runlog"))
+    implementation(project(":catalog"))
+    implementation(project(":catalog"))
+    implementation(project(":inference"))
+    implementation(project(":bridge"))
     implementation(project(":contracts"))
 
     implementation(libs.kotlinx.coroutines.core)

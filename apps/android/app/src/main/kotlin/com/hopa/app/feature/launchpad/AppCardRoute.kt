@@ -9,8 +9,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.accessibility.state.AccessibilityState
-import com.hopa.routing.CatalogRoutes
-import com.hopa.routing.RouteTarget
+import com.hopa.catalog.routing.CatalogRoutes
+import com.hopa.catalog.routing.RouteTarget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

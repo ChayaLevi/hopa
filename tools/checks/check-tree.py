@@ -8,10 +8,10 @@ Rules (ADR-0007):
    decision, not an accident, so it has to be added here and in the ADR.
 2. `harness/` must not exist: it was renamed to `evals/`.
 3. No junk drawers anywhere: `utils`, `helpers`, `common`, `misc`, `shared`.
-4. `packages/` holds only the client (`contracts`, `knowledge`, `turn`) and the
-   five engine modules (`routing`, `observation`, `records`, `prompt`,
-   `execution`), plus the provider and transport adapters; the old Python
-   `packages/wire` lives in `services/wire`.
+4. `core/` holds the client engine, one folder per role: `contracts`,
+   `codec`, `catalog`, `observation`, `records`, `prompt`, `agent`,
+   `providers`, `transport`; the old Python `packages/wire` lives in
+   `services/wire`.
 
 Generated and vendor directories are skipped, and dot-directories are ignored
 except `.github`, so a local `.venv`, `.idea` or `.pytest_cache` cannot fail CI.
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 TOP_LEVEL = {
     "apps",
     "services",
-    "packages",
+    "core",
     "evals",
     "spec",
     "build-logic",
@@ -36,15 +36,13 @@ TOP_LEVEL = {
 JUNK = {"utils", "helpers", "common", "misc", "shared"}
 ENGINE_PACKAGES = {
     "contracts",
-    "knowledge",
+    "catalog",
     "providers",
     "transport",
-    "turn",
-    "routing",
     "observation",
     "records",
     "prompt",
-    "execution",
+    "agent",
 }
 SKIP = {
     "build",

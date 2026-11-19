@@ -254,7 +254,7 @@ interface ModelClient {
   not written to preferences and never logged. The Authorization header is the
   only place it is used. Persistent secure storage (Asset Store Kit / HUKS) is
   not implemented yet.
-- A `StubModelClient` is used by tests and `bench` so the pipeline runs with no
+- A `DemoModelClient` is used by tests and `bench` so the pipeline runs with no
   network.
 - The model only proposes actions/plans; it never executes and never decides
   payment approval.

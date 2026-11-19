@@ -25,7 +25,7 @@ class AccessibilityDevice(
     private val context: Context,
 ) : DevicePort {
     private var refs: Map<String, AccessibilityNodeInfo> = emptyMap()
-    private val producer = com.hopa.observation.ObservationProducer()
+    private val producer = com.hopa.observation.produce.ObservationProducer()
     private var lastShot = 0L
 
     override suspend fun observe(): Observation {

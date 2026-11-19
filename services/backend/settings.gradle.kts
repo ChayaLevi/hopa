@@ -21,18 +21,14 @@ dependencyResolutionManagement {
 
 rootProject.name = "hopa-backend"
 
-include(":knowledge")
-project(":knowledge").projectDir = file("../../packages/knowledge")
+include(":catalog")
+project(":catalog").projectDir = file("../../core/catalog")
 include(":contracts")
-project(":contracts").projectDir = file("../../packages/contracts")
-include(":routing")
-project(":routing").projectDir = file("../../packages/routing")
+project(":contracts").projectDir = file("../../core/contracts")
 include(":observation")
-project(":observation").projectDir = file("../../packages/observation")
-include(":records")
-project(":records").projectDir = file("../../packages/records")
-include(":prompt")
-project(":prompt").projectDir = file("../../packages/prompt")
-include(":execution")
-project(":execution").projectDir = file("../../packages/execution")
+project(":observation").projectDir = file("../../core/observation")
+include(":runlog")
+project(":runlog").projectDir = file("../../core/runlog")
+include(":agent")
+project(":agent").projectDir = file("../../core/agent")
 

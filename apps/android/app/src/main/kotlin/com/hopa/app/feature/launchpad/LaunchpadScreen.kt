@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.app.ui.component.AppIcon
 import com.hopa.app.ui.component.HopaPageHeader
 import com.hopa.app.ui.theme.HopaColor
-import com.hopa.routing.RouteTarget
+import com.hopa.catalog.routing.RouteTarget
 
 /**
  * The catalogue as a list: apps and sites, the same two sections Harmony shows.

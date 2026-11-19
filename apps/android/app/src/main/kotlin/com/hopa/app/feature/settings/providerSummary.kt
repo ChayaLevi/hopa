@@ -1,6 +1,6 @@
 package com.hopa.app.feature.settings
 
-import com.hopa.providers.ProviderState
+import com.hopa.inference.choice.ProviderState
 
 /** One plain word for the answers tile. */
 fun providerSummary(state: SettingsUiState): String = when (state.providerState) {

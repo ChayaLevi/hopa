@@ -3,10 +3,10 @@ package com.hopa.app.tasks
 import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.display.client.ShellClient
 import com.hopa.capabilities.display.client.ShellDisplayDevice
-import com.hopa.observation.ScreenSource
-import com.hopa.observation.ScreenSourceDevice
+import com.hopa.observation.source.ScreenSource
+import com.hopa.observation.source.ScreenSourceDevice
 import com.hopa.contracts.chat.ChatMessage
-import com.hopa.turn.run.TurnSource
+import com.hopa.agent.turn.TurnSource
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -3,7 +3,7 @@
 
 Source of truth: ``spec/catalog/catalog.v1.json`` and
 ``spec/prompts/rules.v1.json``. The bundle has the same shape as the
-Kotlin ``KnowledgeBundle``: schemaVersion, version, catalog, sites, promptRules.
+Kotlin ``CatalogBundle``: schemaVersion, version, catalog, sites, promptRules.
 It is written to ``spec/knowledge`` for review and to the backend resources
 so ``GET /v1/knowledge`` serves exactly the reviewed document.
 
@@ -24,7 +24,7 @@ RULES = ROOT / "spec" / "prompts" / "rules.v1.json"
 OUTPUTS = [
     ROOT / "spec" / "knowledge" / "knowledge.v1.json",
     ROOT / "services" / "backend" / "src" / "main" / "resources" / "knowledge.v1.json",
-    ROOT / "packages" / "knowledge" / "src" / "test" / "resources" / "knowledge.v1.json",
+    ROOT / "core" / "catalog" / "src" / "test" / "resources" / "knowledge.v1.json",
     ROOT / "apps" / "android" / "app" / "src" / "main" / "assets" / "knowledge.v1.json",
     ROOT / "apps" / "windows" / "sidecar" / "src" / "main" / "resources" / "knowledge.v1.json",
 ]

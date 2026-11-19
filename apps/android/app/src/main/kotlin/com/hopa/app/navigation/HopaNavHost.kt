@@ -10,7 +10,7 @@ import com.hopa.app.di.AppContainer
 import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.app.feature.memory.MemoryRoute
-import com.hopa.app.feature.recipes.SkillsRoute
+import com.hopa.app.feature.skills.SkillsRoute
 import com.hopa.app.feature.execution.ComputerRoute
 import com.hopa.app.feature.execution.HowHopaActsRoute
 import com.hopa.app.feature.execution.RunningAppsRoute

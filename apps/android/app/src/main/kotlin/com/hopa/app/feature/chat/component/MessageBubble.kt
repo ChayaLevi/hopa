@@ -1,4 +1,4 @@
-package com.hopa.app.feature.chat.component
+﻿package com.hopa.app.feature.chat.component
 
 import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi

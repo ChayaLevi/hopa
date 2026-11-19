@@ -18,7 +18,7 @@ manager and the hypervisor (Apple's Hypervisor.framework replaces WHP).
 
 | Component | Version | Notes |
 | --- | --- | --- |
-| JDK (toolchain) | **Eclipse Temurin 17** (`17.0.21+9`) | `jvmToolchain(17)` in `packages/*`; what CI uses |
+| JDK (toolchain) | **Eclipse Temurin 17** (`17.0.21+9`) | `jvmToolchain(17)` in `core/*`; what CI uses |
 | JDK (daemon, optional) | Eclipse Temurin 21 (`21.0.13+9`) | only if you also build projects that need a newer JDK |
 | Android Studio | **2026.2.2** (Rabbit 2) | bundles JBR 25 — see § 9 |
 | Android SDK Platform | **37.0** (run) and **35** (compile) | |
@@ -55,10 +55,8 @@ You do **not** need HOPA's HarmonyOS toolchain (DevEco Studio, `hvigor`,
 
 ## 3. JDK 17 (and optionally 21)
 
-**JDK 17 is required.** The shared JVM modules (`packages/contracts`,
-`packages/routing`, `packages/observation`, `packages/records`, `packages/prompt`,
-`packages/execution`, `packages/providers`, `packages/transport`, `packages/turn`,
-`packages/knowledge`) pin `jvmToolchain(17)`, and Gradle 8.x
+**JDK 17 is required.** The shared JVM modules (`core/contracts`, `core/codec`, `core/catalog`, `core/observation`,
+`core/records`, `core/prompt`, `core/agent`, `core/providers`, `core/transport`) pin `jvmToolchain(17)`, and Gradle 8.x
 will not satisfy a 17 toolchain with a 21 JDK — it wants an actual JDK 17 on
 disk. CI uses Temurin 17 for the same reason.
 
@@ -322,7 +320,7 @@ AGP/Kotlin combination.
 
 ### Java toolchains
 
-`apps/android` also compiles three pure-JVM modules from `packages/`, and they pin
+`apps/android` also compiles three pure-JVM modules from `core/`, and they pin
 `jvmToolchain(17)`. That is independent of the daemon JVM: Gradle needs a real
 JDK 17 on disk even when it runs on 21. If it is missing you get
 
@@ -360,7 +358,7 @@ Windows sidecar and by CI, which use 17.
 | `Unable to locate adb` / `adb` not found | `ANDROID_HOME`/PATH not set, or a shell opened before § 7. Restart the terminal, then `adb kill-server; adb start-server`. |
 | Gradle: `SDK location not found` | Set `ANDROID_HOME`, or add `sdk.dir` to `apps/android/local.properties` (gitignored). |
 | Gradle: `Failed to find target android-35` | Install `platforms;android-35` (§ 5). The emulator's API 37 is not a substitute. |
-| `Cannot find a Java installation ... {languageVersion=17}` | No JDK 17 on disk. `jvmToolchain(17)` in `packages/*` needs one (§ 3); the daemon JDK is irrelevant. |
+| `Cannot find a Java installation ... {languageVersion=17}` | No JDK 17 on disk. `jvmToolchain(17)` in `core/*` needs one (§ 3); the daemon JDK is irrelevant. |
 | `This version only understands SDK XML versions up to 3 but ... version 4 was encountered` | AGP 8.13.2 reading metadata written by newer tools. Benign; the build continues and installs the platform. |
 | Studio still uses JBR 25 after the change | **File → Invalidate Caches… → Restart**, then sync again; a stale Gradle daemon can hold the old JVM. |
 | `emulator -accel-check` hangs | Use `emulator-check.exe accel` instead. |

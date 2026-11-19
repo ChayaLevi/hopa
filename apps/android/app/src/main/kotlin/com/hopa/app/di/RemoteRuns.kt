@@ -1,7 +1,7 @@
 package com.hopa.app.di
 
 import com.hopa.app.gateway.RemoteRunRequest
-import com.hopa.execution.TurnResult
+import com.hopa.contracts.turn.TurnResult
 
 /**
  * A delivered task takes the same turn as chat: plan-free (the sender already

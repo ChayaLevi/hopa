@@ -31,7 +31,7 @@ dependencies {
     // Interfaces and models live in packages/data; this module keeps the Room
     // and DataStore implementations.
     api(project(":stores"))
-    api(project(":records"))
+    api(project(":runlog"))
     api(project(":contracts"))
 
     implementation(libs.androidx.core.ktx)
