@@ -1,6 +1,6 @@
 package com.hopa.prompt
 
-import com.hopa.routing.RouteTarget
+import com.hopa.catalog.RouteTarget
 
 /**
  * The catalog as the model reads it: one line per app this client can open,

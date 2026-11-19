@@ -12,7 +12,7 @@ import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
-import com.hopa.routing.CatalogRoutes
+import com.hopa.catalog.CatalogRoutes
 import com.hopa.contracts.chat.Attachment
 import com.hopa.records.InMemoryRunRecorder
 import com.hopa.records.RunChain

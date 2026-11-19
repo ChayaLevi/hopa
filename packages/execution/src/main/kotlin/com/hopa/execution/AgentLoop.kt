@@ -11,16 +11,16 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.knowledge.Knowledge
+import com.hopa.catalog.Knowledge
 import com.hopa.prompt.AppCatalogBlock
 import com.hopa.prompt.ContextBudget
 import com.hopa.prompt.InstalledAppsBlock
 import com.hopa.prompt.ScreenRenderer
 import com.hopa.prompt.SystemPromptBuilder
 import com.hopa.records.RunRecorder
-import com.hopa.routing.AppRouter
-import com.hopa.routing.CatalogRoutes
-import com.hopa.routing.RouterHint
+import com.hopa.catalog.AppRouter
+import com.hopa.catalog.CatalogRoutes
+import com.hopa.catalog.RouterHint
 
 class AgentLoop(
     private val stepPolicy: StepPolicy,

@@ -15,8 +15,8 @@ sourceSets {
 dependencies {
     implementation(project(":codec"))
     api(project(":contracts"))
-    api(project(":knowledge"))
-    api(project(":routing"))
+    api(project(":catalog"))
+    api(project(":catalog"))
     api(project(":observation"))
     api(project(":records"))
     api(project(":prompt"))
@@ -28,5 +28,5 @@ dependencies {
     testImplementation(libs.json.schema.validator)
     testImplementation(libs.slf4j.nop)
     testImplementation(testFixtures(project(":contracts")))
-    testImplementation(testFixtures(project(":knowledge")))
+    testImplementation(testFixtures(project(":catalog")))
 }

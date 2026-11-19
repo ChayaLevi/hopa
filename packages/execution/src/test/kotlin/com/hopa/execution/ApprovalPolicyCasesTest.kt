@@ -2,7 +2,7 @@ package com.hopa.execution
 
 import com.hopa.contracts.approval.RiskLevel
 import com.hopa.contracts.wire.Action
-import com.hopa.knowledge.ApprovalPolicyData
+import com.hopa.catalog.ApprovalPolicyData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

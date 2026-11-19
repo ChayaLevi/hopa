@@ -11,7 +11,7 @@ import com.hopa.execution.StepPolicy
 import com.hopa.execution.TurnContext
 import com.hopa.execution.TurnResult
 import com.hopa.records.RunRecorder
-import com.hopa.knowledge.Knowledge
+import com.hopa.catalog.Knowledge
 import com.hopa.turn.goal.GoalVerification
 import com.hopa.turn.goal.GoalVerifier
 import com.hopa.turn.plan.PlanSource

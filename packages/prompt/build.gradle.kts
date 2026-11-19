@@ -5,8 +5,8 @@ plugins {
 
 dependencies {
     api(project(":contracts"))
-    api(project(":routing"))
+    api(project(":catalog"))
 
     testImplementation(libs.junit)
-    testImplementation(testFixtures(project(":knowledge")))
+    testImplementation(testFixtures(project(":catalog")))
 }

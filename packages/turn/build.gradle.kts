@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     api(project(":contracts"))
-    api(project(":routing"))
+    api(project(":catalog"))
     api(project(":observation"))
     api(project(":records"))
     api(project(":prompt"))

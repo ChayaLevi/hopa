@@ -18,8 +18,8 @@ import com.hopa.execution.ApprovalPolicy
 import com.hopa.execution.StepPolicy
 import com.hopa.records.InMemoryRunRecorder
 import com.hopa.records.RunRecordFactory
-import com.hopa.knowledge.ApprovalPolicyData
-import com.hopa.knowledge.Knowledge
+import com.hopa.catalog.ApprovalPolicyData
+import com.hopa.catalog.Knowledge
 import com.hopa.turn.goal.Checkpoint
 import com.hopa.turn.plan.PlanSource
 import com.hopa.turn.recipe.RecipeStore

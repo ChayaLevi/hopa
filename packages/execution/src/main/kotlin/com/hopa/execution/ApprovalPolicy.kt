@@ -6,7 +6,7 @@ import com.hopa.contracts.approval.RiskLevel
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
-import com.hopa.knowledge.ApprovalPolicyData
+import com.hopa.catalog.ApprovalPolicyData
 
 /**
  * The gate's settings for one run: whether the person turned autonomy on, and

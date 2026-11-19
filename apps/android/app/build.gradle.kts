@@ -100,7 +100,7 @@ dependencies {
     implementation(project(":execution"))
     implementation(project(":observation"))
     implementation(project(":records"))
-    implementation(project(":routing"))
+    implementation(project(":catalog"))
     implementation(project(":turn"))
     implementation(project(":capabilities"))
     implementation(project(":data"))

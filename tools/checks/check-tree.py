@@ -36,11 +36,10 @@ TOP_LEVEL = {
 JUNK = {"utils", "helpers", "common", "misc", "shared"}
 ENGINE_PACKAGES = {
     "contracts",
-    "knowledge",
+    "catalog",
     "providers",
     "transport",
     "turn",
-    "routing",
     "observation",
     "records",
     "prompt",

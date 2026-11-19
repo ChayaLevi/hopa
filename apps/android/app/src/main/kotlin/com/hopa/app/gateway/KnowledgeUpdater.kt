@@ -1,6 +1,6 @@
 package com.hopa.app.gateway
 
-import com.hopa.knowledge.FileKnowledgeStore
+import com.hopa.catalog.FileKnowledgeStore
 import com.hopa.transport.gateway.KnowledgeClient
 
 /**

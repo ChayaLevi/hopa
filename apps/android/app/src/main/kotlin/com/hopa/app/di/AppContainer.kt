@@ -56,13 +56,13 @@ class AppContainer(context: Context) {
      * getter, so a bundle accepted between turns applies on the next one.
      */
     private val bundledKnowledge = com.hopa.app.knowledge.AssetKnowledgeSource(context)
-    val knowledgeStore: com.hopa.knowledge.FileKnowledgeStore =
-        com.hopa.knowledge.FileKnowledgeStore(
+    val knowledgeStore: com.hopa.catalog.FileKnowledgeStore =
+        com.hopa.catalog.FileKnowledgeStore(
             directory = java.io.File(context.filesDir, "knowledge"),
             fallback = bundledKnowledge.current(),
         )
-    val knowledgeSource: com.hopa.knowledge.KnowledgeSource = knowledgeStore
-    val knowledge: com.hopa.knowledge.Knowledge get() = knowledgeSource.current()
+    val knowledgeSource: com.hopa.catalog.KnowledgeSource = knowledgeStore
+    val knowledge: com.hopa.catalog.Knowledge get() = knowledgeSource.current()
     val selectedConversation = MutableStateFlow<String?>(null)
     val runGate = com.hopa.app.run.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
