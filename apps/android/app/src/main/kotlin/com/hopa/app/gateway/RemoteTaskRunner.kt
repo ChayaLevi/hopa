@@ -6,7 +6,7 @@ import com.hopa.transport.gateway.BackendReplies
 import com.hopa.transport.gateway.ProcessedTaskLog
 import com.hopa.contracts.ErrorCodes
 import com.hopa.contracts.HopaError
-import com.hopa.execution.TurnResult
+import com.hopa.contracts.TurnResult
 import com.hopa.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 import kotlinx.coroutines.CancellationException

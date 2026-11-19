@@ -97,11 +97,11 @@ android {
 }
 
 dependencies {
-    implementation(project(":execution"))
+    implementation(project(":agent"))
     implementation(project(":observation"))
     implementation(project(":records"))
     implementation(project(":catalog"))
-    implementation(project(":turn"))
+    implementation(project(":agent"))
     implementation(project(":capabilities"))
     implementation(project(":data"))
     implementation(project(":contracts"))

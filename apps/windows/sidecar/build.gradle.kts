@@ -10,7 +10,7 @@ application {
 
 dependencies {
     implementation(project(":codec"))
-    implementation(project(":execution"))
+    implementation(project(":agent"))
     implementation(project(":observation"))
     implementation(project(":records"))
     implementation(project(":catalog"))

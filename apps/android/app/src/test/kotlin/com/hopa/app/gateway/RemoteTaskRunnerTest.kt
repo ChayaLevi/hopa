@@ -14,7 +14,7 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.execution.TurnResult
+import com.hopa.contracts.TurnResult
 import com.hopa.observation.ScreenSource
 import com.hopa.observation.ScreenSourceDevice
 import com.hopa.contracts.ports.DevicePort

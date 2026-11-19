@@ -22,8 +22,8 @@ import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.execution.ActionExecutor
-import com.hopa.execution.ApprovalPolicy
+import com.hopa.agent.ActionExecutor
+import com.hopa.agent.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
@@ -401,7 +401,7 @@ class AppContainer(context: Context) {
     )
 
     /** Recipes that were replayed before; a matching goal runs without the model. */
-    val recipes by lazy { com.hopa.turn.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+    val recipes by lazy { com.hopa.agent.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
     val runs by lazy { com.hopa.app.run.RunCoordinator(this) }

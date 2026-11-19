@@ -11,8 +11,8 @@ import com.hopa.observation.ScreenPath
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.chat.AttachmentRules
 import com.hopa.contracts.chat.ChatMessage
-import com.hopa.turn.run.TurnOutcome
-import com.hopa.turn.run.TurnSource
+import com.hopa.agent.run.TurnOutcome
+import com.hopa.agent.run.TurnSource
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

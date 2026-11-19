@@ -3,11 +3,11 @@ package com.hopa.sidecar
 import com.hopa.transport.bridge.AdbDevice
 import com.hopa.transport.bridge.BridgeClient
 import com.hopa.providers.ModelFactory
-import com.hopa.execution.ActionExecutor
-import com.hopa.execution.ApprovalPolicy
-import com.hopa.execution.AgentLoop
-import com.hopa.execution.ModelStepPolicy
-import com.hopa.execution.TurnContext
+import com.hopa.agent.ActionExecutor
+import com.hopa.agent.ApprovalPolicy
+import com.hopa.agent.AgentLoop
+import com.hopa.agent.ModelStepPolicy
+import com.hopa.contracts.TurnContext
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.ports.DevicePort

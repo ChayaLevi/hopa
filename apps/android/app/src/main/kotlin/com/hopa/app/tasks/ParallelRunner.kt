@@ -6,7 +6,7 @@ import com.hopa.capabilities.display.client.ShellDisplayDevice
 import com.hopa.observation.ScreenSource
 import com.hopa.observation.ScreenSourceDevice
 import com.hopa.contracts.chat.ChatMessage
-import com.hopa.turn.run.TurnSource
+import com.hopa.agent.run.TurnSource
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

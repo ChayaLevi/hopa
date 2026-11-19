@@ -33,6 +33,6 @@ include(":records")
 project(":records").projectDir = file("../../packages/records")
 include(":prompt")
 project(":prompt").projectDir = file("../../packages/prompt")
-include(":execution")
-project(":execution").projectDir = file("../../packages/execution")
+include(":agent")
+project(":agent").projectDir = file("../../packages/agent")
 

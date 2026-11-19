@@ -39,11 +39,10 @@ ENGINE_PACKAGES = {
     "catalog",
     "providers",
     "transport",
-    "turn",
     "observation",
     "records",
     "prompt",
-    "execution",
+    "agent",
 }
 SKIP = {
     "build",
