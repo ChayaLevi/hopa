@@ -1,6 +1,6 @@
 package com.hopa.app.feature.settings
 
-import com.hopa.app.di.AppContainer
+import com.hopa.stores.SettingsRepository
 
 /**
  * The words HOPA uses and the small switches around them: tone, length, mascot,
@@ -8,37 +8,37 @@ import com.hopa.app.di.AppContainer
  * the screen ViewModel only has to re-read what it shows.
  */
 internal class PreferencesSettings(
-    private val container: AppContainer,
+    private val settings: SettingsRepository,
 ) {
     suspend fun setTone(value: String) {
-        container.settings.update { it.copy(tone = value) }
+        settings.update { it.copy(tone = value) }
     }
 
     suspend fun setChattiness(value: String) {
-        container.settings.update { it.copy(chattiness = value) }
+        settings.update { it.copy(chattiness = value) }
     }
 
     suspend fun setMascotFramed(value: Boolean) {
-        container.settings.update { it.copy(mascotFramed = value) }
+        settings.update { it.copy(mascotFramed = value) }
     }
 
     suspend fun setNotifications(value: Boolean) {
-        container.settings.update { it.copy(notifyAnswers = value) }
+        settings.update { it.copy(notifyAnswers = value) }
     }
 
     suspend fun setReplaySkills(value: Boolean) {
-        container.settings.update { it.copy(replaySkills = value) }
+        settings.update { it.copy(replaySkills = value) }
     }
 
     suspend fun setPlanFirst(value: Boolean) {
-        container.settings.update { it.copy(planFirst = value) }
+        settings.update { it.copy(planFirst = value) }
     }
 
     suspend fun setTrusted(packageName: String, trusted: Boolean) {
         if (packageName.isBlank()) {
             return
         }
-        container.settings.update { current ->
+        settings.update { current ->
             current.copy(
                 trustedApps = if (trusted) {
                     current.trustedApps + packageName

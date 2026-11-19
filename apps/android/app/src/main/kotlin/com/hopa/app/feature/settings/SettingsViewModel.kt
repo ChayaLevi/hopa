@@ -24,10 +24,10 @@ import kotlinx.coroutines.withContext
 class SettingsViewModel(
     private val container: AppContainer,
 ) : ViewModel() {
-    private val modelSettings = ModelSettings(container)
+    private val modelSettings = ModelSettings(container.settings, container.modelFactory)
     private val pairingSettings = PairingSettings(container)
     private val surfaceSettings = SurfaceSettings(container)
-    private val preferences = PreferencesSettings(container)
+    private val preferences = PreferencesSettings(container.settings)
 
     private val _state = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
