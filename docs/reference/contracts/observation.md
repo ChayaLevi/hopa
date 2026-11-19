@@ -3,7 +3,7 @@
 An **observation** is the only picture of the screen the model sees. It is
 redacted, hashable and scoped to one moment.
 
-- Schema: [`contracts/schemas/observation.schema.json`](../../../contracts/schemas/observation.schema.json)
+- Schema: [`spec/schemas/observation.schema.json`](../../../spec/schemas/observation.schema.json)
 - Producer: `hopa-baseline observe` on the PC evaluation rig; the ArkTS a11y capability on
   device.
 - Consumer: the loop, the approval policy, the run record.
@@ -74,8 +74,8 @@ focus, text, tree}))` with sorted keys and no whitespace. The screenshot is
 
 Machine-readable values and a cross-client vector:
 
-- [`contracts/observation/limits.v1.json`](../../../contracts/observation/limits.v1.json)
-- [`contracts/fixtures/observation-hash.json`](../../../contracts/fixtures/observation-hash.json)
+- [`spec/observation/limits.v1.json`](../../../spec/observation/limits.v1.json)
+- [`spec/fixtures/observation-hash.json`](../../../spec/fixtures/observation-hash.json)
 - `tools/checks/check-observation-hash.py` recomputes it in CI.
 
 ## Truncation

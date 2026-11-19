@@ -11,13 +11,11 @@ application {
 sourceSets {
     test {
         // The contracts are the test data: the same fixtures CI replays in Python.
-        resources.srcDir(file("../../contracts"))
+        resources.srcDir(file("../../spec"))
     }
 }
 
 dependencies {
-    implementation(project(":engine"))
-
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 

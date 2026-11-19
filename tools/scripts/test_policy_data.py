@@ -9,9 +9,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "tools" / "scripts" / "build-policy-data.py"
-SOURCE = ROOT / "contracts" / "policy" / "approval.v1.json"
+SOURCE = ROOT / "spec" / "policy" / "approval.v1.json"
 GENERATED = ROOT / "apps" / "harmony" / "core" / "src" / "main" / "ets" / "gate" / "PolicyData.ets"
-SCHEMA = ROOT / "contracts" / "schemas" / "action.schema.json"
+SCHEMA = ROOT / "spec" / "schemas" / "action.schema.json"
 POLICY = ROOT / "apps" / "harmony" / "core" / "src" / "main" / "ets" / "gate" / "ApprovalPolicy.ets"
 
 # Names the Harmony parser still emits that the JSON Schema does not (yet) list.

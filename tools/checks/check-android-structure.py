@@ -46,7 +46,11 @@ CONTRACT = re.compile(r"^(?:public |internal )?(?:data |sealed |enum )+(?:class|
 # Test-only packages with no production namesake: shared fakes and the fixtures
 # the conformance tests read. Anything else under src/test belongs to a package
 # production code ships.
-TEST_SUPPORT = {"com.hopa.engine.testing", "com.hopa.engine.conformance"}
+TEST_SUPPORT = {
+    "com.hopa.contracts.testing",
+    "com.hopa.knowledge.testing",
+    "com.hopa.execution.conformance",
+}
 
 
 def is_contract(line: str) -> bool:

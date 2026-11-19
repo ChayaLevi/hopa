@@ -21,10 +21,10 @@ Duplicating 280 lines would drift.
 - Dependency direction: `apps`, `services`, `evals` may import `packages`;
   `packages` imports only the standard library (plus other `packages`).
   A package never imports a service, an app or the repository's contracts by path.
-- `contracts/` stays data (OpenAPI, JSON schemas); `packages/` is code. A change
+- `spec/` stays data (OpenAPI, JSON schemas); `packages/` is code. A change
   to the wire format updates both.
 - When the repository splits, `packages/wire` becomes a versioned dependency of
-  the backend, bridge and relay repositories - the same role `contracts/` plays
+  the backend, bridge and relay repositories - the same role `spec/` plays
   for clients.
 
 ## Consequences

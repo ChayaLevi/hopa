@@ -59,7 +59,7 @@ services/brain/knowledge/apps/*/APP.md
 services/brain/knowledge/sites/*/SITE.md
         │  tools/scripts/build-app-catalog.py
         ▼
-contracts/catalog/catalog.v1.json        every app, every platform
+spec/catalog/catalog.v1.json        every app, every platform
         │
         ├─ AppCatalog.ets   (Harmony)  reads platforms.harmonyos only
         ├─ AppCatalog.kt    (Kotlin)   reads all three blocks
@@ -79,14 +79,14 @@ ArkTS output is byte-identical when only `platforms.android` changes.
 | Windows | `platforms.windows.id` | running windows + start menu (UIA) — not built yet | catalog names + purposes |
 
 Shared by every client: id, display, aliases, purpose, guardrails, risk classes
-(`contracts/policy/approval.v1.json`), and the site fallback.
+(`spec/policy/approval.v1.json`), and the site fallback.
 
 Different per client: only the identifier that `ui.launch` receives.
 
 Every launchpad lists only the entries that have a target on that client:
 Android hides catalog entries with no Android package, Harmony hides entries
 with no HarmonyOS bundle, Windows hides entries with no exe. The catalog stays
-whole in `contracts/`; the filter happens where the target is resolved, so a row
+whole in `spec/`; the filter happens where the target is resolved, so a row
 on screen is always a row that can open.
 
 ## Runtime rules
@@ -113,7 +113,7 @@ on screen is always a row that can open.
 9. Trust is per app and lives in settings: a trusted app skips the question for
    its typed calls, messages and closing, while payments, uninstalling and
    deleting always ask. The list is shared with Harmony through
-   `contracts/policy/approval.v1.json`.
+   `spec/policy/approval.v1.json`.
 10. On Android a row opens the app's card: status, the surface a run would use,
    the package, and the catalog's guardrail bullets. The card, not Settings, is
    where a person judges whether HOPA should touch that app.

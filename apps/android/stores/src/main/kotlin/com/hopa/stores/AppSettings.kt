@@ -21,6 +21,12 @@ data class AppSettings(
     val replaySkills: Boolean = true,
     /** Attach a screenshot to each model call (needs a model that sees images). */
     val vision: Boolean = false,
+    /**
+     * The framed plush picture as the mascot, instead of the cut-out object.
+     * On is the look the app shipped; the cut-out is the choice for anyone who
+     * wants the mascot standing on the page instead of in a badge.
+     */
+    val mascotFramed: Boolean = true,
     /** Packages whose typed calls, messages and closing skip the question. */
     val trustedApps: Set<String> = emptySet(),
     /** Address of the gateway this device is paired with. */

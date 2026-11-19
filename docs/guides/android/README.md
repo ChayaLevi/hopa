@@ -66,7 +66,7 @@ apps/android/
 ```
 
 The loop mirrors `apps/harmony/core/agent`; the behaviour is defined by
-`contracts/schemas` and `contracts/fixtures`, not by copying code.
+`spec/schemas` and `spec/fixtures`, not by copying code.
 
 ## Permissions
 
@@ -105,7 +105,7 @@ payment gate is local in every tier.
 ## Testing
 
 - Unit tests per module.
-- Conformance: run `contracts/fixtures/conformance.json` through the Kotlin loop.
+- Conformance: run `spec/fixtures/conformance.json` through the Kotlin loop.
 - Emulator smoke: launch an app, tap, screenshot, one full turn with a stub model.
 - Device smoke: the same on hardware, with both execution paths if available.
 

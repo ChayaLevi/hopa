@@ -2,7 +2,7 @@ package com.hopa.turn.goal
 
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
-import com.hopa.engine.observation.NodeAnchor
+import com.hopa.observation.NodeAnchor
 
 /**
  * Says whether the turn actually reached what the person asked for, instead of

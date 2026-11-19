@@ -201,5 +201,5 @@ Next discussion topics, in the order they will block work:
 1. Confirm the seven teams and the two shared roles.
 2. Confirm the task-service boundary (`services/tasks` versus bridge).
 3. Confirm the first recipe app.
-4. Draft `contracts/tasks` and `contracts/recipes` (two weeks, no feature code).
+4. Draft `spec/tasks` and `spec/recipes` (two weeks, no feature code).
 5. Agree the weekly rhythm and who runs it (Architecture).

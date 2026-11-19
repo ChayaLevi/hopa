@@ -42,7 +42,7 @@ them do not affect Android or Windows.
 
 - Starting Android no longer waits for Harmony's redaction, hash chain,
   tombstones, UI tests or file splits.
-- Windows can reuse `core`/contracts/data if the stack decision favours it; the
+- Windows can reuse `core`/spec/data if the stack decision favours it; the
   shared data is already platform-neutral.
 - A Harmony security or data-loss bug is a maintenance ticket, not a roadmap
   item; it is fixed when a build ships or when it blocks a demo.

@@ -7,7 +7,7 @@
 ## Context
 
 ADR-0016 accepts three loop implementations and pins their behaviour with
-`contracts/fixtures`. That covers what a step does, but not the **data** a step
+`spec/fixtures`. That covers what a step does, but not the **data** a step
 reads: the app catalogue, the payment vocabulary, the prompt rules, the routing
 rules and the observation hash. Each of those lived in ArkTS code, and the
 Android client would have copied it.
@@ -19,18 +19,18 @@ forked 35 descriptions.
 
 ## Decision
 
-- **Data lives once, in `contracts/`.** A client may render it into code at
+- **Data lives once, in `spec/`.** A client may render it into code at
   build time; it does not re-author it.
 - Shared files:
-  - `contracts/catalog/catalog.v1.json` — app and site ids, names, aliases,
+  - `spec/catalog/catalog.v1.json` — app and site ids, names, aliases,
     purposes, actions, and a `platforms` map with launch details;
-  - `contracts/policy/approval.v1.json` — payment/sensitive/allowed kinds, the
+  - `spec/policy/approval.v1.json` — payment/sensitive/allowed kinds, the
     payment words and action labels, the amount regexes, merchant prefixes;
-  - `contracts/prompts/rules.v1.json` — the promises a system prompt must keep,
+  - `spec/prompts/rules.v1.json` — the promises a system prompt must keep,
     as phrases a client test asserts;
-  - `contracts/fixtures/routing.json` — lexical routing cases;
-  - `contracts/fixtures/observation-hash.json` and
-    `contracts/observation/limits.v1.json` — the hash vector and the caps.
+  - `spec/fixtures/routing.json` — lexical routing cases;
+  - `spec/fixtures/observation-hash.json` and
+    `spec/observation/limits.v1.json` — the hash vector and the caps.
 - **Rendering is generated and committed.** `tools/scripts/build-app-catalog.py`,
   `build-policy-data.py` and `build-prompt-rules.py` emit ArkTS today and Kotlin
   for Android (the catalogue renderer already does); CI runs each with

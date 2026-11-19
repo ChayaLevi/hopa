@@ -30,7 +30,7 @@ would force `hopa-relay` onto every PC and break `hdc-tunnel`.
   behaviour change.
 - Each package has its own CLI root; there is no shared `common/` module. If a
   helper is genuinely shared it is a few lines and is duplicated, or it moves to
-  `contracts/` as a format, not code.
+  `spec/` as a format, not code.
 - `render.yaml` installs and starts only `services/relay`.
 - For one release, `hopa-bridge relay` prints "moved to hopa-relay" and exits 2,
   so an old script fails loudly instead of silently doing nothing.

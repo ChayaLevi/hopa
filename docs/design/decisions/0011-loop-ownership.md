@@ -26,11 +26,11 @@ Three forces pull the loop to a server:
   the device loop is not extracted "in parallel"; the backend takes ownership in
   one move, and the Harmony app becomes a thin client for remote runs.
 - **Clients are thin**: they capture, execute actions, render, and never hold a
-  model key. Their only coupling is `contracts/` (OpenAPI + schemas).
+  model key. Their only coupling is `spec/` (OpenAPI + schemas).
 - **The bridge remains the device plane**, alongside the relay, and never gains
   product logic. It may be deployed per user PC or hosted for a device farm.
 - **Shared code is versioned, not copied**: `services/wire` is published as
-  `hopa-wire`; `contracts/` is published as a versioned artifact with generated
+  `hopa-wire`; `spec/` is published as a versioned artifact with generated
   clients. A backend, a bridge and a relay depend on a version, not a path.
 - The split order is **backend first, then bridge/relay**, because the backend is
   the only piece with user data that needs a migration plan.

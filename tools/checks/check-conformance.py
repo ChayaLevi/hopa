@@ -13,7 +13,7 @@ internally consistent:
 - a reply that is `done` and also carries an action is expected to be rejected,
   because that rule lives in the loop, not in JSON Schema.
 
-A client's own runner consumes the same file; see contracts/fixtures/README.md.
+A client's own runner consumes the same file; see spec/fixtures/README.md.
 """
 
 from __future__ import annotations
@@ -22,8 +22,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SCHEMAS = ROOT / "contracts" / "schemas"
-FIXTURES = ROOT / "contracts" / "fixtures" / "conformance.json"
+SCHEMAS = ROOT / "spec" / "schemas"
+FIXTURES = ROOT / "spec" / "fixtures" / "conformance.json"
 
 DECISION_KEYS = {"action", "say", "done", "needUser", "options", "sessionId", "version"}
 EXECUTION_KEYS = {"actionKind", "classification", "needsApproval", "executed"}

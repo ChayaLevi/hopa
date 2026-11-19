@@ -13,11 +13,11 @@ import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.engine.execution.ActionExecutor
-import com.hopa.engine.execution.ApprovalPolicy
-import com.hopa.engine.execution.StepPolicy
-import com.hopa.engine.records.InMemoryRunRecorder
-import com.hopa.engine.records.RunRecordFactory
+import com.hopa.execution.ActionExecutor
+import com.hopa.execution.ApprovalPolicy
+import com.hopa.execution.StepPolicy
+import com.hopa.records.InMemoryRunRecorder
+import com.hopa.records.RunRecordFactory
 import com.hopa.knowledge.ApprovalPolicyData
 import com.hopa.knowledge.Knowledge
 import com.hopa.turn.goal.Checkpoint

@@ -22,7 +22,7 @@ A14 (cross-path QA).
 Builds an Android client with the **whole agent loop inside the APK** (ADR-0016)
 that acts through **two families** (ADR-0017): on this phone (hidden display or
 visible screen) and the PC bridge over `adb` as an explicit choice. Behaviour is
-defined by `contracts/schemas` and `contracts/fixtures`.
+defined by `spec/schemas` and `spec/fixtures`.
 
 Count it with:
 
@@ -131,9 +131,9 @@ through to About.
   outbound sheet.
 - **17 approval policy cases**, not 18.
 - **The catalogue and the policy vocabulary are now shared data** (ADR-0018):
-  `contracts/catalog/catalog.v1.json`, `contracts/policy/approval.v1.json`,
-  `contracts/prompts/rules.v1.json`, `contracts/fixtures/routing.json`,
-  `contracts/fixtures/observation-hash.json`. The Android client renders them;
+  `spec/catalog/catalog.v1.json`, `spec/policy/approval.v1.json`,
+  `spec/prompts/rules.v1.json`, `spec/fixtures/routing.json`,
+  `spec/fixtures/observation-hash.json`. The Android client renders them;
   it does not re-author them. The Harmony parser still emits four kinds the
   schema does not list (`ui.sendMessage`, `ui.call`, `a11y.observe`,
   `sandbox.runNetworked`); Android uses the schema names.
@@ -258,7 +258,7 @@ apps/android/
 
 - [x] `packages/contracts`: serializable `Observation`, `Action`, `Decision`, `RunRecord` matching the schemas exactly (names, nullability, unknown fields rejected). (evidence: ConformanceTest decodes every fixture with ignoreUnknownKeys = false)
 - [x] JSON-Schema validation with `networknt/json-schema-validator` (draft 2020-12), including `action` `$ref` inside `decision`; pin the version. (evidence: SchemaValidationTest validates every fixture observation and decision)
-- [x] `ObservationProducer` contract tests: pre-order refs, redaction cases, limits from `contracts/observation/limits.v1.json`, and the exact hash from `contracts/fixtures/observation-hash.json`. (evidence: ObservationProducerTest: refs, redaction, caps, limits, hash fixtures)
+- [x] `ObservationProducer` contract tests: pre-order refs, redaction cases, limits from `spec/observation/limits.v1.json`, and the exact hash from `spec/fixtures/observation-hash.json`. (evidence: ObservationProducerTest: refs, redaction, caps, limits, hash fixtures)
 - [x] Catalogue: generate the Kotlin file from `services/brain/knowledge` (`build-app-catalog.py --kotlin`). (evidence: `packages/knowledge/src/main/kotlin/com/hopa/knowledge/AppCatalog.kt` header; CI runs build-app-catalog.py --check); no hand-written list. Fill the `android` platform map (package, activity) from `PackageManager`.
 - [x] Schema-only conformance: every fixture's observation and decision validates or fails as declared; no semantic gate yet. (evidence: SchemaValidationTest, with the two semantic rejections named)
 - [x] A named negative case: `ui.teleport` must fail with `E_SCHEMA`. (evidence: DecisionParserTest.rejects_an_unknown_kind)
@@ -268,8 +268,8 @@ apps/android/
 
 - [x] `AgentLoop`: initial capture, system prompt, **up to 14 steps**, 1500 ms settle, duplicate-launch short-circuit, cancel at three checkpoints, final text-only call, `summarize`. (evidence: AgentLoopTest (6 cases); settle, cancel, dedupe, usage)
 - [x] `DecisionParser`/`DecisionRules`: fenced and last-object parsing, the **schema's** kinds (not Harmony's 19), reject `finish`/`done`, ignore model payment flags, unknown kind → `E_SCHEMA`, and the fields each kind needs (see A1). (evidence: packages/engine/src/test/kotlin/com/hopa/engine/parser/DecisionParserTest.kt, DecisionRulesTest.kt)
-- [x] `PromptBuilder`: system text carrying every rule in `contracts/prompts/rules.v1.json` (generate Kotlin with `build-prompt-rules.py --kotlin` and assert the phrases in a test), memory/skill/app-catalogue blocks, router hint, screen rendering with 120 element lines. (evidence: SystemPromptTest asserts every generated PROMPT_RULES phrase)
-- [x] `AppRouter` ported from `AppRouter.ets`; run `contracts/fixtures/routing.json` and reproduce every case. (evidence: AppRouterTest reproduces all 12 routing fixtures)
+- [x] `PromptBuilder`: system text carrying every rule in `spec/prompts/rules.v1.json` (generate Kotlin with `build-prompt-rules.py --kotlin` and assert the phrases in a test), memory/skill/app-catalogue blocks, router hint, screen rendering with 120 element lines. (evidence: SystemPromptTest asserts every generated PROMPT_RULES phrase)
+- [x] `AppRouter` ported from `AppRouter.ets`; run `spec/fixtures/routing.json` and reproduce every case. (evidence: AppRouterTest reproduces all 12 routing fixtures)
 - [x] `ContextBudget`: 24 000 chars, keep last 6, 400-char old lines, hard trim. (evidence: packages/engine/.../prompt/ContextBudget.kt; AgentLoop calls budget.fit)
 - [x] `RunNarrator`: per-step sentences, tap grouping, failure phrasing. (evidence: RunNarrator.lines folds consecutive taps, keeps five taps bounded, breaks on failure; RunNarratorTest, 6 cases)
 - [x] `ObservationProducer` behind `ScreenSource`: the chosen path (hidden, visible, or computer) with a timeout, one source per turn. (evidence: ScreenSourceDevice; ScreenSourceDeviceTest covers precedence, timeout, failure, action routing, fallback; ChatViewModel builds the sources from the setting)
@@ -279,7 +279,7 @@ apps/android/
 
 ### A3. Gate, records, semantic conformance (8 d)
 
-- [x] `ApprovalPolicy`: read `contracts/policy/approval.v1.json` (generate Kotlin with `build-policy-data.py --kotlin`), all lists and amount/merchant regexes, trusted-app rule against `system.sendMessage`, fail-closed; autonomous never bypasses payment. (evidence: ApprovalPolicyTest (6 cases); ApprovalPolicyData generated)
+- [x] `ApprovalPolicy`: read `spec/policy/approval.v1.json` (generate Kotlin with `build-policy-data.py --kotlin`), all lists and amount/merchant regexes, trusted-app rule against `system.sendMessage`, fail-closed; autonomous never bypasses payment. (evidence: ApprovalPolicyTest (6 cases); ApprovalPolicyData generated)
 - [x] `ActionExecutor`: guards → policy → approval → capability → verify → record; denial records; unsupported records. (evidence: ActionExecutor.kt; denial and unsupported rows are recorded)
 - [x] `RunRecord` per **contract** with `prevHash`/`hash` (canonical JSON, `sha256:`), step index, trace id; seed pinned to `sha256("")`; `verifyChain` fails on tamper. (evidence: RunChainTest seals, verifies and fails on tamper)
 - [x] Room `RunStore` (last 100, atomic), one run id per turn. (evidence: RunRecordDao.insertAndPrune runs insert+prune in a transaction; RoomRunRecorder prunes to 100; ChatViewModel passes a fresh run id into the loop)
@@ -309,7 +309,7 @@ apps/android/
 - [x] Non-ASCII typing: ADBKeyboard IME path or explicit refusal pointing to accessibility; document both. (evidence: AndroidDevice.type_text refuses with a pointer to accessibility; adding-a-platform)
 - [x] `/apps` endpoint (`pm list packages -3` plus labels) and `apps()` on `DevicePort`; `screenshot()` on `DevicePort` (the handler exists, the protocol does not declare it). (evidence: bridge /apps + DevicePort.screenshot/apps; test_bridge)
 - [x] Tests: layout fixtures, command construction, fake runner, pool routing; hardware smoke. (evidence: 139 bridge tests pass; hardware smoke in A5-bridge.md)
-- [x] `contracts/openapi/bridge.v1.yaml`: add `platform` and `/apps`; keep existing paths stable. (evidence: check-openapi.py ok, 22 paths)
+- [x] `spec/openapi/bridge.v1.yaml`: add `platform` and `/apps`; keep existing paths stable. (evidence: check-openapi.py ok, 22 paths)
 - [x] `services/docs`: `adding-a-platform` updated with the adb reality. (evidence: services/docs/guides/adding-a-platform.md Android section)
 - [x] Evidence: bridge lists an Android device with `platform: android`; observe/tap/screenshot work. (evidence: docs/project/evidence/A5-bridge.md)
 
@@ -375,7 +375,7 @@ apps/android/
 - [x] Usage: counters from `run_records`. (evidence: UsageScreen + emulator run; docs/project/evidence/A11-screens.md)
 - [ ] Plans: repeated-goal suggestions (≥2, 4–90 chars, max 3), intervals, list/delete; **decision**: in-process copy or WorkManager (see §13).
 - [x] Capabilities hub: readiness + tiles. (evidence: docs/project/evidence/A11-screens.md)
-- [ ] Launchpad: render `contracts/catalog/catalog.v1.json`, apps/sites segments, search, verified/unverified; fill and use the `android` package/activity map; `PackageManager` launch with explicit intents.
+- [ ] Launchpad: render `spec/catalog/catalog.v1.json`, apps/sites segments, search, verified/unverified; fill and use the `android` package/activity map; `PackageManager` launch with explicit intents.
 - [ ] Browser: WebView https-only, JS read/click/type, 20 000-char cap, in-app address bar.
 - [x] Memory and Skills: add/delete/clear/export; skill use. (evidence: MemoryScreen + Room v4 + prompt injection; docs/project/evidence/A11-screens.md)
 - [x] Device control page: bridge vs on-device states, both setup flows, retry, "cannot act" honesty. (evidence: DeviceScreen: states, retry, both setup links, honesty; docs/project/evidence/A11-screens.md)

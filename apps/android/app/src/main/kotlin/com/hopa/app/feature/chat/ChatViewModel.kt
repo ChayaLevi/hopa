@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.hopa.app.di.AppContainer
 import com.hopa.app.di.Surfaces
 import com.hopa.contracts.model.ModelMessage
-import com.hopa.engine.observation.ScreenPath
+import com.hopa.observation.ScreenPath
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.chat.AttachmentRules
 import com.hopa.contracts.chat.ChatMessage

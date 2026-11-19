@@ -8,8 +8,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CHECK = ROOT / "tools" / "checks" / "check-observation-hash.py"
-LIMITS = ROOT / "contracts" / "observation" / "limits.v1.json"
-FIXTURES = ROOT / "contracts" / "fixtures" / "observation-hash.json"
+LIMITS = ROOT / "spec" / "observation" / "limits.v1.json"
+FIXTURES = ROOT / "spec" / "fixtures" / "observation-hash.json"
 
 
 def _module():

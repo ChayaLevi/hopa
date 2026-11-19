@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 TARGETS = (
     (
-        ROOT / "contracts/openapi/bridge.v1.yaml",
+        ROOT / "spec/openapi/bridge.v1.yaml",
         (
             ROOT / "services/bridge/src/hopa_bridge/bridge.py",
             ROOT / "services/bridge/src/hopa_bridge/bridge_pool.py",
@@ -28,12 +28,12 @@ TARGETS = (
         "python",
     ),
     (
-        ROOT / "contracts/openapi/relay.v1.yaml",
+        ROOT / "spec/openapi/relay.v1.yaml",
         (ROOT / "services/relay/src/hopa_relay/relay_server.py",),
         "python",
     ),
     (
-        ROOT / "contracts/openapi/backend.v1.yaml",
+        ROOT / "spec/openapi/backend.v1.yaml",
         (ROOT / "services/backend/src/main/kotlin",),
         "kotlin",
     ),

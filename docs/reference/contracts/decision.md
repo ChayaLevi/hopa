@@ -4,7 +4,7 @@ A **decision** is what the model returns for one step: either one action, or a
 statement that it is done, or a question for the user. It is not the loop and not
 the record; the loop validates it, the gate classifies it, the executor runs it.
 
-- Schema: [`contracts/schemas/decision.schema.json`](../../../contracts/schemas/decision.schema.json)
+- Schema: [`spec/schemas/decision.schema.json`](../../../spec/schemas/decision.schema.json)
 - Action schema: [`action.schema.json`](action.md)
 
 ## Shape

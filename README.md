@@ -33,7 +33,7 @@ hello, then the real Bilibili app and a real Weibo post, end to end.
 <tr>
 <td width="25%" align="center" valign="top">
 
-<img src="docs/media/home-2026.jpeg" alt="HOPA home: the smiling living-phone mascot and three example asks" height="420" />
+<img src="docs/media/android-plush-empty-2026-11-19.png" alt="HOPA home: the plush mascot and two example asks" height="420" />
 
 <br/><sub><b>Home.</b> One sentence, three gentle suggestions.</sub>
 
@@ -73,12 +73,12 @@ hello, then the real Bilibili app and a real Weibo post, end to end.
 <tr>
 <td width="26%" align="center" valign="middle">
 
-<img src="docs/media/mascot.svg" alt="HOPA, the little coral phone with feet" width="160" />
+<img src="docs/media/mascot-plush-2026.png" alt="HOPA, the round plush mascot with a cream belly" width="160" />
 
 </td>
 <td valign="middle">
 
-**The little phone with feet.** HOPA stands for *HarmonyOS Personal Assistant*.
+**The plush behind the loop.** HOPA stands for *HarmonyOS Personal Assistant*.
 It blinks while it waits, taps while it works, and hops only when something is
 actually done. In Chinese, the idea is **动口不动手** — speak, don’t tap.
 
@@ -289,11 +289,13 @@ and a secret/license scan.
 - `apps/harmony/laptop/` — the laptop app (module `laptop`); frozen.
 - `packages/contracts/` — shared wire types, port interfaces, model types and
   approval data classes; no logic, no Android imports.
-- `packages/engine/`, `packages/turn/`, `packages/models/`, `packages/net/`,
-  `packages/knowledge/` —
-  the Kotlin client engine shared by the Android and Windows clients: the loop
-  and gate, the one turn every client runs, the model adapters, the network
-  clients, and the generated catalog and rules.
+- `packages/routing/`, `packages/observation/`, `packages/records/`,
+  `packages/prompt/`, `packages/execution/` - the Kotlin client engine shared
+  by the Android and Windows clients: which app answers, the screen model,
+  run records, the prompt, and the loop with its gate and executor.
+- `packages/turn/`, `packages/providers/`, `packages/transport/`,
+  `packages/knowledge/` - the one turn every client runs, the model
+  adapters, the network clients, and the generated catalog and rules.
 - `services/bridge/` — the PC companion and bridge: device control, store,
   images, relay.
 - `services/brain/` — the Kotlin reference brain for routing and knowledge.

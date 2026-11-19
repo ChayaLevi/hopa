@@ -62,7 +62,7 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
                 text = greeting(),
                 fontSize = cappedSp(13f),
                 color = HopaColor.TextHint,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 10.dp),
             )
             Text(
                 text = "HOPA",

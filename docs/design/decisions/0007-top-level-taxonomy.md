@@ -22,7 +22,7 @@ Three problems motivated this record:
 
 ## Decision
 
-- Top level is: `apps/`, `services/`, `evals/`, `contracts/`, `tools/`, `docs/`.
+- Top level is: `apps/`, `services/`, `evals/`, `spec/`, `tools/`, `docs/`.
   Each answers one question before it is opened:
 
   | Folder | Answers | Ships? |
@@ -30,7 +30,7 @@ Three problems motivated this record:
   | `apps/` | what a person holds | yes |
   | `services/` | what runs with nobody watching | deployable, not shipped to a device |
   | `evals/` | how we know it got better | never |
-  | `contracts/` | what both sides may share | data only |
+  | `spec/` | what both sides may share | data only |
   | `tools/` | how we build and check | never |
   | `docs/` | why it is like this | never |
 
@@ -81,9 +81,13 @@ import the Android app. The engine moved out of `apps/`:
 | Folder | What it holds | Who may import it |
 |---|---|---|
 | `packages/contracts` | shared data types (`Action`, `Observation`, `RunRecord`, `Decision`), port interfaces (`DevicePort`, `ModelPort`, …), `ApprovalRequest`, `ApprovalGateway`, JSON helpers | clients |
-| `packages/engine` | loop, gate logic, records, observation, parser, prompt, router | clients |
-| `packages/net` | device and backend transport: the PC bridge client and the gateway client (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
-| `packages/models` | the adapters behind `ModelPort`: provider choice and state, the OpenAI-compatible client, the stub (was `net.llm`) | clients |
+| `packages/routing` | which app answers a goal: the catalog routes | clients |
+| `packages/observation` | the screen model: nodes, anchors, the observer, the screen source | clients |
+| `packages/records` | a run as records, and the chain that links them | clients |
+| `packages/prompt` | the system prompt and its blocks | clients |
+| `packages/execution` | loop, gate logic, parser, decisions, the executor | clients |
+| `packages/transport` | device and backend transport: the PC bridge client and the gateway client (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
+| `packages/providers` | the adapters behind `ModelPort`: provider choice and state, the OpenAI-compatible client, the stub (was `net.llm`) | clients |
 | `packages/knowledge` | generated catalog, policy data and prompt rules, written by the build scripts | clients |
 | `packages/turn` | one turn for every client: goal and checkpoints, recipes, the plan gate and the playbook policy | clients |
 
@@ -92,8 +96,12 @@ Dependency chain (one direction only):
 ```
 knowledge   (no deps)
 contracts   (no deps)
-engine      → contracts + knowledge
-turn        → contracts + engine
+routing     → contracts + knowledge
+observation → contracts
+records     → contracts
+prompt      → contracts + routing
+execution   → the four above + knowledge
+turn        → contracts + the five engine modules
 net         → contracts
 models      → contracts
 ```
@@ -103,12 +111,12 @@ decoupled from agent loop changes and reduces HAP/APK size for modules that only
 need data types and port interfaces.
 
 2026-11-18 addendum: `stores` is no longer a shared package. The Windows sidecar
-imported only the chat vocabulary, which now lives in `contracts/chat`; the store
+imported only the chat vocabulary, which now lives in `spec/chat`; the store
 interfaces and their in-memory implementations moved to `apps/android/stores`,
 next to the Room, DataStore and Keystore classes that implement them. The backend
 also dropped an unused `:stores` dependency.
 
-2026-11-18 addendum 2: `net.llm` moved to `packages/models`. It is the adapter
+2026-11-18 addendum 2: `net.llm` moved to `packages/providers`. It is the adapter
 layer behind `ModelPort` and changes with provider APIs, while `net` changes with
 device and backend protocols; both are HTTP clients, and the README now says so
 instead of claiming `net` was the only one.

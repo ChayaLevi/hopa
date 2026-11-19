@@ -10,7 +10,7 @@ import com.hopa.capabilities.accessibility.tree.GestureDispatcher
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.engine.observation.ObservationProducer
+import com.hopa.observation.ObservationProducer
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
 import kotlinx.coroutines.delay

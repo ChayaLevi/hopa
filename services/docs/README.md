@@ -65,7 +65,7 @@ The central index in [`docs/design/decisions/`](../../docs/design/decisions/READ
 
 The wire formats and the safety/privacy rules bind both the app and the services,
 so they stay in `docs/` and are not duplicated: see
-[`contracts/`](../../docs/reference/contracts/observation.md),
+[`spec/`](../../docs/reference/contracts/observation.md),
 [`reference/safety.md`](../../docs/reference/safety.md) and
 [`reference/threat-model.md`](../../docs/reference/threat-model.md). The machine
-contracts are in [`contracts/openapi/`](../../contracts/openapi/README.md).
+contracts are in [`spec/openapi/`](../../spec/openapi/README.md).

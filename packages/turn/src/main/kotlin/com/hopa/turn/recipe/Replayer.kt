@@ -1,8 +1,8 @@
 package com.hopa.turn.recipe
 
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.engine.execution.ActionExecutor
-import com.hopa.engine.observation.NodeAnchor
+import com.hopa.execution.ActionExecutor
+import com.hopa.observation.NodeAnchor
 import kotlinx.coroutines.delay
 
 /**

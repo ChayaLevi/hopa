@@ -197,7 +197,7 @@ def check(root: Path = ROOT) -> list[str]:
     files = {owner for owner, _ in CLASSES.values()}
     docs = {
         name: json.loads(
-            (root / "contracts" / "schemas" / f"{name}.schema.json").read_text(encoding="utf-8")
+            (root / "spec" / "schemas" / f"{name}.schema.json").read_text(encoding="utf-8")
         )
         for name in files
     }

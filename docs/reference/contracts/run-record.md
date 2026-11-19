@@ -4,7 +4,7 @@ A **run record** is one append-only, hash-chained line about one step. It is wha
 the run pane shows, what the evaluation scores, and what makes a claim about an
 action auditable after the fact.
 
-- Schema: [`contracts/schemas/run-record.schema.json`](../../../contracts/schemas/run-record.schema.json)
+- Schema: [`spec/schemas/run-record.schema.json`](../../../spec/schemas/run-record.schema.json)
 - Action schema: [`action.md`](action.md)
 
 ## Shape

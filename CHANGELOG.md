@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased - app
+
+- The mascot has two looks, chosen in Settings next to Tone and length: the
+  framed badge the app shipped (the default) and a cut-out plush standing on the
+  page. The cut-out assets are produced by `tools/scripts/cutout-mascot.py`,
+  which removes the studio backdrop and the photo's cast shadow; the code draws
+  a warm two-layer contact shadow instead, skipped at avatar size.
+- `mascotFramed` is stored as `mascot_framed`, like every other key in the
+  settings file.
+
 ## Unreleased - build
 
 - `build-logic/` is a composite build of Gradle convention plugins. A module
@@ -15,6 +25,16 @@
   modules instead of the old three.
 
 ## Unreleased - engine
+
+- `packages/engine` is five modules: `routing`, `observation`, `records`,
+  `prompt` and `execution`, with packages named after them. The split makes the
+  one-way dependencies a build fact: `routing` and `records` depend on nothing
+  but `contracts`, `prompt` adds `routing`, and only `execution` sees all four.
+  The fakes that substitute `contracts` ports moved to its test fixtures,
+  `TestKnowledge` moved to `knowledge` test fixtures, and the three builds
+  (Android, Windows sidecar, backend) name the five modules. The split also fixed
+  the backend's test resources, which still pointed at `contracts/` after the
+  folder became `spec/`.
 
 - `RunRecord` carries an optional `targetKey`: what the step's `ref` pointed at
   (`type|text=…|desc=…|id=…`), not where it sat in the tree. `ActionExecutor`
@@ -97,7 +117,7 @@
 
 - Module names now say what they hold: `core` is `engine`, `know` is
   `knowledge`, `remote` is `net` (`com.hopa.engine.*`, `com.hopa.knowledge.*`,
-  `com.hopa.net.*`). `state` keeps its name. A local model runtime is not part
+  `com.hopa.transport.*`). `state` keeps its name. A local model runtime is not part
   of `net`: it will be its own adapter behind `ModelPort`.
 
 - `packages/capabilities` is now `packages/remote`: the module holds the bridge

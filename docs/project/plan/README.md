@@ -81,7 +81,7 @@ hopa/
 │  ├─ evals/                # bench/ + baseline/ (ADR-0013)
 │  ├─ tools/                # scripts/ + checks/ that drive the services
 │  └─ docs/                 # guides, protocols, brain, bench, service ADRs
-├─ contracts/
+├─ spec/
 │  ├─ openapi/              # bridge.v1.yaml (R5)
 │  └─ schemas/              # 4 JSON schemas (exists)
 ├─ tools/                   # app build/check/signing only
@@ -370,12 +370,12 @@ Goal: the relay host installs only relay code; a PC still keeps `cloud-link` and
 Risk: medium (one production blueprint line). Rollback: revert the relay commit,
 then the render commit, then redeploy; `pip uninstall hopa-relay`.
 
-## R5. Freeze the bridge API in `contracts/` (against the real files)
+## R5. Freeze the bridge API in `spec/` (against the real files)
 
 No runtime change. Written against `bridge.py` + `bridge_pool.py`, since the
 `api/` split does not exist yet.
 
-- [x] `contracts/openapi/bridge.v1.yaml` covers the real surface, 21 paths: (evidence: commit 3a96245)
+- [x] `spec/openapi/bridge.v1.yaml` covers the real surface, 21 paths: (evidence: commit 3a96245)
       `/health`, `/whoami`, `/pair`, `/refresh`, `/observe`, `/tap`, `/type`,
       `/swipe`, `/screenshot`, `/launch`, `/foreground`, `/stop`, `/focus`,
       `/key`, `/voices`, `/images`, `/images/{id}`, `GET|POST /chats`,
@@ -383,7 +383,7 @@ No runtime change. Written against `bridge.py` + `bridge_pool.py`, since the
       "ok 21 spec path(s), 20 code route(s), 1 prefix route(s)")
 - [x] Auth is in the spec: bearer token, bootstrap vs paired token, the 12-hour (evidence: commit 3a96245)
       lifetime, `X-Hopa-Role` routing, `X-Hopa-Read`, error body.
-- [x] `contracts/openapi/README.md`: same-PR rule, both-directions check, prefix (evidence: commit 3a96245)
+- [x] `spec/openapi/README.md`: same-PR rule, both-directions check, prefix (evidence: commit 3a96245)
       routes, versioning.
 - [x] `tools/checks/check-openapi.py` reads the `self.path ==` chain in (evidence: commit 3a96245)
       `bridge.py` + `bridge_pool.py`, allows declared prefixes, fails both ways;
@@ -429,7 +429,7 @@ commit; no data changes.
   services/backend exists; clients are thin; the bridge stays the device plane;
   shared code is versioned, not copied.
 - [x] Assignment decided (2026-11-13): evals/, the service half of tools/ and the (evidence: commit 0aa431c)
-  service docs move with services/; contracts/ is shared by version.
+  service docs move with services/; spec/ is shared by version.
 - [x] docs/project/operations/repo-split.md: target repositories, preconditions, order (evidence: commit 0aa431c)
   (backend, wire, bridge/relay, apps), git filter-repo mechanics, per-repo CI
   and the rollback tag.
@@ -447,11 +447,11 @@ Risk: none. Rollback: revert the docs commit.
 - [x] `tools/scripts/test_check_tree.py`: five tests - the real repo, an unknown (evidence: commit 43b308f)
       top-level folder, `harness/`, a nested junk drawer, and ignored build/dot
       directories. (evidence: 5 passed)
-- [x] `check-links.py` extended to `contracts/**` and to `README.md` under (evidence: commit 43b308f)
+- [x] `check-links.py` extended to `spec/**` and to `README.md` under (evidence: commit 43b308f)
       `apps/`, `services/`, `evals/`, `tools/`. It immediately found a stale
       `../docs/brain.md` in `services/brain/README.md`, now
       `../../docs/reference/brain.md`.
-- [x] `README.md` repository map includes `contracts/` and `tools/`; (evidence: commit 43b308f)
+- [x] `README.md` repository map includes `spec/` and `tools/`; (evidence: commit 43b308f)
       `CONTRIBUTING.md` gained the "where does a new file go?" table (top level
       then layer, with the two absolute rules); `CLAUDE.md` paths refreshed in
       R1/R3; `docs/project/plan/README.md` links this plan without adding boxes to the
@@ -467,7 +467,7 @@ Risk: low.
 
 - [x] `apps/android/README.md`: Compose client that runs its own loop (ADR-0016), (evidence: commit 946e639)
       with two `DevicePort` adapters — bridge/adb and `AccessibilityService` (ADR-0017);
-      behaviour shared through `contracts/` and fixtures.
+      behaviour shared through `spec/` and fixtures.
 - [x] `apps/windows/README.md`: WinUI shell, UI Automation adapter, the sparse-tree (evidence: commit 946e639)
       rule, contract-only traffic.
 - [x] `docs/guides/harmony/adding-a-platform.md`: the `DevicePort` method table, the four (evidence: commit 946e639)
@@ -523,7 +523,7 @@ behind in the app repository.
 - [x] `run-tests.ps1` argument list repaired (a `Join-Path` array slipped in (evidence: commit 42bd681)
       during the move). (evidence: the pip/pytest argument lines now use one
       `Join-Path` per path)
-- [x] Relative paths in tests fixed for the new depth (`contracts/schemas`, (evidence: commit 42bd681)
+- [x] Relative paths in tests fixed for the new depth (`spec/schemas`, (evidence: commit 42bd681)
       checker `ROOT`). (evidence: 395 tests pass after the move)
 - [x] ADR-0013 records the rule; ADR-0007 is marked superseded in part; (evidence: commit 42bd681)
       `check-tree.py` rejects a returning top-level `evals/`. (evidence:
@@ -557,16 +557,16 @@ Risk: low (moves and path fixes only). Rollback: revert the consolidation commit
 ## R15. Share the data every client reads
 
 Scope added after the refactor, requested before Android development starts. The
-loop stays per client (ADR-0016); the data and the cases move to `contracts/`
+loop stays per client (ADR-0016); the data and the cases move to `spec/`
 (ADR-0018).
 
-- [x] `contracts/catalog/catalog.v1.json` is generated from `services/brain/knowledge`
+- [x] `spec/catalog/catalog.v1.json` is generated from `services/brain/knowledge`
       with a `platforms` map; the ArkTS copy is rendered from it and a Kotlin
       renderer exists. (evidence: `build-app-catalog.py --check`, 35 apps + 21 sites)
-- [x] Approval vocabularies live in `contracts/policy/approval.v1.json`; the
+- [x] Approval vocabularies live in `spec/policy/approval.v1.json`; the
       ArkTS gate reads generated data and keeps its logic. (evidence: 110 ArkTS
       tests pass, `build-policy-data.py --check`)
-- [x] Prompt promises are `contracts/prompts/rules.v1.json`; a generated constant
+- [x] Prompt promises are `spec/prompts/rules.v1.json`; a generated constant
       and `PromptContract.test.ets` assert every phrase. (evidence:
       `build-prompt-rules.py --check`, 12 rules)
 - [x] Routing cases and an observation hash vector are fixtures with checkers.

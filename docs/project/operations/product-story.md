@@ -41,7 +41,7 @@ Three words before we start:
 
 Before anyone ships a screen or a service, Architecture writes the nouns down:
 what a request is, what a step is, what an approval is, what a record is.
-Contracts live in `contracts/`, one copy, versioned, with fixtures.
+Contracts live in `spec/`, one copy, versioned, with fixtures.
 
 This act has no demo. Its output is that every later act can be built twice
 (phone and PC) without inventing a second vocabulary.

@@ -3,7 +3,7 @@ package com.hopa.turn.goal
 /**
  * Something the person must be able to see when the turn is over.
  *
- * [anchor] is either a full [com.hopa.engine.observation.NodeAnchor] key
+ * [anchor] is either a full [com.hopa.observation.NodeAnchor] key
  * (`TextView|text=wi-fi|id=android:id/title`) or a visible label from the
  * screen (`Wi-Fi`). A label matches exactly, not as a substring: "Wi-Fi" must
  * not be satisfied by "Wi-Fi calling" on the wrong row.

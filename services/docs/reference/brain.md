@@ -131,7 +131,7 @@ Verified against the running service on 2026-11-06:
 - `SiteLoaderTest` — 14 site assertions
 
 `tools/scripts/brain-contract.py` starts the server, calls `/decide`, and validates the
-reply against `contracts/schemas/decision.schema.json`.
+reply against `spec/schemas/decision.schema.json`.
 
 ## Not in this slice
 

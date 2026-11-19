@@ -17,12 +17,12 @@ laptop apps still work after the data was moved out of their code.
 
 | Change | Files |
 |---|---|
-| Neutral catalogue and two renderers | `contracts/catalog/catalog.v1.json`, `tools/scripts/build-app-catalog.py` |
+| Neutral catalogue and two renderers | `spec/catalog/catalog.v1.json`, `tools/scripts/build-app-catalog.py` |
 | Eight lost Chinese aliases repaired while regenerating the catalogue | `services/brain/knowledge/apps/{alipay,baidu,jd,quark,qunar,taobao,ctrip,wps}/APP.md` |
-| Approval vocabulary moves to data | `contracts/policy/approval.v1.json`, `tools/scripts/build-policy-data.py`, `apps/harmony/core/.../gate/PolicyData.ets`, `ApprovalPolicy.ets` |
-| Prompt promises become a tested contract | `contracts/prompts/rules.v1.json`, `tools/scripts/build-prompt-rules.py`, `apps/harmony/core/.../agent/PromptRules.ets`, `PromptContract.test.ets` |
-| Routing cases | `contracts/fixtures/routing.json`, `tools/checks/check-routing.py` |
-| Observation limits and hash vector | `contracts/observation/limits.v1.json`, `contracts/fixtures/observation-hash.json`, `tools/checks/check-observation-hash.py` |
+| Approval vocabulary moves to data | `spec/policy/approval.v1.json`, `tools/scripts/build-policy-data.py`, `apps/harmony/core/.../gate/PolicyData.ets`, `ApprovalPolicy.ets` |
+| Prompt promises become a tested contract | `spec/prompts/rules.v1.json`, `tools/scripts/build-prompt-rules.py`, `apps/harmony/core/.../agent/PromptRules.ets`, `PromptContract.test.ets` |
+| Routing cases | `spec/fixtures/routing.json`, `tools/checks/check-routing.py` |
+| Observation limits and hash vector | `spec/observation/limits.v1.json`, `spec/fixtures/observation-hash.json`, `tools/checks/check-observation-hash.py` |
 | Decision and explanation | `docs/design/decisions/0018-shared-data-per-client-code.md`, `docs/reference/shared-data.md` |
 | CI and the local test script | `.github/workflows/ci.yml`, `tools/scripts/run-tests.ps1` |
 

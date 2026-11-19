@@ -94,10 +94,10 @@ def main() -> int:
         )
         assert status == 200, decision
         schema = json.loads(
-            (ROOT / "contracts" / "schemas" / "decision.schema.json").read_text("utf-8")
+            (ROOT / "spec" / "schemas" / "decision.schema.json").read_text("utf-8")
         )
         action_schema = json.loads(
-            (ROOT / "contracts" / "schemas" / "action.schema.json").read_text("utf-8")
+            (ROOT / "spec" / "schemas" / "action.schema.json").read_text("utf-8")
         )
         registry = Registry().with_resources(
             [

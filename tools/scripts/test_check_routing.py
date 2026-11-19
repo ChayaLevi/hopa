@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CHECK = ROOT / "tools" / "checks" / "check-routing.py"
-FIXTURES = ROOT / "contracts" / "fixtures" / "routing.json"
+FIXTURES = ROOT / "spec" / "fixtures" / "routing.json"
 ROUTER = ROOT / "apps" / "harmony" / "core" / "src" / "main" / "ets" / "router" / "AppRouter.ets"
 
 

@@ -36,7 +36,7 @@ implementation is on the roadmap, not that it exists.
 - A capability is "supported" only when the device smoke for it exists and the
   conformance fixtures pass on that client.
 - A platform may implement a capability differently; it may not change the
-  contract (`contracts/schemas`, `contracts/fixtures`).
+  contract (`spec/schemas`, `spec/fixtures`).
 - If a platform cannot support a capability, the UI says so on the capability
   page; it does not silently fail.
 - The Android bridge path is the reference for Android: it is the one the

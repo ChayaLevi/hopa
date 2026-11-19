@@ -17,7 +17,7 @@ Rules that must hold:
   `./gradlew -p ../windows/sidecar test` after every slice; `DevicePort` is not
   removed until a later decision.
 - Wire types stay hand-written, and a drift check keeps them equal to
-  `contracts/schemas`; see `docs/project/plan/wire-types.md`.
+  `spec/schemas`; see `docs/project/plan/wire-types.md`.
 - No feature work rides along. One slice per commit, gates before the next.
 
 ## Done
@@ -109,7 +109,7 @@ The live gate above has run; the branch is ready to merge when wanted.
    `cancelRequested`, claimed atomically by chat or by a delivery.
    `pendingGoals` stays a channel: that is a queue, not state.
 2. **Done (C1/C2)**: the wire types stay hand-written, and
-   `tools/checks/check-wire-types.py` keeps them equal to `contracts/schemas`.
+   `tools/checks/check-wire-types.py` keeps them equal to `spec/schemas`.
    Generation was spiked and dropped; `docs/project/plan/wire-types.md` has the
    evidence.
 3. **Done (D2)**: screen access is an event. `AccessibilityMonitor` holds one
@@ -124,6 +124,11 @@ The live gate above has run; the branch is ready to merge when wanted.
 5. **Done (F)**: Gradle 8.13, AGP 8.13.2, Kotlin 2.2.21 with KSP 2.2.21-2.0.5
    and Room 2.7.2 (KSP2 needs it), and JUnit 5.14.4 for every test source.
    AGP 9 and Kotlin 2.4 wait for a DSL migration and for KSP to support 2.4.
+6. **Done**: `packages/engine` became five modules by role - `routing`,
+   `observation`, `records`, `prompt`, `execution` - with packages named after
+   them and the shared fakes in test fixtures. See
+   [engine-split.md](engine-split.md). The Android build, the Windows sidecar and
+   the backend name the five instead of one engine.
 
 ## Open, for the next session with the phone
 

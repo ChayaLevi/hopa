@@ -5,7 +5,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.hopa.app.HopaApplication
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
-import com.hopa.net.gateway.BackendState
+import com.hopa.transport.gateway.BackendState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

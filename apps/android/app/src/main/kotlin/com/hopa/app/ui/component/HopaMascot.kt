@@ -11,10 +11,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -34,9 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -46,19 +49,23 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.app.R
-import com.hopa.app.ui.theme.HopaColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * The plush HOPA. The photo is a rounded-square badge; the life comes from the
- * container: a 4.8 s float, breathing squash, a 150 ms blink, the established
- * thinking pulse, listening lean and happy cheer, and a wiggle on tap.
+ * The plush HOPA. Two looks, chosen in Settings: the rounded-square badge the
+ * app shipped (the default) and the cut-out object standing on the page with a
+ * contact shadow. Both share the life: a 4.8 s float, breathing squash, a
+ * 150 ms blink, the established thinking pulse, listening lean and happy cheer,
+ * and a wiggle on tap.
  *
  * Transcript avatars pass <code>animate = false</code>, which creates no
  * infinite transitions and no blink timer, so a long chat costs nothing.
@@ -99,6 +106,12 @@ fun HopaMascot(
     )
     val wiggle = remember { Animatable(0f) }
     val badge = RoundedCornerShape(sizeDp * 0.20f)
+    val art = if (MascotAppearance.framed) R.drawable.hopa_plush else R.drawable.hopa_plush_cut
+    val blinkArt = if (MascotAppearance.framed) {
+        R.drawable.hopa_plush_blink
+    } else {
+        R.drawable.hopa_plush_blink_cut
+    }
 
     LaunchedEffect(motionOn, state) {
         pulse = false
@@ -138,17 +151,47 @@ fun HopaMascot(
                 alpha = alpha,
             ),
     ) {
+        // The object look: the mascot stands on the page, so it needs a floor.
+        // One soft ellipse, warm umber rather than black - a neutral shadow on
+        // the cream page reads as dirt. It sits under the feet, overlaps them,
+        // and shrinks and fades as the mascot floats up, so it stands rather
+        // than being pasted on. Two layers were tried at this size and read as
+        // two shadows; the asset's own seating does the rest. Small avatars get
+        // none: at 26 dp it is a smudge.
+        if (!MascotAppearance.framed && sizeDp >= 56.dp) {
+            val ink = Color(0xFF2A1B10)
+            val rise = motion.float
+            SoftShadow(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(x = sizeDp * -0.01f, y = sizeDp * 0.02f - lift),
+                width = sizeDp * if (sizeDp >= 72.dp) 0.90f else 0.72f,
+                height = sizeDp * if (sizeDp >= 72.dp) 0.13f else 0.11f,
+                alpha = (if (sizeDp >= 72.dp) 0.20f else 0.18f) * (1f - 0.06f * rise),
+                scaleX = 1f - 0.05f * rise,
+                ink = ink,
+            )
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .shadow(elevation = 3.dp, shape = badge, clip = false)
-                .clip(badge)
+                .then(
+                    if (MascotAppearance.framed) {
+                        Modifier.shadow(elevation = 3.dp, shape = badge, clip = false).clip(badge)
+                    } else {
+                        Modifier
+                    },
+                )
                 .semantics(mergeDescendants = true) {
                     contentDescription = label(state)
                 }
                 .then(
                     if (interactive) {
-                        Modifier.clickable {
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (motionOn) {
                                 scope.launch {
@@ -177,13 +220,13 @@ fun HopaMascot(
                 ),
         ) {
             Image(
-                painter = painterResource(R.drawable.hopa_plush),
+                painter = painterResource(art),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
             Image(
-                painter = painterResource(R.drawable.hopa_plush_blink),
+                painter = painterResource(blinkArt),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alpha = blinkAlpha,
@@ -192,36 +235,51 @@ fun HopaMascot(
         }
 
         if (bubble && sizeDp >= 56.dp) {
+            // A light bubble with a hairline rim: the plush stays the accent, and
+            // cream on cream holds because of the outline, not a drop shadow.
+            val appear = remember { Animatable(0f) }
+            LaunchedEffect(Unit) {
+                appear.animateTo(1f, tween(durationMillis = 120))
+            }
+            val width = sizeDp * 1.58f
+            val body = sizeDp * 0.60f
+            val tail = sizeDp * 0.17f
             Box(
                 modifier = Modifier
-                    .offset(x = sizeDp * 0.50f, y = -sizeDp * 1.02f)
-                    .requiredWidth(sizeDp * 1.70f)
-                    .requiredHeight(sizeDp * 0.99f)
-                    .graphicsLayer(rotationZ = -3f),
+                    .align(Alignment.TopCenter)
+                    .offset(y = -(body + tail) - sizeDp * 0.02f)
+                    .requiredWidth(width)
+                    .requiredHeight(body + tail)
+                    .graphicsLayer(alpha = appear.value, scaleX = 0.94f + 0.06f * appear.value,
+                        scaleY = 0.94f + 0.06f * appear.value),
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    val w = size.width
-                    val h = size.height
-                    val path = bubblePath(w, h)
-                    translate(left = w * 0.01f, top = h * 0.05f) {
-                        drawPath(path, color = Color(0x1A000000))
-                    }
-                    translate(left = w * 0.02f, top = h * 0.09f) {
-                        drawPath(path, color = Color(0x0F000000))
-                    }
-                    drawPath(path, color = HopaColor.Accent)
+                    val path = bubbleShape(size.width, size.height, body.toPx(), tail.toPx())
+                    drawPath(
+                        path = path,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(BubbleTop, BubbleFill),
+                            endY = body.toPx(),
+                        ),
+                    )
+                    drawPath(path, color = BubbleRim, style = Stroke(width = 1.dp.toPx()))
+                }
+                val greeting = buildAnnotatedString {
+                    withStyle(SpanStyle(color = BubbleInk)) { append("Hi, I'm ") }
+                    withStyle(SpanStyle(color = BubbleAccent)) { append("HOPA") }
+                    withStyle(SpanStyle(color = BubbleInk)) { append(" \uD83D\uDC4B") }
                 }
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = sizeDp * 0.20f, start = sizeDp * 0.14f, end = sizeDp * 0.14f),
-                    contentAlignment = Alignment.TopCenter,
+                        .fillMaxWidth()
+                        .height(body)
+                        .padding(horizontal = sizeDp * 0.09f),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "Hi, I'm HOPA \uD83D\uDC4B",
-                        color = Color.White,
+                        greeting,
                         fontSize = (
-                            sizeDp.value * 0.19f /
+                            sizeDp.value * 0.195f /
                                 LocalDensity.current.fontScale.coerceAtLeast(1f)
                             ).sp,
                         fontWeight = FontWeight.Bold,
@@ -234,6 +292,57 @@ fun HopaMascot(
         }
     }
 }
+
+/**
+ * A soft ellipse of shadow. A circle is drawn and squashed by the layer, so the
+ * gradient stays round while the shape does not: that keeps the edge soft on
+ * all sides instead of ending in a blurred bar.
+ */
+@Composable
+private fun SoftShadow(
+    modifier: Modifier,
+    width: Dp,
+    height: Dp,
+    alpha: Float,
+    scaleX: Float,
+    ink: Color,
+) {
+    Canvas(
+        modifier = modifier
+            // The layer squashes around the canvas centre, so the square has to
+            // move down by half of what it loses: then the ellipse's bottom edge
+            // is the element's bottom edge, and the caller decides where the
+            // floor is.
+            .offset(y = (width - height) / 2)
+            .size(width)
+            .graphicsLayer {
+                this.scaleX = scaleX
+                this.scaleY = height / width
+            },
+    ) {
+        drawCircle(
+            brush = Brush.radialGradient(
+                colorStops = arrayOf(
+                    0f to ink.copy(alpha = alpha),
+                    0.60f to ink.copy(alpha = alpha * 0.90f),
+                    1f to Color.Transparent,
+                ),
+                center = center,
+                radius = size.minDimension / 2f,
+            ),
+        )
+    }
+}
+
+/**
+ * The speech bubble borrows the plush's own orange, deepened so cream text clears
+ * contrast; the accent blue-orange pair used elsewhere is too red next to fur.
+ */
+private val BubbleTop = Color(0xFFFFFBF5)
+private val BubbleFill = Color(0xFFFFEFDD)
+private val BubbleInk = Color(0xFF3A2416)
+private val BubbleRim = Color(0xFFE6C9B0)
+private val BubbleAccent = Color(0xFFC0662E)
 
 private data class IdleMotion(val float: Float, val breathe: Float)
 
@@ -301,24 +410,23 @@ private fun label(state: String): String {
     return "HOPA"
 }
 
-private fun bubblePath(w: Float, h: Float): Path {
-    val sx = w / 240f
-    val sy = h / 108f
-    fun x(value: Float) = value * sx
-    fun y(value: Float) = value * sy
+private fun bubbleShape(w: Float, h: Float, body: Float, tail: Float): Path {
+    val r = (body * 0.30f).coerceAtMost(w * 0.18f)
+    val cx = w * 0.5f
+    val base = w * 0.10f
     return Path().apply {
-        moveTo(x(36f), y(2f))
-        lineTo(x(204f), y(2f))
-        arcTo(Rect(x(204f), y(2f), x(238f), y(36f)), -90f, 90f, false)
-        lineTo(x(238f), y(44f))
-        arcTo(Rect(x(204f), y(44f), x(238f), y(78f)), 0f, 90f, false)
-        lineTo(x(118f), y(78f))
-        cubicTo(x(104f), y(90f), x(80f), y(100f), x(44f), y(106f))
-        cubicTo(x(68f), y(94f), x(78f), y(86f), x(80f), y(78f))
-        lineTo(x(36f), y(78f))
-        arcTo(Rect(x(2f), y(44f), x(36f), y(78f)), 90f, 90f, false)
-        lineTo(x(2f), y(36f))
-        arcTo(Rect(x(2f), y(2f), x(36f), y(36f)), 180f, 90f, false)
+        moveTo(r, 0f)
+        lineTo(w - r, 0f)
+        quadraticBezierTo(w, 0f, w, r)
+        lineTo(w, body - r)
+        quadraticBezierTo(w, body, w - r, body)
+        lineTo(cx + base, body)
+        lineTo(cx, h)
+        lineTo(cx - base, body)
+        lineTo(r, body)
+        quadraticBezierTo(0f, body, 0f, body - r)
+        lineTo(0f, r)
+        quadraticBezierTo(0f, 0f, r, 0f)
         close()
     }
 }

@@ -208,7 +208,7 @@ Proposed gates (hypotheses, to be calibrated in the pilot):
 
 ## Six-month sequence
 
-1. **Week 1** — `contracts/tasks`; Task Orchestrator skeleton.
+1. **Week 1** — `spec/tasks`; Task Orchestrator skeleton.
 2. **Weeks 2–8** — Task Orchestrator v0; Notifier v0 in parallel; Recipe schema.
 3. **Weeks 4–10** — one app recipe end-to-end; Test Farm on emulator + one phone.
 4. **Weeks 8–16** — Family Space v0; Recipe Factory v0; registry/OTA.
@@ -228,6 +228,6 @@ Proposed gates (hypotheses, to be calibrated in the pilot):
 
 - Is the Task Orchestrator a new service or part of the bridge?
 - Is Family Space local-first (profiles + sync) or account-based from day one?
-- Does the recipe schema live only in `contracts/` or also in `services/mapping`?
+- Does the recipe schema live only in `spec/` or also in `services/mapping`?
 - Which single app is the first recipe: a school app, DiDi, or a system app?
 - Does research start with R1 only, or split 60/40 with R2?

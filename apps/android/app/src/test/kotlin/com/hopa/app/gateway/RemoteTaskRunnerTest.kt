@@ -2,10 +2,10 @@ package com.hopa.app.gateway
 
 import com.hopa.app.run.RunGate
 import com.hopa.app.run.RunSource
-import com.hopa.net.gateway.BackendEnvelope
-import com.hopa.net.gateway.BackendLink
-import com.hopa.net.gateway.BackendState
-import com.hopa.net.gateway.ProcessedTaskLog
+import com.hopa.transport.gateway.BackendEnvelope
+import com.hopa.transport.gateway.BackendLink
+import com.hopa.transport.gateway.BackendState
+import com.hopa.transport.gateway.ProcessedTaskLog
 import com.hopa.capabilities.device.UnavailableDevicePort
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.ErrorCodes
@@ -14,9 +14,9 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.engine.execution.TurnResult
-import com.hopa.engine.observation.ScreenSource
-import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.execution.TurnResult
+import com.hopa.observation.ScreenSource
+import com.hopa.observation.ScreenSourceDevice
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
 import com.hopa.stores.AppSettings
