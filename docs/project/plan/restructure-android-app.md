@@ -3,6 +3,10 @@
 Deep critique and proposed new structure for
 `apps/android/app/src/main/kotlin/com/hopa/app`.
 
+This is a plan, not a single change. It is split into three pull requests:
+mechanical moves first, then the two god classes, then the dependency-injection
+decision. Nothing here changes the wire format.
+
 ---
 
 ## Architecture — the foundational problem
@@ -14,7 +18,17 @@ Because every screen receives the entire container, every screen can reach every
 system. Nothing is explicit: you cannot tell what a feature actually needs without
 reading all its code. This is the service locator anti-pattern.
 
-Modern Android uses Hilt. Each ViewModel declares only what it needs:
+### Dependency injection is its own decision, not part of moving files
+
+The fix is not necessarily Hilt. Two options:
+
+**A. Narrow containers (recommended first).** Split `AppContainer` into a few
+explicit holders (`PlatformContainer`, `CoreContainer`) and give every ViewModel
+factory only the ports its screen uses. No new plugins, no code generation, works
+with the current build. This already removes the "every screen can reach every
+system" property.
+
+**B. Hilt.** Each ViewModel declares only what it needs:
 
 ```kotlin
 @HiltViewModel
@@ -25,9 +39,16 @@ class ChatViewModel @Inject constructor(
 ) : ViewModel()
 ```
 
-The AppContainer pattern was acceptable in 2019. It is technical debt now.
-Everything else in this document flows from this root cause — because features
-get the whole container, there is no pressure to keep responsibilities focused.
+Cost, which the earlier draft of this plan did not state: a new Gradle plugin and
+KSP, `@HiltAndroidApp`, `@AndroidEntryPoint` on `MainActivity`, bindings for every
+port (`DevicePort`, `ModelPort`, `Clock`, `ApprovalGateway`, …),
+`hiltViewModel()` in navigation, and every existing factory rewritten. It also
+lengthens every build.
+
+Whichever option wins, it is a separate PR after the packaging settles. Doing the
+settings split against factories and then converting to Hilt would throw that work
+away, so the order matters. The rest of this document does not depend on the
+choice.
 
 ---
 
@@ -56,20 +77,30 @@ settings/
   surface/      SurfaceSettingsViewModel screen mode, background helper
   pairing/      PairingViewModel         backend + bridge pairing flows
   diagnostics/  DiagnosticsViewModel     self-check, accessibility health
-  character/    CharacterViewModel       tone, chattiness, vision
   notify/       NotifyViewModel          notification permission + test
   SettingsViewModel  ← thin coordinator for top-level settings only
 ```
 
-### `ChatsSheet` — 436 lines, UI composable doing ViewModel work
+`character` (tone, chattiness) stays in `settings/character/` only if it grows a
+second screen; today it is one screen and does not need its own directory.
+
+**A split needs one source of truth.** Six ViewModels must not each subscribe to
+DataStore and keep their own copy. Introduce `SettingsStore` (a repository with a
+single `StateFlow` and synchronous setters) and let each ViewModel observe the
+slice it shows. Without that, the split turns one long class into six inconsistent
+ones.
+
+### `ChatsSheet` — 435 lines, UI composable doing ViewModel work
 
 A single `@Composable` currently handles: searching conversations, grouping by
 date section (Today / Yesterday / 7 days / Older), swipe-to-dismiss, sync to
 bridge, rendering cards. Search and grouping logic is embedded in the composable
 and cannot be tested.
 
-Move search, grouping, and sync coordination into `ConversationsViewModel`. The
-composable receives lists and fires events; nothing else.
+Move the found list and sync coordination into `ConversationsViewModel`. Put the
+date grouping in a **pure function** (`ConversationGrouping.sections(...)`), not in
+the ViewModel: it is a transformation of a list, testable without coroutines or
+Android. The composable then receives sections and fires events; nothing else.
 
 ---
 
@@ -84,39 +115,43 @@ Five distinct concerns are flat in one directory:
 | Session / link lifecycle | `BackendSession`, `BackendIdentity`, `BackendLaunchName`, `BackendTaskState`, `LinkRefresh`, `LinkWindow` |
 | Remote run execution | `RemoteTaskRunner`, `RemoteRunPlanner`, `RemoteRunPlan`, `RemoteRunRequest`, `RemoteScreenState`, `ScreenAccess`, `RunBudget` |
 | Push / wake | `FirebaseToken`, `HopaMessagingService`, `PushTokenFetch`, `WakeRequest`, `WakeRequests` |
-| Catalog | `KnowledgeUpdater` |
+| Sync | `CatalogUpdater`, `ChatSync`, `ChatSyncJson`, `ChatSyncReport`, `ProcessedTaskStore` |
 | Task dedup | `ProcessedTaskStore` |
 
-Rename `gateway/` → `backend/` and give it subpackages:
+Rename `gateway/` → `link/` and give it subpackages:
 
 ```
-backend/
+link/
   session/   connection lifecycle
-  remote/    remote run execution
+  remote/    remote run execution, task dedup
   push/      FCM + wake
-  sync/      CatalogUpdater + ProcessedTaskStore
+  sync/      CatalogUpdater + ChatSync + ProcessedTaskStore
 ```
+
+Why `link/` and not `backend/`: the app already has the `core/backend` module and
+the `services/backend` server, and `core/backend` calls its client-facing package
+`link`. A third package called `backend` makes an import
+(`com.hopa.app.backend.…`) impossible to place at a glance.
 
 ### `gate/` and `gateway/` are one character apart
 
 `gate/` = approval dialog. `gateway/` = backend server. Someone scanning the
 package list will misread one as the other. Rename `gate/` → `approval/`.
 
-### `knowledge/` is stale terminology
+### `knowledge/` is already renamed
 
-The core module was renamed to `catalog`. The Android counterpart was not updated.
+Done in `edcc4c3b`: the Android package is `catalog/`, the source is
+`AssetCatalogSource`, the updater is `CatalogUpdater`. What remains is only the
+**move** of `CatalogUpdater` into `link/sync/`.
 
-| Current | Proposed |
-|---|---|
-| `knowledge/` package | `catalog/` |
-| `AssetKnowledgeSource` | `AssetCatalogSource` |
-| `gateway/KnowledgeUpdater` | `backend/sync/CatalogUpdater` |
+Do not reintroduce the word "knowledge" anywhere except the wire names:
+`knowledge.v1.json`, `GET /v1/knowledge`, `knowledgeVersion`.
 
 ### `feature/sync/` is not a feature
 
 `ChatSync`, `ChatSyncJson`, `ChatSyncReport` are background coordination code —
-no UI, no Route, no Screen, no ViewModel. They belong in `backend/sync/`
-alongside `CatalogUpdater`, not inside `feature/`.
+no UI, no Route, no Screen, no ViewModel. They belong in `link/sync/` alongside
+`CatalogUpdater`, not inside `feature/`.
 
 ### `LaunchPairing.kt` at root level
 
@@ -126,14 +161,28 @@ Android entry points (`Application`, `Activity`, top-level composable).
 
 ### `di/RemoteRuns` is misplaced
 
-`RemoteRuns` is a thin adapter bridging a `RemoteRunRequest` from the gateway to
-`RunCoordinator`. It is not a DI wiring class. It belongs in `run/`.
+`RemoteRuns` is a thin adapter bridging a `RemoteRunRequest` from the link to
+`RunCoordinator`. It is not a DI wiring class. It belongs next to the coordinator.
 
-### `tasks/` should fold into `run/`
+### `tasks/` should fold into the run package
 
 `ParallelRunner` and `TaskItem` manage multiple background goals running on hidden
-displays — a variant of run coordination, not a separate domain. Folding them into
-`run/` makes the relationship explicit.
+displays — a variant of run coordination, not a separate domain.
+
+The current top-level `run/` and the feature package `feature/runs/` differ by one
+letter and mean different things (the coordinator vs the runs screen) — the same
+problem as `gate/` vs `gateway/`. Fix it while moving: the coordinator package
+becomes `runtime/`, and `feature/runs/` keeps its name.
+
+```
+runtime/
+  RunCoordinator.kt
+  RunGate.kt
+  RunState.kt
+  RemoteRuns.kt           ← was di/RemoteRuns.kt
+  ParallelRunner.kt        ← was tasks/ParallelRunner.kt
+  TaskItem.kt              ← was tasks/TaskItem.kt
+```
 
 ---
 
@@ -145,8 +194,9 @@ displays — a variant of run coordination, not a separate domain. Folding them 
 equivalent package — `EasyHistoryRoute`/`EasyHistoryScreen` live inside
 `feature/conversations/`, and `HopaBottomBarEasy` lives inside `ui/component/`.
 
-If Power earns its own feature package, Easy does too. Create `feature/easy/`
-and move all Easy-specific screens there.
+Create `feature/easy/` and move the Easy history route and screen there.
+`HopaBottomBarEasy` is used by both Easy history and `ChatScreen`, so it is shared
+chrome: leave it in `ui/component/`.
 
 ### `MemoryViewModel` manages both facts and skills
 
@@ -155,13 +205,38 @@ and move all Easy-specific screens there.
 of both facts and skills. A dedicated `SkillsViewModel` operating only on
 `container.skills` removes the coupling and makes `feature/skills/` self-contained.
 
-### `feature/settings/` is 40 files flat
+### `feature/settings/` is 45 files flat
 
 Once `SettingsViewModel` is split, sub-ViewModels and their screens should live
-in the matching subpackage. The settings directory should not be a flat list of
-40 files.
+in the matching subpackage, with shared rows/dividers in `settings/shared/`.
 
 ---
+
+## Rules the new layout must keep
+
+1. `feature/*` may depend on `runtime`, `link`, `catalog`, `ui`, `service` and the
+   libraries — never on another `feature/*`, except `feature/shell`, which owns
+   the navigation shell.
+2. No package holds a single file. If it would, merge it into its parent (the
+   same rule `core` follows).
+3. Every move is `git mv`; the moves PR changes no behaviour.
+4. Wire names never change: `knowledge.v1.json`, `/v1/knowledge`,
+   `knowledgeVersion`, `/v1/gateway`.
+5. The FCM entry in `AndroidManifest.xml` moves with `HopaMessagingService`.
+   As of this writing the manifest points at `.backend.HopaMessagingService`,
+   but the class lives in `gateway`, so the wake path is dead in every build
+   since #52. The move fixes it to `.link.push.HopaMessagingService`.
+6. `check-android-structure.py` gains a rule for the feature dependency direction
+   once the layout lands.
+
+## Tests and docs
+
+The point of moving logic out of `ChatsSheet` and `SettingsViewModel` is that it
+becomes testable. Each extraction adds unit tests for the new ViewModel or pure
+function; a moves-only PR adds none and must keep the suite green.
+
+After the moves, update `docs/design/architecture/apps-android.md` and the app
+README so the pictures match the packages.
 
 ## Proposed structure
 
@@ -195,18 +270,18 @@ share/                    ← unchanged
 approval/                 ← was gate/
   UiApprovalGateway.kt
 
-catalog/                  ← was knowledge/
-  AssetCatalogSource.kt   ← was AssetKnowledgeSource.kt
+catalog/                  ← was knowledge/, already renamed
+  AssetCatalogSource.kt
 
-run/                      ← expanded
+runtime/                  ← was run/ + tasks/ + di/RemoteRuns
   RunCoordinator.kt
   RunGate.kt
   RunState.kt
-  RemoteRuns.kt           ← was di/RemoteRuns.kt
-  ParallelRunner.kt       ← was tasks/ParallelRunner.kt
-  TaskItem.kt             ← was tasks/TaskItem.kt
+  RemoteRuns.kt
+  ParallelRunner.kt
+  TaskItem.kt
 
-backend/                  ← was gateway/, now with subpackages
+link/                     ← was gateway/, now with subpackages
   session/
     BackendSession.kt
     BackendIdentity.kt
@@ -222,18 +297,18 @@ backend/                  ← was gateway/, now with subpackages
     RemoteScreenState.kt
     ScreenAccess.kt
     RunBudget.kt
-    WakeRequest.kt
-    WakeRequests.kt
     ProcessedTaskStore.kt
   push/
     FirebaseToken.kt
     HopaMessagingService.kt
     PushTokenFetch.kt
+    WakeRequest.kt
+    WakeRequests.kt
   sync/
     ChatSync.kt             ← was feature/sync/ChatSync.kt
     ChatSyncJson.kt         ← was feature/sync/ChatSyncJson.kt
     ChatSyncReport.kt       ← was feature/sync/ChatSyncReport.kt
-    CatalogUpdater.kt       ← was KnowledgeUpdater.kt
+    CatalogUpdater.kt       ← was gateway/CatalogUpdater.kt
 
 feature/
   browser/
@@ -257,7 +332,6 @@ feature/
     surface/                ← SurfaceSettingsViewModel + screen
     pairing/                ← PairingViewModel + backend + bridge screens
     diagnostics/            ← DiagnosticsViewModel + self-check screen
-    character/              ← CharacterViewModel + screen
     notify/                 ← NotifyViewModel + screen
     shared/                 ← SettingsDivider, SettingsRow, shared UI
   shell/
@@ -269,20 +343,27 @@ feature/
 
 ## Priority order
 
-**Do first — architecture:**
-1. Split `SettingsViewModel` into per-screen ViewModels
-2. Add subpackages to `backend/` (was `gateway/`)
-3. Move `feature/sync/` → `backend/sync/`
+### PR 1 — moves and renames, no behaviour change
 
-**Do next — naming and placement:**
-4. `gate/` → `approval/`
-5. `knowledge/` → `catalog/`, rename `AssetKnowledgeSource` and `KnowledgeUpdater`
-6. `LaunchPairing.kt` → `navigation/`
-7. `di/RemoteRuns` → `run/`
-8. Fold `tasks/` into `run/`
+1. `gate/` → `approval/`
+2. `gateway/` → `link/` with `session`, `remote`, `push`, `sync` subpackages
+3. `feature/sync/` → `link/sync/`
+4. `LaunchPairing.kt` → `navigation/`
+5. `di/RemoteRuns.kt` → `runtime/`
+6. `tasks/` → `runtime/`; `run/` → `runtime/`
+7. Create `feature/easy/` for the Easy history screens
+8. Fix the FCM manifest entry while `HopaMessagingService` moves
+9. Update the architecture docs
 
-**Do after — feature structure:**
-9. Create `feature/easy/` for Easy-mode screens
-10. `SkillsViewModel` independent from `MemoryViewModel`
-11. Organise `feature/settings/` into subpackages
-12. Move search/grouping/sync out of `ChatsSheet` into `ConversationsViewModel`
+### PR 2 — the two god classes
+
+10. Add `SettingsStore`, split `SettingsViewModel` into per-screen ViewModels
+11. Organise `feature/settings/` into the subpackages above
+12. Move search/grouping/sync out of `ChatsSheet`; grouping as a pure function
+13. `SkillsViewModel` independent from `MemoryViewModel`
+14. Unit tests for each extraction
+
+### PR 3 — dependency injection
+
+15. Decide narrow containers vs Hilt, in an ADR
+16. Implement the winner; delete whatever wiring it replaces
