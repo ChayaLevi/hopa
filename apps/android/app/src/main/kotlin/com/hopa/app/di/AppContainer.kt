@@ -27,7 +27,7 @@ import com.hopa.agent.gate.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
-import com.hopa.records.RunRecordFactory
+import com.hopa.runlog.record.RunRecordFactory
 import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.stores.ConversationStore
 import com.hopa.data.store.DbConversationStore

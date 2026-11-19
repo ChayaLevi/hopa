@@ -32,6 +32,7 @@ dependencies {
     implementation(libs.slf4j.simple)
 
     testImplementation(libs.junit)
+    testImplementation(testFixtures(project(":contracts")))
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.client.cio)
     testImplementation(libs.ktor.client.websockets)

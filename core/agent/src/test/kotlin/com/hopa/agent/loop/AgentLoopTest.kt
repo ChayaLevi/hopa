@@ -13,8 +13,8 @@ import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice
 import com.hopa.contracts.turn.TurnContext
-import com.hopa.records.InMemoryRunRecorder
-import com.hopa.records.RunRecordFactory
+import com.hopa.runlog.store.InMemoryRunRecorder
+import com.hopa.runlog.record.RunRecordFactory
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

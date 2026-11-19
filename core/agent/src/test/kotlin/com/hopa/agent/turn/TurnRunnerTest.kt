@@ -21,8 +21,8 @@ import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.records.InMemoryRunRecorder
-import com.hopa.records.RunRecordFactory
+import com.hopa.runlog.store.InMemoryRunRecorder
+import com.hopa.runlog.record.RunRecordFactory
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

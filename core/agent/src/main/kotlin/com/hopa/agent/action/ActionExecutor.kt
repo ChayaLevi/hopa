@@ -15,8 +15,8 @@ import com.hopa.contracts.turn.ExecutionResult
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.observation.tree.NodeAnchor
-import com.hopa.records.RunRecordFactory
-import com.hopa.records.RunRecorder
+import com.hopa.runlog.record.RunRecordFactory
+import com.hopa.runlog.store.RunRecorder
 
 class ActionExecutor(
     private val device: DevicePort,

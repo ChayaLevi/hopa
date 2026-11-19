@@ -1,9 +1,9 @@
 package com.hopa.data.store
 
 import com.hopa.contracts.wire.RunRecord
-import com.hopa.records.RunChain
-import com.hopa.records.RunRecordDraft
-import com.hopa.records.RunRecorder
+import com.hopa.runlog.record.RunChain
+import com.hopa.runlog.record.RunRecordDraft
+import com.hopa.runlog.store.RunRecorder
 import com.hopa.data.database.dao.RunRecordDao
 import com.hopa.data.database.mapper.RunRecordMapper
 

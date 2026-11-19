@@ -14,9 +14,9 @@ import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.ports.InstalledApp
 import com.hopa.catalog.routing.CatalogRoutes
 import com.hopa.contracts.chat.Attachment
-import com.hopa.records.InMemoryRunRecorder
-import com.hopa.records.RunChain
-import com.hopa.records.RunRecordFactory
+import com.hopa.runlog.store.InMemoryRunRecorder
+import com.hopa.runlog.record.RunChain
+import com.hopa.runlog.record.RunRecordFactory
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

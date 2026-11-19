@@ -24,7 +24,7 @@ RULES = ROOT / "spec" / "prompts" / "rules.v1.json"
 OUTPUTS = [
     ROOT / "spec" / "knowledge" / "knowledge.v1.json",
     ROOT / "services" / "backend" / "src" / "main" / "resources" / "knowledge.v1.json",
-    ROOT / "packages" / "catalog" / "src" / "test" / "resources" / "knowledge.v1.json",
+    ROOT / "core" / "catalog" / "src" / "test" / "resources" / "knowledge.v1.json",
     ROOT / "apps" / "android" / "app" / "src" / "main" / "assets" / "knowledge.v1.json",
     ROOT / "apps" / "windows" / "sidecar" / "src" / "main" / "resources" / "knowledge.v1.json",
 ]

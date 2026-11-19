@@ -18,7 +18,7 @@ import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.turn.TurnResult
-import com.hopa.records.RunRecorder
+import com.hopa.runlog.store.RunRecorder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 

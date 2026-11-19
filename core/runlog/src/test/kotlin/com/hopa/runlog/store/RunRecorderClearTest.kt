@@ -1,9 +1,10 @@
-package com.hopa.records
+package com.hopa.runlog.store
 
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
+import com.hopa.runlog.record.RunRecordDraft
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

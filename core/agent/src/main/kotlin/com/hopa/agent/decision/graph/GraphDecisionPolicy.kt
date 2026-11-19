@@ -32,17 +32,3 @@ class GraphDecisionPolicy(
  * be learned app by app without changing the turn: the model still answers where
  * the graph has nothing.
  */
-class FallbackDecisionPolicy(
-    private val first: DecisionPolicy,
-    private val second: DecisionPolicy,
-) : DecisionPolicy {
-    override val name: String = "${first.name}/${second.name}"
-
-    override suspend fun decide(input: DecisionInput): DecisionOutcome {
-        val outcome = first.decide(input)
-        if (outcome.decision is Decision.NoPath) {
-            return second.decide(input)
-        }
-        return outcome
-    }
-}

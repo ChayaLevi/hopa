@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.RunRecord
-import com.hopa.records.RunChain
-import com.hopa.records.RunRecordDraft
+import com.hopa.runlog.record.RunChain
+import com.hopa.runlog.record.RunRecordDraft
 import com.networknt.schema.JsonSchema
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion

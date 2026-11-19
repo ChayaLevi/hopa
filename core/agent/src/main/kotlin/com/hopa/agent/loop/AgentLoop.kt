@@ -28,7 +28,7 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.records.RunRecorder
+import com.hopa.runlog.store.RunRecorder
 
 class AgentLoop(
     private val stepPolicy: StepPolicy,

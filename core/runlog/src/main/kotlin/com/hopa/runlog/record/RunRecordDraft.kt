@@ -1,4 +1,4 @@
-package com.hopa.records
+package com.hopa.runlog.record
 
 import com.hopa.contracts.wire.Action
 
