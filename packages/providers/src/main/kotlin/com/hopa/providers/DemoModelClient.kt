@@ -5,7 +5,7 @@ import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest
 import kotlinx.coroutines.delay
 
-class StubModelClient : ModelPort {
+class DemoModelClient : ModelPort {
     override suspend fun complete(request: ModelRequest): ModelReply {
         delay(250)
         val last = request.messages

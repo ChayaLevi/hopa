@@ -27,7 +27,7 @@ wraps a `ModelPort`:
 | implementation | module | when |
 |---|---|---|
 | `ModelStepPolicy` over `OpenAiClient` | `packages/providers` | a provider over HTTP today |
-| `ModelStepPolicy` over `StubModelClient` | `packages/providers` | no key, demo answers |
+| `ModelStepPolicy` over `DemoModelClient` | `packages/providers` | no key, demo answers |
 | `ModelStepPolicy` over a local runtime | its own module | on-device inference, once it exists |
 | playbook policy | planned, implements `StepPolicy` | no model at all: anchors instead of reasoning |
 

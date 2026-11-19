@@ -7,7 +7,7 @@ class ModelFactory(
 ) {
     fun create(provider: String, endpoint: String, apiKey: String, modelName: String): ModelPort =
         when (rules.choose(provider, endpoint, apiKey)) {
-            ProviderChoice.DEMO -> StubModelClient()
+            ProviderChoice.DEMO -> DemoModelClient()
             ProviderChoice.CLOUD, ProviderChoice.LAN -> OpenAiClient(
                 endpoint = endpoint,
                 apiKey = apiKey,

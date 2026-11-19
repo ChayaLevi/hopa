@@ -42,7 +42,7 @@ class OpenAiClientTest {
             apiKey = "sk-test",
             modelName = "deepseek-chat",
         )
-        assertFalse(client is StubModelClient)
+        assertFalse(client is DemoModelClient)
         val reply = client.complete(
             ModelRequest(messages = listOf(ModelMessage("user", "ready?"))),
         )

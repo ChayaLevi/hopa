@@ -15,7 +15,7 @@ class ProviderChoiceRulesTest {
             apiKey = "sk-test",
         )
         assertEquals(ProviderChoice.CLOUD, choice)
-        assertTrue(ModelFactory().create("stub", "https://api.deepseek.com/v1", "sk-test", "m") !is StubModelClient)
+        assertTrue(ModelFactory().create("stub", "https://api.deepseek.com/v1", "sk-test", "m") !is DemoModelClient)
     }
 
     @Test
@@ -24,7 +24,7 @@ class ProviderChoiceRulesTest {
             ProviderChoice.DEMO,
             rules.choose("stub", "https://api.deepseek.com/v1", ""),
         )
-        assertTrue(ModelFactory().create("stub", "https://api.deepseek.com/v1", "", "m") is StubModelClient)
+        assertTrue(ModelFactory().create("stub", "https://api.deepseek.com/v1", "", "m") is DemoModelClient)
     }
 
     @Test
