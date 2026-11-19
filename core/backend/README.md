@@ -25,9 +25,9 @@ alphabetical. Three packages, no folder with a single file.
 
 | package | what lives here | depends on |
 |---|---|---|
-| `link` | `BackendClient`, `BackendLink`, `BackendListener`, `BackendState`, `BackendClose`, `ProcessedTaskLog`, `KnowledgeClient`: the socket, its lifecycle, the dedup of delivered tasks, and the knowledge fetch | pairing, wire |
+| `link` | `BackendClient`, `BackendLink`, `BackendListener`, `BackendState`, `BackendClose`, `ProcessedTaskLog`, `CatalogClient`: the socket, its lifecycle, the dedup of delivered tasks, and the knowledge fetch | pairing, wire |
 
-`ProcessedTaskLog` and `KnowledgeClient` sit here because both exist only on top
+`ProcessedTaskLog` and `CatalogClient` sit here because both exist only on top
 of a live connection; giving each its own folder would mean two folders with one
 file.
 

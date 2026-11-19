@@ -1,7 +1,7 @@
 package com.hopa.app.gateway
 
-import com.hopa.catalog.knowledge.FileKnowledgeStore
-import com.hopa.backend.link.KnowledgeClient
+import com.hopa.backend.link.CatalogClient
+import com.hopa.catalog.store.FileCatalogStore
 
 /**
  * Asks the backend for a newer knowledge bundle, at most once per [intervalMs].
@@ -10,9 +10,9 @@ import com.hopa.backend.link.KnowledgeClient
  * 304 or a bundle the store refuses all leave the current copy in place. The
  * next turn reads whatever the store holds.
  */
-class KnowledgeUpdater(
+class CatalogUpdater(
     private val session: BackendSession,
-    private val store: FileKnowledgeStore,
+    private val store: FileCatalogStore,
     private val now: () -> Long = System::currentTimeMillis,
     private val intervalMs: Long = DEFAULT_INTERVAL_MS,
 ) {
@@ -31,7 +31,7 @@ class KnowledgeUpdater(
             .replaceFirst("ws://", "http://")
             .substringBefore("/v1/")
         val text = runCatching {
-            KnowledgeClient(baseUrl, credentials.accessToken)
+            CatalogClient(baseUrl, credentials.accessToken)
                 .fetch(store.current().version)
         }.getOrNull() ?: return
         store.accept(text)

@@ -49,7 +49,6 @@ CONTRACT = re.compile(r"^(?:public |internal )?(?:data |sealed |enum )+(?:class|
 TEST_SUPPORT = {
     "com.hopa.contracts.testing",
     "com.hopa.catalog.testing",
-    "com.hopa.catalog.testing.knowledge",
     "com.hopa.agent.conformance",
 }
 

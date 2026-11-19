@@ -1,4 +1,4 @@
-package com.hopa.agent.kinds
+package com.hopa.agent.classify
 
 import com.hopa.catalog.data.ApprovalPolicyData
 import com.hopa.contracts.approval.PaymentContext

@@ -9,8 +9,8 @@ goal.
 | package | what lives here | depends on |
 |---|---|---|
 | `data` | `Catalog`, `CatalogApp`, `CatalogSite`, `CatalogTarget`, `ApprovalPolicyData`, `PromptRule`: the tables themselves | - |
-| `knowledge` | `Knowledge`, `KnowledgeBundle`, `KnowledgeCodec`, `KnowledgeSource`, `FileKnowledgeStore`: the bundle and the store that can replace it | data |
-| `routing` | `AppRouter`, `CatalogRoutes`, `RouteMatch`, `RouterHint`, `RouteTarget`: the goal to a package | contracts, data, knowledge |
+| `store` | `CatalogSnapshot`, `CatalogBundle`, `CatalogCodec`, `CatalogSource`, `FileCatalogStore`: the bundle and the store that can replace it | data |
+| `routing` | `AppRouter`, `CatalogRoutes`, `RouteMatch`, `RouterHint`, `RouteTarget`: the goal to a package | contracts, data, store |
 
 ## Rules
 

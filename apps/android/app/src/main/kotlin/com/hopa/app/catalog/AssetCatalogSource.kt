@@ -1,10 +1,10 @@
-package com.hopa.app.knowledge
+package com.hopa.app.catalog
 
 import android.content.Context
 import com.hopa.catalog.data.ApprovalPolicyData
-import com.hopa.catalog.knowledge.Knowledge
-import com.hopa.catalog.knowledge.KnowledgeCodec
-import com.hopa.catalog.knowledge.KnowledgeSource
+import com.hopa.catalog.store.CatalogSnapshot
+import com.hopa.catalog.store.CatalogCodec
+import com.hopa.catalog.store.CatalogSource
 
 /**
  * The bootstrap bundle packaged with the app.
@@ -14,20 +14,20 @@ import com.hopa.catalog.knowledge.KnowledgeSource
  * catalog: the gate still works and the launchpad says it has nothing to show,
  * which is honest, rather than crashing on a missing file.
  */
-class AssetKnowledgeSource(
+class AssetCatalogSource(
     private val context: Context,
-) : KnowledgeSource {
-    private val bundled: Knowledge by lazy { load() }
+) : CatalogSource {
+    private val bundled: CatalogSnapshot by lazy { load() }
 
-    override fun current(): Knowledge = bundled
+    override fun current(): CatalogSnapshot = bundled
 
-    private fun load(): Knowledge = runCatching {
+    private fun load(): CatalogSnapshot = runCatching {
         val text = context.assets.open(FILE)
             .bufferedReader(Charsets.UTF_8)
             .use { it.readText() }
-        KnowledgeCodec.decode(text).toKnowledge(ApprovalPolicyData)
+        CatalogCodec.decode(text).toCatalogSnapshot(ApprovalPolicyData)
     }.getOrElse {
-        Knowledge(
+        CatalogSnapshot(
             version = "empty",
             catalog = emptyList(),
             sites = emptyList(),

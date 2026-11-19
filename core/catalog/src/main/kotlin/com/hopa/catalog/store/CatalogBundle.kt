@@ -1,4 +1,4 @@
-package com.hopa.catalog.knowledge
+package com.hopa.catalog.store
 
 import kotlinx.serialization.Serializable
 import com.hopa.catalog.data.ApprovalPolicyData
@@ -14,14 +14,14 @@ import com.hopa.catalog.data.PromptRule
  * the gate's floor stays with the app.
  */
 @Serializable
-data class KnowledgeBundle(
+data class CatalogBundle(
     val schemaVersion: Int = SCHEMA_VERSION,
     val version: String,
     val catalog: List<CatalogApp>,
     val sites: List<CatalogSite>,
     val promptRules: List<PromptRule>,
 ) {
-    fun toKnowledge(approval: ApprovalPolicyData): Knowledge = Knowledge(
+    fun toCatalogSnapshot(approval: ApprovalPolicyData): CatalogSnapshot = CatalogSnapshot(
         version = version,
         catalog = catalog,
         sites = sites,
@@ -32,7 +32,7 @@ data class KnowledgeBundle(
     companion object {
         const val SCHEMA_VERSION: Int = 1
 
-        fun from(knowledge: Knowledge): KnowledgeBundle = KnowledgeBundle(
+        fun from(knowledge: CatalogSnapshot): CatalogBundle = CatalogBundle(
             version = knowledge.version,
             catalog = knowledge.catalog,
             sites = knowledge.sites,

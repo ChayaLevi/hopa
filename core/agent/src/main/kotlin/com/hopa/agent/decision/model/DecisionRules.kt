@@ -1,7 +1,7 @@
 package com.hopa.agent.decision.model
 
 import com.hopa.agent.action.ValidationResult
-import com.hopa.agent.kinds.ActionKindRules
+import com.hopa.agent.classify.ActionKindRules
 import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.wire.ActionKind
 import com.hopa.contracts.wire.Decision

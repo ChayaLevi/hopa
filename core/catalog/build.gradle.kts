@@ -11,7 +11,7 @@ sourceSets {
     test {
         resources.srcDir(file("../../spec"))
     }
-    // TestKnowledge loads /knowledge.v1.json from the module's own test resources.
+    // TestCatalog loads /knowledge.v1.json from the module's own test resources.
     testFixtures {
         resources.srcDir(file("src/test/resources"))
     }

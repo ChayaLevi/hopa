@@ -1,4 +1,4 @@
-package com.hopa.agent.kinds
+package com.hopa.agent.classify
 
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.ActionKind

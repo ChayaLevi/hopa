@@ -1,4 +1,4 @@
-package com.hopa.catalog.knowledge
+package com.hopa.catalog.store
 
 import java.io.File
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,7 +10,7 @@ import com.hopa.catalog.data.ApprovalPolicyData
 import com.hopa.catalog.data.CatalogApp
 import com.hopa.catalog.data.CatalogTarget
 
-class FileKnowledgeStoreTest {
+class FileCatalogStoreTest {
     @TempDir
     lateinit var folder: File
 
@@ -18,7 +18,7 @@ class FileKnowledgeStoreTest {
 
     private val empty = CatalogTarget(id = "", detail = "", verified = false)
 
-    private fun tiny(version: String, display: String): Knowledge = Knowledge(
+    private fun tiny(version: String, display: String): CatalogSnapshot = CatalogSnapshot(
         version = version,
         catalog = listOf(
             CatalogApp(
@@ -37,10 +37,10 @@ class FileKnowledgeStoreTest {
         promptRules = emptyList(),
     )
 
-    private fun json(knowledge: Knowledge): String =
-        KnowledgeCodec.encode(KnowledgeBundle.from(knowledge))
+    private fun json(knowledge: CatalogSnapshot): String =
+        CatalogCodec.encode(CatalogBundle.from(knowledge))
 
-    private fun store(): FileKnowledgeStore = FileKnowledgeStore(folder, bundled)
+    private fun store(): FileCatalogStore = FileCatalogStore(folder, bundled)
 
     @Test
     fun an_empty_directory_uses_the_bundled_snapshot() {

@@ -1,13 +1,13 @@
 package com.hopa.agent.turn
 
 import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.action.ApprovalPolicy
 import com.hopa.agent.decision.StepPolicy
-import com.hopa.agent.gate.ApprovalPolicy
 import com.hopa.agent.goal.Checkpoint
 import com.hopa.agent.plan.PlanSource
 import com.hopa.agent.recipe.RecipeStore
 import com.hopa.catalog.data.ApprovalPolicyData
-import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.store.CatalogSnapshot
 import com.hopa.contracts.approval.ApprovalGateway
 import com.hopa.contracts.approval.ApprovalRequest
 import com.hopa.contracts.error.ErrorCodes
@@ -21,8 +21,8 @@ import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
-import com.hopa.runlog.store.InMemoryRunRecorder
 import com.hopa.runlog.record.RunRecordFactory
+import com.hopa.runlog.store.InMemoryRunRecorder
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -116,7 +116,7 @@ class TurnRunnerTest {
     ) {
         val device = FakeDevice(screens)
         val policy = ScriptedPolicy(replies)
-        private val knowledge = Knowledge(
+        private val knowledge = CatalogSnapshot(
             version = "test",
             catalog = emptyList(),
             sites = emptyList(),

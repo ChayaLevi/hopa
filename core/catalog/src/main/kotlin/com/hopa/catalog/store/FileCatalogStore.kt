@@ -1,4 +1,4 @@
-package com.hopa.catalog.knowledge
+package com.hopa.catalog.store
 
 import java.io.File
 import java.io.FileOutputStream
@@ -15,18 +15,18 @@ import java.nio.file.StandardCopyOption
  * Writes are a temp file, a sync, then a rename; the old file is copied to
  * `.prev` first. A crash between the two leaves the previous version readable.
  */
-class FileKnowledgeStore(
+class FileCatalogStore(
     private val directory: File,
-    private val fallback: Knowledge,
-) : KnowledgeSource {
+    private val fallback: CatalogSnapshot,
+) : CatalogSource {
     private val currentFile = File(directory, FILE)
     private val previousFile = File(directory, PREVIOUS)
     private val tempFile = File(directory, TEMP)
 
-    private var cached: Knowledge? = null
+    private var cached: CatalogSnapshot? = null
 
     @Synchronized
-    override fun current(): Knowledge {
+    override fun current(): CatalogSnapshot {
         cached?.let { return it }
         val loaded = read(currentFile) ?: read(previousFile) ?: fallback
         cached = loaded
@@ -43,7 +43,7 @@ class FileKnowledgeStore(
         if (text.length > MAX_CHARS) {
             return false
         }
-        val bundle = runCatching { KnowledgeCodec.decode(text) }.getOrNull() ?: return false
+        val bundle = runCatching { CatalogCodec.decode(text) }.getOrNull() ?: return false
         if (bundle.version.isBlank() || bundle.version == current().version) {
             return bundle.version.isNotBlank()
         }
@@ -58,12 +58,12 @@ class FileKnowledgeStore(
         runCatching { tempFile.delete() }
     }
 
-    private fun read(file: File): Knowledge? {
+    private fun read(file: File): CatalogSnapshot? {
         if (!file.isFile || file.length() > MAX_CHARS) {
             return null
         }
         val text = runCatching { file.readText(Charsets.UTF_8) }.getOrNull() ?: return null
-        return runCatching { KnowledgeCodec.decode(text).toKnowledge(fallback.approval) }.getOrNull()
+        return runCatching { CatalogCodec.decode(text).toCatalogSnapshot(fallback.approval) }.getOrNull()
     }
 
     private fun write(text: String) {

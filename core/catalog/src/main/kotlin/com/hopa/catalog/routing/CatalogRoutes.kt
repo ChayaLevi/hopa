@@ -3,7 +3,7 @@ package com.hopa.catalog.routing
 import com.hopa.contracts.ports.InstalledApp
 import com.hopa.catalog.data.CatalogApp
 import com.hopa.catalog.data.CatalogTarget
-import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.store.CatalogSnapshot
 
 /**
  * The catalog is one list for every platform; this is where a client asks for
@@ -20,7 +20,7 @@ object CatalogRoutes {
     fun targets(
         installed: List<InstalledApp> = emptyList(),
         platform: String = "",
-        knowledge: Knowledge,
+        knowledge: CatalogSnapshot,
     ): List<RouteTarget> {
         val apps = knowledge.catalog.map { app ->
             val chosen = platformTarget(app, platform)

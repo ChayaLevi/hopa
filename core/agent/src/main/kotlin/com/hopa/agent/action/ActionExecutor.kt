@@ -1,7 +1,6 @@
 package com.hopa.agent.action
 
-import com.hopa.agent.gate.ApprovalPolicy
-import com.hopa.agent.kinds.ActionKindRules
+import com.hopa.agent.classify.ActionKindRules
 import com.hopa.contracts.approval.ApprovalGateway
 import com.hopa.contracts.approval.RiskLevel
 import com.hopa.contracts.error.ErrorCodes

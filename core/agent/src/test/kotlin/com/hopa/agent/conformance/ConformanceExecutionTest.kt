@@ -1,15 +1,15 @@
 package com.hopa.agent.conformance
 
 import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.action.ApprovalPolicy
 import com.hopa.agent.decision.model.DecisionParser
-import com.hopa.agent.gate.ApprovalPolicy
 import com.hopa.contracts.json.HopaJson
 import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice
 import com.hopa.contracts.wire.Observation
-import com.hopa.runlog.store.InMemoryRunRecorder
 import com.hopa.runlog.record.RunRecordFactory
+import com.hopa.runlog.store.InMemoryRunRecorder
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.contentOrNull

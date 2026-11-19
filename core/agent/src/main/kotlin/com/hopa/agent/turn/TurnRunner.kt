@@ -10,7 +10,7 @@ import com.hopa.agent.recipe.Recipe
 import com.hopa.agent.recipe.RecipeStore
 import com.hopa.agent.recipe.ReplayAnswer
 import com.hopa.agent.recipe.Replayer
-import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.store.CatalogSnapshot
 import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.model.ModelUsage
@@ -48,7 +48,7 @@ class TurnRunner(
     private val plans: PlanSource? = null,
     private val verifier: GoalVerifier = GoalVerifier(),
     /** The tables this client uses; read per turn, so an update applies next time. */
-    private val knowledge: () -> Knowledge,
+    private val knowledge: () -> CatalogSnapshot,
     /** How long the screen gets between replayed steps; a test passes a no-op. */
     private val settle: suspend (Long) -> Unit = { delay(it) },
 ) {
@@ -97,7 +97,12 @@ class TurnRunner(
     }
 
     /** Null when the recipe did not run to the end; the caller uses the model. */
-    private suspend fun replay(recipe: Recipe, request: TurnRequest, started: Long, tables: Knowledge): TurnOutcome? {
+    private suspend fun replay(
+        recipe: Recipe,
+        request: TurnRequest,
+        started: Long,
+        tables: CatalogSnapshot,
+    ): TurnOutcome? {
         val installed = request.installedApps.map { it.packageName }
         val outcome = runCatching {
             Replayer(
@@ -133,7 +138,7 @@ class TurnRunner(
         request: TurnRequest,
         started: Long,
         isCancelled: () -> Boolean,
-        tables: Knowledge,
+        tables: CatalogSnapshot,
     ): TurnOutcome {
         val loop = AgentLoop(
             stepPolicy = steps,

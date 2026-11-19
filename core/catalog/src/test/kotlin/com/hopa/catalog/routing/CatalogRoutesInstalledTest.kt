@@ -4,11 +4,11 @@ import com.hopa.contracts.ports.InstalledApp
 import com.hopa.catalog.data.ApprovalPolicyData
 import com.hopa.catalog.data.CatalogApp
 import com.hopa.catalog.data.CatalogTarget
-import com.hopa.catalog.knowledge.Knowledge
+import com.hopa.catalog.store.CatalogSnapshot
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.hopa.catalog.testing.knowledge.TestKnowledge
+import com.hopa.catalog.testing.TestCatalog
 
 class CatalogRoutesInstalledTest {
     private val installed = listOf(
@@ -19,13 +19,13 @@ class CatalogRoutesInstalledTest {
     private fun targets(
         installed: List<InstalledApp> = emptyList(),
         platform: String = "",
-        knowledge: Knowledge = TestKnowledge.value,
+        knowledge: CatalogSnapshot = TestCatalog.value,
     ) = CatalogRoutes.targets(installed, platform, knowledge)
 
     @Test
     fun a_supplied_knowledge_replaces_the_bundled_catalog() {
         val empty = CatalogTarget(id = "", detail = "", verified = false)
-        val knowledge = Knowledge(
+        val knowledge = CatalogSnapshot(
             version = "test",
             catalog = listOf(
                 CatalogApp(

@@ -15,16 +15,14 @@ alphabetical.
 
 | package | what lives here | depends on |
 |---|---|---|
-| `gate` | `ApprovalPolicy`: what needs a person before it happens | contracts, catalog, kinds |
-| `kinds` | `ActionKindRules`, `ActionClassifier`: what each action kind needs, the table the gate and the executor share | contracts |
-| `narrate` | `RunNarrator`: a step said in one human line | contracts |
-| `prompt` | `SystemPromptBuilder`, `AppCatalogBlock`, `InstalledAppsBlock`, `ScreenRenderer`, `ContextBudget`: text for the model | contracts, catalog |
+| `classify` | `ActionKindRules`, `ActionClassifier`: what each action kind needs, the table the approval check and the executor share | contracts |
+| `prompt` | `SystemPromptBuilder`, `AppCatalogBlock`, `InstalledAppsBlock`, `ScreenRenderer`, `ContextBudget`: text for the model | catalog, contracts |
 
 ### Layer 1 - on top of layer 0
 
 | package | what lives here | depends on |
 |---|---|---|
-| `action` | `ActionExecutor`, `ValidationResult`, `ScrollGeometry`: what a step can be and how it is performed | contracts, gate, kinds |
+| `action` | `ActionExecutor`, `ApprovalPolicy`, `ValidationResult`, `ScrollGeometry`: what a step can be, whether it needs a person, and how it is performed | catalog, classify, contracts |
 | `decision` | `Decision` (`Act`, `Ask`, `Say`, `NoPath`, `Failed`), `DecisionInput`, `DecisionOutcome`, `DecisionPolicy`, `StepPolicy`: the seam | contracts |
 | `goal` | `Checkpoint`, `GoalVerification`, `GoalVerifier`: did the turn arrive | contracts, observation |
 
@@ -33,14 +31,14 @@ alphabetical.
 | package | what lives here | depends on |
 |---|---|---|
 | `decision/graph` | `ScreenKey`, `EdgeGuard`, `NavGraph`, `NavGraphStore`, `GraphDecisionPolicy`, `FallbackDecisionPolicy`, `GraphBuilder`: navigation without a model | decision, observation |
-| `decision/model` | `ModelDecisionPolicy`, `ModelStepPolicy`, `DecisionParser`, `DecisionRules`, `ParseOutcome`, `ModelReplyText`, `BalancedObjectScanner`: everything model-shaped | action, decision, kinds, prompt |
+| `decision/model` | `ModelDecisionPolicy`, `ModelStepPolicy`, `DecisionParser`, `DecisionRules`, `ParseOutcome`, `ModelReplyText`, `BalancedObjectScanner`: everything model-shaped | action, classify, decision, prompt |
 | `recipe` | `Recipe`, `RecipeStore`, `Replayer`, `ReplayAnswer`, `ReplayOutcome`: a path that worked, and its replay | action, decision/model, prompt |
 
 ### Layer 3 - the loop and the plan
 
 | package | what lives here | depends on |
 |---|---|---|
-| `loop` | `AgentLoop`, `LoopConfig`: observe, decide, execute, record, repeat | action, decision, decision/model, kinds, narrate, prompt |
+| `loop` | `AgentLoop`, `LoopConfig`, `RunNarrator`: observe, decide, execute, record, repeat; a step said in one human line | action, classify, decision, decision/model, prompt |
 | `plan` | `PlanSource`, `ModelPlanSource`: the steps before the first tap | contracts |
 
 ### Layer 4 - the turn

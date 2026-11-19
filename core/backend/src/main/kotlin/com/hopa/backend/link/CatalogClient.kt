@@ -12,7 +12,7 @@ import okhttp3.Request
  * the version it holds as `If-None-Match`, so an unchanged catalog costs one
  * request and no body.
  */
-class KnowledgeClient(
+class CatalogClient(
     private val baseUrl: String,
     private val token: String,
     private val client: OkHttpClient = OkHttpClient(),

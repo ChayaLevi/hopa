@@ -1,6 +1,6 @@
 package com.hopa.agent.prompt
 
-import com.hopa.catalog.testing.knowledge.TestKnowledge
+import com.hopa.catalog.testing.TestCatalog
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -8,7 +8,7 @@ class SystemPromptTest {
     @Test
     fun the_prompt_carries_every_shared_rule() {
         val prompt = SystemPromptBuilder().build()
-        for (rule in TestKnowledge.value.promptRules) {
+        for (rule in TestCatalog.value.promptRules) {
             for (phrase in rule.phrases) {
                 assertTrue(prompt.contains(phrase), "${rule.id} is missing: $phrase")
             }

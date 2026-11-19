@@ -1,9 +1,9 @@
 package com.hopa.agent.loop
 
 import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.action.ApprovalPolicy
 import com.hopa.agent.decision.model.ModelStepPolicy
-import com.hopa.agent.gate.ApprovalPolicy
-import com.hopa.catalog.testing.knowledge.TestKnowledge
+import com.hopa.catalog.testing.TestCatalog
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest
@@ -13,8 +13,8 @@ import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice
 import com.hopa.contracts.turn.TurnContext
-import com.hopa.runlog.store.InMemoryRunRecorder
 import com.hopa.runlog.record.RunRecordFactory
+import com.hopa.runlog.store.InMemoryRunRecorder
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -143,7 +143,7 @@ class AgentLoopTest {
             ),
             recorder = recorder,
             clock = clock,
-            knowledge = TestKnowledge.value,
+            knowledge = TestCatalog.value,
         )
     }
 

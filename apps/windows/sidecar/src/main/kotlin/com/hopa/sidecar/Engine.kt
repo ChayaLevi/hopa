@@ -1,10 +1,10 @@
-package com.hopa.sidecar
+﻿package com.hopa.sidecar
 
 import com.hopa.bridge.device.AdbDevice
 import com.hopa.bridge.session.BridgeClient
 import com.hopa.inference.client.ModelFactory
 import com.hopa.agent.action.ActionExecutor
-import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.agent.action.ApprovalPolicy
 import com.hopa.agent.loop.AgentLoop
 import com.hopa.agent.decision.model.ModelStepPolicy
 import com.hopa.contracts.turn.TurnContext

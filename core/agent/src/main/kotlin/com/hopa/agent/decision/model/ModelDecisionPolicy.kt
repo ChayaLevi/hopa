@@ -10,10 +10,10 @@ import com.hopa.agent.prompt.ContextBudget
 import com.hopa.agent.prompt.InstalledAppsBlock
 import com.hopa.agent.prompt.ScreenRenderer
 import com.hopa.agent.prompt.SystemPromptBuilder
-import com.hopa.catalog.knowledge.Knowledge
 import com.hopa.catalog.routing.AppRouter
 import com.hopa.catalog.routing.CatalogRoutes
 import com.hopa.catalog.routing.RouterHint
+import com.hopa.catalog.store.CatalogSnapshot
 import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.model.ModelMessage
@@ -27,7 +27,7 @@ import com.hopa.contracts.model.ModelRequest
 class ModelDecisionPolicy(
     private val steps: StepPolicy,
     /** The tables this client uses; read per call, so an update applies next turn. */
-    private val knowledge: () -> Knowledge,
+    private val knowledge: () -> CatalogSnapshot,
     private val promptBuilder: SystemPromptBuilder = SystemPromptBuilder(),
     private val budget: ContextBudget = ContextBudget(),
     private val screenRenderer: ScreenRenderer = ScreenRenderer(),

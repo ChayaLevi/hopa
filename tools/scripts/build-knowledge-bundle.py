@@ -3,7 +3,7 @@
 
 Source of truth: ``spec/catalog/catalog.v1.json`` and
 ``spec/prompts/rules.v1.json``. The bundle has the same shape as the
-Kotlin ``KnowledgeBundle``: schemaVersion, version, catalog, sites, promptRules.
+Kotlin ``CatalogBundle``: schemaVersion, version, catalog, sites, promptRules.
 It is written to ``spec/knowledge`` for review and to the backend resources
 so ``GET /v1/knowledge`` serves exactly the reviewed document.
 

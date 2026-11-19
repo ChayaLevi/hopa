@@ -1,4 +1,4 @@
-package com.hopa.agent.gate
+package com.hopa.agent.action
 
 import com.hopa.catalog.data.ApprovalPolicyData
 import com.hopa.contracts.approval.RiskLevel

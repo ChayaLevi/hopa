@@ -1,4 +1,4 @@
-package com.hopa.app.di
+﻿package com.hopa.app.di
 
 import android.content.Context
 import android.os.Build
@@ -23,7 +23,7 @@ import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.agent.action.ActionExecutor
-import com.hopa.agent.gate.ApprovalPolicy
+import com.hopa.agent.action.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
@@ -55,14 +55,14 @@ class AppContainer(context: Context) {
      * snapshot; the file store falls back to it on any problem. `knowledge` is a
      * getter, so a bundle accepted between turns applies on the next one.
      */
-    private val bundledKnowledge = com.hopa.app.knowledge.AssetKnowledgeSource(context)
-    val knowledgeStore: com.hopa.catalog.knowledge.FileKnowledgeStore =
-        com.hopa.catalog.knowledge.FileKnowledgeStore(
+    private val bundledKnowledge = com.hopa.app.catalog.AssetCatalogSource(context)
+    val knowledgeStore: com.hopa.catalog.store.FileCatalogStore =
+        com.hopa.catalog.store.FileCatalogStore(
             directory = java.io.File(context.filesDir, "knowledge"),
             fallback = bundledKnowledge.current(),
         )
-    val knowledgeSource: com.hopa.catalog.knowledge.KnowledgeSource = knowledgeStore
-    val knowledge: com.hopa.catalog.knowledge.Knowledge get() = knowledgeSource.current()
+    val knowledgeSource: com.hopa.catalog.store.CatalogSource = knowledgeStore
+    val knowledge: com.hopa.catalog.store.CatalogSnapshot get() = knowledgeSource.current()
     val selectedConversation = MutableStateFlow<String?>(null)
     val runGate = com.hopa.app.run.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
@@ -408,6 +408,6 @@ class AppContainer(context: Context) {
 
     /** Asks the backend for a newer knowledge bundle; a failure keeps the copy. */
     val knowledgeUpdater by lazy {
-        com.hopa.app.gateway.KnowledgeUpdater(backend, knowledgeStore)
+        com.hopa.app.gateway.CatalogUpdater(backend, knowledgeStore)
     }
 }

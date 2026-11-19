@@ -1,20 +1,19 @@
 package com.hopa.agent.loop
 
 import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.classify.ActionKindRules
 import com.hopa.agent.decision.StepPolicy
 import com.hopa.agent.decision.model.DecisionParser
 import com.hopa.agent.decision.model.ModelReplyText
-import com.hopa.agent.kinds.ActionKindRules
-import com.hopa.agent.narrate.RunNarrator
 import com.hopa.agent.prompt.AppCatalogBlock
 import com.hopa.agent.prompt.ContextBudget
 import com.hopa.agent.prompt.InstalledAppsBlock
 import com.hopa.agent.prompt.ScreenRenderer
 import com.hopa.agent.prompt.SystemPromptBuilder
-import com.hopa.catalog.knowledge.Knowledge
 import com.hopa.catalog.routing.AppRouter
 import com.hopa.catalog.routing.CatalogRoutes
 import com.hopa.catalog.routing.RouterHint
+import com.hopa.catalog.store.CatalogSnapshot
 import com.hopa.contracts.error.ErrorCodes
 import com.hopa.contracts.error.HopaError
 import com.hopa.contracts.model.ModelMessage
@@ -43,7 +42,7 @@ class AgentLoop(
     private val config: LoopConfig = LoopConfig(),
     private val webAvailable: Boolean = false,
     /** The tables this turn routes and prompts with. */
-    private val knowledge: Knowledge,
+    private val knowledge: CatalogSnapshot,
 ) {
     suspend fun run(
         runId: String,
