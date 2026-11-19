@@ -84,11 +84,11 @@ settings/
 `character` (tone, chattiness) stays in `settings/character/` only if it grows a
 second screen; today it is one screen and does not need its own directory.
 
-**A split needs one source of truth.** Six ViewModels must not each subscribe to
-DataStore and keep their own copy. Introduce `SettingsStore` (a repository with a
-single `StateFlow` and synchronous setters) and let each ViewModel observe the
-slice it shows. Without that, the split turns one long class into six inconsistent
-ones.
+**A split needs one source of truth.** `SettingsRepository` already is that source:
+one `Flow<AppSettings>` and focused setters, backed by DataStore and the Keystore.
+Each screen ViewModel must observe that flow or read it once, and update through
+the repository — not keep a private copy that drifts. Do not add a second
+`SettingsStore` wrapper for the sake of the split.
 
 ### `ChatsSheet` — 435 lines, UI composable doing ViewModel work
 
@@ -270,8 +270,7 @@ privacy/                  ← unchanged
 
 share/                    ← unchanged
 
-catalog/                  ← was knowledge/, already renamed
-  AssetCatalogSource.kt
+catalog/                  ← removed: the bundled source lives in :data
 
 runtime/                  ← was run/ + tasks/ + di/RemoteRuns
   RunCoordinator.kt
@@ -355,15 +354,25 @@ feature/
 8. Fix the FCM manifest entry while `HopaMessagingService` moves
 9. Update the architecture docs
 
-### PR 2 — the two god classes
+### PR 2 — the chat list and skills
 
-10. Add `SettingsStore`, split `SettingsViewModel` into per-screen ViewModels
-11. Organise `feature/settings/` into the subpackages above
-12. Move search/grouping/sync out of `ChatsSheet`; grouping as a pure function
-13. `SkillsViewModel` independent from `MemoryViewModel`
-14. Unit tests for each extraction
+10. Extract date grouping from `ChatsSheet` into a pure function; test it
+11. Move the bridge sync out of `ChatsSheet` into `ConversationsViewModel`
+12. `SkillsViewModel` independent from `MemoryViewModel`; drop skills from
+    `MemoryUiState`
+13. Unit tests for each extraction
 
-### PR 3 — dependency injection
+### PR 3 — settings per screen
 
-15. Decide narrow containers vs Hilt, in an ADR
-16. Implement the winner; delete whatever wiring it replaces
+14. Extract the four concerns out of `SettingsViewModel` into focused classes
+    first (model, pairing, surface, preferences); the ViewModel keeps its public
+    API, so no screen changes.
+15. Then turn each concern into its own ViewModel, one screen at a time, and
+    change the screen signatures. This step needs a device smoke test.
+16. Organise `feature/settings/` into the subpackages above
+17. Unit tests for the extracted logic
+
+### PR 4 — dependency injection
+
+18. Decide narrow containers vs Hilt, in an ADR
+19. Implement the winner; delete whatever wiring it replaces

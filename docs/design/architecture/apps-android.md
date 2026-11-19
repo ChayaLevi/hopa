@@ -34,7 +34,6 @@ unit-testable on the JVM and reusable by the Windows sidecar. `capabilities` and
 |---|---|
 | `navigation/` | destinations, the nav host, launch deep links |
 | `di/` | containers and ViewModel factories |
-| `catalog/` | the bundled catalog and its asset source |
 | `runtime/` | run coordinator, gate, state, parallel runners, remote adapter |
 | `link/session/` | the backend socket and its pairing lifecycle |
 | `link/remote/` | remote run planning and execution, task dedup |
@@ -46,8 +45,8 @@ unit-testable on the JVM and reusable by the Windows sidecar. `capabilities` and
 
 A feature package may use `runtime`, `link`, `catalog`, `ui`, `service` and the
 libraries; it never imports another feature, except `feature/shell`, which owns
-the navigation shell. No new package holds a single file (`catalog/` is the
-app-side mirror of the core module and keeps its one adapter).
+the navigation shell. No package holds a single file; the bundled catalog source
+lives in the `data` module, not in the app.
 
 ## What runs where
 
