@@ -2,7 +2,7 @@ package com.hopa.backend.gateway
 
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
-import com.hopa.contracts.testing.FakeDevice
+import com.hopa.backend.harness.FakeDevice
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.MapDirectory
 import com.hopa.backend.harness.bodyString
