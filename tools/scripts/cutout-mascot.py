@@ -41,8 +41,8 @@ TOLERANCE = 70
 FILL_STEPS = 600
 
 # The cast shadow: neutral (low saturation) and brighter than the eyes.
-SHADOW_SATURATION = 62
-SHADOW_BRIGHTNESS = 100
+SHADOW_SATURATION = 85
+SHADOW_BRIGHTNESS = 120
 SHADOW_FROM = 0.55  # of the height; the shadow only lives under the body
 
 # The mascot fills the slot it is drawn in, with a hair of breathing room.
@@ -89,7 +89,10 @@ def matte(img: Image.Image) -> Image.Image:
         & (np.arange(height)[:, None] >= height * SHADOW_FROM)
     )
 
-    alpha = np.where(outside | shadow, 0, 255).astype(np.uint8)
+    # The shadow is reached from the outside, not matched everywhere: the belly
+    # is a similar cream and must survive, and it is enclosed by saturated fur.
+    stray = grow(outside.copy(), close | shadow) & ~outside
+    alpha = np.where(outside | stray, 0, 255).astype(np.uint8)
     # One pixel of erosion: the outermost ring still carries the backdrop hue.
     eroded = alpha.copy()
     eroded[1:, :] = np.minimum(eroded[1:, :], alpha[:-1, :])
