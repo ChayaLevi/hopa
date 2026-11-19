@@ -1,6 +1,7 @@
 plugins {
     id("hopa.kotlin-jvm")
     alias(libs.plugins.kotlin.serialization)
+    `java-test-fixtures`
 }
 
 // Generated knowledge only: the app catalog, the approval policy data and the
@@ -15,4 +16,12 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
+}
+
+sourceSets {
+    // TestKnowledge loads /knowledge.v1.json; the file already sits in the
+    // module's test resources, so the fixtures jar carries that copy.
+    testFixtures {
+        resources.srcDir(file("src/test/resources"))
+    }
 }

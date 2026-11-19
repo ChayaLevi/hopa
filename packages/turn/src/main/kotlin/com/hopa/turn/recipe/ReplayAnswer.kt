@@ -4,8 +4,8 @@ import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.contracts.wire.Observation
-import com.hopa.engine.execution.ModelReplyText
-import com.hopa.engine.prompt.ScreenRenderer
+import com.hopa.execution.ModelReplyText
+import com.hopa.prompt.ScreenRenderer
 
 /**
  * Answers the person after a replay. The recipe carries the taps, not the words:

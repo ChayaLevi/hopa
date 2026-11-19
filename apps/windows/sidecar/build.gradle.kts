@@ -9,7 +9,10 @@ application {
 }
 
 dependencies {
-    implementation(project(":engine"))
+    implementation(project(":execution"))
+    implementation(project(":observation"))
+    implementation(project(":records"))
+    implementation(project(":routing"))
     implementation(project(":knowledge"))
     implementation(project(":providers"))
     implementation(project(":transport"))

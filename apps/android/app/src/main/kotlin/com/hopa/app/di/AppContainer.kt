@@ -13,7 +13,7 @@ import com.hopa.app.gateway.RemoteTaskRunner
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
-import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 import com.hopa.capabilities.accessibility.tree.AccessibilityDevice
 import com.hopa.providers.ModelFactory
@@ -22,12 +22,12 @@ import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.engine.execution.ActionExecutor
-import com.hopa.engine.execution.ApprovalPolicy
+import com.hopa.execution.ActionExecutor
+import com.hopa.execution.ApprovalPolicy
 import com.hopa.app.gate.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DbRunRecorder
-import com.hopa.engine.records.RunRecordFactory
+import com.hopa.records.RunRecordFactory
 import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.stores.ConversationStore
 import com.hopa.data.store.DbConversationStore

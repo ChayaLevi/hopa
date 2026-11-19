@@ -2,7 +2,7 @@ package com.hopa.sidecar
 
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.RunRecord
-import com.hopa.engine.records.RunChain
+import com.hopa.records.RunChain
 import java.nio.file.Files
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

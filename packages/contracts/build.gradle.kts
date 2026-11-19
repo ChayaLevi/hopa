@@ -2,6 +2,7 @@ plugins {
     id("hopa.kotlin-jvm")
     id("hopa.ktlint")
     alias(libs.plugins.kotlin.serialization)
+    `java-test-fixtures`
 }
 
 dependencies {

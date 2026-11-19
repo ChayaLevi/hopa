@@ -289,11 +289,13 @@ and a secret/license scan.
 - `apps/harmony/laptop/` — the laptop app (module `laptop`); frozen.
 - `packages/contracts/` — shared wire types, port interfaces, model types and
   approval data classes; no logic, no Android imports.
-- `packages/engine/`, `packages/turn/`, `packages/models/`, `packages/transport/`,
-  `packages/knowledge/` —
-  the Kotlin client engine shared by the Android and Windows clients: the loop
-  and gate, the one turn every client runs, the model adapters, the network
-  clients, and the generated catalog and rules.
+- `packages/routing/`, `packages/observation/`, `packages/records/`,
+  `packages/prompt/`, `packages/execution/` - the Kotlin client engine shared
+  by the Android and Windows clients: which app answers, the screen model,
+  run records, the prompt, and the loop with its gate and executor.
+- `packages/turn/`, `packages/providers/`, `packages/transport/`,
+  `packages/knowledge/` - the one turn every client runs, the model
+  adapters, the network clients, and the generated catalog and rules.
 - `services/bridge/` — the PC companion and bridge: device control, store,
   images, relay.
 - `services/brain/` — the Kotlin reference brain for routing and knowledge.

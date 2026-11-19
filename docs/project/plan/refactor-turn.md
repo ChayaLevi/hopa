@@ -124,6 +124,11 @@ The live gate above has run; the branch is ready to merge when wanted.
 5. **Done (F)**: Gradle 8.13, AGP 8.13.2, Kotlin 2.2.21 with KSP 2.2.21-2.0.5
    and Room 2.7.2 (KSP2 needs it), and JUnit 5.14.4 for every test source.
    AGP 9 and Kotlin 2.4 wait for a DSL migration and for KSP to support 2.4.
+6. **Done**: `packages/engine` became five modules by role - `routing`,
+   `observation`, `records`, `prompt`, `execution` - with packages named after
+   them and the shared fakes in test fixtures. See
+   [engine-split.md](engine-split.md). The Android build, the Windows sidecar and
+   the backend name the five instead of one engine.
 
 ## Open, for the next session with the phone
 

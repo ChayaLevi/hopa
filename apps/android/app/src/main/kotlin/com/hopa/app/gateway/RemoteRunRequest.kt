@@ -1,6 +1,6 @@
 package com.hopa.app.gateway
 
-import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 
 /**

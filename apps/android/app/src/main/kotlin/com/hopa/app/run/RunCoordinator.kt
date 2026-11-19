@@ -4,8 +4,8 @@ import com.hopa.app.di.AppContainer
 import com.hopa.capabilities.device.UnavailableDevicePort
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.engine.execution.ModelStepPolicy
-import com.hopa.engine.observation.ScreenSourceDevice
+import com.hopa.execution.ModelStepPolicy
+import com.hopa.observation.ScreenSourceDevice
 import com.hopa.stores.AppSettings
 import com.hopa.turn.goal.Checkpoint
 import com.hopa.turn.plan.ModelPlanSource

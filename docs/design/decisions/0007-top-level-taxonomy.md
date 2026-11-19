@@ -81,7 +81,11 @@ import the Android app. The engine moved out of `apps/`:
 | Folder | What it holds | Who may import it |
 |---|---|---|
 | `packages/contracts` | shared data types (`Action`, `Observation`, `RunRecord`, `Decision`), port interfaces (`DevicePort`, `ModelPort`, …), `ApprovalRequest`, `ApprovalGateway`, JSON helpers | clients |
-| `packages/engine` | loop, gate logic, records, observation, parser, prompt, router | clients |
+| `packages/routing` | which app answers a goal: the catalog routes | clients |
+| `packages/observation` | the screen model: nodes, anchors, the observer, the screen source | clients |
+| `packages/records` | a run as records, and the chain that links them | clients |
+| `packages/prompt` | the system prompt and its blocks | clients |
+| `packages/execution` | loop, gate logic, parser, decisions, the executor | clients |
 | `packages/transport` | device and backend transport: the PC bridge client and the gateway client (was `capabilities`, then `remote`; `com.hopa.capabilities.*` stays with the Android adapters) | clients |
 | `packages/providers` | the adapters behind `ModelPort`: provider choice and state, the OpenAI-compatible client, the stub (was `net.llm`) | clients |
 | `packages/knowledge` | generated catalog, policy data and prompt rules, written by the build scripts | clients |
@@ -92,8 +96,12 @@ Dependency chain (one direction only):
 ```
 knowledge   (no deps)
 contracts   (no deps)
-engine      → contracts + knowledge
-turn        → contracts + engine
+routing     → contracts + knowledge
+observation → contracts
+records     → contracts
+prompt      → contracts + routing
+execution   → the four above + knowledge
+turn        → contracts + the five engine modules
 net         → contracts
 models      → contracts
 ```

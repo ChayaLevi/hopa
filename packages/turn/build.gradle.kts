@@ -5,7 +5,11 @@ plugins {
 
 dependencies {
     api(project(":contracts"))
-    api(project(":engine"))
+    api(project(":routing"))
+    api(project(":observation"))
+    api(project(":records"))
+    api(project(":prompt"))
+    api(project(":execution"))
 
     implementation(libs.kotlinx.coroutines.core)
 
