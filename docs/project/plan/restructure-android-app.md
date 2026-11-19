@@ -376,3 +376,9 @@ feature/
 
 18. Decide narrow containers vs Hilt, in an ADR
 19. Implement the winner; delete whatever wiring it replaces
+
+### PR 5 — Gradle modules
+
+20. `:core:ui` with the theme and the shared Compose chrome — done
+21. Move the plush drawables into the library, then `HopaMascot` follows
+22. Extract feature modules one at a time (`settings`, `conversations`, …)
