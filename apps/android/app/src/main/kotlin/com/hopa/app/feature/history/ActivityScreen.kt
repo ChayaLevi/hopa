@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.ui.component.HopaBottomBar
-import com.hopa.app.ui.component.HopaMascot
+import com.hopa.ui.component.HopaMascot
 import com.hopa.ui.component.HopaTopBar
 import com.hopa.ui.theme.HopaColor
 import com.hopa.contracts.wire.RunRecord

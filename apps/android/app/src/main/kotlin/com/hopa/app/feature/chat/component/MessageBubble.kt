@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.ui.component.HopaMascot
+import com.hopa.ui.component.HopaMascot
 import com.hopa.ui.theme.HopaColor
 import com.hopa.contracts.chat.ChatMessage
 import com.hopa.contracts.chat.MessageProof
