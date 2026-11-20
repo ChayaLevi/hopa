@@ -339,6 +339,98 @@ may stay behind.
   the space.
 - Deleting a model touches nothing else: chats, the run log and settings stay.
 
+## Where the work lands
+
+One rule decides the split: `core/*` modules are pure JVM (no Android imports,
+enforced by `hopa.no-android` and `check-android-structure.py`), and everything
+that needs a file, a context, a service or a native library lives under
+`apps/android`. So the provider seam, the catalogue metadata, the prompt budget
+and the grammar are JVM; storage, download, SAF and JNI are Android.
+
+The only new module is `:core:localmodel` (`apps/android/core/localmodel`).
+
+### S1 - the seam
+
+| Where | What |
+|---|---|
+| `core/inference` | `ProviderChoice.ON_DEVICE`, `ProviderState.ON_DEVICE`, `ProviderChoiceRules`, `ProviderStateResolver`, the `ModelFactory` branch |
+| `core/inference` | `LocalModel : ModelPort` in its first form: no engine, `ModelNotLoaded` |
+| `apps/android/app/di` | the binding that hands the model source to the factory |
+| `apps/android/feature/settings` | provider segmented control on the existing Model page, the On-device section stub |
+| `apps/android/stores` | the provider string already exists; no new key yet |
+| tests | `core/inference/src/test` (choice, factory, no `OpenAiClient`), `feature/settings/src/test` |
+
+### S2 - weights and the source port
+
+| Where | What |
+|---|---|
+| `core/inference` | `ModelSource` port, `ModelManifest` codec, `LocalModelCatalogue` metadata, `LocalModelRecommendation` |
+| `apps/android/core/localmodel` (new) | `FileModelStore` (`.part`, sha256, atomic rename), cleanup pass, storage totals, `LocalModelSource`, SAF import, download service |
+| `apps/android/feature/settings` | model cards, import/download, delete, totals, states |
+| `apps/android/stores` | the selected model id and the provider |
+| `apps/android/app` | Hilt bindings, the service entry in the merged manifest |
+| `apps/android/screenshots` | goldens for ready / downloading / error / too-large states |
+| tests | catalogue and recommendation (JVM), hash/part/cleanup over a temp dir, settings view model |
+
+### S3 - prompt budget and grammar
+
+| Where | What |
+|---|---|
+| `core/inference` | `PromptBudget`, `PlanGrammar` (GBNF builders), rejection table |
+| `core/contracts` | `ModelReply` gains `truncated` and `grammar` |
+| `core/agent` | prompt assembly consumes the budget (facts, skills, catalogue, screen) |
+| `core/runtime` | `ModelPlanSource` retries once on a rejected answer |
+| tests | `core/inference` (ceilings, trimming order, grammar accept/reject), `core/agent` |
+
+### S4 - the engine
+
+| Where | What |
+|---|---|
+| `apps/android/core/localmodel` | `src/main/cpp` with the pinned llama.cpp, CMake, JNI (`load`/`complete`/`cancel`/`release`), the `LocalEngine` implementation, proguard keep rules |
+| `core/inference` | `LocalModel` delegates to the `LocalEngine` interface, so the JVM side stays testable with a fake |
+| `apps/android/app` | load/unload lifecycle, the engine is built with the verified file path |
+| tests | JVM parser and grammar tests; the native path is covered in S5 |
+
+### S5 - integration on the emulator
+
+| Where | What |
+|---|---|
+| `apps/android/app` | wiring, service stop/start around a turn |
+| `apps/android/feature/chat` | the "on-device" chip and the missing-model notice in the composer |
+| `apps/android/feature/settings` | engine status and the switch |
+| `apps/android/screenshots` | the chat-with-on-device banner, model page states |
+| tests | none new; the emulator run is the test, recorded in this document |
+
+### S6 - measurement
+
+| Where | What |
+|---|---|
+| `apps/android/localbench` (debug-only, new) | the 10-task bench, tok/s and RSS capture, a JSON result file |
+| `docs/project/plan/on-device-model.md` | the numbers and the winner per class |
+| `apps/android/screenshots` | any UI the numbers change |
+
+### S7 - distribution from the gateway
+
+| Where | What |
+|---|---|
+| `services/backend` | `GET /v1/models` and `/v1/models/{id}`, ETag, paired token, manifest generation |
+| `core/backend` | `ModelClient` next to `CatalogClient` (manifest fetch, 304) |
+| `core/inference` | nothing; the manifest codec already exists from S2 |
+| `apps/android/core/localmodel` | reuse the S2 downloader unchanged |
+| `spec/` + `tools/scripts` | a manifest fixture and a drift check, the way the knowledge bundle has one |
+| tests | backend endpoint tests, `core/backend` client test, the drift check in CI |
+
+### S8 - per-chat model
+
+| Where | What |
+|---|---|
+| `core/contracts` | `Conversation` gains a nullable model id |
+| `apps/android/data` | Room migration for the new column |
+| `apps/android/stores` | conversation store writes it |
+| `apps/android/feature/chat` | the composer chip and the view model wiring |
+| `core/runtime` | the receipt names the model actually used |
+| tests | Room migration test, chat view model test |
+
 ## Acceptance criteria
 
 1. In `ON_DEVICE` with the network off, "open <app>" completes and the action
