@@ -91,6 +91,11 @@ fun AboutScreen(onBack: () -> Unit) {
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 Text(
+                    "Built ${com.hopa.app.BuildConfig.BUILD_TIME}",
+                    fontSize = 12.sp,
+                    color = HopaColor.TextHint,
+                )
+                Text(
                     context.packageName,
                     fontSize = 12.sp,
                     color = HopaColor.TextHint,
