@@ -15,7 +15,6 @@ import com.hopa.feature.settings.SettingsViewModel
 /** The Act hub: how HOPA acts, and the ways into apps, setup and preferences. */
 @Composable
 fun RunningAppsRoute(
-    container: ExecutionDependencies,
     onBack: () -> Unit,
     onOpenHowHopaActs: () -> Unit,
     onOpenAllApps: () -> Unit,

@@ -3,27 +3,24 @@ package com.hopa.feature.easy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.hopa.feature.easy.EasyDependencies
-import com.hopa.contracts.chat.Conversation
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun EasyHistoryRoute(
-    container: EasyDependencies,
     active: String,
     onSelectTab: (String) -> Unit,
     onOpen: (String) -> Unit,
 ) {
-    var conversations by remember { mutableStateOf<List<Conversation>>(emptyList()) }
+    val viewModel: EasyHistoryViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
-        conversations = container.conversations.all()
-            .filter { it.messages.isNotEmpty() }
+        viewModel.refresh()
     }
 
     EasyHistoryScreen(
-        conversations = conversations,
+        conversations = state.conversations,
         active = active,
         onSelectTab = onSelectTab,
         onOpen = onOpen,

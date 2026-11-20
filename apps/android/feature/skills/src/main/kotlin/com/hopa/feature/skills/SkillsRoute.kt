@@ -9,7 +9,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun SkillsRoute(
-    container: SkillsDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: SkillsViewModel = hiltViewModel()

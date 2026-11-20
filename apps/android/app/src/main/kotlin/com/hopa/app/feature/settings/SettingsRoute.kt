@@ -14,7 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hopa.app.di.AppContainer
 import com.hopa.feature.settings.PAGE_MODEL
 import com.hopa.feature.settings.PAGE_NOTIFICATIONS
 import com.hopa.feature.settings.PAGE_PRIVACY
@@ -25,7 +24,6 @@ import com.hopa.feature.settings.SettingsViewModel
 
 @Composable
 fun SettingsRoute(
-    container: AppContainer,
     onBack: () -> Unit,
     onOpenProfiles: () -> Unit,
     onOpenSelfCheck: () -> Unit,

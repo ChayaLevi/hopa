@@ -3,28 +3,24 @@ package com.hopa.feature.runs
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.hopa.feature.runs.RunsDependencies
-import com.hopa.contracts.wire.RunRecord
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun RunsRoute(
-    container: RunsDependencies,
     onBack: () -> Unit,
 ) {
-    var records by remember { mutableStateOf<List<RunRecord>>(emptyList()) }
+    val viewModel: RunsViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
-        records = container.recorder.all()
+        viewModel.refresh()
     }
+
     RunsScreen(
-        records = records,
+        records = state.records,
         onBack = onBack,
-        onVerify = { runId -> container.recorder.verify(runId) },
-        onClear = {
-            container.recorder.clear()
-            records = emptyList()
-        },
+        onVerify = viewModel::verify,
+        onClear = viewModel::clearAll,
     )
 }

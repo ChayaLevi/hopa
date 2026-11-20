@@ -3,33 +3,30 @@ package com.hopa.feature.profiles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import com.hopa.feature.profiles.ProfilesDependencies
-import kotlinx.coroutines.flow.first
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 @Composable
 fun ProfilesRoute(
-    container: ProfilesDependencies,
     onBack: () -> Unit,
 ) {
-    var selected by remember { mutableStateOf("everyday") }
+    val viewModel: ProfilesViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        selected = container.settings.settings.first().profile
+        viewModel.refresh()
     }
 
     ProfilesScreen(
-        selected = selected,
+        selected = state.selected,
         onBack = onBack,
         onSelect = { profile ->
-            selected = profile
+            viewModel.select(profile)
             scope.launch {
-                container.settings.update { it.copy(profile = profile) }
+                viewModel.save(profile)
                 onBack()
             }
         },

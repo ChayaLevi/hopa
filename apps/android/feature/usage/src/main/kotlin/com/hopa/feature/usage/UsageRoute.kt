@@ -8,7 +8,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun UsageRoute(
-    container: UsageDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: UsageViewModel = hiltViewModel()

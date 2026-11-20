@@ -136,6 +136,19 @@ reached from Act.
   geometry), one command in `tools/scripts/android-device-checks.ps1`.
 - Evals and shared fixtures live in `spec/` and `services/evals`.
 
+## State
+
+A route is a thin adapter: it asks Hilt for the screen's view model, collects
+one `StateFlow<UiState>` with `collectAsStateWithLifecycle`, and passes plain
+callbacks down. It holds no screen data.
+
+- Screen data lives in the module's `@HiltViewModel` state holder as one
+  immutable `UiState`; every mutation is a method on that holder.
+- `remember` is for genuine UI-local state only: a dialog, an expanded row, a
+  text field, the page depth inside Settings.
+- The holder that needs Android (the self check, the accessibility switch) lives
+  in `app` and takes the container; the rest take their narrow interface.
+
 ## Toolchain
 
 The build is on the 2026 line and the versions are not incidental: a newer
