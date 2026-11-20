@@ -110,6 +110,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:privacy"))
     implementation(project(":core:share"))
+    implementation(project(":core:localmodel"))
     implementation(project(":core:approval"))
     implementation(project(":feature:usage"))
     implementation(project(":feature:memory"))
@@ -156,6 +157,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.mockwebserver)
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

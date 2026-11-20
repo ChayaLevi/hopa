@@ -42,6 +42,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(project(":core:ui"))
+    api(project(":core:localmodel"))
 
     api(project(":contracts"))
     api(project(":stores"))

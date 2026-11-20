@@ -55,6 +55,7 @@ fun SettingsRoute(
                 onBack = backToHub,
                 onSave = viewModel::save,
                 onTestModel = viewModel::testModel,
+                onDeviceModels = { OnDeviceModels() },
             )
 
             PAGE_PRIVACY -> SettingsPrivacyScreen(

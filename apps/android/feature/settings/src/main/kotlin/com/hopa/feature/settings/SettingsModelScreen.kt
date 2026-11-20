@@ -32,6 +32,7 @@ fun SettingsModelScreen(
     onBack: () -> Unit,
     onSave: (String, String, String, String, Boolean, String, String, Boolean) -> Unit,
     onTestModel: (String, String, String, String, Boolean, String, String, Boolean) -> Unit,
+    onDeviceModels: @Composable () -> Unit = {},
 ) {
     var provider by rememberSaveable { mutableStateOf(state.settings.provider) }
     var endpoint by rememberSaveable { mutableStateOf(state.settings.endpoint) }
@@ -72,12 +73,11 @@ fun SettingsModelScreen(
         )
         if (provider == "on-device") {
             Text(
-                "Answers come from a model file on this phone. The file is chosen " +
-                    "here once the local engine is installed; nothing is sent to a " +
-                    "server.",
+                "Answers come from a model file on this phone; nothing is sent to a server.",
                 style = MaterialTheme.typography.bodySmall,
                 color = HopaColor.TextHint,
             )
+            onDeviceModels()
         }
         OutlinedTextField(
             value = endpoint,

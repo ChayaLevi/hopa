@@ -99,4 +99,8 @@ abstract class ContainerBindings {
     @Binds
     @Singleton
     abstract fun execution(container: AppContainer): ExecutionDependencies
+
+    @Binds
+    @Singleton
+    abstract fun localModels(container: AppContainer): LocalModelHost
 }
