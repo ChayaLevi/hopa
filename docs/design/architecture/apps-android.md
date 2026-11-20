@@ -13,6 +13,7 @@ apps/android/
 │                  wireless shell, system intents, package inventory
 ├─ core/ui/        shared Compose chrome: theme, bars, sheets, the mascot
 ├─ feature/usage/  the usage screen, as the first feature module
+├─ feature/memory/ the facts page
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/

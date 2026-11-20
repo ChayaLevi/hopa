@@ -1,8 +1,8 @@
-package com.hopa.app.feature.memory
+package com.hopa.feature.memory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.MemoryDependencies
+import com.hopa.feature.memory.MemoryDependencies
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

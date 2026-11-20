@@ -14,7 +14,7 @@ import com.hopa.app.feature.execution.RunSetupRoute
 import com.hopa.app.feature.execution.RunningAppsRoute
 import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
-import com.hopa.app.feature.memory.MemoryRoute
+import com.hopa.feature.memory.MemoryRoute
 import com.hopa.app.feature.profiles.ProfilesRoute
 import com.hopa.app.feature.runs.RunsRoute
 import com.hopa.app.feature.settings.AboutScreen

@@ -1,4 +1,4 @@
-package com.hopa.app.feature.memory
+package com.hopa.feature.memory
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

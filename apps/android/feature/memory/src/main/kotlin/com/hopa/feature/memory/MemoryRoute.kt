@@ -1,4 +1,4 @@
-package com.hopa.app.feature.memory
+package com.hopa.feature.memory
 
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -6,11 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hopa.app.di.AppContainer
 
 @Composable
 fun MemoryRoute(
-    container: AppContainer,
+    container: MemoryDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: MemoryViewModel = viewModel(factory = MemoryViewModelFactory(container))
