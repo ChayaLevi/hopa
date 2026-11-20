@@ -186,6 +186,15 @@ Each slice compiles, keeps CI green, and can be merged on its own.
 - Until the backend endpoint exists this slice stays documented and unimplemented;
   no placeholder task or dead screen ships in the app.
 
+### S8 - per-chat model (optional, after S6)
+
+- A model chip in the composer writes the choice onto the conversation; new
+  chats inherit the active model.
+- The prompt budget, grammar and step ceiling follow that model; the receipt
+  names it.
+- Only worth building if S6 shows the small model is good enough for the short
+  commands and bad enough for planning that switching pays off.
+
 ## Choosing the model in the app
 
 Yes, there is a place, and it is one screen:
@@ -209,6 +218,29 @@ Settings -> Model
   page, not a silent switch to the cloud.
 - The Capabilities "Finish setup" card links to the same page.
 - Screenshot goldens cover the page in its import, ready and error states.
+
+## Several models
+
+A model is a catalogue entry plus an installed file, so "installed models" is a
+list and one of them is active. Nothing in the loop cares which: it sees a
+`ModelPort` and the model's spec.
+
+- **Tiers in the catalogue**: Fast (1.5–2B), Balanced (3–4B), Large (8B,
+  experimental, only offered at 12 GB RAM and above). Each carries its own
+  context size, prompt budget, maximum plan steps and licence.
+- **Installed list**: radio for the active model, size, source (gateway or
+  imported), state, Delete per row, and the total at the bottom.
+- **Import any GGUF**: the file is checked for the magic bytes, architecture and
+  context size from its metadata before it is accepted; an unknown architecture
+  is refused with the reason, not a crash.
+- **One model in memory at a time**: switching unloads the current engine and
+  loads the next, with a `Loading` state (seconds, not minutes). The previous
+  weights stay on disk, so switching back needs no download.
+- **The spec follows the model**: prompt budget, grammar and step ceiling are
+  read from the selected model, not from a global setting.
+- **Per-chat override** (a later slice): a chip in the composer picks a model
+  for that conversation only, stored on the conversation; the run receipt
+  already names the model and its version, so two runs stay comparable.
 
 ## Storage lifecycle
 
@@ -248,6 +280,9 @@ may stay behind.
    path downloads and verifies without new storage or hashing code.
 8. Deleting a model frees its bytes immediately, leaves no `.part` file, and an
    active on-device provider falls back with a visible notice.
+9. Two installed models can be switched with one tap; the switch shows a
+   loading state and needs no network. An imported GGUF with an unknown
+   architecture is refused with the reason.
 
 ## Risks
 
