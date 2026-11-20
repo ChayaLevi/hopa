@@ -264,6 +264,56 @@ Each slice compiles, keeps CI green, and can be merged on its own.
 - Only worth building if S6 shows the small model is good enough for the short
   commands and bad enough for planning that switching pays off.
 
+## Footprint: RAM, disk, APK
+
+- **APK**: weights are never inside. The native engine adds roughly 3–4 MB for
+  `arm64-v8a` in a release build (llama.cpp + ggml, stripped), and about 3–4 MB
+  more when `x86_64` is built for the emulator, so a debug APK grows ~7–8 MB.
+- **Disk per model**: router 0.2–0.6 GB, fast 0.8–1.2 GB, balanced 1.8–3.0 GB,
+  large ~5 GB. The Model page states the size before a download and the total
+  installed.
+- **Peak during an update is twice the file**: the previous copy stays until the
+  new one passes sha256, so a 2.5 GB model needs ~5 GB free to update in place.
+  The free-space check uses that number, not the file size.
+- **RAM**: model + KV cache + the app. 4 GB phone: a 1.1 GB model. 6 GB: a 1.1–2
+  GB model. 8 GB: a 2.5 GB model with background apps being evicted. 12 GB and
+  above: the 5 GB large model, still at 2–5 tok/s on CPU.
+- **Verdict for an 8 GB flagship (S24 class)**: an 8B Q4 (~5 GB) technically
+  loads but leaves no headroom for the system, hits low-memory kills and
+  throttles within minutes. It stays in the Large class, greyed out below 12 GB.
+- **NPU**: the first version is CPU-only. Exynos/Snapdragon NPUs are not
+  engaged by llama.cpp, so the numbers are CPU numbers; NPU offload would be a
+  separate investigation.
+
+## First run and download
+
+- **First open downloads nothing.** The app starts in cloud/demo mode and works
+  immediately; an optional card on Capabilities offers "Run the model on this
+  phone (1.1 GB)".
+- **On-device is a deliberate choice** on `Settings -> Model`: the card states
+  size, peak space, licence, expected speed and "downloading never starts by
+  itself".
+- **The download** runs in a foreground service (`dataSyncing`) with a system
+  notification: progress, Pause, Cancel. It survives the app being backgrounded
+  or the screen going off, and resumes after a reboot. Wi-Fi only by default,
+  with an explicit "use mobile data" override and a time estimate.
+- **While it downloads the app is fully usable**: chat answers through the
+  cloud, runs and history work, and the chat header names the model answering.
+  The on-device option stays disabled until the file verifies.
+- **Finish**: sha256 verified -> "Model on the phone is ready" notification ->
+  the switch becomes active and a one-tap switch shows the "On-device, data
+  stays on this phone" banner in the composer.
+- **Updates are never automatic**: the page shows "Update available (2.5 GB)"
+  and waits for a tap.
+- **Failures**: a dropped connection resumes; insufficient space is reported
+  with both numbers and a smaller recommendation; a corrupt file is deleted and
+  the previous copy kept; a missing file with on-device selected is an explicit
+  composer notice, never a silent cloud fallback.
+- If the product ever ships as on-device-only, first run shows a setup screen
+  with two actions (download the recommended model, import a file) and chat
+  stays unavailable until the model verifies - the same components, a different
+  entry point.
+
 ## Choosing the model in the app
 
 Yes, there is a place, and it is one screen:
