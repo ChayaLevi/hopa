@@ -175,6 +175,10 @@ Built-in Kotlin means no module applies `org.jetbrains.kotlin.android`; the
 `compileOptions` target (17) is the Kotlin JVM target too. KSP and the Compose
 compiler stay as plugins because they are compilers, not the Kotlin plugin.
 
+The configuration cache is on (`org.gradle.configuration-cache=true`) together
+with the build cache, so CI reuses one configured build across the checks,
+ktlint and screenshot tasks instead of re-running configuration each time.
+
 ## Minimum version
 
 `minSdk 29` (Android 10). On API 29 the screen is read from the accessibility
