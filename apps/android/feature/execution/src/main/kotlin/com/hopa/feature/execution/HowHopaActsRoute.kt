@@ -1,4 +1,4 @@
-package com.hopa.app.feature.execution
+package com.hopa.feature.execution
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -9,16 +9,17 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hopa.app.di.AppContainer
+import com.hopa.feature.execution.ExecutionDependencies
 import com.hopa.feature.settings.SettingsViewModel
 import com.hopa.feature.settings.SettingsViewModelFactory
 
 @Composable
-fun RunSetupRoute(
-    container: AppContainer,
+fun HowHopaActsRoute(
+    container: ExecutionDependencies,
     onBack: () -> Unit,
     onOpenScreenAccess: () -> Unit,
     onOpenComputer: () -> Unit,
+    onOpenSetup: () -> Unit,
 ) {
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container, container, container))
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -40,16 +41,18 @@ fun RunSetupRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    RunSetupScreen(
+    HowHopaActsScreen(
         state = state,
         pairingStatus = pairing,
         onBack = onBack,
-        onOpenScreenAccess = onOpenScreenAccess,
+        onScreenPath = viewModel::setScreenPath,
         onStartBackgroundHelper = viewModel::startBackgroundHelper,
-        onOpenComputer = onOpenComputer,
-        onRunCheck = viewModel::runScreenCheck,
+        onTestBridge = viewModel::testBridge,
         onPairWireless = viewModel::pairWireless,
         onPairWirelessFromScreen = viewModel::pairWirelessFromScreen,
         onPairWirelessWaiting = viewModel::pairWirelessWaiting,
+        onOpenScreenAccess = onOpenScreenAccess,
+        onOpenComputer = onOpenComputer,
+        onOpenSetup = onOpenSetup,
     )
 }

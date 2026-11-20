@@ -47,6 +47,7 @@ import com.hopa.feature.runs.RunsDependencies
 import com.hopa.feature.settings.PairingDependencies
 import com.hopa.feature.settings.SettingsDependencies
 import com.hopa.feature.settings.SurfaceDependencies
+import com.hopa.feature.execution.ExecutionDependencies
 import com.hopa.feature.skills.SkillsDependencies
 import com.hopa.feature.usage.UsageDependencies
 import com.hopa.inference.choice.ProviderChoiceRules
@@ -64,7 +65,8 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     ActivityDependencies, MemoryDependencies, SkillsDependencies, UsageDependencies,
     SettingsDependencies, PairingDependencies, SurfaceDependencies, ProfilesDependencies,
     HistoryDependencies, RecipesDependencies, RunsDependencies,
-    EasyDependencies, PowerDependencies, LaunchpadDependencies, CapabilitiesDependencies {
+    EasyDependencies, PowerDependencies, LaunchpadDependencies, CapabilitiesDependencies,
+    ExecutionDependencies {
     override val context: Context = context.applicationContext
     override val settings: SettingsRepository = DataStoreSettingsRepository(
         context = context,
@@ -94,7 +96,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     override val selectedConversation = MutableStateFlow<String?>(null)
     override val runGate = com.hopa.runtime.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
-    val pairingStatus = MutableStateFlow<String?>(null)
+    override val pairingStatus = MutableStateFlow<String?>(null)
     /**
      * Goals handed to the chat from outside (a deep link, a profile home).
      * A queue, not a slot: two links in a row must both run, and the second
