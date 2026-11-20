@@ -8,8 +8,7 @@
  */
 object ScreenAccess {
     /** All three must hold before an onscreen surface may be offered. */
-    fun available(allowed: Boolean, enabled: Boolean, bound: Boolean): Boolean =
-        allowed && enabled && bound
+    fun available(allowed: Boolean, enabled: Boolean, bound: Boolean): Boolean = allowed && enabled && bound
 
     /** The permission is on; the service may still be connecting. */
     fun switchedOn(allowed: Boolean, enabled: Boolean): Boolean = allowed && enabled
