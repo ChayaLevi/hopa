@@ -6,7 +6,6 @@ data class AppSettings(
     val model: String = "deepseek-v4-flash",
     val profile: String = "everyday",
     val notifyAnswers: Boolean = true,
-    val webEnabled: Boolean = true,
     val selectedConversation: String = "",
     val bridgeUrl: String = "",
     val useBridge: Boolean = true,

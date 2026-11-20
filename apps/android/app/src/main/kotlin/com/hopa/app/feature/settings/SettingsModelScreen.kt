@@ -1,4 +1,4 @@
-package com.hopa.app.feature.settings
+﻿package com.hopa.app.feature.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,8 +28,8 @@ import com.hopa.ui.theme.HopaColor
 fun SettingsModelScreen(
     state: SettingsUiState,
     onBack: () -> Unit,
-    onSave: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
-    onTestModel: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
+    onSave: (String, String, String, String, Boolean, String, String, Boolean) -> Unit,
+    onTestModel: (String, String, String, String, Boolean, String, String, Boolean) -> Unit,
 ) {
     var provider by rememberSaveable { mutableStateOf(state.settings.provider) }
     var endpoint by rememberSaveable { mutableStateOf(state.settings.endpoint) }
@@ -99,7 +99,6 @@ fun SettingsModelScreen(
                         model,
                         key,
                         state.settings.notifyAnswers,
-                        state.settings.webEnabled,
                         state.settings.bridgeUrl,
                         "",
                         state.settings.useBridge,
@@ -117,7 +116,6 @@ fun SettingsModelScreen(
                         model,
                         key,
                         state.settings.notifyAnswers,
-                        state.settings.webEnabled,
                         state.settings.bridgeUrl,
                         "",
                         state.settings.useBridge,

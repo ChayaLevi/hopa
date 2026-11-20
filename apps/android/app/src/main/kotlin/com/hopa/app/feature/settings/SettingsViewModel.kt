@@ -95,7 +95,6 @@ class SettingsViewModel(
         model: String,
         key: String,
         notifyAnswers: Boolean,
-        webEnabled: Boolean,
         bridgeUrl: String,
         bridgeKey: String,
         useBridge: Boolean,
@@ -104,7 +103,7 @@ class SettingsViewModel(
             _state.update { it.copy(busy = true, saved = false, error = null) }
             runCatching {
                 modelSettings.save(
-                    provider, endpoint, model, key, notifyAnswers, webEnabled,
+                    provider, endpoint, model, key, notifyAnswers,
                     bridgeUrl, bridgeKey, useBridge,
                 )
             }.onSuccess { note ->
@@ -123,7 +122,6 @@ class SettingsViewModel(
         model: String,
         key: String,
         notifyAnswers: Boolean,
-        webEnabled: Boolean,
         bridgeUrl: String,
         bridgeKey: String,
         useBridge: Boolean,
@@ -131,7 +129,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(busy = true, modelTest = "Testing\u2026", error = null) }
             val result = modelSettings.test(
-                provider, endpoint, model, key, notifyAnswers, webEnabled,
+                provider, endpoint, model, key, notifyAnswers,
                 bridgeUrl, bridgeKey, useBridge,
             )
             reload()
