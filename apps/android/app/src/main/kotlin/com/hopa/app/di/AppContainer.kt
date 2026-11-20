@@ -18,6 +18,11 @@ import com.hopa.feature.profiles.ProfilesDependencies
 import com.hopa.feature.history.ActivityDependencies
 import com.hopa.feature.history.HistoryDependencies
 import com.hopa.feature.history.RecipesDependencies
+import com.hopa.feature.runs.RunsDependencies
+import com.hopa.feature.easy.EasyDependencies
+import com.hopa.feature.power.PowerDependencies
+import com.hopa.feature.launchpad.LaunchpadDependencies
+import com.hopa.feature.capabilities.CapabilitiesDependencies
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
@@ -47,7 +52,8 @@ import kotlinx.coroutines.flow.first
 class AppContainer(context: Context) : ChatDependencies, ConversationsDependencies,
     ActivityDependencies, MemoryDependencies, SkillsDependencies, UsageDependencies,
     SettingsDependencies, PairingDependencies, SurfaceDependencies, ProfilesDependencies,
-    HistoryDependencies, RecipesDependencies {
+    HistoryDependencies, RecipesDependencies, RunsDependencies,
+    EasyDependencies, PowerDependencies, LaunchpadDependencies, CapabilitiesDependencies {
     override val context: Context = context.applicationContext
     override val settings: SettingsRepository = DataStoreSettingsRepository(
         context = context,
