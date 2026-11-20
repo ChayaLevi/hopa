@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hopa.inference.choice.ProviderState
 import com.hopa.ui.settings.SettingsPage
 import com.hopa.ui.settings.SettingsSegment
 import com.hopa.ui.theme.HopaColor
@@ -48,6 +49,7 @@ fun SettingsModelScreen(
         }
     }
 
+    val shownState = if (provider == "on-device") ProviderState.ON_DEVICE else state.providerState
     SettingsPage(title = "Answers", onBack = onBack) {
         SettingsSegment(
             options = listOf(
@@ -79,30 +81,32 @@ fun SettingsModelScreen(
             )
             onDeviceModels()
         }
-        OutlinedTextField(
-            value = endpoint,
-            onValueChange = { endpoint = it },
-            label = { Text("Endpoint") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = model,
-            onValueChange = { model = it },
-            label = { Text("Model") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = key,
-            onValueChange = { key = it },
-            label = { Text("API key (stored in Keystore)") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            if (state.keySaved) "A key is saved on this phone" else "No key saved yet",
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Text("Provider state: ${providerSummary(state).lowercase()}", fontSize = 12.sp)
+        if (provider != "on-device") {
+            OutlinedTextField(
+                value = endpoint,
+                onValueChange = { endpoint = it },
+                label = { Text("Endpoint") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = model,
+                onValueChange = { model = it },
+                label = { Text("Model") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = key,
+                onValueChange = { key = it },
+                label = { Text("API key (stored in Keystore)") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                if (state.keySaved) "A key is saved on this phone" else "No key saved yet",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Text("Provider state: ${providerSummary(state.copy(providerState = shownState)).lowercase()}", fontSize = 12.sp)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
                 onClick = {
@@ -121,22 +125,24 @@ fun SettingsModelScreen(
             ) {
                 Text(if (state.busy) "Saving\u2026" else "Save")
             }
-            Button(
-                onClick = {
-                    onTestModel(
-                        provider,
-                        endpoint,
-                        model,
-                        key,
-                        state.settings.notifyAnswers,
-                        state.settings.bridgeUrl,
-                        "",
-                        state.settings.useBridge,
-                    )
-                },
-                enabled = !state.busy,
-            ) {
-                Text("Save and test")
+            if (provider != "on-device") {
+                Button(
+                    onClick = {
+                        onTestModel(
+                            provider,
+                            endpoint,
+                            model,
+                            key,
+                            state.settings.notifyAnswers,
+                            state.settings.bridgeUrl,
+                            "",
+                            state.settings.useBridge,
+                        )
+                    },
+                    enabled = !state.busy,
+                ) {
+                    Text("Save and test")
+                }
             }
         }
         if (state.saved) {

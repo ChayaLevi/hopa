@@ -8,6 +8,7 @@ import com.hopa.feature.settings.LocalModelUiState
 import com.hopa.inference.local.ImportOutcome
 import com.hopa.inference.local.LocalModelCatalogue
 import com.hopa.inference.local.LocalModelRecommendation
+import com.hopa.inference.local.ModelSpec
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,6 +67,38 @@ class LocalModelViewModel @Inject constructor(
             val outcome = host.localModels.import(uri, spec)
             _state.update {
                 it.copy(busy = false, notice = noticeFor(outcome), error = errorFor(outcome))
+            }
+            refresh()
+        }
+    }
+
+    fun download(spec: ModelSpec) {
+        if (spec.bytes > host.freeBytes) {
+            _state.update { it.copy(error = "Not enough free space for ${spec.name}.") }
+            return
+        }
+        _state.update {
+            it.copy(
+                busy = true,
+                downloadingId = spec.id,
+                downloadProgress = 0f,
+                error = null,
+                notice = null,
+            )
+        }
+        viewModelScope.launch {
+            val outcome = host.localModels.download(spec) { read, total ->
+                val progress = if (total > 0) read.toFloat() / total else null
+                _state.update { state -> state.copy(downloadProgress = progress) }
+            }
+            _state.update {
+                it.copy(
+                    busy = false,
+                    downloadingId = null,
+                    downloadProgress = null,
+                    notice = noticeFor(outcome),
+                    error = errorFor(outcome),
+                )
             }
             refresh()
         }

@@ -44,6 +44,7 @@ class LocalModelSectionTest {
                     LocalModelSection(
                         state = LocalModelUiState(recommended = recommended, ramGb = 6),
                         onImport = {},
+                        onDownload = {},
                         onDelete = {},
                         onDeleteAll = {},
                     )
@@ -77,6 +78,7 @@ class LocalModelSectionTest {
                             ramGb = 6,
                         ),
                         onImport = {},
+                        onDownload = {},
                         onDelete = {},
                         onDeleteAll = {},
                     )

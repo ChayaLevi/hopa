@@ -19,6 +19,8 @@ interface LocalModelStore {
 
     suspend fun import(uri: Uri, spec: ModelSpec): ImportOutcome
 
+    suspend fun download(spec: ModelSpec, onProgress: (Long, Long) -> Unit): ImportOutcome
+
     suspend fun delete(id: String): Boolean
 
     suspend fun cleanup(keep: Set<String>): Int

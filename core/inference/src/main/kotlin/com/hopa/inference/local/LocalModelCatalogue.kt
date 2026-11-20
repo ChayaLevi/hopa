@@ -60,6 +60,23 @@ object LocalModelCatalogue {
 
         // Fast: the default on phones that cannot hold a 4B.
         ModelSpec(
+            id = "qwen3-0.6b-q8",
+            name = "Qwen3 0.6B Q8",
+            modelClass = ModelClass.ROUTER,
+            parameters = "0.6B",
+            quantization = "Q8_0",
+            bytes = 639_446_688,
+            minRamGb = 4,
+            contextTokens = 32_000,
+            speedClass = "fast",
+            license = "Apache-2.0",
+            url = "https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q8_0.gguf",
+            sha256 = "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031",
+            strengths = listOf("downloads from inside the app", "fast replies", "small enough to try on any phone"),
+            weaknesses = listOf("tool choice", "multi-step plans"),
+            notes = listOf("the smallest model that proves the engine works"),
+        ),
+        ModelSpec(
             id = "qwen3-1.7b",
             name = "Qwen3 1.7B",
             modelClass = ModelClass.FAST,
