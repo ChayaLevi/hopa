@@ -4,15 +4,16 @@ import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.inference.local.LocalEngine
 import com.hopa.inference.local.ModelNotLoaded
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * llama.cpp behind JNI.
  *
- * The library is built from a pinned tag by CMake and loaded on first use. The
- * model file is resolved per completion, so installing or deleting one takes
- * effect without restarting the app: a different path releases the old session
- * before the new one loads. One session at a time, CPU only, greedy decoding
- * with an optional grammar, so a plan answer cannot come back as prose.
+ * Everything heavy happens off the main thread: loading a 640 MB file and every
+ * token of generation take seconds, and doing that on the UI thread is exactly
+ * the ANR the first phone build showed. [complete] therefore switches to the
+ * default pool, where a blocked thread is harmless.
  */
 class LlamaEngine(
     private val pathProvider: () -> String?,
@@ -44,7 +45,7 @@ class LlamaEngine(
         return true
     }
 
-    override suspend fun complete(request: ModelRequest): ModelReply {
+    override suspend fun complete(request: ModelRequest): ModelReply = withContext(Dispatchers.Default) {
         val path = pathProvider() ?: throw ModelNotLoaded(
             "No on-device model is installed. Import a model file in Settings first.",
         )
@@ -55,7 +56,7 @@ class LlamaEngine(
             "${message.role}: ${message.content}"
         }
         val text = nativeComplete(handle, prompt, request.maxTokens, "")
-        return ModelReply(text = text)
+        ModelReply(text = text)
     }
 
     private external fun nativeLoad(path: String, contextTokens: Int, threads: Int): Long
