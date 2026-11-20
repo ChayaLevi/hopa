@@ -5,7 +5,6 @@ import java.util.Date
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -23,12 +22,13 @@ val hasReleaseSigning = releaseKeystore?.exists() == true
 
 android {
     namespace = "com.hopa.app"
-    compileSdk = 35
+    compileSdk = 37
+    compileSdkMinor = 1
 
     defaultConfig {
         applicationId = "com.hopa.android"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1.0-" + SimpleDateFormat("yyMMdd-HHmm").format(Date())
         buildConfigField(
@@ -92,9 +92,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 
     packaging {
         resources {
