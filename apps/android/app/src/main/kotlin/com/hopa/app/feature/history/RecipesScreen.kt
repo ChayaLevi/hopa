@@ -1,4 +1,4 @@
-package com.hopa.app.feature.settings
+﻿package com.hopa.app.feature.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.agent.recipe.Recipe
+import com.hopa.app.feature.settings.SettingsPage
+import com.hopa.app.feature.settings.SettingsPanel
 import com.hopa.ui.theme.HopaColor
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -16,7 +18,7 @@ import java.util.Locale
 
 /** The goals HOPA can repeat without the model, and a way to forget them. */
 @Composable
-fun SettingsRecipesScreen(
+fun RecipesScreen(
     recipes: List<Recipe>,
     names: Map<String, String> = emptyMap(),
     onBack: () -> Unit,

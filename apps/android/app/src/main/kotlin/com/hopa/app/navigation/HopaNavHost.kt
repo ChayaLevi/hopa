@@ -12,6 +12,8 @@ import com.hopa.app.feature.execution.HowHopaActsRoute
 import com.hopa.app.feature.execution.RunPrefsRoute
 import com.hopa.app.feature.execution.RunSetupRoute
 import com.hopa.app.feature.execution.RunningAppsRoute
+import com.hopa.app.feature.history.HistoryRoute
+import com.hopa.app.feature.history.RecipesRoute
 import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.feature.memory.MemoryRoute
@@ -35,6 +37,8 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onOpenSettings = { navController.navigate(HopaDestination.Settings) },
                 onOpenRuns = { navController.navigate(HopaDestination.Runs) },
                 onOpenUsage = { navController.navigate(HopaDestination.Usage) },
+                onOpenHistory = { navController.navigate(HopaDestination.History) },
+                onOpenRecipes = { navController.navigate(HopaDestination.Recipes) },
                 onOpenMemory = { navController.navigate(HopaDestination.Memory) },
                 onOpenSkills = { navController.navigate(HopaDestination.Skills) },
                 onOpenRunningApps = { navController.navigate(HopaDestination.RunningApps) },
@@ -45,6 +49,18 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
         }
         composable<HopaDestination.Usage> {
             UsageRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<HopaDestination.History> {
+            HistoryRoute(
+                container = container,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<HopaDestination.Recipes> {
+            RecipesRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
             )
@@ -71,7 +87,6 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
             SettingsRoute(
                 container = container,
                 onBack = { navController.popBackStack() },
-                onOpenCapabilities = { navController.popBackStack() },
                 onOpenProfiles = { navController.navigate(HopaDestination.Profiles) },
                 onOpenSelfCheck = { navController.navigate(HopaDestination.SelfCheck) },
                 onOpenAbout = { navController.navigate(HopaDestination.About) },

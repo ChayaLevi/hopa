@@ -1,4 +1,4 @@
-package com.hopa.app.feature.shell
+﻿package com.hopa.app.feature.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +26,8 @@ fun HomeShell(
     onOpenSettings: () -> Unit,
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
+    onOpenHistory: () -> Unit = {},
+    onOpenRecipes: () -> Unit = {},
     onOpenMemory: () -> Unit,
     onOpenSkills: () -> Unit = onOpenMemory,
     onOpenRunningApps: () -> Unit,
@@ -55,6 +57,8 @@ fun HomeShell(
             onOpenSettings = onOpenSettings,
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
+            onOpenHistory = onOpenHistory,
+            onOpenRecipes = onOpenRecipes,
             onOpenMemory = onOpenMemory,
             onOpenSkills = onOpenSkills,
             onOpenRunningApps = onOpenRunningApps,
@@ -85,6 +89,8 @@ fun HomeShell(
             onSelectTab = selectTab,
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
+            onOpenHistory = onOpenHistory,
+            onOpenRecipes = onOpenRecipes,
         )
 
         "capabilities" -> CapabilitiesRoute(
@@ -160,6 +166,8 @@ private fun PowerShell(
     onOpenSettings: () -> Unit,
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
+    onOpenHistory: () -> Unit = {},
+    onOpenRecipes: () -> Unit = {},
     onOpenMemory: () -> Unit,
     onOpenSkills: () -> Unit,
     onOpenRunningApps: () -> Unit,
@@ -195,6 +203,8 @@ private fun PowerShell(
             onSelectTab = select,
             onOpenRuns = onOpenRuns,
             onOpenUsage = onOpenUsage,
+            onOpenHistory = onOpenHistory,
+            onOpenRecipes = onOpenRecipes,
         )
 
         tab == "capabilities" -> CapabilitiesRoute(

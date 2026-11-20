@@ -19,6 +19,8 @@ fun ActivityRoute(
     onSelectTab: (String) -> Unit,
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onOpenRecipes: () -> Unit,
 ) {
     val viewModel: ActivityViewModel = viewModel(factory = ActivityViewModelFactory(container))
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -44,6 +46,8 @@ fun ActivityRoute(
         onSelectTab = onSelectTab,
         onOpenRuns = onOpenRuns,
         onOpenUsage = onOpenUsage,
+        onOpenHistory = onOpenHistory,
+        onOpenRecipes = onOpenRecipes,
         onShare = {
             val send = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"

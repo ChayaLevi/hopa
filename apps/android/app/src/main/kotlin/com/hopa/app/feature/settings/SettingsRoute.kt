@@ -14,15 +14,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
 import com.hopa.app.di.AppContainer
-import com.hopa.app.privacy.TurnLog
 
 @Composable
 fun SettingsRoute(
     container: AppContainer,
     onBack: () -> Unit,
-    onOpenCapabilities: () -> Unit,
     onOpenProfiles: () -> Unit,
     onOpenSelfCheck: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -31,29 +28,7 @@ fun SettingsRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf("") }
     val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()
-    var recipes by rememberSaveable { mutableStateOf(emptyList<com.hopa.agent.recipe.Recipe>()) }
-    var history by rememberSaveable {
-        mutableStateOf(emptyList<com.hopa.data.database.entity.RunHistoryEntity>())
-    }
-    var historyFilter by rememberSaveable { mutableStateOf("") }
-    var appNames by rememberSaveable { mutableStateOf(emptyMap<String, String>()) }
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val backToHub = { page = "" }
-
-    androidx.compose.runtime.LaunchedEffect(page) {
-        if (page == PAGE_RECIPES) {
-            recipes = container.recipes.all()
-            appNames = runCatching {
-                val installed = container.packages.installed()
-                com.hopa.catalog.routing.CatalogRoutes.targets(installed, "android", container.knowledge)
-                    .filter { it.bundle.isNotBlank() }
-                    .associate { it.bundle.lowercase() to it.display }
-            }.getOrDefault(emptyMap())
-        }
-        if (page == PAGE_HISTORY) {
-            history = container.runHistory.latest(historyFilter.ifBlank { null })
-        }
-    }
 
     // A page slides in from the side it belongs to: deeper to the right, back to
     // the left, with the hub itself as depth zero.
@@ -77,34 +52,6 @@ fun SettingsRoute(
                 onTestModel = viewModel::testModel,
             )
 
-            PAGE_HISTORY -> SettingsHistoryScreen(
-                rows = history,
-                selected = historyFilter,
-                onFilter = {
-                    historyFilter = it
-                    scope.launch {
-                        history = container.runHistory.latest(it.ifBlank { null })
-                    }
-                },
-                onBack = backToHub,
-                onClear = {
-                    scope.launch {
-                        container.runHistory.clear()
-                        history = emptyList()
-                    }
-                },
-            )
-
-            PAGE_RECIPES -> SettingsRecipesScreen(
-                recipes = recipes,
-                names = appNames,
-                onBack = backToHub,
-                onDelete = { goal ->
-                    container.recipes.delete(goal)
-                    recipes = container.recipes.all()
-                },
-            )
-
             PAGE_PRIVACY -> SettingsPrivacyScreen(
                 entries = privacy,
                 onBack = backToHub,
@@ -124,7 +71,6 @@ fun SettingsRoute(
                 onChattiness = viewModel::setChattiness,
                 onMascot = viewModel::setMascotFramed,
                 onToggleAlerts = viewModel::setNotifications,
-                onOpenCapabilities = onOpenCapabilities,
                 onOpenProfiles = onOpenProfiles,
                 onOpenSelfCheck = onOpenSelfCheck,
                 onOpenAbout = onOpenAbout,

@@ -25,6 +25,12 @@ sealed interface HopaDestination {
     data object Usage : HopaDestination
 
     @Serializable
+    data object History : HopaDestination
+
+    @Serializable
+    data object Recipes : HopaDestination
+
+    @Serializable
     data object Memory : HopaDestination
 
     @Serializable
