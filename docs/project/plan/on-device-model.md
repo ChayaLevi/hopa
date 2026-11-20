@@ -243,17 +243,19 @@ Each slice compiles, keeps CI green, and can be merged on its own.
   cloud model (open an app, toggle a setting, read a screen). The numbers go
   into this document; the default stays cloud until they justify the switch.
 
-### S7 - distribution from the gateway (blocked on the endpoint)
+### S7 - distribution from the gateway
 
-- Serve the manifest at `GET /v1/models` and the blob at `GET /v1/models/{id}`,
-  with the same pairing token and ETag behaviour as `/v1/knowledge`.
-- `BackendModelSource` starts returning a manifest; the download path in S2 is
-  reused unchanged, so the phone goes from "import a file" to "tap Download"
-  without a second storage or verification implementation.
-- The receipt names the model version, like `MessageProof` names the knowledge
-  version today.
-- Until the backend endpoint exists this slice stays documented and unimplemented;
-  no placeholder task or dead screen ships in the app.
+- Done: `GET /v1/models` serves `models.v1.json` from the configured directory
+  with a digest version and an ETag, 304 on a match, and the same paired-token
+  check as `/v1/knowledge`; `GET /v1/models/{id}` streams the blob named by the
+  entry's `file` field. A server with no directory answers an empty manifest,
+  which is the state before any weights are placed.
+- Done: `ModelClient` in `core/backend` fetches the manifest and keeps the local
+  catalogue on a 304, an error or a document this build cannot decode.
+- Still to do: the download path itself (S2's `FileModelStore` reused), the
+  receipt naming the model version, and the spec fixture plus drift check that
+  the knowledge bundle has. Until then the page offers import, and the endpoint
+  answers an empty list, which is the intended fallback.
 
 ### S8 - per-chat model (optional, after S6)
 
