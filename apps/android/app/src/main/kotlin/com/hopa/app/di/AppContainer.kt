@@ -12,6 +12,7 @@ import com.hopa.app.link.remote.RemoteRunRequest
 import com.hopa.app.link.remote.RemoteTaskRunner
 import com.hopa.app.runtime.RemoteRuns
 import com.hopa.feature.usage.UsageDependencies
+import com.hopa.feature.memory.MemoryDependencies
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService

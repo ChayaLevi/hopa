@@ -1,7 +1,7 @@
-package com.hopa.app.feature.memory
+package com.hopa.feature.memory
 
 import androidx.lifecycle.ViewModelProvider
-import com.hopa.app.di.MemoryDependencies
+import com.hopa.feature.memory.MemoryDependencies
 
 class MemoryViewModelFactory(
     private val container: MemoryDependencies,

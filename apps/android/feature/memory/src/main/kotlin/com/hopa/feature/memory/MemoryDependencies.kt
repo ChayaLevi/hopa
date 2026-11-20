@@ -1,4 +1,4 @@
-package com.hopa.app.di
+package com.hopa.feature.memory
 
 import com.hopa.stores.MemoryStore
 
