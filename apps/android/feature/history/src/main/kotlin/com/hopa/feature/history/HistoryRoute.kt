@@ -1,4 +1,4 @@
-package com.hopa.app.feature.history
+package com.hopa.feature.history
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,14 +8,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.hopa.app.di.AppContainer
 import com.hopa.data.database.entity.RunHistoryEntity
 import kotlinx.coroutines.launch
 
 /** Finished turns, with the surface filter and one clear action. */
 @Composable
 fun HistoryRoute(
-    container: AppContainer,
+    container: HistoryDependencies,
     onBack: () -> Unit,
 ) {
     var rows by remember { mutableStateOf(emptyList<RunHistoryEntity>()) }

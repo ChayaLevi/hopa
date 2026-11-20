@@ -1,8 +1,8 @@
-package com.hopa.app.feature.history
+package com.hopa.feature.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.ActivityDependencies
+import com.hopa.feature.history.ActivityDependencies
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.contracts.wire.RunRecord
 import java.time.Instant

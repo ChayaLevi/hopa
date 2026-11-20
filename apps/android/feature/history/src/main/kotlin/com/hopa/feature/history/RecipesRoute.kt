@@ -1,4 +1,4 @@
-package com.hopa.app.feature.history
+package com.hopa.feature.history
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -7,13 +7,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hopa.agent.recipe.Recipe
-import com.hopa.app.di.AppContainer
 import com.hopa.catalog.routing.CatalogRoutes
 
 /** Paths that worked before, and the goal that brings each one back. */
 @Composable
 fun RecipesRoute(
-    container: AppContainer,
+    container: RecipesDependencies,
     onBack: () -> Unit,
 ) {
     var recipes by remember { mutableStateOf(emptyList<Recipe>()) }

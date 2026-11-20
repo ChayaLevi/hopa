@@ -108,6 +108,7 @@ dependencies {
     implementation(project(":feature:memory"))
     implementation(project(":feature:skills"))
     implementation(project(":feature:profiles"))
+    implementation(project(":feature:history"))
     implementation(project(":data"))
     implementation(project(":contracts"))
     implementation(project(":inference"))

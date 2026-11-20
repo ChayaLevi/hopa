@@ -1,11 +1,11 @@
-package com.hopa.app.di
+package com.hopa.feature.history
 
 import android.content.Context
-import com.hopa.runtime.RunGate
 import com.hopa.runlog.store.RunRecorder
+import com.hopa.runtime.RunGate
 import com.hopa.stores.ConversationStore
 
-/** What the activity/history screen needs. */
+/** What the activity screen needs. */
 interface ActivityDependencies {
     val context: Context
     val conversations: ConversationStore

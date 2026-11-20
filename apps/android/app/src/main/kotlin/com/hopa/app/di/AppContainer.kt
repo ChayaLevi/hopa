@@ -15,6 +15,9 @@ import com.hopa.feature.usage.UsageDependencies
 import com.hopa.feature.memory.MemoryDependencies
 import com.hopa.feature.skills.SkillsDependencies
 import com.hopa.feature.profiles.ProfilesDependencies
+import com.hopa.feature.history.ActivityDependencies
+import com.hopa.feature.history.HistoryDependencies
+import com.hopa.feature.history.RecipesDependencies
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
@@ -43,7 +46,8 @@ import kotlinx.coroutines.flow.first
 
 class AppContainer(context: Context) : ChatDependencies, ConversationsDependencies,
     ActivityDependencies, MemoryDependencies, SkillsDependencies, UsageDependencies,
-    SettingsDependencies, PairingDependencies, SurfaceDependencies, ProfilesDependencies {
+    SettingsDependencies, PairingDependencies, SurfaceDependencies, ProfilesDependencies,
+    HistoryDependencies, RecipesDependencies {
     override val context: Context = context.applicationContext
     override val settings: SettingsRepository = DataStoreSettingsRepository(
         context = context,
@@ -69,7 +73,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
             fallback = bundledKnowledge.current(),
         )
     val knowledgeSource: com.hopa.catalog.store.CatalogSource = knowledgeStore
-    val knowledge: com.hopa.catalog.store.CatalogSnapshot get() = knowledgeSource.current()
+    override val knowledge: com.hopa.catalog.store.CatalogSnapshot get() = knowledgeSource.current()
     override val selectedConversation = MutableStateFlow<String?>(null)
     override val runGate = com.hopa.runtime.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
@@ -92,7 +96,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     /** The last launch-pairing outcome, shown on the Backend card. */
     override val backendNotice = MutableStateFlow<String?>(null)
     override val intake = com.hopa.app.share.AttachmentIntake(context)
-    val packages = AndroidPackageCatalog(context)
+    override val packages = AndroidPackageCatalog(context)
     override val recorder = DbRunRecorder(database.runRecordDao())
     override val runHistory = com.hopa.data.store.DbRunHistory(database.runHistoryDao())
     val pendingApprovals = com.hopa.data.store.DbPendingApprovalStore(
@@ -408,7 +412,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     )
 
     /** Recipes that were replayed before; a matching goal runs without the model. */
-    val recipes by lazy { com.hopa.agent.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
+    override val recipes by lazy { com.hopa.agent.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
     override val runs by lazy { com.hopa.app.runtime.RunCoordinator(this) }

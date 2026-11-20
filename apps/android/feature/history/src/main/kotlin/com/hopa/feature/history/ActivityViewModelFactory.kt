@@ -1,8 +1,8 @@
-package com.hopa.app.feature.history
+package com.hopa.feature.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.hopa.app.di.ActivityDependencies
+import com.hopa.feature.history.ActivityDependencies
 
 class ActivityViewModelFactory(
     private val container: ActivityDependencies,

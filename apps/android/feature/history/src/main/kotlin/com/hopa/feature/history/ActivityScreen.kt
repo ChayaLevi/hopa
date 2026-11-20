@@ -1,4 +1,4 @@
-﻿package com.hopa.app.feature.history
+﻿package com.hopa.feature.history
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

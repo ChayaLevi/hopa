@@ -1,4 +1,4 @@
-﻿package com.hopa.app.feature.history
+﻿package com.hopa.feature.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
