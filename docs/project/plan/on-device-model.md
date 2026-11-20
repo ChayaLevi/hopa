@@ -32,7 +32,7 @@ screen model; it is sized for a 128k-context API today.
 | Engine | llama.cpp via JNI, GGUF | grammar-constrained output, mmap, any GGUF, predictable on arm64 |
 | Quantisation | Q4_K_M | the size/quality knee for 1–4B |
 | Format discipline | GBNF grammar per schema | a 2–4B model does not hold a JSON schema in free mode; the loop parses it |
-| Weights delivery | user-imported file (SAF) into `filesDir`, sha256 pinned | nothing hidden; no multi-GB in the APK |
+| Weights delivery | backend first, local fallback | the gateway will serve models the way it serves the catalogue; until that endpoint exists, a curated catalogue plus an imported file is the fallback |
 | Provider | `ProviderChoice.ON_DEVICE` | one more branch in `ModelFactory`, loop untouched |
 | Profiles | small: 1.5–2B, large: 3–4B, chosen by RAM | 6 GB devices cannot hold a 4B comfortably |
 
@@ -44,6 +44,54 @@ screen model; it is sized for a 128k-context API today.
 | Large (8 GB+) | Qwen3-4B, Phi-4-mini (3.8B) | 2.4–2.6 GB | Apache-2.0 / MIT | 5–12 tok/s |
 
 Gemma is excluded: its licence is not Apache/MIT.
+
+## Where the weights come from
+
+The catalogue already has this shape: `CatalogClient.fetch(knownVersion)` asks
+`GET /v1/knowledge` with `If-None-Match`, `KnowledgeUpdater` polls at most once
+per six hours, `FileKnowledgeStore` keeps the newest valid copy and falls back
+to the previous one, then to the bundled asset. Models mirror it exactly, with
+one port and two sources:
+
+```
+ModelSource                       manifest(knownVersion): ModelManifest?
+  BackendModelSource              GET /v1/models, ETag = digest (future; no endpoint yet)
+  LocalModelSource                the curated catalogue and an imported file (today)
+```
+
+- **Storage**: `filesDir/models/<id>-<digest>.gguf`, written to a `.part` file,
+  hashed while streaming, renamed only when the sha256 matches. The previous
+  file stays until the new one is verified, so a failed download is a no-op.
+- **Fallback order**: downloaded model with a matching digest -> imported file ->
+  explicit `ModelMissing` error. Never a silent cloud fallback.
+- **Versioning**: the manifest carries `version: "sha256:..."` like the
+  knowledge bundle, so a 304 keeps the current copy; the receipt can name the
+  model version a turn used, the way it names the knowledge version.
+- **Manifest draft** (wire names are the contract, so they are fixed here even
+  though the endpoint does not exist yet):
+
+```json
+{
+  "schemaVersion": 1,
+  "version": "sha256:...",
+  "models": [
+    {
+      "id": "qwen3-1.7b-q4km",
+      "profile": "small",
+      "file": "qwen3-1.7b-q4_k_m.gguf",
+      "bytes": 1120000000,
+      "sha256": "...",
+      "license": "Apache-2.0",
+      "minRamGb": 4,
+      "contextTokens": 8192
+    }
+  ]
+}
+```
+
+- **Today**: the endpoint returns 401/404, `BackendModelSource` returns null, and
+  the app uses the curated catalogue with an imported file, exactly the way the
+  knowledge updater keeps the bootstrap until the endpoint exists.
 
 ## Slices
 
@@ -63,18 +111,24 @@ Each slice compiles, keeps CI green, and can be merged on its own.
   engine status; the toggle is disabled with a reason when no file is present.
 - Tests: provider resolution, factory branch, stub error text.
 
-### S2 - weights
+### S2 - weights and the source port
 
-- Import through SAF (`ACTION_OPEN_DOCUMENT`), copy to
-  `filesDir/models/<name>.gguf` with a progress state, sha256 check against a
-  pinned value, size and free-space checks, delete action.
+- `ModelSource` with `BackendModelSource` (a `CatalogClient`-style call to
+  `GET /v1/models`, ETag/304, paired token; returns null while the endpoint
+  returns 401/404) and `LocalModelSource` (the curated catalogue, plus whatever
+  the person imported). The default wiring prefers the backend and falls back
+  to local without a visible failure.
+- Import through SAF (`ACTION_OPEN_DOCUMENT`) for the no-endpoint case: copy to
+  `filesDir/models/` through a `.part` file, hash while copying, atomic rename,
+  size and free-space checks, delete action.
 - `LocalModelCatalogue`: the two profiles with their file names, sizes, hashes,
   licences and minimum RAM; `LocalModelRecommendation` picks by
   `ActivityManager.memoryClass` and free storage.
-- The page shows: no file / verifying / ready / too large / wrong hash / engine
-  missing, plus the recommended profile.
-- Tests: catalogue selection by RAM, hash mismatch, size rejection. Screenshot
-  goldens for the page states.
+- The page shows: no file / downloading / verifying / ready / too large / wrong
+  hash / engine missing, plus the recommended profile and where the file came
+  from (gateway or imported).
+- Tests: catalogue selection by RAM, hash mismatch, size rejection, a null
+  manifest keeping the local file. Screenshot goldens for the page states.
 
 ### S3 - prompt budget and grammar (pure Kotlin, no JNI)
 
@@ -115,6 +169,42 @@ Each slice compiles, keeps CI green, and can be merged on its own.
   cloud model (open an app, toggle a setting, read a screen). The numbers go
   into this document; the default stays cloud until they justify the switch.
 
+### S7 - distribution from the gateway (blocked on the endpoint)
+
+- Serve the manifest at `GET /v1/models` and the blob at `GET /v1/models/{id}`,
+  with the same pairing token and ETag behaviour as `/v1/knowledge`.
+- `BackendModelSource` starts returning a manifest; the download path in S2 is
+  reused unchanged, so the phone goes from "import a file" to "tap Download"
+  without a second storage or verification implementation.
+- The receipt names the model version, like `MessageProof` names the knowledge
+  version today.
+- Until the backend endpoint exists this slice stays documented and unimplemented;
+  no placeholder task or dead screen ships in the app.
+
+## Choosing the model in the app
+
+Yes, there is a place, and it is one screen:
+
+```
+Settings -> Model
+  Provider:  [ Cloud (API key) ] [ LAN ] [ On-device ]
+  On-device:
+    recommended: Qwen3-1.7B Q4 (small phone)   [ Download / Import file ]
+    installed:   qwen3-1.7b-q4km.gguf  1.1 GB  gateway | imported   [ Delete ]
+    state:       ready | verifying | missing | wrong hash | engine missing
+  Cloud/LAN keep the fields they have today.
+```
+
+- The provider choice is a segmented control at the top of the existing Model
+  page; choosing On-device hides the endpoint and key fields and shows the model
+  list instead.
+- The chat header shows which model produced the turn ("on-device" or the model
+  name), so a person never wonders where the answer came from.
+- A missing file is an explicit notice in the composer with a shortcut to the
+  page, not a silent switch to the cloud.
+- The Capabilities "Finish setup" card links to the same page.
+- Screenshot goldens cover the page in its import, ready and error states.
+
 ## Acceptance criteria
 
 1. In `ON_DEVICE` with the network off, "open <app>" completes and the action
@@ -126,6 +216,9 @@ Each slice compiles, keeps CI green, and can be merged on its own.
    5 MB without weights.
 6. A missing or corrupt model file produces an explicit error, never a silent
    cloud fallback.
+7. With the backend endpoint absent (401/404 today), the app keeps working from
+   the local catalogue and an imported file; when the endpoint arrives, the same
+   path downloads and verifies without new storage or hashing code.
 
 ## Risks
 
@@ -136,7 +229,9 @@ Each slice compiles, keeps CI green, and can be merged on its own.
 | Heat and battery | short plans, explicit "on-device turns are slower" note, no background inference |
 | NDK build complexity in CI | one ABI for release, `x86_64` only for the emulator, pinned NDK and llama tag |
 | Licence | Apache-2.0 / MIT candidates only, recorded in the catalogue |
-| Weights shipping | import only; no downloader in the first version |
+| Weights shipping | import only in the first version; the APK never carries a multi-GB file |
+| Partial or corrupt download | `.part` file, hash while streaming, atomic rename, the previous copy stays |
+| The gateway has no model endpoint yet | the local source is the fallback; no dead screen or placeholder task ships |
 
 ## Out of scope
 
