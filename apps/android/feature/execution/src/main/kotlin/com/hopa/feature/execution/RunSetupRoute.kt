@@ -1,4 +1,4 @@
-package com.hopa.app.feature.execution
+package com.hopa.feature.execution
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -9,49 +9,47 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hopa.app.di.AppContainer
+import com.hopa.feature.execution.ExecutionDependencies
 import com.hopa.feature.settings.SettingsViewModel
 import com.hopa.feature.settings.SettingsViewModelFactory
 
-/** The Act hub: how HOPA acts, and the ways into apps, setup and preferences. */
 @Composable
-fun RunningAppsRoute(
-    container: AppContainer,
+fun RunSetupRoute(
+    container: ExecutionDependencies,
     onBack: () -> Unit,
-    onOpenHowHopaActs: () -> Unit,
-    onOpenAllApps: () -> Unit,
-    onOpenSites: () -> Unit,
-    onOpenSetup: () -> Unit,
-    onOpenRunPrefs: () -> Unit,
+    onOpenScreenAccess: () -> Unit,
+    onOpenComputer: () -> Unit,
 ) {
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container, container, container))
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pairing by container.pairingStatus.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // The supervisor owns the helper's state and publishes it; the page reads it
     // once when it opens and follows the flow after that.
     LaunchedEffect(Unit) { viewModel.refreshBackground() }
 
-    // Screen access is granted in Android settings; the service pushes the
-    // change, so only the resume is read explicitly.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refresh()
-                viewModel.refreshScreenAccess()
+                viewModel.refreshBackground()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    RunningAppsScreen(
+    RunSetupScreen(
         state = state,
+        pairingStatus = pairing,
         onBack = onBack,
-        onOpenHowHopaActs = onOpenHowHopaActs,
-        onOpenSetup = onOpenSetup,
-        onOpenRunPrefs = onOpenRunPrefs,
-        onOpenAllApps = onOpenAllApps,
-        onOpenSites = onOpenSites,
+        onOpenScreenAccess = onOpenScreenAccess,
+        onStartBackgroundHelper = viewModel::startBackgroundHelper,
+        onOpenComputer = onOpenComputer,
+        onRunCheck = viewModel::runScreenCheck,
+        onPairWireless = viewModel::pairWireless,
+        onPairWirelessFromScreen = viewModel::pairWirelessFromScreen,
+        onPairWirelessWaiting = viewModel::pairWirelessWaiting,
     )
 }

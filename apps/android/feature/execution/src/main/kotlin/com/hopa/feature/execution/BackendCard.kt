@@ -1,4 +1,4 @@
-﻿package com.hopa.app.feature.execution
+﻿package com.hopa.feature.execution
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement

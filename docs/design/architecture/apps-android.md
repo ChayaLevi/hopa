@@ -25,6 +25,7 @@ apps/android/
 ├─ feature/capabilities/ what HOPA can use and how it acts
 ├─ feature/conversations/ the chats sheet
 ├─ feature/settings/ the settings hub, model, alerts and diagnostics
+├─ feature/execution/ Act, run setup, preferences and the computer link
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/

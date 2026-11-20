@@ -118,6 +118,7 @@ dependencies {
     implementation(project(":feature:capabilities"))
     implementation(project(":feature:conversations"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:execution"))
     implementation(project(":feature:launchpad"))
     implementation(project(":feature:power"))
     implementation(project(":feature:easy"))

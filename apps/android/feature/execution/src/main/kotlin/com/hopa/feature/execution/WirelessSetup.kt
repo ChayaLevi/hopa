@@ -1,10 +1,9 @@
-﻿package com.hopa.app.feature.execution
+package com.hopa.feature.execution
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.provider.Settings
-import com.hopa.app.MainActivity
-import com.hopa.app.di.AppContainer
+import com.hopa.feature.execution.ExecutionDependencies
 import com.hopa.capabilities.accessibility.state.HopaAccessibilityService
 import com.hopa.capabilities.accessibility.tree.ScreenTree
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +19,7 @@ import kotlinx.coroutines.withContext
  * dialog is still in front.
  */
 class WirelessSetup(
-    private val container: AppContainer,
+    private val container: ExecutionDependencies,
 ) {
     private val verbose =
         (container.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -154,9 +153,7 @@ class WirelessSetup(
     }
 
     private fun returnToApp() {
-        val intent = Intent(container.context, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-        runCatching { container.context.startActivity(intent) }
+        container.bringToFront()
     }
 
     private companion object {

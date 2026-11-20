@@ -1,4 +1,4 @@
-package com.hopa.app.feature.execution
+package com.hopa.feature.execution
 
 import com.hopa.feature.settings.SettingsUiState
 
