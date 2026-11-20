@@ -105,7 +105,6 @@ fun HomeShell(
         )
 
         else -> ChatRoute(
-            container = container,
             activeTab = tab,
             onSelectTab = selectTab,
             onOpenActMode = onOpenActMode,
@@ -146,7 +145,6 @@ private fun EasyShell(
         )
     } else {
         ChatRoute(
-            container = container,
             activeTab = tab,
             onSelectTab = select,
             onOpenActMode = onOpenActMode,
@@ -216,7 +214,6 @@ private fun PowerShell(
         )
 
         chatStarted -> ChatRoute(
-            container = container,
             activeTab = tab,
             onSelectTab = select,
             onOpenActMode = onOpenActMode,

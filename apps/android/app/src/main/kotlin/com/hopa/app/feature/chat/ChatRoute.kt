@@ -1,22 +1,20 @@
 package com.hopa.app.feature.chat
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hopa.app.di.AppContainer
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.feature.chat.ChatScreen
 import com.hopa.feature.chat.ChatViewModel
 import com.hopa.feature.conversations.ChatsSheet
 import com.hopa.feature.conversations.ConversationsViewModel
-import com.hopa.stores.AppSettings
 
 @Composable
 fun ChatRoute(
-    container: AppContainer,
     activeTab: String,
     onSelectTab: (String) -> Unit,
     onOpenActMode: () -> Unit = {},
@@ -25,25 +23,13 @@ fun ChatRoute(
     onOpenSettings: () -> Unit = {},
 ) {
     val viewModel: ChatViewModel = hiltViewModel()
-    val conversationsViewModel: ConversationsViewModel =
-        hiltViewModel()
+    val conversationsViewModel: ConversationsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val settings by container.settings.settings.collectAsStateWithLifecycle(
-        initialValue = AppSettings(),
-    )
-    val tasks by container.tasks.collectAsStateWithLifecycle()
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
     var chatsOpen by remember { mutableStateOf(false) }
 
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        for (goal in container.pendingGoals) {
-            viewModel.prefill(goal)
-            // send() marks the app busy before it returns, so the next queued
-            // goal is routed to the parallel runner instead of replacing this one.
-            viewModel.send()
-        }
-    }
-
-    androidx.compose.runtime.LaunchedEffect(initialGoal) {
+    LaunchedEffect(initialGoal) {
         if (initialGoal.isNotBlank()) {
             viewModel.prefill(initialGoal)
         }
@@ -76,12 +62,11 @@ fun ChatRoute(
         onSaveSkill = viewModel::saveSkill,
         tasks = tasks,
         onOpenTask = { conversationsViewModel.select(it.conversationId) },
-        onDismissTask = { container.dismissTask(it) },
+        onDismissTask = viewModel::dismissTask,
     )
 
     if (chatsOpen) {
         ChatsSheet(
-            container = container,
             currentId = state.current?.id,
             onDismiss = { chatsOpen = false },
             onSelect = { id ->

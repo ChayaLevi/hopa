@@ -59,7 +59,6 @@ import com.hopa.contracts.chat.Conversation
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsSheet(
-    container: ConversationsDependencies,
     currentId: String?,
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit,

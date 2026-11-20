@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    id("hopa.ktlint")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
