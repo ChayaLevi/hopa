@@ -1,6 +1,8 @@
 package com.hopa.feature.memory
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.hopa.feature.memory.MemoryDependencies
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MemoryViewModel(
+@HiltViewModel
+class MemoryViewModel @Inject constructor(
     private val container: MemoryDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MemoryUiState())

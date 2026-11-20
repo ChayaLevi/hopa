@@ -1,6 +1,8 @@
 package com.hopa.feature.history
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.hopa.feature.history.ActivityDependencies
 import com.hopa.capabilities.accessibility.state.AccessibilityState
@@ -13,7 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ActivityViewModel(
+@HiltViewModel
+class ActivityViewModel @Inject constructor(
     private val container: ActivityDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ActivityUiState())

@@ -1,6 +1,8 @@
 package com.hopa.feature.conversations
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.hopa.feature.conversations.ConversationsDependencies
 import com.hopa.contracts.chat.Conversation
@@ -10,7 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ConversationsViewModel(
+@HiltViewModel
+class ConversationsViewModel @Inject constructor(
     private val container: ConversationsDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ConversationsUiState())

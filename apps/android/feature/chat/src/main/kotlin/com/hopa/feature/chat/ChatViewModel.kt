@@ -1,6 +1,8 @@
 package com.hopa.feature.chat
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.hopa.feature.chat.ChatDependencies
 import com.hopa.contracts.model.ModelMessage
@@ -22,7 +24,8 @@ import com.hopa.privacy.TurnLog
 import com.hopa.privacy.TurnLogEntry
 import com.hopa.runtime.RunSource
 
-class ChatViewModel(
+@HiltViewModel
+class ChatViewModel @Inject constructor(
     private val container: ChatDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ChatUiState())

@@ -1,6 +1,8 @@
 package com.hopa.feature.settings
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.stores.AppSettings
@@ -19,7 +21,8 @@ import kotlinx.coroutines.withContext
  * one concern - model, pairing, surface, preferences - so this class only
  * merges their answers into [SettingsUiState].
  */
-class SettingsViewModel(
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
     private val container: SettingsDependencies,
     pairingDependencies: PairingDependencies,
     surfaceDependencies: SurfaceDependencies,

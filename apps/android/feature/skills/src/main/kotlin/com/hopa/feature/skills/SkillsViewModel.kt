@@ -1,6 +1,8 @@
 package com.hopa.feature.skills
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.hopa.feature.skills.SkillsDependencies
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +12,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Skills only: adding one no longer reloads the facts on the memory page. */
-class SkillsViewModel(
+@HiltViewModel
+class SkillsViewModel @Inject constructor(
     private val container: SkillsDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SkillsUiState())

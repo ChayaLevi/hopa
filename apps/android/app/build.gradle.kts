@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -121,6 +123,10 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:execution"))
     implementation(project(":feature:chat"))
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
     implementation(project(":feature:launchpad"))
     implementation(project(":feature:power"))
     implementation(project(":feature:easy"))
