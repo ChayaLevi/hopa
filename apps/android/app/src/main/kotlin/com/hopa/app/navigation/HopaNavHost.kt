@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.hopa.app.di.AppContainer
-import com.hopa.app.feature.browser.BrowserRoute
+import com.hopa.feature.browser.BrowserRoute
 import com.hopa.app.feature.execution.ComputerRoute
 import com.hopa.app.feature.execution.HowHopaActsRoute
 import com.hopa.app.feature.execution.RunPrefsRoute
@@ -14,11 +14,11 @@ import com.hopa.app.feature.execution.RunSetupRoute
 import com.hopa.app.feature.execution.RunningAppsRoute
 import com.hopa.feature.history.HistoryRoute
 import com.hopa.feature.history.RecipesRoute
-import com.hopa.app.feature.launchpad.AppCardRoute
-import com.hopa.app.feature.launchpad.LaunchpadRoute
+import com.hopa.feature.launchpad.AppCardRoute
+import com.hopa.feature.launchpad.LaunchpadRoute
 import com.hopa.feature.memory.MemoryRoute
 import com.hopa.feature.profiles.ProfilesRoute
-import com.hopa.app.feature.runs.RunsRoute
+import com.hopa.feature.runs.RunsRoute
 import com.hopa.app.feature.settings.AboutScreen
 import com.hopa.app.feature.settings.AccessibilityRoute
 import com.hopa.app.feature.settings.SelfCheckRoute

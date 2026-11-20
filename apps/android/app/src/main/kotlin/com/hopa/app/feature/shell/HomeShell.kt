@@ -8,10 +8,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hopa.app.di.AppContainer
 import com.hopa.feature.history.ActivityRoute
-import com.hopa.app.feature.capabilities.CapabilitiesRoute
+import com.hopa.feature.capabilities.CapabilitiesRoute
 import com.hopa.app.feature.chat.ChatRoute
-import com.hopa.app.feature.easy.EasyHistoryRoute
-import com.hopa.app.feature.power.PowerHomeRoute
+import com.hopa.feature.easy.EasyHistoryRoute
+import com.hopa.feature.power.PowerHomeRoute
 import com.hopa.stores.AppSettings
 
 /**

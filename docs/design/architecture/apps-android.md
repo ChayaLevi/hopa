@@ -17,6 +17,12 @@ apps/android/
 ├─ feature/skills/ the procedures page
 ├─ feature/profiles/ the everyday / easy / power choice
 ├─ feature/history/ activity, run history and the saved repeats
+├─ feature/runs/    the audit trail of every action
+├─ feature/browser/ the in-app browser
+├─ feature/easy/    the Easy profile history
+├─ feature/power/   the Power profile home
+├─ feature/launchpad/ apps, sites and the app card
+├─ feature/capabilities/ what HOPA can use and how it acts
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/
