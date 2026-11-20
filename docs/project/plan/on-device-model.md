@@ -126,9 +126,14 @@ Each slice compiles, keeps CI green, and can be merged on its own.
   `ActivityManager.memoryClass` and free storage.
 - The page shows: no file / downloading / verifying / ready / too large / wrong
   hash / engine missing, plus the recommended profile and where the file came
-  from (gateway or imported).
+  from (gateway or imported). Every installed row has Delete with its size.
+- A cleanup pass at app start removes stale `.part` files and downloaded files
+  that no manifest or selection refers to; the page shows the total the models
+  occupy and offers "Delete all".
 - Tests: catalogue selection by RAM, hash mismatch, size rejection, a null
-  manifest keeping the local file. Screenshot goldens for the page states.
+  manifest keeping the local file, delete clearing both file and selection, the
+  cleanup pass leaving a current version and dropping orphans. Screenshot
+  goldens for the page states, including the delete confirmation.
 
 ### S3 - prompt budget and grammar (pure Kotlin, no JNI)
 
@@ -205,6 +210,28 @@ Settings -> Model
 - The Capabilities "Finish setup" card links to the same page.
 - Screenshot goldens cover the page in its import, ready and error states.
 
+## Storage lifecycle
+
+A model is 1–3 GB; it must be as easy to remove as it is to add, and nothing
+may stay behind.
+
+- **Delete** sits on every installed model row with its size ("1.1 GB"). It
+  unloads the engine first, then removes the file and the selection.
+- If the deleted model was the active provider, the app does not fall back
+  silently: it switches to cloud and says so ("On-device model removed, switched
+  to the cloud") in the composer and on the Model page.
+- **The page accounts for the total**: "On-device models use 1.1 GB", with a
+  "Delete all" action next to it.
+- **Cleanup pass** at app start and after every successful download removes:
+  `.part` files older than 24 hours (a crash mid-download), and any downloaded
+  file that neither the current manifest nor the current selection refers to.
+- **Retention**: current version plus the previous one. When free space drops
+  below twice the largest catalogue model, the previous version goes first.
+- **Imported files are copies we own**: SAF import copies into `filesDir`, the
+  original in Downloads is untouched, so Delete is always safe and always frees
+  the space.
+- Deleting a model touches nothing else: chats, the run log and settings stay.
+
 ## Acceptance criteria
 
 1. In `ON_DEVICE` with the network off, "open <app>" completes and the action
@@ -219,6 +246,8 @@ Settings -> Model
 7. With the backend endpoint absent (401/404 today), the app keeps working from
    the local catalogue and an imported file; when the endpoint arrives, the same
    path downloads and verifies without new storage or hashing code.
+8. Deleting a model frees its bytes immediately, leaves no `.part` file, and an
+   active on-device provider falls back with a visible notice.
 
 ## Risks
 
