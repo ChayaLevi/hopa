@@ -1,4 +1,4 @@
-package com.hopa.app.ui
+package com.hopa.approval
 
 import com.hopa.contracts.wire.Action
 import com.hopa.contracts.approval.ApprovalRequest
