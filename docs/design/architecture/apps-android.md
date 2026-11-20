@@ -11,7 +11,7 @@ apps/android/
 ├─ app/            Compose UI, navigation, ViewModels, state holders
 ├─ capabilities/   DevicePort adapters: accessibility, hidden display,
 │                  wireless shell, system intents, package inventory
-├─ core/ui/        shared Compose chrome: theme, bars, sheets, the mascot
+├─ core/ui/        shared Compose chrome: theme, bars, sheets, page scaffolds, the mascot
 ├─ feature/usage/  the usage screen, as the first feature module
 ├─ feature/memory/ the facts page
 ├─ feature/skills/ the procedures page
