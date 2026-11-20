@@ -24,7 +24,7 @@ import com.hopa.app.service.PairingService
 import com.hopa.app.service.RunService
 import com.hopa.app.service.ScreenCaptureRequester
 import com.hopa.app.service.ScreenCaptureService
-import com.hopa.app.ui.UiApprovalGateway
+import com.hopa.approval.UiApprovalGateway
 import com.hopa.capabilities.accessibility.tree.AccessibilityDevice
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
@@ -119,7 +119,7 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     )
     /** The last launch-pairing outcome, shown on the Backend card. */
     override val backendNotice = MutableStateFlow<String?>(null)
-    val intake = com.hopa.app.share.AttachmentIntake(context)
+    val intake = com.hopa.share.AttachmentIntake(context)
     override val packages = AndroidPackageCatalog(context)
     override val recorder = DbRunRecorder(database.runRecordDao())
     override val runHistory = com.hopa.data.store.DbRunHistory(database.runHistoryDao())

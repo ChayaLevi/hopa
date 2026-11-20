@@ -112,6 +112,8 @@ dependencies {
     implementation(project(":capabilities"))
     implementation(project(":core:ui"))
     implementation(project(":core:privacy"))
+    implementation(project(":core:share"))
+    implementation(project(":core:approval"))
     implementation(project(":feature:usage"))
     implementation(project(":feature:memory"))
     implementation(project(":feature:skills"))

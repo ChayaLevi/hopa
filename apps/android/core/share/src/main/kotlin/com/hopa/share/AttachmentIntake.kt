@@ -1,4 +1,4 @@
-package com.hopa.app.share
+package com.hopa.share
 
 import android.content.Context
 import android.net.Uri

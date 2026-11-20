@@ -13,6 +13,8 @@ apps/android/
 │                  wireless shell, system intents, package inventory
 ├─ core/ui/        shared Compose chrome: theme, bars, sheets, page scaffolds, the mascot
 ├─ core/privacy/   the turn log: what left the phone, kept on the phone
+├─ core/share/     inbound shares turned into an attachment
+├─ core/approval/  the prompt gateway that waits for a person
 ├─ feature/usage/  the usage screen, as the first feature module
 ├─ feature/memory/ the facts page
 ├─ feature/skills/ the procedures page
