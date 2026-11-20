@@ -39,6 +39,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:history"))
     implementation(project(":feature:runs"))
+    implementation(project(":feature:chat"))
 
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.junit4)
