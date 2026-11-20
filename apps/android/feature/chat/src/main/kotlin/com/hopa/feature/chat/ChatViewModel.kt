@@ -10,12 +10,16 @@ import com.hopa.observation.produce.ScreenPath
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.chat.AttachmentRules
 import com.hopa.contracts.chat.ChatMessage
+import com.hopa.contracts.task.TaskItem
+import com.hopa.stores.AppSettings
 import com.hopa.agent.turn.TurnOutcome
 import com.hopa.agent.turn.TurnSource
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -31,7 +35,21 @@ class ChatViewModel @Inject constructor(
     private val _state = MutableStateFlow(ChatUiState())
     val state: StateFlow<ChatUiState> = _state.asStateFlow()
 
+    /** The queue beside the composer, and the switch the screen reads. */
+    val tasks: StateFlow<List<TaskItem>> = container.tasks
+    val settings: StateFlow<AppSettings> = container.settings.settings
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
+
     init {
+        // A goal handed over from the shell starts a turn on arrival; send()
+        // marks the app busy before it returns, so the next queued goal is
+        // routed to the parallel runner instead of replacing this one.
+        viewModelScope.launch {
+            for (goal in container.pendingGoals) {
+                prefill(goal)
+                send()
+            }
+        }
         viewModelScope.launch { load() }
         viewModelScope.launch {
             container.pendingApproval.collect { request ->
@@ -215,6 +233,11 @@ class ChatViewModel @Inject constructor(
     }
 
     /** Drop the shared file before it is sent, and remove its bytes. */
+    /** A finished task leaves the chip row. */
+    fun dismissTask(id: String) {
+        container.dismissTask(id)
+    }
+
     fun discardAttachment() {
         val attachment = _state.value.attachment
         container.pendingAttachment.value = null
