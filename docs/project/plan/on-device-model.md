@@ -414,8 +414,8 @@ The only new module is `:core:localmodel` (`apps/android/core/localmodel`).
 
 | Where | What |
 |---|---|
-| `core/inference` | `ModelSource` port, `ModelManifest` codec, `LocalModelCatalogue` metadata, `LocalModelRecommendation` |
-| `apps/android/core/localmodel` (new) | `FileModelStore` (`.part`, sha256, atomic rename), cleanup pass, storage totals, `LocalModelSource`, SAF import, download service |
+| `core/inference` | `ModelSource` port, `ModelManifest` codec, `LocalModelCatalogue` metadata, `LocalModelRecommendation`, and `FileModelStore` (`.part`, sha256, atomic rename, cleanup, totals) — all JVM and tested on the JVM |
+| `apps/android/core/localmodel` (new) | SAF import, the download service, and from S4 the engine host; it receives the storage root from the app |
 | `apps/android/feature/settings` | model cards, import/download, delete, totals, states |
 | `apps/android/stores` | the selected model id and the provider |
 | `apps/android/app` | Hilt bindings, the service entry in the merged manifest |
