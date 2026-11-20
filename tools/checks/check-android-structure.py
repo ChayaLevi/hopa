@@ -50,6 +50,8 @@ TEST_SUPPORT = {
     "com.hopa.contracts.testing",
     "com.hopa.catalog.testing",
     "com.hopa.agent.conformance",
+    # The screenshot module is tests only: it renders screens other modules own.
+    "com.hopa.screenshots",
 }
 
 
