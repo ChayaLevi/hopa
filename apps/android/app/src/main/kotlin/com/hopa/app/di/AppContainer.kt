@@ -71,8 +71,22 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     SettingsDependencies, PairingDependencies, SurfaceDependencies, ProfilesDependencies,
     HistoryDependencies, RecipesDependencies, RunsDependencies,
     EasyDependencies, PowerDependencies, LaunchpadDependencies, CapabilitiesDependencies,
-    ExecutionDependencies {
+    ExecutionDependencies, LocalModelHost {
     override val context: Context = context.applicationContext
+    override val localModels: com.hopa.localmodel.LocalModelStore =
+        com.hopa.localmodel.AndroidLocalModelStore(context)
+
+    override val ramGb: Int
+        get() = run {
+            val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            val info = android.app.ActivityManager.MemoryInfo()
+            manager.getMemoryInfo(info)
+            (info.totalMem / 1_073_741_824L).toInt()
+        }
+
+    override val freeBytes: Long
+        get() = context.filesDir.usableSpace
+
     override val settings: SettingsRepository = DataStoreSettingsRepository(
         context = context,
         secrets = KeystoreSecretStore(context),
