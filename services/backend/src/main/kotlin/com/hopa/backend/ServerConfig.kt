@@ -32,4 +32,6 @@ data class ServerConfig(
     val push: PushPort = PushPort.None,
     val traces: TraceRecorder = TraceRecorder.None,
     val traceQuery: TraceQuery? = null,
+    /** Where the served model files and models.v1.json live; blank serves an empty manifest. */
+    val modelsDir: String = "",
 )

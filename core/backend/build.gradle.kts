@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     api(project(":contracts"))
+    api(project(":inference"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

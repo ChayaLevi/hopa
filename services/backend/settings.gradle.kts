@@ -31,4 +31,5 @@ include(":runlog")
 project(":runlog").projectDir = file("../../core/runlog")
 include(":agent")
 project(":agent").projectDir = file("../../core/agent")
-
+include(":inference")
+project(":inference").projectDir = file("../../core/inference")

@@ -18,6 +18,7 @@ data class ModelSpec(
     val id: String,
     val name: String,
     val modelClass: ModelClass,
+    val file: String = "",
     val parameters: String,
     val quantization: String = "Q4_K_M",
     val bytes: Long,
