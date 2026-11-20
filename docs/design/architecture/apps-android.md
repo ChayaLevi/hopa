@@ -179,6 +179,10 @@ The configuration cache is on (`org.gradle.configuration-cache=true`) together
 with the build cache, so CI reuses one configured build across the checks,
 ktlint and screenshot tasks instead of re-running configuration each time.
 
+OkHttp stays on 4.x on purpose: version 5 is a major with a renamed test server
+artifact and API moves, and that migration needs a device to run against, so it
+is its own change rather than part of a version sweep.
+
 ## Minimum version
 
 `minSdk 29` (Android 10). On API 29 the screen is read from the accessibility
