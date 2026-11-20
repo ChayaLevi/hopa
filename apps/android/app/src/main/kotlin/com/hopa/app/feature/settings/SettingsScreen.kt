@@ -1,9 +1,7 @@
-package com.hopa.app.feature.settings
+﻿package com.hopa.app.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,7 +27,6 @@ import com.hopa.inference.choice.ProviderState
  * Settings as one control surface, not a menu: a readiness ring, controls that
  * act where they are, and one-tap fixes for the thing that is missing.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
@@ -39,7 +36,6 @@ fun SettingsScreen(
     onChattiness: (String) -> Unit,
     onMascot: (Boolean) -> Unit,
     onToggleAlerts: (Boolean) -> Unit,
-    onOpenCapabilities: () -> Unit,
     onOpenProfiles: () -> Unit,
     onOpenSelfCheck: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -54,16 +50,10 @@ fun SettingsScreen(
         Searchable("Alerts", "notifications, answer ready", Icons.Filled.Notifications,
             { onOpenPage(PAGE_NOTIFICATIONS) }),
         Searchable("Modes", "profiles, everyday", Icons.Filled.Person, onOpenProfiles),
-        Searchable("What HOPA can do", "capabilities, tools", Icons.Filled.Info,
-            onOpenCapabilities),
         Searchable("Health check", "self-check, diagnostics", Icons.Filled.Info,
             onOpenSelfCheck),
         Searchable("Privacy", "what left your phone, tokens", Icons.Filled.Lock,
             { onOpenPage(PAGE_PRIVACY) }),
-        Searchable("Repeats", "skills, saved, replay", Icons.Filled.List,
-            { onOpenPage(PAGE_RECIPES) }),
-        Searchable("History", "runs, modes, compare", Icons.Filled.List,
-            { onOpenPage(PAGE_HISTORY) }),
         Searchable("About", "version, licences", Icons.Filled.Info, onOpenAbout),
     )
     val matches = if (query.isBlank()) {
@@ -183,16 +173,10 @@ fun SettingsScreen(
             }
         }
 
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             QuickChip("Modes") { onOpenProfiles() }
-            QuickChip("Tools") { onOpenCapabilities() }
             QuickChip("Health") { onOpenSelfCheck() }
             QuickChip("Privacy") { onOpenPage(PAGE_PRIVACY) }
-            QuickChip("Repeats") { onOpenPage(PAGE_RECIPES) }
-            QuickChip("History") { onOpenPage(PAGE_HISTORY) }
             QuickChip("About") { onOpenAbout() }
         }
 
@@ -205,8 +189,6 @@ fun SettingsScreen(
 internal const val PAGE_MODEL = "model"
 internal const val PAGE_NOTIFICATIONS = "notifications"
 internal const val PAGE_PRIVACY = "privacy"
-internal const val PAGE_RECIPES = "recipes"
-internal const val PAGE_HISTORY = "history"
 
 /** One entry the search box can find: a title, its words, and where it goes. */
 private data class Searchable(

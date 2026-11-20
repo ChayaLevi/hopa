@@ -45,6 +45,8 @@ fun ActivityScreen(
     onSelectTab: (String) -> Unit,
     onOpenRuns: () -> Unit,
     onOpenUsage: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onOpenRecipes: () -> Unit,
     onShare: () -> Unit,
     onSave: () -> Unit,
     onUnavailable: (String) -> Unit,
@@ -104,6 +106,10 @@ fun ActivityScreen(
             SectionLabel("RECENT")
             NavCard("Runs and batches", "Every action, approval and duration", onOpenRuns)
             NavCard("Usage", "Tokens and time spent", onOpenUsage)
+
+            SectionLabel("LEARNED")
+            NavCard("Repeats that worked", "Goals HOPA can replay without the model", onOpenRecipes)
+            NavCard("History", "Every finished turn and the surface it used", onOpenHistory)
 
             SectionLabel("SCHEDULED")
             NavCard("Plans", "Goals that run while HOPA is open") { onUnavailable("Plans") }
