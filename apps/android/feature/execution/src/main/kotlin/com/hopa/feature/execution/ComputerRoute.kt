@@ -3,10 +3,9 @@ package com.hopa.feature.execution
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hopa.feature.execution.ExecutionDependencies
 import com.hopa.feature.settings.SettingsViewModel
-import com.hopa.feature.settings.SettingsViewModelFactory
 
 /** The computer as a surface: address, pairing and the two checks. */
 @Composable
@@ -14,7 +13,7 @@ fun ComputerRoute(
     container: ExecutionDependencies,
     onBack: () -> Unit,
 ) {
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container, container, container))
+    val viewModel: SettingsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ComputerScreen(

@@ -1,6 +1,8 @@
 package com.hopa.feature.usage
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.hopa.feature.usage.UsageDependencies
 import java.time.Instant
@@ -11,7 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class UsageViewModel(
+@HiltViewModel
+class UsageViewModel @Inject constructor(
     private val container: UsageDependencies,
 ) : ViewModel() {
     private val _state = MutableStateFlow(UsageUiState())

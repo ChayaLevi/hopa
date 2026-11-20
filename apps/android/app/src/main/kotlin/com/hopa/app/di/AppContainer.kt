@@ -1,6 +1,9 @@
 package com.hopa.app.di
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
@@ -62,7 +65,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 
-class AppContainer(context: Context) : ChatDependencies, ConversationsDependencies,
+@Singleton
+class AppContainer @Inject constructor(@ApplicationContext context: Context) : ChatDependencies, ConversationsDependencies,
     ActivityDependencies, MemoryDependencies, SkillsDependencies, UsageDependencies,
     SettingsDependencies, PairingDependencies, SurfaceDependencies, ProfilesDependencies,
     HistoryDependencies, RecipesDependencies, RunsDependencies,

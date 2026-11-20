@@ -5,14 +5,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun SkillsRoute(
     container: SkillsDependencies,
     onBack: () -> Unit,
 ) {
-    val viewModel: SkillsViewModel = viewModel(factory = SkillsViewModelFactory(container))
+    val viewModel: SkillsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 

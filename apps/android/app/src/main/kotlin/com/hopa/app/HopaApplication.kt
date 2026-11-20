@@ -1,6 +1,8 @@
 package com.hopa.app
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import com.google.firebase.FirebaseApp
 import com.hopa.app.di.AppContainer
 import kotlinx.coroutines.CoroutineScope
@@ -8,15 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
+@HiltAndroidApp
 class HopaApplication : Application() {
-    lateinit var container: AppContainer
-        private set
+    @Inject lateinit var container: AppContainer
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
-        container = AppContainer(this)
         // An approval on disk means the process died while waiting: deny it
         // rather than resurrect a question whose turn is gone.
         scope.launch {

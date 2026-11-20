@@ -1,6 +1,7 @@
 package com.hopa.app
 
 import android.Manifest
+import dagger.hilt.android.AndroidEntryPoint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
@@ -21,6 +22,7 @@ import com.hopa.app.link.session.BackendLaunchName
 import com.hopa.app.navigation.LaunchPairing
 import com.hopa.app.service.AppVisibility
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     // Screen-capture consent (Android 10 screenshots). Only an Activity can ask;
     // on OK the token goes to the foreground service that holds the projection.

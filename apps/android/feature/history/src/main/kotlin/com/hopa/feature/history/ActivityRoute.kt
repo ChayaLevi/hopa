@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
@@ -21,7 +21,7 @@ fun ActivityRoute(
     onOpenHistory: () -> Unit,
     onOpenRecipes: () -> Unit,
 ) {
-    val viewModel: ActivityViewModel = viewModel(factory = ActivityViewModelFactory(container))
+    val viewModel: ActivityViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val saveWeek = rememberLauncherForActivityResult(

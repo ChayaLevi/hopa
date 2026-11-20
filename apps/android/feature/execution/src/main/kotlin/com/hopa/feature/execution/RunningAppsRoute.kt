@@ -8,10 +8,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hopa.feature.execution.ExecutionDependencies
 import com.hopa.feature.settings.SettingsViewModel
-import com.hopa.feature.settings.SettingsViewModelFactory
 
 /** The Act hub: how HOPA acts, and the ways into apps, setup and preferences. */
 @Composable
@@ -24,7 +23,7 @@ fun RunningAppsRoute(
     onOpenSetup: () -> Unit,
     onOpenRunPrefs: () -> Unit,
 ) {
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container, container, container))
+    val viewModel: SettingsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 

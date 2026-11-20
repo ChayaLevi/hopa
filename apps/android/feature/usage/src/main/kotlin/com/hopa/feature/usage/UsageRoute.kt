@@ -4,14 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun UsageRoute(
     container: UsageDependencies,
     onBack: () -> Unit,
 ) {
-    val viewModel: UsageViewModel = viewModel(factory = UsageViewModelFactory(container))
+    val viewModel: UsageViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

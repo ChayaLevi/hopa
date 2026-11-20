@@ -6,14 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hopa.app.di.AppContainer
 import com.hopa.feature.chat.ChatScreen
 import com.hopa.feature.chat.ChatViewModel
-import com.hopa.feature.chat.ChatViewModelFactory
 import com.hopa.feature.conversations.ChatsSheet
 import com.hopa.feature.conversations.ConversationsViewModel
-import com.hopa.feature.conversations.ConversationsViewModelFactory
 import com.hopa.stores.AppSettings
 
 @Composable
@@ -26,9 +24,9 @@ fun ChatRoute(
     easy: Boolean = false,
     onOpenSettings: () -> Unit = {},
 ) {
-    val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(container))
+    val viewModel: ChatViewModel = hiltViewModel()
     val conversationsViewModel: ConversationsViewModel =
-        viewModel(factory = ConversationsViewModelFactory(container))
+        hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by container.settings.settings.collectAsStateWithLifecycle(
         initialValue = AppSettings(),

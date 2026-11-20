@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hopa.ui.theme.HopaColor
 import com.hopa.contracts.chat.Conversation
 
@@ -65,9 +65,7 @@ fun ChatsSheet(
     onSelect: (String) -> Unit,
     onNewChat: () -> Unit,
 ) {
-    val viewModel: ConversationsViewModel = viewModel(
-        factory = ConversationsViewModelFactory(container),
-    )
+    val viewModel: ConversationsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var searchOpen by remember { mutableStateOf(false) }
