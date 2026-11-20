@@ -28,8 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.feature.settings.BackgroundSetupDialog
-import com.hopa.app.feature.settings.SettingsUiState
+import com.hopa.feature.settings.BackgroundSetupDialog
+import com.hopa.feature.settings.SettingsUiState
 import com.hopa.ui.component.HopaPageHeader
 import com.hopa.ui.theme.HopaColor
 

@@ -15,6 +15,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
+import com.hopa.feature.settings.PAGE_MODEL
+import com.hopa.feature.settings.PAGE_NOTIFICATIONS
+import com.hopa.feature.settings.PAGE_PRIVACY
+import com.hopa.feature.settings.SettingsModelScreen
+import com.hopa.feature.settings.SettingsNotificationsScreen
+import com.hopa.feature.settings.SettingsScreen
+import com.hopa.feature.settings.SettingsViewModel
+import com.hopa.feature.settings.SettingsViewModelFactory
 
 @Composable
 fun SettingsRoute(
@@ -24,7 +32,9 @@ fun SettingsRoute(
     onOpenSelfCheck: () -> Unit,
     onOpenAbout: () -> Unit,
 ) {
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
+    val viewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(container, container, container),
+    )
     val state by viewModel.state.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf("") }
     val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()

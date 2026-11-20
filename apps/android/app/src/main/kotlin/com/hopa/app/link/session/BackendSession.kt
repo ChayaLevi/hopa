@@ -5,6 +5,7 @@ import com.hopa.backend.wire.BackendEnvelope
 import com.hopa.backend.link.BackendLink
 import com.hopa.backend.pairing.BackendPairing
 import com.hopa.backend.link.BackendState
+import com.hopa.backend.link.BackendTaskState
 import com.hopa.backend.pairing.PairingLink
 import com.hopa.stores.SettingsRepository
 import java.util.concurrent.atomic.AtomicInteger

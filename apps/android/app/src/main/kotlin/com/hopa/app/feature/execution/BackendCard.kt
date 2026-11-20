@@ -1,4 +1,4 @@
-package com.hopa.app.feature.execution
+﻿package com.hopa.app.feature.execution
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -26,10 +26,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.link.session.BackendTaskState
-import com.hopa.app.feature.settings.PairInput
-import com.hopa.app.feature.settings.SettingsUiState
-import com.hopa.app.feature.settings.pathLabel
+import com.hopa.backend.link.BackendTaskState
+import com.hopa.feature.settings.PairInput
+import com.hopa.feature.settings.SettingsUiState
+import com.hopa.feature.settings.pathLabel
 import com.hopa.ui.theme.HopaColor
 import com.hopa.backend.link.BackendState
 

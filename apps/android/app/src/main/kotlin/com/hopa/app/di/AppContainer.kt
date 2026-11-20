@@ -1,54 +1,63 @@
-﻿package com.hopa.app.di
+package com.hopa.app.di
 
 import android.content.Context
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
+import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.action.ApprovalPolicy
 import com.hopa.app.BuildConfig
-import com.hopa.app.link.session.BackendSession
-import com.hopa.app.link.remote.ProcessedTaskStore
 import com.hopa.app.link.push.PushTokenFetch
+import com.hopa.app.link.push.FirebaseToken
+import com.hopa.app.link.session.BackendLaunchName
+import com.hopa.app.link.remote.ProcessedTaskStore
 import com.hopa.app.link.remote.RemoteRunRequest
 import com.hopa.app.link.remote.RemoteTaskRunner
+import com.hopa.app.link.session.BackendSession
 import com.hopa.app.runtime.RemoteRuns
-import com.hopa.feature.usage.UsageDependencies
-import com.hopa.feature.memory.MemoryDependencies
-import com.hopa.feature.skills.SkillsDependencies
-import com.hopa.feature.profiles.ProfilesDependencies
-import com.hopa.feature.history.ActivityDependencies
-import com.hopa.feature.history.HistoryDependencies
-import com.hopa.feature.history.RecipesDependencies
-import com.hopa.feature.runs.RunsDependencies
-import com.hopa.feature.conversations.ChatSyncOutcome
-import com.hopa.feature.conversations.ConversationsDependencies
-import com.hopa.feature.easy.EasyDependencies
-import com.hopa.feature.power.PowerDependencies
-import com.hopa.feature.launchpad.LaunchpadDependencies
-import com.hopa.feature.capabilities.CapabilitiesDependencies
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
+import com.hopa.app.service.PairingService
 import com.hopa.app.service.RunService
-import com.hopa.observation.source.ScreenSourceDevice
-import com.hopa.stores.AppSettings
+import com.hopa.app.service.ScreenCaptureRequester
+import com.hopa.app.service.ScreenCaptureService
+import com.hopa.app.ui.UiApprovalGateway
 import com.hopa.capabilities.accessibility.tree.AccessibilityDevice
-import com.hopa.inference.client.ModelFactory
-import com.hopa.inference.choice.ProviderChoiceRules
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
 import com.hopa.contracts.ports.DevicePort
-import com.hopa.agent.action.ActionExecutor
-import com.hopa.agent.action.ApprovalPolicy
-import com.hopa.app.ui.UiApprovalGateway
 import com.hopa.data.database.HopaDatabase
-import com.hopa.data.store.DbRunRecorder
-import com.hopa.runlog.record.RunRecordFactory
-import com.hopa.data.store.KeystoreSecretStore
-import com.hopa.stores.ConversationStore
-import com.hopa.data.store.DbConversationStore
 import com.hopa.data.store.DataStoreSettingsRepository
+import com.hopa.data.store.DbConversationStore
+import com.hopa.data.store.DbRunRecorder
+import com.hopa.data.store.KeystoreSecretStore
+import com.hopa.feature.capabilities.CapabilitiesDependencies
+import com.hopa.feature.conversations.ChatSyncOutcome
+import com.hopa.feature.conversations.ConversationsDependencies
+import com.hopa.feature.easy.EasyDependencies
+import com.hopa.feature.history.ActivityDependencies
+import com.hopa.feature.history.HistoryDependencies
+import com.hopa.feature.history.RecipesDependencies
+import com.hopa.feature.launchpad.LaunchpadDependencies
+import com.hopa.feature.memory.MemoryDependencies
+import com.hopa.feature.power.PowerDependencies
+import com.hopa.feature.profiles.ProfilesDependencies
+import com.hopa.feature.runs.RunsDependencies
+import com.hopa.feature.settings.PairingDependencies
+import com.hopa.feature.settings.SettingsDependencies
+import com.hopa.feature.settings.SurfaceDependencies
+import com.hopa.feature.skills.SkillsDependencies
+import com.hopa.feature.usage.UsageDependencies
+import com.hopa.inference.choice.ProviderChoiceRules
+import com.hopa.inference.client.ModelFactory
+import com.hopa.observation.source.ScreenSourceDevice
+import com.hopa.runlog.record.RunRecordFactory
+import com.hopa.stores.AppSettings
+import com.hopa.stores.ConversationStore
 import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 
 class AppContainer(context: Context) : ChatDependencies, ConversationsDependencies,
@@ -143,7 +152,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
      * The app's one gateway link. Pairing and the activity life cycle reach it
      * through here; [remoteRunner] is attached below as its delivery handler.
      */
-    override val backend: BackendSession by lazy {
+    val backend: BackendSession by lazy {
         BackendSession(
             settings = settings,
             pairingFactory = { url -> com.hopa.backend.pairing.BackendPairing(url) },
@@ -410,6 +419,54 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
         val sync = chatSync() ?: return null
         val report = sync.run()
         return ChatSyncOutcome(adopted = report.adopted, tombstoned = report.tombstoned)
+    }
+
+    override val backendState: StateFlow<com.hopa.backend.link.BackendState>
+        get() = backend.state
+
+    override val backendTask: StateFlow<com.hopa.backend.link.BackendTaskState>
+        get() = backend.task
+
+    override suspend fun connectShell(): Boolean =
+        runCatching { shell.connect() }.getOrDefault(false)
+
+    override fun notificationsAllowed(): Boolean = Notifier.permissionGranted(context)
+
+    override fun postTestNotification(): Boolean = Notifier.postTest(context)
+
+    override suspend fun pairGateway(link: com.hopa.backend.pairing.PairingLink): String =
+        backend.pair(link).fold(
+            onSuccess = { "Gateway paired; this phone can receive tasks" },
+            onFailure = { error ->
+                "Gateway: ${error.message ?: error::class.simpleName}"
+            },
+        )
+
+    override suspend fun disconnectGateway(): String {
+        runCatching { backend.disconnect() }
+        return "Disconnected; the pairing is kept"
+    }
+
+    override fun backendToken(): String? = FirebaseToken.current()
+
+    override fun fcmAvailable(): Boolean = FirebaseApp.getApps(context).isNotEmpty()
+
+    override fun backendName(): String = BackendLaunchName.value
+
+    override fun pairWirelessFromScreen() {
+        PairingService.start(context, PairingService.MODE_AUTO)
+    }
+
+    override fun pairWirelessWaiting() {
+        PairingService.start(context, PairingService.MODE_WAIT)
+    }
+
+    override fun requestScreenCapture() {
+        ScreenCaptureRequester.request()
+    }
+
+    override fun stopScreenCapture() {
+        ScreenCaptureService.stop(context)
     }
 
     /** One executor per device path, sharing the gate snapshot, approval and recorder. */

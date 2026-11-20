@@ -1,6 +1,6 @@
 package com.hopa.app.feature.execution
 
-import com.hopa.app.feature.settings.SettingsUiState
+import com.hopa.feature.settings.SettingsUiState
 
 /**
  * The saved path, read the way the Act screens talk about it: which machine

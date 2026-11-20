@@ -1,4 +1,4 @@
-package com.hopa.app.feature.settings
+﻿package com.hopa.app.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

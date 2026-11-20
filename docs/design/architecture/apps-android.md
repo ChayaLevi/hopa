@@ -24,6 +24,7 @@ apps/android/
 ├─ feature/launchpad/ apps, sites and the app card
 ├─ feature/capabilities/ what HOPA can use and how it acts
 ├─ feature/conversations/ the chats sheet
+├─ feature/settings/ the settings hub, model, alerts and diagnostics
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/
@@ -56,6 +57,18 @@ unit-testable on the JVM and reusable by the Windows sidecar. `capabilities` and
 | `feature/` | one package per feature: screens, routes, ViewModels |
 | `service/` | Android foreground services |
 | `ui/` | shared chrome, theme, and the approval dialog gateway |
+
+## Tabs
+
+The three bottom-bar tabs are navigation, not ownership: a feature module may be
+reached from more than one tab.
+
+| tab | opens |
+|---|---|
+| Chat | `chat`, `conversations`, `profiles` (the mode), `easy` / `power` shells |
+| Activity | `history`, `runs`, `usage` |
+| Capabilities | `capabilities`, `execution` (Act), `browser`, `memory`, `skills`, `launchpad` |
+| overlay | `settings` opens from Capabilities; About lives inside it |
 
 A feature package may use `runtime`, `link`, `catalog`, `ui`, `service` and the
 libraries; it never imports another feature, except `feature/shell`, which owns

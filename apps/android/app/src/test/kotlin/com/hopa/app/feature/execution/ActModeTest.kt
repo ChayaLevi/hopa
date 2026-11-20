@@ -1,6 +1,6 @@
 package com.hopa.app.feature.execution
 
-import com.hopa.app.feature.settings.SettingsUiState
+import com.hopa.feature.settings.SettingsUiState
 import com.hopa.stores.AppSettings
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
