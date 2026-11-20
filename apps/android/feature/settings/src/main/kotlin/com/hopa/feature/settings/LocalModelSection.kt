@@ -26,6 +26,7 @@ import com.hopa.ui.theme.HopaColor
 fun LocalModelSection(
     state: LocalModelUiState,
     onImport: () -> Unit,
+    onDownload: (ModelSpec) -> Unit,
     onDelete: (String) -> Unit,
     onDeleteAll: () -> Unit,
 ) {
@@ -51,6 +52,42 @@ fun LocalModelSection(
     } else {
         val installed = state.installed.any { it.id == recommended.id }
         ModelCard(spec = recommended, installed = installed, onImport = onImport)
+    }
+    val downloadable = state.installedSpecs.values
+        .filter { spec -> spec.downloadable && state.installed.none { it.id == spec.id } }
+        .sortedBy { spec -> spec.bytes }
+    if (downloadable.isNotEmpty()) {
+        Text(
+            "Available to download",
+            fontSize = 14.sp,
+            color = HopaColor.TextSecondary,
+            modifier = Modifier.padding(top = 12.dp),
+        )
+        downloadable.forEach { spec ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(spec.name, fontSize = 13.sp, color = HopaColor.TextPrimary)
+                    Text(
+                        "${formatBytes(spec.bytes)}  ·  ${spec.license}",
+                        fontSize = 11.sp,
+                        color = HopaColor.TextHint,
+                    )
+                }
+                if (state.downloadingId == spec.id) {
+                    val percent = state.downloadProgress?.let { (it * 100).toInt() } ?: 0
+                    Text("$percent%", fontSize = 12.sp, color = HopaColor.TextSecondary)
+                } else {
+                    TextButton(onClick = { onDownload(spec) }, enabled = !state.busy) {
+                        Text("Download")
+                    }
+                }
+            }
+        }
     }
     if (state.installed.isNotEmpty()) {
         Text(

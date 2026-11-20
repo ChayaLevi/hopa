@@ -11,6 +11,8 @@ data class LocalModelUiState(
     val totalBytes: Long = 0,
     val ramGb: Int = 0,
     val busy: Boolean = false,
+    val downloadingId: String? = null,
+    val downloadProgress: Float? = null,
     val notice: String? = null,
     val error: String? = null,
 )

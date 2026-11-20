@@ -109,6 +109,8 @@ class LocalModelViewModelTest {
 
         override suspend fun import(uri: Uri, spec: ModelSpec): ImportOutcome = ImportOutcome.Empty
 
+        override suspend fun download(spec: ModelSpec, onProgress: (Long, Long) -> Unit): ImportOutcome = ImportOutcome.Empty
+
         override suspend fun delete(id: String): Boolean {
             deleted += id
             installed = installed.filterNot { it.id == id }

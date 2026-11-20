@@ -41,6 +41,7 @@ android {
 dependencies {
     api(project(":inference"))
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp)
 
     testImplementation(libs.junit)
 }

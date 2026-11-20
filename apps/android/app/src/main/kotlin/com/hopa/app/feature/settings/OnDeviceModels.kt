@@ -20,6 +20,7 @@ fun OnDeviceModels() {
     LocalModelSection(
         state = state,
         onImport = { picker.launch(arrayOf("*/*")) },
+        onDownload = viewModel::download,
         onDelete = viewModel::delete,
         onDeleteAll = viewModel::deleteAll,
     )
