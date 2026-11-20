@@ -1,4 +1,4 @@
-package com.hopa.app.privacy
+package com.hopa.privacy
 
 /** One record of what a turn sent and did. Nothing here holds screen text. */
 data class TurnLogEntry(

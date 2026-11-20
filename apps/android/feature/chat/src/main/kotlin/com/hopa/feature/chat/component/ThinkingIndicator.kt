@@ -1,4 +1,4 @@
-﻿package com.hopa.app.feature.chat.component
+﻿package com.hopa.feature.chat.component
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat

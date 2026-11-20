@@ -1,4 +1,4 @@
-package com.hopa.app.privacy
+package com.hopa.privacy
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

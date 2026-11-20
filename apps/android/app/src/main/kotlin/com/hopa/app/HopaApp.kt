@@ -13,7 +13,7 @@ import com.hopa.ui.theme.HopaTheme
 
 @Composable
 fun HopaApp(container: AppContainer, initialGoal: String = "") {
-    val pending by container.approval.pending.collectAsStateWithLifecycle()
+    val pending by container.pendingApproval.collectAsStateWithLifecycle()
     // Null until the stored value arrives, so the mascot does not flash the
     // default look for one frame when a person prefers the framed one.
     val settings by container.settings.settings.collectAsState(initial = null)
@@ -27,8 +27,8 @@ fun HopaApp(container: AppContainer, initialGoal: String = "") {
         pending?.let { request ->
             ApprovalSheet(
                 request = request,
-                onDeny = { container.approval.resolve(false) },
-                onAllow = { container.approval.resolve(true) },
+                onDeny = { container.resolveApproval(false) },
+                onAllow = { container.resolveApproval(true) },
             )
         }
     }

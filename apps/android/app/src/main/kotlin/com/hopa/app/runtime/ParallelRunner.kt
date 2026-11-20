@@ -11,6 +11,7 @@ import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import com.hopa.contracts.task.TaskItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -87,7 +88,7 @@ class ParallelRunner(
                 fallback = com.hopa.capabilities.device.UnavailableDevicePort(),
             )
             shared.observe()
-            val outcome = container.runs.run(
+            val outcome = container.runTurn(
                 container.runs.request(
                     goal = goal,
                     device = shared,
