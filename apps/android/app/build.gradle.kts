@@ -116,6 +116,7 @@ dependencies {
     implementation(project(":feature:history"))
     implementation(project(":feature:runs"))
     implementation(project(":feature:capabilities"))
+    implementation(project(":feature:conversations"))
     implementation(project(":feature:launchpad"))
     implementation(project(":feature:power"))
     implementation(project(":feature:easy"))

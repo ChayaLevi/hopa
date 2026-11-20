@@ -1,4 +1,4 @@
-package com.hopa.app.feature.conversations
+package com.hopa.feature.conversations
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -53,14 +53,13 @@ import androidx.compose.ui.unit.sp
 import android.widget.Toast
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hopa.app.di.AppContainer
 import com.hopa.ui.theme.HopaColor
 import com.hopa.contracts.chat.Conversation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsSheet(
-    container: AppContainer,
+    container: ConversationsDependencies,
     currentId: String?,
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit,

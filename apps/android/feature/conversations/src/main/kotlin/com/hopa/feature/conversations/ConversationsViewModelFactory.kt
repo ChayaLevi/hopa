@@ -1,8 +1,8 @@
-package com.hopa.app.feature.conversations
+package com.hopa.feature.conversations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.hopa.app.di.ConversationsDependencies
+import com.hopa.feature.conversations.ConversationsDependencies
 
 class ConversationsViewModelFactory(
     private val container: ConversationsDependencies,

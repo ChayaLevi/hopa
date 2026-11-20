@@ -23,6 +23,7 @@ apps/android/
 ├─ feature/power/   the Power profile home
 ├─ feature/launchpad/ apps, sites and the app card
 ├─ feature/capabilities/ what HOPA can use and how it acts
+├─ feature/conversations/ the chats sheet
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/
