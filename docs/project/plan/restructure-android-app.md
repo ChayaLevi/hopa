@@ -386,18 +386,25 @@ feature/
 
 ### After the module split
 
-24. Update Compose BOM and Navigation to the current 2026 releases; decide
-    whether Navigation 3 replaces the typed routes.
-25. UDF pass: one state holder per screen; no `remember`-held screen state in
-    routes (Profiles, Launchpad, ...).
-26. Enforce feature boundaries: a feature never imports another feature except
-    `shell`; add the rule to `check-android-structure.py` or Konsist.
-27. Screenshot tests (Roborazzi/Paparazzi) for Settings, Activity and Chat, and
-    run them in CI.
-28. Finish the DI decision in ADR-0024: keep narrow containers or move to Hilt
-    with the interfaces as modules and bindings.
-29. Baseline profile for startup; enable configuration cache and build cache in
-    CI.
+24. Done: Compose BOM 2026.11.01 and Navigation 2.10.2, on the AGP 9.5 / Gradle
+    9.6 / built-in Kotlin 2.4 toolchain. Navigation 3 was considered and not
+    adopted: the typed routes on Nav2 cover the graph, and Nav3 would rewrite
+    the shell without a product gain.
+25. Done: one state holder per screen. Eleven routes that held their data in
+    `remember` now collect one `UiState` from a `@HiltViewModel`; `remember` is
+    left for dialogs, in-screen filters and text fields.
+26. Done: `check-android-structure.py` fails when a feature imports another
+    feature (with `execution -> settings` as the recorded exception) or imports
+    the app module.
+27. Done: `:screenshots` renders Settings, Activity and Runs through Robolectric
+    and Roborazzi on the JVM; CI runs `verifyRoborazziDebug`.
+28. Done: Hilt is the graph (ADR-0024 revision); the narrow interfaces are the
+    boundaries and the seam for tests.
+29. Done for the caches: the configuration cache is on and reused in CI (which
+    halved the Android job), and the build cache was already on. Baseline
+    profile is open: generating it needs a device or an emulator run, and this
+    repository's release is a debug APK for a phone that is not connected. It
+    stays listed here rather than as a module that produces no profile.
 
 The module split is complete. `app` keeps the composition root and platform
 glue: `di` (the Hilt graph), `navigation`, `service`, the shell, and the
