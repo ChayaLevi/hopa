@@ -11,7 +11,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
 }
 
-val checkNoAndroidImports by tasks.registering {
+val checkNoAndroidImports = tasks.register("checkNoAndroidImports") {
     group = "verification"
     description = "Fails when a pure JVM module imports android.* or androidx.*."
     val sources = fileTree("src") { include("**/*.kt") }

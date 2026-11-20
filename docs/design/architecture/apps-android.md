@@ -136,6 +136,28 @@ reached from Act.
   geometry), one command in `tools/scripts/android-device-checks.ps1`.
 - Evals and shared fixtures live in `spec/` and `services/evals`.
 
+## Toolchain
+
+The build is on the 2026 line and the versions are not incidental: a newer
+AndroidX artifact refuses to build below them.
+
+| Piece | Version | Why |
+|---|---|---|
+| Gradle | 9.6.0 | the minimum the Android Gradle plugin 9.5 accepts |
+| Android Gradle plugin | 9.5.1 | new DSL only; supports API 37 |
+| Kotlin | 2.4.21 | KGP that the built-in Kotlin support uses |
+| KSP | 2.3.14 | KSP2; speaks to built-in Kotlin (2.2.x does not) |
+| Hilt | 2.60.1 | first line that applies on the AGP 9 DSL |
+| Compose BOM | 2026.11.01 | Compose 1.13, Material 3 1.5 |
+| Navigation | 2.10.2 | type-safe destinations |
+| Lifecycle | 2.11.1 | `collectAsStateWithLifecycle`, view model scopes |
+| compileSdk | 37 minor 1 | Compose 1.13 declares a 37.1 floor |
+| targetSdk | 36 | the level Play asks for in 2026; 37 runtime behaviour is untested here |
+
+Built-in Kotlin means no module applies `org.jetbrains.kotlin.android`; the
+`compileOptions` target (17) is the Kotlin JVM target too. KSP and the Compose
+compiler stay as plugins because they are compilers, not the Kotlin plugin.
+
 ## Minimum version
 
 `minSdk 29` (Android 10). On API 29 the screen is read from the accessibility

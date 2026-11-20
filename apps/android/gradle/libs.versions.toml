@@ -1,13 +1,13 @@
 [versions]
-agp = "8.13.2"
-kotlin = "2.2.21"
+agp = "9.5.1"
+kotlin = "2.4.21"
 googleServices = "4.4.2"
 firebaseBom = "33.7.0"
-composeBom = "2024.12.01"
+composeBom = "2026.11.01"
 coreKtx = "1.15.0"
-activityCompose = "1.9.3"
-lifecycle = "2.8.7"
-navigationCompose = "2.8.5"
+activityCompose = "1.13.0"
+lifecycle = "2.11.1"
+navigationCompose = "2.10.2"
 datastore = "1.1.1"
 okhttp = "4.12.0"
 serialization = "1.7.3"
@@ -15,9 +15,9 @@ coroutines = "1.9.0"
 junit = "5.14.4"
 junitPlatform = "1.14.4"
 jsonSchema = "1.5.6"
-ksp = "2.2.21-2.0.5"
+ksp = "2.3.14"
 room = "2.7.2"
-hilt = "2.57.1"
+hilt = "2.60.1"
 slf4j = "2.0.16"
 ktor = "3.0.3"
 flyway = "11.20.3"
@@ -70,13 +70,12 @@ testcontainers-postgresql = { group = "org.testcontainers", name = "postgresql",
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.4.0" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

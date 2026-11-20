@@ -1,12 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.hopa.feature.execution"
-    compileSdk = 35
+    compileSdk = 37
+    compileSdkMinor = 1
 
     defaultConfig {
         minSdk = 29
@@ -21,8 +21,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    testOptions {
+        unitTests.all { it.useJUnitPlatform() }
     }
 }
 
@@ -40,4 +40,5 @@ dependencies {
     api(project(":feature:settings"))
 
     testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
