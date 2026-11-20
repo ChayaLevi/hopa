@@ -181,6 +181,28 @@ def check() -> list[str]:
                         f"{relative}:{number}: a client package uses the platform adapter "
                         "namespace com.hopa.capabilities"
                     )
+
+    # A feature module never imports another feature, and never imports the
+    # app composition root.
+    feature_root = ANDROID / "feature"
+    if feature_root.exists():
+        for module_dir in sorted(p for p in feature_root.iterdir() if p.is_dir()):
+            own = module_dir.name
+            for path in module_dir.rglob("*.kt"):
+                text = path.read_text(encoding="utf-8")
+                relative = path.relative_to(ROOT)
+                for number, line in enumerate(text.splitlines(), 1):
+                    if line.startswith("import com.hopa.feature."):
+                        target = line.split(".")[3] if len(line.split(".")) > 3 else ""
+                        allowed = (own, target) == ("execution", "settings")
+                        if target and target != own and not allowed:
+                            problems.append(
+                                f"{relative}:{number}: feature {own} imports feature {target}"
+                            )
+                    if line.startswith("import com.hopa.app."):
+                        problems.append(
+                            f"{relative}:{number}: a feature imports the app module"
+                        )
     return problems
 
 

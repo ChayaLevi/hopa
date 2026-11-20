@@ -398,3 +398,8 @@ feature/
     with the interfaces as modules and bindings.
 29. Baseline profile for startup; enable configuration cache and build cache in
     CI.
+
+The module split is complete. `app` keeps the composition root and platform
+glue: `di` (the Hilt graph), `navigation`, `service`, the shell, and the
+`link`/`runtime` orchestration that owns the container. Everything a person
+navigates to is a feature or core module.
