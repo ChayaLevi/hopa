@@ -12,6 +12,7 @@ apps/android/
 ├─ capabilities/   DevicePort adapters: accessibility, hidden display,
 │                  wireless shell, system intents, package inventory
 ├─ core/ui/        shared Compose chrome: theme, bars, sheets, the mascot
+├─ feature/usage/  the usage screen, as the first feature module
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/

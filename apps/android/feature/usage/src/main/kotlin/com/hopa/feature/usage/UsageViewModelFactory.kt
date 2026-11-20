@@ -1,7 +1,7 @@
-package com.hopa.app.feature.usage
+package com.hopa.feature.usage
 
 import androidx.lifecycle.ViewModelProvider
-import com.hopa.app.di.UsageDependencies
+import com.hopa.feature.usage.UsageDependencies
 
 class UsageViewModelFactory(
     private val container: UsageDependencies,

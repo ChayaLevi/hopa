@@ -1,4 +1,4 @@
-package com.hopa.app.feature.usage
+package com.hopa.feature.usage
 
 data class UsageUiState(
     val total: Int = 0,

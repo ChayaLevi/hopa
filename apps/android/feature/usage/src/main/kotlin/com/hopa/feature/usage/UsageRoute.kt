@@ -1,15 +1,14 @@
-package com.hopa.app.feature.usage
+package com.hopa.feature.usage
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hopa.app.di.AppContainer
 
 @Composable
 fun UsageRoute(
-    container: AppContainer,
+    container: UsageDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: UsageViewModel = viewModel(factory = UsageViewModelFactory(container))

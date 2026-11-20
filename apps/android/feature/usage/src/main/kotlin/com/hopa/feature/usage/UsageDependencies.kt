@@ -1,4 +1,4 @@
-package com.hopa.app.di
+package com.hopa.feature.usage
 
 import com.hopa.runlog.store.RunRecorder
 

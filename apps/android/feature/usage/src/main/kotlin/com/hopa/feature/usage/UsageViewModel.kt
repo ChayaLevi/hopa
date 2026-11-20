@@ -1,8 +1,8 @@
-package com.hopa.app.feature.usage
+package com.hopa.feature.usage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.UsageDependencies
+import com.hopa.feature.usage.UsageDependencies
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.flow.MutableStateFlow
