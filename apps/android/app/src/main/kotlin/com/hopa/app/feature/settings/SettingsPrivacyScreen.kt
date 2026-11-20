@@ -12,6 +12,8 @@ import com.hopa.ui.theme.HopaColor
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.hopa.ui.settings.SettingsPage
+import com.hopa.ui.settings.SettingsPanel
 
 /**
  * What left the phone, per turn: which surface, how many steps, characters and
