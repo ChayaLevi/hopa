@@ -1,4 +1,4 @@
-package com.hopa.app.feature.profiles
+package com.hopa.feature.profiles
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

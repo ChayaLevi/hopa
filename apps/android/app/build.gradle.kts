@@ -106,6 +106,7 @@ dependencies {
     implementation(project(":feature:usage"))
     implementation(project(":feature:memory"))
     implementation(project(":feature:skills"))
+    implementation(project(":feature:profiles"))
     implementation(project(":data"))
     implementation(project(":contracts"))
     implementation(project(":inference"))

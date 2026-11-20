@@ -15,6 +15,7 @@ apps/android/
 ├─ feature/usage/  the usage screen, as the first feature module
 ├─ feature/memory/ the facts page
 ├─ feature/skills/ the procedures page
+├─ feature/profiles/ the everyday / easy / power choice
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/

@@ -14,6 +14,7 @@ import com.hopa.app.runtime.RemoteRuns
 import com.hopa.feature.usage.UsageDependencies
 import com.hopa.feature.memory.MemoryDependencies
 import com.hopa.feature.skills.SkillsDependencies
+import com.hopa.feature.profiles.ProfilesDependencies
 import com.hopa.app.service.AppVisibility
 import com.hopa.app.service.Notifier
 import com.hopa.app.service.RunService
@@ -42,7 +43,7 @@ import kotlinx.coroutines.flow.first
 
 class AppContainer(context: Context) : ChatDependencies, ConversationsDependencies,
     ActivityDependencies, MemoryDependencies, SkillsDependencies, UsageDependencies,
-    SettingsDependencies, PairingDependencies, SurfaceDependencies {
+    SettingsDependencies, PairingDependencies, SurfaceDependencies, ProfilesDependencies {
     override val context: Context = context.applicationContext
     override val settings: SettingsRepository = DataStoreSettingsRepository(
         context = context,
