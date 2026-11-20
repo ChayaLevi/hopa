@@ -336,9 +336,24 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         }.getOrDefault(false)
     }
 
-    val model = SettingsModelPort(settings, ModelFactory(), ProviderChoiceRules())
+    /**
+     * One engine for the process: the file is resolved per turn, so importing or
+     * deleting a model takes effect without a restart.
+     */
+    private val localEngine: com.hopa.localmodel.LlamaEngine = com.hopa.localmodel.LlamaEngine(
+        pathProvider = {
+            java.io.File(context.filesDir, "models")
+                .listFiles()
+                ?.filter { it.isFile && it.name.endsWith(".gguf") }
+                ?.maxByOrNull { it.lastModified() }
+                ?.absolutePath
+        },
+    )
+
+    override val modelFactory: ModelFactory = ModelFactory(localEngine = localEngine)
+
+    val model = SettingsModelPort(settings, modelFactory, ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
-    override val modelFactory: ModelFactory = ModelFactory()
 
     /** A bridge-backed device when Settings has an address and a token. */
     suspend fun bridgedDevice(): DevicePort? {
