@@ -34,16 +34,82 @@ screen model; it is sized for a 128k-context API today.
 | Format discipline | GBNF grammar per schema | a 2–4B model does not hold a JSON schema in free mode; the loop parses it |
 | Weights delivery | backend first, local fallback | the gateway will serve models the way it serves the catalogue; until that endpoint exists, a curated catalogue plus an imported file is the fallback |
 | Provider | `ProviderChoice.ON_DEVICE` | one more branch in `ModelFactory`, loop untouched |
-| Profiles | small: 1.5–2B, large: 3–4B, chosen by RAM | 6 GB devices cannot hold a 4B comfortably |
+| Classes | router/tiny, fast, balanced, tools, large, reasoning | one size does not fit a 4 GB and a 12 GB phone; the bench keeps one winner per class |
 
 ## Model catalogue
 
-| Profile | Candidates | Q4 size | License | Expected |
-|---|---|---|---|---|
-| Small (≤6 GB RAM) | Qwen3-1.7B, Phi-4-mini-reasoning (1.5B) | 1.0–1.2 GB | Apache-2.0 / MIT | 10–20 tok/s |
-| Large (8 GB+) | Qwen3-4B, Phi-4-mini (3.8B) | 2.4–2.6 GB | Apache-2.0 / MIT | 5–12 tok/s |
+Licence is not a blocker while we experiment; every entry still carries its
+licence and the app shows it before a download. Sizes are Q4_K_M and
+approximate; speeds are CPU-only on a modern phone SoC and depend on the chip,
+so the bench in S6 decides, not the table.
 
-Gemma is excluded: its licence is not Apache/MIT.
+Each entry answers three questions for the person choosing: **strong at**,
+**weak at**, and **worth knowing**.
+
+### Router and tiny (0.2–0.6 GB)
+
+| Model | Size | Strong at | Weak at | Worth knowing |
+|---|---|---|---|---|
+| Gemma 3 270M | 0.2 GB | fastest answer, best instruction following at this size, multilingual | tool choice, multi-step plans | the cheapest first filter: "command or small talk" |
+| SmolLM2-360M | 0.3 GB | speed, Apache-2.0, tiny memory | English-centric, weak plans | good fallback on 4 GB devices |
+| Qwen3-0.6B | 0.4 GB | routing, short answers, thinking mode if wanted | anything multi-step | disable thinking for the loop or it burns the budget |
+
+### Fast (0.8–1.2 GB)
+
+| Model | Size | Strong at | Weak at | Worth knowing |
+|---|---|---|---|---|
+| Qwen3-1.7B | 1.1 GB | best all-round at this size, decent tool choice, Apache-2.0 | long plans, rare apps | the default for ≤6 GB phones; thinking off for turns |
+| Gemma 3 1B | 0.9 GB | instructions, 32k context, 140+ languages | tool choice, 256k vocabulary inflates the file | the multilingual pick when Russian matters |
+| SmolLM2-1.7B | 1.0 GB | speed, Apache-2.0 | planning, tool choice | lighter alternative when 1.7B Qwen is too slow |
+| Llama 3.2 1B | 0.8 GB | short English commands, mature tooling | long context in practice, licence terms | good baseline to measure others against |
+
+### Balanced (2.2–3.0 GB)
+
+| Model | Size | Strong at | Weak at | Worth knowing |
+|---|---|---|---|---|
+| Qwen3-4B | 2.5 GB | planning, tool choice, reasoning, Apache-2.0 | speed on mid-range SoCs, heat | the default for 8 GB phones; thinking off |
+| Phi-4-mini 3.8B | 2.5 GB | reasoning, precise instructions, MIT | slower, heavier context cost | best "careful" model for multi-step plans |
+| Gemma 3 4B | 2.7 GB | 128k context, languages, instruction following | size, tool choice | the multilingual balanced pick |
+| SmolLM3-3B | 2.2 GB | strong at 3B, dual-mode thinking, Apache-2.0 | younger ecosystem, fewer GGUFs | good middle point if 4B is too much |
+| Granite 3.3 2B | 1.8 GB | strict JSON, enterprise phrasing | general chat, creativity | worth testing for schema discipline |
+| Falcon3-3B | 2.2 GB | 32k context, permissive terms | tool choice | solid generalist, not tool-tuned |
+| MiniCPM4-4B | 2.6 GB | efficiency, long context per byte | tool choice, smaller community | interesting for 6 GB phones |
+
+### Tool-calling specialists (1–3 GB)
+
+| Model | Size | Strong at | Weak at | Worth knowing |
+|---|---|---|---|---|
+| xLAM-2-1B | 0.8 GB | function calling, compact | general reasoning, chat | the cheapest way to get a correct tool choice |
+| xLAM-2-3B | 2.0 GB | tool choice close to big models | conversation, explanations | try it against Qwen3-4B on the bench |
+| Hammer 2.1-3B | 2.2 GB | tool calling on a Qwen base | breadth of knowledge | verify the GGUF template before adding |
+
+### Large (5 GB, 12 GB RAM and up, experimental)
+
+| Model | Size | Strong at | Weak at | Worth knowing |
+|---|---|---|---|---|
+| Qwen3-8B | 5.0 GB | the best quality we can run on a phone, Apache-2.0 | 2–5 tok/s, heat, memory pressure | offer only on 12 GB+ with a warning |
+| Llama 3.1 8B | 4.9 GB | mature ecosystem, good general quality | licence, speed, heat | the alternative when Qwen3-8B misbehaves |
+
+### Reasoning models (listed, not recommended for the loop)
+
+| Model | Size | Strong at | Weak at | Worth knowing |
+|---|---|---|---|---|
+| Phi-4-mini-reasoning | 2.5 GB | math and logic | latency: long chains before an answer | fine for "explain", bad for "open the app" |
+| DeepSeek-R1-Distill-Qwen-1.5B | 1.1 GB | small reasoning tasks | token-heavy, slow, plans arrive late | keep out of the default list |
+
+### Rules for adding an entry
+
+- A maintained GGUF must exist and its sha256 is pinned in the catalogue.
+- The chat template and special tokens are checked on the emulator before the
+  entry ships.
+- Every entry states context size, expected speed class, RAM floor, licence and
+  whether it is tool-tuned.
+- An entry that scores worse than another in the same class on the S6 bench is
+  removed, not kept "for choice".
+
+Each model is a card, not a row: name, size, licence, **strong at**, **weak at**,
+**worth knowing**, expected speed, RAM floor, and a "recommended for this phone"
+badge computed from RAM and free storage.
 
 ## Where the weights come from
 
@@ -121,9 +187,12 @@ Each slice compiles, keeps CI green, and can be merged on its own.
 - Import through SAF (`ACTION_OPEN_DOCUMENT`) for the no-endpoint case: copy to
   `filesDir/models/` through a `.part` file, hash while copying, atomic rename,
   size and free-space checks, delete action.
-- `LocalModelCatalogue`: the two profiles with their file names, sizes, hashes,
-  licences and minimum RAM; `LocalModelRecommendation` picks by
-  `ActivityManager.memoryClass` and free storage.
+- `LocalModelCatalogue`: every entry carries id, display name, class, parameters,
+  quantisation, bytes, store URL, sha256, licence and licence URL, RAM floor,
+  context size, expected speed class, whether it is tool-tuned, and three text
+  lists the card renders: **strong at**, **weak at**, **worth knowing**.
+  `LocalModelRecommendation` picks by `ActivityManager.memoryClass` and free
+  storage.
 - The page shows: no file / downloading / verifying / ready / too large / wrong
   hash / engine missing, plus the recommended profile and where the file came
   from (gateway or imported). Every installed row has Delete with its size.
@@ -212,6 +281,12 @@ Settings -> Model
 - The provider choice is a segmented control at the top of the existing Model
   page; choosing On-device hides the endpoint and key fields and shows the model
   list instead.
+- Every model is a card, not a row: size, licence, **strong at**, **weak at**,
+  **worth knowing**, expected speed, RAM floor, and a "recommended for this
+  phone" badge. A model that cannot fit this phone is still visible, greyed out,
+  with the reason ("needs 12 GB RAM").
+- A language note is part of the card: which models handle Russian well, because
+  that changes the choice more than raw parameters.
 - The chat header shows which model produced the turn ("on-device" or the model
   name), so a person never wonders where the answer came from.
 - A missing file is an explicit notice in the composer with a shortcut to the
@@ -283,6 +358,9 @@ may stay behind.
 9. Two installed models can be switched with one tap; the switch shows a
    loading state and needs no network. An imported GGUF with an unknown
    architecture is refused with the reason.
+10. Every card states strong at, weak at and worth knowing before a download,
+    and a model that cannot fit the phone is visible but disabled with the
+    reason shown.
 
 ## Risks
 
