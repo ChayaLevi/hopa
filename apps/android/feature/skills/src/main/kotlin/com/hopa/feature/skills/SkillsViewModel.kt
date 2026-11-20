@@ -1,8 +1,8 @@
-package com.hopa.app.feature.skills
+package com.hopa.feature.skills
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.SkillsDependencies
+import com.hopa.feature.skills.SkillsDependencies
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

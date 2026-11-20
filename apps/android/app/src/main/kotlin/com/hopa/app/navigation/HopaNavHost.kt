@@ -22,7 +22,7 @@ import com.hopa.app.feature.settings.AccessibilityRoute
 import com.hopa.app.feature.settings.SelfCheckRoute
 import com.hopa.app.feature.settings.SettingsRoute
 import com.hopa.app.feature.shell.HomeShell
-import com.hopa.app.feature.skills.SkillsRoute
+import com.hopa.feature.skills.SkillsRoute
 import com.hopa.feature.usage.UsageRoute
 
 @Composable

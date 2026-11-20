@@ -1,8 +1,8 @@
-package com.hopa.app.feature.skills
+package com.hopa.feature.skills
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.hopa.app.di.SkillsDependencies
+import com.hopa.feature.skills.SkillsDependencies
 
 class SkillsViewModelFactory(
     private val container: SkillsDependencies,

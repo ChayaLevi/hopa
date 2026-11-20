@@ -1,4 +1,4 @@
-package com.hopa.app.feature.skills
+package com.hopa.feature.skills
 
 import com.hopa.stores.Skill
 
