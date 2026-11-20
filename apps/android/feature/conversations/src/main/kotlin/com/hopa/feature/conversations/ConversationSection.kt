@@ -1,4 +1,4 @@
-package com.hopa.app.feature.conversations
+package com.hopa.feature.conversations
 
 import com.hopa.contracts.chat.Conversation
 

@@ -19,6 +19,8 @@ import com.hopa.feature.history.ActivityDependencies
 import com.hopa.feature.history.HistoryDependencies
 import com.hopa.feature.history.RecipesDependencies
 import com.hopa.feature.runs.RunsDependencies
+import com.hopa.feature.conversations.ChatSyncOutcome
+import com.hopa.feature.conversations.ConversationsDependencies
 import com.hopa.feature.easy.EasyDependencies
 import com.hopa.feature.power.PowerDependencies
 import com.hopa.feature.launchpad.LaunchpadDependencies
@@ -387,7 +389,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     }
 
     /** The conversation half of the bridge, when one is configured. */
-    override suspend fun chatSync(): com.hopa.app.link.sync.ChatSync? {
+    private suspend fun chatSync(): com.hopa.app.link.sync.ChatSync? {
         val current = settings.settings.first()
         if (!current.useBridge || current.bridgeUrl.isBlank()) {
             return null
@@ -402,6 +404,12 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
                 com.hopa.bridge.session.BridgeClient(current.bridgeUrl, token),
             ),
         )
+    }
+
+    override suspend fun syncChats(): ChatSyncOutcome? {
+        val sync = chatSync() ?: return null
+        val report = sync.run()
+        return ChatSyncOutcome(adopted = report.adopted, tombstoned = report.tombstoned)
     }
 
     /** One executor per device path, sharing the gate snapshot, approval and recorder. */

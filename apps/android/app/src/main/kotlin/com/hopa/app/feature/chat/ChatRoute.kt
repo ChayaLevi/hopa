@@ -8,9 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
-import com.hopa.app.feature.conversations.ChatsSheet
-import com.hopa.app.feature.conversations.ConversationsViewModel
-import com.hopa.app.feature.conversations.ConversationsViewModelFactory
+import com.hopa.feature.conversations.ChatsSheet
+import com.hopa.feature.conversations.ConversationsViewModel
+import com.hopa.feature.conversations.ConversationsViewModelFactory
 import com.hopa.stores.AppSettings
 
 @Composable

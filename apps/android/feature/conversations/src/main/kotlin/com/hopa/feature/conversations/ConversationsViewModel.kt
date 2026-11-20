@@ -1,8 +1,8 @@
-package com.hopa.app.feature.conversations
+package com.hopa.feature.conversations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.ConversationsDependencies
+import com.hopa.feature.conversations.ConversationsDependencies
 import com.hopa.contracts.chat.Conversation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -99,19 +99,14 @@ class ConversationsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(syncing = true) }
             val message = runCatching {
-                val sync = container.chatSync()
+                val outcome = container.syncChats()
                     ?: return@runCatching "Set a bridge first (Capabilities > Act > My computer)"
-                runCatching { sync.run() }.fold(
-                    { report ->
-                        val deleted = if (report.tombstoned > 0) {
-                            ", ${report.tombstoned} deleted"
-                        } else {
-                            ""
-                        }
-                        "Synced: ${report.adopted} chats$deleted"
-                    },
-                    { error -> "Sync failed: ${error.message}" },
-                )
+                val deleted = if (outcome.tombstoned > 0) {
+                    ", ${outcome.tombstoned} deleted"
+                } else {
+                    ""
+                }
+                "Synced: ${outcome.adopted} chats$deleted"
             }.getOrElse { error -> "Sync failed: ${error.message}" }
             load()
             _state.update { it.copy(syncing = false, message = message) }

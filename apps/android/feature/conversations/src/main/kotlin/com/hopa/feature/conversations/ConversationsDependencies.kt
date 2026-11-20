@@ -1,6 +1,5 @@
-package com.hopa.app.di
+package com.hopa.feature.conversations
 
-import com.hopa.app.link.sync.ChatSync
 import com.hopa.stores.ConversationStore
 import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,5 +10,6 @@ interface ConversationsDependencies {
     val settings: SettingsRepository
     val selectedConversation: MutableStateFlow<String?>
 
-    suspend fun chatSync(): ChatSync?
+    /** Null when no bridge is configured; throws when the sync itself fails. */
+    suspend fun syncChats(): ChatSyncOutcome?
 }
