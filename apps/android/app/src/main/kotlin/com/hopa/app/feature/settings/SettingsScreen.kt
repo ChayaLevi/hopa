@@ -2,6 +2,8 @@ package com.hopa.app.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +29,7 @@ import com.hopa.inference.choice.ProviderState
  * Settings as one control surface, not a menu: a readiness ring, controls that
  * act where they are, and one-tap fixes for the thing that is missing.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
@@ -182,7 +185,10 @@ fun SettingsScreen(
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             QuickChip("Modes") { onOpenProfiles() }
             QuickChip("Tools") { onOpenCapabilities() }
             QuickChip("Health") { onOpenSelfCheck() }
