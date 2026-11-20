@@ -220,15 +220,22 @@ Each slice compiles, keeps CI green, and can be merged on its own.
 
 ### S4 - the engine
 
-- `:inference-local` gains `src/main/cpp`: llama.cpp pinned by tag, CMake,
-  `arm64-v8a` (+ `x86_64` for the emulator), JNI bridge with `load`, `complete`,
-  `cancel`, `release`.
-- One session at a time, weights `mmap`ed, KV cache sized by profile.
-- `ModelPort.complete` blocks on the native call and maps tokens into
-  `ModelReply`; cancellation maps to `llama` abort.
-- Proguard keep rules for the JNI entry points; NDK version pinned.
-- Tests: the JVM side of the reply parser and the grammar string builder; the
-  native path is covered on the emulator in S5.
+- `apps/android/core/localmodel/src/main/cpp`: CMake with llama.cpp fetched at a
+  pinned tag (`v1.0.0`, `FetchContent`, no vendored tree), NDK 28.2.13676358,
+  `arm64-v8a` for the phone and `x86_64` for the emulator.
+- JNI surface: `nativeLoad(path, contextTokens, threads)`,
+  `nativeComplete(handle, prompt, maxTokens, grammar)`, `nativeCancel`,
+  `nativeFree`. One session at a time; the KV cache is cleared before every
+  completion so a turn cannot inherit the previous one.
+- Decoding is greedy with an optional GBNF sampler; as of `v1.0.0` the grammar
+  sampler takes only the grammar and the root symbol, and the model is CPU-only
+  (`n_gpu_layers = 0`), because the NPU is not wired up.
+- `LlamaEngine` implements `LocalEngine`, loads the library on first use and
+  reports a missing native part instead of pretending; `cancel()` reaches the
+  same flag the chat's stop button needs.
+- Proguard keep rules for the JNI entry points; the NDK version is pinned.
+- Tests: the JVM side of the reply parser and the grammar builder; the native
+  path is covered on the emulator in S5.
 
 ### S5 - integration on the emulator
 
@@ -268,9 +275,12 @@ Each slice compiles, keeps CI green, and can be merged on its own.
 
 ## Footprint: RAM, disk, APK
 
-- **APK**: weights are never inside. The native engine adds roughly 3–4 MB for
-  `arm64-v8a` in a release build (llama.cpp + ggml, stripped), and about 3–4 MB
-  more when `x86_64` is built for the emulator, so a debug APK grows ~7–8 MB.
+- **APK**: weights are never inside. Measured on 2026-11-20, a **debug** build
+  carries, per ABI: `libllama.so` ~58 MB, `libggml*` ~10 MB, `libc++_shared.so`
+  ~9 MB and the JNI bridge 0.2 MB — about 77 MB for `arm64-v8a`, and the same
+  again when `x86_64` is built for the emulator. A release build strips the
+  debug information; the stripped figure is measured in S6 and is the number
+  that matters. The earlier "3–4 MB" estimate was wrong and is replaced here.
 - **Disk per model**: router 0.2–0.6 GB, fast 0.8–1.2 GB, balanced 1.8–3.0 GB,
   large ~5 GB. The Model page states the size before a download and the total
   installed.
