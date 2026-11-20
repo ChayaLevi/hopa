@@ -29,6 +29,11 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0-" + SimpleDateFormat("yyMMdd-HHmm").format(Date())
+        buildConfigField(
+            "String",
+            "BUILD_TIME",
+            "\"" + SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date()) + "\"",
+        )
     }
 
     signingConfigs {
