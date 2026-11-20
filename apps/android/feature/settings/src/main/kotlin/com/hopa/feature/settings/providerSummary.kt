@@ -6,6 +6,7 @@ import com.hopa.inference.choice.ProviderState
 fun providerSummary(state: SettingsUiState): String = when (state.providerState) {
     ProviderState.CLOUD -> "Cloud"
     ProviderState.LAN -> "Home network"
+    ProviderState.ON_DEVICE -> "On this phone"
     ProviderState.DEMO -> "Demo"
     ProviderState.NO_MODEL -> "Needs a key"
 }

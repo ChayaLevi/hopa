@@ -53,10 +53,12 @@ fun SettingsModelScreen(
                 "stub" to "Demo",
                 "openai" to "Cloud",
                 "lan" to "LAN",
+                "on-device" to "On-device",
             ),
             selected = when (provider) {
                 "stub" -> "stub"
                 "lan" -> "lan"
+                "on-device" -> "on-device"
                 else -> "openai"
             },
             onSelect = { value ->
@@ -68,6 +70,15 @@ fun SettingsModelScreen(
                 }
             },
         )
+        if (provider == "on-device") {
+            Text(
+                "Answers come from a model file on this phone. The file is chosen " +
+                    "here once the local engine is installed; nothing is sent to a " +
+                    "server.",
+                style = MaterialTheme.typography.bodySmall,
+                color = HopaColor.TextHint,
+            )
+        }
         OutlinedTextField(
             value = endpoint,
             onValueChange = { endpoint = it },

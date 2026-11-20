@@ -50,4 +50,24 @@ class ProviderChoiceRulesTest {
             .resolve("stub", "https://api.deepseek.com/v1", "sk-test")
         assertEquals(ProviderState.CLOUD, state)
     }
+
+    @Test
+    fun the_on_device_provider_wins_over_an_endpoint_and_a_key() {
+        assertEquals(
+            ProviderChoice.ON_DEVICE,
+            rules.choose("on-device", "https://api.deepseek.com/v1", "sk-test"),
+        )
+        assertEquals(
+            ProviderState.ON_DEVICE,
+            ProviderStateResolver().resolve("on-device", "", ""),
+        )
+    }
+
+    @Test
+    fun on_device_ignores_case_and_surrounding_space() {
+        assertEquals(
+            ProviderChoice.ON_DEVICE,
+            rules.choose("  On-Device ", "", ""),
+        )
+    }
 }

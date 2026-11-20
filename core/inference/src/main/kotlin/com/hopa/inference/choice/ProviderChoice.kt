@@ -5,4 +5,5 @@ enum class ProviderChoice {
     DEMO,
     CLOUD,
     LAN,
+    ON_DEVICE,
 }
