@@ -10,8 +10,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
-import com.hopa.app.feature.settings.SettingsViewModel
-import com.hopa.app.feature.settings.SettingsViewModelFactory
+import com.hopa.feature.settings.SettingsViewModel
+import com.hopa.feature.settings.SettingsViewModelFactory
 
 @Composable
 fun RunSetupRoute(
@@ -20,7 +20,7 @@ fun RunSetupRoute(
     onOpenScreenAccess: () -> Unit,
     onOpenComputer: () -> Unit,
 ) {
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container))
+    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(container, container, container))
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pairing by container.pairingStatus.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current

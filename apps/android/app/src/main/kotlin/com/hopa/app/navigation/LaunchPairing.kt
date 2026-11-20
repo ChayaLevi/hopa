@@ -1,6 +1,6 @@
 package com.hopa.app.navigation
 
-import com.hopa.app.feature.settings.PairInput
+import com.hopa.feature.settings.PairInput
 import com.hopa.backend.pairing.PairingLink
 import kotlinx.coroutines.flow.MutableStateFlow
 

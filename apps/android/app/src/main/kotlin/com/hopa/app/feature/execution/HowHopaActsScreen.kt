@@ -41,8 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.feature.settings.BackgroundSetupDialog
-import com.hopa.app.feature.settings.SettingsUiState
+import com.hopa.feature.settings.BackgroundSetupDialog
+import com.hopa.feature.settings.SettingsUiState
 import com.hopa.ui.component.HopaPageHeader
 import com.hopa.ui.theme.HopaColor
 

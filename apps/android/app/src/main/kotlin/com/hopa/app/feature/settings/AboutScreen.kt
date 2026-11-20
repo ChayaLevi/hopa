@@ -1,4 +1,4 @@
-package com.hopa.app.feature.settings
+﻿package com.hopa.app.feature.settings
 
 import android.content.Intent
 import android.net.Uri
