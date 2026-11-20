@@ -4,7 +4,7 @@ import android.content.Context
 import com.hopa.app.ui.UiApprovalGateway
 import com.hopa.app.runtime.ParallelRunner
 import com.hopa.app.runtime.RunCoordinator
-import com.hopa.app.runtime.RunGate
+import com.hopa.runtime.RunGate
 import com.hopa.app.share.AttachmentIntake
 import com.hopa.capabilities.voice.VoiceRecorder
 import com.hopa.contracts.chat.Attachment

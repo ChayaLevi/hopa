@@ -23,6 +23,7 @@ core/
 |-- catalog/       app catalogue, approval data, router
 |-- observation/   the screen model and the source that feeds it
 |-- runlog/        a run as records and their chain
+|-- runtime/       the run gate: who owns the phone right now
 |-- inference/     model adapters
 |-- bridge/        the PC companion link
 |-- backend/       the backend link: pairing, tasks, catalog fetch

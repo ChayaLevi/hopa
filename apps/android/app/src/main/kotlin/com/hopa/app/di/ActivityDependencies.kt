@@ -1,7 +1,7 @@
 package com.hopa.app.di
 
 import android.content.Context
-import com.hopa.app.runtime.RunGate
+import com.hopa.runtime.RunGate
 import com.hopa.runlog.store.RunRecorder
 import com.hopa.stores.ConversationStore
 
