@@ -1,4 +1,4 @@
-package com.hopa.app.feature.settings
+﻿package com.hopa.ui.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

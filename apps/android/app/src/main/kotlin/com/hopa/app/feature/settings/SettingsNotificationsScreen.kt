@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import com.hopa.ui.theme.HopaColor
+import com.hopa.ui.settings.SettingsPage
 
 /**
  * Alerts: the test button and the explanation. The switch itself lives on the

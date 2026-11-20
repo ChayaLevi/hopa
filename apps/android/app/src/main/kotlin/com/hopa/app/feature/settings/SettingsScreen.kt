@@ -20,6 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hopa.ui.settings.SettingsPage
+import com.hopa.ui.settings.SettingsPanel
+import com.hopa.ui.settings.SettingsSegment
 import com.hopa.ui.theme.HopaColor
 import com.hopa.inference.choice.ProviderState
 

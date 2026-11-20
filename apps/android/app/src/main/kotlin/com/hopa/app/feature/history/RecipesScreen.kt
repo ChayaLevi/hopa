@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.agent.recipe.Recipe
-import com.hopa.app.feature.settings.SettingsPage
-import com.hopa.app.feature.settings.SettingsPanel
+import com.hopa.ui.settings.SettingsPage
+import com.hopa.ui.settings.SettingsPanel
 import com.hopa.ui.theme.HopaColor
 import java.text.SimpleDateFormat
 import java.util.Date

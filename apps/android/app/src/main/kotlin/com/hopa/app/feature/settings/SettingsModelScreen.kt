@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hopa.ui.settings.SettingsPage
+import com.hopa.ui.settings.SettingsSegment
 import com.hopa.ui.theme.HopaColor
 
 /** Where answers come from: provider, endpoint, model, key. */
