@@ -1,4 +1,4 @@
-package com.hopa.app.feature.history
+package com.hopa.feature.history
 
 import com.hopa.contracts.wire.RunRecord
 

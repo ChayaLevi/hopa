@@ -12,8 +12,8 @@ import com.hopa.app.feature.execution.HowHopaActsRoute
 import com.hopa.app.feature.execution.RunPrefsRoute
 import com.hopa.app.feature.execution.RunSetupRoute
 import com.hopa.app.feature.execution.RunningAppsRoute
-import com.hopa.app.feature.history.HistoryRoute
-import com.hopa.app.feature.history.RecipesRoute
+import com.hopa.feature.history.HistoryRoute
+import com.hopa.feature.history.RecipesRoute
 import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.feature.memory.MemoryRoute

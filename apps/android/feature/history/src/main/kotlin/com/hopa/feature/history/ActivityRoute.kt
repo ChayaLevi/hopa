@@ -1,4 +1,4 @@
-package com.hopa.app.feature.history
+package com.hopa.feature.history
 
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -10,11 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
-import com.hopa.app.di.AppContainer
 
 @Composable
 fun ActivityRoute(
-    container: AppContainer,
+    container: ActivityDependencies,
     activeTab: String,
     onSelectTab: (String) -> Unit,
     onOpenRuns: () -> Unit,

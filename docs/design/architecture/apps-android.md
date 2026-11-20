@@ -16,6 +16,7 @@ apps/android/
 ├─ feature/memory/ the facts page
 ├─ feature/skills/ the procedures page
 ├─ feature/profiles/ the everyday / easy / power choice
+├─ feature/history/ activity, run history and the saved repeats
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/
