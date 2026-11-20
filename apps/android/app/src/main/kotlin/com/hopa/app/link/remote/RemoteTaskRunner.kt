@@ -18,8 +18,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import com.hopa.app.runtime.RunGate
-import com.hopa.app.runtime.RunSource
+import com.hopa.runtime.RunGate
+import com.hopa.runtime.RunSource
 
 /**
  * Runs a task the gateway delivered on the surface the person configured, then
@@ -41,7 +41,7 @@ class RemoteTaskRunner(
     private val settings: suspend () -> AppSettings,
     private val surfaces: suspend (AppSettings) -> ScreenSourceDevice,
     private val screen: (AppSettings) -> RemoteScreenState,
-    private val runGate: com.hopa.app.runtime.RunGate,
+    private val runGate: com.hopa.runtime.RunGate,
     private val foreground: () -> Boolean,
     private val startService: () -> Unit,
     private val stopService: () -> Unit,
@@ -73,7 +73,7 @@ class RemoteTaskRunner(
         }
         // A chat turn or an earlier delivery holds the phone: answer now instead
         // of starting a second loop over the same screen.
-        if (!runGate.claim(goal, com.hopa.app.runtime.RunSource.DELIVERY)) {
+        if (!runGate.claim(goal, com.hopa.runtime.RunSource.DELIVERY)) {
             sendRefusal(live, task, RemoteRunPlanner.busyRefusal())
             return
         }

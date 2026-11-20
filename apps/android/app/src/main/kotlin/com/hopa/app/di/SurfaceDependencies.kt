@@ -1,7 +1,7 @@
 package com.hopa.app.di
 
 import android.content.Context
-import com.hopa.app.runtime.RunGate
+import com.hopa.runtime.RunGate
 import com.hopa.capabilities.display.client.HelperSupervisor
 import com.hopa.capabilities.display.client.ShellClient
 import com.hopa.contracts.ports.DevicePort

@@ -1,4 +1,4 @@
-package com.hopa.app.runtime
+﻿package com.hopa.runtime
 
 /** What the phone is running, if anything. */
 data class RunState(

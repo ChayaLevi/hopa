@@ -71,7 +71,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     val knowledgeSource: com.hopa.catalog.store.CatalogSource = knowledgeStore
     val knowledge: com.hopa.catalog.store.CatalogSnapshot get() = knowledgeSource.current()
     override val selectedConversation = MutableStateFlow<String?>(null)
-    override val runGate = com.hopa.app.runtime.RunGate()
+    override val runGate = com.hopa.runtime.RunGate()
     /** The last wireless-pairing answer, shown on the Act page. */
     val pairingStatus = MutableStateFlow<String?>(null)
     /**

@@ -1,7 +1,7 @@
 package com.hopa.app.link.remote
 
-import com.hopa.app.runtime.RunGate
-import com.hopa.app.runtime.RunSource
+import com.hopa.runtime.RunGate
+import com.hopa.runtime.RunSource
 import com.hopa.backend.wire.BackendEnvelope
 import com.hopa.backend.link.BackendLink
 import com.hopa.backend.link.BackendState

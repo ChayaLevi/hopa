@@ -100,6 +100,7 @@ dependencies {
     implementation(project(":agent"))
     implementation(project(":observation"))
     implementation(project(":runlog"))
+    implementation(project(":runtime"))
     implementation(project(":catalog"))
     implementation(project(":capabilities"))
     implementation(project(":core:ui"))

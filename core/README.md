@@ -1,6 +1,6 @@
 # core - the client engine
 
-Eight Kotlin modules the Android app and the Windows sidecar both build. Plain
+Nine Kotlin modules the Android app and the Windows sidecar both build. Plain
 JVM: no UI, no Android SDK, no `main`.
 
 Modules are listed **bottom first, by dependency**. A module only uses the ones
@@ -22,8 +22,9 @@ above it; inside one layer the order is alphabetical.
 | `inference` | model adapters: the OpenAI-compatible client, the demo client, and later a local runtime | `contracts` |
 | `observation` | the screen as a tree with anchors: `ObservationProducer`, `NodeAnchor`, `ScreenPath`, `ScreenSource` | `contracts` |
 | `runlog` | the run journal: build a record per step, chain it, hand it to a recorder | `contracts` |
+| `runtime` | `RunGate`, `RunState`, `RunSource`: who owns the phone for the current run | nothing |
 
-These six do not import each other. A model API change never touches the bridge;
+These seven do not import each other. A model API change never touches the bridge;
 a bridge change never touches a record.
 
 ## Layer 2 - the engine
@@ -65,10 +66,10 @@ never calls a model does not build a prompt and does not need `inference`.
 
 ```
 ./gradlew :contracts:check :catalog:check :observation:check \
-          :runlog:check :inference:check :bridge:check :backend:check \
+          :runlog:check :runtime:check :inference:check :bridge:check :backend:check \
           :agent:check :agent:ktlintCheck \
           :catalog:test :agent:test :observation:test \
-          :runlog:test :inference:test :bridge:test :backend:test
+          :runlog:test :runtime:test :inference:test :bridge:test :backend:test
 ```
 
 `agent` also runs `com.hopa.agent.conformance`, which validates decisions and
