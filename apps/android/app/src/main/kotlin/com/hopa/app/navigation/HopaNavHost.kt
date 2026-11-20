@@ -49,31 +49,26 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
         }
         composable<HopaDestination.Usage> {
             UsageRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.History> {
             HistoryRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.Recipes> {
             RecipesRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.Memory> {
             MemoryRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.Skills> {
             SkillsRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
@@ -85,7 +80,6 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
         }
         composable<HopaDestination.Settings> {
             SettingsRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
                 onOpenProfiles = { navController.navigate(HopaDestination.Profiles) },
                 onOpenSelfCheck = { navController.navigate(HopaDestination.SelfCheck) },
@@ -94,7 +88,6 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
         }
         composable<HopaDestination.RunningApps> {
             RunningAppsRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
                 onOpenHowHopaActs = { navController.navigate(HopaDestination.ActMode) },
                 onOpenAllApps = { navController.navigate(HopaDestination.Launchpad("apps")) },
@@ -122,19 +115,16 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
         }
         composable<HopaDestination.RunPrefs> {
             RunPrefsRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.Computer> {
             ComputerRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.SelfCheck> {
             SelfCheckRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
@@ -143,25 +133,21 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
         }
         composable<HopaDestination.Accessibility> {
             AccessibilityRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.Profiles> {
             ProfilesRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.Runs> {
             RunsRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
             )
         }
         composable<HopaDestination.Launchpad> { entry ->
             LaunchpadRoute(
-                container = container,
                 onBack = { navController.popBackStack() },
                 section = entry.toRoute<HopaDestination.Launchpad>().section,
                 onOpenApp = { name ->
@@ -174,7 +160,6 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
         }
         composable<HopaDestination.AppCard> { entry ->
             AppCardRoute(
-                container = container,
                 name = entry.toRoute<HopaDestination.AppCard>().name,
                 onBack = { navController.popBackStack() },
                 onOpenScreenAccess = { navController.navigate(HopaDestination.Accessibility) },

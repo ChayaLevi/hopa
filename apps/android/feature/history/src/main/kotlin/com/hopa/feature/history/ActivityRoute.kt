@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun ActivityRoute(
-    container: ActivityDependencies,
     activeTab: String,
     onSelectTab: (String) -> Unit,
     onOpenRuns: () -> Unit,

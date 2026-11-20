@@ -84,7 +84,6 @@ fun HomeShell(
 
     when (tab) {
         "activity" -> ActivityRoute(
-            container = container,
             activeTab = tab,
             onSelectTab = selectTab,
             onOpenRuns = onOpenRuns,
@@ -94,7 +93,6 @@ fun HomeShell(
         )
 
         "capabilities" -> CapabilitiesRoute(
-            container = container,
             activeTab = tab,
             onSelectTab = selectTab,
             onOpenSettings = onOpenSettings,
@@ -139,7 +137,6 @@ private fun EasyShell(
 
     if (tab == "history") {
         EasyHistoryRoute(
-            container = container,
             active = tab,
             onSelectTab = select,
             onOpen = { id ->
@@ -198,7 +195,6 @@ private fun PowerShell(
 
     when {
         tab == "activity" -> ActivityRoute(
-            container = container,
             activeTab = tab,
             onSelectTab = select,
             onOpenRuns = onOpenRuns,
@@ -208,7 +204,6 @@ private fun PowerShell(
         )
 
         tab == "capabilities" -> CapabilitiesRoute(
-            container = container,
             activeTab = tab,
             onSelectTab = select,
             onOpenSettings = onOpenSettings,
@@ -229,7 +224,6 @@ private fun PowerShell(
         )
 
         else -> PowerHomeRoute(
-            container = container,
             active = "chat",
             onSelectTab = select,
             onRun = { goal ->

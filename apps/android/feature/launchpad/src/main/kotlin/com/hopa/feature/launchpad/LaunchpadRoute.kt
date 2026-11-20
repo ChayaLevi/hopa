@@ -3,14 +3,8 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.hopa.feature.launchpad.LaunchpadDependencies
-import com.hopa.catalog.routing.CatalogRoutes
-import com.hopa.catalog.routing.RouteTarget
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /**
  * The catalog, resolved for this phone. Nothing here lists apps the catalog does
@@ -19,33 +13,22 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun LaunchpadRoute(
-    container: LaunchpadDependencies,
     onBack: () -> Unit,
     section: String = "apps",
     onOpenApp: (String) -> Unit,
     onOpenSite: (String) -> Unit,
 ) {
-    var targets by remember { mutableStateOf(emptyList<RouteTarget>()) }
-    var status by remember { mutableStateOf("") }
+    val viewModel: LaunchpadViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        val installed = withContext(Dispatchers.IO) {
-            runCatching { container.packages.installed() }.getOrDefault(emptyList())
-        }
-        targets = runCatching { CatalogRoutes.targets(installed, "android", container.knowledge) }
-            .getOrElse {
-                status = "Could not read the catalog: ${it.message ?: "unknown error"}"
-                emptyList()
-            }
-            // Only what this phone can attempt: an app whose catalog entry has no
-            // Android target is a row that can never open, so it is not shown.
-            .filter { target -> target.kind == "site" || target.status != "none" }
+        viewModel.refresh()
     }
 
     LaunchpadScreen(
-        apps = targets.filter { it.kind == "app" },
-        sites = targets.filter { it.kind == "site" },
-        status = status,
+        apps = state.targets.filter { it.kind == "app" },
+        sites = state.targets.filter { it.kind == "site" },
+        status = state.status,
         initialSection = if (section == "sites") 1 else 0,
         onBack = onBack,
         onOpenApp = { target -> onOpenApp(target.name) },

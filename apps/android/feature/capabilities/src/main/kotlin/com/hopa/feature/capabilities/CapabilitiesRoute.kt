@@ -4,18 +4,13 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hopa.feature.capabilities.CapabilitiesDependencies
 import com.hopa.capabilities.accessibility.state.AccessibilityState
-import kotlinx.coroutines.flow.first
 
 @Composable
 fun CapabilitiesRoute(
-    container: CapabilitiesDependencies,
     activeTab: String,
     onSelectTab: (String) -> Unit,
     onOpenRunningApps: () -> Unit,
@@ -26,33 +21,27 @@ fun CapabilitiesRoute(
     onOpenSkills: () -> Unit,
     onOpenBrowser: () -> Unit,
 ) {
-    var records by remember { mutableStateOf(0) }
-    var facts by remember { mutableStateOf(0) }
-    var skills by remember { mutableStateOf(0) }
-    var allowed by remember { mutableStateOf(true) }
+    val viewModel: CapabilitiesViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val access by AccessibilityState.state.collectAsStateWithLifecycle()
-    val accessibilityEnabled = allowed && access.ready
+    val accessibilityEnabled = state.allowed && access.ready
 
     LaunchedEffect(Unit) {
-        records = container.recorder.all().size
-        facts = container.memory.all().size
-        skills = container.skills.all().size
-        allowed = container.settings.settings.first().accessibilityAllowed
-        AccessibilityState.refresh(container.context)
+        viewModel.refresh()
     }
     // The tab is the place a person checks after changing something in Android
     // settings, which sends this app no event; ask again when they come back.
     LaunchedEffect(activeTab) {
         if (activeTab == "capabilities") {
-            AccessibilityState.refresh(container.context)
+            viewModel.refreshAccessibility()
         }
     }
 
     CapabilitiesScreen(
-        records = records,
-        facts = facts,
-        skills = skills,
+        records = state.records,
+        facts = state.facts,
+        skills = state.skills,
         accessibilityEnabled = accessibilityEnabled,
         activeTab = activeTab,
         onSelectTab = onSelectTab,

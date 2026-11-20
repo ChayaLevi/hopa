@@ -3,38 +3,25 @@ package com.hopa.feature.history
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.hopa.agent.recipe.Recipe
-import com.hopa.catalog.routing.CatalogRoutes
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /** Paths that worked before, and the goal that brings each one back. */
 @Composable
 fun RecipesRoute(
-    container: RecipesDependencies,
     onBack: () -> Unit,
 ) {
-    var recipes by remember { mutableStateOf(emptyList<Recipe>()) }
-    var names by remember { mutableStateOf(emptyMap<String, String>()) }
+    val viewModel: RecipesViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        recipes = container.recipes.all()
-        names = runCatching {
-            val installed = container.packages.installed()
-            CatalogRoutes.targets(installed, "android", container.knowledge)
-                .filter { it.bundle.isNotBlank() }
-                .associate { it.bundle.lowercase() to it.display }
-        }.getOrDefault(emptyMap())
+        viewModel.refresh()
     }
 
     RecipesScreen(
-        recipes = recipes,
-        names = names,
+        recipes = state.recipes,
+        names = state.names,
         onBack = onBack,
-        onDelete = { goal ->
-            container.recipes.delete(goal)
-            recipes = container.recipes.all()
-        },
+        onDelete = viewModel::delete,
     )
 }

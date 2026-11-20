@@ -9,7 +9,6 @@ import com.hopa.feature.settings.SettingsViewModel
 
 @Composable
 fun RunPrefsRoute(
-    container: ExecutionDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()

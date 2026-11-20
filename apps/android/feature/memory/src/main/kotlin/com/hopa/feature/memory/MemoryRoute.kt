@@ -9,7 +9,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun MemoryRoute(
-    container: MemoryDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: MemoryViewModel = hiltViewModel()

@@ -10,7 +10,6 @@ import com.hopa.feature.settings.SettingsViewModel
 /** The computer as a surface: address, pairing and the two checks. */
 @Composable
 fun ComputerRoute(
-    container: ExecutionDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
