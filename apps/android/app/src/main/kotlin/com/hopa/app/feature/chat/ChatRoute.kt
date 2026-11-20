@@ -8,6 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hopa.app.di.AppContainer
+import com.hopa.feature.chat.ChatScreen
+import com.hopa.feature.chat.ChatViewModel
+import com.hopa.feature.chat.ChatViewModelFactory
 import com.hopa.feature.conversations.ChatsSheet
 import com.hopa.feature.conversations.ConversationsViewModel
 import com.hopa.feature.conversations.ConversationsViewModelFactory
@@ -30,7 +33,7 @@ fun ChatRoute(
     val settings by container.settings.settings.collectAsStateWithLifecycle(
         initialValue = AppSettings(),
     )
-    val tasks by container.runner.tasks.collectAsStateWithLifecycle()
+    val tasks by container.tasks.collectAsStateWithLifecycle()
     var chatsOpen by remember { mutableStateOf(false) }
 
     androidx.compose.runtime.LaunchedEffect(Unit) {
@@ -75,7 +78,7 @@ fun ChatRoute(
         onSaveSkill = viewModel::saveSkill,
         tasks = tasks,
         onOpenTask = { conversationsViewModel.select(it.conversationId) },
-        onDismissTask = { container.runner.dismiss(it) },
+        onDismissTask = { container.dismissTask(it) },
     )
 
     if (chatsOpen) {

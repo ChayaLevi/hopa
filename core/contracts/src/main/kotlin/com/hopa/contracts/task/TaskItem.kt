@@ -1,4 +1,4 @@
-package com.hopa.app.runtime
+﻿package com.hopa.contracts.task
 
 /** One background task the person started while another was already running. */
 data class TaskItem(

@@ -1,4 +1,4 @@
-package com.hopa.app.feature.chat
+package com.hopa.feature.chat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-﻿package com.hopa.app.feature.chat
+package com.hopa.feature.chat
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -59,12 +59,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hopa.app.feature.chat.component.AccessibilityBanner
-import com.hopa.app.feature.chat.component.ChatEmptyState
-import com.hopa.app.feature.chat.component.Composer
-import com.hopa.app.feature.chat.component.MessageBubble
-import com.hopa.app.feature.chat.component.PendingAttachmentRow
-import com.hopa.app.feature.chat.component.ThinkingIndicator
+import com.hopa.feature.chat.component.AccessibilityBanner
+import com.hopa.feature.chat.component.ChatEmptyState
+import com.hopa.feature.chat.component.Composer
+import com.hopa.feature.chat.component.MessageBubble
+import com.hopa.feature.chat.component.PendingAttachmentRow
+import com.hopa.feature.chat.component.ThinkingIndicator
 import com.hopa.ui.component.HopaBottomBar
 import com.hopa.ui.component.HopaBottomBarEasy
 import com.hopa.ui.component.HopaMascot
@@ -72,7 +72,7 @@ import com.hopa.ui.component.HopaTopBar
 import com.hopa.ui.theme.HopaColor
 import com.hopa.capabilities.accessibility.state.AccessibilityState
 import com.hopa.contracts.chat.ChatMessage
-import com.hopa.app.runtime.TaskItem
+import com.hopa.contracts.task.TaskItem
 
 /** Screen access arrives from the service; the banner above the composer. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,8 +102,8 @@ fun ChatScreen(
     onApprovePlan: () -> Unit = {},
     onCancelPlan: () -> Unit = {},
     onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
-    tasks: List<com.hopa.app.runtime.TaskItem> = emptyList(),
-    onOpenTask: (com.hopa.app.runtime.TaskItem) -> Unit = {},
+    tasks: List<com.hopa.contracts.task.TaskItem> = emptyList(),
+    onOpenTask: (com.hopa.contracts.task.TaskItem) -> Unit = {},
     onDismissTask: (String) -> Unit = {},
 ) {
     val messages = state.current?.messages.orEmpty()

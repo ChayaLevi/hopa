@@ -34,6 +34,7 @@ import com.hopa.data.store.DbRunRecorder
 import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.feature.capabilities.CapabilitiesDependencies
 import com.hopa.feature.conversations.ChatSyncOutcome
+import com.hopa.feature.chat.ChatDependencies
 import com.hopa.feature.conversations.ConversationsDependencies
 import com.hopa.feature.easy.EasyDependencies
 import com.hopa.feature.history.ActivityDependencies
@@ -73,8 +74,8 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
         secrets = KeystoreSecretStore(context),
     )
     init {
-        com.hopa.app.privacy.TurnLog.attach(
-            com.hopa.app.privacy.TurnLogFile(context),
+        com.hopa.privacy.TurnLog.attach(
+            com.hopa.privacy.TurnLogFile(context),
         )
     }
 
@@ -102,7 +103,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
      * A queue, not a slot: two links in a row must both run, and the second
      * must reach the parallel runner while the first holds the main turn.
      */
-    val pendingGoals = kotlinx.coroutines.channels.Channel<String>(
+    override val pendingGoals = kotlinx.coroutines.channels.Channel<String>(
         kotlinx.coroutines.channels.Channel.UNLIMITED,
     )
     /** A file shared into the app, waiting in the composer. */
@@ -114,7 +115,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     )
     /** The last launch-pairing outcome, shown on the Backend card. */
     override val backendNotice = MutableStateFlow<String?>(null)
-    override val intake = com.hopa.app.share.AttachmentIntake(context)
+    val intake = com.hopa.app.share.AttachmentIntake(context)
     override val packages = AndroidPackageCatalog(context)
     override val recorder = DbRunRecorder(database.runRecordDao())
     override val runHistory = com.hopa.data.store.DbRunHistory(database.runHistoryDao())
@@ -137,13 +138,13 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
         gatePolicy = ApprovalPolicy(autonomous = autonomous, trustedApps = trustedApps)
     }
 
-    override val approval = UiApprovalGateway(pendingApprovals)
+    val approval = UiApprovalGateway(pendingApprovals)
     val factory = RunRecordFactory(clock)
     val device = AccessibilityDevice(context)
     override val voice = com.hopa.capabilities.voice.VoiceRecorder(context)
     val speaker = com.hopa.capabilities.voice.Speaker(context)
     /** Goals that run at the same time, each on its own hidden display. */
-    override val runner by lazy { com.hopa.app.runtime.ParallelRunner(this) }
+    val runner by lazy { com.hopa.app.runtime.ParallelRunner(this) }
 
     /** Why the last hidden-display start failed; empty when it worked. */
     override var lastBackgroundError: String = ""
@@ -204,8 +205,8 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
             screen = { current -> Surfaces.state(this, current) },
             runGate = runGate,
             foreground = { AppVisibility.foreground },
-            startService = { startRunService() },
-            stopService = { stopRunService() },
+            startService = { startRunServiceInternal() },
+            stopService = { stopRunServiceInternal() },
             postApproval = { Notifier.postApproval(context) },
             releaseSurface = { Surfaces.release() },
             run = { request: RemoteRunRequest -> RemoteRuns.execute(this, request) },
@@ -214,12 +215,12 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
         )
     }
 
-    private fun startRunService() {
+    private fun startRunServiceInternal() {
         val intent = android.content.Intent(context, RunService::class.java)
         ContextCompat.startForegroundService(context, intent)
     }
 
-    private fun stopRunService() {
+    private fun stopRunServiceInternal() {
         val intent = android.content.Intent(context, RunService::class.java)
         runCatching { context.stopService(intent) }
     }
@@ -471,6 +472,65 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
         ScreenCaptureService.stop(context)
     }
 
+    override val pendingApproval: StateFlow<com.hopa.contracts.approval.ApprovalRequest?>
+        get() = approval.pending
+
+    override val tasks: StateFlow<List<com.hopa.contracts.task.TaskItem>>
+        get() = runner.tasks
+
+    override fun resolveApproval(allow: Boolean) {
+        approval.resolve(allow)
+    }
+
+    override fun canStartTask(): Boolean = runner.canStart()
+
+    override fun startTask(goal: String) {
+        runner.start(goal)
+    }
+
+    override fun dismissTask(id: String) {
+        runner.dismiss(id)
+    }
+
+    override suspend fun deleteAttachment(attachment: com.hopa.contracts.chat.Attachment) {
+        intake.delete(attachment)
+    }
+
+    override fun planRequest(
+        goal: String,
+        runId: String,
+        traceId: String,
+    ): com.hopa.agent.turn.TurnRequest = runs.planRequest(goal, runId, traceId)
+
+    override suspend fun request(
+        goal: String,
+        device: com.hopa.observation.source.ScreenSourceDevice,
+        settings: com.hopa.stores.AppSettings,
+        runId: String,
+        traceId: String,
+        history: List<com.hopa.contracts.model.ModelMessage>,
+    ): com.hopa.agent.turn.TurnRequest =
+        runs.request(goal, device, settings, runId, traceId, history)
+
+    override suspend fun runTurn(
+        request: com.hopa.agent.turn.TurnRequest,
+        isCancelled: () -> Boolean,
+    ): com.hopa.agent.turn.TurnOutcome = runs.run(request, isCancelled)
+
+    override fun releaseSurfaces() {
+        Surfaces.release()
+    }
+
+    override fun isForeground(): Boolean = AppVisibility.foreground
+
+    override fun postAnswer(text: String) {
+        Notifier.postAnswer(context, text)
+    }
+
+    override fun startRunService() = startRunServiceInternal()
+
+    override fun stopRunService() = stopRunServiceInternal()
+
     /** One executor per device path, sharing the gate snapshot, approval and recorder. */
     fun executorFor(device: DevicePort): ActionExecutor = ActionExecutor(
         device = device,
@@ -488,7 +548,7 @@ class AppContainer(context: Context) : ChatDependencies, ConversationsDependenci
     override val recipes by lazy { com.hopa.agent.recipe.RecipeStore(java.io.File(context.filesDir, "recipes.txt")) }
 
     /** The one path from a goal to an answer: chat, parallel runs and deliveries. */
-    override val runs by lazy { com.hopa.app.runtime.RunCoordinator(this) }
+    val runs by lazy { com.hopa.app.runtime.RunCoordinator(this) }
 
     /** Asks the backend for a newer knowledge bundle; a failure keeps the copy. */
     val knowledgeUpdater by lazy {

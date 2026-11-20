@@ -1,4 +1,4 @@
-package com.hopa.app.feature.chat
+package com.hopa.feature.chat
 
 import com.hopa.contracts.approval.ApprovalRequest
 import com.hopa.contracts.chat.Attachment

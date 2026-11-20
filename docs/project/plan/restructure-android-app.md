@@ -383,3 +383,18 @@ feature/
 21. The plush drawables and `HopaMascot` moved into the library — done
 22. Extract feature modules one at a time — `:feature:usage` is the first
 23. Continue with `:feature:settings`, then the rest
+
+### After the module split
+
+24. Update Compose BOM and Navigation to the current 2026 releases; decide
+    whether Navigation 3 replaces the typed routes.
+25. UDF pass: one state holder per screen; no `remember`-held screen state in
+    routes (Profiles, Launchpad, ...).
+26. Enforce feature boundaries: a feature never imports another feature except
+    `shell`; add the rule to `check-android-structure.py` or Konsist.
+27. Screenshot tests (Roborazzi/Paparazzi) for Settings, Activity and Chat, and
+    run them in CI.
+28. Finish the DI decision in ADR-0024: keep narrow containers or move to Hilt
+    with the interfaces as modules and bindings.
+29. Baseline profile for startup; enable configuration cache and build cache in
+    CI.

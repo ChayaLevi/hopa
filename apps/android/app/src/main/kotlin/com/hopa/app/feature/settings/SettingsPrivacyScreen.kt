@@ -7,7 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.privacy.TurnLogEntry
+import com.hopa.privacy.TurnLogEntry
 import com.hopa.ui.theme.HopaColor
 import java.text.SimpleDateFormat
 import java.util.Date

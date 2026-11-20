@@ -1,4 +1,4 @@
-package com.hopa.app.feature.chat
+package com.hopa.feature.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hopa.app.runtime.TaskItem
+import com.hopa.contracts.task.TaskItem
 import com.hopa.ui.theme.HopaColor
 
 /** One background task: its goal, a state light, and a way in. */

@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
             val previous = container.pendingAttachment.value
             val result = container.intake.accept(uri, hint = intent.type)
             if (previous != null && previous.path != result.attachment?.path) {
-                container.intake.delete(previous)
+                container.deleteAttachment(previous)
             }
             container.pendingNotice.value = result.notice
             container.pendingAttachment.value = result.attachment

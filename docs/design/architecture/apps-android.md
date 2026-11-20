@@ -12,6 +12,7 @@ apps/android/
 ├─ capabilities/   DevicePort adapters: accessibility, hidden display,
 │                  wireless shell, system intents, package inventory
 ├─ core/ui/        shared Compose chrome: theme, bars, sheets, page scaffolds, the mascot
+├─ core/privacy/   the turn log: what left the phone, kept on the phone
 ├─ feature/usage/  the usage screen, as the first feature module
 ├─ feature/memory/ the facts page
 ├─ feature/skills/ the procedures page
@@ -26,6 +27,7 @@ apps/android/
 ├─ feature/conversations/ the chats sheet
 ├─ feature/settings/ the settings hub, model, alerts and diagnostics
 ├─ feature/execution/ Act, run setup, preferences and the computer link
+├─ feature/chat/    the conversation, composer and plan sheet
 └─ data/           Room and DataStore: sessions, settings, secrets, history
 
 core/

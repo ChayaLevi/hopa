@@ -1,11 +1,8 @@
-package com.hopa.app.feature.chat
+package com.hopa.feature.chat
 
-import android.content.Intent
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hopa.app.di.ChatDependencies
-import com.hopa.app.di.Surfaces
+import com.hopa.feature.chat.ChatDependencies
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.observation.produce.ScreenPath
 import com.hopa.contracts.chat.Attachment
@@ -21,12 +18,9 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.hopa.app.privacy.TurnLog
-import com.hopa.app.privacy.TurnLogEntry
+import com.hopa.privacy.TurnLog
+import com.hopa.privacy.TurnLogEntry
 import com.hopa.runtime.RunSource
-import com.hopa.app.service.AppVisibility
-import com.hopa.app.service.Notifier
-import com.hopa.app.service.RunService
 
 class ChatViewModel(
     private val container: ChatDependencies,
@@ -37,7 +31,7 @@ class ChatViewModel(
     init {
         viewModelScope.launch { load() }
         viewModelScope.launch {
-            container.approval.pending.collect { request ->
+            container.pendingApproval.collect { request ->
                 _state.update { it.copy(pendingApproval = request) }
             }
         }
@@ -208,8 +202,8 @@ class ChatViewModel(
         if (_state.value.busy) {
             // The main turn is still going. A second goal goes to its own hidden
             // display instead of being dropped on the floor.
-            if (text.isNotBlank() && container.runner.canStart()) {
-                container.runner.start(text)
+            if (text.isNotBlank() && container.canStartTask()) {
+                container.startTask(text)
                 _state.update { it.copy(input = "") }
             }
             return
@@ -224,7 +218,7 @@ class ChatViewModel(
         container.pendingNotice.value = null
         _state.update { it.copy(attachment = null, attachmentNotice = null) }
         if (attachment != null) {
-            viewModelScope.launch { container.intake.delete(attachment) }
+            viewModelScope.launch { container.deleteAttachment(attachment) }
         }
     }
 
@@ -283,7 +277,7 @@ class ChatViewModel(
     }
 
     fun resolveApproval(allow: Boolean) {
-        container.approval.resolve(allow)
+        container.resolveApproval(allow)
     }
 
     // ── Core send loop ────────────────────────────────────────────────────────
@@ -318,7 +312,7 @@ class ChatViewModel(
             }
             return
         }
-        startRunService()
+        container.startRunService()
         viewModelScope.launch {
             val now = System.currentTimeMillis()
             if (appendUser) appendUserMessage(conversation.id, body, attachment, now)
@@ -330,15 +324,15 @@ class ChatViewModel(
             // Plan-first gate: show the plan before anything is tapped. A plan
             // asks for steps, so no surface is opened and nothing is observed.
             if (current.planFirst && planApprovedFor != body) {
-                val outcome = container.runs.run(
-                    container.runs.planRequest(
+                val outcome = container.runTurn(
+                    container.planRequest(
                         goal = body,
                         runId = "run-$now",
                         traceId = UUID.randomUUID().toString(),
                     ),
                 )
                 container.runGate.finish()
-                stopRunService()
+                container.stopRunService()
                 if (outcome.pendingPlan.isEmpty()) {
                     _state.update {
                         it.copy(busy = false, error = outcome.error?.message ?: "No plan came back")
@@ -352,7 +346,7 @@ class ChatViewModel(
 
             val device = container.surfaces(current)
             device.observe()
-            val request = container.runs.request(
+            val request = container.request(
                 goal = body,
                 device = device,
                 settings = current,
@@ -361,10 +355,10 @@ class ChatViewModel(
                 traceId = UUID.randomUUID().toString(),
             )
             val outcome = try {
-                container.runs.run(request) { container.runGate.isCancelled() }
+                container.runTurn(request) { container.runGate.isCancelled() }
             } finally {
-                stopRunService()
-                Surfaces.release()
+                container.stopRunService()
+                container.releaseSurfaces()
             }
             when (outcome.source) {
                 TurnSource.PLAN -> Unit // handled above; a plan never reaches here
@@ -387,7 +381,7 @@ class ChatViewModel(
         conversationId: String,
     ) {
         container.runGate.finish()
-        stopRunService()
+        container.stopRunService()
         container.conversations.append(
             conversationId,
             ChatMessage(
@@ -546,8 +540,8 @@ class ChatViewModel(
                 conversationId = conversationId,
             )
         }
-        com.hopa.app.privacy.TurnLog.add(
-            com.hopa.app.privacy.TurnLogEntry(
+        com.hopa.privacy.TurnLog.add(
+            com.hopa.privacy.TurnLogEntry(
                 at = System.currentTimeMillis(),
                 path = result.surfaceName,
                 steps = steps.size,
@@ -576,28 +570,15 @@ class ChatViewModel(
      * case Android refuses a background activity start.
      */
     private suspend fun answerOutsideApp(text: String) {
-        if (text.isBlank() || com.hopa.app.service.AppVisibility.foreground) {
+        if (text.isBlank() || container.isForeground()) {
             return
         }
         val notify = runCatching { container.settings.settings.first().notifyAnswers }
             .getOrDefault(true)
         if (notify) {
-            runCatching { com.hopa.app.service.Notifier.postAnswer(container.context, text) }
+            runCatching { container.postAnswer(text) }
         }
         container.bringToFront()
-    }
-
-    private fun startRunService() {
-        val intent = Intent(container.context, com.hopa.app.service.RunService::class.java)
-        runCatching { ContextCompat.startForegroundService(container.context, intent) }
-    }
-
-    private fun stopRunService() {
-        runCatching {
-            container.context.stopService(
-                Intent(container.context, com.hopa.app.service.RunService::class.java),
-            )
-        }
     }
 
     private suspend fun load() {

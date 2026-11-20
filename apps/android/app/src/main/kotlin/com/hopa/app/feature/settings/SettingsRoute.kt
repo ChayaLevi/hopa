@@ -37,7 +37,7 @@ fun SettingsRoute(
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf("") }
-    val privacy by com.hopa.app.privacy.TurnLog.entries.collectAsStateWithLifecycle()
+    val privacy by com.hopa.privacy.TurnLog.entries.collectAsStateWithLifecycle()
     val backToHub = { page = "" }
 
     // A page slides in from the side it belongs to: deeper to the right, back to

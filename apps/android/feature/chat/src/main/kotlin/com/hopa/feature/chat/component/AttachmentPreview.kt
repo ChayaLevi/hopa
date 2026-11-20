@@ -1,4 +1,4 @@
-package com.hopa.app.feature.chat.component
+package com.hopa.feature.chat.component
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

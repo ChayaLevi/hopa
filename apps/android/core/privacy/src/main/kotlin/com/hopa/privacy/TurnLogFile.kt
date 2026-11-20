@@ -1,4 +1,4 @@
-package com.hopa.app.privacy
+package com.hopa.privacy
 
 import android.content.Context
 import java.io.File
