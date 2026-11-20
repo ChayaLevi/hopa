@@ -17,7 +17,7 @@ import com.hopa.app.feature.history.RecipesRoute
 import com.hopa.app.feature.launchpad.AppCardRoute
 import com.hopa.app.feature.launchpad.LaunchpadRoute
 import com.hopa.feature.memory.MemoryRoute
-import com.hopa.app.feature.profiles.ProfilesRoute
+import com.hopa.feature.profiles.ProfilesRoute
 import com.hopa.app.feature.runs.RunsRoute
 import com.hopa.app.feature.settings.AboutScreen
 import com.hopa.app.feature.settings.AccessibilityRoute
