@@ -132,6 +132,10 @@ reached from Act.
 ## Testing
 
 - JVM: `:catalog:test`, `:agent:test`, `:stores:test`, `:app:testDebugUnitTest`.
+- Screenshots: `:screenshots` renders Settings, Activity and Runs through
+  Robolectric on the JVM, so a layout regression fails without a device. CI runs
+  `:screenshots:verifyRoborazziDebug`; after an intended change, re-record with
+  `:screenshots:recordRoborazziDebug` and review the PNGs in the diff.
 - Device: `app/src/androidTest` (background display, certificate, scroll
   geometry), one command in `tools/scripts/android-device-checks.ps1`.
 - Evals and shared fixtures live in `spec/` and `services/evals`.
