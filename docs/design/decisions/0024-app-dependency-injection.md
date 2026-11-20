@@ -1,6 +1,6 @@
-# ADR-0024 - Dependency injection in the Android app: narrow containers before Hilt
+# ADR-0024 - Dependency injection in the Android app
 
-Status: accepted (2026-11-19)
+Status: accepted (2026-11-19), revised (2026-11-20): Hilt is the final standard
 
 ## Context
 
@@ -41,3 +41,19 @@ factory. That is a separate project, not a line item in a packaging refactor.
   composition root that implements all of them.
 - This decision does not block the type-safe navigation or the Gradle
   modularisation work.
+
+## Revision (2026-11-20)
+
+The narrow containers were the right first step: they made dependencies
+explicit and kept JVM tests working. With the app now split into feature
+modules, the final standard is Hilt.
+
+- `AppContainer` becomes a `@Singleton` built by Hilt, not passed by hand.
+- Each dependency interface is bound to the container with `@Binds`.
+- ViewModels become `@HiltViewModel` and routes use `hiltViewModel()`; the
+  hand-written factories go away.
+- The interfaces stay: they are the graph's boundaries and the seam for tests.
+
+Why Hilt over Koin or manual wiring: compile-time validation instead of runtime
+lookups, first-party ViewModel and Navigation integration, and a graph that
+scales with the module count. Manual wiring already cost more than it explained.
