@@ -1,4 +1,4 @@
-package com.hopa.app.feature.skills
+package com.hopa.feature.skills
 
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -6,11 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hopa.app.di.AppContainer
 
 @Composable
 fun SkillsRoute(
-    container: AppContainer,
+    container: SkillsDependencies,
     onBack: () -> Unit,
 ) {
     val viewModel: SkillsViewModel = viewModel(factory = SkillsViewModelFactory(container))
