@@ -64,6 +64,7 @@ class SelfCheckViewModel @Inject constructor(
 private fun ProviderState.label(): String = when (this) {
     ProviderState.CLOUD -> "Cloud model"
     ProviderState.LAN -> "LAN model"
+    ProviderState.ON_DEVICE -> "Model on this phone"
     ProviderState.DEMO -> "Demo model (no key)"
     ProviderState.NO_MODEL -> "No model"
 }

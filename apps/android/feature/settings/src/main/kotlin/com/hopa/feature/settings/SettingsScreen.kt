@@ -68,7 +68,8 @@ fun SettingsScreen(
         }
     }
     val answers = state.providerState == ProviderState.CLOUD ||
-        state.providerState == ProviderState.LAN
+        state.providerState == ProviderState.LAN ||
+        state.providerState == ProviderState.ON_DEVICE
 
     SettingsPage(title = "Settings", onBack = onBack, collapseTitle = true) {
         androidx.compose.material3.OutlinedTextField(

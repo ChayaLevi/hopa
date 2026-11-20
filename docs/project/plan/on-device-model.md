@@ -429,7 +429,7 @@ The only new module is `:core:localmodel` (`apps/android/core/localmodel`).
 | `core/inference` | `PromptBudget`, `PlanGrammar` (GBNF builders), rejection table |
 | `core/contracts` | `ModelReply` gains `truncated` and `grammar` |
 | `core/agent` | prompt assembly consumes the budget (facts, skills, catalogue, screen) |
-| `core/runtime` | `ModelPlanSource` retries once on a rejected answer |
+| `core/agent/plan` | `ModelPlanSource` retries once on a rejected answer |
 | tests | `core/inference` (ceilings, trimming order, grammar accept/reject), `core/agent` |
 
 ### S4 - the engine
@@ -478,7 +478,7 @@ The only new module is `:core:localmodel` (`apps/android/core/localmodel`).
 | `apps/android/data` | Room migration for the new column |
 | `apps/android/stores` | conversation store writes it |
 | `apps/android/feature/chat` | the composer chip and the view model wiring |
-| `core/runtime` | the receipt names the model actually used |
+| `core/contracts/chat/MessageProof.kt` | the receipt names the model actually used |
 | tests | Room migration test, chat view model test |
 
 ## Acceptance criteria

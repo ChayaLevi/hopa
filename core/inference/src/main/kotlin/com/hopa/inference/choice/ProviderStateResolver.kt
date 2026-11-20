@@ -12,6 +12,7 @@ class ProviderStateResolver(
         when (rules.choose(provider, endpoint, apiKey)) {
             ProviderChoice.DEMO -> ProviderState.DEMO
             ProviderChoice.LAN -> ProviderState.LAN
+            ProviderChoice.ON_DEVICE -> ProviderState.ON_DEVICE
             ProviderChoice.CLOUD ->
                 if (apiKey.isBlank()) ProviderState.NO_MODEL else ProviderState.CLOUD
         }
