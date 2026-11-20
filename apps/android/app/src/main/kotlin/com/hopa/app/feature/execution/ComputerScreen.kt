@@ -1,4 +1,4 @@
-package com.hopa.app.feature.execution
+﻿package com.hopa.app.feature.execution
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -43,7 +43,7 @@ import com.hopa.ui.theme.HopaColor
 fun ComputerScreen(
     state: SettingsUiState,
     onBack: () -> Unit,
-    onSave: (String, String, String, String, Boolean, Boolean, String, String, Boolean) -> Unit,
+    onSave: (String, String, String, String, Boolean, String, String, Boolean) -> Unit,
     onTestBridge: (String, String) -> Unit,
     onPairBridge: (String, String) -> Unit,
     onPairBackend: (String, String) -> Unit,
@@ -67,7 +67,6 @@ fun ComputerScreen(
             state.settings.model,
             "",
             state.settings.notifyAnswers,
-            state.settings.webEnabled,
             url,
             token,
             state.settings.useBridge,

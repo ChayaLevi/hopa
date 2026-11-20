@@ -25,7 +25,6 @@ class ModelSettingsTest {
             model = model,
             key = key,
             notifyAnswers = true,
-            webEnabled = true,
             bridgeUrl = "",
             bridgeKey = bridgeKey,
             useBridge = true,

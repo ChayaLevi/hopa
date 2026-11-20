@@ -49,7 +49,6 @@ internal class ModelSettings(
         model: String,
         key: String,
         notifyAnswers: Boolean,
-        webEnabled: Boolean,
         bridgeUrl: String,
         bridgeKey: String,
         useBridge: Boolean,
@@ -68,7 +67,6 @@ internal class ModelSettings(
                 endpoint = trimmedEndpoint,
                 model = model.trim(),
                 notifyAnswers = notifyAnswers,
-                webEnabled = webEnabled,
                 bridgeUrl = bridgeUrl.trim(),
                 useBridge = useBridge,
             )
@@ -99,13 +97,12 @@ internal class ModelSettings(
         model: String,
         key: String,
         notifyAnswers: Boolean,
-        webEnabled: Boolean,
         bridgeUrl: String,
         bridgeKey: String,
         useBridge: Boolean,
     ): ModelTestResult {
         val message = runCatching {
-            save(provider, endpoint, model, key, notifyAnswers, webEnabled, bridgeUrl, bridgeKey, useBridge)
+            save(provider, endpoint, model, key, notifyAnswers, bridgeUrl, bridgeKey, useBridge)
             val current = settings.settings.first()
             val storedKey = settings.modelKey()
             val state = ProviderStateResolver()

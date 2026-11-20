@@ -77,15 +77,6 @@ fun SettingsRoute(
                 onTestModel = viewModel::testModel,
             )
 
-            PAGE_CHARACTER -> SettingsCharacterScreen(
-                state = state,
-                onBack = backToHub,
-                onTone = viewModel::setTone,
-                onChattiness = viewModel::setChattiness,
-                onMascot = viewModel::setMascotFramed,
-                onOpenProfiles = onOpenProfiles,
-            )
-
             PAGE_HISTORY -> SettingsHistoryScreen(
                 rows = history,
                 selected = historyFilter,
@@ -122,7 +113,6 @@ fun SettingsRoute(
             PAGE_NOTIFICATIONS -> SettingsNotificationsScreen(
                 state = state,
                 onBack = backToHub,
-                onSave = viewModel::save,
                 onTestNotification = viewModel::testNotification,
             )
 

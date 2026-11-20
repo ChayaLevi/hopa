@@ -1,4 +1,4 @@
-package com.hopa.data.store
+﻿package com.hopa.data.store
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -26,7 +26,6 @@ class DataStoreSettingsRepository(
             model = prefs[MODEL] ?: "deepseek-v4-flash",
             profile = prefs[PROFILE] ?: "everyday",
             notifyAnswers = prefs[NOTIFY] ?: true,
-            webEnabled = prefs[WEB] ?: true,
             selectedConversation = prefs[SELECTED] ?: "",
             bridgeUrl = prefs[BRIDGE_URL] ?: "",
             useBridge = prefs[USE_BRIDGE] ?: true,
@@ -37,7 +36,7 @@ class DataStoreSettingsRepository(
             planFirst = prefs[PLAN_FIRST] ?: false,
             replaySkills = prefs[REPLAY_SKILLS] ?: true,
             vision = prefs[VISION] ?: false,
-        mascotFramed = prefs[MASCOT_FRAMED] ?: false,
+            mascotFramed = prefs[MASCOT_FRAMED] ?: false,
             trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
             backendUrl = prefs[BACKEND_URL] ?: "",
             backendDeviceId = prefs[BACKEND_DEVICE_ID] ?: "",
@@ -53,7 +52,6 @@ class DataStoreSettingsRepository(
             prefs[MODEL] = next.model
             prefs[PROFILE] = next.profile
             prefs[NOTIFY] = next.notifyAnswers
-            prefs[WEB] = next.webEnabled
             prefs[SELECTED] = next.selectedConversation
             prefs[BRIDGE_URL] = next.bridgeUrl
             prefs[USE_BRIDGE] = next.useBridge
@@ -117,7 +115,6 @@ class DataStoreSettingsRepository(
         val MODEL = stringPreferencesKey("model")
         val PROFILE = stringPreferencesKey("profile")
         val NOTIFY = booleanPreferencesKey("notify_answers")
-        val WEB = booleanPreferencesKey("web_enabled")
         val SELECTED = stringPreferencesKey("selected_conversation")
         val BRIDGE_URL = stringPreferencesKey("bridge_url")
         val USE_BRIDGE = booleanPreferencesKey("use_bridge")

@@ -51,8 +51,6 @@ fun SettingsScreen(
     val searchable = listOf(
         Searchable("Answers", "model, key, provider, endpoint", Icons.Filled.Star,
             { onOpenPage(PAGE_MODEL) }),
-        Searchable("Tone and length", "how HOPA talks, short, long", Icons.Filled.Face,
-            { onOpenPage(PAGE_CHARACTER) }),
         Searchable("Alerts", "notifications, answer ready", Icons.Filled.Notifications,
             { onOpenPage(PAGE_NOTIFICATIONS) }),
         Searchable("Modes", "profiles, everyday", Icons.Filled.Person, onOpenProfiles),
@@ -205,7 +203,6 @@ fun SettingsScreen(
 }
 
 internal const val PAGE_MODEL = "model"
-internal const val PAGE_CHARACTER = "character"
 internal const val PAGE_NOTIFICATIONS = "notifications"
 internal const val PAGE_PRIVACY = "privacy"
 internal const val PAGE_RECIPES = "recipes"

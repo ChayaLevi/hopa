@@ -100,7 +100,7 @@ class ConversationsViewModel(
             _state.update { it.copy(syncing = true) }
             val message = runCatching {
                 val sync = container.chatSync()
-                    ?: return@runCatching "Set a bridge first (Settings > Bridge)"
+                    ?: return@runCatching "Set a bridge first (Capabilities > Act > My computer)"
                 runCatching { sync.run() }.fold(
                     { report ->
                         val deleted = if (report.tombstoned > 0) {
