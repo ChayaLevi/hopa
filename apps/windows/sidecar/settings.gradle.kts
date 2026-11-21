@@ -34,6 +34,11 @@ project(":runlog").projectDir = file("../../../core/runlog")
 include(":agent")
 project(":agent").projectDir = file("../../../core/agent")
 
+include(":decision")
+project(":decision").projectDir = file("../../../core/decision")
+include(":decision-rules")
+project(":decision-rules").projectDir = file("../../../core/decision-rules")
+
 include(":inference")
 project(":inference").projectDir = file("../../../core/inference")
 include(":bridge")
