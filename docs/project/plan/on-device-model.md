@@ -51,8 +51,9 @@ Each entry answers three questions for the person choosing: **strong at**,
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
 | Gemma 3 270M | 0.3 GB | downloads from inside the app; fastest answer, best instruction following at this size, multilingual | tool choice, multi-step plans | the cheapest first filter: "command or small talk" |
-| SmolLM2-360M | 0.3 GB | speed, Apache-2.0, tiny memory | English-centric, weak plans | good fallback on 4 GB devices |
-| Qwen3-0.6B | 0.4 GB | routing, short answers, thinking mode if wanted | anything multi-step | disable thinking for the loop or it burns the budget |
+| SmolLM2-360M | 0.4 GB | downloads from inside the app; speed, Apache-2.0, tiny memory | English-centric, weak plans | good fallback on 4 GB devices |
+| MiniCPM4 0.5B | 0.3 GB | downloads from inside the app; tiny memory, long context per byte | tool choice, tiny knowledge | community quant of OpenBMB weights |
+| Qwen3-0.6B | 0.5 GB | downloads from inside the app; routing, short answers, thinking mode if wanted | anything multi-step | disable thinking for the loop or it burns the budget |
 
 ### Fast (0.8–1.2 GB)
 
@@ -60,8 +61,10 @@ Each entry answers three questions for the person choosing: **strong at**,
 |---|---|---|---|---|
 | Qwen3-1.7B | 1.3 GB | downloads from inside the app; best all-round at this size, decent tool choice, Apache-2.0 | long plans, rare apps | the default for ≤6 GB phones; thinking off for turns |
 | Gemma 3 1B | 0.8 GB | instructions, 32k context, 140+ languages; downloads from inside the app | tool choice, its own licence | the multilingual pick when Russian matters |
-| SmolLM2-1.7B | 1.0 GB | speed, Apache-2.0 | planning, tool choice | lighter alternative when 1.7B Qwen is too slow |
-| Llama 3.2 1B | 0.8 GB | short English commands, mature tooling | long context in practice, licence terms | good baseline to measure others against |
+| SmolLM2-1.7B | 1.1 GB | downloads from inside the app; speed, Apache-2.0 | planning, tool choice | lighter alternative when 1.7B Qwen is too slow |
+| LFM2.5 1.2B | 0.7 GB | downloads from inside the app; designed for phones, fast | tool choice, its own licence | the phone-first pick |
+| Falcon3 1B | 1.1 GB | downloads from inside the app; 32k context, general phrasing | tool choice, its own licence | a TII generalist |
+| Llama 3.2 1B | 0.8 GB | downloads from inside the app; short English commands, mature tooling | long context in practice, licence terms | good baseline to measure others against |
 
 ### Balanced (2.2–3.0 GB)
 
@@ -71,7 +74,7 @@ Each entry answers three questions for the person choosing: **strong at**,
 | Phi-4-mini 3.8B | 2.5 GB | reasoning, precise instructions, MIT | slower, heavier context cost | best "careful" model for multi-step plans |
 | Gemma 3 4B | 2.7 GB | 128k context, languages, instruction following | size, tool choice | the multilingual balanced pick |
 | SmolLM3-3B | 2.2 GB | strong at 3B, dual-mode thinking, Apache-2.0 | younger ecosystem, fewer GGUFs | good middle point if 4B is too much |
-| Granite 3.3 2B | 1.8 GB | strict JSON, enterprise phrasing | general chat, creativity | worth testing for schema discipline |
+| Granite 3.3 2B | 1.5 GB | downloads from inside the app; strict JSON, enterprise phrasing | general chat, creativity | worth testing for schema discipline |
 | Falcon3-3B | 2.2 GB | 32k context, permissive terms | tool choice | solid generalist, not tool-tuned |
 | MiniCPM4-4B | 2.6 GB | efficiency, long context per byte | tool choice, smaller community | interesting for 6 GB phones |
 

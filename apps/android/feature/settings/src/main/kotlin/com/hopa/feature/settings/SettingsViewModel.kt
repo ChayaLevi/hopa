@@ -146,23 +146,19 @@ class SettingsViewModel @Inject constructor(
     /** The model picker on How HOPA acts: the provider, without leaving the page. */
     fun selectProvider(value: String) {
         viewModelScope.launch {
-            container.settings.update {
-                it.copy(
-                    provider = value,
-                    endpoint = when (value) {
-                        "lan" -> if (it.endpoint.startsWith("https://")) {
-                            "http://192.168.1.5:11434/v1"
-                        } else {
-                            it.endpoint
-                        }
-                        "openai" -> if (it.endpoint.startsWith("http://")) {
-                            "https://api.deepseek.com/v1"
-                        } else {
-                            it.endpoint
-                        }
-                        else -> it.endpoint
-                    },
-                )
+            container.settings.update { current ->
+                // "Server" covers a cloud provider and a machine on the network;
+                // the endpoint decides which, and the stored choice is kept when
+                // it is one of the two.
+                val provider = when (value) {
+                    "server" -> when {
+                        current.provider == "openai" || current.provider == "lan" -> current.provider
+                        current.endpoint.startsWith("http://") -> "lan"
+                        else -> "openai"
+                    }
+                    else -> value
+                }
+                current.copy(provider = provider)
             }
             reload()
         }

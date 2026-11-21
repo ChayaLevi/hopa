@@ -10,7 +10,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,7 +31,9 @@ fun SettingsRoute(
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var page by rememberSaveable { mutableStateOf("") }
+    // Always open on the hub: the screen keeps the page only while the person
+    // walks inside Settings, not after they leave it.
+    var page by remember { mutableStateOf("") }
     val privacy by com.hopa.privacy.TurnLog.entries.collectAsStateWithLifecycle()
     val backToHub = { page = "" }
 
