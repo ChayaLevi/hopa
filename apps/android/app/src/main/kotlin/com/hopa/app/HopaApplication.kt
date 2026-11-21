@@ -27,6 +27,9 @@ class HopaApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Seed the shared access state before any screen asks for it. A process
+        // started by the accessibility service may not get a fresh ON_RESUME.
+        com.hopa.capabilities.accessibility.state.AccessibilityState.refresh(this)
         // An approval on disk means the process died while waiting: deny it
         // rather than resurrect a question whose turn is gone.
         scope.launch {

@@ -43,6 +43,25 @@ verb per case; it is filled by capturing what the model-only path answered on a
 device. Until then the comparison has no baseline, and the table says so by
 omission rather than inventing numbers.
 
+## What decisions change on the model path
+
+The model (DeepSeek today, on-device tomorrow) still writes the plan and the
+steps. A layer only decides whether the proposed step may run:
+
+| Mode | What a layer does |
+|---|---|
+| `Off` | nothing; the model path is byte-for-byte the old one |
+| `Off` + shadow | votes into `decision_votes`, never applies |
+| `Automatic` | applies to `READ` steps only (observe, back, home, launch, scroll): act, verify, wait, ask or escalate |
+| pinned (`rules`, `laix`) | the same `READ` application; on `CHANGE` and `DANGEROUS` it only votes |
+| payments, delete, reset, uninstall | the layer never applies; the model and the approval gate decide |
+
+A layer does **not** choose the action yet: that is the intent classifier's job
+for the closed command set, and a later stage for the rest. Canonical commands
+(open, back, home, scroll, wait) are the only turns that skip the model, and
+`instantCommands` turns that path off. Decisions on the plan and on the whole
+conversation are not implemented.
+
 ## The ten-task protocol (needs a phone)
 
 Run the same ten goals in three modes, twice each to catch flakes:

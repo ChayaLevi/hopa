@@ -2,6 +2,7 @@ package com.hopa.agent.turn
 
 import com.hopa.agent.action.ActionExecutor
 import com.hopa.agent.action.ApprovalPolicy
+import com.hopa.agent.decision.DecisionRuntime
 import com.hopa.agent.decision.StepPolicy
 import com.hopa.agent.goal.Checkpoint
 import com.hopa.agent.plan.PlanSource
@@ -21,6 +22,19 @@ import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
+import com.hopa.decision.ActionClass
+import com.hopa.decision.ConformanceStatus
+import com.hopa.decision.DecisionContext
+import com.hopa.decision.DecisionCoordinator
+import com.hopa.decision.DecisionLayer
+import com.hopa.decision.DecisionMode
+import com.hopa.decision.DecisionRegistry
+import com.hopa.decision.DecisionRun
+import com.hopa.decision.LatencyClass
+import com.hopa.decision.LayerDecision
+import com.hopa.decision.LayerMetadata
+import com.hopa.decision.LayerStatus
+import com.hopa.decision.Verb
 import com.hopa.decision.classifier.IntentClassifier
 import com.hopa.runlog.record.RunRecordFactory
 import com.hopa.runlog.store.InMemoryRunRecorder
@@ -115,6 +129,7 @@ class TurnRunnerTest {
         plan: List<String>? = null,
         store: RecipeStore? = null,
         commands: Boolean = false,
+        decisions: com.hopa.agent.decision.DecisionRuntime? = null,
     ) {
         val device = FakeDevice(screens)
         val policy = ScriptedPolicy(replies)
@@ -148,6 +163,7 @@ class TurnRunnerTest {
             knowledge = { knowledge },
             settle = {},
             commands = if (commands) IntentClassifier() else null,
+            decisions = decisions,
         )
 
         fun request(
@@ -372,6 +388,49 @@ class TurnRunnerTest {
         assertEquals(1, outcome.executed)
         assertFalse(outcome.recipeSaved)
         assertNull(store.find("Open settings"))
+    }
+
+    @Test
+    fun the_classic_model_flow_is_untouched_when_decisions_are_off() = runBlocking {
+        val votes = mutableListOf<DecisionRun>()
+        val asking = object : DecisionLayer {
+            override val metadata = LayerMetadata(
+                id = "asking",
+                version = "1.0.0",
+                latency = LatencyClass.MICRO,
+                decidesUpTo = ActionClass.DANGEROUS,
+                status = LayerStatus.DEFAULT,
+                conformance = ConformanceStatus.PASSED,
+                author = "test",
+                summary = "asks about everything",
+            )
+
+            override suspend fun decide(context: DecisionContext): LayerDecision =
+                LayerDecision(Verb.ASK, "always_ask", 0.9, "asking")
+        }
+        val decisions = DecisionRuntime(
+            coordinator = DecisionCoordinator(DecisionRegistry(listOf(asking))),
+            mode = { DecisionMode.Off },
+            shadow = { false },
+            sink = { _, run -> votes += run },
+            applies = { true },
+        )
+        val harness = Harness(
+            screens = listOf(labelled("Settings"), labelled("Connections")),
+            replies = listOf(
+                """{"kind":"ui.tap","ref":"e1"}""",
+                """{"say":"Done.","done":true,"needUser":false}""",
+            ),
+            decisions = decisions,
+        )
+
+        val outcome = harness.runner.run(harness.request("Open settings"))
+
+        assertEquals(TurnSource.MODEL, outcome.source)
+        assertEquals("Done.", outcome.answer)
+        assertEquals(1, outcome.executed)
+        assertEquals(listOf("e1"), harness.device.taps)
+        assertEquals(0, votes.size)
     }
 
     @Test

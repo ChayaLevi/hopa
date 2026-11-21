@@ -31,17 +31,36 @@ object AccessibilityState {
         if (HopaAccessibilityService.instance != null) {
             return true
         }
-        return runCatching {
+        val listed = runCatching {
             val manager = context.getSystemService(AccessibilityManager::class.java)
             manager
                 .getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
                 .any { it.resolveInfo.serviceInfo.packageName == context.packageName }
         }.getOrDefault(false)
+        if (listed) {
+            return true
+        }
+        // Some OEM builds return an incomplete list right after a toggle. The
+        // secure setting is the source Android itself reads, so use it as the
+        // fallback instead of telling the person access is off when it is on.
+        val component = "${context.packageName}/" +
+            "com.hopa.capabilities.accessibility.state.HopaAccessibilityService"
+        val stored = runCatching {
+            android.provider.Settings.Secure.getString(
+                context.contentResolver,
+                android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+            )
+        }.getOrNull().orEmpty()
+        return stored.split(':').any { it.equals(component, ignoreCase = true) } ||
+            stored.contains(context.packageName, ignoreCase = true)
     }
 
     /** Re-read Android once: on app start, and whenever the app is resumed. */
     fun refresh(context: Context) {
-        monitor.refresh(isEnabled(context), HopaAccessibilityService.instance != null)
+        val enabled = isEnabled(context)
+        val connected = HopaAccessibilityService.instance != null
+        android.util.Log.i("HopaA11yState", "refresh enabled=$enabled connected=$connected")
+        monitor.refresh(enabled, connected)
     }
 
     /** Called by the service itself; a bound service is access that works. */
