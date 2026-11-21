@@ -19,10 +19,3 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 }
 
-tasks.register<JavaExec>("decisionReport") {
-    group = "verification"
-    description = "Runs every decision layer over spec/decisions and prints the comparison table"
-    mainClass.set("com.hopa.decision.rules.DecisionReport")
-    classpath = sourceSets["main"].runtimeClasspath
-    args = listOf(file("../../spec/decisions/corpus.v1.json").path)
-}
