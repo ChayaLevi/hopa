@@ -117,6 +117,43 @@ class FileModelStoreTest {
         assertTrue(fresh.exists())
     }
 
+    @Test
+    fun a_finished_download_is_adopted_without_a_copy() {
+        val source = File(dir, "download.part").apply { writeBytes(payload) }
+        val store = FileModelStore(File(dir, "models"))
+
+        val outcome = store.adopt(source, spec())
+
+        assertTrue(outcome is ImportOutcome.Imported)
+        assertFalse(source.exists())
+        assertEquals("test-model", store.installed().single().id)
+        assertEquals(payload.size.toLong(), store.totalBytes())
+    }
+
+    @Test
+    fun an_adopted_file_with_the_wrong_digest_is_removed() {
+        val source = File(dir, "download.part").apply { writeBytes(payload) }
+        val store = FileModelStore(File(dir, "models"))
+
+        val outcome = store.adopt(source, spec(sha = "0".repeat(64)))
+
+        assertTrue(outcome is ImportOutcome.HashMismatch)
+        assertFalse(source.exists())
+        assertTrue(store.installed().isEmpty())
+    }
+
+    @Test
+    fun an_adopted_file_larger_than_declared_is_refused() {
+        val source = File(dir, "download.part").apply { writeBytes(payload) }
+        val store = FileModelStore(File(dir, "models"))
+
+        val outcome = store.adopt(source, spec().copy(bytes = payload.size - 1L))
+
+        assertEquals(ImportOutcome.TooLarge, outcome)
+        assertFalse(source.exists())
+        assertTrue(store.installed().isEmpty())
+    }
+
     private fun sha256(bytes: ByteArray): String =
         MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
 }

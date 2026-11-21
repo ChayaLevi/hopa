@@ -111,8 +111,13 @@ class FileModelStore(private val root: File) {
         val target = File(root, "${spec.id}-${actual.take(8)}.gguf")
         val previous = modelFor(spec.id)?.file
         if (!source.renameTo(target)) {
+            // Same volume should rename; if it does not, copy and keep the source
+            // until the copy succeeded, so a failure never loses the bytes.
+            if (runCatching { source.copyTo(target, overwrite = true) }.isFailure) {
+                target.delete()
+                return ImportOutcome.Failed(ImportFailure.STORAGE)
+            }
             source.delete()
-            return ImportOutcome.Failed(ImportFailure.STORAGE)
         }
         if (previous != null && previous.name != target.name) previous.delete()
         return ImportOutcome.Imported(InstalledModel(spec.id, target, target.length()))
