@@ -103,6 +103,8 @@ fun ChatScreen(
     onApprovePlan: () -> Unit = {},
     onCancelPlan: () -> Unit = {},
     onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
+    /** Fixed hour for screenshots and tests; null reads the device clock. */
+    hourOfDay: Int? = null,
     tasks: List<com.hopa.contracts.task.TaskItem> = emptyList(),
     onOpenTask: (com.hopa.contracts.task.TaskItem) -> Unit = {},
     onDismissTask: (String) -> Unit = {},
@@ -376,7 +378,7 @@ fun ChatScreen(
                 )
             }
             if (messages.isEmpty()) {
-                ChatEmptyState(onQuick = onQuick)
+                ChatEmptyState(onQuick = onQuick, hourOfDay = hourOfDay)
             } else {
                 LazyColumn(
                     state = listState,

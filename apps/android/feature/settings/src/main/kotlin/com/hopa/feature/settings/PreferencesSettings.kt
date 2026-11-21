@@ -34,6 +34,18 @@ internal class PreferencesSettings(
         settings.update { it.copy(planFirst = value) }
     }
 
+    suspend fun setDecisionMode(value: String) {
+        settings.update { it.copy(decisionMode = value) }
+    }
+
+    suspend fun setShadowDecisions(value: Boolean) {
+        settings.update { it.copy(shadowDecisions = value) }
+    }
+
+    suspend fun setInstantCommands(value: Boolean) {
+        settings.update { it.copy(instantCommands = value) }
+    }
+
     suspend fun setTrusted(packageName: String, trusted: Boolean) {
         if (packageName.isBlank()) {
             return

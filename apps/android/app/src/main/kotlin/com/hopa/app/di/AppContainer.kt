@@ -37,9 +37,12 @@ import com.hopa.data.store.DbConversationStore
 import com.hopa.data.store.DbDecisionVoteSink
 import com.hopa.data.store.DbRunRecorder
 import com.hopa.data.store.KeystoreSecretStore
+import com.hopa.decision.ActionClass
 import com.hopa.decision.DecisionCoordinator
 import com.hopa.decision.DecisionMode
 import com.hopa.decision.DecisionRegistry
+import com.hopa.decision.DecisionSelector
+import com.hopa.decision.LayerMetadata
 import com.hopa.decision.classifier.IntentClassifier
 import com.hopa.decision.laix.LaixDecisionLayer
 import com.hopa.decision.rules.RulesDecisionLayer
@@ -176,17 +179,31 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     private val decisionRegistry: DecisionRegistry =
         DecisionRegistry(listOf(RulesDecisionLayer(), LaixDecisionLayer()))
 
+    /**
+     * A layer applies only to reading the screen. A change keeps the model and
+     * the approval policy; a payment keeps the gate no matter what is selected.
+     */
     val decisions: DecisionRuntime by lazy {
         DecisionRuntime(
             coordinator = DecisionCoordinator(decisionRegistry),
             mode = { decisionMode },
             shadow = { shadowDecisions },
             sink = decisionVotes,
+            applies = { actionClass ->
+                actionClass == ActionClass.READ && decisionMode !is DecisionMode.Off
+            },
         )
     }
 
     /** Canonical commands that need no model at all. */
     val commands: IntentClassifier = IntentClassifier()
+
+    override val decisionLayers: List<LayerMetadata>
+        get() = decisionRegistry.all().map { it.metadata }
+
+    override fun activeDecision(actionClass: ActionClass): String =
+        DecisionSelector(decisionRegistry).select(decisionMode, actionClass).layer?.metadata?.id
+            ?: "model"
     /**
      * The gate settings, replaced as a whole when they change. The executor
      * reads one snapshot per step, so a turn that starts while Settings is being

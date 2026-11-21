@@ -21,6 +21,12 @@ interface SettingsDependencies {
     val helperStatus: StateFlow<HelperStatus>
     val shell: ShellClient
 
+    /** What the Decisions page shows; metadata only, no layer is called. */
+    val decisionLayers: List<com.hopa.decision.LayerMetadata>
+
+    /** The layer that would decide this class now, or `model` when none does. */
+    fun activeDecision(actionClass: com.hopa.decision.ActionClass): String
+
     suspend fun connectShell(): Boolean
 
     fun notificationsAllowed(): Boolean

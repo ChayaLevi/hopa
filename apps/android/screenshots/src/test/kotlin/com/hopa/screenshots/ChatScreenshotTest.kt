@@ -43,6 +43,7 @@ class ChatScreenshotTest {
                     onUndo = {},
                     onDiscardAttachment = {},
                     onDismissAttachmentNotice = {},
+                    hourOfDay = 9,
                 )
             }
         }

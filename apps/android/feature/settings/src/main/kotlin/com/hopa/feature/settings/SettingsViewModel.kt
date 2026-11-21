@@ -171,6 +171,28 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /** off, auto, or a layer id; the same words the decision mode parses. */
+    fun setDecisionMode(value: String) {
+        viewModelScope.launch {
+            preferences.setDecisionMode(value)
+            reload()
+        }
+    }
+
+    fun setShadowDecisions(value: Boolean) {
+        viewModelScope.launch {
+            preferences.setShadowDecisions(value)
+            reload()
+        }
+    }
+
+    fun setInstantCommands(value: Boolean) {
+        viewModelScope.launch {
+            preferences.setInstantCommands(value)
+            reload()
+        }
+    }
+
     /** The framed picture or the cut-out object; see MascotAppearance. */
     fun setMascotFramed(value: Boolean) {
         viewModelScope.launch {
@@ -347,6 +369,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private fun layerTitle(id: String): String = when (id) {
+        "rules" -> "Rules"
+        "laix" -> "LAIX"
+        else -> id.replaceFirstChar { it.uppercase() }
+    }
+
     private suspend fun reload() {
         val settings: AppSettings = container.settings.settings.first()
         val background = withContext(Dispatchers.IO) {
@@ -355,9 +383,35 @@ class SettingsViewModel @Inject constructor(
         val model = modelSettings.snapshot()
         val pairing = pairingSettings.snapshot(settings)
         val phoneAccess = surfaceSettings.phoneAccess(settings)
+        val layers = container.decisionLayers.map { metadata ->
+            DecisionLayerInfo(
+                id = metadata.id,
+                title = layerTitle(metadata.id),
+                detail = "${metadata.version} · ${metadata.latency.name.lowercase()} · " +
+                    "up to ${metadata.decidesUpTo.name.lowercase()} actions",
+                summary = metadata.summary,
+                howTo = when (metadata.status) {
+                    com.hopa.decision.LayerStatus.DEFAULT ->
+                        "It decides the steps it is allowed to; the other layers keep voting."
+                    com.hopa.decision.LayerStatus.SHADOW ->
+                        "It votes on every step and is recorded, but it does not decide yet."
+                    com.hopa.decision.LayerStatus.EXPERIMENTAL ->
+                        "Available to try: it votes in the log but does not decide."
+                    com.hopa.decision.LayerStatus.RETIRED ->
+                        "No longer in this build; choosing it falls back to Automatic."
+                },
+            )
+        }
+        val active = mapOf(
+            "read" to container.activeDecision(com.hopa.decision.ActionClass.READ),
+            "change" to container.activeDecision(com.hopa.decision.ActionClass.CHANGE),
+            "dangerous" to container.activeDecision(com.hopa.decision.ActionClass.DANGEROUS),
+        )
         _state.update {
             it.copy(
                 settings = settings,
+                decisionLayers = layers,
+                decisionActive = active,
                 key = model.key,
                 keySaved = model.keySaved,
                 bridgeKey = pairing.bridgeKey,

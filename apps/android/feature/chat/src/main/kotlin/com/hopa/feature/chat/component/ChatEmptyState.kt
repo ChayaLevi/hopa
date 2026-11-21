@@ -34,10 +34,11 @@ import com.hopa.ui.theme.HopaColor
 import java.util.Calendar
 
 @Composable
-fun ChatEmptyState(onQuick: (String) -> Unit) {
+fun ChatEmptyState(onQuick: (String) -> Unit, hourOfDay: Int? = null) {
     var ideasOpen by remember { mutableStateOf(false) }
-    val ritualTitle = ritualTitle()
-    val ritualGoal = ritualGoal()
+    val hour = hourOfDay ?: Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val ritualTitle = ritualTitle(hour)
+    val ritualGoal = ritualGoal(hour)
     val suggestions = listOf(
         "Open Bilibili and show me the top 3 videos",
         "Open Settings and show me Wi-Fi",
@@ -59,7 +60,7 @@ fun ChatEmptyState(onQuick: (String) -> Unit) {
         ) {
             HopaMascot(sizeDp = 76.dp)
             Text(
-                text = greeting(),
+                text = greeting(hour),
                 fontSize = cappedSp(13f),
                 color = HopaColor.TextHint,
                 modifier = Modifier.padding(top = 10.dp),
@@ -190,29 +191,20 @@ private fun Pill(text: String, onClick: () -> Unit) {
     }
 }
 
-private fun ritualTitle(): String {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    return when {
-        hour in 5..11 -> "Morning brief"
-        hour >= 18 -> "Evening close"
-        else -> ""
-    }
+private fun ritualTitle(hour: Int): String = when {
+    hour in 5..11 -> "Morning brief"
+    hour >= 18 -> "Evening close"
+    else -> ""
 }
 
-private fun ritualGoal(): String {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    return when {
-        hour in 5..11 -> "What should I get done today?"
-        hour >= 18 -> "What did I get done today?"
-        else -> ""
-    }
+private fun ritualGoal(hour: Int): String = when {
+    hour in 5..11 -> "What should I get done today?"
+    hour >= 18 -> "What did I get done today?"
+    else -> ""
 }
 
-private fun greeting(): String {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    return when {
-        hour in 5..11 -> "Good morning"
-        hour in 12..17 -> "Good afternoon"
-        else -> "Good evening"
-    }
+private fun greeting(hour: Int): String = when {
+    hour in 5..11 -> "Good morning"
+    hour in 12..17 -> "Good afternoon"
+    else -> "Good evening"
 }

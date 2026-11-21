@@ -38,4 +38,8 @@ data class SettingsUiState(
     val backendName: String = "",
     /** The last pairing attempt's answer, shown under the card's buttons. */
     val backendStatus: String? = null,
+    /** The layers this build ships, for the Decisions page. */
+    val decisionLayers: List<DecisionLayerInfo> = emptyList(),
+    /** Who decides now for read, change and dangerous actions; `model` when none. */
+    val decisionActive: Map<String, String> = emptyMap(),
 )
