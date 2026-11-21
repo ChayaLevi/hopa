@@ -73,6 +73,7 @@ class ParallelRunner(
         try {
             val settings = container.settings.settings.first()
             container.useGate(settings.trustedApps.toList())
+        container.useDecisions(settings.decisionMode, settings.shadowDecisions)
 
             // The hidden display has its own foreground app; its typed functions
             // must come from that display, not from the phone's own screen.

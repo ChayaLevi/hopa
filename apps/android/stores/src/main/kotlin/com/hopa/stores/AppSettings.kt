@@ -27,6 +27,14 @@ data class AppSettings(
     val mascotFramed: Boolean = false,
     /** Packages whose typed calls, messages and closing skip the question. */
     val trustedApps: Set<String> = emptySet(),
+    /**
+     * Which decision layer decides: `off` (the model, as before), `auto` (the
+     * best allowed layer per action class) or a layer id. An unknown id falls
+     * back to auto with a notice, never to a silent change of what executes.
+     */
+    val decisionMode: String = "off",
+    /** Record what the layers that were not applied would have decided. */
+    val shadowDecisions: Boolean = false,
     /** Address of the gateway this device is paired with. */
     val backendUrl: String = "",
     /** Identity this device was given when it joined the household. */

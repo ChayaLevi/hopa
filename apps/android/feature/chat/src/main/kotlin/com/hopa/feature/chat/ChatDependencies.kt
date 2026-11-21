@@ -71,6 +71,9 @@ interface ChatDependencies {
 
     fun useGate(trustedApps: Collection<String>, autonomous: Boolean = false)
 
+    /** Use these decision settings for the steps of the turns that start now. */
+    fun useDecisions(mode: String, shadow: Boolean)
+
     fun bringToFront()
 
     fun releaseSurfaces()

@@ -90,4 +90,24 @@ object Migrations {
             )
         }
     }
+
+    val MIGRATION_8_9: Migration = object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `decision_votes` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`runId` TEXT NOT NULL, `step` INTEGER NOT NULL, " +
+                    "`layerId` TEXT NOT NULL, `layerVersion` TEXT NOT NULL, " +
+                    "`actionKind` TEXT NOT NULL, `actionClass` TEXT NOT NULL, " +
+                    "`mode` TEXT NOT NULL, `verb` TEXT, `reason` TEXT NOT NULL, " +
+                    "`confidence` REAL NOT NULL, `trace` TEXT NOT NULL, " +
+                    "`latencyMicros` INTEGER NOT NULL, `applied` INTEGER NOT NULL, " +
+                    "`error` TEXT, `notice` TEXT, `at` INTEGER NOT NULL)",
+            )
+            db.execSQL(
+                "CREATE INDEX IF NOT EXISTS `index_decision_votes_runId` " +
+                    "ON `decision_votes` (`runId`)",
+            )
+        }
+    }
 }

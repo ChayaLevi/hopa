@@ -1,6 +1,6 @@
 # Decision layers
 
-Status: D1-D2 done (2026-11-21); D3-D7 planned
+Status: D1-D3 done (2026-11-21); D4-D7 planned
 
 HOPA will use **several decision layers**, not one. LAIX is the first to try, a
 rules layer is the baseline, a small intent classifier may follow, and a
@@ -132,6 +132,16 @@ Every active layer votes on real turns; only the selected layer is applied.
 All votes land in the run log as `decision.vote` records (layer id, verb,
 reason, confidence, whether it was applied). Nothing is blocked.
 
+In the app the votes go to the `decision_votes` table (`DecisionVoteEntity`):
+run id, step, layer id and version, action kind and class, the mode that was in
+force, verb, reason, confidence, trace, latency, `applied`, an error for a layer
+that threw, the selector's notice, and the time. The table keeps the latest
+5 000 rows. A failing sink never stops a turn.
+
+Shadow recording is on when `shadowDecisions` is true, whatever the mode. In
+that state the applied layer's vote is also written, so a later comparison can
+tell "applied and right" from "would have been better".
+
 This is how "which one works best" becomes data: after a week the run log shows
 where LAIX disagrees with the rules, where it is over-confident, and where the
 model path was the only correct answer.
@@ -159,12 +169,16 @@ model path was the only correct answer.
 Decision: included build for the spike, vendored sources for anything merged.
 No `latest`, no SNAPSHOT.
 
-## In the build now (D1-D2)
+## In the build now (D1-D3)
 
 | Where | What |
 |---|---|
 | `core/decision` (`:decision`) | `DecisionLayer`, `LayerMetadata`, `DecisionContext`, `LayerDecision`, `DecisionRegistry`, `DecisionSelector`, `DecisionCoordinator`, `DecisionVote`, `ConformanceKit`, `ComparisonHarness` |
 | `core/decision-rules` (`:decision-rules`) | `RulesDecisionLayer`, the `decisionReport` task |
+| `core/agent` | `DecisionRuntime`: the loop's one way to ask, with mode and shadow as suppliers |
+| `core/agent/.../AgentLoop` | calls the runtime after the model's action is parsed; the vote is data, the action still runs |
+| `apps/android/data` | `decision_votes` table (schema 9), `DbDecisionVoteSink` |
+| `apps/android/stores` | `AppSettings.decisionMode` (`off` by default) and `shadowDecisions` |
 | `spec/decisions/corpus.v1.json` | 17 cases, each with a reference answer and the defensible answers |
 | `spec/decisions/README.md` | the case format and the rules for adding one |
 
@@ -193,10 +207,13 @@ Nothing is wired into the loop.
 layer is available). The corpus in `spec/decisions/` and the runner that prints
 the comparison table for any layer.
 
-### D3 - shadow logging (1 PR)
+### D3 - shadow logging (1 PR) - done
 
 The loop calls the registry in shadow mode and writes `decision.vote` into the
-run log. Behaviour unchanged, data starts flowing.
+run log. Behaviour unchanged, data starts flowing. `DecisionRuntime` is wired
+into `TurnRunner`; `AgentLoop` evaluates every parsed action; `DbDecisionVoteSink`
+writes the rows. A setting of `decisionMode = auto` with `shadowDecisions = true`
+now produces one row per step per layer.
 
 ### D4 - LAIX adapter (1 PR)
 

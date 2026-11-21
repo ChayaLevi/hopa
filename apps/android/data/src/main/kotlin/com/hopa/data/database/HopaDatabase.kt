@@ -8,9 +8,11 @@ import com.hopa.data.database.dao.MemoryDao
 import com.hopa.data.database.dao.PendingApprovalDao
 import com.hopa.data.database.dao.RunHistoryDao
 import com.hopa.data.database.dao.RunRecordDao
+import com.hopa.data.database.dao.DecisionVoteDao
 import com.hopa.data.database.dao.SessionDao
 import com.hopa.data.database.dao.SkillDao
 import com.hopa.data.database.dao.TurnDao
+import com.hopa.data.database.entity.DecisionVoteEntity
 import com.hopa.data.database.entity.MemoryFactEntity
 import com.hopa.data.database.entity.PendingApprovalEntity
 import com.hopa.data.database.entity.RunHistoryEntity
@@ -28,8 +30,9 @@ import com.hopa.data.database.entity.TurnEntity
         MemoryFactEntity::class,
         SkillEntity::class,
         RunHistoryEntity::class,
+        DecisionVoteEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false,
 )
 abstract class HopaDatabase : RoomDatabase() {
@@ -47,6 +50,8 @@ abstract class HopaDatabase : RoomDatabase() {
 
     abstract fun runHistoryDao(): RunHistoryDao
 
+    abstract fun decisionVoteDao(): DecisionVoteDao
+
     companion object {
         fun build(context: Context): HopaDatabase =
             Room.databaseBuilder(context, HopaDatabase::class.java, "hopa.db")
@@ -58,6 +63,7 @@ abstract class HopaDatabase : RoomDatabase() {
         Migrations.MIGRATION_5_6,
                     Migrations.MIGRATION_6_7,
         Migrations.MIGRATION_7_8,
+                    Migrations.MIGRATION_8_9,
                 )
                 .build()
     }

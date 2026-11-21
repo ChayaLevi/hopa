@@ -2,6 +2,7 @@ package com.hopa.agent.loop
 
 import com.hopa.agent.action.ActionExecutor
 import com.hopa.agent.classify.ActionKindRules
+import com.hopa.agent.decision.DecisionRuntime
 import com.hopa.agent.decision.StepPolicy
 import com.hopa.agent.decision.model.DecisionParser
 import com.hopa.agent.decision.model.ModelReplyText
@@ -43,6 +44,11 @@ class AgentLoop(
     private val webAvailable: Boolean = false,
     /** The tables this turn routes and prompts with. */
     private val knowledge: CatalogSnapshot,
+    /**
+     * The decision layers. In shadow mode they vote into the run log and the
+     * model still decides; nothing here changes what executes.
+     */
+    private val decisions: DecisionRuntime? = null,
 ) {
     suspend fun run(
         runId: String,
@@ -159,6 +165,16 @@ class AgentLoop(
                     narration,
                     usage = usage,
                 )
+
+            // Every layer that is active votes here, including the one that
+            // would apply. Nothing is blocked in this stage: the vote is data.
+            decisions?.observe(
+                runId = runId,
+                step = step,
+                action = action,
+                screen = observation?.let(screenRenderer::render).orEmpty(),
+                history = steps.toList(),
+            )
 
             if (action.kind == "ui.launch") {
                 val app = action.app.orEmpty()

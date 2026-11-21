@@ -12,6 +12,7 @@ import com.hopa.contracts.turn.TurnResult
 object RemoteRuns {
     suspend fun execute(container: AppContainer, request: RemoteRunRequest): TurnResult {
         container.useGate(request.settings.trustedApps.toList())
+        container.useDecisions(request.settings.decisionMode, request.settings.shadowDecisions)
         val outcome = container.runTurn(
             container.request(
                 goal = request.goal,
