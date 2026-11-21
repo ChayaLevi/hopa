@@ -17,6 +17,7 @@ dependencies {
     api(project(":observation"))
     api(project(":runlog"))
     api(project(":decision"))
+    api(project(":decision-classifier"))
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)

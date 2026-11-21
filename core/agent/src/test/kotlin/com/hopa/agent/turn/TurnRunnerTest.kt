@@ -21,6 +21,7 @@ import com.hopa.contracts.wire.Action
 import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.ScreenSize
+import com.hopa.decision.classifier.IntentClassifier
 import com.hopa.runlog.record.RunRecordFactory
 import com.hopa.runlog.store.InMemoryRunRecorder
 import kotlinx.coroutines.runBlocking
@@ -113,6 +114,7 @@ class TurnRunnerTest {
         replies: List<String> = emptyList(),
         plan: List<String>? = null,
         store: RecipeStore? = null,
+        commands: Boolean = false,
     ) {
         val device = FakeDevice(screens)
         val policy = ScriptedPolicy(replies)
@@ -145,6 +147,7 @@ class TurnRunnerTest {
             plans = plan?.let { planned -> PlanSource { planned } },
             knowledge = { knowledge },
             settle = {},
+            commands = if (commands) IntentClassifier() else null,
         )
 
         fun request(
@@ -369,5 +372,66 @@ class TurnRunnerTest {
         assertEquals(1, outcome.executed)
         assertFalse(outcome.recipeSaved)
         assertNull(store.find("Open settings"))
+    }
+
+    @Test
+    fun a_canonical_command_runs_without_the_model() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Settings")),
+            replies = emptyList(),
+            commands = true,
+        )
+
+        val outcome = harness.runner.run(harness.request("open settings"))
+
+        assertEquals(TurnSource.COMMAND, outcome.source)
+        assertEquals(listOf(SETTINGS), harness.device.launches)
+        assertEquals("Opened Settings.", outcome.answer)
+        assertEquals(0, harness.policy.calls)
+        assertEquals(1, outcome.executed)
+    }
+
+    @Test
+    fun an_unrecognized_goal_still_uses_the_model() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Settings")),
+            replies = listOf("All done."),
+            commands = true,
+        )
+
+        val outcome = harness.runner.run(harness.request("купи хлеб"))
+
+        assertEquals(TurnSource.MODEL, outcome.source)
+        assertEquals(1, harness.policy.calls)
+    }
+
+    @Test
+    fun the_command_path_can_be_switched_off() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Settings")),
+            replies = listOf("All done."),
+            commands = true,
+        )
+
+        val outcome = harness.runner.run(
+            harness.request("open settings").copy(instantCommands = false),
+        )
+
+        assertEquals(TurnSource.MODEL, outcome.source)
+        assertEquals(1, harness.policy.calls)
+    }
+
+    @Test
+    fun back_is_a_command_too() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Settings")),
+            replies = emptyList(),
+            commands = true,
+        )
+
+        val outcome = harness.runner.run(harness.request("назад"))
+
+        assertEquals(TurnSource.COMMAND, outcome.source)
+        assertEquals("ui.back", outcome.records.single().action.kind)
     }
 }

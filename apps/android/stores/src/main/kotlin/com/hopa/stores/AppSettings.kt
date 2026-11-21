@@ -18,6 +18,8 @@ data class AppSettings(
     val planFirst: Boolean = false,
     /** Repeat a goal that worked before without asking the model. */
     val replaySkills: Boolean = true,
+    /** Run a recognized command (open, back, home, scroll, wait) without a model. */
+    val instantCommands: Boolean = true,
     /** Attach a screenshot to each model call (needs a model that sees images). */
     val vision: Boolean = false,
     /**

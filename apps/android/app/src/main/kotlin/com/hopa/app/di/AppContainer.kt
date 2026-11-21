@@ -40,6 +40,7 @@ import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.decision.DecisionCoordinator
 import com.hopa.decision.DecisionMode
 import com.hopa.decision.DecisionRegistry
+import com.hopa.decision.classifier.IntentClassifier
 import com.hopa.decision.laix.LaixDecisionLayer
 import com.hopa.decision.rules.RulesDecisionLayer
 import com.hopa.feature.capabilities.CapabilitiesDependencies
@@ -183,6 +184,9 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
             sink = decisionVotes,
         )
     }
+
+    /** Canonical commands that need no model at all. */
+    val commands: IntentClassifier = IntentClassifier()
     /**
      * The gate settings, replaced as a whole when they change. The executor
      * reads one snapshot per step, so a turn that starts while Settings is being
