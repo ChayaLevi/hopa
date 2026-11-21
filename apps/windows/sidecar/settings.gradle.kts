@@ -40,6 +40,8 @@ include(":decision-rules")
 project(":decision-rules").projectDir = file("../../../core/decision-rules")
 include(":decision-classifier")
 project(":decision-classifier").projectDir = file("../../../core/decision-classifier")
+include(":decision-graph")
+project(":decision-graph").projectDir = file("../../../core/decision-graph")
 
 include(":inference")
 project(":inference").projectDir = file("../../../core/inference")

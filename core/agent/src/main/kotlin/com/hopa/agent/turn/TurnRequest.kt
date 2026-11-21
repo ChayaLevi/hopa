@@ -46,6 +46,8 @@ data class TurnRequest(
     val replay: Boolean = true,
     /** Try the canonical-command path before the model. */
     val instantCommands: Boolean = true,
+    /** Try the hand-written known-app graphs before the model. */
+    val useGraphs: Boolean = true,
     /** One deadline for the whole turn, not per step. */
     val timeoutMillis: Long = 120_000,
 

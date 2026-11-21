@@ -59,6 +59,7 @@ class DecisionsScreenshotTest {
                     onMode = {},
                     onShadow = {},
                     onInstantCommands = {},
+                    onKnownGraphs = {},
                 )
             }
         }

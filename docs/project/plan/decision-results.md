@@ -62,6 +62,25 @@ for the closed command set, and a later stage for the rest. Canonical commands
 `instantCommands` turns that path off. Decisions on the plan and on the whole
 conversation are not implemented.
 
+## Known-app graphs (v0)
+
+A second path skips the model for a few apps written down by hand in
+`core/decision-graph`:
+
+| App | What it can do |
+|---|---|
+| Settings | open, Connections, Wi-Fi, Bluetooth |
+| Clock | open, Alarms, Timer |
+| Camera | open |
+
+Matching is literal: the current package and a visible string must identify the
+node, the goal must contain one of the edge's words, and the control to tap must
+be on screen. Anything else returns null and the model takes over. Every step
+goes through the normal executor, so an approval or a failed tap stops it
+honestly. The switch is **Known-app graphs** in Act -> Decisions (`knownGraphs`,
+on by default); turning it off restores the model-only path. Nothing is learned
+or recorded yet.
+
 ## The ten-task protocol (needs a phone)
 
 Run the same ten goals in three modes, twice each to catch flakes:

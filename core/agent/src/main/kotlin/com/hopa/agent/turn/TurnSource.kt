@@ -14,6 +14,9 @@ enum class TurnSource {
     /** A canonical command ran without asking a model. */
     COMMAND,
 
+    /** A hand-written graph for a known app ran the steps. */
+    GRAPH,
+
     /** No surface could see the screen, so the turn did not start. */
     UNAVAILABLE,
 }

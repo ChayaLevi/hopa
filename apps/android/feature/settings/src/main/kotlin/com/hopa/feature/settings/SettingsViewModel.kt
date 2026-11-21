@@ -193,6 +193,13 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun setKnownGraphs(value: Boolean) {
+        viewModelScope.launch {
+            preferences.setKnownGraphs(value)
+            reload()
+        }
+    }
+
     /** The framed picture or the cut-out object; see MascotAppearance. */
     fun setMascotFramed(value: Boolean) {
         viewModelScope.launch {

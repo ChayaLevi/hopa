@@ -184,6 +184,7 @@ on purpose; `ktlint` does too.
 | `core/decision-laix` (`:decision-laix`) | LAIX 0.18 action policy vendored at a pinned commit; `LaixDecisionLayer` is the only code that imports `dev.laix.*` |
 | `core/decision-report` (`:decision-report`) | the `decisionReport` task; the one list of shipped layers |
 | `core/decision-classifier` (`:decision-classifier`) | `IntentClassifier`: launch, back, home, scroll and wait, with a confidence threshold |
+| `core/decision-graph` (`:decision-graph`) | hand-written graphs for Settings, Clock and Camera; unknown screen or goal goes to the model |
 | `core/agent/.../TurnRunner` | runs a recognized command before the model; a miss falls through unchanged |
 | `core/agent/.../AgentLoop` | applies the selected layer to `READ` steps: ACT proceeds, VERIFY re-reads, WAIT/ASK/ESCALATE stop the step |
 | `apps/android/stores` | `AppSettings.instantCommands` (on by default) |
@@ -228,9 +229,15 @@ data class LayerDecision(..., val chosen: String? = null)
   adapter maps it back to `chosen`.
 - `failures` is the hook for graph statistics; nothing fills it yet.
 
-Still missing for a real graph: the graph source itself, a node key in the
-context, learning edge statistics from run records, and a plan step per edge.
-None of them require touching the loop again.
+A first graph source exists in `core/decision-graph` (`:decision-graph`): three
+hand-written apps (Settings, Clock, Camera), matched by package and visible text,
+with a tap resolved from the control's label. A miss on the screen, the control
+or the goal returns null and the model handles the turn. The switch is
+**Known-app graphs** on the Act -> Decisions page and `knownGraphs` in settings.
+
+Still missing for a general graph: a node key in the context, learning edge
+statistics from run records, a plan step per edge, and a screen to inspect or
+delete learned edges. None of them require touching the loop again.
 
 ## Stages
 

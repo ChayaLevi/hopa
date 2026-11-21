@@ -20,6 +20,8 @@ data class AppSettings(
     val replaySkills: Boolean = true,
     /** Run a recognized command (open, back, home, scroll, wait) without a model. */
     val instantCommands: Boolean = true,
+    /** Use the hand-written graphs for a few known apps before the model. */
+    val knownGraphs: Boolean = true,
     /** Attach a screenshot to each model call (needs a model that sees images). */
     val vision: Boolean = false,
     /**

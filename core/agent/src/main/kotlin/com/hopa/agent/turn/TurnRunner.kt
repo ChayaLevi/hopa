@@ -20,7 +20,9 @@ import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.turn.TurnResult
+import com.hopa.contracts.wire.RunRecord
 import com.hopa.decision.classifier.IntentClassifier
+import com.hopa.decision.graph.GraphStepSource
 import com.hopa.runlog.store.RunRecorder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
@@ -56,6 +58,8 @@ class TurnRunner(
     private val decisions: DecisionRuntime? = null,
     /** Canonical commands that need no model; null disables the fast path. */
     private val commands: IntentClassifier? = null,
+    /** Hand-written known-app graphs; null disables the path. */
+    private val graphs: GraphStepSource? = null,
     /** How long the screen gets between replayed steps; a test passes a no-op. */
     private val settle: suspend (Long) -> Unit = { delay(it) },
 ) {
@@ -91,6 +95,9 @@ class TurnRunner(
             if (recipe != null) {
                 replay(recipe, request, started, tables)?.let { return it }
             }
+        }
+        if (request.useGraphs && graphs != null) {
+            graph(request, started, tables, isCancelled)?.let { return it }
         }
         return fromModel(request, started, isCancelled, tables)
     }
@@ -182,6 +189,93 @@ class TurnRunner(
             surfaceName = request.surfaceName,
             finalScreen = outcome.screen,
             replaySteps = recipe.steps.mapIndexed { index, action -> "${index + 1}. ${action.kind}" },
+            millis = clock.nowMillis() - started,
+        )
+    }
+
+    /**
+     * A hand-written path for a known app.
+     *
+     * It executes at most a few steps, each through the normal executor, so an
+     * approval or a failed tap stops it honestly. A miss on the first screen
+     * returns null and the model handles the turn; a miss after some progress
+     * returns a partial outcome that names what was opened.
+     */
+    private suspend fun graph(
+        request: TurnRequest,
+        started: Long,
+        tables: CatalogSnapshot,
+        isCancelled: () -> Boolean,
+    ): TurnOutcome? {
+        val source = graphs ?: return null
+        var observation = runCatching { request.device.observe() }.getOrNull() ?: return null
+        val executor = executorFor(request.device)
+        val records = mutableListOf<RunRecord>()
+        val narration = mutableListOf<String>()
+        var answer: String = ""
+        for (step in 0 until MAX_GRAPH_STEPS) {
+            if (isCancelled()) {
+                break
+            }
+            val next = runCatching { source.next(observation, request.goal) }.getOrNull() ?: break
+            val result = runCatching {
+                executor.execute(
+                    runId = request.runId,
+                    step = step,
+                    traceId = request.traceId,
+                    action = next.action,
+                    before = observation,
+                )
+            }.getOrNull() ?: break
+            records += result.record
+            narration += RunNarrator.lines(listOf(result.record))
+            observation = result.observation
+            if (!result.record.executed || !result.record.error.isNullOrBlank()) {
+                return TurnOutcome(
+                    source = TurnSource.GRAPH,
+                    knowledgeVersion = tables.version,
+                    answer = "I could not finish that in ${next.graph}.",
+                    records = records,
+                    narration = narration,
+                    error = HopaError(
+                        ErrorCodes.BLOCKED,
+                        result.record.error ?: "the graph step did not run",
+                    ),
+                    surfaceName = request.surfaceName,
+                    finalScreen = observation,
+                    millis = clock.nowMillis() - started,
+                )
+            }
+            if (next.answer.isNotBlank()) {
+                answer = next.answer
+            }
+            if (next.done) {
+                return TurnOutcome(
+                    source = TurnSource.GRAPH,
+                    knowledgeVersion = tables.version,
+                    answer = answer.ifBlank { "Done." },
+                    records = records,
+                    narration = narration,
+                    surfaceName = request.surfaceName,
+                    finalScreen = observation,
+                    millis = clock.nowMillis() - started,
+                )
+            }
+            settle(GRAPH_SETTLE_MS)
+        }
+        if (records.isEmpty()) {
+            return null
+        }
+        return TurnOutcome(
+            source = TurnSource.GRAPH,
+            knowledgeVersion = tables.version,
+            answer = answer.ifBlank {
+                "I opened the app, but I do not know the next step for that goal."
+            },
+            records = records,
+            narration = narration,
+            surfaceName = request.surfaceName,
+            finalScreen = observation,
             millis = clock.nowMillis() - started,
         )
     }
@@ -300,5 +394,11 @@ class TurnRunner(
         "I stopped after ${timeoutMillis / 60_000} minutes."
     } else {
         "I stopped after ${timeoutMillis / 1_000} seconds."
+    }
+
+    private companion object {
+        /** A hand-written path is five edges at most; beyond that it is a plan. */
+        const val MAX_GRAPH_STEPS = 5
+        const val GRAPH_SETTLE_MS = 800L
     }
 }
