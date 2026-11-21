@@ -117,6 +117,67 @@ paths:
           description: The caller's copy is current
         "401":
           description: A paired device token is required
+  /v1/models:
+    get:
+      summary: The on-device model manifest
+      description: |
+        The models this phone may download. The body is `models.v1.json` from the
+        server's models directory, in the same shape the app already decodes;
+        `version` is a digest of the entries, so `If-None-Match` with that value
+        answers 304. A server with no directory configured answers an empty
+        manifest, which is the app's local fallback. A paired device token is
+        required.
+      parameters:
+        - name: If-None-Match
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: The manifest
+          headers:
+            ETag:
+              schema: { type: string }
+            Cache-Control:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ModelManifest" }
+        "304":
+          description: The caller's copy is current
+        "401":
+          description: A paired device token is required
+  /v1/models/{id}:
+    get:
+      summary: One model file
+      description: |
+        Streams the GGUF weights of one entry of the manifest. `id` is the
+        manifest id, not the file name. The `ETag` is the model's sha256, and
+        `If-None-Match` with it answers 304. A paired device token is required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: If-None-Match
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: The model file
+          headers:
+            ETag:
+              schema: { type: string }
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        "304":
+          description: The caller's copy is current
+        "401":
+          description: A paired device token is required
+        "404":
+          description: Unknown id, or no file behind it
   /v1/pair/sessions:
     post:
       summary: Mint a pairing session and its QR payload
@@ -277,6 +338,56 @@ components:
       scheme: bearer
       description: Operator bootstrap token from the environment; creates pairing sessions only.
   schemas:
+    ModelManifest:
+      type: object
+      required: [schemaVersion, version, models]
+      properties:
+        schemaVersion: { type: integer, enum: [1] }
+        version: { type: string }
+        models:
+          type: array
+          items: { $ref: "#/components/schemas/ModelSpec" }
+    ModelSpec:
+      type: object
+      required:
+        - id
+        - name
+        - modelClass
+        - parameters
+        - bytes
+        - minRamGb
+        - contextTokens
+        - speedClass
+        - license
+      properties:
+        id: { type: string }
+        name: { type: string }
+        modelClass:
+          type: string
+          enum: [ROUTER, FAST, BALANCED, TOOLS, LARGE, REASONING]
+        file: { type: string }
+        parameters: { type: string }
+        quantization: { type: string }
+        bytes: { type: integer, minimum: 0 }
+        minRamGb: { type: integer, minimum: 0 }
+        contextTokens: { type: integer, minimum: 1 }
+        speedClass: { type: string }
+        supportsTools: { type: boolean }
+        thinking: { type: boolean }
+        license: { type: string }
+        licenseUrl: { type: string }
+        url: { type: string }
+        sha256: { type: string }
+        strengths:
+          type: array
+          items: { type: string }
+        weaknesses:
+          type: array
+          items: { type: string }
+        notes:
+          type: array
+          items: { type: string }
+        preferred: { type: boolean }
     Error:
       type: object
       required: [code, message, retryable, traceId]
