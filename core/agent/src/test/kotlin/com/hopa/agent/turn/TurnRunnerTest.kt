@@ -392,6 +392,23 @@ class TurnRunnerTest {
     }
 
     @Test
+    fun a_canonical_command_skips_the_plan_gate() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Settings")),
+            replies = emptyList(),
+            plan = listOf("Open Settings", "Tap Connections"),
+            commands = true,
+        )
+
+        val outcome = harness.runner.run(harness.request("open settings", planFirst = true))
+
+        assertEquals(TurnSource.COMMAND, outcome.source)
+        assertEquals(listOf(SETTINGS), harness.device.launches)
+        assertEquals(0, harness.policy.calls)
+        assertTrue(outcome.pendingPlan.isEmpty())
+    }
+
+    @Test
     fun an_unrecognized_goal_still_uses_the_model() = runBlocking {
         val harness = Harness(
             screens = listOf(labelled("Settings")),

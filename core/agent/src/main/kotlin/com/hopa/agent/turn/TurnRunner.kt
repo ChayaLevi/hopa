@@ -65,9 +65,6 @@ class TurnRunner(
         // receipt must name the one this turn actually routed with.
         val tables = knowledge()
 
-        if (request.planFirst && !request.planApproved) {
-            return plan(request, started)
-        }
         if (!request.surfaceAvailable) {
             return TurnOutcome(
                 source = TurnSource.UNAVAILABLE,
@@ -80,14 +77,20 @@ class TurnRunner(
                 millis = clock.nowMillis() - started,
             )
         }
+        // A canonical command needs no plan: asking a model to write steps for
+        // "open settings" is slower and less predictable than opening it. The
+        // path still falls through to the plan gate on any doubt.
+        if (request.instantCommands && commands != null) {
+            command(request, started, tables)?.let { return it }
+        }
+        if (request.planFirst && !request.planApproved) {
+            return plan(request, started)
+        }
         if (request.replay) {
             val recipe = runCatching { recipes?.find(request.goal) }.getOrNull()
             if (recipe != null) {
                 replay(recipe, request, started, tables)?.let { return it }
             }
-        }
-        if (request.instantCommands && commands != null) {
-            command(request, started, tables)?.let { return it }
         }
         return fromModel(request, started, isCancelled, tables)
     }

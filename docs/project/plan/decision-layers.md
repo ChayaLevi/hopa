@@ -248,7 +248,9 @@ model otherwise.
 The closed set is launch (any installed app, matched by label or package),
 back, home, scroll up/down and wait. It is not a `DecisionLayer`: it replaces
 the whole turn, not one step, so it lives in `TurnRunner` as a path before the
-model. A hit produces `TurnSource.COMMAND`, one run record, no tokens and a
+plan gate and the model: asking a model for steps to "open settings" is slower
+and less predictable than opening it. A hit produces `TurnSource.COMMAND`, one
+run record, no tokens and a
 plain answer; a miss, an unknown app, an ambiguous label, an unreadable screen
 or a thrown step all fall through to the model. `instantCommands` turns the
 path off. Taps, typing and anything that changes a setting are deliberately not
