@@ -1,6 +1,5 @@
 package com.hopa.inference.client
 
-import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelReply
 import com.hopa.contracts.model.ModelRequest
 import com.hopa.contracts.model.ModelWithGrammar
@@ -17,12 +16,11 @@ import com.hopa.inference.local.ModelNotLoaded
 class LocalModel(
     private val engine: LocalEngine?,
 ) : ModelWithGrammar {
-    override suspend fun complete(request: ModelRequest): ModelReply =
-        complete(request, grammar = "")
+    override suspend fun complete(request: ModelRequest): ModelReply = complete(request, grammar = "")
 
-    override suspend fun complete(request: ModelRequest, grammar: String): ModelReply =
-        engine?.complete(request, grammar)
-            ?: throw ModelNotLoaded(
-                "No on-device model is loaded. Choose a model file in Settings, then try again.",
-            )
+    override suspend fun complete(request: ModelRequest, grammar: String): ModelReply {
+        return engine?.complete(request, grammar) ?: throw ModelNotLoaded(
+            "No on-device model is loaded. Choose a model file in Settings, then try again.",
+        )
+    }
 }
