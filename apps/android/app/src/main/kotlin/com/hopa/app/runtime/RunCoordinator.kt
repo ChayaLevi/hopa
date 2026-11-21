@@ -37,6 +37,7 @@ class RunCoordinator(
             plans = ModelPlanSource(container.model) { planEnvironment() },
             knowledge = { container.knowledge },
             decisions = container.decisions,
+            commands = container.commands,
         )
     }
 
@@ -117,6 +118,7 @@ class RunCoordinator(
             phoneAccess = phoneAccess ?: (device.sourceName != "fallback"),
             checkpoints = checkpoints,
             replay = settings.replaySkills,
+            instantCommands = settings.instantCommands,
             surfaceName = device.sourceName,
             surfaceAvailable = device.sourceName != "fallback",
             surfaceError = device.lastError,

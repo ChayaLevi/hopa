@@ -44,6 +44,8 @@ data class TurnRequest(
     val planApproved: Boolean = false,
     /** Try the cheap recipe path before the model. */
     val replay: Boolean = true,
+    /** Try the canonical-command path before the model. */
+    val instantCommands: Boolean = true,
     /** One deadline for the whole turn, not per step. */
     val timeoutMillis: Long = 120_000,
 

@@ -1,6 +1,6 @@
 # Decision layers
 
-Status: D1-D4 done (2026-11-21); D5-D7 planned
+Status: D1-D5 done (2026-11-21); D6-D7 planned
 
 HOPA will use **several decision layers**, not one. LAIX is the first to try, a
 rules layer is the baseline, a small intent classifier may follow, and a
@@ -183,6 +183,9 @@ on purpose; `ktlint` does too.
 | `core/decision-rules` (`:decision-rules`) | `RulesDecisionLayer` |
 | `core/decision-laix` (`:decision-laix`) | LAIX 0.18 action policy vendored at a pinned commit; `LaixDecisionLayer` is the only code that imports `dev.laix.*` |
 | `core/decision-report` (`:decision-report`) | the `decisionReport` task; the one list of shipped layers |
+| `core/decision-classifier` (`:decision-classifier`) | `IntentClassifier`: launch, back, home, scroll and wait, with a confidence threshold |
+| `core/agent/.../TurnRunner` | runs a recognized command before the model; a miss falls through unchanged |
+| `apps/android/stores` | `AppSettings.instantCommands` (on by default) |
 | `core/agent` | `DecisionRuntime`: the loop's one way to ask, with mode and shadow as suppliers |
 | `core/agent/.../AgentLoop` | calls the runtime after the model's action is parsed; the vote is data, the action still runs |
 | `apps/android/data` | `decision_votes` table (schema 9), `DbDecisionVoteSink` |
@@ -233,11 +236,20 @@ its row in the comparison table. Only the action policy and the shapes it
 returns are copied; `LAIX.md` lists the files and the update rules. The adapter
 never offers `ACT` for a payment or a delete: those are `ASK` by construction.
 
-### D5 - intent classifier for closed commands (1-2 PRs)
+### D5 - intent classifier for closed commands (1 PR) - done
 
 15-20 canonical commands, a small JVM classifier with a confidence threshold,
 and a path that skips the model when the intent is clear. Falls back to the
 model otherwise.
+
+The closed set is launch (any installed app, matched by label or package),
+back, home, scroll up/down and wait. It is not a `DecisionLayer`: it replaces
+the whole turn, not one step, so it lives in `TurnRunner` as a path before the
+model. A hit produces `TurnSource.COMMAND`, one run record, no tokens and a
+plain answer; a miss, an unknown app, an ambiguous label, an unreadable screen
+or a thrown step all fall through to the model. `instantCommands` turns the
+path off. Taps, typing and anything that changes a setting are deliberately not
+classified: those need the screen the model reads.
 
 ### D6 - enable for safe actions (1 PR)
 
@@ -262,7 +274,7 @@ Decisions
   (o) Automatic - the best allowed layer for each action
   ( ) Rules only
   ( ) LAIX
-  ( ) Intent classifier            [experimental]
+  [x] Instant commands - open, back, home, scroll and wait skip the model
   [x] Record what other layers would have decided (shadow)
   Active now: Automatic -> Rules + LAIX (safe actions)
 ```

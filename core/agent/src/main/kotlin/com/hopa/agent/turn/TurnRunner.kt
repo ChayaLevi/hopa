@@ -6,6 +6,7 @@ import com.hopa.agent.decision.StepPolicy
 import com.hopa.agent.goal.GoalVerification
 import com.hopa.agent.goal.GoalVerifier
 import com.hopa.agent.loop.AgentLoop
+import com.hopa.agent.loop.RunNarrator
 import com.hopa.agent.plan.PlanSource
 import com.hopa.agent.recipe.Recipe
 import com.hopa.agent.recipe.RecipeStore
@@ -19,6 +20,7 @@ import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.turn.TurnResult
+import com.hopa.decision.classifier.IntentClassifier
 import com.hopa.runlog.store.RunRecorder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
@@ -52,6 +54,8 @@ class TurnRunner(
     private val knowledge: () -> CatalogSnapshot,
     /** Decision layers; null in a client that has none registered. */
     private val decisions: DecisionRuntime? = null,
+    /** Canonical commands that need no model; null disables the fast path. */
+    private val commands: IntentClassifier? = null,
     /** How long the screen gets between replayed steps; a test passes a no-op. */
     private val settle: suspend (Long) -> Unit = { delay(it) },
 ) {
@@ -82,7 +86,49 @@ class TurnRunner(
                 replay(recipe, request, started, tables)?.let { return it }
             }
         }
+        if (request.instantCommands && commands != null) {
+            command(request, started, tables)?.let { return it }
+        }
         return fromModel(request, started, isCancelled, tables)
+    }
+
+    /**
+     * A canonical command, executed without a model.
+     *
+     * The classifier returns null for anything it is not sure about, and so
+     * does this path when the screen cannot be read or the step throws: the
+     * model then handles the turn exactly as before. One step, one record, no
+     * tokens, and the answer names what happened.
+     */
+    private suspend fun command(request: TurnRequest, started: Long, tables: CatalogSnapshot): TurnOutcome? {
+        val classifier = commands ?: return null
+        val match = runCatching { classifier.classify(request.goal, request.installedApps) }
+            .getOrNull() ?: return null
+        val before = runCatching { request.device.observe() }.getOrNull() ?: return null
+        val result = runCatching {
+            executorFor(request.device).execute(
+                runId = request.runId,
+                step = 0,
+                traceId = request.traceId,
+                action = match.intent.action,
+                before = before,
+            )
+        }.getOrNull() ?: return null
+        val error = result.record.error
+        return TurnOutcome(
+            source = TurnSource.COMMAND,
+            knowledgeVersion = tables.version,
+            answer = match.intent.answer,
+            records = listOf(result.record),
+            narration = RunNarrator.lines(listOf(result.record)),
+            error = if (result.record.executed && error.isNullOrBlank()) {
+                null
+            } else {
+                HopaError(ErrorCodes.BLOCKED, error ?: "the step did not run")
+            },
+            surfaceName = request.surfaceName,
+            millis = clock.nowMillis() - started,
+        )
     }
 
     /** Answers with the steps to approve; the person's yes sends a new request. */

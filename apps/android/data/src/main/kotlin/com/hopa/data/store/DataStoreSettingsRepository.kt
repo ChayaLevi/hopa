@@ -35,6 +35,7 @@ class DataStoreSettingsRepository(
             screenPath = prefs[SCREEN_PATH] ?: "auto",
             planFirst = prefs[PLAN_FIRST] ?: false,
             replaySkills = prefs[REPLAY_SKILLS] ?: true,
+            instantCommands = prefs[INSTANT_COMMANDS] ?: true,
             vision = prefs[VISION] ?: false,
             mascotFramed = prefs[MASCOT_FRAMED] ?: false,
             trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
@@ -63,6 +64,7 @@ class DataStoreSettingsRepository(
             prefs[SCREEN_PATH] = next.screenPath
             prefs[PLAN_FIRST] = next.planFirst
             prefs[REPLAY_SKILLS] = next.replaySkills
+            prefs[INSTANT_COMMANDS] = next.instantCommands
             prefs[VISION] = next.vision
         prefs[MASCOT_FRAMED] = next.mascotFramed
             prefs[TRUSTED_APPS] = next.trustedApps
@@ -128,6 +130,7 @@ class DataStoreSettingsRepository(
         val SCREEN_PATH = stringPreferencesKey("screen_path")
         val PLAN_FIRST = booleanPreferencesKey("plan_first")
         val REPLAY_SKILLS = booleanPreferencesKey("replay_skills")
+        val INSTANT_COMMANDS = booleanPreferencesKey("instant_commands")
         val VISION = booleanPreferencesKey("vision")
     val MASCOT_FRAMED = booleanPreferencesKey("mascot_framed")
         val TRUSTED_APPS = stringSetPreferencesKey("trusted_apps")

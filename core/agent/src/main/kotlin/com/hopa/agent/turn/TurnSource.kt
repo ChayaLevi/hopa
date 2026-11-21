@@ -11,6 +11,9 @@ enum class TurnSource {
     /** The plan gate answered; nothing was tapped and the person decides next. */
     PLAN,
 
+    /** A canonical command ran without asking a model. */
+    COMMAND,
+
     /** No surface could see the screen, so the turn did not start. */
     UNAVAILABLE,
 }
