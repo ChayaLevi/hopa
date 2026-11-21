@@ -486,6 +486,29 @@ class TurnRunnerTest {
     }
 
     @Test
+    fun a_known_graph_skips_the_plan_gate() = runBlocking {
+        val step = com.hopa.decision.graph.GraphStep(
+            graph = "Settings",
+            node = "start",
+            action = Action(kind = "ui.launch", app = SETTINGS),
+            answer = "Opened Settings.",
+            done = true,
+        )
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = emptyList(),
+            plan = listOf("Open Settings", "Tap Connections"),
+            graphs = FakeGraph(listOf(step)),
+        )
+
+        val outcome = harness.runner.run(harness.request("open settings", planFirst = true))
+
+        assertEquals(TurnSource.GRAPH, outcome.source)
+        assertTrue(outcome.pendingPlan.isEmpty())
+        assertEquals(listOf(SETTINGS), harness.device.launches)
+    }
+
+    @Test
     fun a_graph_miss_falls_through_to_the_model() = runBlocking {
         val harness = Harness(
             screens = listOf(labelled("Home")),

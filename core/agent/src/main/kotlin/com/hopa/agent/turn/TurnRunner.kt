@@ -87,6 +87,11 @@ class TurnRunner(
         if (request.instantCommands && commands != null) {
             command(request, started, tables)?.let { return it }
         }
+        // A known path needs no plan: asking a model for steps to "open Wi-Fi
+        // settings" is slower and less predictable than the written edges.
+        if (request.useGraphs && graphs != null) {
+            graph(request, started, tables, isCancelled)?.let { return it }
+        }
         if (request.planFirst && !request.planApproved) {
             return plan(request, started)
         }
@@ -95,9 +100,6 @@ class TurnRunner(
             if (recipe != null) {
                 replay(recipe, request, started, tables)?.let { return it }
             }
-        }
-        if (request.useGraphs && graphs != null) {
-            graph(request, started, tables, isCancelled)?.let { return it }
         }
         return fromModel(request, started, isCancelled, tables)
     }
