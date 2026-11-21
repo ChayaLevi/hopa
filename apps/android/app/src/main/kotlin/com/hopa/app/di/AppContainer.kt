@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
 import com.hopa.agent.action.ActionExecutor
 import com.hopa.agent.action.ApprovalPolicy
+import com.hopa.agent.decision.DecisionRuntime
 import com.hopa.app.BuildConfig
 import com.hopa.app.link.push.PushTokenFetch
 import com.hopa.app.link.push.FirebaseToken
@@ -33,8 +34,13 @@ import com.hopa.contracts.ports.DevicePort
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DataStoreSettingsRepository
 import com.hopa.data.store.DbConversationStore
+import com.hopa.data.store.DbDecisionVoteSink
 import com.hopa.data.store.DbRunRecorder
 import com.hopa.data.store.KeystoreSecretStore
+import com.hopa.decision.DecisionCoordinator
+import com.hopa.decision.DecisionMode
+import com.hopa.decision.DecisionRegistry
+import com.hopa.decision.rules.RulesDecisionLayer
 import com.hopa.feature.capabilities.CapabilitiesDependencies
 import com.hopa.feature.conversations.ChatSyncOutcome
 import com.hopa.feature.chat.ChatDependencies
@@ -143,6 +149,38 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     override val memory = com.hopa.data.store.DbMemoryStore(database.memoryDao())
     override val skills = com.hopa.data.store.DbSkillStore(database.skillDao())
     val clock = AndroidClock()
+
+    /**
+     * Which layer decides, and whether the others vote. Both are replaced as a
+     * whole before a turn starts, so no step sees half of a new setting.
+     */
+    @Volatile
+    private var decisionMode: DecisionMode = DecisionMode.Off
+
+    @Volatile
+    private var shadowDecisions = false
+
+    /** Use these decision settings for the steps of the turns that start now. */
+    override fun useDecisions(mode: String, shadow: Boolean) {
+        decisionMode = DecisionMode.parse(mode)
+        shadowDecisions = shadow
+    }
+
+    private val decisionVotes: DbDecisionVoteSink by lazy {
+        DbDecisionVoteSink(database.decisionVoteDao(), clock) { decisionMode }
+    }
+
+    /** The layers this build ships; a new adapter is one entry here. */
+    private val decisionRegistry: DecisionRegistry = DecisionRegistry(listOf(RulesDecisionLayer()))
+
+    val decisions: DecisionRuntime by lazy {
+        DecisionRuntime(
+            coordinator = DecisionCoordinator(decisionRegistry),
+            mode = { decisionMode },
+            shadow = { shadowDecisions },
+            sink = decisionVotes,
+        )
+    }
     /**
      * The gate settings, replaced as a whole when they change. The executor
      * reads one snapshot per step, so a turn that starts while Settings is being

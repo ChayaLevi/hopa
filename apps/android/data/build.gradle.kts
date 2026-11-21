@@ -31,6 +31,7 @@ dependencies {
     api(project(":runlog"))
     api(project(":contracts"))
     api(project(":catalog"))
+    api(project(":decision"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.datastore.preferences)

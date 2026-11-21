@@ -1,6 +1,7 @@
 package com.hopa.agent.turn
 
 import com.hopa.agent.action.ActionExecutor
+import com.hopa.agent.decision.DecisionRuntime
 import com.hopa.agent.decision.StepPolicy
 import com.hopa.agent.goal.GoalVerification
 import com.hopa.agent.goal.GoalVerifier
@@ -49,6 +50,8 @@ class TurnRunner(
     private val verifier: GoalVerifier = GoalVerifier(),
     /** The tables this client uses; read per turn, so an update applies next time. */
     private val knowledge: () -> CatalogSnapshot,
+    /** Decision layers; null in a client that has none registered. */
+    private val decisions: DecisionRuntime? = null,
     /** How long the screen gets between replayed steps; a test passes a no-op. */
     private val settle: suspend (Long) -> Unit = { delay(it) },
 ) {
@@ -148,6 +151,7 @@ class TurnRunner(
             clock = clock,
             webAvailable = request.webAvailable,
             knowledge = tables,
+            decisions = decisions,
         )
         val result = withTimeoutOrNull(request.timeoutMillis) {
             loop.run(

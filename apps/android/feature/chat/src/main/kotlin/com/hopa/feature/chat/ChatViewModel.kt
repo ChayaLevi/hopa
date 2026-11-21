@@ -353,6 +353,7 @@ class ChatViewModel @Inject constructor(
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
             container.useGate(current.trustedApps.toList())
+        container.useDecisions(current.decisionMode, current.shadowDecisions)
             val preferred = ScreenPath.of(current.screenPath)
 
             // Plan-first gate: show the plan before anything is tapped. A plan

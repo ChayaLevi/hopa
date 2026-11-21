@@ -36,6 +36,7 @@ class RunCoordinator(
             replayAnswer = ReplayAnswer(container.model),
             plans = ModelPlanSource(container.model) { planEnvironment() },
             knowledge = { container.knowledge },
+            decisions = container.decisions,
         )
     }
 

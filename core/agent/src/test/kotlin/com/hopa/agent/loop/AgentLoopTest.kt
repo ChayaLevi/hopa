@@ -2,6 +2,7 @@ package com.hopa.agent.loop
 
 import com.hopa.agent.action.ActionExecutor
 import com.hopa.agent.action.ApprovalPolicy
+import com.hopa.agent.decision.DecisionRuntime
 import com.hopa.agent.decision.model.ModelStepPolicy
 import com.hopa.catalog.testing.TestCatalog
 import com.hopa.contracts.model.ModelPort
@@ -13,6 +14,19 @@ import com.hopa.contracts.testing.FakeApproval
 import com.hopa.contracts.testing.FakeClock
 import com.hopa.contracts.testing.FakeDevice
 import com.hopa.contracts.turn.TurnContext
+import com.hopa.decision.ActionClass
+import com.hopa.decision.ConformanceStatus
+import com.hopa.decision.DecisionContext
+import com.hopa.decision.DecisionCoordinator
+import com.hopa.decision.DecisionLayer
+import com.hopa.decision.DecisionMode
+import com.hopa.decision.DecisionRegistry
+import com.hopa.decision.DecisionRun
+import com.hopa.decision.LatencyClass
+import com.hopa.decision.LayerDecision
+import com.hopa.decision.LayerMetadata
+import com.hopa.decision.LayerStatus
+import com.hopa.decision.Verb
 import com.hopa.runlog.record.RunRecordFactory
 import com.hopa.runlog.store.InMemoryRunRecorder
 import kotlinx.coroutines.runBlocking
@@ -102,6 +116,43 @@ class AgentLoopTest {
     }
 
     @Test
+    fun a_shadow_vote_is_recorded_and_changes_nothing() {
+        val votes = mutableListOf<DecisionRun>()
+        val asking = object : DecisionLayer {
+            override val metadata = LayerMetadata(
+                id = "asking",
+                version = "1.0.0",
+                latency = LatencyClass.MICRO,
+                decidesUpTo = ActionClass.DANGEROUS,
+                status = LayerStatus.DEFAULT,
+                conformance = ConformanceStatus.PASSED,
+                author = "test",
+                summary = "asks about everything",
+            )
+
+            override suspend fun decide(context: DecisionContext): LayerDecision =
+                LayerDecision(Verb.ASK, "always_ask", 0.9, "asking about everything")
+        }
+        val decisions = DecisionRuntime(
+            coordinator = DecisionCoordinator(DecisionRegistry(listOf(asking))),
+            mode = { DecisionMode.Automatic },
+            shadow = { true },
+            sink = { _, run -> votes += run },
+        )
+        val harness = Harness(replies = listOf(TAP, "Done."), decisions = decisions)
+        val result = runBlocking {
+            harness.loop.run("run-8", "trace-8", TurnContext("open settings")) { false }
+        }
+
+        // The layer said ASK; the model path still tapped, because D3 applies nothing.
+        assertEquals(1, harness.device.taps)
+        assertEquals(1, result.records.size)
+        assertEquals(1, votes.size)
+        assertEquals(Verb.ASK, votes.single().applied?.verb)
+        assertEquals("always_ask", votes.single().applied?.reason)
+    }
+
+    @Test
     fun the_prompt_carries_the_packages_installed_on_this_phone() {
         val harness = Harness(replies = listOf("Done."))
         val installed = listOf(InstalledApp("tv.danmaku.bili", "Bilibili"))
@@ -123,6 +174,7 @@ class AgentLoopTest {
         replies: List<String>,
         val device: FakeDevice = FakeDevice(),
         approval: FakeApproval = FakeApproval(),
+        decisions: DecisionRuntime? = null,
     ) {
         val recorder = InMemoryRunRecorder()
         val model = ScriptedModel(replies)
@@ -144,6 +196,7 @@ class AgentLoopTest {
             recorder = recorder,
             clock = clock,
             knowledge = TestCatalog.value,
+            decisions = decisions,
         )
     }
 
