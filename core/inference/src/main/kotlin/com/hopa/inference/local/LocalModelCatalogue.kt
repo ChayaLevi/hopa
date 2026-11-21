@@ -9,7 +9,7 @@ package com.hopa.inference.local
  * that changes the choice. Sizes are Q4_K_M and rounded down.
  */
 object LocalModelCatalogue {
-    const val VERSION: String = "catalogue:2026-11-20"
+    const val VERSION: String = "catalogue:2026-11-21"
 
     val models: List<ModelSpec> = listOf(
         // Router and tiny: the first filter, cheap enough to run on any phone.
@@ -116,14 +116,25 @@ object LocalModelCatalogue {
             name = "Gemma 3 1B",
             modelClass = ModelClass.FAST,
             parameters = "1B",
-            bytes = 900_000_000,
+            bytes = 806_058_240,
             minRamGb = 4,
             contextTokens = 32_000,
             speedClass = "medium",
             license = "Gemma Terms of Use",
-            strengths = listOf("instruction following", "32k context", "140+ languages"),
-            weaknesses = listOf("tool choice", "256k vocabulary inflates the file"),
-            notes = listOf("the multilingual pick when Russian matters"),
+            licenseUrl = "https://ai.google.dev/gemma/terms",
+            url = "https://huggingface.co/ggml-org/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf",
+            sha256 = "8ccc5cd1f1b3602548715ae25a66ed73fd5dc68a210412eea643eb20eb75a135",
+            strengths = listOf(
+                "downloads from inside the app",
+                "instruction following",
+                "32k context",
+                "140+ languages",
+            ),
+            weaknesses = listOf("tool choice", "its own licence, not open source"),
+            notes = listOf(
+                "the multilingual pick when Russian matters; " +
+                    "the file is the llama.cpp quant of Google's weights",
+            ),
         ),
         ModelSpec(
             id = "smollm2-1.7b",
