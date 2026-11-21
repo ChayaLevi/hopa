@@ -1,6 +1,6 @@
 # Decision layers
 
-Status: planned (2026-11-21)
+Status: D1-D2 done (2026-11-21); D3-D7 planned
 
 HOPA will use **several decision layers**, not one. LAIX is the first to try, a
 rules layer is the baseline, a small intent classifier may follow, and a
@@ -27,27 +27,44 @@ commitments and an audit trail - and it ships a Kotlin/JVM implementation
 
 ```kotlin
 interface DecisionLayer {
-    val id: String
-    suspend fun decide(context: DecisionContext): Decision
+    val metadata: LayerMetadata
+    suspend fun decide(context: DecisionContext): LayerDecision
 }
 
-data class DecisionContext(
-    val action: Action,            // what is about to happen
-    val screen: String,            // the current screen summary
-    val history: List<String>,     // the steps already taken
-    val approvals: List<String>,   // what a person already allowed
-    val budget: AttentionBudget,   // how much interruption is left
+data class LayerMetadata(
+    val id: String,
+    val version: String,
+    val latency: LatencyClass,      // MICRO | MILLI | SECONDS
+    val decidesUpTo: ActionClass,   // READ | CHANGE | DANGEROUS
+    val status: LayerStatus,        // EXPERIMENTAL | SHADOW | DEFAULT | RETIRED
+    val conformance: ConformanceStatus, // NOT_RUN | PASSED | FAILED
+    val author: String,
+    val summary: String,
 )
 
-data class Decision(
+data class DecisionContext(
+    val runId: String,
+    val step: Int,
+    val action: Action?,            // what is about to happen
+    val screen: String,             // the current screen summary
+    val history: List<String>,      // action signatures already taken
+    val approvals: List<String>,    // signatures a person already allowed
+    val attention: AttentionBudget, // how much interruption is left
+    val cancelled: Boolean,
+    val atStepLimit: Boolean,
+)
+
+data class LayerDecision(
     val verb: Verb,                // ACT | WAIT | ASK | VERIFY | ESCALATE
     val reason: String,            // a stable code, never prose
     val confidence: Double,        // 0..1
     val trace: String,             // one line for the run log
 )
-
-enum class Verb { ACT, WAIT, ASK, VERIFY, ESCALATE }
 ```
+
+The output is `LayerDecision`, not `Decision`: `com.hopa.contracts.wire.Decision`
+is already the model's wire answer (say / done / needUser), and two types with
+one name in one loop is how a bug is born.
 
 No vendor type crosses this boundary. LAIX, rules, a classifier or a model
 judge are all adapters behind it, so a pre-1.0 API cannot leak into the loop.
@@ -59,25 +76,33 @@ Every layer registers with:
 | Field | Why |
 |---|---|
 | `id`, `version` | the run log must name what decided |
-| `latencyClass` | `micro` / `milli` / `seconds` - a phone cannot wait for the last one per step |
-| `riskClass` | `safe` / `careful` / `dangerous` - what it may decide alone |
-| `status` | `experimental` / `shadow` / `default` / `retired` |
-| `author` | who to ask when it misbehaves |
+| `latency` | `MICRO` / `MILLI` / `SECONDS` - a phone cannot wait for the last one per step |
+| `decidesUpTo` | the strongest action class it may decide alone |
+| `status` | `EXPERIMENTAL` / `SHADOW` / `DEFAULT` / `RETIRED` |
+| `conformance` | `NOT_RUN` / `PASSED` / `FAILED`; only `PASSED` layers may decide |
+| `author`, `summary` | who to ask when it misbehaves, and what it is good at |
 
-The registry lists layers; it does not decide which one runs.
+The registry lists layers; it does not decide which one runs. It refuses a
+duplicate id at construction, so a misconfigured build fails in a test rather
+than on a phone.
 
 ## Choosing a layer is policy, not a winner-take-all
 
 A single global "best layer" is wrong: the class of action decides.
 
-| Action class | Allowed layers |
-|---|---|
-| `ui.launch`, `ui.read`, navigation | layers of `riskClass = safe` |
-| settings changes | safe and careful layers |
-| payments, delete, reset, uninstall | only layers that passed conformance, and the person still approves |
-| everything else | the default layer, with the rules layer as fallback |
+| Action class | Wire actions | Allowed layers |
+|---|---|---|
+| `READ` | `ui.observe`, `ui.back`, `ui.home`, `ui.launch`, `ui.scroll`, `ui.wait`, `ui.stop`, `web.read` | layers whose `decidesUpTo` is at least `READ` |
+| `CHANGE` | taps, typing, swipes, app functions, navigation and calls | layers whose `decidesUpTo` is at least `CHANGE` |
+| `DANGEROUS` | payments, delete, uninstall, reset, **and every unknown kind** | layers that cover `DANGEROUS` and passed conformance; the person still approves |
 
-The policy lives in `:core:decision` and is configuration, not code in the loop.
+Under `Automatic`, the first `DEFAULT` layer allowed for the class is applied.
+A pinned layer that cannot cover the class, is retired or has not passed
+conformance is skipped with a notice, and `Automatic` decides instead. The
+`requiresApproval` flag stays true for `DANGEROUS` whatever is selected.
+
+The policy lives in `core/decision` (`:decision`) and is configuration, not code
+in the loop.
 
 ## Conformance kit
 
@@ -134,18 +159,39 @@ model path was the only correct answer.
 Decision: included build for the spike, vendored sources for anything merged.
 No `latest`, no SNAPSHOT.
 
+## In the build now (D1-D2)
+
+| Where | What |
+|---|---|
+| `core/decision` (`:decision`) | `DecisionLayer`, `LayerMetadata`, `DecisionContext`, `LayerDecision`, `DecisionRegistry`, `DecisionSelector`, `DecisionCoordinator`, `DecisionVote`, `ConformanceKit`, `ComparisonHarness` |
+| `core/decision-rules` (`:decision-rules`) | `RulesDecisionLayer`, the `decisionReport` task |
+| `spec/decisions/corpus.v1.json` | 17 cases, each with a reference answer and the defensible answers |
+| `spec/decisions/README.md` | the case format and the rules for adding one |
+
+Commands, from `apps/android`:
+
+```
+gradlew :decision:test :decision-rules:test        # contract, kit, rules, corpus
+gradlew :decision-rules:decisionReport             # the comparison table
+```
+
+The rules layer currently matches all 17 reference answers, makes no dangerous
+`ACT`, and passes the conformance kit. Nothing is wired into the loop yet: the
+app behaves exactly as before D1.
+
 ## Stages
 
-### D1 - the port and the registry (1 PR)
+### D1 - the port and the registry (1 PR) - done
 
-`:core:decision`: `DecisionLayer`, `DecisionContext`, `Decision`, the registry,
-the class policy, and tests. Nothing is wired into the loop.
+`:decision` (the plan said `:core:decision`): `DecisionLayer`, `DecisionContext`,
+`LayerDecision`, the registry, the class policy, the coordinator and tests.
+Nothing is wired into the loop.
 
-### D2 - the rules layer and the harness (1 PR)
+### D2 - the rules layer and the harness (1 PR) - done
 
-`:core:decision-rules`: heuristics for the known commands (the fallback when no
-other layer is available). The corpus in `spec/decisions/` and the runner that
-prints the comparison table for any layer.
+`:decision-rules`: heuristics for the known commands (the fallback when no other
+layer is available). The corpus in `spec/decisions/` and the runner that prints
+the comparison table for any layer.
 
 ### D3 - shadow logging (1 PR)
 
@@ -154,9 +200,9 @@ run log. Behaviour unchanged, data starts flowing.
 
 ### D4 - LAIX adapter (1 PR)
 
-Vendored `:core:decision-laix`, the mapping from `Action`/`ApprovalRequest` to
-LAIX's request and back, the conformance kit, and its row in the comparison
-table.
+Vendored `:decision-laix` (`core/decision-laix`), the mapping from
+`Action`/`ApprovalRequest` to LAIX's request and back, the conformance kit, and
+its row in the comparison table.
 
 ### D5 - intent classifier for closed commands (1-2 PRs)
 
