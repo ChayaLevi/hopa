@@ -50,7 +50,7 @@ Each entry answers three questions for the person choosing: **strong at**,
 
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
-| Gemma 3 270M | 0.2 GB | fastest answer, best instruction following at this size, multilingual | tool choice, multi-step plans | the cheapest first filter: "command or small talk" |
+| Gemma 3 270M | 0.3 GB | downloads from inside the app; fastest answer, best instruction following at this size, multilingual | tool choice, multi-step plans | the cheapest first filter: "command or small talk" |
 | SmolLM2-360M | 0.3 GB | speed, Apache-2.0, tiny memory | English-centric, weak plans | good fallback on 4 GB devices |
 | Qwen3-0.6B | 0.4 GB | routing, short answers, thinking mode if wanted | anything multi-step | disable thinking for the loop or it burns the budget |
 
@@ -58,7 +58,7 @@ Each entry answers three questions for the person choosing: **strong at**,
 
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
-| Qwen3-1.7B | 1.1 GB | best all-round at this size, decent tool choice, Apache-2.0 | long plans, rare apps | the default for ≤6 GB phones; thinking off for turns |
+| Qwen3-1.7B | 1.3 GB | downloads from inside the app; best all-round at this size, decent tool choice, Apache-2.0 | long plans, rare apps | the default for ≤6 GB phones; thinking off for turns |
 | Gemma 3 1B | 0.8 GB | instructions, 32k context, 140+ languages; downloads from inside the app | tool choice, its own licence | the multilingual pick when Russian matters |
 | SmolLM2-1.7B | 1.0 GB | speed, Apache-2.0 | planning, tool choice | lighter alternative when 1.7B Qwen is too slow |
 | Llama 3.2 1B | 0.8 GB | short English commands, mature tooling | long context in practice, licence terms | good baseline to measure others against |
@@ -79,7 +79,7 @@ Each entry answers three questions for the person choosing: **strong at**,
 
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
-| xLAM-2-1B | 0.8 GB | function calling, compact | general reasoning, chat | the cheapest way to get a correct tool choice |
+| xLAM-2-1B | 1.0 GB | downloads from inside the app; function calling, compact | general reasoning, chat | the cheapest way to get a correct tool choice |
 | xLAM-2-3B | 2.0 GB | tool choice close to big models | conversation, explanations | try it against Qwen3-4B on the bench |
 | Hammer 2.1-3B | 2.2 GB | tool calling on a Qwen base | breadth of knowledge | verify the GGUF template before adding |
 
