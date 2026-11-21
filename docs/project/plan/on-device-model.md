@@ -529,6 +529,94 @@ The only new module is `:core:localmodel` (`apps/android/core/localmodel`).
 | Partial or corrupt download | `.part` file, hash while streaming, atomic rename, the previous copy stays |
 | The gateway has no model endpoint yet | the local source is the fallback; no dead screen or placeholder task ships |
 
+
+## Review: what the plan missed
+
+Written after the first real device runs, where the engine produced a plan, the
+app crashed in `llama_decode`, and the chat sat silent for minutes. These are the
+gaps that only showed up in use, in priority order.
+
+### Correctness of the prompt (highest)
+
+1. **Chat template.** The engine joins `"role: content"` by hand. Real GGUF
+   models carry their template in metadata; without applying it the model sees a
+   format it was not trained on, which is a large part of why a 0.6B answered
+   with repeated prose. Use the GGUF template (`llama_chat_apply_template` or the
+   chat-template metadata) and fall back to a plain format only when absent.
+2. **Sampling.** Greedy decoding only: no temperature, top-p, repetition penalty
+   or stop sequences. Grammar plus greedy can loop; the defaults must be chosen
+   per profile and recorded in the receipt.
+3. **Token accounting.** The prompt is truncated by tail length, but the budget
+   does not reserve for the grammar, the template tokens and the reply ceiling.
+   Count once, then trim.
+
+### Runtime safety
+
+4. **Crash isolation.** A `GGML_ABORT` inside the engine kills the whole app (it
+   did: `SIGABRT` in `llama_context::decode`). The engine should run in its own
+   process, so an engine failure becomes "the model stopped" instead of the app
+   disappearing. Until then, a supervisor around `load/complete` and a visible
+   error.
+5. **Concurrency.** One session exists, but nothing serialises callers: a chat
+   turn and a background run can enter `complete` simultaneously. A `Mutex` and
+   a queue with a timeout are required.
+6. **Cancellation.** `cancel()` exists and the loop cannot reach it. The stop
+   button must abort between chunks, and the engine must check the flag there.
+7. **First-token watchdog.** No first piece within N seconds means "the model is
+   not answering"; show it and offer to stop instead of waiting.
+
+### Device reality
+
+8. **Thermals and battery.** No use of `PowerManager` thermal status: a long
+   turn can throttle the phone with no explanation. Detect throttling, shorten
+   or defer, and say so.
+9. **Memory pressure.** `onTrimMemory`/low-memory kills are not handled; the
+   model is never unloaded. Release on background and on memory pressure, and
+   size the KV cache from the profile.
+10. **Threads.** All cores are used (`availableProcessors`), which is both hot and
+    slower on big.LITTLE. Pin to the performance cluster, keep threads at 4-6,
+    and set a background thread priority.
+11. **ABI and size.** A debug APK carries two ABIs (~15 MB of native libraries
+    in the package, ~77 MB unstripped). Release ships `arm64-v8a` only; ABI
+    splits or an App Bundle keep a single download small.
+
+### Delivery
+
+12. **Resume.** The downloader restarts from zero after a failure. Large files on
+    mobile networks need HTTP `Range` resume and backoff.
+13. **Licence acceptance.** The licence is displayed but never accepted; store the
+    acceptance next to the file and re-prompt when the model changes.
+14. **Updates.** No "update available" flow and no removal of a superseded file
+    after a successful update beyond the cleanup pass.
+15. **Storage quota.** No overall cap: a person can fill the phone with models.
+    Show a quota, warn above it, and offer the largest model for removal first.
+16. **Backup.** Model files live in `filesDir` and would be included in Android
+    auto-backup; exclude them in the backup rules (a 2.5 GB upload is not a
+    backup).
+
+### Trust and privacy
+
+17. **GGUF validation.** Import checks the catalogue hash, but not the file's
+    magic bytes, architecture or declared context before `llama_model_load`. A
+    malformed file should be refused with a reason, not abort the loader.
+18. **Prompt content in logs.** The screen summary and the goal can contain
+    personal text. Nothing from the engine may reach logcat by default; crash
+    reports must be scrubbed.
+19. **Receipt.** The run record still does not name the model and its version.
+    Without it, "the same request gave a worse answer" cannot be explained.
+
+### Product
+
+20. **Accessibility.** The streaming text must be announced without flooding
+    TalkBack, and the status line needs a spoken form ("the model is writing,
+    twelve seconds").
+21. **Model choice guidance.** The recommended model comes from RAM and free
+    space only; prompt length and task type matter too (a router model for short
+    commands, a balanced one for plans).
+22. **Errors have names.** Out of memory, unsupported architecture, corrupt file,
+    licence not accepted, thermal limit, storage full - each needs its own
+    message and next action, not a generic failure.
+
 ## Out of scope
 
 Browser traffic, the backend gateway, pairing and push, the PC bridge, voice
