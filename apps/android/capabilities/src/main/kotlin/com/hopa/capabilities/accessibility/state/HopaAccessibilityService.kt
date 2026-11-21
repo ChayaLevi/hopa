@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 class HopaAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         instance = this
+        android.util.Log.i("HopaA11yState", "onServiceConnected")
         AccessibilityState.connected()
     }
 

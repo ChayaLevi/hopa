@@ -121,6 +121,12 @@ fun ChatScreen(
     val access by AccessibilityState.state.collectAsStateWithLifecycle()
     val accessEnabled = access.enabled
     val accessConnected = access.connected
+    androidx.compose.runtime.LaunchedEffect(accessAllowed, accessEnabled, accessConnected) {
+        android.util.Log.i(
+            "HopaA11yState",
+            "banner allowed=$accessAllowed enabled=$accessEnabled connected=$accessConnected",
+        )
+    }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -129,6 +135,11 @@ fun ChatScreen(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    // A cold start can compose after ON_RESUME already fired, so the first frame
+    // would otherwise show a banner until the next app switch.
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        AccessibilityState.refresh(context)
     }
     val micPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
