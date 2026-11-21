@@ -4,6 +4,7 @@ import android.net.Uri
 import com.hopa.app.di.LocalModelHost
 import com.hopa.inference.local.ImportOutcome
 import com.hopa.inference.local.InstalledModel
+import com.hopa.inference.local.LocalModelCatalogue
 import com.hopa.inference.local.ModelSpec
 import com.hopa.localmodel.LocalModelStore
 import java.io.File
@@ -13,6 +14,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -79,6 +81,59 @@ class LocalModelViewModelTest {
     }
 
     @Test
+    fun a_download_asks_for_the_licence_first() = runTest(dispatcher) {
+        val store = FakeStore()
+        val viewModel = LocalModelViewModel(host(ramGb = 8, freeBytes = 20_000_000_000L, store = store))
+        advanceUntilIdle()
+        val spec = com.hopa.inference.local.LocalModelCatalogue.models.first { it.id == "qwen3-4b" }
+
+        viewModel.download(spec)
+        advanceUntilIdle()
+
+        assertEquals(spec, viewModel.state.value.licenceFor)
+        assertEquals(emptyList<String>(), store.downloads)
+    }
+
+    @Test
+    fun accepting_the_licence_downloads_and_remembers_it() = runTest(dispatcher) {
+        val store = FakeStore()
+        val settings = fakeSettings()
+        val viewModel = LocalModelViewModel(
+            host(ramGb = 8, freeBytes = 20_000_000_000L, store = store, settings = settings),
+        )
+        advanceUntilIdle()
+        val spec = com.hopa.inference.local.LocalModelCatalogue.models.first { it.id == "qwen3-4b" }
+        viewModel.download(spec)
+        advanceUntilIdle()
+
+        viewModel.acceptLicenceAndDownload()
+        advanceUntilIdle()
+
+        assertEquals(listOf("qwen3-4b"), store.downloads)
+        val accepted = settings.settings.first().acceptedModelLicences
+        assertEquals(setOf("qwen3-4b:${spec.sha256}"), accepted)
+        assertEquals(null, viewModel.state.value.licenceFor)
+    }
+
+    @Test
+    fun the_quota_stops_a_model_that_does_not_fit() = runTest(dispatcher) {
+        val installed = InstalledModel("qwen3-1.7b", File("qwen3-1.7b-1234.gguf"), 7_900_000_000L)
+        val store = FakeStore(listOf(installed))
+        val viewModel = LocalModelViewModel(
+            host(ramGb = 8, freeBytes = 20_000_000_000L, store = store, installed = listOf(installed)),
+        )
+        advanceUntilIdle()
+        val spec = com.hopa.inference.local.LocalModelCatalogue.models.first { it.id == "qwen3-4b" }
+
+        viewModel.download(spec)
+        advanceUntilIdle()
+
+        assertEquals(emptyList<String>(), store.downloads)
+        assertNotNull(viewModel.state.value.error)
+        assertEquals(true, viewModel.state.value.error!!.contains("Models already use"))
+    }
+
+    @Test
     fun a_phone_with_no_room_gets_no_offer() = runTest(dispatcher) {
         val viewModel = LocalModelViewModel(host(ramGb = 8, freeBytes = 10_000_000L))
 
@@ -92,16 +147,44 @@ class LocalModelViewModelTest {
         freeBytes: Long,
         installed: List<InstalledModel> = emptyList(),
         store: FakeStore = FakeStore(installed),
+        settings: com.hopa.stores.SettingsRepository = fakeSettings(),
     ): LocalModelHost = object : LocalModelHost {
         override val localModels: LocalModelStore = store
         override val ramGb: Int = ramGb
         override val freeBytes: Long = freeBytes
+        override val settings: com.hopa.stores.SettingsRepository = settings
     }
+
+    private fun fakeSettings(): com.hopa.stores.SettingsRepository =
+        object : com.hopa.stores.SettingsRepository {
+            private val flow = kotlinx.coroutines.flow.MutableStateFlow(com.hopa.stores.AppSettings())
+            override val settings: kotlinx.coroutines.flow.Flow<com.hopa.stores.AppSettings> = flow
+
+            override suspend fun update(transform: (com.hopa.stores.AppSettings) -> com.hopa.stores.AppSettings) {
+                flow.value = transform(flow.value)
+            }
+
+            override suspend fun modelKey(): String = ""
+            override suspend fun hasModelKey(): Boolean = false
+            override suspend fun setModelKey(value: String) = Unit
+            override suspend fun bridgeToken(): String = ""
+            override suspend fun setBridgeToken(value: String) = Unit
+            override suspend fun bridgeRefresh(): String = ""
+            override suspend fun setBridgeRefresh(value: String) = Unit
+            override suspend fun backendAccessToken(): String = ""
+            override suspend fun setBackendAccessToken(value: String) = Unit
+            override suspend fun backendRefreshToken(): String = ""
+            override suspend fun setBackendRefreshToken(value: String) = Unit
+            override suspend fun backendPrivateKey(): String = ""
+            override suspend fun setBackendPrivateKey(value: String) = Unit
+            override suspend fun clearBackend() = Unit
+        }
 
     private class FakeStore(
         var installed: List<InstalledModel> = emptyList(),
     ) : LocalModelStore {
         val deleted = mutableListOf<String>()
+        val downloads = mutableListOf<String>()
 
         override suspend fun installed(): List<InstalledModel> = installed
 
@@ -109,7 +192,10 @@ class LocalModelViewModelTest {
 
         override suspend fun import(uri: Uri, spec: ModelSpec): ImportOutcome = ImportOutcome.Empty
 
-        override suspend fun download(spec: ModelSpec, onProgress: (Long, Long) -> Unit): ImportOutcome = ImportOutcome.Empty
+        override suspend fun download(spec: ModelSpec, onProgress: (Long, Long) -> Unit): ImportOutcome {
+            downloads += spec.id
+            return ImportOutcome.Empty
+        }
 
         override suspend fun delete(id: String): Boolean {
             deleted += id

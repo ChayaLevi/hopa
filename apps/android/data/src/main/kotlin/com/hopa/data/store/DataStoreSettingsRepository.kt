@@ -41,6 +41,7 @@ class DataStoreSettingsRepository(
             trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
             decisionMode = prefs[DECISION_MODE] ?: "off",
             shadowDecisions = prefs[SHADOW_DECISIONS] ?: false,
+            acceptedModelLicences = prefs[ACCEPTED_MODEL_LICENCES] ?: emptySet(),
             backendUrl = prefs[BACKEND_URL] ?: "",
             backendDeviceId = prefs[BACKEND_DEVICE_ID] ?: "",
             backendHouseholdId = prefs[BACKEND_HOUSEHOLD_ID] ?: "",
@@ -70,6 +71,7 @@ class DataStoreSettingsRepository(
             prefs[TRUSTED_APPS] = next.trustedApps
             prefs[DECISION_MODE] = next.decisionMode
             prefs[SHADOW_DECISIONS] = next.shadowDecisions
+            prefs[ACCEPTED_MODEL_LICENCES] = next.acceptedModelLicences
             prefs[BACKEND_URL] = next.backendUrl
             prefs[BACKEND_DEVICE_ID] = next.backendDeviceId
             prefs[BACKEND_HOUSEHOLD_ID] = next.backendHouseholdId
@@ -136,6 +138,7 @@ class DataStoreSettingsRepository(
         val TRUSTED_APPS = stringSetPreferencesKey("trusted_apps")
         val DECISION_MODE = stringPreferencesKey("decision_mode")
         val SHADOW_DECISIONS = booleanPreferencesKey("shadow_decisions")
+        val ACCEPTED_MODEL_LICENCES = stringSetPreferencesKey("accepted_model_licences")
         val BACKEND_URL = stringPreferencesKey("backend_url")
         val BACKEND_DEVICE_ID = stringPreferencesKey("backend_device_id")
         val BACKEND_HOUSEHOLD_ID = stringPreferencesKey("backend_household_id")

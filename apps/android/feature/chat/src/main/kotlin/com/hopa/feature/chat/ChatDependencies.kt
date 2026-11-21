@@ -77,6 +77,9 @@ interface ChatDependencies {
     /** Ask the running turn to stop and abort a native decode if one is running. */
     fun stopTurn()
 
+    /** The model label for the receipt, including the installed file's name. */
+    suspend fun onDeviceModelName(): String
+
     fun bringToFront()
 
     fun releaseSurfaces()

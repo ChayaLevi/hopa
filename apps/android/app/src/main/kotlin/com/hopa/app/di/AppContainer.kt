@@ -176,6 +176,15 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         localEngine.cancel()
     }
 
+    override suspend fun onDeviceModelName(): String {
+        val installed = localModels.installed()
+        val id = installed.firstOrNull()?.id ?: return "on-device"
+        return com.hopa.inference.local.LocalModelCatalogue.models
+            .firstOrNull { it.id == id }
+            ?.name
+            ?: id
+    }
+
     private val decisionVotes: DbDecisionVoteSink by lazy {
         DbDecisionVoteSink(database.decisionVoteDao(), clock) { decisionMode }
     }
@@ -414,7 +423,16 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
                 ?.maxByOrNull { it.lastModified() }
                 ?.absolutePath
         },
+        thermalStatus = {
+            (context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager)
+                .currentThermalStatus
+        },
     )
+
+    /** Free the model's memory when Android is short or the app is in the background. */
+    fun releaseLocalModel() {
+        localEngine.release()
+    }
 
     override val modelFactory: ModelFactory = ModelFactory(localEngine = localEngine)
 

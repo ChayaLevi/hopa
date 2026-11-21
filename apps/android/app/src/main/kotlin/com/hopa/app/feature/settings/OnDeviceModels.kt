@@ -23,5 +23,7 @@ fun OnDeviceModels() {
         onDownload = viewModel::download,
         onDelete = viewModel::delete,
         onDeleteAll = viewModel::deleteAll,
+        onAcceptLicence = viewModel::acceptLicenceAndDownload,
+        onCancelLicence = viewModel::cancelLicence,
     )
 }

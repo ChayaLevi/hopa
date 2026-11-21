@@ -74,6 +74,55 @@ class FileModelStore(private val root: File) {
         return ImportOutcome.Imported(InstalledModel(spec.id, target, target.length()))
     }
 
+    /**
+     * Take a file that is already on disk, as a resumed download is.
+     *
+     * The hash is computed by reading the file once; nothing is copied, so a
+     * 2.5 GB model does not need 2.5 GB of temporary space besides itself. A
+     * file that is too large, empty or has the wrong digest is removed.
+     */
+    fun adopt(source: File, spec: ModelSpec): ImportOutcome {
+        if (!source.isFile) {
+            return ImportOutcome.Failed(ImportFailure.CORRUPT)
+        }
+        if (spec.bytes > 0 && source.length() > spec.bytes) {
+            source.delete()
+            return ImportOutcome.TooLarge
+        }
+        if (source.length() == 0L) {
+            source.delete()
+            return ImportOutcome.Empty
+        }
+        val digest = MessageDigest.getInstance("SHA-256")
+        source.inputStream().use { input ->
+            val buffer = ByteArray(DEFAULT_BUFFER)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        val actual = digest.digest().joinToString("") { "%02x".format(it) }
+        if (spec.sha256.isNotBlank() && !actual.equals(spec.sha256, ignoreCase = true)) {
+            source.delete()
+            return ImportOutcome.HashMismatch(expected = spec.sha256, actual = actual)
+        }
+        root.mkdirs()
+        val target = File(root, "${spec.id}-${actual.take(8)}.gguf")
+        val previous = modelFor(spec.id)?.file
+        if (!source.renameTo(target)) {
+            // Same volume should rename; if it does not, copy and keep the source
+            // until the copy succeeded, so a failure never loses the bytes.
+            if (runCatching { source.copyTo(target, overwrite = true) }.isFailure) {
+                target.delete()
+                return ImportOutcome.Failed(ImportFailure.STORAGE)
+            }
+            source.delete()
+        }
+        if (previous != null && previous.name != target.name) previous.delete()
+        return ImportOutcome.Imported(InstalledModel(spec.id, target, target.length()))
+    }
+
     fun delete(id: String): Boolean {
         var removed = false
         installed().filter { it.id == id }.forEach { removed = it.file.delete() || removed }

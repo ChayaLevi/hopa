@@ -536,6 +536,37 @@ Written after the first real device runs, where the engine produced a plan, the
 app crashed in `llama_decode`, and the chat sat silent for minutes. These are the
 gaps that only showed up in use, in priority order.
 
+### Landed since the review (2026-11-21)
+
+- **Chat template** (1): `nativeApplyTemplate` reads the template from the GGUF
+  and applies it; no metadata falls back to a transcript that ends at the
+  assistant marker.
+- **Sampling** (2): repetition penalty, top-k, top-p, min-p and temperature 0.7;
+  grammar is applied before truncation.
+- **Token accounting** (3): 64 tokens are reserved for the template and reply.
+- **Concurrency** (5): one generation at a time behind a `Mutex`.
+- **Cancellation** (6): the stop button now reaches the native decode, and the
+  run gate stops the loop.
+- **First-token watchdog** (7): an on-device turn with no token after 20 s says
+  "Loading the model" instead of looking hung.
+- **Resume** (12), **licence acceptance** (13), **quota** (15) and **backup
+  exclusion** (16): the downloader resumes with `Range`, acceptance is stored per
+  `id:sha256`, an 8 GiB quota is enforced with a sentence, and weights are
+  excluded from backup and transfer.
+- **GGUF validation** (17), **named errors** (22 partially): magic, size and a
+  loader failure each have their own message; a hot phone refuses to start.
+- **Receipt** (19): every proof names the provider and model, including the
+  installed on-device file.
+- **Memory pressure** (9 partially): the model is released on `onTrimMemory`.
+
+Still open: crash isolation in a separate process (4), the engine's own process
+and supervisor around load/decode, per-model sampling defaults, thermal
+throttling as a visible state (the refusal exists, the explanation does not),
+thread pinning to the performance cluster, ABI splits for a smaller release,
+update-available flow, prompt scrubbing, TalkBack polish and model-choice
+guidance. Device measurements (tokens/s, heat, RSS) are blocked until the phone
+is connected.
+
 ### Correctness of the prompt (highest)
 
 1. **Chat template.** The engine joins `"role: content"` by hand. Real GGUF

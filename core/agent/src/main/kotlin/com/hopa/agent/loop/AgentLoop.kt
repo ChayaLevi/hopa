@@ -118,7 +118,8 @@ class AgentLoop(
             val reply = runCatching { stepPolicy.next(ModelRequest(messages, images = frames)) }
                 .getOrElse { error ->
                     return TurnResult(
-                        answer = "I could not reach the model. Check the provider and network.",
+                        answer = "I could not reach the model: ${error.message ?: "unknown error"}. " +
+                            "Check the provider and network.",
                         records = records,
                         narration = narration,
                         error = HopaError(ErrorCodes.MODEL, error.message ?: "model failed"),
@@ -179,7 +180,7 @@ class AgentLoop(
                 history = steps.toList(),
             )
             val chosen = run?.decision
-            if (chosen != null && decisions != null && decisions.appliesTo(ActionClass.of(action.kindOrNull()))) {
+            if (chosen != null && decisions.appliesTo(ActionClass.of(action.kindOrNull()))) {
                 when (chosen.verb) {
                     Verb.ACT -> Unit
 

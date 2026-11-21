@@ -359,7 +359,17 @@ class ChatViewModel @Inject constructor(
             val current = container.settings.settings.first()
             container.useGate(current.trustedApps.toList())
             container.useDecisions(current.decisionMode, current.shadowDecisions)
-            _state.update { it.copy(onDevice = current.provider == "on-device") }
+            val receiptModel = if (current.provider.equals("on-device", ignoreCase = true)) {
+                runCatching { container.onDeviceModelName() }.getOrDefault("on-device")
+            } else {
+                listOf(current.provider, current.model).filter { it.isNotBlank() }.joinToString("/")
+            }
+            _state.update {
+                it.copy(
+                    onDevice = current.provider == "on-device",
+                    receiptModel = receiptModel,
+                )
+            }
             val preferred = ScreenPath.of(current.screenPath)
 
             // Plan-first gate: show the plan before anything is tapped. A plan
@@ -480,6 +490,7 @@ class ChatViewModel @Inject constructor(
                     fellBack = preferred == ScreenPath.AUTO &&
                         outcome.surfaceName == "accessibility",
                     knowledgeVersion = outcome.knowledgeVersion,
+                    model = _state.value.receiptModel,
                 ),
             ),
         )
@@ -558,6 +569,7 @@ class ChatViewModel @Inject constructor(
             steps = steps,
             fellBack = preferred == ScreenPath.AUTO && result.surfaceName == "accessibility",
             knowledgeVersion = result.knowledgeVersion,
+            model = _state.value.receiptModel,
         )
         container.conversations.append(
             conversationId,

@@ -32,6 +32,8 @@ class LlamaEngine(
     private val topP: Float = 0.95f,
     private val topK: Int = 40,
     private val repeatPenalty: Float = 1.1f,
+    /** Android thermal status; >= SEVERE means the phone needs a pause. */
+    private val thermalStatus: () -> Int = { 0 },
 ) : LocalEngine {
     private val _tokens = MutableSharedFlow<String>(extraBufferCapacity = 128)
 
@@ -67,11 +69,20 @@ class LlamaEngine(
     override suspend fun complete(request: ModelRequest, grammar: String): ModelReply =
         withContext(Dispatchers.Default) {
             lock.withLock {
+                if (thermalStatus() >= android.os.PowerManager.THERMAL_STATUS_SEVERE) {
+                    throw ModelNotLoaded(
+                        "The phone is too hot to run a model. Let it cool down, then try again.",
+                    )
+                }
                 val path = pathProvider() ?: throw ModelNotLoaded(
                     "No on-device model is installed. Import a model file in Settings first.",
                 )
+                validate(path)?.let { reason -> throw ModelNotLoaded(reason) }
                 if (!ensureLoaded(path)) {
-                    throw ModelNotLoaded("The on-device engine could not load $path.")
+                    throw ModelNotLoaded(
+                        "This model could not be loaded: the file is damaged or its architecture " +
+                            "is not supported by this build. Download it again from Settings.",
+                    )
                 }
                 val prompt = promptFor(request)
                 // A phone CPU writes a few tokens a second; a longer answer is a
@@ -92,6 +103,28 @@ class LlamaEngine(
                 ModelReply(text = text)
             }
         }
+
+    /**
+     * A cheap refusal before the loader sees the file: a missing, tiny or
+     * non-GGUF file becomes a named error instead of an abort inside llama.cpp.
+     */
+    private fun validate(path: String): String? {
+        val file = java.io.File(path)
+        if (!file.isFile) {
+            return "The model file is missing. Download it again from Settings."
+        }
+        if (file.length() < MIN_MODEL_BYTES) {
+            return "The model file is incomplete. Download it again from Settings."
+        }
+        val magic = ByteArray(4)
+        val read = runCatching {
+            file.inputStream().use { input -> input.read(magic) }
+        }.getOrDefault(0)
+        if (read != magic.size || String(magic, Charsets.US_ASCII) != "GGUF") {
+            return "This file is not a GGUF model. Choose a .gguf file."
+        }
+        return null
+    }
 
     /**
      * The exact chat format the model was trained on, read from its GGUF
@@ -139,6 +172,9 @@ class LlamaEngine(
 
     private companion object {
         const val ON_DEVICE_MAX_TOKENS = 160
+
+        /** Smaller than this cannot be a real GGUF with weights. */
+        const val MIN_MODEL_BYTES = 1L * 1024 * 1024
 
         val libraryLoaded: Boolean = runCatching {
             System.loadLibrary("hopa_llama")

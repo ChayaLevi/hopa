@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Model weights are downloaded, not backed up: a 2.5 GB file is not a backup,
+  and it is reproducible from the catalogue while the phone's chats are not.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="models" />
+        <exclude domain="file" path="model-downloads" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="models" />
+        <exclude domain="file" path="model-downloads" />
+    </device-transfer>
+</data-extraction-rules>
