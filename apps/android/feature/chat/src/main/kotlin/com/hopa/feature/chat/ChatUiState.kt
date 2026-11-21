@@ -9,6 +9,8 @@ data class ChatUiState(
     val current: Conversation? = null,
     val input: String = "",
     val busy: Boolean = false,
+    /** On-device text as it is produced, shown while the turn runs. */
+    val liveText: String = "",
     val error: String? = null,
     val options: List<String> = emptyList(),
     val pendingApproval: ApprovalRequest? = null,

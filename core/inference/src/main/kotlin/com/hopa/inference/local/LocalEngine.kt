@@ -11,5 +11,5 @@ import com.hopa.contracts.model.ModelRequest
  * prompt budget and the grammar stay in this module and are tested on the JVM.
  */
 interface LocalEngine {
-    suspend fun complete(request: ModelRequest): ModelReply
+    suspend fun complete(request: ModelRequest, grammar: String = ""): ModelReply
 }

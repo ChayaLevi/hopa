@@ -41,6 +41,13 @@ class ChatViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
 
     init {
+        viewModelScope.launch {
+            container.localTokens.collect { piece ->
+                if (_state.value.busy) {
+                    _state.update { state -> state.copy(liveText = state.liveText + piece) }
+                }
+            }
+        }
         // A goal handed over from the shell starts a turn on arrival; send()
         // marks the app busy before it returns, so the next queued goal is
         // routed to the parallel runner instead of replacing this one.
@@ -322,6 +329,7 @@ class ChatViewModel @Inject constructor(
             it.copy(
                 input = "",
                 busy = true,
+        liveText = "",
                 error = null,
                 options = emptyList(),
                 attachment = null,
@@ -361,7 +369,7 @@ class ChatViewModel @Inject constructor(
                 container.stopRunService()
                 if (outcome.pendingPlan.isEmpty()) {
                     _state.update {
-                        it.copy(busy = false, error = outcome.error?.message ?: "No plan came back")
+                        it.copy(liveText = "", busy = false, error = outcome.error?.message ?: "No plan came back")
                     }
                 } else {
                     pendingGoal = body
