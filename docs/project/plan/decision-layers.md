@@ -1,6 +1,6 @@
 # Decision layers
 
-Status: D1-D6 done (2026-11-21); D7 planned
+Status: D1-D7 done except the device run (2026-11-21); see `decision-results.md`
 
 HOPA will use **several decision layers**, not one. LAIX is the first to try, a
 rules layer is the baseline, a small intent classifier may follow, and a
@@ -175,7 +175,7 @@ entry in the root `NOTICE`, and `core/decision-laix/LAIX.md` describing the
 provenance and the update procedure. The structure check skips that directory
 on purpose; `ktlint` does too.
 
-## In the build now (D1-D4)
+## In the build now (D1-D7)
 
 | Where | What |
 |---|---|
@@ -194,6 +194,7 @@ on purpose; `ktlint` does too.
 | `apps/android/stores` | `AppSettings.decisionMode` (`off` by default) and `shadowDecisions` |
 | `spec/decisions/corpus.v1.json` | 17 cases, each with a reference answer and the defensible answers |
 | `spec/decisions/README.md` | the case format and the rules for adding one |
+| `docs/project/plan/decision-results.md` | the measured table, the ten-task protocol, the promotion rule |
 
 Commands, from `apps/android`:
 
@@ -269,11 +270,16 @@ and names the layer active for read, change and dangerous actions. A pinned
 layer that has been retired, does not cover the class or failed conformance is
 not used; the page shows what Automatic chose instead.
 
-### D7 - measurement and the go/no-go (1 PR)
+### D7 - measurement and the go/no-go (1 PR) - harness and protocol done
 
 Ten tasks across three modes: model-only, shadow, decisions-on. Metrics: task
 success, p50/p95 latency, model calls, false refusals, trace completeness. The
 result decides whether the command set grows or the layer stays an audit trail.
+
+`decision-results.md` holds the current corpus table (both layers 17/17, zero
+dangerous `ACT`), the exact ten-task protocol, the five promotion conditions and
+the current decision: rules is the fallback, LAIX stays shadow, automatic stays
+opt-in. The device half needs the phone and the model-only capture.
 
 ## Choosing in Settings
 
