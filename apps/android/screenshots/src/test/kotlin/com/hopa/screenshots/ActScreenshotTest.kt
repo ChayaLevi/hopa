@@ -28,7 +28,12 @@ class ActScreenshotTest {
             HopaTheme {
                 HowHopaActsScreen(
                     state = SettingsUiState(
-                        settings = AppSettings(screenPath = "onscreen", decisionMode = "auto"),
+                        settings = AppSettings(
+                            screenPath = "onscreen",
+                            decisionMode = "auto",
+                            provider = "on-device",
+                            activeModelId = "qwen3-4b",
+                        ),
                         decisionActive = mapOf(
                             "read" to "rules",
                             "change" to "model",
@@ -38,6 +43,18 @@ class ActScreenshotTest {
                             "Settings: Wi-Fi, Bluetooth",
                             "Clock: Alarms, Timer",
                             "Camera: open",
+                        ),
+                        installedModels = listOf(
+                            com.hopa.feature.settings.ModelOption(
+                                id = "qwen3-4b",
+                                label = "Qwen3 4B",
+                                bytes = 2_497_280_256,
+                            ),
+                            com.hopa.feature.settings.ModelOption(
+                                id = "gemma3-1b",
+                                label = "Gemma 3 1B",
+                                bytes = 806_058_240,
+                            ),
                         ),
                     ),
                     pairingStatus = null,
@@ -53,6 +70,9 @@ class ActScreenshotTest {
                     onOpenSetup = {},
                     onOpenDecisions = {},
                     onStepSource = {},
+                    onProvider = {},
+                    onLocalModel = {},
+                    onOpenAnswers = {},
                 )
             }
         }

@@ -44,4 +44,13 @@ data class SettingsUiState(
     val decisionActive: Map<String, String> = emptyMap(),
     /** One line per known app and its written paths. */
     val graphPaths: List<String> = emptyList(),
+    /** The model files on this phone, for the picker on Act. */
+    val installedModels: List<ModelOption> = emptyList(),
+)
+
+/** An installed on-device model as the picker shows it. */
+data class ModelOption(
+    val id: String,
+    val label: String,
+    val bytes: Long,
 )

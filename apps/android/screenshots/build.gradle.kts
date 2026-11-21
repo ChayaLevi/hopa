@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:execution"))
+    implementation(project(":feature:capabilities"))
     implementation(project(":feature:history"))
     implementation(project(":feature:runs"))
     implementation(project(":feature:chat"))

@@ -77,7 +77,9 @@ import com.hopa.stores.ConversationStore
 import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Singleton
 class AppContainer @Inject constructor(@ApplicationContext context: Context) : ChatDependencies, ConversationsDependencies,
@@ -105,10 +107,22 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         context = context,
         secrets = KeystoreSecretStore(context),
     )
+
+    /** The catalogue id of the model that answers on-device turns; empty = newest. */
+    @Volatile
+    private var selectedModel: String = ""
+
     init {
         com.hopa.privacy.TurnLog.attach(
             com.hopa.privacy.TurnLogFile(context),
         )
+        // Follow the picked model so the engine's file and the receipt's name
+        // can never disagree, without blocking the first turn on DataStore.
+        kotlinx.coroutines.CoroutineScope(
+            kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default,
+        ).launch {
+            settings.settings.collect { current -> selectedModel = current.activeModelId }
+        }
     }
 
     private val database = HopaDatabase.build(context)
@@ -180,15 +194,35 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     }
 
     override suspend fun onDeviceModelName(): String {
-        val installed = localModels.installed().firstOrNull() ?: return "on-device"
+        val file = localModelFile() ?: return "on-device"
+        val id = file.name.substringBeforeLast('-', "")
         val name = com.hopa.inference.local.LocalModelCatalogue.models
-            .firstOrNull { it.id == installed.id }
+            .firstOrNull { it.id == id }
             ?.name
-            ?: installed.id
-        val version = installed.file.name
+            ?: id.ifBlank { "on-device" }
+        val version = file.name
             .substringAfterLast('-', "")
             .removeSuffix(".gguf")
         return if (version.isBlank()) name else "$name ($version)"
+    }
+
+    /** The model directory: one file per catalogue id, named `<id>-<hash>.gguf`. */
+    private fun modelDir(): java.io.File = java.io.File(context.filesDir, "models")
+
+    /**
+     * The file that answers an on-device turn.
+     *
+     * The picked id wins; without one (a fresh install) the newest file does, so
+     * the engine and the receipt always name the same file.
+     */
+    private fun localModelFile(): java.io.File? {
+        val files = modelDir().listFiles()
+            ?.filter { it.isFile && it.name.endsWith(".gguf") }
+            .orEmpty()
+        if (selectedModel.isNotBlank()) {
+            files.firstOrNull { it.name.startsWith("${selectedModel}-") }?.let { return it }
+        }
+        return files.maxByOrNull { it.lastModified() }
     }
 
     private val decisionVotes: DbDecisionVoteSink by lazy {
@@ -430,13 +464,7 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
      * deleting a model takes effect without a restart.
      */
     private val localEngine: com.hopa.localmodel.LlamaEngine = com.hopa.localmodel.LlamaEngine(
-        pathProvider = {
-            java.io.File(context.filesDir, "models")
-                .listFiles()
-                ?.filter { it.isFile && it.name.endsWith(".gguf") }
-                ?.maxByOrNull { it.lastModified() }
-                ?.absolutePath
-        },
+        pathProvider = { localModelFile()?.absolutePath },
         thermalStatus = {
             (context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager)
                 .currentThermalStatus

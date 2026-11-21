@@ -20,6 +20,7 @@ fun HowHopaActsRoute(
     onOpenComputer: () -> Unit,
     onOpenSetup: () -> Unit,
     onOpenDecisions: () -> Unit,
+    onOpenAnswers: () -> Unit,
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -56,5 +57,8 @@ fun HowHopaActsRoute(
         onOpenSetup = onOpenSetup,
         onOpenDecisions = onOpenDecisions,
         onStepSource = viewModel::setStepSource,
+        onProvider = viewModel::selectProvider,
+        onLocalModel = viewModel::selectLocalModel,
+        onOpenAnswers = onOpenAnswers,
     )
 }

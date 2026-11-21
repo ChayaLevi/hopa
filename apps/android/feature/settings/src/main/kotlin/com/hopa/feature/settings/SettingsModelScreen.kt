@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.inference.choice.ProviderState
 import com.hopa.ui.settings.SettingsPage
-import com.hopa.ui.settings.SettingsSegment
 import com.hopa.ui.theme.HopaColor
 
 /** Where answers come from: provider, endpoint, model, key. */
@@ -51,27 +50,11 @@ fun SettingsModelScreen(
 
     val shownState = if (provider == "on-device") ProviderState.ON_DEVICE else state.providerState
     SettingsPage(title = "Answers", onBack = onBack) {
-        SettingsSegment(
-            options = listOf(
-                "stub" to "Demo",
-                "openai" to "Cloud",
-                "lan" to "LAN",
-                "on-device" to "On-device",
-            ),
-            selected = when (provider) {
-                "stub" -> "stub"
-                "lan" -> "lan"
-                "on-device" -> "on-device"
-                else -> "openai"
-            },
-            onSelect = { value ->
-                provider = value
-                endpoint = when (value) {
-                    "lan" -> "http://192.168.1.5:11434/v1"
-                    "openai" -> "https://api.deepseek.com/v1"
-                    else -> endpoint
-                }
-            },
+        Text(
+            "Answers come from ${providerLabel(provider)}. " +
+                "Choose the model on How HOPA acts.",
+            style = MaterialTheme.typography.bodySmall,
+            color = HopaColor.TextHint,
         )
         if (provider == "on-device") {
             Text(
@@ -166,4 +149,12 @@ fun SettingsModelScreen(
             color = HopaColor.TextHint,
         )
     }
+}
+
+/** The provider as a person reads it, not the stored wire name. */
+private fun providerLabel(provider: String): String = when (provider) {
+    "stub" -> "Demo"
+    "lan" -> "LAN"
+    "on-device" -> "On-device"
+    else -> "Cloud"
 }
