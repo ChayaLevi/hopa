@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -48,8 +47,6 @@ fun SettingsScreen(
         androidx.compose.runtime.mutableStateOf("")
     }
     val searchable = listOf(
-        Searchable("Answers", "model, key, provider, endpoint", Icons.Filled.Star,
-            { onOpenPage(PAGE_MODEL) }),
         Searchable("Alerts", "notifications, answer ready", Icons.Filled.Notifications,
             { onOpenPage(PAGE_NOTIFICATIONS) }),
         Searchable("Modes", "profiles, everyday", Icons.Filled.Person, onOpenProfiles),
@@ -103,30 +100,9 @@ fun SettingsScreen(
             summary = if (answers) {
                 "Ready to help."
             } else {
-                "Add a model key so HOPA can answer."
+                "Keys and models are set on How HOPA acts."
             },
         )
-
-        // Apps are not configured here: Settings keeps the model, the words, the
-        // alerts and the records. Everything about running another app lives on
-        // Capabilities, Act.
-        SettingsPanel {
-            Column {
-                StatusLine(
-                    "Answers",
-                    if (answers) "Keys and downloads" else "needs a key",
-                    answers,
-                ) { onOpenPage(PAGE_MODEL) }
-                if (!answers) {
-                    Row(
-                        modifier = Modifier.padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        QuickChip("Add a key") { onOpenPage(PAGE_MODEL) }
-                    }
-                }
-            }
-        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -190,7 +166,6 @@ fun SettingsScreen(
     }
 }
 
-const val PAGE_MODEL = "model"
 const val PAGE_NOTIFICATIONS = "notifications"
 const val PAGE_PRIVACY = "privacy"
 

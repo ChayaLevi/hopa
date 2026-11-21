@@ -215,11 +215,13 @@ fun HowHopaActsScreen(
                     fontSize = 12.sp,
                     color = HopaColor.TextHint,
                 )
-                TextButton(
-                    onClick = onOpenAnswers,
-                    contentPadding = PaddingValues(0.dp),
-                ) {
-                    Text("Keys, endpoint and downloads", fontSize = 12.sp)
+                if (state.settings.provider != "stub") {
+                    TextButton(
+                        onClick = onOpenAnswers,
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Text("Keys, endpoint and downloads", fontSize = 12.sp)
+                    }
                 }
             }
 
