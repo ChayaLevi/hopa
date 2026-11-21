@@ -12,8 +12,7 @@ object LocalModelQuota {
     const val MAX_BYTES: Long = 8L * 1024 * 1024 * 1024
 
     /** True when adding [bytes] to [used] would cross the quota. */
-    fun exceeded(used: Long, bytes: Long, quota: Long = MAX_BYTES): Boolean =
-        bytes > 0 && used + bytes > quota
+    fun exceeded(used: Long, bytes: Long, quota: Long = MAX_BYTES): Boolean = bytes > 0 && used + bytes > quota
 
     /** The number to show next to "of 8 GB". */
     fun remaining(used: Long, quota: Long = MAX_BYTES): Long = (quota - used).coerceAtLeast(0)
