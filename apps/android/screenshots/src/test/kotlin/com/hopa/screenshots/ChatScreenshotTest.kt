@@ -49,4 +49,65 @@ class ChatScreenshotTest {
         }
         compose.onRoot().captureRoboImage("src/test/screenshots/chat-empty.png")
     }
+
+    @Test
+    fun graphTurn() {
+        val conversation = com.hopa.contracts.chat.Conversation(
+            id = "c1",
+            title = "Camera",
+            messages = listOf(
+                com.hopa.contracts.chat.ChatMessage(
+                    id = "m1",
+                    role = "user",
+                    text = "open camera",
+                    timestamp = 1L,
+                ),
+                com.hopa.contracts.chat.ChatMessage(
+                    id = "m2",
+                    role = "assistant",
+                    text = "Opened Camera.",
+                    timestamp = 2L,
+                    proof = com.hopa.contracts.chat.MessageProof(
+                        path = "accessibility",
+                        executed = 1,
+                        verified = 1,
+                        tokens = 0,
+                        millis = 3674,
+                        steps = listOf("0. ui.launch com.sec.android.app.camera"),
+                        knowledgeVersion = "sha256:test",
+                        model = "openai/deepseek-v4-flash",
+                        source = "graph",
+                    ),
+                ),
+            ),
+        )
+        compose.setContent {
+            HopaTheme {
+                ChatScreen(
+                    state = ChatUiState(
+                        conversations = listOf(conversation),
+                        current = conversation,
+                    ),
+                    activeTab = "chat",
+                    onSelectTab = {},
+                    onInput = {},
+                    onSend = {},
+                    onOption = {},
+                    onQuick = {},
+                    onNewChat = {},
+                    onOpenConversations = {},
+                    onStartVoice = {},
+                    onStopVoice = {},
+                    onDismissVoiceError = {},
+                    onSpeak = {},
+                    onRetry = {},
+                    onUndo = {},
+                    onDiscardAttachment = {},
+                    onDismissAttachmentNotice = {},
+                    hourOfDay = 9,
+                )
+            }
+        }
+        compose.onRoot().captureRoboImage("src/test/screenshots/chat-graph-turn.png")
+    }
 }

@@ -15,6 +15,25 @@ object GraphCatalog {
         isLenient = false
     }
 
+    /** One line per app for the Act page: what the written paths can finish. */
+    fun summary(graphs: List<AppGraph> = load()): List<String> = graphs.map { graph ->
+        val actions = graph.edges.filter { it.done }.mapNotNull { edge ->
+            when {
+                edge.to != null -> NODE_TITLES[edge.to] ?: edge.to.replace('-', ' ')
+                edge.action.kind == "launch" -> "open"
+                else -> null
+            }
+        }.distinct()
+        if (actions.isEmpty()) graph.name else "${graph.name}: ${actions.joinToString(", ")}"
+    }
+
+    private val NODE_TITLES = mapOf(
+        "wifi" to "Wi-Fi",
+        "bluetooth" to "Bluetooth",
+        "alarms" to "Alarms",
+        "timer" to "Timer",
+    )
+
     fun load(): List<AppGraph> {
         val text = runCatching {
             GraphCatalog::class.java.getResourceAsStream(RESOURCE)?.use { stream ->

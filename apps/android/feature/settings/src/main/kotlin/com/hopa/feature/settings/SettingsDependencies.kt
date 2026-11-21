@@ -24,6 +24,9 @@ interface SettingsDependencies {
     /** What the Decisions page shows; metadata only, no layer is called. */
     val decisionLayers: List<com.hopa.decision.LayerMetadata>
 
+    /** One line per known app, for the Steps section. */
+    val graphPaths: List<String>
+
     /** The layer that would decide this class now, or `model` when none does. */
     fun activeDecision(actionClass: com.hopa.decision.ActionClass): String
 

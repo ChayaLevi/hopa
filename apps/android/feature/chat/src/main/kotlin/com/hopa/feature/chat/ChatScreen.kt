@@ -418,7 +418,7 @@ fun ChatScreen(
                     if (state.busy) {
                         item(key = "thinking") {
                             ThinkingIndicator(
-                                label = modelLabel,
+                                label = state.liveLabel.ifBlank { modelLabel },
                                 stalled = state.onDevice && state.liveText.isBlank(),
                             )
                             if (state.liveText.isNotBlank()) {

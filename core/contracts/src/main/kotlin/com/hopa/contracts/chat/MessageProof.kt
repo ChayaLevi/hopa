@@ -20,4 +20,6 @@ data class MessageProof(
     val knowledgeVersion: String = "",
     /** The model that wrote this answer, with its provider, so a difference is explainable. */
     val model: String = "",
+    /** What ran the steps: model, graph, command, recipe or plan. */
+    val source: String = "",
 )

@@ -234,7 +234,9 @@ hand-written apps (Settings, Clock, Camera), matched by package and visible text
 with a tap resolved from the control's label. A miss on the screen, the control
 or the goal returns null. **How HOPA acts -> Steps** chooses **Auto** (graph,
 then model), **Model** (model only) or **Graph** (written paths only, unknown
-goals refused); stored as `stepSource` in settings.
+goals refused); stored as `stepSource` in settings. The same section lists the
+concrete **Known paths** per app from `graphs.v1.json`, and a graph answer keeps
+its source in the chat receipt, so the claim survives the turn.
 
 Still missing for a general graph: a node key in the context, learning edge
 statistics from run records, a plan step per edge, and a screen to inspect or

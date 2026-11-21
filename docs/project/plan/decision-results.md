@@ -81,7 +81,14 @@ executor, so an approval or a failed tap stops it honestly.
 The source is a first-class choice on **How HOPA acts -> Steps**:
 **Auto** (a written path when the app is known, the model otherwise), **Model**
 (model only, exactly as before) or **Graph** (written paths only; a goal they do
-not cover is refused with a note to switch to Auto or Model). Nothing is learned
+not cover is refused with a note to switch to Auto or Model). Under the segment,
+the same page lists **Known paths**, built from `graphs.v1.json`, so a person can
+see the concrete scenarios without opening a second screen.
+
+The turn says its source twice: while it runs the status line names the path
+("Graph - Camera"), and the receipt under the answer carries `source`, so a graph
+answer reads "Graph - 1 step - 1 confirmed - 0 tokens" long after the turn. The
+model's own label is used only when the model actually runs. Nothing is learned
 or recorded yet.
 
 ## The ten-task protocol (needs a phone)
