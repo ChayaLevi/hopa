@@ -103,6 +103,7 @@ fun ChatScreen(
     onApprovePlan: () -> Unit = {},
     onCancelPlan: () -> Unit = {},
     onSaveSkill: (String, List<String>) -> Unit = { _, _ -> },
+    onStop: () -> Unit = {},
     /** Fixed hour for screenshots and tests; null reads the device clock. */
     hourOfDay: Int? = null,
     tasks: List<com.hopa.contracts.task.TaskItem> = emptyList(),
@@ -311,6 +312,7 @@ fun ChatScreen(
                             }
                         },
                         hasAttachment = state.attachment != null,
+                        onStop = onStop,
                     )
                 }
                 state.attachmentNotice?.let { notice ->
@@ -404,7 +406,10 @@ fun ChatScreen(
                     }
                     if (state.busy) {
                         item(key = "thinking") {
-                            ThinkingIndicator(label = modelLabel)
+                            ThinkingIndicator(
+                                label = modelLabel,
+                                stalled = state.onDevice && state.liveText.isBlank(),
+                            )
                             if (state.liveText.isNotBlank()) {
                                 Text(
                                     state.liveText,

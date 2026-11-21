@@ -284,6 +284,11 @@ class ChatViewModel @Inject constructor(
         sendText(goal, appendUser = false)
     }
 
+    /** The stop button: the loop checks the gate, the native decode checks its flag. */
+    fun stop() {
+        container.stopTurn()
+    }
+
     fun cancelPlan() {
         pendingGoal = ""
         _state.update { it.copy(pendingPlan = null) }
@@ -329,7 +334,7 @@ class ChatViewModel @Inject constructor(
             it.copy(
                 input = "",
                 busy = true,
-        liveText = "",
+                liveText = "",
                 error = null,
                 options = emptyList(),
                 attachment = null,
@@ -359,7 +364,12 @@ class ChatViewModel @Inject constructor(
             } else {
                 listOf(current.provider, current.model).filter { it.isNotBlank() }.joinToString("/")
             }
-            _state.update { it.copy(receiptModel = receiptModel) }
+            _state.update {
+                it.copy(
+                    onDevice = current.provider == "on-device",
+                    receiptModel = receiptModel,
+                )
+            }
             val preferred = ScreenPath.of(current.screenPath)
 
             // Plan-first gate: show the plan before anything is tapped. A plan

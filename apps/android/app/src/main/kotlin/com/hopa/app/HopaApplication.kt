@@ -16,6 +16,15 @@ class HopaApplication : Application() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+            // A loaded model is hundreds of megabytes; release it before the
+            // system kills the process for it. It reloads on the next turn.
+            runCatching { container.releaseLocalModel() }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         // An approval on disk means the process died while waiting: deny it

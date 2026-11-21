@@ -118,7 +118,8 @@ class AgentLoop(
             val reply = runCatching { stepPolicy.next(ModelRequest(messages, images = frames)) }
                 .getOrElse { error ->
                     return TurnResult(
-                        answer = "I could not reach the model. Check the provider and network.",
+                        answer = "I could not reach the model: ${error.message ?: "unknown error"}. " +
+                    "Check the provider and network.",
                         records = records,
                         narration = narration,
                         error = HopaError(ErrorCodes.MODEL, error.message ?: "model failed"),

@@ -171,6 +171,11 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         shadowDecisions = shadow
     }
 
+    override fun stopTurn() {
+        runGate.cancel()
+        localEngine.cancel()
+    }
+
     override suspend fun onDeviceModelName(): String {
         val installed = localModels.installed()
         val id = installed.firstOrNull()?.id ?: return "on-device"
@@ -418,7 +423,16 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
                 ?.maxByOrNull { it.lastModified() }
                 ?.absolutePath
         },
+        thermalStatus = {
+            (context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager)
+                .currentThermalStatus
+        },
     )
+
+    /** Free the model's memory when Android is short or the app is in the background. */
+    fun releaseLocalModel() {
+        localEngine.release()
+    }
 
     override val modelFactory: ModelFactory = ModelFactory(localEngine = localEngine)
 
