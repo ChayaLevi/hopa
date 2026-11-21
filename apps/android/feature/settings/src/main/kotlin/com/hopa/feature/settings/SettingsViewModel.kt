@@ -193,6 +193,14 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /** auto, model or graph; the same words the turn reads. */
+    fun setStepSource(value: String) {
+        viewModelScope.launch {
+            preferences.setStepSource(value)
+            reload()
+        }
+    }
+
     /** The framed picture or the cut-out object; see MascotAppearance. */
     fun setMascotFramed(value: Boolean) {
         viewModelScope.launch {

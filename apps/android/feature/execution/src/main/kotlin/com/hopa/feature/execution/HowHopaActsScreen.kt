@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.hopa.feature.settings.BackgroundSetupDialog
 import com.hopa.feature.settings.SettingsUiState
 import com.hopa.ui.component.HopaPageHeader
+import com.hopa.ui.settings.SettingsSegment
 import com.hopa.ui.theme.HopaColor
 
 /**
@@ -68,6 +69,7 @@ fun HowHopaActsScreen(
     onOpenComputer: () -> Unit,
     onOpenSetup: () -> Unit,
     onOpenDecisions: () -> Unit,
+    onStepSource: (String) -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = ActMode.of(state)
@@ -181,6 +183,24 @@ fun HowHopaActsScreen(
                 )
             }
 
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SectionLabel("Steps")
+                SettingsSegment(
+                    options = listOf(
+                        "auto" to "Auto",
+                        "model" to "Model",
+                        "graph" to "Graph",
+                    ),
+                    selected = state.settings.stepSource,
+                    onSelect = onStepSource,
+                )
+                Text(
+                    stepSourceNote(state.settings.stepSource),
+                    fontSize = 12.sp,
+                    color = HopaColor.TextHint,
+                )
+            }
+
             if (mode.hidden) {
                 pairingStatus?.let { message ->
                     Text(
@@ -259,6 +279,12 @@ private fun decisionLabel(id: String?): String = when (id) {
     "rules" -> "Rules"
     "laix" -> "LAIX"
     else -> id
+}
+
+private fun stepSourceNote(source: String): String = when (source) {
+    "model" -> "The model writes every step, as before."
+    "graph" -> "Only written paths for Settings, Clock and Camera; a goal they do not cover is refused."
+    else -> "A written path first for Settings, Clock and Camera; the model for everything else."
 }
 
 @Composable

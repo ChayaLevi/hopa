@@ -61,6 +61,16 @@ class TurnRunnerTest {
         override suspend fun sleep(millis: Long) = Unit
     }
 
+    private class FakeGraph(
+        private val steps: List<com.hopa.decision.graph.GraphStep>,
+    ) : com.hopa.decision.graph.GraphStepSource {
+        private var index = 0
+
+        override fun next(observation: Observation, goal: String): com.hopa.decision.graph.GraphStep? {
+            return steps.getOrNull(index++)
+        }
+    }
+
     private class ScriptedPolicy(private val replies: List<String>) : StepPolicy {
         var calls: Int = 0
             private set
@@ -130,6 +140,7 @@ class TurnRunnerTest {
         store: RecipeStore? = null,
         commands: Boolean = false,
         decisions: com.hopa.agent.decision.DecisionRuntime? = null,
+        graphs: com.hopa.decision.graph.GraphStepSource? = null,
     ) {
         val device = FakeDevice(screens)
         val policy = ScriptedPolicy(replies)
@@ -164,6 +175,7 @@ class TurnRunnerTest {
             settle = {},
             commands = if (commands) IntentClassifier() else null,
             decisions = decisions,
+            graphs = graphs,
         )
 
         fun request(
@@ -448,6 +460,105 @@ class TurnRunnerTest {
         assertEquals("Opened Settings.", outcome.answer)
         assertEquals(0, harness.policy.calls)
         assertEquals(1, outcome.executed)
+    }
+
+    @Test
+    fun a_known_graph_runs_without_the_model() = runBlocking {
+        val step = com.hopa.decision.graph.GraphStep(
+            graph = "Settings",
+            node = "start",
+            action = Action(kind = "ui.launch", app = SETTINGS),
+            answer = "Opened Settings.",
+            done = true,
+        )
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = emptyList(),
+            graphs = FakeGraph(listOf(step)),
+        )
+
+        val outcome = harness.runner.run(harness.request("open settings"))
+
+        assertEquals(TurnSource.GRAPH, outcome.source)
+        assertEquals("Opened Settings.", outcome.answer)
+        assertEquals(listOf(SETTINGS), harness.device.launches)
+        assertEquals(0, harness.policy.calls)
+    }
+
+    @Test
+    fun a_known_graph_skips_the_plan_gate() = runBlocking {
+        val step = com.hopa.decision.graph.GraphStep(
+            graph = "Settings",
+            node = "start",
+            action = Action(kind = "ui.launch", app = SETTINGS),
+            answer = "Opened Settings.",
+            done = true,
+        )
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = emptyList(),
+            plan = listOf("Open Settings", "Tap Connections"),
+            graphs = FakeGraph(listOf(step)),
+        )
+
+        val outcome = harness.runner.run(harness.request("open settings", planFirst = true))
+
+        assertEquals(TurnSource.GRAPH, outcome.source)
+        assertTrue(outcome.pendingPlan.isEmpty())
+        assertEquals(listOf(SETTINGS), harness.device.launches)
+    }
+
+    @Test
+    fun a_graph_miss_falls_through_to_the_model() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = listOf("All done."),
+            graphs = FakeGraph(emptyList()),
+        )
+
+        val outcome = harness.runner.run(harness.request("open settings"))
+
+        assertEquals(TurnSource.MODEL, outcome.source)
+        assertEquals(1, harness.policy.calls)
+    }
+
+    @Test
+    fun graph_only_refuses_a_goal_without_a_written_path() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = listOf("All done."),
+            graphs = FakeGraph(emptyList()),
+        )
+
+        val outcome = harness.runner.run(
+            harness.request("open settings").copy(graphFallback = false),
+        )
+
+        assertEquals(TurnSource.GRAPH, outcome.source)
+        assertEquals(0, harness.policy.calls)
+        assertEquals(ErrorCodes.BLOCKED, outcome.error?.code)
+        assertTrue(outcome.answer.contains("Auto or Model", ignoreCase = true))
+    }
+
+    @Test
+    fun the_graph_path_can_be_switched_off() = runBlocking {
+        val step = com.hopa.decision.graph.GraphStep(
+            graph = "Settings",
+            node = "start",
+            action = Action(kind = "ui.launch", app = SETTINGS),
+            answer = "Opened Settings.",
+            done = true,
+        )
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = listOf("All done."),
+            graphs = FakeGraph(listOf(step)),
+        )
+
+        val outcome = harness.runner.run(harness.request("open settings").copy(useGraphs = false))
+
+        assertEquals(TurnSource.MODEL, outcome.source)
+        assertEquals(emptyList<String>(), harness.device.launches)
     }
 
     @Test

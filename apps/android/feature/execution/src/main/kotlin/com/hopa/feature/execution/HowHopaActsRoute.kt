@@ -55,5 +55,6 @@ fun HowHopaActsRoute(
         onOpenComputer = onOpenComputer,
         onOpenSetup = onOpenSetup,
         onOpenDecisions = onOpenDecisions,
+        onStepSource = viewModel::setStepSource,
     )
 }

@@ -38,6 +38,7 @@ class RunCoordinator(
             knowledge = { container.knowledge },
             decisions = container.decisions,
             commands = container.commands,
+            graphs = container.graphs,
         )
     }
 
@@ -119,6 +120,8 @@ class RunCoordinator(
             checkpoints = checkpoints,
             replay = settings.replaySkills,
             instantCommands = settings.instantCommands,
+            useGraphs = settings.stepSource != "model",
+            graphFallback = settings.stepSource != "graph",
             surfaceName = device.sourceName,
             surfaceAvailable = device.sourceName != "fallback",
             surfaceError = device.lastError,

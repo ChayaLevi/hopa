@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "graphs": [
+    {
+      "app": "com.android.settings",
+      "name": "Settings",
+      "nodes": [
+        { "id": "settings", "texts": ["Settings", "Настройки"] },
+        { "id": "connections", "texts": ["Connections", "Подключения"] },
+        { "id": "wifi", "texts": ["Wi-Fi", "Wi‑Fi", "Wi-Fi settings"] },
+        { "id": "bluetooth", "texts": ["Bluetooth", "Bluetooth settings"] }
+      ],
+      "edges": [
+        {
+          "from": "start",
+          "to": "settings",
+          "goal": ["settings", "настройки", "настройках"],
+          "action": { "kind": "launch", "app": "com.android.settings" }
+        },
+        {
+          "from": "settings",
+          "to": "connections",
+          "goal": ["wi-fi", "wifi", "вай-фай", "вайфай", "bluetooth", "блютуз", "connections", "подключения"],
+          "action": { "kind": "tap", "texts": ["Connections", "Подключения"] }
+        },
+        {
+          "from": "settings",
+          "to": "wifi",
+          "goal": ["wi-fi", "wifi", "вай-фай", "вайфай"],
+          "action": { "kind": "tap", "texts": ["Wi-Fi", "Wi‑Fi"] },
+          "answer": "Opened Wi-Fi settings.",
+          "done": true
+        },
+        {
+          "from": "connections",
+          "to": "wifi",
+          "goal": ["wi-fi", "wifi", "вай-фай", "вайфай"],
+          "action": { "kind": "tap", "texts": ["Wi-Fi", "Wi‑Fi"] },
+          "answer": "Opened Wi-Fi settings.",
+          "done": true
+        },
+        {
+          "from": "connections",
+          "to": "bluetooth",
+          "goal": ["bluetooth", "блютуз", "блюпуп"],
+          "action": { "kind": "tap", "texts": ["Bluetooth"] },
+          "answer": "Opened Bluetooth settings.",
+          "done": true
+        },
+        {
+          "from": "connections",
+          "to": "connections",
+          "goal": ["wi-fi", "wifi", "вай-фай", "вайфай"],
+          "action": { "kind": "scroll", "direction": "up" }
+        }
+      ]
+    },
+    {
+      "app": "com.sec.android.app.clockpackage",
+      "name": "Clock",
+      "nodes": [
+        { "id": "clock", "texts": ["Clock", "Часы", "Alarm", "Будильник", "Timer", "Таймер"] },
+        { "id": "alarms", "texts": ["Alarms", "Будильники"] },
+        { "id": "timer", "texts": ["Timer", "Таймер"] }
+      ],
+      "edges": [
+        {
+          "from": "start",
+          "to": "clock",
+          "goal": ["clock", "часы", "alarm", "будильник", "timer", "таймер"],
+          "action": { "kind": "launch", "app": "com.sec.android.app.clockpackage" }
+        },
+        {
+          "from": "clock",
+          "to": "alarms",
+          "goal": ["alarm", "будильник"],
+          "action": { "kind": "tap", "texts": ["Alarm", "Будильник"] },
+          "answer": "Opened Alarms.",
+          "done": true
+        },
+        {
+          "from": "clock",
+          "to": "timer",
+          "goal": ["timer", "таймер"],
+          "action": { "kind": "tap", "texts": ["Timer", "Таймер"] },
+          "answer": "Opened Timer.",
+          "done": true
+        }
+      ]
+    },
+    {
+      "app": "com.sec.android.app.camera",
+      "name": "Camera",
+      "nodes": [],
+      "edges": [
+        {
+          "from": "start",
+          "to": null,
+          "goal": ["camera", "камера", "камеру"],
+          "action": { "kind": "launch", "app": "com.sec.android.app.camera" },
+          "answer": "Opened Camera.",
+          "done": true
+        }
+      ]
+    }
+  ]
+}

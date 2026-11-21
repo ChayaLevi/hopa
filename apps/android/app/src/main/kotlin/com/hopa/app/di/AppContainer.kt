@@ -44,6 +44,9 @@ import com.hopa.decision.DecisionRegistry
 import com.hopa.decision.DecisionSelector
 import com.hopa.decision.LayerMetadata
 import com.hopa.decision.classifier.IntentClassifier
+import com.hopa.decision.graph.GraphCatalog
+import com.hopa.decision.graph.GraphStepSource
+import com.hopa.decision.graph.HandGraphSource
 import com.hopa.decision.laix.LaixDecisionLayer
 import com.hopa.decision.rules.RulesDecisionLayer
 import com.hopa.feature.capabilities.CapabilitiesDependencies
@@ -214,6 +217,9 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
 
     /** Canonical commands that need no model at all. */
     val commands: IntentClassifier = IntentClassifier()
+
+    /** Hand-written paths for a few known apps; a miss goes to the model. */
+    val graphs: GraphStepSource = HandGraphSource(GraphCatalog.load())
 
     override val decisionLayers: List<LayerMetadata>
         get() = decisionRegistry.all().map { it.metadata }
