@@ -43,6 +43,9 @@ sealed interface HopaDestination {
     data object ActMode : HopaDestination
 
     @Serializable
+    data object Decisions : HopaDestination
+
+    @Serializable
     data object RunSetup : HopaDestination
 
     @Serializable

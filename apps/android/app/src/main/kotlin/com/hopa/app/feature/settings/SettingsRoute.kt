@@ -14,8 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hopa.feature.settings.DecisionsScreen
-import com.hopa.feature.settings.PAGE_DECISIONS
 import com.hopa.feature.settings.PAGE_MODEL
 import com.hopa.feature.settings.PAGE_NOTIFICATIONS
 import com.hopa.feature.settings.PAGE_PRIVACY
@@ -63,14 +61,6 @@ fun SettingsRoute(
             PAGE_PRIVACY -> SettingsPrivacyScreen(
                 entries = privacy,
                 onBack = backToHub,
-            )
-
-            PAGE_DECISIONS -> DecisionsScreen(
-                state = state,
-                onBack = backToHub,
-                onMode = viewModel::setDecisionMode,
-                onShadow = viewModel::setShadowDecisions,
-                onInstantCommands = viewModel::setInstantCommands,
             )
 
             PAGE_NOTIFICATIONS -> SettingsNotificationsScreen(

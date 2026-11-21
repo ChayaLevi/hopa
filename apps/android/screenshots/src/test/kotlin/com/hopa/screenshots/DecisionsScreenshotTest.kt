@@ -3,8 +3,8 @@ package com.hopa.screenshots
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.hopa.feature.execution.DecisionsScreen
 import com.hopa.feature.settings.DecisionLayerInfo
-import com.hopa.feature.settings.DecisionsScreen
 import com.hopa.feature.settings.SettingsUiState
 import com.hopa.stores.AppSettings
 import com.hopa.ui.theme.HopaTheme

@@ -2,6 +2,7 @@ package com.hopa.feature.execution
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,6 +67,7 @@ fun HowHopaActsScreen(
     onOpenScreenAccess: () -> Unit,
     onOpenComputer: () -> Unit,
     onOpenSetup: () -> Unit,
+    onOpenDecisions: () -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = ActMode.of(state)
@@ -165,6 +167,20 @@ fun HowHopaActsScreen(
                 else -> ScreenStatus(mode = mode, onScreenAccess = onOpenScreenAccess)
             }
 
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SectionLabel("Who chooses")
+                DecisionsCard(
+                    mode = state.settings.decisionMode,
+                    active = state.decisionActive,
+                    onClick = onOpenDecisions,
+                )
+                Text(
+                    "Rules answer a read in milliseconds; a change still asks you, and a payment always does.",
+                    fontSize = 12.sp,
+                    color = HopaColor.TextHint,
+                )
+            }
+
             if (mode.hidden) {
                 pairingStatus?.let { message ->
                     Text(
@@ -201,6 +217,48 @@ fun HowHopaActsScreen(
             },
         )
     }
+}
+
+@Composable
+private fun DecisionsCard(mode: String, active: Map<String, String>, onClick: () -> Unit) {
+    val title = when (mode) {
+        "auto" -> "Automatic"
+        "rules" -> "Rules"
+        "laix" -> "LAIX"
+        else -> "The model"
+    }
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        color = HopaColor.Surface,
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(title, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = HopaColor.TextPrimary)
+                Text(
+                    "Reads: ${decisionLabel(active["read"])}  ·  Changes: ${decisionLabel(active["change"])}",
+                    fontSize = 12.sp,
+                    color = HopaColor.TextHint,
+                )
+            }
+            Text("Change", fontSize = 13.sp, color = HopaColor.Primary)
+        }
+    }
+}
+
+private fun decisionLabel(id: String?): String = when (id) {
+    null, "", "model" -> "Model"
+    "rules" -> "Rules"
+    "laix" -> "LAIX"
+    else -> id
 }
 
 @Composable

@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(project(":core:ui"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:execution"))
     implementation(project(":feature:history"))
     implementation(project(":feature:runs"))
     implementation(project(":feature:chat"))
