@@ -24,11 +24,18 @@ Third-party components
    Used as the JavaScript-in-WebAssembly runtime inside the sandbox, if and when
    bundled.
 
-4. HarmonyOS, ArkTS, ArkUI, ArkWeb, DevEco Studio and related marks are
+4. LAIX (Live AI Experience)
+   Project: https://github.com/michaelatamuk/laix
+   License: Apache-2.0.
+   The Kotlin action policy is vendored under core/decision-laix at the pinned
+   commit recorded in core/decision-laix/LAIX.md; the license text is copied
+   beside it. No changes to the copied files.
+
+5. HarmonyOS, ArkTS, ArkUI, ArkWeb, DevEco Studio and related marks are
    trademarks of Huawei Technologies Co., Ltd. This project is not affiliated
    with or endorsed by Huawei.
 
-5. Python packages and JavaScript libraries used at build/runtime are listed in
+6. Python packages and JavaScript libraries used at build/runtime are listed in
    their respective package manifests (pyproject.toml, oh-package.json5) and are
    distributed under their own licenses. Keep an SBOM current for the project's
    configuration-management deliverables.

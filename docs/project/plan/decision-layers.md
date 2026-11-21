@@ -1,6 +1,6 @@
 # Decision layers
 
-Status: D1-D3 done (2026-11-21); D4-D7 planned
+Status: D1-D4 done (2026-11-21); D5-D7 planned
 
 HOPA will use **several decision layers**, not one. LAIX is the first to try, a
 rules layer is the baseline, a small intent classifier may follow, and a
@@ -169,12 +169,20 @@ model path was the only correct answer.
 Decision: included build for the spike, vendored sources for anything merged.
 No `latest`, no SNAPSHOT.
 
-## In the build now (D1-D3)
+Done in D4: the vendored copy is a subset (the action policy, its contracts and
+three support files) at a pinned commit, with the Apache-2.0 text beside it, an
+entry in the root `NOTICE`, and `core/decision-laix/LAIX.md` describing the
+provenance and the update procedure. The structure check skips that directory
+on purpose; `ktlint` does too.
+
+## In the build now (D1-D4)
 
 | Where | What |
 |---|---|
 | `core/decision` (`:decision`) | `DecisionLayer`, `LayerMetadata`, `DecisionContext`, `LayerDecision`, `DecisionRegistry`, `DecisionSelector`, `DecisionCoordinator`, `DecisionVote`, `ConformanceKit`, `ComparisonHarness` |
-| `core/decision-rules` (`:decision-rules`) | `RulesDecisionLayer`, the `decisionReport` task |
+| `core/decision-rules` (`:decision-rules`) | `RulesDecisionLayer` |
+| `core/decision-laix` (`:decision-laix`) | LAIX 0.18 action policy vendored at a pinned commit; `LaixDecisionLayer` is the only code that imports `dev.laix.*` |
+| `core/decision-report` (`:decision-report`) | the `decisionReport` task; the one list of shipped layers |
 | `core/agent` | `DecisionRuntime`: the loop's one way to ask, with mode and shadow as suppliers |
 | `core/agent/.../AgentLoop` | calls the runtime after the model's action is parsed; the vote is data, the action still runs |
 | `apps/android/data` | `decision_votes` table (schema 9), `DbDecisionVoteSink` |
@@ -185,13 +193,14 @@ No `latest`, no SNAPSHOT.
 Commands, from `apps/android`:
 
 ```
-gradlew :decision:test :decision-rules:test        # contract, kit, rules, corpus
-gradlew :decision-rules:decisionReport             # the comparison table
+gradlew :decision:test :decision-rules:test :decision-laix:test
+gradlew :decision-report:decisionReport             # the comparison table
 ```
 
-The rules layer currently matches all 17 reference answers, makes no dangerous
-`ACT`, and passes the conformance kit. Nothing is wired into the loop yet: the
-app behaves exactly as before D1.
+Both shipped layers match all 17 reference answers, make no dangerous `ACT`,
+and pass the conformance kit. LAIX is registered as `SHADOW`: it votes on real
+steps and is never applied until D6 gives it a class. The app behaves exactly
+as before D1 apart from the recorded votes.
 
 ## Stages
 
@@ -215,11 +224,14 @@ into `TurnRunner`; `AgentLoop` evaluates every parsed action; `DbDecisionVoteSin
 writes the rows. A setting of `decisionMode = auto` with `shadowDecisions = true`
 now produces one row per step per layer.
 
-### D4 - LAIX adapter (1 PR)
+### D4 - LAIX adapter (1 PR) - done
 
-Vendored `:decision-laix` (`core/decision-laix`), the mapping from
+Vendored `:decision-laix` (`core/decision-laix`) at
+`3ccc8add90dbd019197a990393600bbe1c1647d7`, the mapping from
 `Action`/`ApprovalRequest` to LAIX's request and back, the conformance kit, and
-its row in the comparison table.
+its row in the comparison table. Only the action policy and the shapes it
+returns are copied; `LAIX.md` lists the files and the update rules. The adapter
+never offers `ACT` for a payment or a delete: those are `ASK` by construction.
 
 ### D5 - intent classifier for closed commands (1-2 PRs)
 

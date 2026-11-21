@@ -40,6 +40,7 @@ import com.hopa.data.store.KeystoreSecretStore
 import com.hopa.decision.DecisionCoordinator
 import com.hopa.decision.DecisionMode
 import com.hopa.decision.DecisionRegistry
+import com.hopa.decision.laix.LaixDecisionLayer
 import com.hopa.decision.rules.RulesDecisionLayer
 import com.hopa.feature.capabilities.CapabilitiesDependencies
 import com.hopa.feature.conversations.ChatSyncOutcome
@@ -171,7 +172,8 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     }
 
     /** The layers this build ships; a new adapter is one entry here. */
-    private val decisionRegistry: DecisionRegistry = DecisionRegistry(listOf(RulesDecisionLayer()))
+    private val decisionRegistry: DecisionRegistry =
+        DecisionRegistry(listOf(RulesDecisionLayer(), LaixDecisionLayer()))
 
     val decisions: DecisionRuntime by lazy {
         DecisionRuntime(

@@ -63,11 +63,25 @@ def is_contract(line: str) -> bool:
     return bool(CONTRACT.match(text))
 
 
+# Third-party sources copied verbatim. They are not ours to restyle, they ship
+# with their own file layout and several declarations per file, and the adapter
+# around them is the only code this repository owns. See core/decision-laix/LAIX.md.
+VENDORED = (
+    "core/decision-laix/src/main/kotlin/dev/laix/",
+)
+
+
+def is_vendored(path: Path) -> bool:
+    relative = path.relative_to(ROOT).as_posix()
+    return any(relative.startswith(prefix) for prefix in VENDORED)
+
+
 def kotlin_files() -> list[Path]:
-    return sorted(
+    files = sorted(
         list(ANDROID.glob("**/src/*/kotlin/**/*.kt"))
         + list(PACKAGES.glob("*/src/*/kotlin/**/*.kt"))
     )
+    return [path for path in files if not is_vendored(path)]
 
 
 def relative_package(path: Path) -> str | None:
