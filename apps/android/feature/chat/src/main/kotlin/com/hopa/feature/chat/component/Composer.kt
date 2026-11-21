@@ -47,6 +47,7 @@ fun Composer(
     transcribing: Boolean = false,
     onMic: () -> Unit = {},
     hasAttachment: Boolean = false,
+    onStop: () -> Unit = {},
 ) {
     val canSend = (value.isNotBlank() || hasAttachment) && !busy && !transcribing
     Row(
@@ -119,7 +120,7 @@ fun Composer(
                 )
                 .clickable {
                     when {
-                        busy -> Unit
+                        busy -> onStop()
                         canSend -> onSend()
                         !transcribing -> onMic()
                     }

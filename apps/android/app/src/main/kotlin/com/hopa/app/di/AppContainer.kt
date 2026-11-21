@@ -171,6 +171,11 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         shadowDecisions = shadow
     }
 
+    override fun stopTurn() {
+        runGate.cancel()
+        localEngine.cancel()
+    }
+
     private val decisionVotes: DbDecisionVoteSink by lazy {
         DbDecisionVoteSink(database.decisionVoteDao(), clock) { decisionMode }
     }

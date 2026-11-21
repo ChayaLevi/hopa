@@ -11,6 +11,8 @@ data class ChatUiState(
     val busy: Boolean = false,
     /** On-device text as it is produced, shown while the turn runs. */
     val liveText: String = "",
+    /** True when this turn runs a model on this phone, so the first token is slow. */
+    val onDevice: Boolean = false,
     val error: String? = null,
     val options: List<String> = emptyList(),
     val pendingApproval: ApprovalRequest? = null,

@@ -37,6 +37,8 @@ import com.hopa.ui.theme.HopaColor
 fun ThinkingIndicator(
     modifier: Modifier = Modifier,
     label: String = "",
+    /** On-device model with no token yet: say what the wait is for. */
+    stalled: Boolean = false,
 ) {
     var seconds by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
@@ -74,8 +76,9 @@ fun ThinkingIndicator(
                 }
             }
             if (label.isNotBlank()) {
+                val note = if (stalled && seconds >= 20) "Loading the model" else label
                 Text(
-                    "$label  ·  %d:%02d".format(seconds / 60, seconds % 60),
+                    "$note  ·  %d:%02d".format(seconds / 60, seconds % 60),
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 11.sp,
                     color = HopaColor.TextHint,
