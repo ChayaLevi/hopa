@@ -15,6 +15,7 @@ data class DecisionRun(
                     reason = vote.reason,
                     confidence = vote.confidence,
                     trace = vote.trace,
+                    chosen = vote.chosen,
                 )
             }
         }

@@ -1,6 +1,7 @@
 package com.hopa.decision.rules
 
 import com.hopa.contracts.wire.Action
+import com.hopa.decision.ActionCandidate
 import com.hopa.decision.ComparisonHarness
 import com.hopa.decision.ConformanceKit
 import com.hopa.decision.DecisionCase
@@ -78,11 +79,65 @@ class RulesDecisionLayerTest {
         assertEquals(Verb.WAIT, decision.verb)
     }
 
+    @Test
+    fun `one safe read among several is chosen`() = runTest {
+        val launch = ActionCandidate(
+            "launch",
+            Action(kind = "ui.launch", app = "com.android.settings"),
+        )
+        val delete = ActionCandidate("delete", Action(kind = "system.delete", ref = "e9"))
+
+        val decision = layer.decide(context(null, candidates = listOf(launch, delete)))
+
+        assertEquals(Verb.ACT, decision.verb)
+        assertEquals("launch", decision.chosen)
+        assertEquals("edge_read", decision.reason)
+    }
+
+    @Test
+    fun `two equally plausible reads ask instead of guessing`() = runTest {
+        val back = ActionCandidate("back", Action(kind = "ui.back"))
+        val home = ActionCandidate("home", Action(kind = "ui.home"))
+
+        val decision = layer.decide(context(null, candidates = listOf(back, home)))
+
+        assertEquals(Verb.ASK, decision.verb)
+        assertEquals("ambiguous_edges", decision.reason)
+    }
+
+    @Test
+    fun `one change edge asks with the edge named`() = runTest {
+        val wifi = ActionCandidate("wifi", Action(kind = "ui.tap", ref = "e1", text = "Wi-Fi"))
+        val delete = ActionCandidate("delete", Action(kind = "system.delete", ref = "e9"))
+
+        val decision = layer.decide(context(null, candidates = listOf(wifi, delete)))
+
+        assertEquals(Verb.ASK, decision.verb)
+        assertEquals("edge_needs_approval", decision.reason)
+        assertEquals("wifi", decision.chosen)
+    }
+
+    @Test
+    fun `an edge that failed twice is not chosen again`() = runTest {
+        val dead = ActionCandidate(
+            "dead",
+            Action(kind = "ui.observe"),
+            failures = 2,
+        )
+        val delete = ActionCandidate("delete", Action(kind = "system.delete", ref = "e9"))
+
+        val decision = layer.decide(context(null, candidates = listOf(dead, delete)))
+
+        assertEquals(Verb.VERIFY, decision.verb)
+        assertEquals("no_fresh_edge", decision.reason)
+    }
+
     private fun context(
         action: Action?,
         history: List<String> = emptyList(),
         approvals: List<String> = emptyList(),
         cancelled: Boolean = false,
+        candidates: List<ActionCandidate> = emptyList(),
     ): DecisionContext = DecisionContext(
         runId = "run-1",
         step = 1,
@@ -91,6 +146,7 @@ class RulesDecisionLayerTest {
         history = history,
         approvals = approvals,
         cancelled = cancelled,
+        candidates = candidates,
     )
 
     private fun corpus(): List<DecisionCase> {

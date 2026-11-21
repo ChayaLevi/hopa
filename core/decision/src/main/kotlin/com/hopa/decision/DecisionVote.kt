@@ -15,5 +15,7 @@ data class DecisionVote(
     val trace: String,
     val latencyMicros: Long,
     val applied: Boolean,
+    /** The candidate the layer chose, when it chose among several. */
+    val chosen: String? = null,
     val error: String? = null,
 )

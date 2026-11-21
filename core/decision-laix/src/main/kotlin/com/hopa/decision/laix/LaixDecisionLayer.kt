@@ -1,6 +1,7 @@
 package com.hopa.decision.laix
 
 import com.hopa.decision.ActionClass
+import com.hopa.decision.ActionSignature
 import com.hopa.decision.ConformanceStatus
 import com.hopa.decision.DecisionContext
 import com.hopa.decision.DecisionHistory
@@ -43,11 +44,15 @@ class LaixDecisionLayer(
 
     override suspend fun decide(context: DecisionContext): LayerDecision {
         val decision = policy.decide(input(context))
+        val chosen = decision.actionId?.takeIf { id ->
+            context.candidates.any { it.id == id }
+        }
         return LayerDecision(
             verb = LaixVerbs.toHopa(decision.verb),
             reason = "laix.${decision.verb.value}",
             confidence = decision.confidence,
             trace = "laix ${policy.version}: ${decision.rationale}",
+            chosen = chosen,
         )
     }
 
@@ -75,6 +80,9 @@ class LaixDecisionLayer(
     }
 
     private fun options(context: DecisionContext): List<ActionOption> {
+        if (context.candidates.size > 1) {
+            return candidateOptions(context)
+        }
         val options = mutableListOf<ActionOption>()
         if (canAct(context)) {
             val change = context.actionClass == ActionClass.CHANGE
@@ -141,6 +149,67 @@ class LaixDecisionLayer(
         return options
     }
 
+    /**
+     * One ACT option per usable edge, plus the same ask/wait/observe choices a
+     * single-step turn has. Dangerous edges are not offered at all.
+     */
+    private fun candidateOptions(context: DecisionContext): List<ActionOption> {
+        val options = mutableListOf<ActionOption>()
+        context.candidates
+            .filter { it.actionClass != ActionClass.DANGEROUS && it.failures < 2 }
+            .forEach { candidate ->
+                val change = candidate.actionClass == ActionClass.CHANGE
+                options += ActionOption(
+                    id = candidate.id,
+                    verb = Verb.ACT,
+                    name = candidate.describe(),
+                    params = mapOf("signature" to ActionSignature.of(candidate.action)),
+                    expectedBenefit = 0.8,
+                    cost = 0.1,
+                    risk = risk(candidate.actionClass),
+                    latencyMs = 250,
+                    interruptCost = interrupt(candidate.actionClass),
+                    reversible = true,
+                    requiresApproval = change,
+                    rationale = "an edge from the current screen",
+                )
+            }
+        if (!context.atStepLimit) {
+            options += ActionOption(
+                id = "wait",
+                verb = Verb.WAIT,
+                name = "wait",
+                expectedBenefit = 0.2,
+                risk = 0.0,
+                reversible = true,
+                rationale = "let the situation settle",
+            )
+        }
+        options += ActionOption(
+            id = "ask",
+            verb = Verb.ASK,
+            name = "ask the person",
+            expectedBenefit = 0.45,
+            risk = 0.0,
+            interruptCost = 0.5,
+            reversible = true,
+            rationale = "the edges are equally plausible",
+        )
+        if (needsMoreInfo(context)) {
+            options += ActionOption(
+                id = "observe",
+                verb = Verb.OBSERVE,
+                name = "read the screen",
+                expectedBenefit = 0.3,
+                cost = 0.1,
+                risk = 0.0,
+                reversible = true,
+                rationale = "a cheap check may settle the doubt",
+            )
+        }
+        return options
+    }
+
     private fun canAct(context: DecisionContext): Boolean = context.action != null &&
         !context.cancelled &&
         !context.atStepLimit &&
@@ -169,6 +238,7 @@ class LaixDecisionLayer(
         context.atStepLimit -> 0.6
         // With no interruptions left, waiting is the confident answer.
         context.attention.isSpent() -> 0.8
+        context.candidates.size > 1 -> candidateConfidence(context)
         context.action == null -> 0.4
         context.signature in context.approvals -> 0.9
         verificationDue(context) -> 0.75
@@ -181,11 +251,34 @@ class LaixDecisionLayer(
         context.cancelled -> 0.1
         context.atStepLimit -> 0.2
         context.attention.isSpent() -> 0.4
+        context.candidates.size > 1 -> candidateUrgency(context)
         context.signature in context.approvals -> 0.8
         verificationDue(context) -> 0.6
         context.actionClass == ActionClass.READ -> 0.8
         context.actionClass == ActionClass.CHANGE -> 0.55
         else -> 0.2
+    }
+
+    private fun candidateConfidence(context: DecisionContext): Double {
+        val safe = context.candidates.filter {
+            it.actionClass != ActionClass.DANGEROUS && it.failures < 2
+        }
+        return when {
+            safe.isEmpty() -> 0.4
+            safe.size == 1 && safe.single().actionClass == ActionClass.READ -> 0.95
+            safe.size == 1 -> 0.5
+            else -> 0.5
+        }
+    }
+
+    private fun candidateUrgency(context: DecisionContext): Double {
+        val safe = context.candidates.filter {
+            it.actionClass != ActionClass.DANGEROUS && it.failures < 2
+        }
+        return when {
+            safe.size == 1 && safe.single().actionClass == ActionClass.READ -> 0.8
+            else -> 0.5
+        }
     }
 
     private fun risk(actionClass: ActionClass): Double = when (actionClass) {
