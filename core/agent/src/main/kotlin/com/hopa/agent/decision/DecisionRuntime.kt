@@ -1,6 +1,7 @@
 package com.hopa.agent.decision
 
 import com.hopa.contracts.wire.Action
+import com.hopa.decision.ActionCandidate
 import com.hopa.decision.ActionClass
 import com.hopa.decision.AttentionBudget
 import com.hopa.decision.DecisionContext
@@ -36,6 +37,9 @@ class DecisionRuntime(
         approvals: List<String> = emptyList(),
         cancelled: Boolean = false,
         atStepLimit: Boolean = false,
+        goal: String = "",
+        planStep: String = "",
+        candidates: List<ActionCandidate> = emptyList(),
     ): DecisionRun {
         val context = DecisionContext(
             runId = runId,
@@ -47,6 +51,9 @@ class DecisionRuntime(
             attention = AttentionBudget(),
             cancelled = cancelled,
             atStepLimit = atStepLimit,
+            goal = goal,
+            planStep = planStep,
+            candidates = candidates,
         )
         return coordinator.evaluate(context, mode(), shadow(), sink)
     }

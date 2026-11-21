@@ -1,6 +1,7 @@
 package com.hopa.decision.laix
 
 import com.hopa.contracts.wire.Action
+import com.hopa.decision.ActionCandidate
 import com.hopa.decision.ComparisonHarness
 import com.hopa.decision.ConformanceKit
 import com.hopa.decision.DecisionCase
@@ -54,12 +55,39 @@ class LaixDecisionLayerTest {
         assertEquals(Verb.ACT, LaixVerbs.toHopa(LaixVerb.ACT))
     }
 
-    private fun context(action: Action?): DecisionContext = DecisionContext(
-        runId = "run-1",
-        step = 1,
-        action = action,
-        screen = "test screen",
-    )
+    @Test
+    fun `LAIX picks the read edge and never the delete`() = runTest {
+        val launch = ActionCandidate(
+            "launch",
+            Action(kind = "ui.launch", app = "com.android.settings"),
+        )
+        val delete = ActionCandidate("delete", Action(kind = "system.delete", ref = "e9"))
+
+        val decision = layer.decide(context(null, listOf(launch, delete)))
+
+        assertEquals(Verb.ACT, decision.verb)
+        assertEquals("launch", decision.chosen)
+    }
+
+    @Test
+    fun `LAIX asks when two reads are equally plausible`() = runTest {
+        val back = ActionCandidate("back", Action(kind = "ui.back"))
+        val home = ActionCandidate("home", Action(kind = "ui.home"))
+
+        val decision = layer.decide(context(null, listOf(back, home)))
+
+        assertEquals(Verb.ASK, decision.verb)
+    }
+
+    private fun context(action: Action?, candidates: List<ActionCandidate> = emptyList()): DecisionContext {
+        return DecisionContext(
+            runId = "run-1",
+            step = 1,
+            action = action,
+            screen = "test screen",
+            candidates = candidates,
+        )
+    }
 
     private fun corpus(): List<DecisionCase> {
         val stream = checkNotNull(javaClass.getResourceAsStream("/decisions/corpus.v1.json"))

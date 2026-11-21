@@ -208,6 +208,30 @@ and pass the conformance kit. LAIX is registered as `SHADOW`: it votes on real
 steps and is never applied until D6 gives it a class. The app behaves exactly
 as before D1 apart from the recorded votes.
 
+## Ready for a graph
+
+The contract already separates **where the options come from** from **who chooses**:
+
+```kotlin
+data class ActionCandidate(val id: String, val action: Action, val failures: Int = 0)
+data class DecisionContext(..., val goal: String, val planStep: String, val candidates: List<ActionCandidate>)
+data class LayerDecision(..., val chosen: String? = null)
+```
+
+- The model path passes one candidate (`proposed`, the action the model chose),
+  so the layers behave exactly as before.
+- A navigation graph passes its outgoing edges; a layer returns `chosen` with
+  the edge it picked.
+- `Rules` ignores edges that failed twice, never picks a dangerous one, acts
+  when exactly one safe read remains, and asks when several are plausible.
+- `LAIX` builds one ACT option per edge and returns LAIX's own `actionId`; the
+  adapter maps it back to `chosen`.
+- `failures` is the hook for graph statistics; nothing fills it yet.
+
+Still missing for a real graph: the graph source itself, a node key in the
+context, learning edge statistics from run records, and a plan step per edge.
+None of them require touching the loop again.
+
 ## Stages
 
 ### D1 - the port and the registry (1 PR) - done

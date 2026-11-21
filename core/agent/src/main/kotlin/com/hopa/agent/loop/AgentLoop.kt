@@ -28,6 +28,7 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
+import com.hopa.decision.ActionCandidate
 import com.hopa.decision.ActionClass
 import com.hopa.decision.Verb
 import com.hopa.runlog.store.RunRecorder
@@ -178,6 +179,8 @@ class AgentLoop(
                 action = action,
                 screen = observation?.let(screenRenderer::render).orEmpty(),
                 history = steps.toList(),
+                goal = context.goal,
+                candidates = listOf(ActionCandidate("proposed", action)),
             )
             val chosen = run?.decision
             if (chosen != null && decisions.appliesTo(ActionClass.of(action.kindOrNull()))) {

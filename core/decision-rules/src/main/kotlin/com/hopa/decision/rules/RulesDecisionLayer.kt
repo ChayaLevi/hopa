@@ -1,5 +1,6 @@
 package com.hopa.decision.rules
 
+import com.hopa.decision.ActionCandidate
 import com.hopa.decision.ActionClass
 import com.hopa.decision.ConformanceStatus
 import com.hopa.decision.DecisionContext
@@ -38,11 +39,14 @@ class RulesDecisionLayer : DecisionLayer {
         if (context.atStepLimit) {
             return decision(Verb.ASK, "step_limit", 0.9, context)
         }
-        val action = context.action ?: return decision(Verb.ASK, "no_action", 0.6, context)
-        val kind = action.kindOrNull() ?: return decision(Verb.ASK, "unknown_action", 0.4, context)
         if (context.attention.isSpent()) {
             return decision(Verb.WAIT, "attention_spent", 0.8, context)
         }
+        if (context.candidates.size > 1) {
+            return chooseEdge(context)
+        }
+        val action = context.action ?: return decision(Verb.ASK, "no_action", 0.6, context)
+        val kind = action.kindOrNull() ?: return decision(Verb.ASK, "unknown_action", 0.4, context)
         if (context.history.contains(DecisionHistory.DECLINED)) {
             return decision(Verb.ASK, "user_declined", 0.95, context)
         }
@@ -70,6 +74,45 @@ class RulesDecisionLayer : DecisionLayer {
             ActionClass.CHANGE -> decision(Verb.ASK, "needs_approval", 0.6, context)
         }
     }
+
+    /**
+     * Pick among the outgoing edges of a graph.
+     *
+     * The rules stay conservative: ignore edges that already failed twice, never
+     * choose a payment or a delete, act only when exactly one safe read remains,
+     * and ask when several edges are equally plausible.
+     */
+    private fun chooseEdge(context: DecisionContext): LayerDecision {
+        val fresh = context.candidates.filter { it.failures < 2 }
+        val safe = fresh.filter { it.actionClass != ActionClass.DANGEROUS }
+        val reads = safe.filter { it.actionClass == ActionClass.READ }
+        return when {
+            safe.isEmpty() -> decision(Verb.VERIFY, "no_fresh_edge", 0.6, context)
+
+            reads.size == 1 -> LayerDecision(
+                verb = Verb.ACT,
+                reason = "edge_read",
+                confidence = 0.9,
+                trace = edgeTrace("edge_read", reads.single(), context),
+                chosen = reads.single().id,
+            )
+
+            reads.size > 1 -> decision(Verb.ASK, "ambiguous_edges", 0.4, context)
+
+            safe.size == 1 -> LayerDecision(
+                verb = Verb.ASK,
+                reason = "edge_needs_approval",
+                confidence = 0.6,
+                trace = edgeTrace("edge_needs_approval", safe.single(), context),
+                chosen = safe.single().id,
+            )
+
+            else -> decision(Verb.ASK, "ambiguous_edges", 0.5, context)
+        }
+    }
+
+    private fun edgeTrace(reason: String, edge: ActionCandidate, context: DecisionContext): String =
+        "rules: ${context.candidates.size} edges, chose ${edge.describe()} ($reason)"
 
     private fun decision(verb: Verb, reason: String, confidence: Double, context: DecisionContext): LayerDecision =
         LayerDecision(

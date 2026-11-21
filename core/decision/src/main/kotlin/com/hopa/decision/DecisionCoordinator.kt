@@ -57,6 +57,7 @@ class DecisionCoordinator(
                 trace = decision.trace,
                 latencyMicros = elapsedMicros(started),
                 applied = applied,
+                chosen = decision.chosen,
             )
         } catch (cancelled: kotlinx.coroutines.CancellationException) {
             throw cancelled
