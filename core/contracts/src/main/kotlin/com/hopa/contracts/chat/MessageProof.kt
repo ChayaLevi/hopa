@@ -18,4 +18,6 @@ data class MessageProof(
     val fellBack: Boolean = false,
     /** The knowledge bundle the turn routed with, so two runs are comparable. */
     val knowledgeVersion: String = "",
+    /** The model that wrote this answer, with its provider, so a difference is explainable. */
+    val model: String = "",
 )

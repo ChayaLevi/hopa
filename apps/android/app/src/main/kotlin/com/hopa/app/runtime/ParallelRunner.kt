@@ -73,7 +73,12 @@ class ParallelRunner(
         try {
             val settings = container.settings.settings.first()
             container.useGate(settings.trustedApps.toList())
-        container.useDecisions(settings.decisionMode, settings.shadowDecisions)
+            container.useDecisions(settings.decisionMode, settings.shadowDecisions)
+            val receiptModel = if (settings.provider.equals("on-device", ignoreCase = true)) {
+                runCatching { container.onDeviceModelName() }.getOrDefault("on-device")
+            } else {
+                listOf(settings.provider, settings.model).filter { it.isNotBlank() }.joinToString("/")
+            }
 
             // The hidden display has its own foreground app; its typed functions
             // must come from that display, not from the phone's own screen.
@@ -137,6 +142,7 @@ class ParallelRunner(
                 millis = System.currentTimeMillis() - started,
                 steps = steps,
                 knowledgeVersion = outcome.knowledgeVersion,
+                model = receiptModel,
             )
             append(conversation.id, answer, proof.takeIf { it.executed > 0 })
             record(goal, conversation.id, steps.size, outcome.usage.totalTokens)

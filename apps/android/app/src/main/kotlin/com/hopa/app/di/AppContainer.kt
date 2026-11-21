@@ -171,6 +171,15 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         shadowDecisions = shadow
     }
 
+    override suspend fun onDeviceModelName(): String {
+        val installed = localModels.installed()
+        val id = installed.firstOrNull()?.id ?: return "on-device"
+        return com.hopa.inference.local.LocalModelCatalogue.models
+            .firstOrNull { it.id == id }
+            ?.name
+            ?: id
+    }
+
     private val decisionVotes: DbDecisionVoteSink by lazy {
         DbDecisionVoteSink(database.decisionVoteDao(), clock) { decisionMode }
     }

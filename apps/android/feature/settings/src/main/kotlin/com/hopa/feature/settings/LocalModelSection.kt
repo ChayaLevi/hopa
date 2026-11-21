@@ -48,6 +48,8 @@ fun LocalModelSection(
     onDownload: (ModelSpec) -> Unit,
     onDelete: (String) -> Unit,
     onDeleteAll: () -> Unit,
+    onAcceptLicence: () -> Unit = {},
+    onCancelLicence: () -> Unit = {},
 ) {
     var pendingDelete by remember { mutableStateOf<String?>(null) }
     var confirmDeleteAll by remember { mutableStateOf(false) }
@@ -99,7 +101,7 @@ fun LocalModelSection(
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    "Using ${formatBytes(state.totalBytes)}",
+                    "${formatBytes(state.totalBytes)} of ${formatBytes(state.quotaBytes)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = HopaColor.TextHint,
                 )
@@ -158,6 +160,36 @@ fun LocalModelSection(
             },
             dismissButton = {
                 TextButton(onClick = { pendingDelete = null }) { Text("Keep") }
+            },
+        )
+    }
+
+    state.licenceFor?.let { spec ->
+        AlertDialog(
+            onDismissRequest = onCancelLicence,
+            title = { Text("Download ${spec.name}?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Licence: ${spec.license}")
+                    if (spec.licenseUrl.isNotBlank()) {
+                        Text(
+                            spec.licenseUrl,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = HopaColor.Primary,
+                        )
+                    }
+                    Text(
+                        "Accepting is stored for this exact file. A new version asks again.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = HopaColor.TextHint,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onAcceptLicence) { Text("Accept and download") }
+            },
+            dismissButton = {
+                TextButton(onClick = onCancelLicence) { Text("Not now") }
             },
         )
     }

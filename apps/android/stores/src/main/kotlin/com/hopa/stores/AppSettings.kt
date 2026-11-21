@@ -37,6 +37,11 @@ data class AppSettings(
     val decisionMode: String = "off",
     /** Record what the layers that were not applied would have decided. */
     val shadowDecisions: Boolean = false,
+    /**
+     * Model licences the person accepted, as `id:sha256`. A re-downloaded or
+     * updated file has a different hash and asks again.
+     */
+    val acceptedModelLicences: Set<String> = emptySet(),
     /** Address of the gateway this device is paired with. */
     val backendUrl: String = "",
     /** Identity this device was given when it joined the household. */

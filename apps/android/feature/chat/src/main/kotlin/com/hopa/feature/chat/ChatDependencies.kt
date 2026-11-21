@@ -74,6 +74,9 @@ interface ChatDependencies {
     /** Use these decision settings for the steps of the turns that start now. */
     fun useDecisions(mode: String, shadow: Boolean)
 
+    /** The model label for the receipt, including the installed file's name. */
+    suspend fun onDeviceModelName(): String
+
     fun bringToFront()
 
     fun releaseSurfaces()

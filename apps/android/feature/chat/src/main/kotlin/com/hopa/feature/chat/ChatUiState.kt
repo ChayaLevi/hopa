@@ -11,6 +11,8 @@ data class ChatUiState(
     val busy: Boolean = false,
     /** On-device text as it is produced, shown while the turn runs. */
     val liveText: String = "",
+    /** Provider and model for the receipt, so 'it answered worse' is explainable. */
+    val receiptModel: String = "",
     val error: String? = null,
     val options: List<String> = emptyList(),
     val pendingApproval: ApprovalRequest? = null,

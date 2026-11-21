@@ -1,6 +1,7 @@
 package com.hopa.feature.settings
 
 import com.hopa.inference.local.InstalledModel
+import com.hopa.inference.local.LocalModelQuota
 import com.hopa.inference.local.ModelSpec
 
 /** What the on-device section shows: the offer, the files, and the outcome. */
@@ -10,6 +11,10 @@ data class LocalModelUiState(
     val installedSpecs: Map<String, ModelSpec> = emptyMap(),
     val totalBytes: Long = 0,
     val ramGb: Int = 0,
+    val quotaBytes: Long = LocalModelQuota.MAX_BYTES,
+    val acceptedLicences: Set<String> = emptySet(),
+    /** Set when a download waits for the person to accept the licence. */
+    val licenceFor: ModelSpec? = null,
     val busy: Boolean = false,
     val downloadingId: String? = null,
     val downloadProgress: Float? = null,

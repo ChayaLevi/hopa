@@ -12,6 +12,9 @@ import com.hopa.localmodel.LocalModelStore
 interface LocalModelHost {
     val localModels: LocalModelStore
 
+    /** Licence acceptance and the rest of the person's settings. */
+    val settings: com.hopa.stores.SettingsRepository
+
     /** Total RAM of this phone, in gigabytes, for the recommendation. */
     val ramGb: Int
 
