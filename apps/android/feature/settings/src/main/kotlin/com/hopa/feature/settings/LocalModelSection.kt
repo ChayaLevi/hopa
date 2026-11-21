@@ -110,8 +110,15 @@ fun LocalModelSection(
                 val spec = state.installedSpecs[model.id]
                 InstalledRow(
                     title = spec?.name ?: model.id,
-                    subtitle = "${formatBytes(model.bytes)}  ·  active",
+                    subtitle = if (model.id in state.updates) {
+                        "${formatBytes(model.bytes)}  ·  update available"
+                    } else {
+                        "${formatBytes(model.bytes)}  ·  active"
+                    },
                     onDelete = { pendingDelete = model.id },
+                    onUpdate = spec?.takeIf { model.id in state.updates }?.let { current ->
+                        { onDownload(current) }
+                    },
                 )
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -282,7 +289,12 @@ private fun ModelCard(
 }
 
 @Composable
-private fun InstalledRow(title: String, subtitle: String, onDelete: () -> Unit) {
+private fun InstalledRow(
+    title: String,
+    subtitle: String,
+    onDelete: () -> Unit,
+    onUpdate: (() -> Unit)? = null,
+) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = HopaColor.Surface),
@@ -302,6 +314,9 @@ private fun InstalledRow(title: String, subtitle: String, onDelete: () -> Unit) 
                 .padding(start = 10.dp)) {
                 Text(title, style = MaterialTheme.typography.bodyLarge, color = HopaColor.TextPrimary)
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = HopaColor.TextHint)
+            }
+            if (onUpdate != null) {
+                TextButton(onClick = onUpdate) { Text("Update") }
             }
             IconButton(onClick = onDelete) {
                 Icon(

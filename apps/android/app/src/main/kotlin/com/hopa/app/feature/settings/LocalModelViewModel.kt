@@ -47,11 +47,19 @@ class LocalModelViewModel @Inject constructor(
                 ramGb = host.ramGb,
                 freeBytes = host.freeBytes,
             )
+            val specs = LocalModelCatalogue.models.associateBy { model -> model.id }
+            val updates = installed.mapNotNull { model ->
+                val spec = specs[model.id] ?: return@mapNotNull null
+                val current = spec.sha256.isNotBlank() &&
+                    !model.file.name.contains(spec.sha256.take(8), ignoreCase = true)
+                if (current) model.id else null
+            }.toSet()
             _state.update {
                 it.copy(
                     recommended = recommended,
                     installed = installed,
-                    installedSpecs = LocalModelCatalogue.models.associateBy { model -> model.id },
+                    installedSpecs = specs,
+                    updates = updates,
                     totalBytes = installed.sumOf { model -> model.bytes },
                     ramGb = host.ramGb,
                     quotaBytes = LocalModelQuota.MAX_BYTES,

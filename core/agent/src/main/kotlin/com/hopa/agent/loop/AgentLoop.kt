@@ -180,7 +180,7 @@ class AgentLoop(
                 history = steps.toList(),
             )
             val chosen = run?.decision
-            if (chosen != null && decisions?.appliesTo(ActionClass.of(action.kindOrNull())) == true) {
+            if (chosen != null && decisions.appliesTo(ActionClass.of(action.kindOrNull()))) {
                 when (chosen.verb) {
                     Verb.ACT -> Unit
 

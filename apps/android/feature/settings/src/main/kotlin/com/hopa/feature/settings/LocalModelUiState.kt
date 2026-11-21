@@ -13,6 +13,8 @@ data class LocalModelUiState(
     val ramGb: Int = 0,
     val quotaBytes: Long = LocalModelQuota.MAX_BYTES,
     val acceptedLicences: Set<String> = emptySet(),
+    /** Installed ids whose catalogue hash no longer matches the file on disk. */
+    val updates: Set<String> = emptySet(),
     /** Set when a download waits for the person to accept the licence. */
     val licenceFor: ModelSpec? = null,
     val busy: Boolean = false,
