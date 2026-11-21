@@ -180,11 +180,14 @@ fun HowHopaActsScreen(
                 SettingsSegment(
                     options = listOf(
                         "stub" to "Demo",
-                        "openai" to "Cloud",
-                        "lan" to "LAN",
+                        "server" to "Server",
                         "on-device" to "On-device",
                     ),
-                    selected = state.settings.provider,
+                    selected = when (state.settings.provider) {
+                        "stub" -> "stub"
+                        "on-device" -> "on-device"
+                        else -> "server"
+                    },
                     onSelect = onProvider,
                 )
                 if (state.settings.provider == "on-device") {
@@ -352,9 +355,8 @@ private fun stepSourceNote(source: String): String = when (source) {
 
 private fun modelNote(provider: String, cloudModel: String): String = when (provider) {
     "on-device" -> "Answers stay on this phone."
-    "lan" -> "Answers come from a server on your network."
     "stub" -> "Demo answers; no model is called."
-    else -> "Cloud answers \u00B7 " + cloudModel.ifBlank { "no model set" }
+    else -> "Cloud or your own server \u00B7 " + cloudModel.ifBlank { "no model set" }
 }
 
 /** One installed model, with the check that says which one answers. */

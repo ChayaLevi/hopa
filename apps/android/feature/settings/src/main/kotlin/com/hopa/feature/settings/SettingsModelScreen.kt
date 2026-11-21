@@ -52,10 +52,17 @@ fun SettingsModelScreen(
     SettingsPage(title = "Answers", onBack = onBack) {
         Text(
             "Answers come from ${providerLabel(provider)}. " +
-                "Choose the model on How HOPA acts.",
+                "Choose where they come from on How HOPA acts.",
             style = MaterialTheme.typography.bodySmall,
             color = HopaColor.TextHint,
         )
+        if (provider == "stub") {
+            Text(
+                "Demo answers with a small canned set: no model, no network, no key.",
+                style = MaterialTheme.typography.bodySmall,
+                color = HopaColor.TextHint,
+            )
+        }
         if (provider == "on-device") {
             Text(
                 "Answers come from a model file on this phone; nothing is sent to a server.",
@@ -64,7 +71,7 @@ fun SettingsModelScreen(
             )
             onDeviceModels()
         }
-        if (provider != "on-device") {
+        if (provider != "on-device" && provider != "stub") {
             OutlinedTextField(
                 value = endpoint,
                 onValueChange = { endpoint = it },
@@ -108,7 +115,7 @@ fun SettingsModelScreen(
             ) {
                 Text(if (state.busy) "Saving\u2026" else "Save")
             }
-            if (provider != "on-device") {
+            if (provider != "on-device" && provider != "stub") {
                 Button(
                     onClick = {
                         onTestModel(
@@ -154,7 +161,6 @@ fun SettingsModelScreen(
 /** The provider as a person reads it, not the stored wire name. */
 private fun providerLabel(provider: String): String = when (provider) {
     "stub" -> "Demo"
-    "lan" -> "LAN"
     "on-device" -> "On-device"
-    else -> "Cloud"
+    else -> "Server"
 }
