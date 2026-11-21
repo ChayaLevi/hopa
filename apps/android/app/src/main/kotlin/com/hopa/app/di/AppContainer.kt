@@ -177,12 +177,15 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     }
 
     override suspend fun onDeviceModelName(): String {
-        val installed = localModels.installed()
-        val id = installed.firstOrNull()?.id ?: return "on-device"
-        return com.hopa.inference.local.LocalModelCatalogue.models
-            .firstOrNull { it.id == id }
+        val installed = localModels.installed().firstOrNull() ?: return "on-device"
+        val name = com.hopa.inference.local.LocalModelCatalogue.models
+            .firstOrNull { it.id == installed.id }
             ?.name
-            ?: id
+            ?: installed.id
+        val version = installed.file.name
+            .substringAfterLast('-', "")
+            .removeSuffix(".gguf")
+        return if (version.isBlank()) name else "$name ($version)"
     }
 
     private val decisionVotes: DbDecisionVoteSink by lazy {

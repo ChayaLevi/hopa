@@ -556,7 +556,8 @@ gaps that only showed up in use, in priority order.
 - **GGUF validation** (17), **named errors** (22 partially): magic, size and a
   loader failure each have their own message; a hot phone refuses to start.
 - **Receipt** (19): every proof names the provider and model, including the
-  installed on-device file.
+  installed on-device file and its hash prefix, so two files of the same family
+  are distinguishable.
 - **Memory pressure** (9 partially): the model is released on `onTrimMemory`.
 
 Still open: crash isolation in a separate process (4), the engine's own process
