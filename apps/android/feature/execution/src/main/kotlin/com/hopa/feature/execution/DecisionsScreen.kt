@@ -36,7 +36,6 @@ fun DecisionsScreen(
     onMode: (String) -> Unit,
     onShadow: (Boolean) -> Unit,
     onInstantCommands: (Boolean) -> Unit,
-    onKnownGraphs: (Boolean) -> Unit,
 ) {
     val settings = state.settings
     SettingsPage(title = "Decisions", onBack = onBack) {
@@ -80,17 +79,11 @@ fun DecisionsScreen(
                 checked = settings.instantCommands,
                 onChange = onInstantCommands,
             )
-            SettingsDivider()
-            SettingsSwitchRow(
-                title = "Known-app graphs",
-                checked = settings.knownGraphs,
-                onChange = onKnownGraphs,
-            )
         }
         Text(
             "Instant commands run open, back, home, scroll and wait without a model. " +
-                "Known-app graphs follow hand-written paths for Settings, Clock and Camera; " +
-                "a screen they do not know goes to the model.",
+                "Anything they do not recognize goes to the model. " +
+                "Steps (Auto / Model / Graph) are chosen on the Act page.",
             fontSize = 12.sp,
             color = HopaColor.TextHint,
             modifier = Modifier.padding(horizontal = 4.dp),

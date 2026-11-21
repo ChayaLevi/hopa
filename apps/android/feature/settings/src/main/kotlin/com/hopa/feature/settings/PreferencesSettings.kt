@@ -46,8 +46,8 @@ internal class PreferencesSettings(
         settings.update { it.copy(instantCommands = value) }
     }
 
-    suspend fun setKnownGraphs(value: Boolean) {
-        settings.update { it.copy(knownGraphs = value) }
+    suspend fun setStepSource(value: String) {
+        settings.update { it.copy(stepSource = value) }
     }
 
     suspend fun setTrusted(packageName: String, trusted: Boolean) {

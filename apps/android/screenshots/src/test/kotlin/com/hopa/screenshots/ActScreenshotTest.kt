@@ -47,6 +47,7 @@ class ActScreenshotTest {
                     onOpenComputer = {},
                     onOpenSetup = {},
                     onOpenDecisions = {},
+                    onStepSource = {},
                 )
             }
         }

@@ -523,6 +523,24 @@ class TurnRunnerTest {
     }
 
     @Test
+    fun graph_only_refuses_a_goal_without_a_written_path() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = listOf("All done."),
+            graphs = FakeGraph(emptyList()),
+        )
+
+        val outcome = harness.runner.run(
+            harness.request("open settings").copy(graphFallback = false),
+        )
+
+        assertEquals(TurnSource.GRAPH, outcome.source)
+        assertEquals(0, harness.policy.calls)
+        assertEquals(ErrorCodes.BLOCKED, outcome.error?.code)
+        assertTrue(outcome.answer.contains("Auto or Model", ignoreCase = true))
+    }
+
+    @Test
     fun the_graph_path_can_be_switched_off() = runBlocking {
         val step = com.hopa.decision.graph.GraphStep(
             graph = "Settings",

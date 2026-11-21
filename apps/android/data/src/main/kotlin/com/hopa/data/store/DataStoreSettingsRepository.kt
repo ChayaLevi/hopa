@@ -36,7 +36,7 @@ class DataStoreSettingsRepository(
             planFirst = prefs[PLAN_FIRST] ?: false,
             replaySkills = prefs[REPLAY_SKILLS] ?: true,
             instantCommands = prefs[INSTANT_COMMANDS] ?: true,
-            knownGraphs = prefs[KNOWN_GRAPHS] ?: true,
+            stepSource = prefs[STEP_SOURCE] ?: if (prefs[KNOWN_GRAPHS] == false) "model" else "auto",
             vision = prefs[VISION] ?: false,
             mascotFramed = prefs[MASCOT_FRAMED] ?: false,
             trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
@@ -67,7 +67,7 @@ class DataStoreSettingsRepository(
             prefs[PLAN_FIRST] = next.planFirst
             prefs[REPLAY_SKILLS] = next.replaySkills
             prefs[INSTANT_COMMANDS] = next.instantCommands
-            prefs[KNOWN_GRAPHS] = next.knownGraphs
+            prefs[STEP_SOURCE] = next.stepSource
             prefs[VISION] = next.vision
         prefs[MASCOT_FRAMED] = next.mascotFramed
             prefs[TRUSTED_APPS] = next.trustedApps
@@ -136,6 +136,7 @@ class DataStoreSettingsRepository(
         val REPLAY_SKILLS = booleanPreferencesKey("replay_skills")
         val INSTANT_COMMANDS = booleanPreferencesKey("instant_commands")
         val KNOWN_GRAPHS = booleanPreferencesKey("known_graphs")
+        val STEP_SOURCE = stringPreferencesKey("step_source")
         val VISION = booleanPreferencesKey("vision")
     val MASCOT_FRAMED = booleanPreferencesKey("mascot_framed")
         val TRUSTED_APPS = stringSetPreferencesKey("trusted_apps")

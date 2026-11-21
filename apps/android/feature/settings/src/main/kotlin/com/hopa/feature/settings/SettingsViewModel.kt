@@ -193,9 +193,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setKnownGraphs(value: Boolean) {
+    /** auto, model or graph; the same words the turn reads. */
+    fun setStepSource(value: String) {
         viewModelScope.launch {
-            preferences.setKnownGraphs(value)
+            preferences.setStepSource(value)
             reload()
         }
     }

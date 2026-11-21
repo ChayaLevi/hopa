@@ -92,6 +92,16 @@ class TurnRunner(
         // settings" is slower and less predictable than the written edges.
         if (request.useGraphs && graphs != null) {
             graph(request, started, tables, isCancelled)?.let { return it }
+            if (!request.graphFallback) {
+                return TurnOutcome(
+                    source = TurnSource.GRAPH,
+                    answer = "I only have written paths for a few apps. " +
+                        "Switch Steps to Auto or Model for this goal.",
+                    error = HopaError(ErrorCodes.BLOCKED, "no written path for this goal"),
+                    surfaceName = request.surfaceName,
+                    millis = clock.nowMillis() - started,
+                )
+            }
         }
         if (request.planFirst && !request.planApproved) {
             return plan(request, started)

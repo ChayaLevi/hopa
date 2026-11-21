@@ -48,6 +48,8 @@ data class TurnRequest(
     val instantCommands: Boolean = true,
     /** Try the hand-written known-app graphs before the model. */
     val useGraphs: Boolean = true,
+    /** When false, a goal the graph does not know is refused instead of handed to the model. */
+    val graphFallback: Boolean = true,
     /** One deadline for the whole turn, not per step. */
     val timeoutMillis: Long = 120_000,
 

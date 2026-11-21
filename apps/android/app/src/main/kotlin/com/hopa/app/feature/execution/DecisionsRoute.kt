@@ -27,6 +27,5 @@ fun DecisionsRoute(onBack: () -> Unit) {
         onMode = viewModel::setDecisionMode,
         onShadow = viewModel::setShadowDecisions,
         onInstantCommands = viewModel::setInstantCommands,
-        onKnownGraphs = viewModel::setKnownGraphs,
     )
 }
