@@ -59,7 +59,7 @@ Each entry answers three questions for the person choosing: **strong at**,
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
 | Qwen3-1.7B | 1.1 GB | best all-round at this size, decent tool choice, Apache-2.0 | long plans, rare apps | the default for ≤6 GB phones; thinking off for turns |
-| Gemma 3 1B | 0.9 GB | instructions, 32k context, 140+ languages | tool choice, 256k vocabulary inflates the file | the multilingual pick when Russian matters |
+| Gemma 3 1B | 0.8 GB | instructions, 32k context, 140+ languages; downloads from inside the app | tool choice, its own licence | the multilingual pick when Russian matters |
 | SmolLM2-1.7B | 1.0 GB | speed, Apache-2.0 | planning, tool choice | lighter alternative when 1.7B Qwen is too slow |
 | Llama 3.2 1B | 0.8 GB | short English commands, mature tooling | long context in practice, licence terms | good baseline to measure others against |
 
