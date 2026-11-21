@@ -114,7 +114,7 @@ fun SettingsScreen(
             Column {
                 StatusLine(
                     "Answers",
-                    if (answers) providerSummary(state) else "needs a key",
+                    if (answers) "Keys and downloads" else "needs a key",
                     answers,
                 ) { onOpenPage(PAGE_MODEL) }
                 if (!answers) {
