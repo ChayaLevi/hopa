@@ -199,6 +199,18 @@ fun HowHopaActsScreen(
                     fontSize = 12.sp,
                     color = HopaColor.TextHint,
                 )
+                if (state.settings.stepSource != "model" && state.graphPaths.isNotEmpty()) {
+                    Text(
+                        "Known paths",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = HopaColor.TextHint,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                    state.graphPaths.forEach { line ->
+                        Text(line, fontSize = 11.sp, color = HopaColor.TextSecondary)
+                    }
+                }
             }
 
             if (mode.hidden) {

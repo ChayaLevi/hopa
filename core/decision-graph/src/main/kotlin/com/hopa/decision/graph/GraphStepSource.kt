@@ -10,4 +10,13 @@ import com.hopa.contracts.wire.Observation
  */
 interface GraphStepSource {
     fun next(observation: Observation, goal: String): GraphStep?
+
+    /** The app a goal would start in, for the status line before a turn runs. */
+    fun target(goal: String): GraphTarget?
 }
+
+/** Where a goal would go, for the chat status line. */
+data class GraphTarget(
+    val app: String,
+    val name: String,
+)

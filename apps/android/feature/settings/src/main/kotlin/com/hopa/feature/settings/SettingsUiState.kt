@@ -42,4 +42,6 @@ data class SettingsUiState(
     val decisionLayers: List<DecisionLayerInfo> = emptyList(),
     /** Who decides now for read, change and dangerous actions; `model` when none. */
     val decisionActive: Map<String, String> = emptyMap(),
+    /** One line per known app and its written paths. */
+    val graphPaths: List<String> = emptyList(),
 )

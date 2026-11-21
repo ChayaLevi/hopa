@@ -224,6 +224,11 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     override val decisionLayers: List<LayerMetadata>
         get() = decisionRegistry.all().map { it.metadata }
 
+    override val graphPaths: List<String>
+        get() = GraphCatalog.summary()
+
+    override fun graphTarget(goal: String): com.hopa.decision.graph.GraphTarget? = graphs.target(goal)
+
     override fun activeDecision(actionClass: ActionClass): String =
         DecisionSelector(decisionRegistry).select(decisionMode, actionClass).layer?.metadata?.id
             ?: "model"

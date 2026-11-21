@@ -420,6 +420,7 @@ class SettingsViewModel @Inject constructor(
                 settings = settings,
                 decisionLayers = layers,
                 decisionActive = active,
+                graphPaths = container.graphPaths,
                 key = model.key,
                 keySaved = model.keySaved,
                 bridgeKey = pairing.bridgeKey,

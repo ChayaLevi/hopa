@@ -34,6 +34,11 @@ class ActScreenshotTest {
                             "change" to "model",
                             "dangerous" to "model",
                         ),
+                        graphPaths = listOf(
+                            "Settings: Wi-Fi, Bluetooth",
+                            "Clock: Alarms, Timer",
+                            "Camera: open",
+                        ),
                     ),
                     pairingStatus = null,
                     onBack = {},

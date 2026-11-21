@@ -189,7 +189,8 @@ private fun ProofReceipt(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    (if (proof.executed == 1) "1 step" else "${proof.executed} steps") +
+                    sourceLabel(proof.source) +
+                        (if (proof.executed == 1) "1 step" else "${proof.executed} steps") +
                         " \u00B7 ${proof.verified} confirmed \u00B7 " +
                         tokensText(proof.tokens),
                     fontSize = 11.sp,
@@ -257,6 +258,15 @@ private fun ProofReceipt(
 
 private fun tokensText(tokens: Int): String =
     if (tokens >= 1_000) String.format("%.1fk tokens", tokens / 1000.0) else "$tokens tokens"
+
+/** What ran the steps, in one word, for the receipt's summary line. */
+private fun sourceLabel(source: String): String = when (source) {
+    "graph" -> "Graph \u00B7 "
+    "command" -> "Command \u00B7 "
+    "recipe" -> "Skill \u00B7 "
+    "model" -> "Model \u00B7 "
+    else -> ""
+}
 
 private fun surfaceLabel(path: String): String = when (path) {
     "background" -> "Hidden screen"

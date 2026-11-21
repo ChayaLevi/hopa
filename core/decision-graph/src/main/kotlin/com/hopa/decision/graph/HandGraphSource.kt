@@ -43,6 +43,20 @@ class HandGraphSource(private val graphs: List<AppGraph>) : GraphStepSource {
         return null
     }
 
+    override fun target(goal: String): GraphTarget? {
+        val wanted = normalize(goal)
+        if (wanted.isEmpty()) return null
+        for (graph in graphs) {
+            val starts = graph.edges.any { edge ->
+                edge.from == START && edge.goal.any { wanted.contains(normalize(it)) }
+            }
+            if (starts) {
+                return GraphTarget(app = graph.app, name = graph.name)
+            }
+        }
+        return null
+    }
+
     private fun nodeFor(graph: AppGraph, visible: String): GraphNode? = graph.nodes.firstOrNull { node ->
         node.texts.any { text -> visible.contains(normalize(text)) }
     }

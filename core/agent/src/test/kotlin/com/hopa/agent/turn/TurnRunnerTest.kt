@@ -69,6 +69,8 @@ class TurnRunnerTest {
         override fun next(observation: Observation, goal: String): com.hopa.decision.graph.GraphStep? {
             return steps.getOrNull(index++)
         }
+
+        override fun target(goal: String): com.hopa.decision.graph.GraphTarget? = null
     }
 
     private class ScriptedPolicy(private val replies: List<String>) : StepPolicy {

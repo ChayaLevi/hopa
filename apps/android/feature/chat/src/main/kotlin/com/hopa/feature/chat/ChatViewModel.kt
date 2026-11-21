@@ -320,6 +320,22 @@ class ChatViewModel @Inject constructor(
 
     // ── Core send loop ────────────────────────────────────────────────────────
 
+    /**
+     * What is about to run, said before the first step. Empty means "the model",
+     * where the screen already shows the configured model.
+     */
+    private fun liveLabelFor(goal: String, settings: AppSettings): String {
+        if (goal.isBlank() || settings.stepSource == "model") {
+            return ""
+        }
+        val target = runCatching { container.graphTarget(goal) }.getOrNull()
+        return when {
+            target != null -> "Graph \u00B7 ${target.name}"
+            settings.stepSource == "graph" -> "Only written paths"
+            else -> ""
+        }
+    }
+
     private fun sendText(
         text: String,
         attachment: Attachment? = null,
@@ -335,6 +351,7 @@ class ChatViewModel @Inject constructor(
                 input = "",
                 busy = true,
                 liveText = "",
+                liveLabel = liveLabelFor(body, settings.value),
                 error = null,
                 options = emptyList(),
                 attachment = null,
@@ -357,6 +374,14 @@ class ChatViewModel @Inject constructor(
             if (appendUser) appendUserMessage(conversation.id, body, attachment, now)
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
+            // A written path needs no plan: asking for steps to "open Wi-Fi
+            // settings" is slower than following them, and the turn has the
+            // same rule before its own plan gate.
+            val graphTarget = if (current.stepSource == "model") {
+                null
+            } else {
+                runCatching { container.graphTarget(body) }.getOrNull()
+            }
             container.useGate(current.trustedApps.toList())
             container.useDecisions(current.decisionMode, current.shadowDecisions)
             val receiptModel = if (current.provider.equals("on-device", ignoreCase = true)) {
@@ -368,13 +393,14 @@ class ChatViewModel @Inject constructor(
                 it.copy(
                     onDevice = current.provider == "on-device",
                     receiptModel = receiptModel,
+                    liveLabel = liveLabelFor(body, current),
                 )
             }
             val preferred = ScreenPath.of(current.screenPath)
 
             // Plan-first gate: show the plan before anything is tapped. A plan
             // asks for steps, so no surface is opened and nothing is observed.
-            if (current.planFirst && planApprovedFor != body) {
+            if (current.planFirst && planApprovedFor != body && graphTarget == null) {
                 val outcome = container.runTurn(
                     container.planRequest(
                         goal = body,
@@ -491,6 +517,7 @@ class ChatViewModel @Inject constructor(
                         outcome.surfaceName == "accessibility",
                     knowledgeVersion = outcome.knowledgeVersion,
                     model = _state.value.receiptModel,
+                    source = outcome.source.name.lowercase(),
                 ),
             ),
         )
@@ -570,6 +597,7 @@ class ChatViewModel @Inject constructor(
             fellBack = preferred == ScreenPath.AUTO && result.surfaceName == "accessibility",
             knowledgeVersion = result.knowledgeVersion,
             model = _state.value.receiptModel,
+            source = result.source.name.lowercase(),
         )
         container.conversations.append(
             conversationId,
