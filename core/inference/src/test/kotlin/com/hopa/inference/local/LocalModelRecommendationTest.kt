@@ -23,7 +23,7 @@ class LocalModelRecommendationTest {
     @Test
     fun a_six_gigabyte_phone_is_offered_the_fast_model() {
         val model = recommendation.recommend(ramGb = 6, freeBytes = 20 * gigabyte)
-        assertEquals("qwen3-1.7b", model?.id)
+        assertEquals("qwen3-1.7b-q8", model?.id)
     }
 
     @Test

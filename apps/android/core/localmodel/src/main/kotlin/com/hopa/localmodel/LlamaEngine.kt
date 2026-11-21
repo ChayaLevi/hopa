@@ -5,6 +5,9 @@ import com.hopa.contracts.model.ModelRequest
 import com.hopa.inference.local.LocalEngine
 import com.hopa.inference.local.ModelNotLoaded
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
 
 /**
@@ -20,6 +23,11 @@ class LlamaEngine(
     private val contextTokens: Int = 4_096,
     private val threads: Int = Runtime.getRuntime().availableProcessors().coerceIn(2, 6),
 ) : LocalEngine {
+    private val _tokens = MutableSharedFlow<String>(extraBufferCapacity = 128)
+
+    /** Pieces as they are produced, for the chat to show while a turn runs. */
+    val tokens: SharedFlow<String> = _tokens.asSharedFlow()
+
     private var handle: Long = 0L
     private var loadedPath: String = ""
 
@@ -45,7 +53,7 @@ class LlamaEngine(
         return true
     }
 
-    override suspend fun complete(request: ModelRequest): ModelReply = withContext(Dispatchers.Default) {
+    override suspend fun complete(request: ModelRequest, grammar: String): ModelReply = withContext(Dispatchers.Default) {
         val path = pathProvider() ?: throw ModelNotLoaded(
             "No on-device model is installed. Import a model file in Settings first.",
         )
@@ -55,7 +63,12 @@ class LlamaEngine(
         val prompt = request.messages.joinToString("\n\n") { message ->
             "${message.role}: ${message.content}"
         }
-        val text = nativeComplete(handle, prompt, request.maxTokens, "")
+        // A phone CPU writes a few tokens a second; a longer answer is a
+        // different feature, not a longer wait.
+        val cap = minOf(request.maxTokens, ON_DEVICE_MAX_TOKENS)
+        val text = nativeCompleteStream(handle, prompt, cap, grammar) { piece ->
+            _tokens.tryEmit(piece)
+        }
         ModelReply(text = text)
     }
 
@@ -65,14 +78,17 @@ class LlamaEngine(
 
     private external fun nativeCancel()
 
-    private external fun nativeComplete(
+    private external fun nativeCompleteStream(
         handle: Long,
         prompt: String,
         maxTokens: Int,
         grammar: String,
+        sink: TokenSink,
     ): String
 
     private companion object {
+        const val ON_DEVICE_MAX_TOKENS = 160
+
         val libraryLoaded: Boolean = runCatching {
             System.loadLibrary("hopa_llama")
         }.isSuccess

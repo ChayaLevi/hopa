@@ -3,6 +3,7 @@ package com.hopa.agent.plan
 import com.hopa.contracts.model.ModelMessage
 import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.model.ModelRequest
+import com.hopa.contracts.model.ModelWithGrammar
 
 /**
  * Asks the model for a plan; never acts, and an empty answer is not a crash.
@@ -19,16 +20,20 @@ class ModelPlanSource(
     override suspend fun plan(goal: String): List<String> {
         val where = runCatching { environment() }.getOrNull().orEmpty().trim()
         val system = if (where.isEmpty()) PROMPT else PROMPT + "\n\n" + where
+        val request = ModelRequest(
+            messages = listOf(
+                ModelMessage("system", system),
+                ModelMessage("user", goal),
+            ),
+            maxTokens = 400,
+        )
         val reply = runCatching {
-            model.complete(
-                ModelRequest(
-                    messages = listOf(
-                        ModelMessage("system", system),
-                        ModelMessage("user", goal),
-                    ),
-                    maxTokens = 400,
-                ),
-            ).text
+            val grammarModel = model as? ModelWithGrammar
+            if (grammarModel != null) {
+                grammarModel.complete(request, PlanListGrammar.GRAMMAR).text
+            } else {
+                model.complete(request).text
+            }
         }.getOrNull().orEmpty()
 
         return reply.lineSequence()

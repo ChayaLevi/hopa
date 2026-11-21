@@ -36,6 +36,9 @@ interface ChatDependencies {
     val pendingApproval: StateFlow<ApprovalRequest?>
     val tasks: StateFlow<List<TaskItem>>
 
+    /** Pieces of an on-device answer as they are produced; empty for cloud. */
+    val localTokens: kotlinx.coroutines.flow.Flow<String>
+
     fun resolveApproval(allow: Boolean)
 
     fun canStartTask(): Boolean

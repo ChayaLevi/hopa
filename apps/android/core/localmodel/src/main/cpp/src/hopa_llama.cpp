@@ -78,19 +78,27 @@ Java_com_hopa_localmodel_LlamaEngine_nativeCancel(JNIEnv * /* env */, jobject /*
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_hopa_localmodel_LlamaEngine_nativeComplete(
+Java_com_hopa_localmodel_LlamaEngine_nativeCompleteStream(
         JNIEnv * env,
         jobject /* thiz */,
         jlong handle,
         jstring prompt,
         jint maxTokens,
-        jstring grammar) {
+        jstring grammar,
+        jobject sink) {
     auto * session = reinterpret_cast<Session *>(handle);
     if (session == nullptr) return env->NewStringUTF("");
 
     g_cancel.store(false);
     // A completion is stateless: the previous turn's tokens must not leak in.
     llama_memory_clear(llama_get_memory(session->context), true);
+
+    jclass sinkClass = nullptr;
+    jmethodID sinkMethod = nullptr;
+    if (sink != nullptr) {
+        sinkClass = env->GetObjectClass(sink);
+        sinkMethod = env->GetMethodID(sinkClass, "onToken", "(Ljava/lang/String;)V");
+    }
 
     const std::string text = to_string(env, prompt);
     if (text.empty()) return env->NewStringUTF("");
@@ -121,10 +129,28 @@ Java_com_hopa_localmodel_LlamaEngine_nativeComplete(
     }
     llama_sampler_chain_add(chain, llama_sampler_init_greedy());
 
-    llama_batch batch = llama_batch_get_one(tokens.data(), count);
-    if (llama_decode(session->context, batch) != 0) {
-        llama_sampler_free(chain);
-        return env->NewStringUTF("");
+    // The prompt never fits one batch: a plan prompt is far longer than the
+    // 512-token batch the context was created with, and llama_decode() aborts
+    // the process when a batch is larger than n_batch. Decode it in chunks.
+    const int32_t batchLimit = 512;
+    const int32_t contextLimit = static_cast<int32_t>(llama_n_ctx(session->context));
+    if (count > contextLimit - maxTokens - 8) {
+        // Keep the tail: instructions and the task live at the end of the prompt.
+        const int32_t keep = contextLimit - maxTokens - 8;
+        if (keep <= 0) {
+            llama_sampler_free(chain);
+            return env->NewStringUTF("");
+        }
+        tokens.erase(tokens.begin(), tokens.end() - keep);
+        count = keep;
+    }
+    for (int32_t offset = 0; offset < count; offset += batchLimit) {
+        const int32_t size = std::min(batchLimit, count - offset);
+        llama_batch chunk = llama_batch_get_one(tokens.data() + offset, size);
+        if (llama_decode(session->context, chunk) != 0) {
+            llama_sampler_free(chain);
+            return env->NewStringUTF("");
+        }
     }
 
     std::string out;
@@ -134,12 +160,20 @@ Java_com_hopa_localmodel_LlamaEngine_nativeComplete(
         char piece[256];
         const int32_t length =
                 llama_token_to_piece(session->vocab, token, piece, sizeof(piece), 0, true);
-        if (length > 0) out.append(piece, static_cast<size_t>(length));
+        if (length > 0) {
+            out.append(piece, static_cast<size_t>(length));
+            if (sink != nullptr && sinkMethod != nullptr) {
+                jstring chunk = env->NewStringUTF(std::string(piece, static_cast<size_t>(length)).c_str());
+                env->CallVoidMethod(sink, sinkMethod, chunk);
+                env->DeleteLocalRef(chunk);
+            }
+        }
         llama_batch next = llama_batch_get_one(&token, 1);
         if (llama_decode(session->context, next) != 0) break;
     }
 
     llama_sampler_free(chain);
+    if (sinkClass != nullptr) env->DeleteLocalRef(sinkClass);
     return env->NewStringUTF(out.c_str());
 }
 

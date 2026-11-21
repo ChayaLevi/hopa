@@ -95,6 +95,7 @@ fun ChatScreen(
     onUndo: () -> Unit,
     onDiscardAttachment: () -> Unit,
     onDismissAttachmentNotice: () -> Unit,
+    modelLabel: String = "",
     easy: Boolean = false,
     onOpenSettings: () -> Unit = {},
     onOpenActMode: () -> Unit = {},
@@ -401,7 +402,15 @@ fun ChatScreen(
                     }
                     if (state.busy) {
                         item(key = "thinking") {
-                            ThinkingIndicator()
+                            ThinkingIndicator(label = modelLabel)
+                            if (state.liveText.isNotBlank()) {
+                                Text(
+                                    state.liveText,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = HopaColor.TextPrimary,
+                                    modifier = Modifier.padding(start = 10.dp, top = 2.dp),
+                                )
+                            }
                         }
                     }
                 }

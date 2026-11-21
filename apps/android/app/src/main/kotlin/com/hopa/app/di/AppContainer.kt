@@ -352,6 +352,8 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
 
     override val modelFactory: ModelFactory = ModelFactory(localEngine = localEngine)
 
+    override val localTokens: kotlinx.coroutines.flow.Flow<String> = localEngine.tokens
+
     val model = SettingsModelPort(settings, modelFactory, ProviderChoiceRules())
     /** Shared by the settings screen's "Test the model" button. */
 

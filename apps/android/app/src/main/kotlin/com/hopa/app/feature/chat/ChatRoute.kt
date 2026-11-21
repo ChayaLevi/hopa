@@ -24,6 +24,8 @@ fun ChatRoute(
 ) {
     val viewModel: ChatViewModel = hiltViewModel()
     val conversationsViewModel: ConversationsViewModel = hiltViewModel()
+    val localModels: com.hopa.app.feature.settings.LocalModelViewModel = hiltViewModel()
+    val localState by localModels.state.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val tasks by viewModel.tasks.collectAsStateWithLifecycle()
@@ -54,6 +56,13 @@ fun ChatRoute(
         onUndo = viewModel::undoLast,
         onDiscardAttachment = viewModel::discardAttachment,
         onDismissAttachmentNotice = viewModel::dismissAttachmentNotice,
+        modelLabel = if (settings.provider.trim().equals("on-device", ignoreCase = true)) {
+            localState.installed.firstOrNull()?.let { model ->
+                localState.installedSpecs[model.id]?.name ?: model.id
+            } ?: "On-device (no model)"
+        } else {
+            listOf(settings.provider, settings.model).filter { it.isNotBlank() }.joinToString(" · ")
+        },
         easy = easy,
         onOpenSettings = onOpenSettings,
         accessAllowed = settings.accessibilityAllowed,
