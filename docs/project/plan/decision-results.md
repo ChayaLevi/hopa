@@ -81,9 +81,27 @@ executor, so an approval or a failed tap stops it honestly.
 The source is a first-class choice on **How HOPA acts -> Steps**:
 **Auto** (a written path when the app is known, the model otherwise), **Model**
 (model only, exactly as before) or **Graph** (written paths only; a goal they do
-not cover is refused with a note to switch to Auto or Model). Under the segment,
+not cover is refused with a note to switch to Auto or Model, and neither a
+command nor the model answers in their place). Under the segment,
 the same page lists **Known paths**, built from `graphs.v1.json`, so a person can
 see the concrete scenarios without opening a second screen.
+
+A goal the graph can finish goes before an instant command: "open camera" is a
+written path with an answer, so its receipt says Graph, not Command. A goal that
+only opens an app ("open settings") stays with the command, because the graph has
+no edge that finishes it.
+
+A node is matched only inside its own app, and by an **exact** label: One UI's
+root has no "Settings" title, so it is recognised by its category rows
+(Connected devices, Notifications), while the Connections page is identified by
+its items (Flight mode, Mobile networks, UWB), because Samsung does not expose
+that page's heading. The screen is the node with the **most** matching labels, not
+the first one found: the Connections page shows a Wi-Fi row before its other rows,
+and a first-match rule would mistake it for the Wi-Fi screen. Exact matching is
+what keeps a deep page titled "More connection settings" from passing as the
+root. Settings also reopens on its last page, so the graph has a back edge from
+any unknown Settings screen: it walks back to a screen it knows instead of giving
+up or guessing.
 
 The turn says its source twice: while it runs the status line names the path
 ("Graph - Camera"), and the receipt under the answer carries `source`, so a graph

@@ -82,27 +82,39 @@ class TurnRunner(
                 millis = clock.nowMillis() - started,
             )
         }
+        val written = if (request.useGraphs) {
+            runCatching { graphs?.target(request.goal) }.getOrNull()
+        } else {
+            null
+        }
+        // Graph only: the person asked for written paths, so neither a command
+        // nor the model may answer in their place.
+        if (request.useGraphs && graphs != null && !request.graphFallback) {
+            graph(request, started, tables, isCancelled)?.let { return it }
+            return TurnOutcome(
+                source = TurnSource.GRAPH,
+                answer = "I only have written paths for a few apps. " +
+                    "Switch Steps to Auto or Model for this goal.",
+                error = HopaError(ErrorCodes.BLOCKED, "no written path for this goal"),
+                surfaceName = request.surfaceName,
+                millis = clock.nowMillis() - started,
+            )
+        }
+        // A goal the graph can finish goes first: its steps are written, its
+        // receipt says Graph, and no model is asked for something already known.
+        val graphFirst = written?.completes == true
+        if (!graphFirst && request.instantCommands && commands != null) {
+            command(request, started, tables)?.let { return it }
+        }
+        if (request.useGraphs && graphs != null) {
+            graph(request, started, tables, isCancelled)?.let { return it }
+        }
+        if (graphFirst && request.instantCommands && commands != null) {
+            command(request, started, tables)?.let { return it }
+        }
         // A canonical command needs no plan: asking a model to write steps for
         // "open settings" is slower and less predictable than opening it. The
         // path still falls through to the plan gate on any doubt.
-        if (request.instantCommands && commands != null) {
-            command(request, started, tables)?.let { return it }
-        }
-        // A known path needs no plan: asking a model for steps to "open Wi-Fi
-        // settings" is slower and less predictable than the written edges.
-        if (request.useGraphs && graphs != null) {
-            graph(request, started, tables, isCancelled)?.let { return it }
-            if (!request.graphFallback) {
-                return TurnOutcome(
-                    source = TurnSource.GRAPH,
-                    answer = "I only have written paths for a few apps. " +
-                        "Switch Steps to Auto or Model for this goal.",
-                    error = HopaError(ErrorCodes.BLOCKED, "no written path for this goal"),
-                    surfaceName = request.surfaceName,
-                    millis = clock.nowMillis() - started,
-                )
-            }
-        }
         if (request.planFirst && !request.planApproved) {
             return plan(request, started)
         }
@@ -231,9 +243,12 @@ class TurnRunner(
             if (isCancelled()) {
                 break
             }
-            val next = runCatching { source.next(observation, request.goal) }.getOrNull() ?: break
+            val next = runCatching { source.next(observation, request.goal) }.getOrNull()
+                ?: break
             val signature = ActionSignature.of(next.action)
-            if (!seen.add(signature)) {
+            // Back is how a graph walks out of a screen it did not expect; a
+            // second identical tap or scroll is a loop, a second back is not.
+            if (next.action.kind != "ui.back" && !seen.add(signature)) {
                 break
             }
             val result = runCatching {
@@ -279,7 +294,11 @@ class TurnRunner(
                     millis = clock.nowMillis() - started,
                 )
             }
+            // The executor reads the screen the instant the tap lands, often
+            // before the next page has drawn. Read again after the settle, or the
+            // graph judges a transition and finds nothing to do.
             settle(GRAPH_SETTLE_MS)
+            observation = runCatching { request.device.observe() }.getOrNull() ?: observation
         }
         if (records.isEmpty()) {
             return null

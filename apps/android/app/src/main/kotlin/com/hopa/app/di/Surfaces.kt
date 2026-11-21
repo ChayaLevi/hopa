@@ -45,10 +45,18 @@ object Surfaces {
             },
             close = { device -> (device as? ShellDisplayDevice)?.stop() },
             body = { hidden ->
+                val enabled = AccessibilityState.isEnabled(container.context)
+                // A rebind after an update can still be in flight; give it a
+                // moment before deciding this phone has no screen to read.
+                val bound = if (enabled && settings.accessibilityAllowed) {
+                    AccessibilityState.awaitConnected()
+                } else {
+                    HopaAccessibilityService.instance != null
+                }
                 val onscreen = ScreenAccess.available(
                     allowed = settings.accessibilityAllowed,
-                    enabled = AccessibilityState.isEnabled(container.context),
-                    bound = HopaAccessibilityService.instance != null,
+                    enabled = enabled,
+                    bound = bound,
                 )
                 // The order is a setting: the background display leaves the
                 // person's screen alone, so AUTO tries it first, then the

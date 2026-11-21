@@ -29,10 +29,10 @@ class AccessibilityDevice(
     private var lastShot = 0L
 
     override suspend fun observe(): Observation {
-        val service = HopaAccessibilityService.instance
-            ?: throw IllegalStateException(
-                "screen access is off; turn it on in Settings, Accessibility, HOPA",
-            )
+        // A rebind after an update can leave a short window where access is on
+        // but the new instance has not connected yet. Waiting a moment is
+        // honest; failing the turn there is not.
+        val service = awaitService()
         val reader = NodeTreeReader(service)
         val raw = reader.read()
         refs = reader.refs
@@ -40,7 +40,7 @@ class AccessibilityDevice(
     }
 
     override suspend fun tap(ref: String?, x: Int?, y: Int?) {
-        val service = service()
+        val service = awaitService(ACTION_WAIT_MS)
         val dispatcher = GestureDispatcher(service)
         if (ref != null) {
             val node = refs[ref] ?: throw IllegalArgumentException("stale ref $ref")
@@ -63,13 +63,13 @@ class AccessibilityDevice(
 
     override suspend fun doubleTap(ref: String?, x: Int?, y: Int?) {
         val point = pointFor(ref, x, y)
-        GestureDispatcher(service()).doubleTap(point.first, point.second)
+        GestureDispatcher(awaitService(ACTION_WAIT_MS)).doubleTap(point.first, point.second)
         delay(250)
     }
 
     override suspend fun longPress(ref: String?, x: Int?, y: Int?) {
         val point = pointFor(ref, x, y)
-        GestureDispatcher(service()).longPress(point.first, point.second)
+        GestureDispatcher(awaitService(ACTION_WAIT_MS)).longPress(point.first, point.second)
         delay(250)
     }
 
@@ -98,11 +98,11 @@ class AccessibilityDevice(
         throw IllegalStateException("the field refused the text")
     }
 
-    private fun typingTarget(ref: String?): AccessibilityNodeInfo {
+    private suspend fun typingTarget(ref: String?): AccessibilityNodeInfo {
         if (ref != null) {
             refs[ref]?.let { return it }
         }
-        val root = service().activeRoot() ?: throw IllegalStateException("no window to type into")
+        val root = awaitService(ACTION_WAIT_MS).activeRoot() ?: throw IllegalStateException("no window to type into")
         root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)?.let { return it }
         firstEditable(root)?.let { return it }
         throw IllegalStateException("no text field is focused")
@@ -120,17 +120,17 @@ class AccessibilityDevice(
     }
 
     override suspend fun swipe(fromX: Int, fromY: Int, toX: Int, toY: Int, velocity: Int) {
-        GestureDispatcher(service()).swipe(fromX, fromY, toX, toY)
+        GestureDispatcher(awaitService(ACTION_WAIT_MS)).swipe(fromX, fromY, toX, toY)
         delay(350)
     }
 
     override suspend fun pressBack() {
-        service().performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+        awaitService(ACTION_WAIT_MS).performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
         delay(250)
     }
 
     override suspend fun pressHome() {
-        service().performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
+        awaitService(ACTION_WAIT_MS).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
         delay(250)
     }
 
@@ -160,7 +160,7 @@ class AccessibilityDevice(
         if (now - lastShot < 1_000) {
             return null
         }
-        val service = runCatching { service() }.getOrNull() ?: return null
+        val service = runCatching { awaitService(ACTION_WAIT_MS) }.getOrNull() ?: return null
         lastShot = now
         return try {
             suspendCancellableCoroutine { continuation ->
@@ -195,12 +195,16 @@ class AccessibilityDevice(
     override suspend fun apps(): List<InstalledApp> =
         com.hopa.capabilities.system.AndroidPackageCatalog(context).installed()
 
-    private fun service(): HopaAccessibilityService {
+    /** The connected service, waiting up to [waitMillis] for a rebind to finish. */
+    private suspend fun awaitService(waitMillis: Long = READ_WAIT_MS): HopaAccessibilityService {
         if (!AccessibilityState.isEnabled(context)) {
             throw IllegalStateException("accessibility is disabled in Android settings")
         }
-        return HopaAccessibilityService.instance
-            ?: throw IllegalStateException("accessibility is enabled but not connected yet")
+        HopaAccessibilityService.instance?.let { return it }
+        if (AccessibilityState.awaitConnected(waitMillis)) {
+            HopaAccessibilityService.instance?.let { return it }
+        }
+        throw IllegalStateException("accessibility is enabled but not connected yet")
     }
 
     private fun pointFor(ref: String?, x: Int?, y: Int?): Pair<Int, Int> {
@@ -216,4 +220,8 @@ class AccessibilityDevice(
         return x to y
     }
 
+    private companion object {
+        const val READ_WAIT_MS = 2_500L
+        const val ACTION_WAIT_MS = 1_000L
+    }
 }

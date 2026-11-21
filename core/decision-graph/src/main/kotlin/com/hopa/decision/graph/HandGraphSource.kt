@@ -15,15 +15,17 @@ class HandGraphSource(private val graphs: List<AppGraph>) : GraphStepSource {
     override fun next(observation: Observation, goal: String): GraphStep? {
         val wanted = normalize(goal)
         if (wanted.isEmpty()) return null
-        val visible = normalize(visibleText(observation))
         for (graph in graphs) {
             val inApp = observation.app.equals(graph.app, ignoreCase = true)
-            val node = nodeFor(graph, visible)
-            if (node == null && inApp) {
-                // In the app but on an unknown screen: do not guess.
-                continue
+            // A node means "this is the screen of this app". Words from another
+            // window (a chat history that mentions Settings, say) must never
+            // choose a node, or the graph would tap a control that is not there.
+            val node = if (inApp) nodeFor(graph, observation.tree) else null
+            val from = when {
+                node != null -> node.id
+                inApp -> ANY
+                else -> START
             }
-            val from = node?.id ?: START
             val matching = graph.edges.filter { edge ->
                 edge.from == from && edge.goal.any { keyword -> wanted.contains(normalize(keyword)) }
             }
@@ -47,18 +49,65 @@ class HandGraphSource(private val graphs: List<AppGraph>) : GraphStepSource {
         val wanted = normalize(goal)
         if (wanted.isEmpty()) return null
         for (graph in graphs) {
-            val starts = graph.edges.any { edge ->
-                edge.from == START && edge.goal.any { wanted.contains(normalize(it)) }
+            val matching = graph.edges.filter { edge ->
+                edge.goal.any { keyword -> wanted.contains(normalize(keyword)) }
             }
+            val starts = matching.any { edge -> edge.from == START }
             if (starts) {
-                return GraphTarget(app = graph.app, name = graph.name)
+                // A goal the graph can finish deserves the first try, before a
+                // one-shot command: the receipt then says Graph, and the steps
+                // are the written ones, not a launch plus a model.
+                return GraphTarget(
+                    app = graph.app,
+                    name = graph.name,
+                    completes = matching.any { edge -> edge.done },
+                )
             }
         }
         return null
     }
 
-    private fun nodeFor(graph: AppGraph, visible: String): GraphNode? = graph.nodes.firstOrNull { node ->
-        node.texts.any { text -> visible.contains(normalize(text)) }
+    /**
+     * The node the screen most looks like, by exact labels.
+     *
+     * Exact, not "anywhere on screen": a deep Settings page is titled "More
+     * connection settings", which contains "settings" but is not the root, and a
+     * substring match would send the graph to a control that is not there.
+     *
+     * The best-supported node wins, not the first label found: Samsung's
+     * Connections page shows a Wi-Fi row near the top, so a first-match rule
+     * would call it the Wi-Fi screen before seeing its other rows. Ties go to the
+     * declared order, where the broader screen comes first.
+     */
+    private fun nodeFor(graph: AppGraph, root: ObservationNode): GraphNode? {
+        val byName = graph.nodes
+            .map { node -> node to node.texts.map(::normalize).filter { it.isNotEmpty() }.toSet() }
+            .filter { (_, texts) -> texts.isNotEmpty() }
+        if (byName.isEmpty()) return null
+        val hits = mutableMapOf<GraphNode, MutableSet<String>>()
+        fun visit(current: ObservationNode) {
+            val labels = listOf(normalize(current.text), normalize(current.description))
+                .filter { it.isNotEmpty() }
+            for (label in labels) {
+                for ((node, texts) in byName) {
+                    if (label in texts) {
+                        hits.getOrPut(node) { mutableSetOf() }.add(label)
+                    }
+                }
+            }
+            for (child in current.children) visit(child)
+        }
+        visit(root)
+        var best: GraphNode? = null
+        var bestCount = 0
+        for (node in graph.nodes) {
+            val count = hits[node]?.size ?: 0
+            if (count > bestCount) {
+                best = node
+                bestCount = count
+            }
+        }
+        return best
     }
 
     private fun resolve(action: GraphAction, graph: AppGraph, observation: Observation): Action? = when (action.kind) {
@@ -69,8 +118,11 @@ class HandGraphSource(private val graphs: List<AppGraph>) : GraphStepSource {
         )
 
         "tap" -> {
-            val ref = findRef(observation.tree, action.texts) ?: return null
-            Action(kind = "ui.tap", ref = ref)
+            // Tap by what was seen, not by a node handle: Settings can finish
+            // drawing between the read and the tap, and a recycled handle would
+            // fail on a control that is still right there.
+            val point = findPoint(observation.tree, action.texts) ?: return null
+            Action(kind = "ui.tap", x = point.first, y = point.second)
         }
 
         "back" -> Action(kind = "ui.back")
@@ -83,38 +135,51 @@ class HandGraphSource(private val graphs: List<AppGraph>) : GraphStepSource {
         else -> null
     }
 
-    /** The first clickable node whose text or description names one of [texts]. */
-    private fun findRef(node: ObservationNode, texts: List<String>): String? {
+    /**
+     * The centre of the control that carries one of [texts].
+     *
+     * A tap only counts when something tappable carries the label: the node
+     * itself, or the row around it. A group heading (Samsung's Settings root has
+     * a "Connections" heading above Wi-Fi) is not a control, so a tap edge that
+     * matches only a heading is a miss, and the next edge gets its turn.
+     */
+    private fun findPoint(node: ObservationNode, texts: List<String>): Pair<Int, Int>? {
         if (texts.isEmpty()) return null
         val wanted = texts.map(::normalize).filter { it.isNotEmpty() }
-        var fallback: String? = null
-        fun visit(current: ObservationNode): String? {
+        var loose: Pair<Int, Int>? = null
+        fun visit(current: ObservationNode, row: Pair<Int, Int>?): Pair<Int, Int>? {
+            val point = center(current.bounds)
+            val here = if (current.clickable) point else null
             val label = normalize("${current.text} ${current.description}")
-            val matches = wanted.any { label.contains(it) }
-            if (matches && current.ref.isNotBlank()) {
-                if (current.clickable) return current.ref
-                if (fallback == null) fallback = current.ref
+            val exact = wanted.any { label == it }
+            if (exact || wanted.any { label.contains(it) }) {
+                val target = here ?: row
+                if (target != null) {
+                    // "Wi-Fi" must not become "Wi-Fi calling": an exact label wins
+                    // over a longer one that merely contains the words.
+                    if (exact) return target
+                    if (loose == null) loose = target
+                }
             }
+            val nextRow = if (current.clickable && point != null) point else row
             for (child in current.children) {
-                visit(child)?.let { return it }
+                visit(child, nextRow)?.let { return it }
             }
             return null
         }
-        visit(node)?.let { return it }
-        return fallback
+        visit(node, null)?.let { return it }
+        return loose
     }
 
-    private fun visibleText(observation: Observation): String = buildString {
-        append(observation.text)
-        append(' ')
-        fun visit(node: ObservationNode) {
-            append(node.text)
-            append(' ')
-            append(node.description)
-            append(' ')
-            for (child in node.children) visit(child)
-        }
-        visit(observation.tree)
+    /** The middle of a visible rectangle, or null when the node has no usable bounds. */
+    private fun center(bounds: List<Int>?): Pair<Int, Int>? {
+        if (bounds == null || bounds.size != 4) return null
+        val left = bounds[0]
+        val top = bounds[1]
+        val right = bounds[2]
+        val bottom = bounds[3]
+        if (right <= left || bottom <= top) return null
+        return (left + right) / 2 to (top + bottom) / 2
     }
 
     private fun normalize(text: String): String = text
@@ -126,5 +191,8 @@ class HandGraphSource(private val graphs: List<AppGraph>) : GraphStepSource {
 
     private companion object {
         const val START = "start"
+
+        /** Any screen of this app that the graph does not name. */
+        const val ANY = "any"
     }
 }

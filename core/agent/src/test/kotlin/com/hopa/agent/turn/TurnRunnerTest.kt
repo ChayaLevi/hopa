@@ -63,6 +63,7 @@ class TurnRunnerTest {
 
     private class FakeGraph(
         private val steps: List<com.hopa.decision.graph.GraphStep>,
+        private val planned: com.hopa.decision.graph.GraphTarget? = null,
     ) : com.hopa.decision.graph.GraphStepSource {
         private var index = 0
 
@@ -70,7 +71,7 @@ class TurnRunnerTest {
             return steps.getOrNull(index++)
         }
 
-        override fun target(goal: String): com.hopa.decision.graph.GraphTarget? = null
+        override fun target(goal: String): com.hopa.decision.graph.GraphTarget? = planned
     }
 
     private class ScriptedPolicy(private val replies: List<String>) : StepPolicy {
@@ -484,6 +485,51 @@ class TurnRunnerTest {
         assertEquals(TurnSource.GRAPH, outcome.source)
         assertEquals("Opened Settings.", outcome.answer)
         assertEquals(listOf(SETTINGS), harness.device.launches)
+        assertEquals(0, harness.policy.calls)
+    }
+
+    @Test
+    fun a_written_path_goes_before_a_command() = runBlocking {
+        val clock = "com.sec.android.app.clockpackage"
+        val step = com.hopa.decision.graph.GraphStep(
+            graph = "Clock",
+            node = "start",
+            action = Action(kind = "ui.launch", app = clock),
+            answer = "Opened Alarms.",
+            done = true,
+        )
+        val harness = Harness(
+            screens = listOf(labelled("Home")),
+            replies = emptyList(),
+            commands = true,
+            graphs = FakeGraph(
+                listOf(step),
+                com.hopa.decision.graph.GraphTarget(clock, "Clock", completes = true),
+            ),
+        )
+
+        val outcome = harness.runner.run(harness.request("open clock"))
+
+        assertEquals(TurnSource.GRAPH, outcome.source)
+        assertEquals(listOf(clock), harness.device.launches)
+        assertEquals(0, harness.policy.calls)
+    }
+
+    @Test
+    fun graph_only_never_answers_with_a_command() = runBlocking {
+        val harness = Harness(
+            screens = listOf(labelled("Settings")),
+            replies = emptyList(),
+            commands = true,
+            graphs = FakeGraph(emptyList()),
+        )
+
+        val outcome = harness.runner.run(
+            harness.request("open settings").copy(graphFallback = false),
+        )
+
+        assertEquals(TurnSource.GRAPH, outcome.source)
+        assertEquals(emptyList<String>(), harness.device.launches)
         assertEquals(0, harness.policy.calls)
     }
 

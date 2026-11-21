@@ -231,7 +231,9 @@ data class LayerDecision(..., val chosen: String? = null)
 
 A first graph source exists in `core/decision-graph` (`:decision-graph`): three
 hand-written apps (Settings, Clock, Camera), matched by package and visible text,
-with a tap resolved from the control's label. A miss on the screen, the control
+with a tap resolved from the control's label. A node counts only inside its own
+app; an unknown screen inside a known app can have an `any` edge (Settings uses
+it to step back to a page it knows). A miss on the screen, the control
 or the goal returns null. **How HOPA acts -> Steps** chooses **Auto** (graph,
 then model), **Model** (model only) or **Graph** (written paths only, unknown
 goals refused); stored as `stepSource` in settings. The same section lists the
