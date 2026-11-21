@@ -14,10 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hopa.feature.settings.PAGE_MODEL
 import com.hopa.feature.settings.PAGE_NOTIFICATIONS
 import com.hopa.feature.settings.PAGE_PRIVACY
-import com.hopa.feature.settings.SettingsModelScreen
 import com.hopa.feature.settings.SettingsNotificationsScreen
 import com.hopa.feature.settings.SettingsScreen
 import com.hopa.feature.settings.SettingsViewModel
@@ -52,14 +50,6 @@ fun SettingsRoute(
         label = "settings-page",
     ) { current ->
         when (current) {
-            PAGE_MODEL -> SettingsModelScreen(
-                state = state,
-                onBack = backToHub,
-                onSave = viewModel::save,
-                onTestModel = viewModel::testModel,
-                onDeviceModels = { OnDeviceModels() },
-            )
-
             PAGE_PRIVACY -> SettingsPrivacyScreen(
                 entries = privacy,
                 onBack = backToHub,
