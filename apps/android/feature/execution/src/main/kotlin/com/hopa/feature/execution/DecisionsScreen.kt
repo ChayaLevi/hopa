@@ -1,4 +1,4 @@
-package com.hopa.feature.settings
+package com.hopa.feature.execution
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,11 +10,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hopa.feature.settings.SettingsChoiceCard
+import com.hopa.feature.settings.SettingsDivider
+import com.hopa.feature.settings.SettingsGroup
+import com.hopa.feature.settings.SettingsHeader
+import com.hopa.feature.settings.SettingsSwitchRow
+import com.hopa.feature.settings.SettingsUiState
 import com.hopa.ui.settings.SettingsPage
 import com.hopa.ui.theme.HopaColor
 
 /**
- * Which layer decides, which ones only watch, and what is actually active now.
+ * Which layer decides a step, which ones only watch, and what is active now.
+ *
+ * It lives with the Act screens because it is part of how HOPA acts: the
+ * choices here change who taps and who asks, not how a chat looks.
  *
  * The page never claims more than the registry can back: a shadow layer says it
  * does not decide, and the "Active now" rows name the layer per action class,

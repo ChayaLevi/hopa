@@ -52,8 +52,6 @@ fun SettingsScreen(
             { onOpenPage(PAGE_MODEL) }),
         Searchable("Alerts", "notifications, answer ready", Icons.Filled.Notifications,
             { onOpenPage(PAGE_NOTIFICATIONS) }),
-        Searchable("Decisions", "layers, rules, laix, shadow, instant commands", Icons.Filled.List,
-            { onOpenPage(PAGE_DECISIONS) }),
         Searchable("Modes", "profiles, everyday", Icons.Filled.Person, onOpenProfiles),
         Searchable("Health check", "self-check, diagnostics", Icons.Filled.Info,
             onOpenSelfCheck),
@@ -183,9 +181,6 @@ fun SettingsScreen(
             QuickChip("Modes") { onOpenProfiles() }
             QuickChip("Health") { onOpenSelfCheck() }
             QuickChip("Privacy") { onOpenPage(PAGE_PRIVACY) }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            QuickChip("Decisions") { onOpenPage(PAGE_DECISIONS) }
             QuickChip("About") { onOpenAbout() }
         }
 
@@ -198,7 +193,6 @@ fun SettingsScreen(
 const val PAGE_MODEL = "model"
 const val PAGE_NOTIFICATIONS = "notifications"
 const val PAGE_PRIVACY = "privacy"
-const val PAGE_DECISIONS = "decisions"
 
 /** One entry the search box can find: a title, its words, and where it goes. */
 private data class Searchable(

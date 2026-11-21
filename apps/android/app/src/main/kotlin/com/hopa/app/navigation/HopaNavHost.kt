@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import com.hopa.app.di.AppContainer
 import com.hopa.feature.browser.BrowserRoute
 import com.hopa.feature.execution.ComputerRoute
+import com.hopa.app.feature.execution.DecisionsRoute
 import com.hopa.feature.execution.HowHopaActsRoute
 import com.hopa.feature.execution.RunPrefsRoute
 import com.hopa.feature.execution.RunSetupRoute
@@ -103,7 +104,11 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onOpenScreenAccess = { navController.navigate(HopaDestination.Accessibility) },
                 onOpenComputer = { navController.navigate(HopaDestination.Computer) },
                 onOpenSetup = { navController.navigate(HopaDestination.RunSetup) },
+                onOpenDecisions = { navController.navigate(HopaDestination.Decisions) },
             )
+        }
+        composable<HopaDestination.Decisions> {
+            DecisionsRoute(onBack = { navController.popBackStack() })
         }
         composable<HopaDestination.RunSetup> {
             RunSetupRoute(

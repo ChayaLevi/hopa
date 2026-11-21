@@ -187,7 +187,7 @@ on purpose; `ktlint` does too.
 | `core/agent/.../TurnRunner` | runs a recognized command before the model; a miss falls through unchanged |
 | `core/agent/.../AgentLoop` | applies the selected layer to `READ` steps: ACT proceeds, VERIFY re-reads, WAIT/ASK/ESCALATE stop the step |
 | `apps/android/stores` | `AppSettings.instantCommands` (on by default) |
-| `apps/android/feature/settings` | the `Decisions` page: Off / Automatic / a layer, shadow, instant commands, and what is active per class |
+| `apps/android/feature/execution` | the `Decisions` page, reached from **How HOPA acts → Who chooses**: Off / Automatic / a layer, shadow, instant commands, and what is active per class |
 | `core/agent` | `DecisionRuntime`: the loop's one way to ask, with mode and shadow as suppliers |
 | `core/agent/.../AgentLoop` | calls the runtime after the model's action is parsed; the vote is data, the action still runs |
 | `apps/android/data` | `decision_votes` table (schema 9), `DbDecisionVoteSink` |
@@ -264,7 +264,7 @@ is not replaced by a layer.
 the mode is not Off. The loop then: ACT proceeds; VERIFY re-reads the screen,
 adds it to the prompt and skips the step; WAIT, ASK and ESCALATE end the step
 with the layer's trace. `CHANGE` and `DANGEROUS` still vote (shadow or pinned)
-but never change what runs. Settings -> Decisions writes `decisionMode`,
+but never change what runs. How HOPA acts -> Who chooses writes `decisionMode`,
 `shadowDecisions` and `instantCommands`, shows each layer's status and latency,
 and names the layer active for read, change and dangerous actions. A pinned
 layer that has been retired, does not cover the class or failed conformance is
@@ -281,10 +281,11 @@ dangerous `ACT`), the exact ten-task protocol, the five promotion conditions and
 the current decision: rules is the fallback, LAIX stays shadow, automatic stays
 opt-in. The device half needs the phone and the model-only capture.
 
-## Choosing in Settings
+## Choosing where HOPA acts
 
-The person decides whether layers are used at all, and which one. One page:
-`Settings -> Decisions`.
+The person decides whether layers are used at all, and which one. The choice
+belongs with the act screens, not with the model or the chat: **How HOPA acts ->
+Who chooses -> Change** opens the Decisions page. Settings no longer lists it.
 
 ```
 Decisions
