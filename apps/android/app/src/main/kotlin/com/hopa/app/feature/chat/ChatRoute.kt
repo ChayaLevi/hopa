@@ -44,6 +44,7 @@ fun ChatRoute(
         onOpenActMode = onOpenActMode,
         onInput = viewModel::onInput,
         onSend = viewModel::send,
+        onStop = viewModel::stop,
         onOption = viewModel::sendOption,
         onQuick = viewModel::sendQuick,
         onNewChat = viewModel::newChat,

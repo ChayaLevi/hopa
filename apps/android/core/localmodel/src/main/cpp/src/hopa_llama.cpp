@@ -78,6 +78,59 @@ Java_com_hopa_localmodel_LlamaEngine_nativeCancel(JNIEnv * /* env */, jobject /*
 }
 
 JNIEXPORT jstring JNICALL
+Java_com_hopa_localmodel_LlamaEngine_nativeApplyTemplate(
+        JNIEnv * env,
+        jobject /* thiz */,
+        jlong handle,
+        jobjectArray roles,
+        jobjectArray contents) {
+    auto * session = reinterpret_cast<Session *>(handle);
+    if (session == nullptr || roles == nullptr || contents == nullptr) {
+        return env->NewStringUTF("");
+    }
+    const char * tmpl = llama_model_chat_template(session->model, nullptr);
+    if (tmpl == nullptr) {
+        return env->NewStringUTF("");
+    }
+    const jsize count = env->GetArrayLength(roles);
+    if (count <= 0 || count != env->GetArrayLength(contents)) {
+        return env->NewStringUTF("");
+    }
+    std::vector<std::string> roleText;
+    std::vector<std::string> contentText;
+    roleText.reserve(static_cast<size_t>(count));
+    contentText.reserve(static_cast<size_t>(count));
+    for (jsize index = 0; index < count; ++index) {
+        auto role = static_cast<jstring>(env->GetObjectArrayElement(roles, index));
+        auto content = static_cast<jstring>(env->GetObjectArrayElement(contents, index));
+        roleText.push_back(to_string(env, role));
+        contentText.push_back(to_string(env, content));
+        env->DeleteLocalRef(role);
+        env->DeleteLocalRef(content);
+    }
+    std::vector<llama_chat_message> messages;
+    messages.reserve(static_cast<size_t>(count));
+    for (jsize index = 0; index < count; ++index) {
+        messages.push_back({roleText[static_cast<size_t>(index)].c_str(),
+                            contentText[static_cast<size_t>(index)].c_str()});
+    }
+    const int32_t needed = llama_chat_apply_template(
+            tmpl, messages.data(), messages.size(), true, nullptr, 0);
+    if (needed <= 0) {
+        return env->NewStringUTF("");
+    }
+    std::vector<char> buffer(static_cast<size_t>(needed) + 1);
+    const int32_t written = llama_chat_apply_template(
+            tmpl, messages.data(), messages.size(), true, buffer.data(),
+            static_cast<int32_t>(buffer.size()));
+    if (written <= 0) {
+        return env->NewStringUTF("");
+    }
+    buffer[static_cast<size_t>(written)] = '\0';
+    return env->NewStringUTF(buffer.data());
+}
+
+JNIEXPORT jstring JNICALL
 Java_com_hopa_localmodel_LlamaEngine_nativeCompleteStream(
         JNIEnv * env,
         jobject /* thiz */,
@@ -85,6 +138,10 @@ Java_com_hopa_localmodel_LlamaEngine_nativeCompleteStream(
         jstring prompt,
         jint maxTokens,
         jstring grammar,
+        jfloat temperature,
+        jfloat topP,
+        jint topK,
+        jfloat repeatPenalty,
         jobject sink) {
     auto * session = reinterpret_cast<Session *>(handle);
     if (session == nullptr) return env->NewStringUTF("");
@@ -121,22 +178,41 @@ Java_com_hopa_localmodel_LlamaEngine_nativeCompleteStream(
 
     llama_sampler_chain_params samplerParams = llama_sampler_chain_default_params();
     llama_sampler * chain = llama_sampler_chain_init(samplerParams);
+    if (repeatPenalty > 1.0f) {
+        llama_sampler_chain_add(
+                chain,
+                llama_sampler_init_penalties(
+                        llama_vocab_n_tokens(session->vocab), 64, repeatPenalty, 0.0f, 0.0f));
+    }
+    // The grammar masks logits before they are truncated, so a constrained
+    // token can never be removed by top-k or top-p.
     const std::string grammarText = to_string(env, grammar);
     if (!grammarText.empty()) {
         llama_sampler * constrained =
                 llama_sampler_init_grammar(session->vocab, grammarText.c_str(), "root");
         if (constrained != nullptr) llama_sampler_chain_add(chain, constrained);
     }
-    llama_sampler_chain_add(chain, llama_sampler_init_greedy());
+    if (topK > 0) {
+        llama_sampler_chain_add(chain, llama_sampler_init_top_k(topK));
+    }
+    llama_sampler_chain_add(chain, llama_sampler_init_top_p(topP, 1));
+    llama_sampler_chain_add(chain, llama_sampler_init_min_p(0.05f, 1));
+    if (temperature > 0.0f) {
+        llama_sampler_chain_add(chain, llama_sampler_init_temp(temperature));
+        llama_sampler_chain_add(chain, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+    } else {
+        llama_sampler_chain_add(chain, llama_sampler_init_greedy());
+    }
 
     // The prompt never fits one batch: a plan prompt is far longer than the
     // 512-token batch the context was created with, and llama_decode() aborts
     // the process when a batch is larger than n_batch. Decode it in chunks.
     const int32_t batchLimit = 512;
     const int32_t contextLimit = static_cast<int32_t>(llama_n_ctx(session->context));
-    if (count > contextLimit - maxTokens - 8) {
+    // Reserve the reply and the few tokens a chat template adds around it.
+    if (count > contextLimit - maxTokens - 64) {
         // Keep the tail: instructions and the task live at the end of the prompt.
-        const int32_t keep = contextLimit - maxTokens - 8;
+        const int32_t keep = contextLimit - maxTokens - 64;
         if (keep <= 0) {
             llama_sampler_free(chain);
             return env->NewStringUTF("");

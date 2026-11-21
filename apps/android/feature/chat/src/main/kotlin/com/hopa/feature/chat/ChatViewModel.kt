@@ -284,6 +284,11 @@ class ChatViewModel @Inject constructor(
         sendText(goal, appendUser = false)
     }
 
+    /** The stop button: the loop checks the gate, the native decode checks its flag. */
+    fun stop() {
+        container.stopTurn()
+    }
+
     fun cancelPlan() {
         pendingGoal = ""
         _state.update { it.copy(pendingPlan = null) }
@@ -329,7 +334,7 @@ class ChatViewModel @Inject constructor(
             it.copy(
                 input = "",
                 busy = true,
-        liveText = "",
+                liveText = "",
                 error = null,
                 options = emptyList(),
                 attachment = null,
@@ -353,7 +358,8 @@ class ChatViewModel @Inject constructor(
             val history = conversation.messages.map { ModelMessage(it.role, it.text) }
             val current = container.settings.settings.first()
             container.useGate(current.trustedApps.toList())
-        container.useDecisions(current.decisionMode, current.shadowDecisions)
+            container.useDecisions(current.decisionMode, current.shadowDecisions)
+            _state.update { it.copy(onDevice = current.provider == "on-device") }
             val preferred = ScreenPath.of(current.screenPath)
 
             // Plan-first gate: show the plan before anything is tapped. A plan
