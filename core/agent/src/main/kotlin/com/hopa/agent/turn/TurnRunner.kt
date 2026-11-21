@@ -21,6 +21,7 @@ import com.hopa.contracts.ports.DevicePort
 import com.hopa.contracts.turn.TurnContext
 import com.hopa.contracts.turn.TurnResult
 import com.hopa.contracts.wire.RunRecord
+import com.hopa.decision.ActionSignature
 import com.hopa.decision.classifier.IntentClassifier
 import com.hopa.decision.graph.GraphStepSource
 import com.hopa.runlog.store.RunRecorder
@@ -214,12 +215,17 @@ class TurnRunner(
         val executor = executorFor(request.device)
         val records = mutableListOf<RunRecord>()
         val narration = mutableListOf<String>()
+        val seen = mutableSetOf<String>()
         var answer: String = ""
         for (step in 0 until MAX_GRAPH_STEPS) {
             if (isCancelled()) {
                 break
             }
             val next = runCatching { source.next(observation, request.goal) }.getOrNull() ?: break
+            val signature = ActionSignature.of(next.action)
+            if (!seen.add(signature)) {
+                break
+            }
             val result = runCatching {
                 executor.execute(
                     runId = request.runId,

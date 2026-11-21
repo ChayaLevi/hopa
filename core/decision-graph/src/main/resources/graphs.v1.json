@@ -46,6 +46,12 @@
           "action": { "kind": "tap", "texts": ["Bluetooth"] },
           "answer": "Opened Bluetooth settings.",
           "done": true
+        },
+        {
+          "from": "connections",
+          "to": "connections",
+          "goal": ["wi-fi", "wifi", "вай-фай", "вайфай"],
+          "action": { "kind": "scroll", "direction": "up" }
         }
       ]
     },

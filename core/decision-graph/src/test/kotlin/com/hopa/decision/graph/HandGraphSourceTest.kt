@@ -58,6 +58,20 @@ class HandGraphSourceTest {
     }
 
     @Test
+    fun `a Connections page scrolled away from Wi-Fi scrolls up instead of guessing`() {
+        val scrolled = screen(
+            "com.android.settings",
+            "Connections",
+            ObservationNode(ref = "e9", type = "TextView", text = "UWB", clickable = true),
+        )
+
+        val step = source.next(scrolled, "open wifi settings")
+
+        assertEquals("ui.scroll", step?.action?.kind)
+        assertEquals("up", step?.action?.direction)
+    }
+
+    @Test
     fun `an unknown goal is left to the model`() {
         assertNull(source.next(screen("com.android.settings", "Settings"), "order a pizza"))
     }
