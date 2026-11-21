@@ -80,4 +80,28 @@ object AccessibilityState {
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }
+
+    /**
+     * True once the service is connected, waiting briefly for a rebind.
+     *
+     * After an update, a restart or a toggle Android disconnects and reconnects
+     * the service; a turn that reads the screen in that window used to fail with
+     * "no screen answered". Waiting a couple of seconds is honest.
+     */
+    suspend fun awaitConnected(waitMillis: Long = CONNECT_WAIT_MS): Boolean {
+        var waited = 0L
+        while (true) {
+            if (HopaAccessibilityService.instance != null) {
+                return true
+            }
+            if (waited >= waitMillis) {
+                return false
+            }
+            kotlinx.coroutines.delay(CONNECT_STEP_MS)
+            waited += CONNECT_STEP_MS
+        }
+    }
+
+    private const val CONNECT_WAIT_MS = 2_500L
+    private const val CONNECT_STEP_MS = 100L
 }

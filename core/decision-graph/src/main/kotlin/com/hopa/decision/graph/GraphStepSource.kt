@@ -15,8 +15,10 @@ interface GraphStepSource {
     fun target(goal: String): GraphTarget?
 }
 
-/** Where a goal would go, for the chat status line. */
+/** Where a goal would go, for the status line and for the order of paths. */
 data class GraphTarget(
     val app: String,
     val name: String,
+    /** True when the app has an edge that finishes this goal, not only starts it. */
+    val completes: Boolean = false,
 )

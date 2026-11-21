@@ -5,8 +5,8 @@
       "app": "com.android.settings",
       "name": "Settings",
       "nodes": [
-        { "id": "settings", "texts": ["Settings", "Настройки"] },
-        { "id": "connections", "texts": ["Connections", "Подключения"] },
+        { "id": "settings", "texts": ["Settings", "Настройки", "Connected devices", "Modes and Routines", "Sounds and vibration", "Notifications"] },
+        { "id": "connections", "texts": ["Ultra-wideband", "Flight mode", "Mobile networks", "SIM manager", "Подключения"] },
         { "id": "wifi", "texts": ["Wi-Fi", "Wi‑Fi", "Wi-Fi settings"] },
         { "id": "bluetooth", "texts": ["Bluetooth", "Bluetooth settings"] }
       ],
@@ -16,6 +16,11 @@
           "to": "settings",
           "goal": ["settings", "настройки", "настройках"],
           "action": { "kind": "launch", "app": "com.android.settings" }
+        },
+        {
+          "from": "any",
+          "goal": ["settings", "настройки", "настройках", "wi-fi", "wifi", "вай-фай", "вайфай", "bluetooth", "блютуз", "connections", "подключения"],
+          "action": { "kind": "back" }
         },
         {
           "from": "settings",
