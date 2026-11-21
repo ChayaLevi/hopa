@@ -1,6 +1,6 @@
 # Decision layers
 
-Status: D1-D5 done (2026-11-21); D6-D7 planned
+Status: D1-D6 done (2026-11-21); D7 planned
 
 HOPA will use **several decision layers**, not one. LAIX is the first to try, a
 rules layer is the baseline, a small intent classifier may follow, and a
@@ -185,7 +185,9 @@ on purpose; `ktlint` does too.
 | `core/decision-report` (`:decision-report`) | the `decisionReport` task; the one list of shipped layers |
 | `core/decision-classifier` (`:decision-classifier`) | `IntentClassifier`: launch, back, home, scroll and wait, with a confidence threshold |
 | `core/agent/.../TurnRunner` | runs a recognized command before the model; a miss falls through unchanged |
+| `core/agent/.../AgentLoop` | applies the selected layer to `READ` steps: ACT proceeds, VERIFY re-reads, WAIT/ASK/ESCALATE stop the step |
 | `apps/android/stores` | `AppSettings.instantCommands` (on by default) |
+| `apps/android/feature/settings` | the `Decisions` page: Off / Automatic / a layer, shadow, instant commands, and what is active per class |
 | `core/agent` | `DecisionRuntime`: the loop's one way to ask, with mode and shadow as suppliers |
 | `core/agent/.../AgentLoop` | calls the runtime after the model's action is parsed; the vote is data, the action still runs |
 | `apps/android/data` | `decision_votes` table (schema 9), `DbDecisionVoteSink` |
@@ -251,11 +253,21 @@ or a thrown step all fall through to the model. `instantCommands` turns the
 path off. Taps, typing and anything that changes a setting are deliberately not
 classified: those need the screen the model reads.
 
-### D6 - enable for safe actions (1 PR)
+### D6 - enable for safe actions (1 PR) - done
 
 The class policy enforces decisions for `ui.launch`, `ui.read` and navigation.
 Payments, delete, reset and uninstall keep the current approval policy, which
 is not replaced by a layer.
+
+`DecisionRuntime.appliesTo` is true only for `ActionClass.READ` and only when
+the mode is not Off. The loop then: ACT proceeds; VERIFY re-reads the screen,
+adds it to the prompt and skips the step; WAIT, ASK and ESCALATE end the step
+with the layer's trace. `CHANGE` and `DANGEROUS` still vote (shadow or pinned)
+but never change what runs. Settings -> Decisions writes `decisionMode`,
+`shadowDecisions` and `instantCommands`, shows each layer's status and latency,
+and names the layer active for read, change and dangerous actions. A pinned
+layer that has been retired, does not cover the class or failed conformance is
+not used; the page shows what Automatic chose instead.
 
 ### D7 - measurement and the go/no-go (1 PR)
 
@@ -270,21 +282,29 @@ The person decides whether layers are used at all, and which one. One page:
 
 ```
 Decisions
-  ( ) Off - the model decides, as today
-  (o) Automatic - the best allowed layer for each action
-  ( ) Rules only
-  ( ) LAIX
+  (o) Off - the model decides, as today
+  ( ) Automatic - the best allowed layer for each action
+  ( ) Rules - heuristics for known commands
+  ( ) LAIX - live decision policy
+
+  Recording
+  [x] Record what other layers would decide (shadow)
   [x] Instant commands - open, back, home, scroll and wait skip the model
-  [x] Record what other layers would have decided (shadow)
-  Active now: Automatic -> Rules + LAIX (safe actions)
+
+  Active now
+  Reading the screen      Rules
+  Changing a setting      Model
+  Payments and deletes    Model
 ```
 
 - **Off** is the honest default until a layer beats the model on the corpus. The
   model path stays exactly as it is.
-- **Automatic** applies the class policy in `:core:decision`; the page shows
-  which layers that means for safe, careful and dangerous actions.
-- **A specific layer** pins it everywhere it is allowed; a layer that is not
-  allowed for an action class is skipped there and the page says so.
+- **Automatic** applies the class policy in `:decision`; the page shows which
+  layer that means for reading, changing and dangerous actions.
+- **A specific layer** pins it wherever it is allowed; a layer that does not
+  cover an action class is skipped there, Automatic decides, and the page's
+  "Active now" rows say so. In this build a layer is applied to `READ` steps
+  only; `CHANGE` and `DANGEROUS` still take the model path.
 - **Shadow** can be on in any mode: votes are logged, nothing changes.
 - Each row shows the layer's status badge (`default`, `shadow`, `experimental`),
   its latency class and one line of what it is good at - the same honesty the
@@ -292,8 +312,8 @@ Decisions
 - Dangerous actions (payments, delete, reset, uninstall) always keep the
   approval step, whatever is selected.
 
-Storage: `decisionMode` and `shadowDecisions` in `AppSettings`; the selected
-layer id is a string, empty for Automatic. A layer that disappears from the
+Storage: `decisionMode`, `shadowDecisions` and `instantCommands` in
+`AppSettings`; the mode is `off`, `auto` or a layer id. A layer that disappears from the
 build leaves the setting pointing at nothing, and the page falls back to
 Automatic with a notice instead of breaking.
 

@@ -28,6 +28,8 @@ import com.hopa.contracts.wire.Observation
 import com.hopa.contracts.wire.ObservationNode
 import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.wire.ScreenSize
+import com.hopa.decision.ActionClass
+import com.hopa.decision.Verb
 import com.hopa.runlog.store.RunRecorder
 
 class AgentLoop(
@@ -166,15 +168,52 @@ class AgentLoop(
                     usage = usage,
                 )
 
-            // Every layer that is active votes here, including the one that
-            // would apply. Nothing is blocked in this stage: the vote is data.
-            decisions?.observe(
+            // Every active layer votes here. The selected one applies only for
+            // the classes the runtime allows, and only to change the step, never
+            // the approval: a payment still goes through the gate.
+            val run = decisions?.observe(
                 runId = runId,
                 step = step,
                 action = action,
                 screen = observation?.let(screenRenderer::render).orEmpty(),
                 history = steps.toList(),
             )
+            val chosen = run?.decision
+            if (chosen != null && decisions != null && decisions.appliesTo(ActionClass.of(action.kindOrNull()))) {
+                when (chosen.verb) {
+                    Verb.ACT -> Unit
+
+                    Verb.VERIFY -> {
+                        observation = runCatching { device.observe() }.getOrNull() ?: observation
+                        observation?.let {
+                            messages += ModelMessage("user", "LOOK AGAIN\n" + screenRenderer.render(it))
+                        }
+                        return@repeat
+                    }
+
+                    Verb.WAIT -> return TurnResult(
+                        answer = "I am waiting: ${chosen.trace}",
+                        records = records,
+                        narration = narration,
+                        usage = usage,
+                    )
+
+                    Verb.ASK -> return TurnResult(
+                        answer = "I need your go-ahead before this step. ${chosen.trace}",
+                        records = records,
+                        narration = narration,
+                        usage = usage,
+                    )
+
+                    Verb.ESCALATE -> return TurnResult(
+                        answer = "I need you to take over: ${chosen.trace}",
+                        records = records,
+                        narration = narration,
+                        error = HopaError(ErrorCodes.BLOCKED, chosen.reason),
+                        usage = usage,
+                    )
+                }
+            }
 
             if (action.kind == "ui.launch") {
                 val app = action.app.orEmpty()

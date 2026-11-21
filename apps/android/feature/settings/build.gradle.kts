@@ -46,6 +46,7 @@ dependencies {
 
     api(project(":contracts"))
     api(project(":stores"))
+    api(project(":decision"))
     api(project(":inference"))
     api(project(":capabilities"))
     api(project(":backend"))

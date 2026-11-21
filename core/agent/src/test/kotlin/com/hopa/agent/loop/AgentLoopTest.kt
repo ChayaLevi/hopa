@@ -153,6 +153,74 @@ class AgentLoopTest {
     }
 
     @Test
+    fun a_decision_layer_can_ask_instead_of_acting() {
+        val harness = Harness(
+            replies = listOf(OBSERVE, "Done."),
+            decisions = decisionRuntime(Verb.ASK),
+        )
+        val result = runBlocking {
+            harness.loop.run("run-9", "trace-9", TurnContext("look")) { false }
+        }
+
+        assertTrue(result.answer.contains("go-ahead"), result.answer)
+        assertTrue(result.records.isEmpty())
+        assertEquals(1, harness.model.calls)
+    }
+
+    @Test
+    fun a_waiting_layer_stops_the_step() {
+        val harness = Harness(
+            replies = listOf(OBSERVE, "Done."),
+            decisions = decisionRuntime(Verb.WAIT),
+        )
+        val result = runBlocking {
+            harness.loop.run("run-10", "trace-10", TurnContext("look")) { false }
+        }
+
+        assertTrue(result.answer.contains("waiting", ignoreCase = true), result.answer)
+        assertEquals(1, harness.model.calls)
+    }
+
+    @Test
+    fun a_verify_vote_re_reads_and_skips_the_tap() {
+        val harness = Harness(
+            replies = listOf(TAP, "Done."),
+            decisions = decisionRuntime(Verb.VERIFY),
+        )
+        val result = runBlocking {
+            harness.loop.run("run-11", "trace-11", TurnContext("tap")) { false }
+        }
+
+        assertEquals(0, harness.device.taps)
+        assertEquals("Done.", result.answer)
+        assertEquals(2, harness.model.calls)
+    }
+
+    private fun decisionRuntime(verb: Verb): DecisionRuntime {
+        val layer = object : DecisionLayer {
+            override val metadata = LayerMetadata(
+                id = "test-$verb".lowercase(),
+                version = "1.0.0",
+                latency = LatencyClass.MICRO,
+                decidesUpTo = ActionClass.DANGEROUS,
+                status = LayerStatus.DEFAULT,
+                conformance = ConformanceStatus.PASSED,
+                author = "test",
+                summary = "a layer that answers $verb",
+            )
+
+            override suspend fun decide(context: DecisionContext): LayerDecision =
+                LayerDecision(verb, "test_${verb.name.lowercase()}", 0.9, "test says $verb")
+        }
+        return DecisionRuntime(
+            coordinator = DecisionCoordinator(DecisionRegistry(listOf(layer))),
+            mode = { DecisionMode.Automatic },
+            shadow = { false },
+            applies = { true },
+        )
+    }
+
+    @Test
     fun the_prompt_carries_the_packages_installed_on_this_phone() {
         val harness = Harness(replies = listOf("Done."))
         val installed = listOf(InstalledApp("tv.danmaku.bili", "Bilibili"))
