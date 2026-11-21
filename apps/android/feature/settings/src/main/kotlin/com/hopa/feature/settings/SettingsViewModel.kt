@@ -143,6 +143,41 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /** The model picker on How HOPA acts: the provider, without leaving the page. */
+    fun selectProvider(value: String) {
+        viewModelScope.launch {
+            container.settings.update {
+                it.copy(
+                    provider = value,
+                    endpoint = when (value) {
+                        "lan" -> if (it.endpoint.startsWith("https://")) {
+                            "http://192.168.1.5:11434/v1"
+                        } else {
+                            it.endpoint
+                        }
+                        "openai" -> if (it.endpoint.startsWith("http://")) {
+                            "https://api.deepseek.com/v1"
+                        } else {
+                            it.endpoint
+                        }
+                        else -> it.endpoint
+                    },
+                )
+            }
+            reload()
+        }
+    }
+
+    /** Which installed file answers; the engine and the receipt read the same id. */
+    fun selectLocalModel(id: String) {
+        viewModelScope.launch {
+            container.settings.update {
+                it.copy(provider = "on-device", activeModelId = id)
+            }
+            reload()
+        }
+    }
+
     fun setVision(value: Boolean) {
         viewModelScope.launch {
             surfaceSettings.setVision(value)
@@ -415,12 +450,20 @@ class SettingsViewModel @Inject constructor(
             "change" to container.activeDecision(com.hopa.decision.ActionClass.CHANGE),
             "dangerous" to container.activeDecision(com.hopa.decision.ActionClass.DANGEROUS),
         )
+        val installed = container.localModels.installed().map { model ->
+            val name = com.hopa.inference.local.LocalModelCatalogue.models
+                .firstOrNull { it.id == model.id }
+                ?.name
+                ?: model.id
+            ModelOption(id = model.id, label = name, bytes = model.bytes)
+        }
         _state.update {
             it.copy(
                 settings = settings,
                 decisionLayers = layers,
                 decisionActive = active,
                 graphPaths = container.graphPaths,
+                installedModels = installed,
                 key = model.key,
                 keySaved = model.keySaved,
                 bridgeKey = pairing.bridgeKey,

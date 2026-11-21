@@ -22,6 +22,7 @@ import com.hopa.feature.profiles.ProfilesRoute
 import com.hopa.feature.runs.RunsRoute
 import com.hopa.app.feature.settings.AboutScreen
 import com.hopa.app.feature.settings.AccessibilityRoute
+import com.hopa.app.feature.settings.AnswersRoute
 import com.hopa.app.feature.settings.SelfCheckRoute
 import com.hopa.app.feature.settings.SettingsRoute
 import com.hopa.app.feature.shell.HomeShell
@@ -105,7 +106,11 @@ fun HopaNavHost(container: AppContainer, initialGoal: String = "") {
                 onOpenComputer = { navController.navigate(HopaDestination.Computer) },
                 onOpenSetup = { navController.navigate(HopaDestination.RunSetup) },
                 onOpenDecisions = { navController.navigate(HopaDestination.Decisions) },
+                onOpenAnswers = { navController.navigate(HopaDestination.Answers) },
             )
+        }
+        composable<HopaDestination.Answers> {
+            AnswersRoute(onBack = { navController.popBackStack() })
         }
         composable<HopaDestination.Decisions> {
             DecisionsRoute(onBack = { navController.popBackStack() })

@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.ui.component.HopaBottomBar
@@ -50,32 +49,14 @@ fun CapabilitiesScreen(
     onOpenSettings: () -> Unit,
     onOpenBrowser: () -> Unit,
     onOpenRuns: () -> Unit,
-    onOpenUsage: () -> Unit,
     onOpenMemory: () -> Unit,
     onOpenSkills: () -> Unit,
-    onUnavailable: (String) -> Unit,
 ) {
     val ready = accessibilityEnabled
     Scaffold(
         containerColor = HopaColor.Bg,
         topBar = {
-            HopaPageHeader(
-                title = "Capabilities",
-                actions = {
-                    Text(
-                        text = "Settings",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = HopaColor.Primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .clickable(onClick = onOpenSettings)
-                            .background(HopaColor.PrimarySoft, RoundedCornerShape(20.dp))
-                            .height(40.dp)
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                    )
-                },
-            )
+            HopaPageHeader(title = "Capabilities")
         },
         bottomBar = {
             Column(modifier = Modifier.navigationBarsPadding()) {
@@ -173,21 +154,13 @@ fun CapabilitiesScreen(
                 )
             }
 
-            SectionLabel("TOOLS")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Tile(
-                    title = "Usage",
-                    subtitle = "$records recorded",
-                    onClick = onOpenUsage,
-                    modifier = Modifier.weight(1f),
-                )
-                Tile(
-                    title = "MCP servers",
-                    subtitle = "Phone and PC tools",
-                    onClick = { onUnavailable("MCP servers") },
-                    modifier = Modifier.weight(1f),
-                )
-            }
+            SectionLabel("HOPA")
+            Tile(
+                title = "Settings",
+                subtitle = "Keys, models and privacy",
+                onClick = onOpenSettings,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

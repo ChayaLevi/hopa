@@ -24,6 +24,7 @@ class DataStoreSettingsRepository(
             provider = prefs[PROVIDER] ?: "stub",
             endpoint = prefs[ENDPOINT] ?: "https://api.deepseek.com/v1",
             model = prefs[MODEL] ?: "deepseek-v4-flash",
+            activeModelId = prefs[ACTIVE_MODEL_ID] ?: "",
             profile = prefs[PROFILE] ?: "everyday",
             notifyAnswers = prefs[NOTIFY] ?: true,
             selectedConversation = prefs[SELECTED] ?: "",
@@ -55,6 +56,7 @@ class DataStoreSettingsRepository(
             prefs[PROVIDER] = next.provider
             prefs[ENDPOINT] = next.endpoint
             prefs[MODEL] = next.model
+            prefs[ACTIVE_MODEL_ID] = next.activeModelId
             prefs[PROFILE] = next.profile
             prefs[NOTIFY] = next.notifyAnswers
             prefs[SELECTED] = next.selectedConversation
@@ -123,6 +125,7 @@ class DataStoreSettingsRepository(
         val PROVIDER = stringPreferencesKey("provider")
         val ENDPOINT = stringPreferencesKey("endpoint")
         val MODEL = stringPreferencesKey("model")
+        val ACTIVE_MODEL_ID = stringPreferencesKey("active_model_id")
         val PROFILE = stringPreferencesKey("profile")
         val NOTIFY = booleanPreferencesKey("notify_answers")
         val SELECTED = stringPreferencesKey("selected_conversation")

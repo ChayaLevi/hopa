@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +44,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hopa.feature.settings.BackgroundSetupDialog
+import com.hopa.feature.settings.ModelOption
 import com.hopa.feature.settings.SettingsUiState
+import com.hopa.feature.settings.formatBytes
 import com.hopa.ui.component.HopaPageHeader
 import com.hopa.ui.settings.SettingsSegment
 import com.hopa.ui.theme.HopaColor
@@ -70,6 +73,9 @@ fun HowHopaActsScreen(
     onOpenSetup: () -> Unit,
     onOpenDecisions: () -> Unit,
     onStepSource: (String) -> Unit,
+    onProvider: (String) -> Unit,
+    onLocalModel: (String) -> Unit,
+    onOpenAnswers: () -> Unit,
 ) {
     var setup by rememberSaveable { mutableStateOf(false) }
     val mode = ActMode.of(state)
@@ -167,6 +173,51 @@ fun HowHopaActsScreen(
                 )
 
                 else -> ScreenStatus(mode = mode, onScreenAccess = onOpenScreenAccess)
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SectionLabel("Model")
+                SettingsSegment(
+                    options = listOf(
+                        "stub" to "Demo",
+                        "openai" to "Cloud",
+                        "lan" to "LAN",
+                        "on-device" to "On-device",
+                    ),
+                    selected = state.settings.provider,
+                    onSelect = onProvider,
+                )
+                if (state.settings.provider == "on-device") {
+                    if (state.installedModels.isEmpty()) {
+                        Text(
+                            "No model on this phone yet. Download one in Answers.",
+                            fontSize = 12.sp,
+                            color = HopaColor.TextHint,
+                        )
+                    } else {
+                        val active = state.settings.activeModelId.ifBlank {
+                            state.installedModels.first().id
+                        }
+                        state.installedModels.forEach { model ->
+                            ModelRow(
+                                model = model,
+                                selected = model.id == active,
+                                onClick = { onLocalModel(model.id) },
+                            )
+                        }
+                    }
+                }
+                Text(
+                    modelNote(state.settings.provider, state.settings.model),
+                    fontSize = 12.sp,
+                    color = HopaColor.TextHint,
+                )
+                TextButton(
+                    onClick = onOpenAnswers,
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Text("Keys, endpoint and downloads", fontSize = 12.sp)
+                }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -297,6 +348,46 @@ private fun stepSourceNote(source: String): String = when (source) {
     "model" -> "The model writes every step, as before."
     "graph" -> "Only written paths for Settings, Clock and Camera; a goal they do not cover is refused."
     else -> "A written path first for Settings, Clock and Camera; the model for everything else."
+}
+
+private fun modelNote(provider: String, cloudModel: String): String = when (provider) {
+    "on-device" -> "Answers stay on this phone."
+    "lan" -> "Answers come from a server on your network."
+    "stub" -> "Demo answers; no model is called."
+    else -> "Cloud answers \u00B7 " + cloudModel.ifBlank { "no model set" }
+}
+
+/** One installed model, with the check that says which one answers. */
+@Composable
+private fun ModelRow(model: ModelOption, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                if (selected) HopaColor.PrimarySoft else HopaColor.Surface,
+                RoundedCornerShape(12.dp),
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            model.label,
+            fontSize = 14.sp,
+            color = HopaColor.TextPrimary,
+            modifier = Modifier.weight(1f),
+        )
+        Text(formatBytes(model.bytes), fontSize = 11.sp, color = HopaColor.TextHint)
+        if (selected) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.Outlined.Check,
+                contentDescription = "Selected",
+                tint = HopaColor.Primary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
 }
 
 @Composable

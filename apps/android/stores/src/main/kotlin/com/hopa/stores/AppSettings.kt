@@ -4,6 +4,8 @@ data class AppSettings(
     val provider: String = "stub",
     val endpoint: String = "https://api.deepseek.com/v1",
     val model: String = "deepseek-v4-flash",
+    /** Which installed model file answers when the provider is `on-device`. */
+    val activeModelId: String = "",
     val profile: String = "everyday",
     val notifyAnswers: Boolean = true,
     val selectedConversation: String = "",
