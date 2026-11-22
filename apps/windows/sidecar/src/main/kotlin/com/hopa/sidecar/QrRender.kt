@@ -6,6 +6,8 @@ import com.google.zxing.qrcode.QRCodeWriter
 import java.awt.image.BufferedImage
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.attribute.PosixFileAttributeView
+import java.nio.file.attribute.PosixFilePermissions
 import javax.imageio.ImageIO
 
 /**
@@ -60,6 +62,15 @@ object QrRender {
         }
         path.parent?.let { Files.createDirectories(it) }
         ImageIO.write(image, "png", path.toFile())
+        ownerOnly(path)
+    }
+
+    /** The PNG carries the live pairing secret, so keep it to the owner where possible. */
+    private fun ownerOnly(path: Path) {
+        runCatching {
+            Files.getFileAttributeView(path, PosixFileAttributeView::class.java)
+                ?.setPermissions(PosixFilePermissions.fromString("rw-------"))
+        }
     }
 
     private const val BLACK = 0x000000

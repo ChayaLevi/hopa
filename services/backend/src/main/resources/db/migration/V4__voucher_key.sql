@@ -12,3 +12,5 @@
 -- before it writes anything, so the pending row stays untouched.
 alter table pending_pairings
     add column voucher_device_id uuid null references devices (id) on delete set null;
+
+create index pending_pairings_voucher_idx on pending_pairings (voucher_device_id);

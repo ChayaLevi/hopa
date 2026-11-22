@@ -225,6 +225,9 @@ class BackendPairingTest {
             assertEquals("s1", pending.secret)
             assertEquals("hopa://pair?v=1&s=s1&u=wss://a/v1/gateway", pending.qr)
             assertEquals("2026-11-17T00:05:00Z", pending.expiresAt)
+            assertFalse(pending.toString().contains("s1"))
+            assertTrue(pending.toString().contains("sessionId=sid"))
+            assertTrue(pending.toString().contains("secret=<redacted>"))
 
             val request = server.takeRequest()
             assertEquals("/v1/pair/pending", request.path)
@@ -285,6 +288,9 @@ class BackendPairingTest {
             assertEquals("a1", claimed.credentials.accessToken)
             assertEquals("d3JhcA", claimed.wrappedKey)
             assertEquals("cGhvbmU", claimed.voucherPublicKey)
+            assertFalse(claimed.credentials.toString().contains("a1"))
+            assertFalse(claimed.credentials.toString().contains("r1"))
+            assertTrue(claimed.credentials.toString().contains("accessToken=<redacted>"))
 
             val request = server.takeRequest()
             assertEquals("/v1/pair/claim", request.path)

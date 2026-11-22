@@ -1,7 +1,9 @@
 package com.hopa.sidecar
 
+import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.PosixFilePermissions
 import kotlinx.serialization.Serializable
@@ -43,9 +45,20 @@ class BackendSessionStore(private val file: Path) {
     }
 
     fun save(session: BackendSession) {
-        file.parent?.let { Files.createDirectories(it) }
-        Files.writeString(file, json.encodeToString(BackendSession.serializer(), session))
-        ownerOnly(file)
+        val directory = file.toAbsolutePath().parent
+        Files.createDirectories(directory)
+        val temp = Files.createTempFile(directory, "backend-session", ".tmp")
+        try {
+            Files.writeString(temp, json.encodeToString(BackendSession.serializer(), session))
+            ownerOnly(temp)
+            try {
+                Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            } catch (_: AtomicMoveNotSupportedException) {
+                Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING)
+            }
+        } finally {
+            runCatching { Files.deleteIfExists(temp) }
+        }
     }
 
     /** POSIX permissions where available; Windows ACLs are inherited from the user profile. */

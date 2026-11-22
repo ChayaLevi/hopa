@@ -11,4 +11,9 @@ data class BackendCredentials(
     val refreshToken: String,
     val expiresAt: String,
     val gatewayUrl: String,
-)
+) {
+    /** Tokens are bearer capabilities: a log line must never carry them. */
+    override fun toString(): String = "BackendCredentials(deviceId=$deviceId, householdId=$householdId, " +
+        "accessToken=<redacted>, refreshToken=<redacted>, expiresAt=$expiresAt, " +
+        "gatewayUrl=$gatewayUrl)"
+}

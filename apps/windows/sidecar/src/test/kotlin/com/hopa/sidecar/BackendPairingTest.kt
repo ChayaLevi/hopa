@@ -5,16 +5,20 @@ import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.RGBLuminanceSource
+import com.google.zxing.common.BitMatrix
 import com.google.zxing.common.HybridBinarizer
 import com.hopa.backend.crypto.KeyWrap
 import com.hopa.backend.pairing.X25519Keys
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.nio.file.Path
 import java.security.MessageDigest
 import java.util.ArrayDeque
 import java.util.Base64
-import javax.imageio.ImageIO
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -27,6 +31,7 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -44,15 +49,13 @@ class BackendPairingTest {
     private val qr = "hopa://pair?v=1&s=secret-1&u=wss://example.test/v1/gateway"
 
     @Test
-    fun `admit mints, polls, claims and unwraps the household key`() {
+    fun `admit mints, polls, claims and unwraps the household key`() = runTest {
         val server = server(ResolveStep.State("pending"), ResolveStep.State("vouched"))
         try {
             val dataDir = Files.createTempDirectory("hopa-admit")
             val lines = mutableListOf<String>()
-            val result = runBlocking {
-                BackendPairing(dataDir, out = { lines += it })
-                    .admit(backendUrl(server), "Studio")
-            }
+            val result = BackendPairing(dataDir, out = { lines += it })
+                .admit(backendUrl(server), "Studio")
 
             assertArrayEquals(contentKey, result.contentKey)
             assertEquals(32, result.contentKey.size)
@@ -61,27 +64,34 @@ class BackendPairingTest {
             assertEquals("a1", result.credentials.accessToken)
             assertEquals(backendUrl(server), result.credentials.gatewayUrl)
 
-            // The key pair the sidecar generated is the one the wrap names.
-            assertArrayEquals(server.pcPublicKey, X25519Keys.publicKeyBytes(result.privateKeyPkcs8))
-
             assertEquals(1, server.claimCount)
             assertEquals(2, server.resolveCount)
             assertTrue(server.mintBody.contains("\"platform\":\"windows\""))
             assertTrue(server.claimBody.contains("\"platform\":\"windows\""))
             assertTrue(server.claimBody.contains("\"alg\":\"x25519\""))
 
-            // The printed QR is the exact pending string and the PNG decodes to it.
+            // The printed link and Unicode blocks are the pending QR and decode
+            // back to it; the PNG is transient and is gone after the claim.
             assertTrue(lines.contains(qr))
-            assertEquals(qr, decodeQr(dataDir.resolve("pair-qr.png")))
-            assertTrue(lines.any { line -> line.any { it == '▀' || it == '▄' || it == '█' } })
+            val blocks = lines.first { line -> line.any { it == '▀' || it == '▄' || it == '█' } }
+            assertEquals(qr, decodeBlocks(blocks))
+            assertFalse(Files.exists(dataDir.resolve("pair-qr.png")))
             val expectedFingerprint = sha256Hex(server.pcPublicKey).take(8)
             assertTrue(lines.contains("fingerprint: $expectedFingerprint"))
+
+            // The returned result never prints tokens or key material.
+            assertFalse(result.toString().contains("a1"))
+            assertFalse(result.toString().contains("r1"))
+            assertFalse(result.toString().contains(Base64.getEncoder().encodeToString(contentKey)))
 
             val stored = BackendSessionStore(dataDir.resolve("backend-session.json")).load()!!
             assertEquals("d1", stored.deviceId)
             assertEquals("h1", stored.householdId)
             assertArrayEquals(contentKey, Base64.getDecoder().decode(stored.contentKeyBase64))
-            assertArrayEquals(result.privateKeyPkcs8, Base64.getDecoder().decode(stored.privateKeyBase64))
+            assertArrayEquals(
+                server.pcPublicKey,
+                X25519Keys.publicKeyBytes(Base64.getDecoder().decode(stored.privateKeyBase64)),
+            )
         } finally {
             server.close()
         }
@@ -129,14 +139,110 @@ class BackendPairingTest {
         }
     }
 
+    @Test
+    fun `a claimed session fails clearly and never claims again`() {
+        val server = server(ResolveStep.State("claimed"))
+        try {
+            val dataDir = Files.createTempDirectory("hopa-admit-claimed")
+            val failure = assertThrows(IllegalStateException::class.java) {
+                runBlocking { BackendPairing(dataDir).admit(backendUrl(server), "Studio") }
+            }
+
+            assertTrue(failure.message.orEmpty().contains("already claimed"))
+            assertEquals(0, server.claimCount)
+            assertEquals(1, server.resolveCount)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `a session that is never vouched times out after five minutes`() {
+        val server = serverDefaultingTo("pending")
+        try {
+            val dataDir = Files.createTempDirectory("hopa-admit-timeout")
+            var clock = 0L
+            val pairing = BackendPairing(
+                dataDir,
+                sleep = { clock += it },
+                now = { clock },
+            )
+            val failure = assertThrows(IllegalStateException::class.java) {
+                runBlocking { pairing.admit(backendUrl(server), "Studio") }
+            }
+
+            assertTrue(failure.message.orEmpty().contains("timed out"))
+            assertEquals(0, server.claimCount)
+            assertTrue(server.resolveCount >= 60)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `the default output keeps the pairing secret off stdout`() {
+        val server = server(ResolveStep.State("pending"), ResolveStep.State("vouched"))
+        val originalOut = System.out
+        val originalErr = System.err
+        val stdout = ByteArrayOutputStream()
+        val stderr = ByteArrayOutputStream()
+        System.setOut(PrintStream(stdout, true, StandardCharsets.UTF_8))
+        System.setErr(PrintStream(stderr, true, StandardCharsets.UTF_8))
+        try {
+            val dataDir = Files.createTempDirectory("hopa-admit-stderr")
+            runTest { BackendPairing(dataDir).admit(backendUrl(server), "Studio") }
+
+            val out = stdout.toString(StandardCharsets.UTF_8)
+            val err = stderr.toString(StandardCharsets.UTF_8)
+            assertFalse(out.contains("secret-1"))
+            assertFalse(out.contains(qr))
+            assertTrue(err.contains(qr))
+        } finally {
+            System.setOut(originalOut)
+            System.setErr(originalErr)
+            server.close()
+        }
+    }
+
     private fun server(vararg steps: ResolveStep): FakeServer =
-        FakeServer(contentKey, phonePrivateKey, phonePublicKey, qr, steps.toList()).also { it.start() }
+        server(steps.toList(), defaultState = "vouched")
+
+    private fun serverDefaultingTo(state: String): FakeServer =
+        server(emptyList(), defaultState = state)
+
+    private fun server(steps: List<ResolveStep>, defaultState: String): FakeServer =
+        FakeServer(contentKey, phonePrivateKey, phonePublicKey, qr, steps, defaultState)
+            .also { it.start() }
 
     private fun backendUrl(server: FakeServer) =
         "ws://${server.hostName}:${server.port}/v1/gateway"
 
-    private fun decodeQr(path: Path): String {
-        val image = ImageIO.read(path.toFile())
+    private fun decodeBlocks(blocks: String): String {
+        val rows = blocks.trimEnd('\n').split('\n')
+        val width = rows.maxOf { it.length }
+        val matrix = BitMatrix(width, rows.size * 2)
+        rows.forEachIndexed { row, line ->
+            line.forEachIndexed { x, glyph ->
+                when (glyph) {
+                    '█' -> {
+                        matrix.set(x, row * 2)
+                        matrix.set(x, row * 2 + 1)
+                    }
+                    '▀' -> matrix.set(x, row * 2)
+                    '▄' -> matrix.set(x, row * 2 + 1)
+                }
+            }
+        }
+        return decodeImage(matrix, scale = 8)
+    }
+
+    private fun decodeImage(matrix: BitMatrix, scale: Int = 1): String {
+        val image = BufferedImage(matrix.width * scale, matrix.height * scale, BufferedImage.TYPE_INT_RGB)
+        for (y in 0 until image.height) {
+            for (x in 0 until image.width) {
+                image.setRGB(x, y, if (matrix[x / scale, y / scale]) 0x000000 else 0xFFFFFF)
+            }
+        }
         val pixels = IntArray(image.width * image.height)
         image.getRGB(0, 0, image.width, image.height, pixels, 0, image.width)
         val bitmap = BinaryBitmap(HybridBinarizer(RGBLuminanceSource(image.width, image.height, pixels)))
@@ -165,6 +271,7 @@ class BackendPairingTest {
         private val phonePublicKey: ByteArray,
         private val qr: String,
         steps: List<ResolveStep>,
+        private val defaultState: String,
     ) : Dispatcher() {
         private val steps = ArrayDeque(steps)
         private val server = MockWebServer()
@@ -196,7 +303,7 @@ class BackendPairingTest {
 
             "/v1/pair/pending/resolve" -> {
                 resolveCount++
-                when (val step = steps.pollFirst() ?: ResolveStep.State("vouched")) {
+                when (val step = steps.pollFirst() ?: ResolveStep.State(defaultState)) {
                     is ResolveStep.RateLimited -> MockResponse().setResponseCode(429).setBody(
                         """{"code":"E_RATE","message":"too many pending pairing polls","retryable":true}""",
                     )

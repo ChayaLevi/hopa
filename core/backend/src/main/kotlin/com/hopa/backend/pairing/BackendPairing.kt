@@ -22,7 +22,11 @@ data class PendingSession(
     val secret: String,
     val qr: String,
     val expiresAt: String,
-)
+) {
+    /** The secret and QR contents are capabilities until the session ends. */
+    override fun toString(): String = "PendingSession(sessionId=$sessionId, secret=<redacted>, qr=<redacted>, " +
+        "expiresAt=$expiresAt)"
+}
 
 /** What a poller may learn by presenting the session secret. */
 data class PendingState(
