@@ -58,16 +58,21 @@ data class PendingResolveRequest(val sessionSecret: String)
  * the secret in the QR, so the poller never needs a session id, a household or
  * an account: it presents the secret, the token GUC makes exactly that row
  * visible, and nothing else is stored in the clear.
+ *
+ * The two verbs have separate per-address budgets: minting is rare (5/min), while
+ * polling is the PC/sidecar's liveness loop (30/min, enough for every 5 s over
+ * the five-minute session).
  */
 class PendingPairingService(
     private val db: Database,
     private val clock: () -> Long = System::currentTimeMillis,
     private val publicHost: String =
         System.getenv("HOPA_PUBLIC_HOST") ?: "hopa-backend.onrender.com",
-    perMinute: Int = 5,
+    mintPerMinute: Int = 5,
+    resolvePerMinute: Int = 30,
 ) {
-    private val mintLimiter = RateLimiter(perMinute, 60_000, clock)
-    private val resolveLimiter = RateLimiter(perMinute, 60_000, clock)
+    private val mintLimiter = RateLimiter(mintPerMinute, 60_000, clock)
+    private val resolveLimiter = RateLimiter(resolvePerMinute, 60_000, clock)
 
     fun mint(request: PendingRequest, remoteAddress: String): PairingOutcome<PendingMinted> {
         if (!mintLimiter.allow(remoteAddress)) {

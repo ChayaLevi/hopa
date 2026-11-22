@@ -267,7 +267,7 @@ paths:
         Unauthenticated. The new device mints its own session, shows the QR to an
         operator, then polls `/v1/pair/pending/resolve` with the secret. The secret
         leaves the server exactly once; only its SHA-256 is stored. Sessions expire
-        in five minutes and are rate limited to five per minute per address
+        in five minutes and minting is rate limited to five per minute per address
         (`X-Forwarded-For` first hop).
       security: []
       requestBody:
@@ -279,7 +279,12 @@ paths:
               required: [platform, name, publicKey, alg]
               properties:
                 platform: { type: string, enum: [android, windows] }
-                name: { type: string, minLength: 1, maxLength: 100 }
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  pattern: '\S'
+                  description: Non-blank, at most 100 characters
                 publicKey:
                   type: string
                   description: Base64 or base64url X25519 public key, exactly 32 bytes
@@ -302,12 +307,16 @@ paths:
                     description: "hopa://pair?v=1&s=<secret>&u=<wss url>; carries no household id"
                   expiresAt: { type: string, format: date-time }
         "400":
-          description: Invalid platform, name, public key or algorithm
+          description: Invalid platform, name, public key, algorithm or JSON body
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
-        "429": { $ref: "#/components/responses/RateLimited" }
+        "429":
+          description: More than five mints per minute from one address
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /v1/pair/pending/resolve:
     post:
       summary: Poll a pending pairing session by the secret from its QR
@@ -315,8 +324,9 @@ paths:
         Unauthenticated. The poller holds only the secret, never a session id or a
         household, so the row is visible through the token-hash policy alone.
         Unknown secrets answer the same `E_SCHEMA` message; expired and claimed
-        sessions answer 200 with that `state` so the device can explain it. Rate
-        limited to five per minute per address.
+        sessions answer 200 with that `state` so the device can explain it. Polling
+        is rate limited to thirty per minute per address, which covers a five-second
+        poll loop for the whole five-minute session.
       security: []
       requestBody:
         required: true
@@ -356,7 +366,11 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
-        "429": { $ref: "#/components/responses/RateLimited" }
+        "429":
+          description: More than thirty polls per minute from one address
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /v1/token/refresh:
     post:
       summary: Rotate an access token

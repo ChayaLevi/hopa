@@ -77,6 +77,9 @@ class PendingPairingTest {
     private suspend fun errorCode(response: HttpResponse): String =
         bodyOf(response.bodyAsText())["code"]!!.jsonPrimitive.content
 
+    private suspend fun errorMessage(response: HttpResponse): String =
+        bodyOf(response.bodyAsText())["message"]!!.jsonPrimitive.content
+
     private fun fingerprintOf(bytes: ByteArray): String =
         Tokens.hex(MessageDigest.getInstance("SHA-256").digest(bytes)).take(8)
 
@@ -286,8 +289,7 @@ class PendingPairingTest {
         val secret = minted["secret"]!!.jsonPrimitive.content
         val updated = db.token(hashHex(secret)) { connection ->
             connection.prepareStatement(
-                "update pending_pairings set claimed_at = now(), " +
-                    "expires_at = now() - interval '1 minute' " +
+                "update pending_pairings set claimed_at = now() " +
                     "where code_hash = decode(?, 'hex')",
             ).use { statement ->
                 statement.setString(1, hashHex(secret))
@@ -295,10 +297,74 @@ class PendingPairingTest {
             }
         }
         assertEquals(1, updated)
+        clock.addAndGet(300_001)
 
         val state = bodyOf(client.resolve(secret).bodyAsText())
 
         assertEquals("claimed", state["state"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun `a vouched session that expired resolves as expired`() = testApplication {
+        application { module(config()) }
+        val minted = bodyOf(client.mint().bodyAsText())
+        val secret = minted["secret"]!!.jsonPrimitive.content
+        val updated = db.token(hashHex(secret)) { connection ->
+            connection.prepareStatement(
+                "update pending_pairings set vouched_at = now() " +
+                    "where code_hash = decode(?, 'hex')",
+            ).use { statement ->
+                statement.setString(1, hashHex(secret))
+                statement.executeUpdate()
+            }
+        }
+        assertEquals(1, updated)
+        clock.addAndGet(300_001)
+
+        val state = bodyOf(client.resolve(secret).bodyAsText())
+
+        assertEquals("expired", state["state"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun `an empty or wrong-length secret is uniformly unknown`() = testApplication {
+        application { module(config()) }
+
+        val unknown = client.resolve(Tokens.mint())
+        val empty = client.resolve("")
+        val short = client.resolve("not-a-secret", address = "198.51.100.21")
+
+        for (response in listOf(unknown, empty, short)) {
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals("E_SCHEMA", errorCode(response))
+            assertEquals("unknown pairing session", errorMessage(response))
+        }
+    }
+
+    @Test
+    fun `the thirty-first resolve from one address in a minute is E_RATE`() = testApplication {
+        application { module(config()) }
+        val minted = bodyOf(client.mint().bodyAsText())
+        val secret = minted["secret"]!!.jsonPrimitive.content
+
+        repeat(30) {
+            assertEquals(
+                HttpStatusCode.OK,
+                client.resolve(secret, address = "203.0.113.30").status,
+            )
+        }
+        val denied = client.resolve(secret, address = "203.0.113.30")
+
+        assertEquals(HttpStatusCode.TooManyRequests, denied.status)
+        assertEquals("E_RATE", errorCode(denied))
+
+        // The window is driven by the injected clock: one minute later the same
+        // poller is allowed again, while the session itself is still live.
+        clock.addAndGet(60_001)
+        assertEquals(
+            HttpStatusCode.OK,
+            client.resolve(secret, address = "203.0.113.30").status,
+        )
     }
 
     @Test
