@@ -27,6 +27,9 @@ import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.boolean
@@ -200,6 +203,22 @@ class DeviceRevokeTest {
             }
         }
 
+    /** The handler's finally runs just after the client sees the close frame. */
+    private suspend fun awaitOffline(deviceId: String, timeoutMs: Long = 5_000) {
+        try {
+            withTimeout(timeoutMs) {
+                while (registry.online(deviceId) || registry.connected(deviceId)) {
+                    delay(10)
+                }
+            }
+        } catch (timeout: TimeoutCancellationException) {
+            throw AssertionError(
+                "$deviceId: registry still reports the device connected/online",
+                timeout,
+            )
+        }
+    }
+
     @Test
     fun `the device list is household scoped and marks the caller`() = testApplication {
         application { module(config()) }
@@ -236,6 +255,9 @@ class DeviceRevokeTest {
 
             assertEquals(HttpStatusCode.NoContent, revoked.status)
             socket.awaitClosed(5_000)
+            awaitOffline(paired.pc)
+            assertFalse(registry.online(paired.pc))
+            assertFalse(registry.connected(paired.pc))
 
             // The deleted access token cannot open a new gateway socket.
             val again = FakeDevice(paired.pc, paired.pcAccess)
@@ -257,6 +279,14 @@ class DeviceRevokeTest {
             val pc = listed.single { it.id() == paired.pc }
             assertFalse(pc.current())
             assertTrue(pc.revokedAt() != null, "the revoked device must stay listed with revokedAt")
+
+            // A repeat DELETE is idempotent and must not move the timestamp.
+            val revokedFirst = revokedAt(paired.household, paired.pc)
+            val againDeleted = client.revoke(paired.phoneAccess, paired.pc)
+            assertEquals(HttpStatusCode.NoContent, againDeleted.status)
+            assertEquals(revokedFirst, revokedAt(paired.household, paired.pc))
+            assertEquals(0, wrapCount(paired.household, paired.pc))
+            assertEquals(0, accessCount(paired.household, paired.pc))
         }
 
     @Test

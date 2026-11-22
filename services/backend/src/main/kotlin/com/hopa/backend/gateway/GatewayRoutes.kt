@@ -27,12 +27,16 @@ import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+
+/** How long a revoked socket gets to complete the close handshake. */
+private const val KICK_CLOSE_GRACE_MS = 1_000L
 
 fun Application.gatewayRoutes(
     config: ServerConfig,
@@ -76,15 +80,22 @@ fun Application.gatewayRoutes(
                 }
             }
             val session = DeviceRegistry.Session(identity, outgoing)
-            registry.attach(session)
+            val attached = registry.attach(session)
             // A revoke completes the session's close signal from another
-            // coroutine; closing here ends the read loop and runs the finally.
+            // coroutine. Close with a bounded grace: a peer that stalls the
+            // close handshake must not hold the read loop to the ping timeout.
             val kicked = launch {
                 session.closed.await()
-                close(CloseReason(CloseReason.Codes.GOING_AWAY, "revoked"))
+                val closed = withTimeoutOrNull(KICK_CLOSE_GRACE_MS) {
+                    close(CloseReason(CloseReason.Codes.GOING_AWAY, "revoked"))
+                }
+                if (closed == null) incoming.cancel()
             }
 
             try {
+                // Revoked between deviceFor and attach: the tombstone already
+                // completed the close signal, so leave without attaching.
+                if (!attached) return@webSocket
                 for (frame in incoming) {
                     if (frame !is Frame.Text) continue
                     val raw = frame.readText()
@@ -118,7 +129,8 @@ fun Application.gatewayRoutes(
 
                     when (envelope.type) {
                         "device.hello" -> {
-                            registry.join(session)
+                            // A revoke landed after attach: never join presence.
+                            if (!registry.join(session)) return@webSocket
                             config.devices.touch(
                                 identity.deviceId,
                                 identity.householdId,

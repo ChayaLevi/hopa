@@ -2,6 +2,7 @@ package com.hopa.backend.pairing
 
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
+import com.hopa.backend.auth.TokenCacheInvalidator
 import com.hopa.backend.http.respondError
 import com.hopa.backend.store.DeviceInventory
 import io.ktor.http.HttpHeaders
@@ -40,7 +41,7 @@ fun Application.deviceRoutes(config: ServerConfig) {
             if (inventory == null) {
                 call.respondError(
                     HttpStatusCode.ServiceUnavailable,
-                    "E_SCHEMA",
+                    "E_UNSUPPORTED",
                     "device inventory is not configured",
                 )
                 return@get
@@ -73,7 +74,7 @@ fun Application.deviceRoutes(config: ServerConfig) {
             if (inventory == null) {
                 call.respondError(
                     HttpStatusCode.ServiceUnavailable,
-                    "E_SCHEMA",
+                    "E_UNSUPPORTED",
                     "device inventory is not configured",
                 )
                 return@delete
@@ -89,7 +90,7 @@ fun Application.deviceRoutes(config: ServerConfig) {
 
             // The transaction is committed: drop the cached token identity and
             // close the live socket if the device is connected on this process.
-            (config.auth as? PgAuth)?.revoke(deviceId)
+            (config.auth as? TokenCacheInvalidator)?.invalidate(deviceId)
             config.registry.kick(deviceId)
             call.respond(HttpStatusCode.NoContent)
         }

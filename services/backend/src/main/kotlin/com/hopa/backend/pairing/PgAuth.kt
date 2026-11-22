@@ -2,6 +2,7 @@ package com.hopa.backend.pairing
 
 import com.hopa.backend.auth.AuthPort
 import com.hopa.backend.auth.DeviceIdentity
+import com.hopa.backend.auth.TokenCacheInvalidator
 import com.hopa.backend.store.Database
 import java.util.concurrent.ConcurrentHashMap
 
@@ -15,7 +16,7 @@ class PgAuth(
     private val db: Database,
     private val clock: () -> Long = System::currentTimeMillis,
     private val cacheTtlMs: Long = 5_000,
-) : AuthPort {
+) : AuthPort, TokenCacheInvalidator {
     private data class Cached(val identity: DeviceIdentity, val until: Long)
 
     private val cache = ConcurrentHashMap<String, Cached>()
@@ -78,6 +79,10 @@ class PgAuth(
     /** Called on rotation reuse and on an explicit revoke. */
     fun revoke(deviceId: String) {
         cache.entries.removeIf { entry -> entry.value.identity.deviceId == deviceId }
+    }
+
+    override fun invalidate(deviceId: String) {
+        revoke(deviceId)
     }
 
     private data class TokenRow(

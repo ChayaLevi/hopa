@@ -87,8 +87,9 @@ class PgDevices(private val db: Database) : DeviceDirectory, DeviceInventory {
         db.tenant(householdId) { connection ->
             connection.prepareStatement(
                 "select id, platform, name, last_seen_at, revoked_at from devices " +
-                    "order by created_at, id",
+                    "where household_id = ?::uuid order by created_at, id",
             ).use {
+                it.setString(1, householdId)
                 it.executeQuery().use { rows ->
                     buildList {
                         while (rows.next()) {
@@ -115,37 +116,48 @@ class PgDevices(private val db: Database) : DeviceDirectory, DeviceInventory {
     override fun revokeDevice(deviceId: String, householdId: String): Boolean =
         db.tenant(householdId) { connection ->
             val present = connection.prepareStatement(
-                "select 1 from devices where id = ?::uuid",
+                "select 1 from devices " +
+                    "where id = ?::uuid and household_id = ?::uuid",
             ).use {
                 it.setString(1, deviceId)
+                it.setString(2, householdId)
                 it.executeQuery().use { rows -> rows.next() }
             }
             if (!present) return@tenant false
 
+            // RLS already scopes these; the explicit household predicate is a
+            // second, independent guard so a future policy change cannot turn
+            // a revoke into a cross-tenant operation.
             connection.prepareStatement(
                 "update devices set revoked_at = now() " +
-                    "where id = ?::uuid and revoked_at is null",
+                    "where id = ?::uuid and household_id = ?::uuid and revoked_at is null",
             ).use {
                 it.setString(1, deviceId)
+                it.setString(2, householdId)
                 it.executeUpdate()
             }
             connection.prepareStatement(
-                "delete from access_tokens where device_id = ?::uuid",
+                "delete from access_tokens " +
+                    "where device_id = ?::uuid and household_id = ?::uuid",
             ).use {
                 it.setString(1, deviceId)
+                it.setString(2, householdId)
                 it.executeUpdate()
             }
             connection.prepareStatement(
                 "update refresh_tokens set revoked_at = now() " +
-                    "where device_id = ?::uuid and revoked_at is null",
+                    "where device_id = ?::uuid and household_id = ?::uuid and revoked_at is null",
             ).use {
                 it.setString(1, deviceId)
+                it.setString(2, householdId)
                 it.executeUpdate()
             }
             connection.prepareStatement(
-                "delete from household_key_wraps where device_id = ?::uuid",
+                "delete from household_key_wraps " +
+                    "where device_id = ?::uuid and household_id = ?::uuid",
             ).use {
                 it.setString(1, deviceId)
+                it.setString(2, householdId)
                 it.executeUpdate()
             }
             true

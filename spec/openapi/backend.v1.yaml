@@ -482,6 +482,11 @@ paths:
                     revokedAt: { type: string, format: date-time, nullable: true }
                     current: { type: boolean }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "503":
+          description: This deployment has no SQL-backed device inventory (`E_UNSUPPORTED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /v1/devices/{id}:
     delete:
       summary: Revoke a device
@@ -507,6 +512,11 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404":
           description: Unknown device, or one belonging to another household (`E_TENANT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: This deployment has no SQL-backed device inventory (`E_UNSUPPORTED`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }

@@ -11,8 +11,13 @@ import kotlinx.coroutines.channels.Channel
  * Presence is in memory on purpose: a socket only exists on the process that
  * holds it, and the durable record of a task is the Postgres row (slice B).
  */
-class DeviceRegistry {
-    data class Session(
+class DeviceRegistry(private val clock: () -> Long = System::currentTimeMillis) {
+    /**
+     * One live socket. A plain class, not a data class: [sent] is mutated while
+     * the session is a key in [live], so identity equality is required or the
+     * set can never find the entry again.
+     */
+    class Session(
         val identity: DeviceIdentity,
         val outgoing: Channel<String>,
         /**
@@ -36,18 +41,51 @@ class DeviceRegistry {
      */
     private val live = ConcurrentHashMap<String, MutableSet<Session>>()
 
-    fun join(session: Session) {
+    /**
+     * Devices revoked in the last [KICKED_TTL_MS]. A revoke can land between
+     * `deviceFor` resolving the token and the handler calling [attach]; without
+     * this tombstone that reconnect would attach after [kick] and stay open
+     * forever, because the handler never re-validates the token. The entry is
+     * pruned lazily on the next attach/join/kick; five minutes far outlives the
+     * five-second token cache and the revoke has already deleted the tokens.
+     */
+    private val kicked = ConcurrentHashMap<String, Long>()
+
+    /** True while the device is present (hello received). */
+    fun online(deviceId: String): Boolean =
+        sessionFor(deviceId) != null
+
+    fun sessionFor(deviceId: String): Session? = sessions[deviceId]
+
+    /** True while any authenticated socket for the device is open, hello or not. */
+    fun connected(deviceId: String): Boolean = live[deviceId]?.isNotEmpty() == true
+
+    /** Presence-only join: a tombstoned device never becomes online. */
+    fun join(session: Session): Boolean {
+        if (tombstoned(session.identity.deviceId)) {
+            session.closed.complete(Unit)
+            return false
+        }
         sessions[session.identity.deviceId] = session
+        return true
     }
 
     fun leave(session: Session) {
         sessions.remove(session.identity.deviceId, session)
     }
 
-    /** Registers the socket as soon as it authenticates, before hello. */
-    fun attach(session: Session) {
+    /**
+     * Registers the socket as soon as it authenticates, before hello. Returns
+     * false when a revoke already tombstoned the device.
+     */
+    fun attach(session: Session): Boolean {
+        if (tombstoned(session.identity.deviceId)) {
+            session.closed.complete(Unit)
+            return false
+        }
         live.computeIfAbsent(session.identity.deviceId) { ConcurrentHashMap.newKeySet() }
             .add(session)
+        return true
     }
 
     fun detach(session: Session) {
@@ -57,12 +95,11 @@ class DeviceRegistry {
         if (set.isEmpty()) live.remove(device, set)
     }
 
-    fun online(deviceId: String): Boolean = sessions.containsKey(deviceId)
-
-    fun sessionFor(deviceId: String): Session? = sessions[deviceId]
-
     /** Ends every live socket for the device; an offline device is a no-op. */
     fun kick(deviceId: String) {
+        val now = clock()
+        pruneKicked(now)
+        kicked[deviceId] = now + KICKED_TTL_MS
         live[deviceId]?.forEach { it.closed.complete(Unit) }
         sessions[deviceId]?.closed?.complete(Unit)
     }
@@ -77,4 +114,20 @@ class DeviceRegistry {
 
     fun deviceIds(householdId: String): List<String> =
         householdSessions(householdId).map { it.identity.deviceId }
+
+    private fun tombstoned(deviceId: String): Boolean {
+        val now = clock()
+        pruneKicked(now)
+        val until = kicked[deviceId] ?: return false
+        return until > now
+    }
+
+    private fun pruneKicked(now: Long) {
+        kicked.entries.removeIf { (_, until) -> until <= now }
+    }
+
+    private companion object {
+        /** Covers the auth→attach window for any later reconnect attempt. */
+        const val KICKED_TTL_MS = 5 * 60 * 1000L
+    }
 }
