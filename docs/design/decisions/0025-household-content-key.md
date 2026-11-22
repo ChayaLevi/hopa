@@ -31,26 +31,36 @@ phone at sign-up.** The server stores it only wrapped.
    row per admitted device; no row means the device holds no key. The server
    never sees the content key itself.
 
-2. **Wrap.** Wrapping uses the device key pairs already collected at pairing:
-   X25519 ECDH between the wrapping device's private key and the receiving
-   device's public key, then HKDF-SHA256 with salt
-   `SHA-256("hopa.v1.keywrap" || recipientPublicKey)`, info
-   `"hopa.content.key.wrap"` and a 32-byte output (the key-encryption key), then
-   AES-256-GCM over the content key. A 12-byte random IV is prepended to the
-   ciphertext and the 128-bit tag is appended, so a wrapped 32-byte key is 48
-   bytes. Because both device keys are static and known at pairing time, no
+2. **Wrap.** Wrapping uses the X25519 key pairs already collected at pairing.
+   Public keys are the **raw 32-byte u-coordinate**, never base64 text. The
+   wrapping device computes the static-static X25519 ECDH shared secret with
+   the receiving device's raw public key, then derives a key-encryption key
+   with HKDF-SHA256: IKM = the 32-byte shared secret; salt =
+   `SHA-256("hopa.v1.keywrap" || recipientPublicKey)`, where the first term is
+   the ASCII/UTF-8 bytes of the literal and the second is the raw 32-byte
+   recipient public key; info = the UTF-8 bytes of `"hopa.content.key.wrap"`;
+   output = 32 bytes. The content key is then sealed with AES-256-GCM under that
+   key-encryption key, using a 12-byte random IV, a 128-bit tag and **empty
+   AAD**. The wrapped blob is `IV(12) || ciphertext(32) || tag(16)`, **60
+   bytes**. Because both device keys are static and known at pairing time, no
    ephemeral public key travels alongside the wrap.
 
 3. **Payloads.** Task bodies and sync rows are AES-GCM ciphertext under the
-   content key, produced and consumed on devices only. `tasks.payload` and
+   content key, produced and consumed on devices only. Each message gets a fresh
+   random 12-byte IV, the blob is `IV || ciphertext || tag`, and the AAD is
+   empty; an IV is never reused under the same content key. `tasks.payload` and
    `tasks.body` store bytes; the server never parses, re-encrypts or re-wraps
    them.
 
 4. **Recovery code.** The owner may generate a recovery code: the content key
    wrapped under a key derived with Argon2id (`m = 64 MiB`, `t = 3`, `p = 4`)
-   over a 16-byte random salt, stored as `salt || ciphertext`. Week 2 ships the
-   primitive only, wrap, unwrap and derivation; the endpoints and phone UI land
-   with later admission work.
+   over a 16-byte random salt. The passphrase is the UTF-8 bytes as given; the
+   primitive does **no** normalization, callers normalize before calling. The
+   raw 32-byte Argon2id output is used directly as the AES-256-GCM key, with a
+   12-byte random IV, a 128-bit tag and empty AAD. The code is stored as
+   `salt(16) || IV(12) || ciphertext(32) || tag(16)`, **76 bytes**. Week 2
+   ships the primitive only, wrap, unwrap and derivation; the endpoints and
+   phone UI land with later admission work.
 
 5. **`diag.*` exemption.** Server-authored diagnostics, `diag.ping`,
    `diag.state` and `diag.reset`, are the **only** plaintext payloads. They are
@@ -70,17 +80,17 @@ phone at sign-up.** The server stores it only wrapped.
 - Losing every device loses the household's history unless the recovery code
   is kept. This is the deliberate cost of content-blindness; the recovery code
   is the escape hatch and must be presented as such.
-- Adding a device is one wrap. Admission needs an authenticated device that
-  already holds the key; there is no re-encryption of history and no key
-  rotation event.
+- Adding a device is one wrap. Authenticated admission through a device that
+  already holds the key is the normal path; the recovery code is the exception
+  when no such device exists. Neither re-encrypts history or rotates the key.
 - The admin console cannot decrypt by construction, so its diagnostic view is
   metadata plus the `diag.*` payloads it authored. Support cannot read a task
   body, by design.
 - `accounts` and `admins` sit outside tenancy but hold no keys, so a console
   compromise yields identity data, not content.
 - The wrap table grows one small row per device, and its RLS policy is the same
-  one every tenant table uses; the absence of a row is a revocation, not an
-  error to repair by hand.
+  one every tenant table uses. A missing wrap row is not an error: it means the
+  device is not yet admitted to the content key, or its wrap was revoked.
 
 ## Alternatives considered
 

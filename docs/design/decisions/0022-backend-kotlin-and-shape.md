@@ -19,8 +19,9 @@ not against general taste:
 - The clients are **Kotlin** (Android) and **.NET over a Kotlin sidecar**
   (Windows). The shared JVM modules under `core/*` - `catalog`, `contracts`,
   `observation`, `runlog`, `agent`, `decision*` and `inference` - are pure
-  Kotlin with no Android imports, enforced by their `build.gradle.kts` files
-  and CI.
+  Kotlin with no Android imports, enforced by
+  `build-logic/src/main/kotlin/hopa.no-android.gradle.kts` in each module's
+  build.
 - Those modules already implement the pieces hardest to keep in sync: the
   approval gate and classifier, the run-record chain and factory, the decision
   parser, the observation hasher, the loop, and `ConversationStore` with the
