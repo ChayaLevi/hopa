@@ -455,6 +455,61 @@ paths:
                   expiresAt: { type: string, format: date-time }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
+  /v1/devices:
+    get:
+      summary: The caller's paired devices
+      description: |
+        Every device in the caller's household, revoked ones included, ordered by
+        creation time then id. `current` marks the device whose token made the
+        call. Another household's devices never appear.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The household's devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, platform, name, current]
+                  properties:
+                    id: { type: string, format: uuid }
+                    platform: { type: string, enum: [android, windows] }
+                    name: { type: string }
+                    lastSeenAt: { type: string, format: date-time, nullable: true }
+                    revokedAt: { type: string, format: date-time, nullable: true }
+                    current: { type: boolean }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/devices/{id}:
+    delete:
+      summary: Revoke a device
+      description: |
+        Revokes the device and its whole token family, deletes its household key
+        wrap and closes its live gateway socket within five seconds. Revoking an
+        already-revoked device in the household answers 204.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: Revoked (or already revoked)
+        "400":
+          description: The id is not a uuid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: Unknown device, or one belonging to another household (`E_TENANT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /v1/traces/{traceId}:
     get:
       summary: The path one message took, by trace id

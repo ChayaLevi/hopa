@@ -36,7 +36,7 @@ import kotlinx.serialization.json.put
 
 fun Application.gatewayRoutes(
     config: ServerConfig,
-    registry: DeviceRegistry = DeviceRegistry(),
+    registry: DeviceRegistry = config.registry,
     router: TaskRouter = TaskRouter(
         store = config.tasks,
         registry = registry,
@@ -76,6 +76,13 @@ fun Application.gatewayRoutes(
                 }
             }
             val session = DeviceRegistry.Session(identity, outgoing)
+            registry.attach(session)
+            // A revoke completes the session's close signal from another
+            // coroutine; closing here ends the read loop and runs the finally.
+            val kicked = launch {
+                session.closed.await()
+                close(CloseReason(CloseReason.Codes.GOING_AWAY, "revoked"))
+            }
 
             try {
                 for (frame in incoming) {
@@ -173,6 +180,8 @@ fun Application.gatewayRoutes(
                     }
                 }
             } finally {
+                kicked.cancel()
+                registry.detach(session)
                 registry.leave(session)
                 // A reconnect replaces the session; the old socket closing then
                 // must not tell peers that a live device went away.

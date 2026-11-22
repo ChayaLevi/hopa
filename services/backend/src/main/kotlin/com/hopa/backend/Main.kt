@@ -1,6 +1,7 @@
 package com.hopa.backend
 
 import com.hopa.backend.auth.AuthPort
+import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.gateway.gatewayRoutes
 import com.hopa.backend.http.healthRoutes
 import com.hopa.backend.http.knowledgeRoutes
@@ -10,6 +11,7 @@ import com.hopa.backend.pairing.PairingService
 import com.hopa.backend.pairing.PendingPairingService
 import com.hopa.backend.pairing.PgAuth
 import com.hopa.backend.pairing.TokenIssuer
+import com.hopa.backend.pairing.deviceRoutes
 import com.hopa.backend.pairing.pairingRoutes
 import com.hopa.backend.pairing.pendingPairingRoutes
 import com.hopa.backend.pairing.tokenRoutes
@@ -46,6 +48,7 @@ fun Application.module(config: ServerConfig) {
     pairingRoutes(config)
     pendingPairingRoutes(config)
     tokenRoutes(config)
+    deviceRoutes(config)
     traceRoutes(config)
     gatewayRoutes(config)
 }
@@ -79,11 +82,13 @@ fun main() {
     }
 
     val traceStore = database?.let { PgTraceStore(it) }
+    val registry = DeviceRegistry()
 
     val config = ServerConfig(
         version = version,
         auth = auth ?: AuthPort.DenyAll,
         devices = devices,
+        registry = registry,
         db = database?.let(::PostgresProbe) ?: DbProbe.Unconfigured,
         pairing = if (database != null && tokens != null) {
             PairingService(database, tokens = tokens)

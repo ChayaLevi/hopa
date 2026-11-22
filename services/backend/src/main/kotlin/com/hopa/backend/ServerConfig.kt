@@ -1,6 +1,7 @@
 ﻿package com.hopa.backend
 
 import com.hopa.backend.auth.AuthPort
+import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.http.RateLimiter
 import com.hopa.backend.log.EventLog
 import com.hopa.backend.pairing.PairingApi
@@ -23,6 +24,8 @@ data class ServerConfig(
     val version: String,
     val auth: AuthPort = AuthPort.DenyAll,
     val devices: DeviceDirectory = DeviceDirectory.Empty,
+    /** The one in-memory presence registry shared by the gateway and device routes. */
+    val registry: DeviceRegistry = DeviceRegistry(),
     val db: DbProbe = DbProbe.Unconfigured,
     val pairing: PairingApi? = null,
     val pendingPairings: PendingPairingService? = null,
