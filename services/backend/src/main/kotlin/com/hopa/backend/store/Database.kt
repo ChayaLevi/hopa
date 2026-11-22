@@ -9,13 +9,16 @@ import java.sql.Connection
 import org.flywaydb.core.Flyway
 
 /**
- * The pool and the only two ways to touch SQL.
+ * The pool and the only ways to touch SQL.
  *
  * [tenant] sets `hopa.household_id` for the transaction; [token] sets
  * `hopa.token_hash` so a token row can only be read by a caller who already
- * holds that token. Both are `SET LOCAL` (`set_config(..., true)`), so the value
- * cannot leak to the next borrower of a pooled connection. A query outside these
- * helpers sees nothing, because the policies default to deny.
+ * holds that token; [tenantAndToken] sets both when one statement must be
+ * allowed by the presented-hash branch and checked by the tenant branch (a
+ * vouch binding a pending pairing to its household). All are `SET LOCAL`
+ * (`set_config(..., true)`), so the value cannot leak to the next borrower of a
+ * pooled connection. A query outside these helpers sees nothing, because the
+ * policies default to deny.
  */
 class Database(internal val dataSource: HikariDataSource) : AutoCloseable {
     fun migrate(): Int =
@@ -30,6 +33,23 @@ class Database(internal val dataSource: HikariDataSource) : AutoCloseable {
 
     fun <T> token(tokenHashHex: String, block: (Connection) -> T): T =
         transaction(mapOf("hopa.token_hash" to tokenHashHex), block)
+
+    /**
+     * Both branches at once. A vouch presents the session's secret hash and is
+     * checked against the vouching tenant, so the update is allowed by one
+     * policy branch and validated by the other.
+     */
+    fun <T> tenantAndToken(
+        householdId: String,
+        tokenHashHex: String,
+        block: (Connection) -> T,
+    ): T = transaction(
+        mapOf(
+            "hopa.household_id" to householdId,
+            "hopa.token_hash" to tokenHashHex,
+        ),
+        block,
+    )
 
     override fun close() {
         dataSource.close()

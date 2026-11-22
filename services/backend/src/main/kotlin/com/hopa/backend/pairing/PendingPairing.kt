@@ -1,14 +1,17 @@
 package com.hopa.backend.pairing
 
 import com.hopa.backend.ServerConfig
+import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.http.BodyTooLarge
 import com.hopa.backend.http.RateLimiter
 import com.hopa.backend.http.receiveBounded
 import com.hopa.backend.http.respondError
 import com.hopa.backend.store.Database
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.request.header
 import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -53,15 +56,31 @@ data class PendingState(
 data class PendingResolveRequest(val sessionSecret: String)
 
 /**
+ * A phone shows its approval by wrapping the household content key to the
+ * pending device's X25519 key. [wrappedKey] is base64url text at the wire
+ * boundary; the server stores the bytes and never unwraps them.
+ */
+@Serializable
+data class VouchRequest(val sessionSecret: String, val wrappedKey: String)
+
+@Serializable
+data class Vouched(
+    val sessionId: String,
+    val householdId: String,
+    val memberId: String,
+)
+
+/**
  * Pending pairing sessions are minted by the device that wants in and polled by
  * it until an operator vouches and claims. The row is keyed only by the hash of
  * the secret in the QR, so the poller never needs a session id, a household or
  * an account: it presents the secret, the token GUC makes exactly that row
  * visible, and nothing else is stored in the clear.
  *
- * The two verbs have separate per-address budgets: minting is rare (5/min), while
- * polling is the PC/sidecar's liveness loop (30/min, enough for every 5 s over
- * the five-minute session).
+ * The verbs have separate budgets: minting is rare (5/min per address), polling
+ * is the PC/sidecar's liveness loop (30/min per address, enough for every 5 s
+ * over the five-minute session), and a vouch is per authenticated device
+ * (10/min) so a stolen phone token cannot sweep the pending table.
  */
 class PendingPairingService(
     private val db: Database,
@@ -70,9 +89,11 @@ class PendingPairingService(
         System.getenv("HOPA_PUBLIC_HOST") ?: "hopa-backend.onrender.com",
     mintPerMinute: Int = 5,
     resolvePerMinute: Int = 30,
+    vouchPerMinute: Int = 10,
 ) {
     private val mintLimiter = RateLimiter(mintPerMinute, 60_000, clock)
     private val resolveLimiter = RateLimiter(resolvePerMinute, 60_000, clock)
+    private val vouchLimiter = RateLimiter(vouchPerMinute, 60_000, clock)
 
     fun mint(request: PendingRequest, remoteAddress: String): PairingOutcome<PendingMinted> {
         if (!mintLimiter.allow(remoteAddress)) {
@@ -182,6 +203,54 @@ class PendingPairingService(
         )
     }
 
+    /**
+     * Bind a pending session to the caller's household and park the wrap on it.
+     *
+     * One transaction with both GUCs: the presented hash makes the row visible
+     * (the pending row has no household yet), and the tenant branch validates
+     * the household the update writes. The CAS refuses an expired, already
+     * claimed or already vouched session with the same message, so a caller
+     * holding an arbitrary secret cannot tell those apart. No
+     * `household_key_wraps` row is written here: there is no device to key it
+     * on until the claim.
+     */
+    fun vouch(identity: DeviceIdentity, request: VouchRequest): PairingOutcome<Vouched> {
+        if (!vouchLimiter.allow(identity.deviceId)) {
+            return PairingOutcome.Refused("E_RATE", "too many pairing vouches", retryable = true)
+        }
+        val wrapped = decodeKey(request.wrappedKey)
+            ?: return PairingOutcome.Refused("E_SCHEMA", "wrappedKey is not base64")
+        if (wrapped.size != WRAP_BYTES) {
+            return PairingOutcome.Refused("E_SCHEMA", "wrappedKey must be $WRAP_BYTES bytes")
+        }
+
+        val hash = Tokens.hex(Tokens.hash(request.sessionSecret))
+        val sessionId = db.tenantAndToken(identity.householdId, hash) { connection ->
+            connection.prepareStatement(
+                "update pending_pairings set household_id = ?::uuid, member_id = ?::uuid, " +
+                    "vouched_at = now(), wrapped_key = ? " +
+                    "where code_hash = decode(?, 'hex') and vouched_at is null " +
+                    "and claimed_at is null and expires_at > now() returning id::text",
+            ).use { statement ->
+                statement.setString(1, identity.householdId)
+                statement.setString(2, identity.memberId)
+                statement.setBytes(3, wrapped)
+                statement.setString(4, hash)
+                statement.executeQuery().use { rows ->
+                    if (rows.next()) rows.getString(1) else null
+                }
+            }
+        } ?: return PairingOutcome.Refused("E_SCHEMA", UNKNOWN_VOUCH)
+
+        return PairingOutcome.Ok(
+            Vouched(
+                sessionId = sessionId,
+                householdId = identity.householdId,
+                memberId = identity.memberId,
+            ),
+        )
+    }
+
     private fun decodeKey(value: String): ByteArray? =
         try {
             Base64.getDecoder().decode(value)
@@ -209,9 +278,146 @@ class PendingPairingService(
     private companion object {
         const val SESSION_MS = 5 * 60 * 1000L
         const val MAX_NAME = 100
+        const val WRAP_BYTES = 60
+        const val UNKNOWN_VOUCH = "unknown, expired or already vouched pairing session"
         val PLATFORMS = setOf("android", "windows")
     }
 }
+
+/**
+ * The claim half of an admission, consulted before the operator-minted
+ * `pairing_sessions` path. Returns null when the presented secret names no
+ * pending row, so the caller falls through unchanged.
+ *
+ * The CAS, the device, the wrap and the tokens commit together: a race that
+ * loses the CAS leaves a retryable session, not a device that can never sign in
+ * and not a second wrap. A public key that differs from the minted one is
+ * refused before the transaction and leaves the session claimable.
+ */
+internal fun claimPendingSession(
+    db: Database,
+    tokens: TokenIssuer,
+    clock: () -> Long,
+    codeHashHex: String,
+    request: ClaimRequest,
+    publicKey: ByteArray,
+): PairingOutcome<Claimed>? {
+    val parked = db.token(codeHashHex) { connection ->
+        connection.prepareStatement(
+            "select id::text, household_id::text, member_id::text, public_key, " +
+                "expires_at, vouched_at, claimed_at, wrapped_key " +
+                "from pending_pairings where code_hash = decode(?, 'hex')",
+        ).use { statement ->
+            statement.setString(1, codeHashHex)
+            statement.executeQuery().use { rows ->
+                if (!rows.next()) {
+                    null
+                } else {
+                    ParkedRow(
+                        id = rows.getString(1),
+                        householdId = rows.getString(2),
+                        memberId = rows.getString(3),
+                        publicKey = rows.getBytes(4),
+                        expiresAt = rows.getTimestamp(5).toInstant().toEpochMilli(),
+                        vouched = rows.getTimestamp(6) != null,
+                        claimed = rows.getTimestamp(7) != null,
+                        wrap = rows.getBytes(8),
+                    )
+                }
+            }
+        }
+    } ?: return null
+
+    if (parked.claimed) {
+        return PairingOutcome.Refused("E_SCHEMA", "pairing session already claimed")
+    }
+    if (!parked.vouched) {
+        return PairingOutcome.Refused("E_SCHEMA", "pairing session has not been vouched")
+    }
+    if (parked.expiresAt <= clock()) {
+        return PairingOutcome.Refused("E_SCHEMA", "pairing session expired")
+    }
+    if (!parked.publicKey.contentEquals(publicKey)) {
+        return PairingOutcome.Refused("E_SCHEMA", "publicKey does not match the pairing session")
+    }
+    val wrap = parked.wrap
+        ?: return PairingOutcome.Refused("E_SCHEMA", "pairing session has no wrapped key")
+    val householdId = parked.householdId
+        ?: return PairingOutcome.Refused("E_SCHEMA", "pairing session has not been vouched")
+    val memberId = parked.memberId
+        ?: return PairingOutcome.Refused("E_SCHEMA", "pairing session has not been vouched")
+
+    val device = UUID.randomUUID().toString()
+    val (access, refresh) = try {
+        db.tenantAndToken(householdId, codeHashHex) { connection ->
+            val won = connection.prepareStatement(
+                "update pending_pairings set claimed_at = now() " +
+                    "where id = ?::uuid and claimed_at is null " +
+                    "and vouched_at is not null and expires_at > now()",
+            ).use {
+                it.setString(1, parked.id)
+                it.executeUpdate()
+            }
+            if (won != 1) throw PendingTaken()
+
+            connection.prepareStatement(
+                "insert into devices(id, household_id, member_id, platform, name, " +
+                    "public_key, alg, push_token) values (?::uuid, ?::uuid, ?::uuid, ?, ?, ?, ?, ?)",
+            ).use {
+                it.setString(1, device)
+                it.setString(2, householdId)
+                it.setString(3, memberId)
+                it.setString(4, request.platform)
+                it.setString(5, request.name)
+                it.setBytes(6, publicKey)
+                it.setString(7, request.alg)
+                it.setString(8, request.pushToken)
+                it.executeUpdate()
+            }
+
+            // The parked ciphertext moves to the device it was wrapped for, in
+            // the same transaction that created that device.
+            connection.prepareStatement(
+                "insert into household_key_wraps(household_id, device_id, wrapped_key) " +
+                    "values (?::uuid, ?::uuid, ?)",
+            ).use {
+                it.setString(1, householdId)
+                it.setString(2, device)
+                it.setBytes(3, wrap)
+                it.executeUpdate()
+            }
+
+            tokens.issueAccessOn(connection, device, householdId) to
+                tokens.issueRefreshOn(connection, device, householdId)
+        }
+    } catch (_: PendingTaken) {
+        return PairingOutcome.Refused("E_SCHEMA", "pairing session already claimed")
+    }
+
+    return PairingOutcome.Ok(
+        Claimed(
+            deviceId = device,
+            householdId = householdId,
+            accessToken = access.token,
+            refreshToken = refresh.token,
+            expiresAt = access.expiresAt,
+            wrappedKey = Base64.getUrlEncoder().withoutPadding().encodeToString(wrap),
+        ),
+    )
+}
+
+private data class ParkedRow(
+    val id: String,
+    val householdId: String?,
+    val memberId: String?,
+    val publicKey: ByteArray,
+    val expiresAt: Long,
+    val vouched: Boolean,
+    val claimed: Boolean,
+    val wrap: ByteArray?,
+)
+
+private class PendingTaken : RuntimeException()
 
 fun Application.pendingPairingRoutes(config: ServerConfig) {
     val api = config.pendingPairings ?: return
@@ -252,6 +458,41 @@ fun Application.pendingPairingRoutes(config: ServerConfig) {
                 return@post
             }
             when (val outcome = api.resolve(request.sessionSecret, remoteAddress(call))) {
+                is PairingOutcome.Ok -> call.respond(HttpStatusCode.OK, outcome.value)
+                is PairingOutcome.Refused -> call.refuse(outcome)
+            }
+        }
+
+        // A signed-in phone vouches for the pending device. 200, not 201: no new
+        // resource is created for the caller, an existing session changes state.
+        post("/v1/pair/vouch") {
+            val presented = call.request.header(HttpHeaders.Authorization)
+                ?.removePrefix("Bearer ")
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+            val identity = presented?.let(config.auth::deviceFor)
+            if (identity == null) {
+                call.respondError(
+                    HttpStatusCode.Unauthorized,
+                    "E_AUTH",
+                    "device token is not valid",
+                )
+                return@post
+            }
+            val request = try {
+                call.receiveBounded(VouchRequest.serializer())
+            } catch (_: BodyTooLarge) {
+                call.respondError(
+                    HttpStatusCode.PayloadTooLarge,
+                    "E_SCHEMA",
+                    "request body is larger than 64 KiB",
+                )
+                return@post
+            } catch (_: Exception) {
+                call.respondError(HttpStatusCode.BadRequest, "E_SCHEMA", "invalid JSON body")
+                return@post
+            }
+            when (val outcome = api.vouch(identity, request)) {
                 is PairingOutcome.Ok -> call.respond(HttpStatusCode.OK, outcome.value)
                 is PairingOutcome.Refused -> call.refuse(outcome)
             }

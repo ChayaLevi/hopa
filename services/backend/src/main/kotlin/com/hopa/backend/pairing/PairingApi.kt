@@ -43,6 +43,12 @@ data class Claimed(
     val accessToken: String,
     val refreshToken: String,
     val expiresAt: String,
+    /**
+     * Base64url of the household key wrap this device was admitted with, when it
+     * came through a vouched pending session. Null (and omitted from the JSON)
+     * for an operator-minted session, which carries no wrap.
+     */
+    val wrappedKey: String? = null,
 )
 
 interface PairingApi {

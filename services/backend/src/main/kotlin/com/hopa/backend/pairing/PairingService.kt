@@ -114,6 +114,12 @@ class PairingService(
         }
 
         val hash = Tokens.hex(Tokens.hash(request.session))
+
+        // A pending session carries no household until a phone vouches, so the
+        // operator path below cannot see it. Consult it first, and fall through
+        // unchanged only when the secret names no pending row at all.
+        claimPendingSession(db, tokens, clock, hash, request, publicKey)?.let { return it }
+
         val session = db.token(hash) { connection ->
             connection.prepareStatement(
                 "select id, household_id, member_id, expires_at, claimed_at " +

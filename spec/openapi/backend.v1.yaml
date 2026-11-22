@@ -222,8 +222,11 @@ paths:
     post:
       summary: Trade a pairing session for device tokens
       description: |
-        Called by the new device. The public key is stored now and used for
-        household-key wrapping in week 2; nothing is wrapped in week 1.
+        Called by the new device. Resolves either an operator-minted pairing
+        session or a pending session a phone vouched for. A vouched pending
+        session requires the exact public key it was minted with and answers with
+        the household key wrap parked on it; other refusals name the session
+        state. An operator-minted session answers no `wrappedKey`.
       security: []
       requestBody:
         required: true
@@ -253,8 +256,14 @@ paths:
                   accessToken: { type: string }
                   refreshToken: { type: string }
                   expiresAt: { type: string, format: date-time }
+                  wrappedKey:
+                    type: string
+                    description: |
+                      Base64url of the 60-byte household key wrap this device was
+                      admitted with. Present only for a session that came through
+                      `/v1/pair/vouch`; omitted for an operator-minted session.
         "400":
-          description: Expired or already claimed session
+          description: Expired, unvouched or already claimed session, or a public key that does not match
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -371,6 +380,53 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+  /v1/pair/vouch:
+    post:
+      summary: Admit a pending pairing with a wrapped household key
+      description: |
+        Called by a phone that already belongs to the household. The body carries
+        the pending session's secret and the household content key wrapped to the
+        pending device's X25519 key (base64 or base64url, exactly 60 bytes:
+        12-byte IV, 32-byte ciphertext, 16-byte tag). The server stores the
+        ciphertext and never unwraps it. The wrap parks on the pending row until
+        the device claims; the claim moves it to `household_key_wraps` in the same
+        transaction that creates the device. Vouching is rate limited to ten per
+        minute per device. Unknown, expired, claimed and already-vouched secrets
+        answer the same `E_SCHEMA` message.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionSecret, wrappedKey]
+              properties:
+                sessionSecret: { type: string }
+                wrappedKey:
+                  type: string
+                  description: Base64 or base64url of exactly 60 bytes
+      responses:
+        "200":
+          description: Vouched
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionId, householdId, memberId]
+                properties:
+                  sessionId: { type: string, format: uuid }
+                  householdId: { type: string, format: uuid }
+                  memberId: { type: string, format: uuid }
+        "400":
+          description: Invalid wrap, or an unknown, expired or already vouched session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
   /v1/token/refresh:
     post:
       summary: Rotate an access token
