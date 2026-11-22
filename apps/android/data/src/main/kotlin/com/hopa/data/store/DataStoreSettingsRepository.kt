@@ -1,13 +1,15 @@
 ﻿package com.hopa.data.store
 
 import android.content.Context
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.hopa.stores.SecretStore
 import com.hopa.stores.AppSettings
+import com.hopa.stores.DEFAULT_BACKEND_URL
+import com.hopa.stores.SecretStore
 import com.hopa.stores.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -19,36 +21,8 @@ class DataStoreSettingsRepository(
     private val context: Context,
     private val secrets: SecretStore,
 ) : SettingsRepository {
-    override val settings: Flow<AppSettings> = context.settingsDataStore.data.map { prefs ->
-        AppSettings(
-            provider = prefs[PROVIDER] ?: "stub",
-            endpoint = prefs[ENDPOINT] ?: "https://api.deepseek.com/v1",
-            model = prefs[MODEL] ?: "deepseek-v4-flash",
-            activeModelId = prefs[ACTIVE_MODEL_ID] ?: "",
-            profile = prefs[PROFILE] ?: "everyday",
-            notifyAnswers = prefs[NOTIFY] ?: true,
-            selectedConversation = prefs[SELECTED] ?: "",
-            bridgeUrl = prefs[BRIDGE_URL] ?: "",
-            useBridge = prefs[USE_BRIDGE] ?: true,
-            accessibilityAllowed = prefs[ACCESSIBILITY_ALLOWED] ?: true,
-            tone = prefs[TONE] ?: "friendly",
-            chattiness = prefs[CHATTINESS] ?: "balanced",
-            screenPath = prefs[SCREEN_PATH] ?: "auto",
-            planFirst = prefs[PLAN_FIRST] ?: false,
-            replaySkills = prefs[REPLAY_SKILLS] ?: true,
-            instantCommands = prefs[INSTANT_COMMANDS] ?: true,
-            stepSource = prefs[STEP_SOURCE] ?: if (prefs[KNOWN_GRAPHS] == false) "model" else "auto",
-            vision = prefs[VISION] ?: false,
-            mascotFramed = prefs[MASCOT_FRAMED] ?: false,
-            trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
-            decisionMode = prefs[DECISION_MODE] ?: "off",
-            shadowDecisions = prefs[SHADOW_DECISIONS] ?: false,
-            acceptedModelLicences = prefs[ACCEPTED_MODEL_LICENCES] ?: emptySet(),
-            backendUrl = prefs[BACKEND_URL] ?: "",
-            backendDeviceId = prefs[BACKEND_DEVICE_ID] ?: "",
-            backendHouseholdId = prefs[BACKEND_HOUSEHOLD_ID] ?: "",
-        )
-    }
+    override val settings: Flow<AppSettings> =
+        context.settingsDataStore.data.map(DataStoreSettingsRepository::settingsFrom)
 
     override suspend fun update(transform: (AppSettings) -> AppSettings) {
         val next = transform(settings.first())
@@ -71,7 +45,7 @@ class DataStoreSettingsRepository(
             prefs[INSTANT_COMMANDS] = next.instantCommands
             prefs[STEP_SOURCE] = next.stepSource
             prefs[VISION] = next.vision
-        prefs[MASCOT_FRAMED] = next.mascotFramed
+            prefs[MASCOT_FRAMED] = next.mascotFramed
             prefs[TRUSTED_APPS] = next.trustedApps
             prefs[DECISION_MODE] = next.decisionMode
             prefs[SHADOW_DECISIONS] = next.shadowDecisions
@@ -118,10 +92,49 @@ class DataStoreSettingsRepository(
         secrets.clear(BACKEND_ACCESS)
         secrets.clear(BACKEND_REFRESH)
         secrets.clear(BACKEND_PRIVATE_KEY)
-        update { it.copy(backendUrl = "", backendDeviceId = "", backendHouseholdId = "") }
+        update {
+            it.copy(
+                backendUrl = DEFAULT_BACKEND_URL,
+                backendDeviceId = "",
+                backendHouseholdId = "",
+            )
+        }
     }
 
-    private companion object {
+    internal companion object {
+        /**
+         * The stored settings. A key that was never written falls back to the
+         * value the app ships with; an empty string is a written value and wins.
+         */
+        fun settingsFrom(prefs: Preferences): AppSettings = AppSettings(
+            provider = prefs[PROVIDER] ?: "stub",
+            endpoint = prefs[ENDPOINT] ?: "https://api.deepseek.com/v1",
+            model = prefs[MODEL] ?: "deepseek-v4-flash",
+            activeModelId = prefs[ACTIVE_MODEL_ID] ?: "",
+            profile = prefs[PROFILE] ?: "everyday",
+            notifyAnswers = prefs[NOTIFY] ?: true,
+            selectedConversation = prefs[SELECTED] ?: "",
+            bridgeUrl = prefs[BRIDGE_URL] ?: "",
+            useBridge = prefs[USE_BRIDGE] ?: true,
+            accessibilityAllowed = prefs[ACCESSIBILITY_ALLOWED] ?: true,
+            tone = prefs[TONE] ?: "friendly",
+            chattiness = prefs[CHATTINESS] ?: "balanced",
+            screenPath = prefs[SCREEN_PATH] ?: "auto",
+            planFirst = prefs[PLAN_FIRST] ?: false,
+            replaySkills = prefs[REPLAY_SKILLS] ?: true,
+            instantCommands = prefs[INSTANT_COMMANDS] ?: true,
+            stepSource = prefs[STEP_SOURCE] ?: if (prefs[KNOWN_GRAPHS] == false) "model" else "auto",
+            vision = prefs[VISION] ?: false,
+            mascotFramed = prefs[MASCOT_FRAMED] ?: false,
+            trustedApps = prefs[TRUSTED_APPS] ?: emptySet(),
+            decisionMode = prefs[DECISION_MODE] ?: "off",
+            shadowDecisions = prefs[SHADOW_DECISIONS] ?: false,
+            acceptedModelLicences = prefs[ACCEPTED_MODEL_LICENCES] ?: emptySet(),
+            backendUrl = prefs[BACKEND_URL] ?: DEFAULT_BACKEND_URL,
+            backendDeviceId = prefs[BACKEND_DEVICE_ID] ?: "",
+            backendHouseholdId = prefs[BACKEND_HOUSEHOLD_ID] ?: "",
+        )
+
         val PROVIDER = stringPreferencesKey("provider")
         val ENDPOINT = stringPreferencesKey("endpoint")
         val MODEL = stringPreferencesKey("model")
@@ -141,7 +154,7 @@ class DataStoreSettingsRepository(
         val KNOWN_GRAPHS = booleanPreferencesKey("known_graphs")
         val STEP_SOURCE = stringPreferencesKey("step_source")
         val VISION = booleanPreferencesKey("vision")
-    val MASCOT_FRAMED = booleanPreferencesKey("mascot_framed")
+        val MASCOT_FRAMED = booleanPreferencesKey("mascot_framed")
         val TRUSTED_APPS = stringSetPreferencesKey("trusted_apps")
         val DECISION_MODE = stringPreferencesKey("decision_mode")
         val SHADOW_DECISIONS = booleanPreferencesKey("shadow_decisions")
