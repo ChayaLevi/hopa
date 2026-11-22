@@ -51,6 +51,9 @@ class DeviceRegistry(private val clock: () -> Long = System::currentTimeMillis) 
      */
     private val kicked = ConcurrentHashMap<String, Long>()
 
+    /** Makes the tombstone check+insert and [kick]'s write+sweep one step. */
+    private val lock = Any()
+
     /** True while the device is present (hello received). */
     fun online(deviceId: String): Boolean =
         sessionFor(deviceId) != null
@@ -61,13 +64,14 @@ class DeviceRegistry(private val clock: () -> Long = System::currentTimeMillis) 
     fun connected(deviceId: String): Boolean = live[deviceId]?.isNotEmpty() == true
 
     /** Presence-only join: a tombstoned device never becomes online. */
-    fun join(session: Session): Boolean {
+    fun join(session: Session): Boolean = synchronized(lock) {
         if (tombstoned(session.identity.deviceId)) {
             session.closed.complete(Unit)
-            return false
+            false
+        } else {
+            sessions[session.identity.deviceId] = session
+            true
         }
-        sessions[session.identity.deviceId] = session
-        return true
     }
 
     fun leave(session: Session) {
@@ -78,14 +82,15 @@ class DeviceRegistry(private val clock: () -> Long = System::currentTimeMillis) 
      * Registers the socket as soon as it authenticates, before hello. Returns
      * false when a revoke already tombstoned the device.
      */
-    fun attach(session: Session): Boolean {
+    fun attach(session: Session): Boolean = synchronized(lock) {
         if (tombstoned(session.identity.deviceId)) {
             session.closed.complete(Unit)
-            return false
+            false
+        } else {
+            live.computeIfAbsent(session.identity.deviceId) { ConcurrentHashMap.newKeySet() }
+                .add(session)
+            true
         }
-        live.computeIfAbsent(session.identity.deviceId) { ConcurrentHashMap.newKeySet() }
-            .add(session)
-        return true
     }
 
     fun detach(session: Session) {
@@ -97,11 +102,13 @@ class DeviceRegistry(private val clock: () -> Long = System::currentTimeMillis) 
 
     /** Ends every live socket for the device; an offline device is a no-op. */
     fun kick(deviceId: String) {
-        val now = clock()
-        pruneKicked(now)
-        kicked[deviceId] = now + KICKED_TTL_MS
-        live[deviceId]?.forEach { it.closed.complete(Unit) }
-        sessions[deviceId]?.closed?.complete(Unit)
+        synchronized(lock) {
+            val now = clock()
+            pruneKicked(now)
+            kicked[deviceId] = now + KICKED_TTL_MS
+            live[deviceId]?.forEach { it.closed.complete(Unit) }
+            sessions[deviceId]?.closed?.complete(Unit)
+        }
     }
 
     fun householdSessions(householdId: String): List<Session> =

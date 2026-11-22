@@ -1,6 +1,9 @@
 package com.hopa.backend.gateway
 
 import com.hopa.backend.auth.DeviceIdentity
+import java.util.concurrent.CyclicBarrier
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.channels.Channel
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -67,6 +70,36 @@ class DeviceRegistryTest {
         assertTrue(registry.attach(fresh), "the tombstone must have expired")
         assertFalse(fresh.closed.isCompleted)
         assertTrue(registry.connected("dev-a"))
+    }
+
+    @Test
+    fun `a kick racing an attach and join always closes the session`() {
+        val pool = Executors.newFixedThreadPool(2)
+        try {
+            repeat(200) {
+                val registry = DeviceRegistry()
+                val late = session()
+                val barrier = CyclicBarrier(2)
+                val kick = pool.submit {
+                    barrier.await()
+                    registry.kick("dev-a")
+                }
+                val attachAndJoin = pool.submit {
+                    barrier.await()
+                    registry.attach(late)
+                    registry.join(late)
+                }
+                kick.get(5, TimeUnit.SECONDS)
+                attachAndJoin.get(5, TimeUnit.SECONDS)
+
+                assertTrue(
+                    late.closed.isCompleted,
+                    "kick must close the session whether it wins before or after attach",
+                )
+            }
+        } finally {
+            pool.shutdownNow()
+        }
     }
 
     @Test

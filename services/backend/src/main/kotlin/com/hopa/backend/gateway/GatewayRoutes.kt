@@ -25,6 +25,8 @@ import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -36,7 +38,29 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /** How long a revoked socket gets to complete the close handshake. */
-private const val KICK_CLOSE_GRACE_MS = 1_000L
+internal const val KICK_CLOSE_GRACE_MS = 1_000L
+
+/**
+ * Waits for a kick, offers the peer a bounded time to answer the Close frame,
+ * then cancels the incoming channel unconditionally. Ktor's `close()` only
+ * sends and flushes the frame; the read loop ends when `incoming` ends, which a
+ * peer that never answers would otherwise postpone indefinitely.
+ */
+internal suspend fun closeKickedSession(
+    closed: Deferred<Unit>,
+    graceMs: Long = KICK_CLOSE_GRACE_MS,
+    sendClose: suspend () -> Unit,
+    cancelIncoming: () -> Unit,
+) {
+    closed.await()
+    try {
+        withTimeoutOrNull(graceMs) { sendClose() }
+    } finally {
+        // Even a close() that returned (or threw) leaves incoming open until
+        // the peer answers; cancel it so the read loop cannot outlive the kick.
+        cancelIncoming()
+    }
+}
 
 fun Application.gatewayRoutes(
     config: ServerConfig,
@@ -85,11 +109,13 @@ fun Application.gatewayRoutes(
             // coroutine. Close with a bounded grace: a peer that stalls the
             // close handshake must not hold the read loop to the ping timeout.
             val kicked = launch {
-                session.closed.await()
-                val closed = withTimeoutOrNull(KICK_CLOSE_GRACE_MS) {
-                    close(CloseReason(CloseReason.Codes.GOING_AWAY, "revoked"))
-                }
-                if (closed == null) incoming.cancel()
+                closeKickedSession(
+                    closed = session.closed,
+                    sendClose = {
+                        close(CloseReason(CloseReason.Codes.GOING_AWAY, "revoked"))
+                    },
+                    cancelIncoming = { incoming.cancel(CancellationException("revoked")) },
+                )
             }
 
             try {
