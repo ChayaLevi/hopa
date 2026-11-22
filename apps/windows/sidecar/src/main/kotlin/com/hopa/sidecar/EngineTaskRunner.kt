@@ -20,10 +20,12 @@ import kotlin.coroutines.resumeWithException
  * engine's current turn. The lambdas keep the adapter testable without a
  * model; production supplies `engine.startTurn` and `engine.onTurnEnd`.
  *
- * Turns are serialized with a lock because the engine runs one at a time;
- * the gateway may deliver a second `task.create` while the first is still
- * running. Each turn is bounded by [turnTimeoutMs] so a lost `onTurnEnd`
- * releases the queue instead of wedging it.
+ * The runner still keeps its own lock even though `Engine.startTurn` now holds
+ * a turn gate too: the runner's lock is also its pending-turn bookkeeping, and
+ * a second `task.create` must not queue a second engine turn just to wait.
+ * The engine gate is the one that serializes host and backend turns. Each turn
+ * is bounded by [turnTimeoutMs] so a lost `onTurnEnd` releases the queue
+ * instead of wedging it.
  */
 class EngineTaskRunner(
     private val startTurn: (id: String, goal: String) -> Unit,

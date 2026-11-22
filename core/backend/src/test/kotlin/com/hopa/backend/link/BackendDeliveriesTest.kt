@@ -130,9 +130,10 @@ class BackendDeliveriesTest {
     }
 
     @Test
-    fun `diagnostic frames are handed to onTask like a task create`() = runBlocking {
+    fun `diagnostic frames go to onDiagnostic and never onTask`() = runBlocking {
         val handled = CompletableDeferred<Unit>()
         val received = mutableListOf<String>()
+        val tasks = AtomicInteger()
         val server = MockWebServer()
         server.enqueue(
             MockResponse().withWebSocketUpgrade(object : FakeGateway() {
@@ -145,7 +146,8 @@ class BackendDeliveriesTest {
             }),
         )
         val client = clientFor(server)
-        client.onTask = { frame ->
+        client.onTask = { tasks.incrementAndGet() }
+        client.onDiagnostic = { frame ->
             synchronized(received) {
                 received += frame.type
                 if (received.size == 3) handled.complete(Unit)
@@ -155,6 +157,7 @@ class BackendDeliveriesTest {
         client.start(this)
         withTimeout(5_000) { handled.await() }
         assertEquals(listOf("diag.ping", "diag.state", "diag.reset"), received)
+        assertEquals(0, tasks.get(), "a diag frame reached the goal-bearing task handler")
         client.stop()
         server.shutdown()
     }

@@ -12,6 +12,16 @@ import kotlinx.coroutines.flow.StateFlow
 interface BackendLink {
     val state: StateFlow<BackendState>
     var onTask: (suspend (BackendEnvelope) -> Unit)?
+
+    /**
+     * Plaintext `diag.*` deliveries. Android leaves this null: a diagnostic is
+     * not a goal-bearing task and must not become a `task.create`. The sidecar
+     * gateway wires it to its diagnostic handler.
+     */
+    var onDiagnostic: (suspend (BackendEnvelope) -> Unit)?
+        get() = null
+        set(@Suppress("UNUSED_PARAMETER") value) {}
+
     fun start(scope: CoroutineScope)
     suspend fun stop()
 

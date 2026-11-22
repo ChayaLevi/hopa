@@ -18,11 +18,14 @@ import com.hopa.runlog.store.InMemoryRunRecorder
 import com.hopa.runlog.record.RunChain
 import com.hopa.runlog.record.RunRecordFactory
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** One turn at a time; the loop and the gate are the real ones. */
 class Engine(
@@ -44,6 +47,17 @@ class Engine(
     private var runningTurn: String? = null
 
     /**
+     * Host and backend turns share one loop, one screen and one chat store, so
+     * they must not interleave. The gate is held for the whole turn body; a
+     * queued turn waits here rather than starting a second loop.
+     */
+    private val turnGate = Mutex()
+
+    /** Ids waiting for [turnGate]; a cancel before the start is remembered. */
+    private val queuedTurns: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val cancelledBeforeStart: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    /**
      * Invoked next to `turn.end` with the turn id and its answer, so the
      * backend gateway can resume a `task.create` (R31). One turn at a time is
      * this engine's contract; the hook must not block.
@@ -61,14 +75,23 @@ class Engine(
     /** Cancels only the named turn, so a backend task cannot stop a host turn. */
     @Synchronized
     fun cancel(id: String) {
-        if (runningTurn != id) return
-        cancelled = true
-        io.log("turn $id cancelled by the user")
+        if (runningTurn == id) {
+            cancelled = true
+            io.log("turn $id cancelled by the user")
+            return
+        }
+        // The turn is still waiting for the gate. Keep the request so the turn
+        // starts already cancelled instead of silently ignoring the user.
+        if (queuedTurns.remove(id)) {
+            cancelledBeforeStart += id
+            io.log("turn $id cancelled before it started")
+        }
     }
 
     @Synchronized
     private fun beginTurn(id: String) {
-        cancelled = false
+        queuedTurns.remove(id)
+        cancelled = cancelledBeforeStart.remove(id)
         runningTurn = id
     }
 
@@ -93,9 +116,25 @@ class Engine(
         conversationId: String?,
         attachment: Attachment? = null,
     ) {
-        beginTurn(id)
+        queuedTurns += id
         scope.launch {
-            guardedTurn(id) { runTurn(id, goal, conversationId, attachment) }
+            runSerialized(id) { runTurn(id, goal, conversationId, attachment) }
+        }
+    }
+
+    /**
+     * The one gate every turn goes through. Extracted so the serialization is
+     * testable with fake turn bodies: the second body does not run until the
+     * first has finished and released the gate.
+     */
+    internal suspend fun runSerialized(id: String, turn: suspend () -> String) {
+        turnGate.withLock {
+            beginTurn(id)
+            try {
+                guardedTurn(id, turn)
+            } finally {
+                cancelledBeforeStart.remove(id)
+            }
         }
     }
 

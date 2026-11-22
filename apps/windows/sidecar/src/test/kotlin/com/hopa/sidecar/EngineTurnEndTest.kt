@@ -2,6 +2,9 @@ package com.hopa.sidecar
 
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -24,6 +27,40 @@ class EngineTurnEndTest {
         assertEquals(1, ends.size)
         assertEquals("turn-1", ends.single().first)
         assertFalse(ends.single().second.contains("store exploded"))
+    }
+
+    @Test
+    fun `a second turn waits for the gate instead of running beside the first`() = runBlocking {
+        val engine = engine()
+        val order = mutableListOf<String>()
+        val firstStarted = CompletableDeferred<Unit>()
+        val releaseFirst = CompletableDeferred<Unit>()
+        val secondStarted = CompletableDeferred<Unit>()
+
+        val first = launch {
+            engine.runSerialized("turn-a") {
+                firstStarted.complete(Unit)
+                releaseFirst.await()
+                order += "a"
+                "a"
+            }
+        }
+        firstStarted.await()
+        val second = launch {
+            engine.runSerialized("turn-b") {
+                order += "b"
+                secondStarted.complete(Unit)
+                "b"
+            }
+        }
+        delay(100)
+        assertFalse(secondStarted.isCompleted, "the second turn ran before the first released the gate")
+
+        releaseFirst.complete(Unit)
+        first.join()
+        second.join()
+
+        assertEquals(listOf("a", "b"), order)
     }
 
     @Test

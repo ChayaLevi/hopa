@@ -147,7 +147,7 @@ class BackendGatewayTest {
         val gateway = BackendGateway(link, contentKey, run = { "never" }, clock = { 4_242 }, newId = { "reply" })
         gateway.attach()
 
-        link.onTask!!.invoke(diag("diag.ping", "diag-1", buildJsonObject { put("probe", "one") }))
+        link.onDiagnostic!!.invoke(diag("diag.ping", "diag-1", buildJsonObject { put("probe", "one") }))
 
         val reply = link.sent.single()
         assertEquals("task.result", reply.type)
@@ -172,7 +172,7 @@ class BackendGatewayTest {
         )
         gateway.attach()
 
-        link.onTask!!.invoke(diag("diag.state", "diag-2"))
+        link.onDiagnostic!!.invoke(diag("diag.state", "diag-2"))
 
         val body = link.sent.single().body
         assertEquals(3, body["conversations"]!!.jsonPrimitive.int)
@@ -186,7 +186,7 @@ class BackendGatewayTest {
         val gateway = BackendGateway(link, contentKey, run = { runs++; "never" }, clock = { 1_000 }, newId = { "reply" })
         gateway.attach()
 
-        link.onTask!!.invoke(diag("diag.reset", "diag-3"))
+        link.onDiagnostic!!.invoke(diag("diag.reset", "diag-3"))
 
         assertEquals("accepted", link.sent.single().body["reset"]!!.jsonPrimitive.content)
         assertEquals(0, runs)
@@ -293,6 +293,7 @@ class BackendGatewayTest {
 
         assertEquals(1, link.starts)
         assertTrue(link.onTask != null)
+        assertTrue(link.onDiagnostic != null)
 
         job.cancel()
         runCurrent()
@@ -338,6 +339,7 @@ class BackendGatewayTest {
         private val _state = MutableStateFlow<BackendState>(BackendState.Disconnected)
         override val state: StateFlow<BackendState> = _state
         override var onTask: (suspend (BackendEnvelope) -> Unit)? = null
+        override var onDiagnostic: (suspend (BackendEnvelope) -> Unit)? = null
         val sent = mutableListOf<BackendEnvelope>()
         val acked = mutableListOf<BackendEnvelope>()
         var starts = 0

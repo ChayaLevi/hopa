@@ -43,9 +43,12 @@ class BackendGateway(
         }
     }
 
-    /** Points the link's delivery seam at this gateway. */
+    /** Points the link's delivery seams at this gateway. */
     fun attach() {
         link.onTask = { frame -> dispatch(frame) }
+        // `diag.*` is plaintext and goal-less; the shared client keeps it off
+        // the goal-bearing task handler so Android never turns it into a task.
+        link.onDiagnostic = { frame -> dispatch(frame) }
     }
 
     /**

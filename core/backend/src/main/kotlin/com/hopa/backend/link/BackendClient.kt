@@ -34,9 +34,9 @@ import java.util.concurrent.TimeUnit
  * Holds one `/v1/gateway` WebSocket: bearer token in the handshake header,
  * `device.hello` as the first frame, `Live` once the ack arrives. A frame that
  * cannot be decoded is ignored so a malformed message never costs the socket.
- * A delivered `task.create` or `diag.*` is handed to [onTask] on the session's
- * coroutine scope, so a slow handler neither stalls the reader nor dies when
- * the socket reconnects.
+ * A delivered `task.create` is handed to [onTask] and a plaintext `diag.*` to
+ * [onDiagnostic] on the session's coroutine scope, so a slow handler neither
+ * stalls the reader nor dies when the socket reconnects.
  *
  * A `1008 E_AUTH` close refreshes the credentials once; a null refresh asks for
  * pairing instead of retrying, because a rotated token may never be presented
@@ -58,6 +58,9 @@ class BackendClient(
 
     @Volatile
     override var onTask: (suspend (BackendEnvelope) -> Unit)? = null
+
+    @Volatile
+    override var onDiagnostic: (suspend (BackendEnvelope) -> Unit)? = null
 
     private var job: Job? = null
 
@@ -181,7 +184,8 @@ class BackendClient(
             )
             "pong" -> pongs.trySend(Unit)
             "ping" -> answerPing(webSocket, frame)
-            "task.create", "diag.ping", "diag.state", "diag.reset" -> dispatch(frame)
+            "task.create" -> dispatch(frame, onTask)
+            "diag.ping", "diag.state", "diag.reset" -> dispatch(frame, onDiagnostic)
         }
     }
 
@@ -220,8 +224,8 @@ class BackendClient(
      * Runs the handler on the session's scope, so a reconnect does not cancel a
      * task that already started. A failed handler is the handler's problem.
      */
-    private fun dispatch(frame: BackendEnvelope) {
-        val handler = onTask ?: return
+    private fun dispatch(frame: BackendEnvelope, handler: (suspend (BackendEnvelope) -> Unit)?) {
+        val handler = handler ?: return
         val live = session ?: return
         live.launch {
             try {
