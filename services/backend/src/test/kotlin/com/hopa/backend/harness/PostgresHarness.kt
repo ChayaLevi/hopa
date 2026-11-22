@@ -76,7 +76,7 @@ object PostgresHarness {
                         "GRANT USAGE, CREATE ON SCHEMA public TO hopa_owner WITH GRANT OPTION",
                     )
                     statement.execute("GRANT USAGE ON SCHEMA public TO hopa_app")
-                    statement.execute("GRANT hopa_admin TO hopa_owner WITH ADMIN OPTION")
+                    statement.execute("GRANT hopa_admin TO hopa_owner WITH ADMIN OPTION, SET FALSE")
                 }
             }
 
@@ -86,12 +86,13 @@ object PostgresHarness {
 
             admin.tenant(NO_HOUSEHOLD) { connection ->
                 connection.createStatement().use { statement ->
-                    // The superuser bootstrap grant exists only so the migration
-                    // can transfer function ownership. It has a different
-                    // grantor than the migration's own temporary grant, so
-                    // hopa_owner cannot remove it under Postgres's grantor
-                    // model; drop it here to match production, where the deploy
-                    // role is not a member at runtime either.
+                    // Models the operator provisioning the migration documents:
+                    // the bootstrap grant carries ADMIN OPTION (so the migration
+                    // can grant/revoke its own SET-capable row) but not SET. The
+                    // superuser removes it after migration, exactly as the
+                    // operator must when the deploy role is not a superuser
+                    // (Postgres tracks grants per grantor, so hopa_owner cannot
+                    // revoke this superuser-granted row itself).
                     statement.execute("REVOKE hopa_admin FROM hopa_owner")
                     statement.execute(
                         "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO hopa_app",

@@ -2,11 +2,11 @@
 -- sessions and unauthenticated pending pairings.
 --
 -- V1's posture is unchanged: every tenant table still carries household_id,
--- RLS is enabled and forced, and a missing setting denies. The two new global
--- tables (accounts, admins) are read only by the auth and admin paths, so they
--- carry no tenant policy. Admin lookups into tenant rows are the only escape
--- hatch and they are SECURITY DEFINER functions returning minimum columns --
--- there is no BYPASSRLS role and no blanket GUC.
+-- RLS is enabled and forced, and a missing setting denies. The three new global
+-- tables (accounts, admins, admin_sessions) are read only by the auth and admin
+-- paths, so they carry no tenant policy. Admin lookups into tenant rows are the
+-- only escape hatch and they are SECURITY DEFINER functions returning minimum
+-- columns -- there is no BYPASSRLS app role and no blanket GUC.
 
 create table accounts (
     id uuid primary key,
@@ -64,6 +64,7 @@ create table pending_pairings (
 create index pending_pairings_expires_idx on pending_pairings (expires_at);
 
 alter table members add column account_id uuid null references accounts (id);
+create index members_account_idx on members (account_id);
 
 -- Server-authored diagnostic tasks have no originating device, and every task
 -- carries the envelope type it will be delivered as.
@@ -103,11 +104,18 @@ create policy pending_pairings_tenant_update on pending_pairings for update
 -- itself never bypasses a policy. Each function returns only the columns the
 -- lookup page renders, and callers audit-log every phone-number read.
 --
--- Production: the deploy role needs CREATEROLE once, or an operator runs the
--- same line as a superuser. If an operator pre-creates `hopa_admin` instead,
--- it must also be granted to the deploy role WITH ADMIN OPTION, or the
--- temporary membership below fails here at deploy time. That is deliberate:
--- the alternative is empty lookups at request time.
+-- Production provisioning (creating or altering a BYPASSRLS role requires a
+-- superuser; CREATEROLE alone is not enough):
+--   create role hopa_admin nologin bypassrls;
+-- Run this migration as that superuser, or as a non-superuser deploy role that
+-- holds `hopa_admin` WITH ADMIN OPTION, SET FALSE for the duration of the
+-- migration and has it revoked afterwards. The temporary grant below adds SET
+-- only to this migration's own grant row; a pre-existing grant from another
+-- grantor survives the revoke. If a non-superuser deploy role still has SET on
+-- `hopa_admin` when the migration ends, the check at the bottom fails here,
+-- loudly, rather than leaving a SQL-injection route to the BYPASSRLS owner.
+-- `ALTER ... OWNER` also requires CREATE on schema `public` (or ownership of
+-- it), so that privilege is borrowed below as well.
 do $$
 begin
     if not exists (select from pg_roles where rolname = 'hopa_admin') then
@@ -116,8 +124,25 @@ begin
         exception
             when insufficient_privilege then
                 raise exception
-                    'admin lookups need the hopa_admin role. Run as a superuser: create role hopa_admin nologin bypassrls;';
+                    'admin lookups need hopa_admin, and only a superuser can create a BYPASSRLS role. Run as a superuser: create role hopa_admin nologin bypassrls;';
         end;
+    end if;
+end
+$$;
+
+-- A pre-created role with the wrong attributes would silently deny every admin
+-- lookup (or allow a login). Refuse to migrate instead.
+do $$
+declare
+    can_login boolean;
+    bypasses_rls boolean;
+begin
+    select rolcanlogin, rolbypassrls into can_login, bypasses_rls
+    from pg_roles
+    where rolname = 'hopa_admin';
+    if can_login or not bypasses_rls then
+        raise exception
+            'hopa_admin must be NOLOGIN BYPASSRLS. As a superuser: alter role hopa_admin nologin bypassrls;';
     end if;
 end
 $$;
@@ -163,6 +188,7 @@ as $$
     from members m
     where m.household_id = $1
       and m.role = 'owner'
+    order by m.created_at, m.id
     limit 1
 $$;
 
@@ -204,9 +230,23 @@ alter function admin_resolve_household(uuid) owner to hopa_admin;
 alter function admin_list_devices(uuid) owner to hopa_admin;
 revoke create on schema public from hopa_admin;
 
--- The migration role is a member of hopa_admin only between the grant above and
--- this revoke, which runs after the last ownership change. At runtime neither
--- hopa_app nor hopa_owner can SET ROLE into the BYPASSRLS owner, so a SQL
--- injection cannot use the owner's privileges. V2SchemaTest asserts
--- pg_has_role(..., 'hopa_admin', 'member') is false for both roles.
+-- The migration role's own grant is gone after this line, but a grant made by
+-- another grantor (for example the operator's bootstrap grant) is not removed
+-- by it. The invariant that matters is narrower and is checked below: no
+-- non-superuser may be able to SET ROLE into the BYPASSRLS owner.
 revoke hopa_admin from current_user;
+
+-- Runtime invariant: "no SET capability for a non-superuser", not "no
+-- membership". Superusers are exempt because they can already do anything (and
+-- Postgres reports SET for them universally). A failure here rolls the whole
+-- migration back and names the operator line that removes the residual grant.
+do $$
+begin
+    if not (select rolsuper from pg_roles where rolname = current_user) then
+        if pg_has_role(current_user, 'hopa_admin', 'set') then
+            raise exception
+                'the deploy role can still SET ROLE to the BYPASSRLS owner. As a superuser: revoke hopa_admin from %;', current_user;
+        end if;
+    end if;
+end
+$$;

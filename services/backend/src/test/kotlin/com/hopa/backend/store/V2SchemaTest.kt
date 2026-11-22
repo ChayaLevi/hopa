@@ -5,11 +5,13 @@ import com.hopa.backend.harness.newDevice
 import com.hopa.backend.harness.newHousehold
 import com.hopa.backend.harness.seedHousehold
 import java.sql.Connection
+import java.sql.SQLException
 import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -308,6 +310,49 @@ class V2SchemaTest {
             }
         }
         assertEquals(account, accountId)
+
+        val rejected = assertThrows(SQLException::class.java) {
+            db.tenant(home) { connection ->
+                connection.prepareStatement(
+                    "update members set account_id = ?::uuid where id = ?::uuid",
+                ).use {
+                    it.setString(1, UUID.randomUUID().toString())
+                    it.setString(2, member)
+                    it.executeUpdate()
+                }
+            }
+        }
+        assertEquals("23503", rejected.sqlState)
+    }
+
+    @Test
+    fun `a live phone is unique and a tombstoned phone can be registered again`() {
+        val phone = "+9725" + UUID.randomUUID().toString().replace("-", "").take(8)
+
+        fun insertAccount(): Int = db.dataSource.connection.use { connection ->
+            connection.prepareStatement(
+                "insert into accounts(id, phone, password_hash) values (?::uuid, ?, 'hash')",
+            ).use {
+                it.setString(1, UUID.randomUUID().toString())
+                it.setString(2, phone)
+                it.executeUpdate()
+            }
+        }
+
+        assertEquals(1, insertAccount())
+        val duplicate = assertThrows(SQLException::class.java) { insertAccount() }
+        assertEquals("23505", duplicate.sqlState)
+
+        db.dataSource.connection.use { connection ->
+            connection.prepareStatement(
+                "update accounts set deleted_at = now() where phone = ? and deleted_at is null",
+            ).use {
+                it.setString(1, phone)
+                assertEquals(1, it.executeUpdate())
+            }
+        }
+
+        assertEquals(1, insertAccount())
     }
 
     @Test
@@ -326,6 +371,7 @@ class V2SchemaTest {
                 "${fn.name} has no pinned search_path: ${fn.config}",
             )
             assertTrue(fn.executable, "${fn.name} is not executable by hopa_app")
+            assertEquals(0, fn.publicGrants, "${fn.name} is executable through PUBLIC")
         }
 
         assertEquals(listOf("member:uuid"), inputs(member))
@@ -488,24 +534,42 @@ class V2SchemaTest {
         }
         assertEquals(0, directMembers)
 
-        val appIsAdmin = db.dataSource.connection.use { connection ->
+        // The BYPASSRLS owner is NOLOGIN, and neither runtime role may SET ROLE
+        // into it. Superuser cannot be checked from these sessions; both roles
+        // here are non-superusers.
+        val (canLogin, bypassRls) = PostgresHarness.adminDatabase().dataSource.connection.use { connection ->
             connection.createStatement().use { statement ->
                 statement.executeQuery(
-                    "select pg_has_role(current_user, 'hopa_admin', 'member')",
-                ).use { rows -> rows.next(); rows.getBoolean(1) }
+                    "select rolcanlogin, rolbypassrls from pg_roles where rolname = 'hopa_admin'",
+                ).use { rows -> rows.next(); rows.getBoolean(1) to rows.getBoolean(2) }
             }
         }
-        assertFalse(appIsAdmin)
+        assertFalse(canLogin)
+        assertTrue(bypassRls)
 
-        // Separate connection: hopa_owner's temporary membership was revoked.
-        val ownerIsAdmin = PostgresHarness.ownerDatabase().dataSource.connection.use { connection ->
+        val appRoles = db.dataSource.connection.use { connection ->
             connection.createStatement().use { statement ->
                 statement.executeQuery(
-                    "select pg_has_role(current_user, 'hopa_admin', 'member')",
-                ).use { rows -> rows.next(); rows.getBoolean(1) }
+                    "select pg_has_role(current_user, 'hopa_admin', 'member'), " +
+                        "pg_has_role(current_user, 'hopa_admin', 'set')",
+                ).use { rows -> rows.next(); rows.getBoolean(1) to rows.getBoolean(2) }
             }
         }
-        assertFalse(ownerIsAdmin)
+        assertFalse(appRoles.first)
+        assertFalse(appRoles.second)
+
+        // Separate connection: hopa_owner has neither membership nor SET after
+        // the harness's operator-style revoke.
+        val ownerRoles = PostgresHarness.ownerDatabase().dataSource.connection.use { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery(
+                    "select pg_has_role(current_user, 'hopa_admin', 'member'), " +
+                        "pg_has_role(current_user, 'hopa_admin', 'set')",
+                ).use { rows -> rows.next(); rows.getBoolean(1) to rows.getBoolean(2) }
+            }
+        }
+        assertFalse(ownerRoles.first)
+        assertFalse(ownerRoles.second)
     }
 
     @Test
@@ -539,6 +603,7 @@ class V2SchemaTest {
         val definer: Boolean,
         val config: String?,
         val executable: Boolean,
+        val publicGrants: Int,
         val args: List<Arg>,
     ) {
         val tableColumns: List<String> by lazy { args.filter { it.mode == "t" }.map { it.name } }
@@ -551,6 +616,7 @@ class V2SchemaTest {
         val config: String?,
         val executable: Boolean,
         val owner: String,
+        val publicGrants: Int,
     )
 
     private fun function(name: String): FunctionInfo? =
@@ -560,7 +626,8 @@ class V2SchemaTest {
                 select p.prosecdef,
                        array_to_string(p.proconfig, ','),
                        has_function_privilege('hopa_app', p.oid, 'EXECUTE'),
-                       pg_get_userbyid(p.proowner)
+                       pg_get_userbyid(p.proowner),
+                       (select count(*) from aclexplode(p.proacl) a where a.grantee = 0)
                 from pg_proc p
                 join pg_namespace n on n.oid = p.pronamespace
                 where n.nspname = 'public' and p.proname = ?
@@ -576,6 +643,7 @@ class V2SchemaTest {
                             rows.getString(2),
                             rows.getBoolean(3),
                             rows.getString(4),
+                            rows.getInt(5),
                         )
                     }
                 }
@@ -602,7 +670,15 @@ class V2SchemaTest {
                 }
             }
 
-            FunctionInfo(name, header.owner, header.definer, header.config, header.executable, args)
+            FunctionInfo(
+                name,
+                header.owner,
+                header.definer,
+                header.config,
+                header.executable,
+                header.publicGrants,
+                args,
+            )
         }
 
     private fun inputs(fn: FunctionInfo): List<String> =
