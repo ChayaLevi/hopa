@@ -1,6 +1,8 @@
 # Week 2 · 22–26 Nov 2026: accounts, PC admission, console, sync v0
 
-Status: **planned.** Written 2026-11-22. Parent: [`weekly-plan.md`](weekly-plan.md),
+Status: **lane A implemented, 2026-11-22** — branch `backend-week2-A`
+(pushed to `amir-fork`), HEAD `118749e0`. Lane B and sync v0 remain planned.
+Written 2026-11-22. Parent: [`weekly-plan.md`](weekly-plan.md),
 tracked in [#32](https://github.com/agents-demo/hopa/issues/32). Design source:
 [`docs/superpowers/specs/2026-11-22-pairing-accounts-design.md`](../../../superpowers/specs/2026-11-22-pairing-accounts-design.md)
 (decisions below argue from it, not from this file).
@@ -87,8 +89,14 @@ breaking change — unknown types are already refused with `E_UNSUPPORTED`.
 | `household_key_wraps` | `household_id`, `device_id`, `wrapped_key`, `wrapped_at` | tenant-scoped, RLS on; deleted on revoke |
 | `admins` | `id`, `email` unique, `password_hash`, `role`, `created_at` | not tenant-scoped; first row seeded from `HOPA_ADMIN_EMAIL`/`HOPA_ADMIN_PASSWORD` at boot |
 | `admin_sessions` | `id`, `admin_id`, `token_hash`, `expires_at` | 8 h, opaque, SHA-256 at rest |
-| `pending_pairings` | `id`, `code_hash`, `platform`, `name`, `public_key`, `alg`, `household_id` null, `member_id` null, `vouched_at`, `expires_at`, `claimed_at` | single use, 5-min TTL; binding written by vouch |
+| `pending_pairings` | `id`, `code_hash`, `platform`, `name`, `public_key`, `alg`, `household_id` null, `member_id` null, `vouched_at`, `expires_at`, `claimed_at`, `wrapped_key` null, `voucher_device_id` null | single use, 5-min TTL; binding written by vouch; the wrap parks here until a device exists, and the voucher's device id lets claim return its public key |
 | `members` (alter) | + `account_id uuid null references accounts` | null for operator-paired members |
+| `tasks` (alter) | + `type text not null default 'task.create'`; `from_device` nullable | server-authored `diag.*` rows have no sending device |
+
+Follow-up migrations landed by lane A (V2 is the base schema above):
+`V3__pending_wrap.sql` adds `pending_pairings.wrapped_key` (R25) and
+`V4__voucher_key.sql` adds `pending_pairings.voucher_device_id` (R28), both
+nullable and additive. `tasks.type` / nullable `from_device` are in V2 (R1, R11).
 
 Plus four `SECURITY DEFINER` functions owned by the non-login `hopa_admin`
 (`BYPASSRLS`) role, each returning minimum columns and audit-logged by the caller:
@@ -127,6 +135,8 @@ Sync v0 never slides.
 | Camera + ML Kit is a new Android dependency | Build size, permission friction, device variance | Paste fallback ships in the same PR; camera is additive | B |
 | `SECURITY DEFINER` functions widen access by mistake | Tenant leak — the one bug that ends the beta | Four functions return minimum columns only; CI calls them as the app role and asserts the shape; every call is audit-logged | B |
 | Plaintext `diag.*` becomes a smuggling channel | Server-readable task bodies reappear | Validator allows plaintext for the three `diag.*` types only; admin-auth required; audit per send | A |
+| QR capability: a photographed QR claimed in the vouch→claim window | The claimant obtains household **device tokens** (not the content key, which stays wrapped to the PC) | 5-min TTL, the phone shows the key fingerprint before vouching, and the residual is accepted for the demo (R32); a second claim secret, returned only to the PC, lands with week-6 admission | both |
+| `hopa_admin` needs superuser provisioning once | V2 fails at boot on a deploy role that cannot create a `BYPASSRLS` role | Probe the role at migration time with an actionable error; deploy guide documents the SQL and the temporary ADMIN OPTION; the runtime role is not superuser (R21/R21a) | A |
 | Phone-number enumeration via sign-up errors | Account discovery before any SMS | Uniform `E_AUTH` for wrong phone and wrong password; per-IP and per-phone rate limits | B |
 | Sync v0 redesign mid-week (mini-design slips past Monday) | B loses Thursday | The mini-design is one page, Monday-only; if it slips, sync v0 keeps the bridge store's rules verbatim and the design lands as a PR comment | B |
 
@@ -144,7 +154,97 @@ Sync v0 never slides.
 | 8 | Cross-tenant suite still green | 1,000 attempts, 0 rows (extended with accounts + wraps + pending pairings) | CI job |
 | 9 | No plaintext payload or phone number in logs | grep of the week's logs is clean | evidence file, command shown |
 
-## 9. Checklist
+## 9. Lane A execution record (22 Nov 2026)
+
+Lane A ran subagent-driven: one implementer per task, a fresh task reviewer per
+diff, a final whole-branch review, then one fix wave. Task 0 is slice B Task 1
+pulled forward; Tasks 1–8 are lane A. 26 commits from `f9682f69` to `118749e0`
+on `backend-week2-A`. Nothing is deployed and no exit check is claimed without
+the evidence named here.
+
+### 9.1 Task status
+
+| Task | Scope | Commits | Proof |
+|---|---|---|---|
+| 0 | V2 accounts/wraps/admins/pending pairings + the four definer functions | `68bfb7d1`, `07229282`, `f2f81dd2` | `V2SchemaTest` (10), full module suite |
+| 1 | ADR-0025 + ADR-0022 accepted | `054fd423`, `3fc7b944` | ADR review, `check-links` 0 |
+| 2 | `KeyWrap`, `Argon2`, RFC 7748 key helpers | `0b7ef05b`, `0cbfa980` | 97 `:backend` tests, RFC 7748 vectors |
+| 3 | Pending sessions: mint, resolve-by-secret | `40197f2f`, `aeb5e796` | `PendingPairingTest` (16) |
+| 4 | Vouch, claim-with-wrap, parked wrap (V3) | `7616ddcb` | `AdmissionTest` (13) |
+| 5 | Device list + 5 s revocation | `6523d033`, `d436b8ca`, `46cdd1b8` | `DeviceRevokeTest`, `KickTeardownTest` |
+| 6 | `diag.*`, admin auth, presence, audit | `92272bd2`, `400126b1` | `DiagSendTest` (16) |
+| 7 | Sidecar admission, QR, poll, claim, unwrap (V4) | `2e2914e2`, `93272f03`, `8d059231` | sidecar + core admission tests |
+| 8 | Sidecar encrypted gateway both directions | `60a1e3be`, `9c0176c0` | `BackendGatewayTest`, `PayloadCipherTest` |
+| — | Final-review fix wave | `99416bd4`, `e3c9be38`, `d4515c5d`, `809c97e2`, `118749e0` | see §9.5 |
+
+### 9.2 Decisions taken during execution
+
+These are now part of the plan; Lane B and sync v0 build on them.
+
+| Area | Decision | Why it deviated from the written slice |
+|---|---|---|
+| Order | Slice B Task 1 (V2) ran first as Task 0 | Lane A Tasks 4–6 depend on the schema |
+| Schema | V3 adds `pending_pairings.wrapped_key`; V4 adds `voucher_device_id` | A wrap is FK'd to `devices`, which exists only at claim; static-static X25519 needs the wrapper's public key at unwrap |
+| Admission | No `GET /v1/pair/pending/{id}`; both devices resolve by the secret | The id cannot satisfy the pending RLS (no tenant, no token hash) and the PC already holds the secret |
+| Polling | Resolve is 30/min/IP; the sidecar polls every 5 s, backing off on 429 | 5/min could not sustain a 5-minute poll; 2 s would burn the budget |
+| Keys | Canonical public keys are RFC 7748 octets; ECDH is BouncyCastle-only | The JDK `XECPublicKey.u` path and Android's SPKI fallback produced opposite byte orders; BC also removes the API-33 floor |
+| Admin RLS | The four definer functions are owned by a non-login `hopa_admin` (`BYPASSRLS`) role; the migration borrows membership, then revokes it and refuses a non-superuser that still has `SET` or `ADMIN OPTION` | `FORCE RLS` binds the table owner, so definer functions owned by the migration role saw zero rows |
+| Admin API | `GET /v1/admin/devices` calls `admin_list_devices`; a diag request names its `household` | Use the containment mechanism that was built; avoid another cross-tenant lookup |
+| Tasks | `tasks.type` column; `from_device` nullable; `"server"` is the sentinel; terminal states are terminal | Diag envelopes need their own type, and a late `ack` must not downgrade `done` |
+| Payloads | Encrypted bodies are `{"sealed": "<base64url(IV‖ct‖tag)>"}` under the household key | One convention both clients can implement; `diag.*` stays the only plaintext |
+| Reuse | A reused refresh token revokes the device, deletes its wrap and kicks the live socket; `rotate` refuses a revoked device under a row lock | Reuse detection previously only cleared the cache, and rotation could race a revoke |
+| Client seams | `onTask` handles `task.create`; `onDiagnostic` handles `diag.*` | Keeps the Android task runner from treating a diagnostic as a goal-less task |
+| Sidecar entry | `--pair-backend <url>` and a `backend.pair` protocol command | `admit()` had no production caller, so the PC could not be admitted |
+
+### 9.3 Review findings that changed the code
+
+| Task | Finding | Resolution |
+|---|---|---|
+| 0 | Definer functions returned no rows to `hopa_app` under `FORCE RLS` | `hopa_admin` owner + attribute/no-SET/no-ADMIN-OPTION guards |
+| 1 | Wrapped-key length said 48 bytes; recovery blob and wrap inputs under-specified | 60/76-byte layouts, raw octets, HKDF salt/info, empty AAD pinned |
+| 2 | **Critical:** JDK and Android produced opposite public-key byte orders; self-wrap failed | RFC 7748 octets everywhere; BC-only ECDH; fixed vectors |
+| 3 | Resolve at 5/min would 429 the PC's poll | 30/min + backoff, precedence tests |
+| 5 | A kick could be lost between auth and attach; `Session` leaked as a mutable map key; close was not bounded; tombstone not atomic | Tombstone in `attach`/`join`, referential equality, unconditional cancel after a 1 s grace, one lock |
+| 6 | Diag trace spans were dropped (`"server"` into a uuid column); audit was written after delivery | Span device = target; audit before deliver/wake |
+| 7 | Pairing secret written to protocol stdout; credential `toString` unredacted | stderr/UI seam; redacted `toString`; atomic owner-only store; PNG deleted |
+| 8 | **Critical:** the shared link never dispatched `diag.*`; the goal was logged; a wedged turn held the mutex; a failed reply was not acked; cancel cross-talk | `onDiagnostic` + dispatch, log redaction, turn gate + timeout, reply-before-ack, id-aware cancel |
+| Final | No PC admission entry point; Android diag regression; reuse not a hard cut; rotate/revoke race; concurrent host/backend turns; unused definer; ack downgraded `done`; wake failure returned 500 | All fixed in the final wave (§9.1) |
+
+### 9.4 Deferred and parked
+
+- **Manual deployed PC admission E2E** — one real phone + one real PC, camera scan,
+  one encrypted task each way, trace ids in `docs/project/evidence/B2-accounts.md`.
+  The entry point now exists; this is the only Lane A exit proof still missing.
+- **Lane B** — accounts/OTP, admin sign-in issuer, household lookup, console,
+  Android sign-in/local mode/camera scan, sync v0, `services/backend/README.md`.
+- **Parked design items** — the QR capability residual (accepted for the demo; a
+  second claim secret lands with week-6 admission), server-side `sealed`
+  enforcement (sync v0 hardening), expired-row/limiter sweeps and `X-Forwarded-For`
+  trust (single container; verify the edge), duplication/secret-zeroing cleanup.
+- **Minor** — stale comments in `PostgresHarness` about the old migration path.
+
+### 9.5 Verification at `118749e0`
+
+| Command | Result |
+|---|---|
+| `apps\android\gradlew.bat -p services/backend :test --rerun-tasks` | BUILD SUCCESSFUL, 172 tests |
+| `apps\android\gradlew.bat -p apps/android :backend:test --rerun-tasks` | BUILD SUCCESSFUL, 97 tests |
+| `apps\android\gradlew.bat -p apps/windows/sidecar test --rerun-tasks` | BUILD SUCCESSFUL, 39 sidecar tests + dependency suites |
+| `py -3 tools/checks/check-links.py` | 0 broken links |
+| `python tools/scripts/plan-status.py --plan docs/project/plan/backend` | green |
+
+### 9.6 Exit-check status
+
+- **Proven by tests:** #2 (revoke cuts tokens, wrap and the live socket within 5 s),
+  #7 (offline diag queues, wakes once via FakeFcm, audit names the admin),
+  #8 (the 1,000-attempt isolation suite now includes wraps and pending pairings).
+- **Partially proven:** #3 — admission, unwrap and encrypted tasks both ways are
+  tested against MockWebServer/fake links; the real camera scan and deployed
+  round-trip are the deferred manual E2E.
+- **Lane B:** #1, #4, #5, #6, #9 (account/sync/console/Android paths and the
+  week-log grep).
+
+## 10. Checklist
 
 Every box is a change, a test or an artifact, not a meeting. Slices:
 [`tasks/week2a.md`](tasks/week2a.md) (lane A), [`tasks/week2b.md`](tasks/week2b.md)
@@ -152,28 +252,30 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 
 ### W2.0 Design and ADR — Monday
 
-- [ ] `docs/design/decisions/0025-household-content-key.md` written and indexed in
-      `docs/design/decisions/README.md`.
-- [ ] ADR-0022 status flipped to accepted; stale version/module references fixed.
+- [x] `docs/design/decisions/0025-household-content-key.md` written and indexed in
+      `docs/design/decisions/README.md`. *(Lane A, `054fd423`/`3fc7b944`.)*
+- [x] ADR-0022 status flipped to accepted; stale version/module references fixed.
+      *(Lane A, `054fd423`/`3fc7b944`.)*
 - [ ] Sync v0 mini-design (one page: tables, cursors, tombstone rules, ciphertext)
       agreed and linked here.
 
 ### W2.1 Schema and utilities — Monday
 
-- [ ] `V2__accounts.sql`: accounts, household_key_wraps, admins, admin_sessions,
+- [x] `V2__accounts.sql`: accounts, household_key_wraps, admins, admin_sessions,
       pending_pairings, `members.account_id`; RLS on tenant tables; the four
-      `hopa_admin`-owned definer functions.
-- [ ] Testcontainers: migration applies fresh and idempotent; app-role reads of
+      `hopa_admin`-owned definer functions. *(Lane A Task 0, `68bfb7d1`; V3/V4 followed.)*
+- [x] Testcontainers: migration applies fresh and idempotent; app-role reads of
       `household_key_wraps` outside the tenant return zero rows; definer functions
-      return exactly their minimum columns.
+      return exactly their minimum columns. *(`V2SchemaTest`, 10 tests.)*
 - [ ] E.164 normalization + argon2id hashing utilities with unit tests.
 - [ ] Admin seed from `HOPA_ADMIN_EMAIL`/`HOPA_ADMIN_PASSWORD` at boot, upsert.
 
 ### W2.2 Key wrapping — Monday/Tuesday
 
-- [ ] `KeyWrap`: X25519 ECDH → HKDF-SHA256 → AES-256-GCM wrap/unwrap; round-trip
+- [x] `KeyWrap`: X25519 ECDH → HKDF-SHA256 → AES-256-GCM wrap/unwrap; round-trip
       unit tests; tamper test (flipped bit → refusal); recovery-code derivation
-      (Argon2id → AES-GCM) unit-tested, endpoints deferred.
+      (Argon2id → AES-GCM) unit-tested, endpoints deferred. *(Lane A Task 2,
+      `0b7ef05b`/`0cbfa980`; RFC 7748 vectors.)*
 
 ### W2.3 Accounts and sessions — Tuesday
 
@@ -187,21 +289,24 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 
 ### W2.4 Admission — Tuesday/Wednesday
 
-- [ ] pending-session + resolve-by-secret + vouch + claim-with-wrap endpoints per
+- [x] pending-session + resolve-by-secret + vouch + claim-with-wrap endpoints per
       §4; single-use, 5-min TTL, one vouch; QR string `hopa://pair?v=1&s=…&u=…`.
-- [ ] Integration: unauthenticated session never becomes a device without vouch;
+      *(Lane A Tasks 3–4, `40197f2f`, `aeb5e796`, `7616ddcb`.)*
+- [x] Integration: unauthenticated session never becomes a device without vouch;
       double claim refused; wrap stored once; PC receives the wrapped key and the
-      voucher's public key at claim.
+      voucher's public key at claim. *(`AdmissionTest`, 13 tests.)*
 
 ### W2.5 Devices and admin API — Wednesday/Thursday
 
-- [ ] `GET /v1/devices`, `DELETE /v1/devices/{id}` (token family + wrap row, ≤ 5 s
-      cut-off), `POST /v1/token/refresh` reuse detection already proven.
-- [ ] `POST /v1/admin/session`, `GET /v1/admin/households?query=`,
-      `GET /v1/admin/devices?household=` (live presence), access log on every
-      phone-number read.
-- [ ] `diag.ping/state/reset` in the validator; server-authored tasks through
-      `TaskRouter`; audit row names the admin.
+- [x] `GET /v1/devices`, `DELETE /v1/devices/{id}` (token family + wrap row, ≤ 5 s
+      cut-off), `POST /v1/token/refresh` reuse detection already proven. *(Lane A
+      Task 5, `6523d033`, `d436b8ca`, `46cdd1b8`; hard cut on reuse in `99416bd4`.)*
+- [x] `GET /v1/admin/devices?household=` (live presence) — lane A Task 6, `92272bd2`,
+      now read through `admin_list_devices` (`809c97e2`).
+- [ ] `POST /v1/admin/session` and `GET /v1/admin/households?query=` with the
+      access log on every phone-number read — **lane B Task 5**.
+- [x] `diag.ping/state/reset` in the validator; server-authored tasks through
+      `TaskRouter`; audit row names the admin. *(Lane A Task 6, `92272bd2`/`400126b1`.)*
 
 ### W2.6 Console — Wednesday/Thursday
 
@@ -211,9 +316,11 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 
 ### W2.7 Clients — Thursday/Friday
 
-- [ ] Sidecar: pending session, QR render on **stderr** (image + `hopa://` string;
+- [x] Sidecar: pending session, QR render on **stderr** (image + `hopa://` string;
       stdout is the protocol channel), 5 s resolve-by-secret poll, claim, unwrap,
-      credentials stored, gateway envelopes both directions.
+      credentials stored, gateway envelopes both directions. *(Lane A Tasks 7–8,
+      `2e2914e2`, `93272f03`, `8d059231`, `60a1e3be`, `9c0176c0`; entry point
+      `--pair-backend`/`backend.pair` in `e3c9be38`.)*
 - [ ] Android: sign-in screen, local-only mode when `backendUrl` is null, debug
       `buildConfigField` from `local.properties`, camera QR scanner with paste
       fallback, vouch sends the wrapped key.
