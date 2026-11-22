@@ -23,7 +23,7 @@ sealed interface RotateOutcome {
 class TokenIssuer(
     private val db: Database,
     private val clock: () -> Long = System::currentTimeMillis,
-    private val onRevoke: (deviceId: String) -> Unit = {},
+    private val onRevoke: (deviceId: String, householdId: String) -> Unit = { _, _ -> },
 ) {
     fun issueAccess(deviceId: String, householdId: String, memberId: String = ""): Issued =
         db.tenant(householdId) { connection ->
@@ -123,29 +123,66 @@ class TokenIssuer(
             }
             if (rotated) {
                 revokeFamily(row.deviceId, row.householdId)
-                onRevoke(row.deviceId)
+                onRevoke(row.deviceId, row.householdId)
             }
             return RotateOutcome.Refused
         }
 
-        val won = db.tenant(row.householdId) { connection ->
-            connection.prepareStatement(
-                "update refresh_tokens set revoked_at = now() " +
-                    "where id = ?::uuid and revoked_at is null",
+        // Rotation and issuance are one tenant transaction, and the device row
+        // is locked for update. A concurrent revoke therefore either waits for
+        // this turn (and then revokes the freshly issued family) or commits
+        // first (and the revoked_at check refuses to issue anything). Issuing
+        // outside this transaction would let a revoke slip into the gap and
+        // leave a live refresh token behind.
+        val attempt = db.tenant(row.householdId) { connection ->
+            val (present, revokedAt) = connection.prepareStatement(
+                "select revoked_at from devices where id = ?::uuid and household_id = ?::uuid for update",
             ).use {
-                it.setString(1, row.id)
-                it.executeUpdate()
+                it.setString(1, row.deviceId)
+                it.setString(2, row.householdId)
+                it.executeQuery().use { rows ->
+                    if (!rows.next()) false to null else true to rows.getTimestamp(1)
+                }
+            }
+            when {
+                !present -> RotateAttempt.NoDevice
+                revokedAt != null -> RotateAttempt.Revoked
+                else -> {
+                    val won = connection.prepareStatement(
+                        "update refresh_tokens set revoked_at = now() " +
+                            "where id = ?::uuid and revoked_at is null",
+                    ).use {
+                        it.setString(1, row.id)
+                        it.executeUpdate()
+                    }
+                    if (won != 1) {
+                        RotateAttempt.Revoked
+                    } else {
+                        RotateAttempt.Done(
+                            access = issueAccessOn(connection, row.deviceId, row.householdId),
+                            refresh = issueRefreshOn(
+                                connection,
+                                row.deviceId,
+                                row.householdId,
+                                rotatedFrom = row.id,
+                            ),
+                        )
+                    }
+                }
             }
         }
-        if (won != 1) {
-            revokeFamily(row.deviceId, row.householdId)
-            onRevoke(row.deviceId)
-            return RotateOutcome.Refused
+        return when (attempt) {
+            is RotateAttempt.Done -> RotateOutcome.Rotated(attempt.access, attempt.refresh)
+            RotateAttempt.Revoked -> {
+                revokeFamily(row.deviceId, row.householdId)
+                onRevoke(row.deviceId, row.householdId)
+                RotateOutcome.Refused
+            }
+            RotateAttempt.NoDevice -> {
+                revokeFamily(row.deviceId, row.householdId)
+                RotateOutcome.Refused
+            }
         }
-
-        val access = issueAccess(row.deviceId, row.householdId)
-        val refresh = issueRefresh(row.deviceId, row.householdId, rotatedFrom = row.id)
-        return RotateOutcome.Rotated(access, refresh)
     }
 
     private fun revokeFamily(deviceId: String, householdId: String) {
@@ -173,6 +210,14 @@ class TokenIssuer(
         val expiresAt: Long,
         val revoked: Boolean,
     )
+
+    private sealed interface RotateAttempt {
+        data class Done(val access: Issued, val refresh: Issued) : RotateAttempt
+
+        data object Revoked : RotateAttempt
+
+        data object NoDevice : RotateAttempt
+    }
 
     private companion object {
         const val ACCESS_MS = 15 * 60 * 1000L

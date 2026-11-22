@@ -66,9 +66,20 @@ fun main() {
     database?.migrate()
 
     val auth: PgAuth? = database?.let(::PgAuth)
-    val devices: DeviceDirectory = database?.let(::PgDevices) ?: DeviceDirectory.Empty
+    // The registry exists before the issuer: a reused refresh token must both
+    // cut the durable device and close its live socket.
+    val registry = DeviceRegistry()
+    val pgDevices: PgDevices? = database?.let(::PgDevices)
+    val devices: DeviceDirectory = pgDevices ?: DeviceDirectory.Empty
     val tokens = database?.let { db ->
-        TokenIssuer(db, onRevoke = { deviceId -> auth?.revoke(deviceId) })
+        TokenIssuer(
+            db,
+            onRevoke = { deviceId, householdId ->
+                pgDevices?.revokeDevice(deviceId, householdId)
+                auth?.revoke(deviceId)
+                registry.kick(deviceId)
+            },
+        )
     }
 
     val fcmProject = System.getenv("HOPA_FCM_PROJECT")
@@ -85,7 +96,6 @@ fun main() {
     }
 
     val traceStore = database?.let { PgTraceStore(it) }
-    val registry = DeviceRegistry()
 
     val config = ServerConfig(
         version = version,
