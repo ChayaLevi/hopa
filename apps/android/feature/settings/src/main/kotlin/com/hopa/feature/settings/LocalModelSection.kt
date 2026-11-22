@@ -1,6 +1,7 @@
 package com.hopa.feature.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,6 +56,10 @@ fun LocalModelSection(
 ) {
     var pendingDelete by remember { mutableStateOf<String?>(null) }
     var confirmDeleteAll by remember { mutableStateOf(false) }
+    // A row opens its card in place, so every model can be compared without
+    // making every card permanent.
+    var openInstalled by remember { mutableStateOf<String?>(null) }
+    var openAvailable by remember { mutableStateOf<String?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
@@ -115,6 +122,11 @@ fun LocalModelSection(
                     } else {
                         "${formatBytes(model.bytes)}  ·  active"
                     },
+                    spec = spec,
+                    expanded = openInstalled == model.id,
+                    onToggle = {
+                        openInstalled = if (openInstalled == model.id) null else model.id
+                    },
                     onDelete = { pendingDelete = model.id },
                     onUpdate = spec?.takeIf { model.id in state.updates }?.let { current ->
                         { onDownload(current) }
@@ -142,6 +154,10 @@ fun LocalModelSection(
                 DownloadRow(
                     spec = spec,
                     state = state,
+                    expanded = openAvailable == spec.id,
+                    onToggle = {
+                        openAvailable = if (openAvailable == spec.id) null else spec.id
+                    },
                     onDownload = onDownload,
                 )
             }
@@ -245,21 +261,7 @@ private fun ModelCard(
                 )
                 Pill(if (installed) "Installed" else formatBytes(spec.bytes))
             }
-            Text(
-                "${spec.license}  ·  ${spec.contextTokens / 1000}k context  ·  ${spec.speedClass}",
-                style = MaterialTheme.typography.bodySmall,
-                color = HopaColor.TextHint,
-            )
-            spec.strengths.forEach { line -> Bullet(line, strong = true) }
-            spec.weaknesses.forEach { line -> Bullet(line, strong = false) }
-            spec.notes.forEach { line ->
-                Text(
-                    line,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = HopaColor.TextHint,
-                    modifier = Modifier.padding(top = 2.dp),
-                )
-            }
+            ModelDetails(spec)
             if (!installed) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -292,6 +294,9 @@ private fun ModelCard(
 private fun InstalledRow(
     title: String,
     subtitle: String,
+    spec: ModelSpec?,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     onDelete: () -> Unit,
     onUpdate: (() -> Unit)? = null,
 ) {
@@ -300,29 +305,43 @@ private fun InstalledRow(
         colors = CardDefaults.cardColors(containerColor = HopaColor.Surface),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, top = 10.dp, bottom = 10.dp, end = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
+        Column {
+            Row(
                 modifier = Modifier
-                    .size(8.dp)
-                    .background(HopaColor.Success, CircleShape),
-            )
-            Column(modifier = Modifier
-                .weight(1f)
-                .padding(start = 10.dp)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge, color = HopaColor.TextPrimary)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = HopaColor.TextHint)
+                    .fillMaxWidth()
+                    .clickable(enabled = spec != null, onClick = onToggle)
+                    .padding(start = 16.dp, top = 10.dp, bottom = 10.dp, end = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(HopaColor.Success, CircleShape),
+                )
+                Column(modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp)) {
+                    Text(title, style = MaterialTheme.typography.bodyLarge, color = HopaColor.TextPrimary)
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = HopaColor.TextHint)
+                }
+                if (spec != null) {
+                    Arrow(expanded)
+                }
+                if (onUpdate != null) {
+                    TextButton(onClick = onUpdate) { Text("Update") }
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = "Remove $title",
+                        tint = HopaColor.TextHint,
+                    )
+                }
             }
-            if (onUpdate != null) {
-                TextButton(onClick = onUpdate) { Text("Update") }
-            }
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Filled.Delete,
-                    contentDescription = "Remove $title",
-                    tint = HopaColor.TextHint,
+            if (expanded && spec != null) {
+                ModelDetails(
+                    spec = spec,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp),
                 )
             }
         }
@@ -330,34 +349,84 @@ private fun InstalledRow(
 }
 
 @Composable
-private fun DownloadRow(spec: ModelSpec, state: LocalModelUiState, onDownload: (ModelSpec) -> Unit) {
+private fun DownloadRow(
+    spec: ModelSpec,
+    state: LocalModelUiState,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    onDownload: (ModelSpec) -> Unit,
+) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = HopaColor.SurfaceAlt),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(spec.name, style = MaterialTheme.typography.bodyLarge, color = HopaColor.TextPrimary)
-                Text(
-                    "${formatBytes(spec.bytes)}  ·  ${spec.license}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = HopaColor.TextHint,
-                )
-            }
-            if (state.downloadingId == spec.id) {
-                val percent = state.downloadProgress?.let { (it * 100).toInt() } ?: 0
-                Text("$percent%", style = MaterialTheme.typography.labelLarge, color = HopaColor.TextSecondary)
-            } else {
-                FilledTonalButton(onClick = { onDownload(spec) }, enabled = !state.busy) {
-                    Text("Download")
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggle)
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(spec.name, style = MaterialTheme.typography.bodyLarge, color = HopaColor.TextPrimary)
+                    Text(
+                        "${formatBytes(spec.bytes)}  ·  ${spec.license}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = HopaColor.TextHint,
+                    )
                 }
+                Arrow(expanded)
+                if (state.downloadingId == spec.id) {
+                    val percent = state.downloadProgress?.let { (it * 100).toInt() } ?: 0
+                    Text("$percent%", style = MaterialTheme.typography.labelLarge, color = HopaColor.TextSecondary)
+                } else {
+                    FilledTonalButton(onClick = { onDownload(spec) }, enabled = !state.busy) {
+                        Text("Download")
+                    }
+                }
+            }
+            if (expanded) {
+                ModelDetails(
+                    spec = spec,
+                    modifier = Modifier.padding(start = 14.dp, end = 14.dp, bottom = 14.dp),
+                )
             }
         }
     }
+}
+
+/** The card a row opens in place: what it is good at, bad at, and worth knowing. */
+@Composable
+private fun ModelDetails(spec: ModelSpec, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            "${spec.license}  ·  ${spec.contextTokens / 1000}k context  ·  ${spec.speedClass}",
+            style = MaterialTheme.typography.bodySmall,
+            color = HopaColor.TextHint,
+        )
+        spec.strengths.forEach { line -> Bullet(line, strong = true) }
+        spec.weaknesses.forEach { line -> Bullet(line, strong = false) }
+        spec.notes.forEach { line ->
+            Text(
+                line,
+                style = MaterialTheme.typography.bodySmall,
+                color = HopaColor.TextHint,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun Arrow(expanded: Boolean) {
+    Icon(
+        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+        contentDescription = if (expanded) "Hide details" else "Show details",
+        tint = HopaColor.TextHint,
+        modifier = Modifier.padding(horizontal = 6.dp),
+    )
 }
 
 @Composable
