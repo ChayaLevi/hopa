@@ -32,7 +32,8 @@ phone at sign-up.** The server stores it only wrapped.
    never sees the content key itself.
 
 2. **Wrap.** Wrapping uses the X25519 key pairs already collected at pairing.
-   Public keys are the **raw 32-byte u-coordinate**, never base64 text. The
+   Public keys are the **raw 32-byte RFC 7748 u-coordinate** (little-endian
+   octets), never base64 text. The
    wrapping device computes the static-static X25519 ECDH shared secret with
    the receiving device's raw public key, then derives a key-encryption key
    with HKDF-SHA256: IKM = the 32-byte shared secret; salt =
@@ -48,9 +49,8 @@ phone at sign-up.** The server stores it only wrapped.
 3. **Payloads.** Task bodies and sync rows are AES-GCM ciphertext under the
    content key, produced and consumed on devices only. Each message gets a fresh
    random 12-byte IV, the blob is `IV || ciphertext || tag`, and the AAD is
-   empty; an IV is never reused under the same content key. `tasks.payload` and
-   `tasks.body` store bytes; the server never parses, re-encrypts or re-wraps
-   them.
+   empty; an IV is never reused under the same content key. `tasks.body` stores
+   bytes; the server never parses, re-encrypts or re-wraps them.
 
 4. **Recovery code.** The owner may generate a recovery code: the content key
    wrapped under a key derived with Argon2id (`m = 64 MiB`, `t = 3`, `p = 4`)
@@ -91,6 +91,12 @@ phone at sign-up.** The server stores it only wrapped.
 - The wrap table grows one small row per device, and its RLS policy is the same
   one every tenant table uses. A missing wrap row is not an error: it means the
   device is not yet admitted to the content key, or its wrap was revoked.
+- Residual accepted for week 2: an attacker who photographs the PC's QR can claim
+  the session after the phone vouches but before the PC does, receiving household
+  device tokens (not the content key, because the wrap is bound to the PC's key);
+  the window is the vouch-to-claim gap inside five minutes and needs a screen
+  capture. A second claim secret returned only to the PC is the fix when admission
+  generalizes.
 
 ## Alternatives considered
 

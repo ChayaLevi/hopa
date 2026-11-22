@@ -282,8 +282,8 @@ paths:
     post:
       summary: Mint a pending pairing session for a device that wants to join
       description: |
-        Unauthenticated. The new device mints its own session, shows the QR to an
-        operator, then polls `/v1/pair/pending/resolve` with the secret. The secret
+        Unauthenticated. The new device mints its own session, shows the QR to the
+        phone, then polls `/v1/pair/pending/resolve` with the secret. The secret
         leaves the server exactly once; only its SHA-256 is stored. Sessions expire
         in five minutes and minting is rate limited to five per minute per address
         (`X-Forwarded-For` first hop).

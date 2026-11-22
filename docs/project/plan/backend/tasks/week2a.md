@@ -146,7 +146,7 @@ git commit -m "feat(backend): household key wrap and argon2 primitives"
 
 **Files:**
 - Create: `services/backend/src/main/kotlin/com/hopa/backend/pairing/PendingPairing.kt`
-- Modify: `spec/openapi/backend.v1.yaml` (`/v1/pair/pending`, `/v1/pair/pending/{id}`)
+- Modify: `spec/openapi/backend.v1.yaml` (`/v1/pair/pending`, `/v1/pair/pending/resolve`)
 - Test: `services/backend/src/test/kotlin/com/hopa/backend/pairing/PendingPairingTest.kt`
 
 **Interfaces:**
@@ -161,26 +161,30 @@ data class PendingMinted(val sessionId: String, val secret: String,
                          val qr: String, val expiresAt: String)
 // qr = hopa://pair?v=1&s=<secret>&u=wss://<publicHost>/v1/gateway   (no household id)
 class PendingPairingService(db: Database, clock: () -> Long, publicHost: String,
-                            perMinute: Int = 5) {
+                            mintPerMinute: Int = 5, resolvePerMinute: Int = 30) {
     fun mint(request: PendingRequest, remoteAddress: String): PairingOutcome<PendingMinted>
-    fun state(sessionId: String): PairingOutcome<PendingState>   // pending | vouched | claimed | expired
+    fun resolve(secret: String, remoteAddress: String): PairingOutcome<PendingState>
+    // PendingState: sessionId, state (pending | vouched | claimed | expired),
+    // name, platform, publicKey, fingerprint, expiresAt
 }
 ```
 
-- [ ] **Step 1: Write the failing tests** (Ktor `testApplication`, no DB — assertions
-  against refusals and the QR shape; DB paths land in Task 4's integration test):
+- [ ] **Step 1: Write the failing tests** (Ktor `testApplication` over
+  `PostgresHarness`, per R3 — assertions against refusals and the QR shape):
   mint with `alg != "x25519"` or a non-32-byte key → `E_SCHEMA`; the 6th mint from
   one IP in a minute → `E_RATE`; the QR matches
   `^hopa://pair\?v=1&s=[A-Za-z0-9_-]+&u=wss://.+/v1/gateway$` and contains no `h=`;
-  `state` of an unknown id → `E_SCHEMA`; of an expired session → the `Expired`
+  resolving an unknown secret → `E_SCHEMA`; an expired session → the `expired`
   state.
 - [ ] **Step 2: Run to watch them fail** — Run:
   `apps\android\gradlew.bat -p services/backend test --tests "*PendingPairingTest*"`
   Expected: compile error.
 - [ ] **Step 3: Implement** — insert into `pending_pairings` (hash the secret like
-  `PairingService` does, 5-min TTL, X-Forwarded-For-aware limiter 5/min/IP); `state`
-  reads one row by id and maps `vouched_at`/`claimed_at`/`expires_at`. Routes in the
-  same file: `POST /v1/pair/pending`, `GET /v1/pair/pending/{id}`. Update
+  `PairingService` does, 5-min TTL, X-Forwarded-For-aware limiter 5/min/IP for mint,
+  30/min/IP for resolve); `resolve` reads one row by the presented secret hash and
+  maps `vouched_at`/`claimed_at`/`expires_at` to the state. There is no id lookup:
+  the PC only has the secret in its QR. Routes in the same file:
+  `POST /v1/pair/pending`, `POST /v1/pair/pending/resolve`. Update
   `backend.v1.yaml` in this commit.
 - [ ] **Step 4: Run to watch them pass** — same command, `BUILD SUCCESSFUL`.
 - [ ] **Step 5: Commit**
@@ -197,7 +201,7 @@ git commit -m "feat(backend): pending pairing sessions with QR"
 **Files:**
 - Modify: `services/backend/src/main/kotlin/com/hopa/backend/pairing/PendingPairing.kt` (vouch + claim)
 - Modify: `services/backend/src/main/kotlin/com/hopa/backend/pairing/PairingService.kt` (claim falls through to pending)
-- Modify: `spec/openapi/backend.v1.yaml` (`/v1/pair/vouch`; claim response gains `wrappedKey`)
+- Modify: `spec/openapi/backend.v1.yaml` (`/v1/pair/vouch`; claim response gains `wrappedKey` and `voucherPublicKey`)
 - Test: `services/backend/src/test/kotlin/com/hopa/backend/pairing/AdmissionTest.kt` (Testcontainers)
 
 **Interfaces:**
@@ -206,11 +210,12 @@ git commit -m "feat(backend): pending pairing sessions with QR"
 - Produces:
 
 ```kotlin
-data class VouchRequest(val sessionSecret: String, val wrappedKey: ByteArray) // wrappedKey ≤ 512 B
+data class VouchRequest(val sessionSecret: String, val wrappedKey: String) // base64url, 60 B decoded
 fun vouch(identity: DeviceIdentity, request: VouchRequest): PairingOutcome<Vouched>
 // Vouched(sessionId, householdId, memberId)
 // claim: POST /v1/pair/claim {session} now also resolves pending_pairings;
-//        Claimed gains wrappedKey: ByteArray?  (null for operator sessions)
+//        Claimed gains wrappedKey: String?  and voucherPublicKey: String?
+//        (both null for operator sessions)
 ```
 
 - [ ] **Step 1: Write the failing integration tests** — full journey: phone signs in
@@ -227,12 +232,14 @@ fun vouch(identity: DeviceIdentity, request: VouchRequest): PairingOutcome<Vouch
   `apps\android\gradlew.bat -p services/backend test --tests "*AdmissionTest*"`
   Expected: compile error on `vouch`.
 - [ ] **Step 3: Implement** — `vouch`: CAS `update pending_pairings set
-  household_id=?, member_id=?, vouched_at=now() where code_hash=? and vouched_at is
-  null and expires_at > now()`; then insert the wrap row **in the same tenant
-  transaction** (`db.tenant(identity.householdId)`), so an unvouched session can
-  never leave a stray wrap. `claim`: fall through to `pending_pairings` when
-  `pairing_sessions` misses; require `vouched_at` set; reuse the existing CAS +
-  `tokens.issueAccessOn/issueRefreshOn` block; return the wrap bytes.
+  household_id=?, member_id=?, vouched_at=now(), wrapped_key=?, voucher_device_id=?
+  where code_hash=? and vouched_at is null and expires_at > now()` in one
+  `db.tenantAndToken(...)` transaction (R2/R25), parking the 60-byte wrap on the
+  pending row. `claim`: fall through to `pending_pairings` when
+  `pairing_sessions` misses; require `vouched_at`; reuse the existing CAS +
+  `tokens.issueAccessOn/issueRefreshOn` block in one tenant transaction; create the
+  device from the minted name/platform, move the parked wrap to
+  `household_key_wraps`, and return the wrap plus the voucher device's public key.
 - [ ] **Step 4: Run to watch them pass** — same command, `BUILD SUCCESSFUL`.
 - [ ] **Step 5: Commit**
 
@@ -253,9 +260,10 @@ git commit -m "feat(backend): phone vouch admits a PC with a wrapped household k
 **Interfaces:**
 - Consumes: `PgAuth`, `DeviceRegistry`, `PgDevices`.
 - Produces: `GET /v1/devices` → `[{id, platform, name, lastSeenAt, revokedAt,
-  current}]`; `DELETE /v1/devices/{id}` → 204; revoke =
-  `PgAuth.revoke` (token family + cache clear) **+** delete the `household_key_wraps`
-  row **+** `DeviceRegistry.kick(deviceId)` closing the live socket.
+  current}]`; `DELETE /v1/devices/{id}` → 204; revoke = `PgDevices.revokeDevice`
+  (device `revoked_at`, access delete, refresh family revoke and wrap delete in one
+  tenant transaction) **+** `PgAuth.revoke` cache clear **+**
+  `DeviceRegistry.kick(deviceId)` closing the live socket.
 
 - [ ] **Step 1: Write the failing tests** — a connected FakeDevice is revoked:
   its socket closes within 5 s; a refresh with its token → `E_AUTH`; the wrap row is
@@ -266,8 +274,9 @@ git commit -m "feat(backend): phone vouch admits a PC with a wrapped household k
 - [ ] **Step 2: Run to watch them fail** — expected compile error on `DeviceRoutes`.
 - [ ] **Step 3: Implement** — add `fun kick(deviceId: String)` to `DeviceRegistry`
   (close the session; `leave` already handles roster fan-out) and
-  `fun revokeDevice(id: String)` to `PgDevices` running all three effects in one
-  tenant transaction. Routes use the standard bearer auth + `respondError`.
+  `fun revokeDevice(id: String, householdId: String)` to `PgDevices` running all
+  four effects in one tenant transaction. Routes use the standard bearer auth +
+  `respondError`.
 - [ ] **Step 4: Run to watch them pass.**
 - [ ] **Step 5: Commit**
 
@@ -295,19 +304,22 @@ git commit -m "feat(backend): device list and 5-second revocation"
   AdminIdentity? }` (reads `admin_sessions`; the `POST /v1/admin/session` route
   that issues them belongs to slice B Task 5 — land in either order, keep these
   signatures identical); `GET /v1/admin/devices?household=` (rows + `online` from
-  the registry — slice B's lookup page calls this); `POST /v1/admin/devices/{id}/diag` → creates a
-  server-authored task; `EnvelopeValidator.TYPES` gains `diag.ping`, `diag.state`,
-  `diag.reset`; `TaskRouter.createServerTask(adminId, identity-of-target, type, body)`
-  with `from_device` null (V2 made it nullable) and an audit event
-  `{kind: "diag.send", adminId, deviceId, taskId, trace}`.
+  the registry, read through `admin_list_devices` — slice B's lookup page calls
+  this); `POST /v1/admin/devices/{id}/diag` takes `{household, type, body?}` and
+  creates a server-authored task; `EnvelopeValidator.TYPES` gains `diag.ping`,
+  `diag.state`, `diag.reset`; `TaskRouter.createServerTask(adminId,
+  identity-of-target, type, body)` with `from_device` null (V2 made it nullable)
+  and an audit event
+  `diag.send {admin_id, household_id, device_id, task_id, trace}`.
 
 - [ ] **Step 1: Write the failing tests** — an admin token (issued by slice B's
   Task 5 route, or minted directly into `admin_sessions` in the test if that task
-  has not landed) authorizes the routes; `diag.ping` to an **online** FakeDevice
-  arrives as a plaintext envelope
-  with `from: "server"` and echoes back a `task.result`; to an **offline** device it
-  queues and FakeFcm records exactly one high-priority wake; a **revoked** target →
-  `E_SCHEMA` (not queued forever); a household device token used on
+  has not landed) authorizes the routes; `diag.ping` with
+  `{household, type, body}` to an **online** FakeDevice arrives as a plaintext
+  envelope with `from: "server"` and echoes back a `task.result`; to an **offline**
+  device it queues and FakeFcm records exactly one high-priority wake (a wake
+  failure still answers 202 after the row/audit); a **revoked** or wrong-household
+  target → `E_TENANT` (not queued forever); a household device token used on
   `/v1/admin/*` → `E_AUTH`; a diag send with `type: "task.create"` (smuggling) →
   `E_SCHEMA`; the audit log line names the admin and the task.
 - [ ] **Step 2: Run to watch them fail.**
@@ -341,22 +353,27 @@ git commit -m "feat(backend): admin diag tasks and presence, audit-logged"
 **Interfaces:**
 - Consumes: `core/backend` client types (`BackendClient` or the pairing helpers the
   Android app uses), `KeyWrap`, `BackendCredentials`.
-- Produces: `class BackendPairing(client, credentials) { suspend fun
-  admit(backendUrl: String): AdmissionResult }` — generates the XDH keypair, POSTs
-  the pending session, renders the QR (Unicode block matrix to stdout **and** a PNG
-  next to the sidecar log) plus the `hopa://` string for paste fallback, polls until
-  `vouched`, claims, unwraps the content key, stores credentials + key; and prints
-  the key fingerprint `sha256(publicKey)[0..8]` the phone also shows.
+- Produces: `class BackendPairing(dataDir) { suspend fun
+  admit(backendUrl: String, name: String): AdmissionResult }` — generates the XDH
+  keypair, POSTs the pending session, renders the QR (Unicode block matrix and the
+  `hopa://` string to **stderr**, plus a transient PNG) so stdout stays the JSON
+  protocol channel, polls `/v1/pair/pending/resolve` by the minted secret every
+  **5 s** until `vouched`, claims, unwraps the content key with the returned
+  `voucherPublicKey`, stores credentials + key, and prints the key fingerprint
+  `sha256(publicKey)[0..8]` the phone also shows. The session's `gatewayUrl` is
+  taken from the minted QR, not the input URL.
 
 - [ ] **Step 1: Write the failing test** — against a MockWebServer serving the
-  pending/vouch/claim sequence: `admit` returns a stored credential with the
+  pending/resolve/vouch/claim sequence: `admit` returns a stored credential with the
   unwrapped 32-byte key equal to the test's content key; the rendered QR matrix
-  encodes the exact `hopa://pair?...` string (decode it back with zxing and compare).
+  encodes the exact `hopa://pair?...` string (decode it back with zxing and compare);
+  the default sink writes the secret to stderr, never stdout.
 - [ ] **Step 2: Run to watch it fail** — Run:
   `apps\android\gradlew.bat -p apps/windows/sidecar test --tests "*BackendPairingTest*"`
   Expected: compile error.
 - [ ] **Step 3: Implement** — zxing `QRCodeWriter` → `BitMatrix` → Unicode blocks +
-  PNG; poll every 2 s with a 5-min deadline; no LAN-bridge code anywhere in the file.
+  PNG; poll every 5 s with a 5-min deadline and back off on 429; no LAN-bridge code
+  anywhere in the file.
 - [ ] **Step 4: Run to watch it pass.**
 - [ ] **Step 5: Commit**
 
@@ -376,16 +393,17 @@ git commit -m "feat(sidecar): admit the PC by QR with a wrapped household key"
 **Interfaces:**
 - Consumes: Task 7's stored credentials; the Android app's `BackendLink`/envelope
   client from `core/backend`; `KeyWrap`.
-- Produces: `class BackendGateway(link, keys) { suspend fun run() }` — connects
-  `device.hello`, drains the queue, decrypts incoming `task.create` bodies with the
-  content key, hands them to the existing sidecar engine, encrypts and sends
-  `task.result`/`task.error` back; `diag.ping` answers with a plaintext echo per the
-  exemption.
+- Produces: `class BackendGateway(link, contentKey, run, onDiagState)` — attaches
+  the link's `onTask` and `onDiagnostic` seams, decrypts incoming `task.create`
+  bodies with the content key, hands the goal to the existing sidecar engine,
+  encrypts and sends `task.result`/`task.error` back; `diag.*` answers in plaintext
+  per the exemption and never reaches the task handler.
 
-- [ ] **Step 1: Write the failing test** — a real Ktor WebSocket server double (the
-  mirror of Android's `FakeDevice`): sends an encrypted `task.create`, expects a
-  ciphertext `task.result` that decrypts to the engine's answer; sends a plaintext
-  `diag.ping`, expects the echo; killed-socket reconnect resends `hello` and drains.
+- [ ] **Step 1: Write the failing test** — against a fake `BackendLink` (R30; the
+  socket/reconnect behaviour is already covered in `core/backend`): a delivered
+  encrypted `task.create` is answered with a ciphertext `task.result` that decrypts
+  to the engine's answer and then acked; a plaintext `diag.ping` arrives through
+  `onDiagnostic` (never `onTask`) and echoes.
 - [ ] **Step 2: Run to watch it fail.**
 - [ ] **Step 3: Implement** — reuse the shared link/client; no new protocol code
   beyond what `core/backend` already provides.

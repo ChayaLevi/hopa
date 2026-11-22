@@ -36,7 +36,8 @@ barcode-scanning on Android.
 - `accounts`, `admins`, `admin_sessions` are not tenant tables; `household_key_wraps`
   and `pending_pairings` are (RLS on, `FORCE` like the rest).
 - Admin lookups into tenant rows go only through the migration's `SECURITY DEFINER`
-  functions; no `BYPASSRLS`, no blanket GUC.
+  functions owned by `hopa_admin`; the app role has no `BYPASSRLS` and no blanket
+  tenant GUC.
 - Every admin read of a phone number writes an access-log line first.
 - `HOPA_SMS_ENABLED` defaults to **false**; when false, the OTP routes return
   `E_UNSUPPORTED` and no code is generated.
@@ -76,17 +77,19 @@ Each line has a test in Task 3, Task 4, Task 5 or Task 7.
   `alter table members add column account_id uuid null references accounts`;
   `alter table tasks alter column from_device drop not null` (server-authored diag
   tasks); RLS enable+force + household policy on `household_key_wraps` and
-  `pending_pairings`; **no** RLS on `accounts`/`admins`/`admin_sessions`; functions
-  `admin_resolve_member(uuid) returns (household_id, member_id, display_name)` and
-  `admin_resolve_phone(text) returns (household_id, member_id, display_name,
-  account_id)`, both `SECURITY DEFINER`, `search_path = public, pg_temp`, returning
-  minimum columns.
+  `pending_pairings`; **no** RLS on `accounts`/`admins`/`admin_sessions`; four
+  functions owned by the non-login `hopa_admin` (`BYPASSRLS`) role:
+  `admin_resolve_member(uuid)` and `admin_resolve_household(uuid)` return
+  `(household_id, member_id, display_name)`, `admin_resolve_phone(text)` returns
+  those plus `account_id`, and `admin_list_devices(uuid)` returns
+  `(device_id, platform, name, last_seen_at, revoked_at)`. All are
+  `SECURITY DEFINER`, `search_path = public, pg_temp`, and return minimum columns.
 
 - [ ] **Step 1: Write the failing tests** — migration applies fresh and re-applies as
   a no-op; as `hopa_app` with no tenant set: `select count(*) from
   household_key_wraps` returns 0 (RLS force) while `select count(*) from accounts`
   works (non-tenant); `admin_resolve_member('00000000-...-0000')` returns no row;
-  both functions' result type is exactly the columns above (`information_schema`).
+  each function's result type is exactly the columns above (`information_schema`).
 - [ ] **Step 2: Run to watch them fail** — Run:
   `apps\android\gradlew.bat -p services/backend test --tests "*V2SchemaTest*"`
   Expected: Flyway error — `V2__accounts.sql` not found (or table missing).
@@ -341,9 +344,9 @@ git commit -m "feat(android): phone-and-password sign-in and the two modes"
 - Consumes: `PairingLink` (parses `hopa://pair?…`); slice A Task 4's
   `/v1/pair/vouch`; `KeyWrap`; the pending session's PC public key.
 - Produces: `ScanScreen` (CameraX preview + ML Kit, fires on the first matching
-  `hopa://` barcode); `VouchViewModel.vouch(link: PairingLink)`: fetches the
-  pending session's PC public key (GET `/v1/pair/pending/{id}` — add the key to
-  that response in slice A Task 3 if not present), shows name + fingerprint
+  `hopa://` barcode); `VouchViewModel.vouch(link: PairingLink)`: resolves the
+  pending session by the secret in the QR (`POST /v1/pair/pending/resolve
+  {sessionSecret}` — there is no id route), shows name + fingerprint
   `sha256(publicKey)[0..8]`, then POSTs the vouch with
   `KeyWrap.wrapForDevice(contentKey, pcPublicKey, phonePrivateKey)`.
 

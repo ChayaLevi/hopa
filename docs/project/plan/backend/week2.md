@@ -63,16 +63,16 @@ re-open.
 | `POST /v1/session` | none (rate-limited) | `{phone, password, platform, name, publicKey, pushToken?}` → signed-in device + tokens (no history without a wrap) |
 | `POST /v1/session/otp` | none | `{phone}` → code sent via `SmsPort` (log-only until a vendor exists) |
 | `POST /v1/session/otp/verify` | none | `{phone, code, platform, name, publicKey}` → verified login; binds and stamps `verified_at` on an unverified account |
-| `POST /v1/pair/pending` | none (5/min/IP) | `{platform, name, publicKey, alg}` → `{sessionId, qr, expiresAt}` |
-| `GET /v1/pair/pending/{id}` | none | `{state: pending \| vouched \| claimed \| expired}` — the PC polls |
+| `POST /v1/pair/pending` | none (5/min/IP) | `{platform, name, publicKey, alg}` → `{sessionId, secret, qr, expiresAt}` |
+| `POST /v1/pair/pending/resolve` | none (30/min/IP) | `{sessionSecret}` → `{sessionId, state, name, platform, publicKey, fingerprint, expiresAt}`; the PC polls by the secret it minted |
 | `POST /v1/pair/vouch` | device Bearer | `{sessionSecret, wrappedKey}` → binds household + member; stores the wrap; session becomes vouchable |
-| `POST /v1/pair/claim` | none | extended: a pending session claim returns tokens + `wrappedKey` for the PC's key |
+| `POST /v1/pair/claim` | none | extended: a pending session claim returns tokens, `wrappedKey` and the voucher's `voucherPublicKey` for the PC's key |
 | `GET /v1/devices` | device Bearer | the household's device list |
 | `DELETE /v1/devices/{id}` | device Bearer | revoke: token family + wrap row, 5 s cut-off (exit check) |
 | `POST /v1/admin/session` | none (rate-limited) | admin sign-in (email + password) |
 | `GET /v1/admin/households?query=` | admin Bearer | lookup by phone, member-id or household-id (access-logged) |
 | `GET /v1/admin/devices?household=` | admin Bearer | device list + live presence + `last_seen_at` |
-| `POST /v1/admin/devices/{id}/diag` | admin Bearer | `{type: diag.ping \| diag.state \| diag.reset, body?}` → server-authored task |
+| `POST /v1/admin/devices/{id}/diag` | admin Bearer | `{household, type: diag.ping \| diag.state \| diag.reset, body?}` → server-authored task |
 
 Envelope: `diag.ping`, `diag.state`, `diag.reset` join the allowed types; they are
 the only plaintext bodies. Everything else stays as frozen in week 1 (§4 of
@@ -90,10 +90,13 @@ breaking change — unknown types are already refused with `E_UNSUPPORTED`.
 | `pending_pairings` | `id`, `code_hash`, `platform`, `name`, `public_key`, `alg`, `household_id` null, `member_id` null, `vouched_at`, `expires_at`, `claimed_at` | single use, 5-min TTL; binding written by vouch |
 | `members` (alter) | + `account_id uuid null references accounts` | null for operator-paired members |
 
-Plus two `SECURITY DEFINER` functions, audit-logged:
-`admin_resolve_member(member uuid)` and `admin_resolve_phone(phone text)` — both
-return `(household_id, member_id, display_name)` and nothing else. No `BYPASSRLS`
-role, no blanket GUC.
+Plus four `SECURITY DEFINER` functions owned by the non-login `hopa_admin`
+(`BYPASSRLS`) role, each returning minimum columns and audit-logged by the caller:
+`admin_resolve_member(member uuid)` and `admin_resolve_household(household uuid)`
+return `(household_id, member_id, display_name)`; `admin_resolve_phone(phone text)`
+also returns `account_id` (four columns); `admin_list_devices(household uuid)`
+returns `(device_id, platform, name, last_seen_at, revoked_at)`. The app role has
+no `BYPASSRLS` and no blanket tenant GUC.
 
 Sync v0's tables (`threads`, `turns`, `device_cursors` — naming to be settled by
 Monday's mini-design) land in the same migration only if that design is agreed
@@ -122,7 +125,7 @@ Sync v0 never slides.
 | Sidecar PC work is new surface (no backend code exists there today) | The admission exit check fails late | Reuse the JVM `backend` client module Android already uses; lane A owns it Thu–Fri; fallback path is already deployed | A |
 | Argon2id on the free tier | Slow sign-up under load | Tune cost parameters once, measure in CI; it is a sign-in-path cost, not per-message | B |
 | Camera + ML Kit is a new Android dependency | Build size, permission friction, device variance | Paste fallback ships in the same PR; camera is additive | B |
-| `SECURITY DEFINER` functions widen access by mistake | Tenant leak — the one bug that ends the beta | Functions return three columns only; CI calls them as the app role and asserts the shape; every call is audit-logged | B |
+| `SECURITY DEFINER` functions widen access by mistake | Tenant leak — the one bug that ends the beta | Four functions return minimum columns only; CI calls them as the app role and asserts the shape; every call is audit-logged | B |
 | Plaintext `diag.*` becomes a smuggling channel | Server-readable task bodies reappear | Validator allows plaintext for the three `diag.*` types only; admin-auth required; audit per send | A |
 | Phone-number enumeration via sign-up errors | Account discovery before any SMS | Uniform `E_AUTH` for wrong phone and wrong password; per-IP and per-phone rate limits | B |
 | Sync v0 redesign mid-week (mini-design slips past Monday) | B loses Thursday | The mini-design is one page, Monday-only; if it slips, sync v0 keeps the bridge store's rules verbatim and the design lands as a PR comment | B |
@@ -158,11 +161,11 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 ### W2.1 Schema and utilities — Monday
 
 - [ ] `V2__accounts.sql`: accounts, household_key_wraps, admins, admin_sessions,
-      pending_pairings, `members.account_id`; RLS on tenant tables; the two
-      definer functions.
+      pending_pairings, `members.account_id`; RLS on tenant tables; the four
+      `hopa_admin`-owned definer functions.
 - [ ] Testcontainers: migration applies fresh and idempotent; app-role reads of
       `household_key_wraps` outside the tenant return zero rows; definer functions
-      return exactly `(household_id, member_id, display_name)`.
+      return exactly their minimum columns.
 - [ ] E.164 normalization + argon2id hashing utilities with unit tests.
 - [ ] Admin seed from `HOPA_ADMIN_EMAIL`/`HOPA_ADMIN_PASSWORD` at boot, upsert.
 
@@ -184,10 +187,11 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 
 ### W2.4 Admission — Tuesday/Wednesday
 
-- [ ] pending-session + poll + vouch + claim-with-wrap endpoints per §4;
-      single-use, 5-min TTL, one vouch; QR string `hopa://pair?v=1&s=…&u=…`.
+- [ ] pending-session + resolve-by-secret + vouch + claim-with-wrap endpoints per
+      §4; single-use, 5-min TTL, one vouch; QR string `hopa://pair?v=1&s=…&u=…`.
 - [ ] Integration: unauthenticated session never becomes a device without vouch;
-      double claim refused; wrap stored once; PC receives wrapped key at claim.
+      double claim refused; wrap stored once; PC receives the wrapped key and the
+      voucher's public key at claim.
 
 ### W2.5 Devices and admin API — Wednesday/Thursday
 
@@ -207,8 +211,9 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 
 ### W2.7 Clients — Thursday/Friday
 
-- [ ] Sidecar: pending session, QR render (image + `hopa://` string), poll, claim,
-      unwrap, credentials stored, gateway envelopes both directions.
+- [ ] Sidecar: pending session, QR render on **stderr** (image + `hopa://` string;
+      stdout is the protocol channel), 5 s resolve-by-secret poll, claim, unwrap,
+      credentials stored, gateway envelopes both directions.
 - [ ] Android: sign-in screen, local-only mode when `backendUrl` is null, debug
       `buildConfigField` from `local.properties`, camera QR scanner with paste
       fallback, vouch sends the wrapped key.
