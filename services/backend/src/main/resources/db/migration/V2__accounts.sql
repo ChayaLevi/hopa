@@ -96,9 +96,37 @@ create policy pending_pairings_tenant_update on pending_pairings for update
     using (household_id = nullif(current_setting('hopa.household_id', true), '')::uuid)
     with check (household_id = nullif(current_setting('hopa.household_id', true), '')::uuid);
 
--- Admin console lookups. SECURITY DEFINER so the console role never needs a
--- tenant GUC or BYPASSRLS; each function returns only the columns the lookup
--- page renders, and callers audit-log every phone number read.
+-- Admin console lookups. FORCE RLS binds the table owner too, so a
+-- SECURITY DEFINER function owned by the migration role would read no tenant
+-- rows. These four functions are therefore owned by `hopa_admin`, a NOLOGIN
+-- role with BYPASSRLS that only these functions ever run as; the app role
+-- itself never bypasses a policy. Each function returns only the columns the
+-- lookup page renders, and callers audit-log every phone-number read.
+--
+-- Production: the deploy role needs CREATEROLE once, or an operator runs the
+-- same line as a superuser. If an operator pre-creates `hopa_admin` instead,
+-- it must also be granted to the deploy role WITH ADMIN OPTION, or the
+-- temporary membership below fails here at deploy time. That is deliberate:
+-- the alternative is empty lookups at request time.
+do $$
+begin
+    if not exists (select from pg_roles where rolname = 'hopa_admin') then
+        begin
+            create role hopa_admin nologin bypassrls;
+        exception
+            when insufficient_privilege then
+                raise exception
+                    'admin lookups need the hopa_admin role. Run as a superuser: create role hopa_admin nologin bypassrls;';
+        end;
+    end if;
+end
+$$;
+
+-- BYPASSRLS bypasses policies, not privileges: the function owner still needs
+-- schema usage and SELECT on every table the lookups touch.
+grant usage on schema public to hopa_admin;
+grant select on accounts, members, devices, households to hopa_admin;
+
 create function admin_resolve_member(member uuid)
 returns table (household_id uuid, member_id uuid, display_name text)
 language sql
@@ -164,3 +192,21 @@ grant execute on function admin_resolve_member(uuid) to hopa_app;
 grant execute on function admin_resolve_phone(text) to hopa_app;
 grant execute on function admin_resolve_household(uuid) to hopa_app;
 grant execute on function admin_list_devices(uuid) to hopa_app;
+
+-- Temporary membership, held only while the ownership changes are made. The
+-- new owner must have CREATE on the object's schema, so that privilege is also
+-- borrowed for the duration and taken back before the migration ends.
+grant hopa_admin to current_user;
+grant create on schema public to hopa_admin;
+alter function admin_resolve_member(uuid) owner to hopa_admin;
+alter function admin_resolve_phone(text) owner to hopa_admin;
+alter function admin_resolve_household(uuid) owner to hopa_admin;
+alter function admin_list_devices(uuid) owner to hopa_admin;
+revoke create on schema public from hopa_admin;
+
+-- The migration role is a member of hopa_admin only between the grant above and
+-- this revoke, which runs after the last ownership change. At runtime neither
+-- hopa_app nor hopa_owner can SET ROLE into the BYPASSRLS owner, so a SQL
+-- injection cannot use the owner's privileges. V2SchemaTest asserts
+-- pg_has_role(..., 'hopa_admin', 'member') is false for both roles.
+revoke hopa_admin from current_user;

@@ -7,6 +7,8 @@ import com.hopa.backend.harness.seedHousehold
 import java.sql.Connection
 import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -317,6 +319,7 @@ class V2SchemaTest {
         val devices = function("admin_list_devices") ?: fail("admin_list_devices is missing")
 
         for (fn in listOf(member, phone, household, devices)) {
+            assertEquals("hopa_admin", fn.owner, "${fn.name} is not owned by hopa_admin")
             assertTrue(fn.definer, "${fn.name} is not SECURITY DEFINER")
             assertTrue(
                 fn.config.orEmpty().contains("search_path=public, pg_temp"),
@@ -362,21 +365,177 @@ class V2SchemaTest {
     }
 
     @Test
-    fun `admin resolve member returns no row for an unknown member`() {
-        val rows = db.dataSource.connection.use { connection ->
+    fun `admin lookups resolve tenant rows without a tenant`() {
+        val home = newHousehold()
+        val member = UUID.randomUUID().toString()
+        val device = newDevice()
+        seedHousehold(db, home, device, member)
+
+        val account = UUID.randomUUID().toString()
+        val phone = "+9725" + UUID.randomUUID().toString().replace("-", "").take(8)
+        db.dataSource.connection.use { connection ->
             connection.prepareStatement(
-                "select count(*) from admin_resolve_member(?::uuid)",
+                "insert into accounts(id, phone, password_hash) values (?::uuid, ?, 'hash')",
             ).use {
-                it.setString(1, "00000000-0000-0000-0000-000000000000")
-                it.executeQuery().use { result -> result.next(); result.getInt(1) }
+                it.setString(1, account)
+                it.setString(2, phone)
+                it.executeUpdate()
+            }
+        }
+        db.tenant(home) { connection ->
+            connection.prepareStatement(
+                "update members set account_id = ?::uuid where id = ?::uuid",
+            ).use {
+                it.setString(1, account)
+                it.setString(2, member)
+                assertEquals(1, it.executeUpdate())
+            }
+            connection.prepareStatement(
+                "update devices set last_seen_at = now() where id = ?::uuid",
+            ).use {
+                it.setString(1, device)
+                assertEquals(1, it.executeUpdate())
             }
         }
 
-        assertEquals(0, rows)
+        // Every call is hopa_app with no household/token GUC set.
+        val resolvedMember = db.dataSource.connection.use { connection ->
+            connection.prepareStatement(
+                "select household_id, member_id, display_name " +
+                    "from admin_resolve_member(?::uuid)",
+            ).use {
+                it.setString(1, member)
+                it.executeQuery().use { rows ->
+                    assertTrue(rows.next())
+                    val row = Triple(
+                        rows.getString("household_id"),
+                        rows.getString("member_id"),
+                        rows.getString("display_name"),
+                    )
+                    assertFalse(rows.next())
+                    row
+                }
+            }
+        }
+        assertEquals(Triple(home, member, "Test"), resolvedMember)
+
+        val resolvedHousehold = db.dataSource.connection.use { connection ->
+            connection.prepareStatement(
+                "select household_id, member_id, display_name " +
+                    "from admin_resolve_household(?::uuid)",
+            ).use {
+                it.setString(1, home)
+                it.executeQuery().use { rows ->
+                    assertTrue(rows.next())
+                    val row = Triple(
+                        rows.getString("household_id"),
+                        rows.getString("member_id"),
+                        rows.getString("display_name"),
+                    )
+                    assertFalse(rows.next())
+                    row
+                }
+            }
+        }
+        assertEquals(Triple(home, member, "Test"), resolvedHousehold)
+
+        val resolvedDevice = db.dataSource.connection.use { connection ->
+            connection.prepareStatement(
+                "select device_id, platform, name, last_seen_at, revoked_at " +
+                    "from admin_list_devices(?::uuid)",
+            ).use {
+                it.setString(1, home)
+                it.executeQuery().use { rows ->
+                    assertTrue(rows.next())
+                    assertNotNull(rows.getString("last_seen_at"))
+                    assertNull(rows.getString("revoked_at"))
+                    val row = Triple(
+                        rows.getString("device_id"),
+                        rows.getString("platform"),
+                        rows.getString("name"),
+                    )
+                    assertFalse(rows.next())
+                    row
+                }
+            }
+        }
+        assertEquals(Triple(device, "android", "Pixel"), resolvedDevice)
+
+        val resolvedPhone = db.dataSource.connection.use { connection ->
+            connection.prepareStatement(
+                "select household_id, member_id, display_name, account_id " +
+                    "from admin_resolve_phone(?)",
+            ).use {
+                it.setString(1, phone)
+                it.executeQuery().use { rows ->
+                    assertTrue(rows.next())
+                    val row = listOf(
+                        rows.getString("household_id"),
+                        rows.getString("member_id"),
+                        rows.getString("display_name"),
+                        rows.getString("account_id"),
+                    )
+                    assertFalse(rows.next())
+                    row
+                }
+            }
+        }
+        assertEquals(listOf(home, member, "Test", account), resolvedPhone)
+
+        // The functions bypass the policy; the app role still does not.
+        val directMembers = db.dataSource.connection.use {
+            it.count("select count(*) from members")
+        }
+        assertEquals(0, directMembers)
+
+        val appIsAdmin = db.dataSource.connection.use { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery(
+                    "select pg_has_role(current_user, 'hopa_admin', 'member')",
+                ).use { rows -> rows.next(); rows.getBoolean(1) }
+            }
+        }
+        assertFalse(appIsAdmin)
+
+        // Separate connection: hopa_owner's temporary membership was revoked.
+        val ownerIsAdmin = PostgresHarness.ownerDatabase().dataSource.connection.use { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery(
+                    "select pg_has_role(current_user, 'hopa_admin', 'member')",
+                ).use { rows -> rows.next(); rows.getBoolean(1) }
+            }
+        }
+        assertFalse(ownerIsAdmin)
+    }
+
+    @Test
+    fun `admin lookups return no row for unknown values`() {
+        val unknown = "00000000-0000-0000-0000-000000000000"
+        val (byMember, byHousehold, byPhone) = db.dataSource.connection.use { connection ->
+            Triple(
+                connection.preparedCount(
+                    "select count(*) from admin_resolve_member(?::uuid)",
+                    unknown,
+                ),
+                connection.preparedCount(
+                    "select count(*) from admin_resolve_household(?::uuid)",
+                    unknown,
+                ),
+                connection.preparedCount(
+                    "select count(*) from admin_resolve_phone(?)",
+                    "+970000000000",
+                ),
+            )
+        }
+
+        assertEquals(0, byMember)
+        assertEquals(0, byHousehold)
+        assertEquals(0, byPhone)
     }
 
     private data class FunctionInfo(
         val name: String,
+        val owner: String,
         val definer: Boolean,
         val config: String?,
         val executable: Boolean,
@@ -387,13 +546,21 @@ class V2SchemaTest {
 
     private data class Arg(val name: String, val type: String, val mode: String)
 
+    private data class Header(
+        val definer: Boolean,
+        val config: String?,
+        val executable: Boolean,
+        val owner: String,
+    )
+
     private fun function(name: String): FunctionInfo? =
         PostgresHarness.adminDatabase().dataSource.connection.use { connection ->
             val header = connection.prepareStatement(
                 """
                 select p.prosecdef,
                        array_to_string(p.proconfig, ','),
-                       has_function_privilege('hopa_app', p.oid, 'EXECUTE')
+                       has_function_privilege('hopa_app', p.oid, 'EXECUTE'),
+                       pg_get_userbyid(p.proowner)
                 from pg_proc p
                 join pg_namespace n on n.oid = p.pronamespace
                 where n.nspname = 'public' and p.proname = ?
@@ -404,7 +571,12 @@ class V2SchemaTest {
                     if (!rows.next()) {
                         null
                     } else {
-                        Triple(rows.getBoolean(1), rows.getString(2), rows.getBoolean(3))
+                        Header(
+                            rows.getBoolean(1),
+                            rows.getString(2),
+                            rows.getBoolean(3),
+                            rows.getString(4),
+                        )
                     }
                 }
             } ?: return@use null
@@ -430,7 +602,7 @@ class V2SchemaTest {
                 }
             }
 
-            FunctionInfo(name, header.first, header.second, header.third, args)
+            FunctionInfo(name, header.owner, header.definer, header.config, header.executable, args)
         }
 
     private fun inputs(fn: FunctionInfo): List<String> =
@@ -445,6 +617,12 @@ class V2SchemaTest {
     private fun Connection.count(sql: String): Int =
         createStatement().use { statement ->
             statement.executeQuery(sql).use { rows -> rows.next(); rows.getInt(1) }
+        }
+
+    private fun Connection.preparedCount(sql: String, argument: String): Int =
+        prepareStatement(sql).use { statement ->
+            statement.setString(1, argument)
+            statement.executeQuery().use { rows -> rows.next(); rows.getInt(1) }
         }
 
     private fun hex(bytes: ByteArray): String = bytes.joinToString("") { "%02x".format(it) }

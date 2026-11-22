@@ -11,7 +11,9 @@ import org.testcontainers.containers.PostgreSQLContainer
  * are owned by a role the policies actually apply to — that is what makes
  * `FORCE ROW LEVEL SECURITY` a real assertion rather than decoration. The app
  * under test connects as `hopa_app`, a second non-superuser role. The container
- * superuser is used only to create the two roles.
+ * superuser is used only to create the two login roles and the non-login
+ * `hopa_admin` role (BYPASSRLS) that owns the admin lookup functions; the
+ * migration grants and then revokes its own temporary membership in it.
  */
 object PostgresHarness {
     private const val NO_HOUSEHOLD = "00000000-0000-0000-0000-000000000000"
@@ -64,11 +66,17 @@ object PostgresHarness {
                           IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'hopa_app') THEN
                             CREATE ROLE hopa_app LOGIN PASSWORD 'hopa_app' NOSUPERUSER NOBYPASSRLS;
                           END IF;
+                          IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'hopa_admin') THEN
+                            CREATE ROLE hopa_admin NOLOGIN BYPASSRLS;
+                          END IF;
                         END $$;
                         """.trimIndent(),
                     )
-                    statement.execute("GRANT USAGE, CREATE ON SCHEMA public TO hopa_owner")
+                    statement.execute(
+                        "GRANT USAGE, CREATE ON SCHEMA public TO hopa_owner WITH GRANT OPTION",
+                    )
                     statement.execute("GRANT USAGE ON SCHEMA public TO hopa_app")
+                    statement.execute("GRANT hopa_admin TO hopa_owner WITH ADMIN OPTION")
                 }
             }
 
@@ -78,6 +86,13 @@ object PostgresHarness {
 
             admin.tenant(NO_HOUSEHOLD) { connection ->
                 connection.createStatement().use { statement ->
+                    // The superuser bootstrap grant exists only so the migration
+                    // can transfer function ownership. It has a different
+                    // grantor than the migration's own temporary grant, so
+                    // hopa_owner cannot remove it under Postgres's grantor
+                    // model; drop it here to match production, where the deploy
+                    // role is not a member at runtime either.
+                    statement.execute("REVOKE hopa_admin FROM hopa_owner")
                     statement.execute(
                         "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO hopa_app",
                     )
