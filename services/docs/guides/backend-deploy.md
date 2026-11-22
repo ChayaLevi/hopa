@@ -58,6 +58,44 @@ curl https://hopa-backend.onrender.com/v1/health
 The free Postgres instance is also time-limited. Move both to paid plans before
 beta; the evidence file records this as a release gate.
 
+## Check and repair from the terminal
+
+`tools/scripts/render-check.ps1` reads the same facts the dashboard shows:
+health, the live deploy and its commit, the service state, `DATABASE_URL`, and
+the Postgres instance. It wakes a sleeping service, waits for a deploy, and can
+redeploy `main` when the live commit is behind.
+
+```powershell
+# Health, live commit, database and free-tier expiry. Wakes the service if needed.
+.\tools\scripts\render-check.ps1
+
+# Wait longer than the default 150 s for a cold start.
+.\tools\scripts\render-check.ps1 -WakeTimeoutSec 300
+
+# Deploy the current branch HEAD only when the live commit differs from local.
+.\tools\scripts\render-check.ps1 -RedeployIfStale
+
+# Deploy now, optionally clearing the build cache.
+.\tools\scripts\render-check.ps1 -Redeploy -ClearCache
+
+# A specific commit, then wait for it to go live.
+.\tools\scripts\render-check.ps1 -Redeploy -Commit <sha>
+
+# Show the deploy request without sending it.
+.\tools\scripts\render-check.ps1 -RedeployIfStale -DryRun
+
+# No Render API: health only, for a machine without the key.
+.\tools\scripts\render-check.ps1 -NoApi -Url https://hopa-backend-test.onrender.com
+```
+
+The Render API half needs `RENDER_API_KEY` in the environment; the script never
+prints it. Exit code `0` means the service is healthy and the database answers,
+`1` means a check failed, and `2` means the service or key could not be resolved.
+`-Json` emits one machine-readable object with the same fields.
+
+The database line shows `expires in N day(s)` when the free instance is close to
+its expiry date. Treat that as a release gate, not a warning to ignore.
+
 ## Smoke the image locally
 
 ```powershell
