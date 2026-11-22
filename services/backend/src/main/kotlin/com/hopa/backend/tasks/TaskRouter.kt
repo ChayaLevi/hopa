@@ -66,6 +66,9 @@ class TaskRouter(
 
         /** The only payloads that are plaintext by type; nothing else is routable here. */
         val DIAG_TYPES = setOf("diag.ping", "diag.state", "diag.reset")
+
+        /** Half the frame cap, leaving room for the envelope fields around it. */
+        const val MAX_DIAG_BODY_BYTES = 32 * 1024
     }
 
     fun route(
@@ -109,8 +112,13 @@ class TaskRouter(
         body: JsonObject,
     ): RouteResult {
         if (type !in DIAG_TYPES) {
+            return RouteResult.Refused(GatewayError("E_SCHEMA", "not a diagnostic type"), null)
+        }
+        // The body becomes the delivered frame's body; cap it well under the
+        // frame limit so the envelope's own fields can never push it over.
+        if (body.toString().toByteArray(Charsets.UTF_8).size > MAX_DIAG_BODY_BYTES) {
             return RouteResult.Refused(
-                GatewayError("E_SCHEMA", "not a diagnostic type: $type"),
+                GatewayError("E_SCHEMA", "diagnostic body is larger than $MAX_DIAG_BODY_BYTES bytes"),
                 null,
             )
         }
@@ -138,13 +146,9 @@ class TaskRouter(
         }
         store.event(task.id, task.householdId, "create", body, now())
 
-        val routed = if (registry.online(target.deviceId)) {
-            deliver(task)
-        } else {
-            wake(task)
-            task
-        }
-
+        // The audit is written as soon as the row is durable and before the
+        // delivery or wake: a push failure after this point must not leave a
+        // task whose only admin linkage never reached the log.
         log.event(
             "diag.send",
             mapOf(
@@ -155,6 +159,13 @@ class TaskRouter(
                 "trace" to trace,
             ),
         )
+
+        val routed = if (registry.online(target.deviceId)) {
+            deliver(task)
+        } else {
+            wake(task)
+            task
+        }
         return RouteResult.Accepted(routed, duplicate = false)
     }
 
@@ -242,7 +253,7 @@ class TaskRouter(
             task.householdId,
             traceId(task.trace),
             "wake",
-            task.from,
+            spanDevice(task),
             task.id,
         ) {
             push.wake(task.to, task.id, traceId(task.trace), pushToken)
@@ -317,7 +328,7 @@ class TaskRouter(
             task.householdId,
             traceId(task.trace),
             "deliver",
-            task.from,
+            spanDevice(task),
             task.id,
         ) {
             val session = registry.sessionFor(task.to) ?: return@span task
@@ -351,6 +362,14 @@ class TaskRouter(
             store.event(task.id, task.householdId, "deliver", JsonObject(emptyMap()), now())
             task.copy(state = "delivered")
         }
+
+    /**
+     * `trace_spans.device_id` is a uuid, so a server-authored task's span must
+     * name the target device; the literal "server" would make the insert fail
+     * and the trace silently disappear.
+     */
+    private fun spanDevice(task: TaskRecord): String =
+        if (task.from == SERVER) task.to else task.from
 
     private fun traceId(traceparent: String): String =
         TraceIds.traceId(traceparent) ?: TraceIds.traceId(TraceIds.newTraceparent())!!

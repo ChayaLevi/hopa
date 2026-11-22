@@ -1,6 +1,7 @@
 package com.hopa.backend.admin
 
 import com.hopa.backend.ServerConfig
+import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.harness.FakeDevice
 import com.hopa.backend.harness.FakeFcm
 import com.hopa.backend.harness.PostgresHarness
@@ -14,9 +15,14 @@ import com.hopa.backend.pairing.Tokens
 import com.hopa.backend.protocol.Envelope
 import com.hopa.backend.protocol.EnvelopeValidator
 import com.hopa.backend.protocol.GatewayCodec
+import com.hopa.backend.push.PushOutcome
+import com.hopa.backend.push.PushPort
 import com.hopa.backend.store.PgDevices
 import com.hopa.backend.store.PgTaskStore
 import com.hopa.backend.store.PostgresProbe
+import com.hopa.backend.tasks.DeviceDirectory
+import com.hopa.backend.trace.PgTraceStore
+import com.hopa.backend.trace.TraceIds
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.get
@@ -159,7 +165,9 @@ class DiagSendTest {
         }
     }
 
-    private fun config(push: com.hopa.backend.push.PushPort = com.hopa.backend.push.PushPort.None) =
+    private val traceStore = PgTraceStore(db)
+
+    private fun config(push: PushPort = PushPort.None) =
         ServerConfig(
             version = "0.1.0",
             auth = PgAuth(db),
@@ -168,6 +176,8 @@ class DiagSendTest {
             tasks = PgTaskStore(db),
             push = push,
             log = EventLog { name, fields -> events += name to fields },
+            traces = traceStore,
+            traceQuery = traceStore,
             adminAuth = AdminAuth(db),
         )
 
@@ -339,59 +349,65 @@ class DiagSendTest {
     @Test
     fun `an online diag ping is delivered plaintext and the device result closes it`() =
         testApplication {
-            val admin = seedAdmin()
-            val household = newHousehold()
-            val device = newDevice()
-            seedHousehold(db, household, device, UUID.randomUUID().toString())
-            application { module(config()) }
-            val deviceWs = connect(device, accessToken(household, device))
+            val fcm = FakeFcm()
+            try {
+                val admin = seedAdmin()
+                val household = newHousehold()
+                val device = newDevice()
+                seedHousehold(db, household, device, UUID.randomUUID().toString())
+                application { module(config(fcm.push())) }
+                val deviceWs = connect(device, accessToken(household, device))
 
-            val response = client.diag(
-                admin.token,
-                device,
-                household,
-                "diag.ping",
-                buildJsonObject { put("note", "hello") },
-            )
-            assertEquals(HttpStatusCode.Accepted, response.status)
-            val accepted = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-            val taskId = accepted["taskId"]!!.jsonPrimitive.content
-            val trace = accepted["trace"]!!.jsonPrimitive.content
-            assertEquals("delivered", accepted["state"]!!.jsonPrimitive.content)
+                val response = client.diag(
+                    admin.token,
+                    device,
+                    household,
+                    "diag.ping",
+                    buildJsonObject { put("note", "hello") },
+                )
+                assertEquals(HttpStatusCode.Accepted, response.status)
+                val accepted = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+                val taskId = accepted["taskId"]!!.jsonPrimitive.content
+                val trace = accepted["trace"]!!.jsonPrimitive.content
+                assertEquals("delivered", accepted["state"]!!.jsonPrimitive.content)
 
-            val frame = deviceWs.expect("diag.ping")
-            assertEquals("server", frame.from)
-            assertEquals(device, frame.to)
-            assertEquals(taskId, frame.task)
-            assertEquals(trace, frame.trace)
-            assertEquals(buildJsonObject { put("note", "hello") }, frame.body)
+                val frame = deviceWs.expect("diag.ping")
+                assertEquals("server", frame.from)
+                assertEquals(device, frame.to)
+                assertEquals(taskId, frame.task)
+                assertEquals(trace, frame.trace)
+                assertEquals(buildJsonObject { put("note", "hello") }, frame.body)
 
-            deviceWs.send(
-                Envelope(
-                    v = 1,
-                    id = UUID.randomUUID().toString(),
-                    type = "task.result",
-                    ts = System.currentTimeMillis(),
-                    to = "server",
-                    task = taskId,
-                    body = buildJsonObject { put("output", "ok") },
-                ),
-            )
-            assertEquals("done", awaitTaskState(household, taskId, "done"))
+                deviceWs.send(
+                    Envelope(
+                        v = 1,
+                        id = UUID.randomUUID().toString(),
+                        type = "task.result",
+                        ts = System.currentTimeMillis(),
+                        to = "server",
+                        task = taskId,
+                        body = buildJsonObject { put("output", "ok") },
+                    ),
+                )
+                assertEquals("done", awaitTaskState(household, taskId, "done"))
 
-            val audits = diagEvents()
-            assertEquals(1, audits.size)
-            val fields = audits.single().second
-            assertEquals(
-                setOf("admin_id", "household_id", "device_id", "task_id", "trace"),
-                fields.keys,
-            )
-            assertEquals(admin.id, fields["admin_id"])
-            assertEquals(household, fields["household_id"])
-            assertEquals(device, fields["device_id"])
-            assertEquals(taskId, fields["task_id"])
-            assertEquals(trace, fields["trace"])
-            deviceWs.close()
+                val audits = diagEvents()
+                assertEquals(1, audits.size)
+                val fields = audits.single().second
+                assertEquals(
+                    setOf("admin_id", "household_id", "device_id", "task_id", "trace"),
+                    fields.keys,
+                )
+                assertEquals(admin.id, fields["admin_id"])
+                assertEquals(household, fields["household_id"])
+                assertEquals(device, fields["device_id"])
+                assertEquals(taskId, fields["task_id"])
+                assertEquals(trace, fields["trace"])
+                assertTrue(fcm.requests.isEmpty(), "an online device must not be woken")
+                deviceWs.close()
+            } finally {
+                fcm.close()
+            }
         }
 
     @Test
@@ -415,6 +431,7 @@ class DiagSendTest {
             assertEquals(HttpStatusCode.Accepted, response.status)
             val accepted = Json.parseToJsonElement(response.bodyAsText()).jsonObject
             val taskId = accepted["taskId"]!!.jsonPrimitive.content
+            val trace = accepted["trace"]!!.jsonPrimitive.content
             assertEquals("queued", accepted["state"]!!.jsonPrimitive.content)
             assertEquals("queued", taskState(household, taskId))
 
@@ -423,7 +440,10 @@ class DiagSendTest {
                 .jsonObject["message"]!!.jsonObject
             assertEquals("fcm-device", message["token"]!!.jsonPrimitive.content)
             assertEquals("high", message["android"]!!.jsonObject["priority"]!!.jsonPrimitive.content)
-            assertEquals(setOf("taskId", "traceId"), message["data"]!!.jsonObject.keys)
+            val data = message["data"]!!.jsonObject
+            assertEquals(setOf("taskId", "traceId"), data.keys)
+            assertEquals(taskId, data["taskId"]!!.jsonPrimitive.content)
+            assertEquals(TraceIds.traceId(trace), data["traceId"]!!.jsonPrimitive.content)
             assertFalse(fcm.requests.single().contains("hello"))
         } finally {
             fcm.close()
@@ -493,6 +513,154 @@ class DiagSendTest {
                 .jsonObject["taskId"]!!.jsonPrimitive.content
             assertEquals(type, taskType(household, taskId))
         }
+    }
+
+    @Test
+    fun `diag delivery and wake leave spans that resolve by trace`() = testApplication {
+        val admin = seedAdmin()
+        val household = newHousehold()
+        val online = newDevice()
+        seedHousehold(db, household, online, UUID.randomUUID().toString())
+        val offline = extraDevice(household, memberOf(household, online))
+        setPushToken(household, offline, "fcm-offline")
+        application { module(config(PushPort { _, _, _, _ -> PushOutcome.Delivered })) }
+        val onlineToken = accessToken(household, online)
+        val onlineWs = connect(online, onlineToken)
+
+        val delivered = Json.parseToJsonElement(
+            client.diag(admin.token, online, household, "diag.ping").bodyAsText(),
+        ).jsonObject
+        val onlineTrace = delivered["trace"]!!.jsonPrimitive.content
+        val onlineTraceId = TraceIds.traceId(onlineTrace)
+        assertNotNull(onlineTraceId, "the admin response must carry a traceparent: $onlineTrace")
+        val onlineSpans = traceStore.spans(household, onlineTraceId!!)
+        assertTrue(
+            onlineSpans.any { it.operation == "deliver" && it.deviceId == online },
+            "deliver span with the target device id expected, got $onlineSpans",
+        )
+        onlineWs.expect("diag.ping")
+
+        val resolved = client.get("/v1/traces/$onlineTraceId") {
+            header("Authorization", "Bearer $onlineToken")
+        }
+        assertEquals(HttpStatusCode.OK, resolved.status)
+        assertTrue(resolved.bodyAsText().contains("\"deliver\""))
+
+        val queued = Json.parseToJsonElement(
+            client.diag(admin.token, offline, household, "diag.reset").bodyAsText(),
+        ).jsonObject
+        val offlineTrace = queued["trace"]!!.jsonPrimitive.content
+        val offlineSpans = traceStore.spans(household, TraceIds.traceId(offlineTrace)!!)
+        assertTrue(
+            offlineSpans.any { it.operation == "wake" && it.deviceId == offline },
+            "wake span with the target device id expected, got $offlineSpans",
+        )
+        onlineWs.close()
+    }
+
+    @Test
+    fun `the diag audit is durable when the wake fails`() = testApplication {
+        val admin = seedAdmin()
+        val household = newHousehold()
+        val device = newDevice()
+        seedHousehold(db, household, device, UUID.randomUUID().toString())
+        setPushToken(household, device, "fcm-device")
+        application { module(config(PushPort { _, _, _, _ -> error("push is down") })) }
+
+        val response = client.diag(admin.token, device, household, "diag.ping")
+
+        assertEquals(HttpStatusCode.InternalServerError, response.status)
+        assertEquals(1, diagEvents().size, "the audit line must survive the failed wake")
+        assertEquals(1, taskCount(household), "the queued row must survive the failed wake")
+    }
+
+    @Test
+    fun `a client cannot route a diag frame`() = testApplication {
+        val household = newHousehold()
+        val device = newDevice()
+        seedHousehold(db, household, device, UUID.randomUUID().toString())
+        application { module(config()) }
+        val ws = connect(device, accessToken(household, device))
+
+        ws.send(
+            Envelope(
+                v = 1,
+                id = UUID.randomUUID().toString(),
+                type = "diag.ping",
+                ts = System.currentTimeMillis(),
+                from = device,
+                to = device,
+                body = buildJsonObject { put("note", "from a client") },
+            ),
+        )
+
+        val error = ws.expect("error")
+        assertEquals("E_UNSUPPORTED", error.body["code"]!!.jsonPrimitive.content)
+        ws.expectNothing("diag.ping")
+        assertEquals(0, taskCount(household), "a client diag frame must not create a task")
+        ws.close()
+    }
+
+    @Test
+    fun `an oversized diag body is E_SCHEMA`() = testApplication {
+        val admin = seedAdmin()
+        val household = newHousehold()
+        val device = newDevice()
+        seedHousehold(db, household, device, UUID.randomUUID().toString())
+        application { module(config()) }
+
+        val response = client.diag(
+            admin.token,
+            device,
+            household,
+            "diag.ping",
+            buildJsonObject { put("blob", "a".repeat(33_000)) },
+        )
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals("E_SCHEMA", code(response.bodyAsText()))
+        assertEquals(0, taskCount(household))
+    }
+
+    @Test
+    fun `a directory answer from another household is still E_TENANT`() = testApplication {
+        val admin = seedAdmin()
+        val household = newHousehold()
+        val device = newDevice()
+        val foreign = newHousehold()
+        val liar = object : DeviceDirectory {
+            override fun lookup(deviceId: String, householdId: String) =
+                DeviceIdentity(deviceId, foreign, UUID.randomUUID().toString())
+        }
+        application { module(config().copy(devices = liar)) }
+
+        val response = client.diag(admin.token, device, household, "diag.ping")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals("E_TENANT", code(response.bodyAsText()))
+        assertEquals(0, taskCount(household))
+    }
+
+    @Test
+    fun `a queued diag is redelivered on hello with its type`() = testApplication {
+        val admin = seedAdmin()
+        val household = newHousehold()
+        val device = newDevice()
+        seedHousehold(db, household, device, UUID.randomUUID().toString())
+        application { module(config()) }
+
+        val response = client.diag(admin.token, device, household, "diag.ping")
+        assertEquals(HttpStatusCode.Accepted, response.status)
+        val taskId = Json.parseToJsonElement(response.bodyAsText())
+            .jsonObject["taskId"]!!.jsonPrimitive.content
+
+        val ws = connect(device, accessToken(household, device))
+
+        val frame = ws.expect("diag.ping")
+        assertEquals("diag.ping", frame.type)
+        assertEquals(taskId, frame.task)
+        assertEquals("server", frame.from)
+        ws.close()
     }
 
     @Test

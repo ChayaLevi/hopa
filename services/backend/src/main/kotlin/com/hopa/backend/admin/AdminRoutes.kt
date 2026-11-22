@@ -111,7 +111,9 @@ fun Application.adminRoutes(config: ServerConfig) {
                 call.respondError(HttpStatusCode.BadRequest, "E_SCHEMA", "invalid JSON body")
                 return@post
             }
-            val household = request.household.takeIf { UUID_PATTERN.matches(it) }
+            val household = request.household
+                .takeIf { UUID_PATTERN.matches(it) }
+                ?.let { UUID.fromString(it).toString() }
             if (household == null) {
                 call.respondError(HttpStatusCode.BadRequest, "E_SCHEMA", "household must be a uuid")
                 return@post
@@ -121,7 +123,10 @@ fun Application.adminRoutes(config: ServerConfig) {
             // named household and hides a revoked device, so both answer the
             // same refusal and no row is written.
             val target = config.devices.lookup(deviceId, household)
-            if (target == null) {
+            // The directory is already tenant-scoped; comparing the returned
+            // household is a second, independent guard against a future
+            // directory implementation drifting from that contract.
+            if (target == null || target.householdId != household) {
                 call.respondError(
                     HttpStatusCode.Forbidden,
                     "E_TENANT",
