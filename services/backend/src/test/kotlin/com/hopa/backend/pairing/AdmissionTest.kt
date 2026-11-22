@@ -508,6 +508,42 @@ class AdmissionTest {
     }
 
     @Test
+    fun `a claim cannot change the minted algorithm`() = testApplication {
+        application { module(config()) }
+        val phone = seedPhone()
+        val secret = bodyOf(client.mintPending())["secret"]!!.jsonPrimitive.content
+        assertEquals(HttpStatusCode.OK, client.vouch(secret, bearer = phone.token).status)
+
+        // The route layer refuses any non-x25519 alg before the claim, so the
+        // mismatch is only reachable by calling the internal claim half the way
+        // a widened algorithm set would.
+        val outcome = claimPendingSession(
+            db,
+            TokenIssuer(db, clock::get),
+            clock::get,
+            hashHex(secret),
+            ClaimRequest(
+                session = secret,
+                platform = "windows",
+                name = "Studio",
+                publicKey = base64Url(pcKey),
+                alg = "mlkem768",
+            ),
+            pcKey,
+        )
+        assertTrue(outcome is PairingOutcome.Ok)
+        val deviceId = (outcome as PairingOutcome.Ok).value.deviceId
+
+        val alg = db.tenant(phone.household) { connection ->
+            connection.prepareStatement("select alg from devices where id = ?::uuid").use {
+                it.setString(1, deviceId)
+                it.executeQuery().use { rows -> rows.next(); rows.getString(1) }
+            }
+        }
+        assertEquals("x25519", alg)
+    }
+
+    @Test
     fun `two claims racing create one device and one wrap`() = testApplication {
         application { module(config()) }
         val phone = seedPhone()

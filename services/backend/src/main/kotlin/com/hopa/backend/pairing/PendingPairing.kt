@@ -307,7 +307,7 @@ internal fun claimPendingSession(
         connection.prepareStatement(
             "select id::text, household_id::text, member_id::text, public_key, " +
                 "expires_at, vouched_at, claimed_at, wrapped_key, voucher_device_id::text, " +
-                "platform, name from pending_pairings where code_hash = decode(?, 'hex')",
+                "platform, name, alg from pending_pairings where code_hash = decode(?, 'hex')",
         ).use { statement ->
             statement.setString(1, codeHashHex)
             statement.executeQuery().use { rows ->
@@ -326,6 +326,7 @@ internal fun claimPendingSession(
                         voucherDeviceId = rows.getString(9),
                         platform = rows.getString(10),
                         name = rows.getString(11),
+                        alg = rows.getString(12),
                     )
                 }
             }
@@ -387,11 +388,12 @@ internal fun claimPendingSession(
                 it.setString(2, householdId)
                 it.setString(3, memberId)
                 // The minted row is authoritative: a claim cannot rename the
-                // device or change its platform after the phone saw the QR.
+                // device, change its platform or swap its algorithm after the
+                // phone saw the QR.
                 it.setString(4, parked.platform)
                 it.setString(5, parked.name)
                 it.setBytes(6, publicKey)
-                it.setString(7, request.alg)
+                it.setString(7, parked.alg)
                 it.setString(8, request.pushToken)
                 it.executeUpdate()
             }
@@ -446,6 +448,7 @@ private data class ParkedRow(
     val voucherDeviceId: String?,
     val platform: String,
     val name: String,
+    val alg: String,
 )
 
 private data class ClaimedTokens(
