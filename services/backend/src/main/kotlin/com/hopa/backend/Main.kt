@@ -1,5 +1,7 @@
 package com.hopa.backend
 
+import com.hopa.backend.admin.AdminAuth
+import com.hopa.backend.admin.adminRoutes
 import com.hopa.backend.auth.AuthPort
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.gateway.gatewayRoutes
@@ -49,6 +51,7 @@ fun Application.module(config: ServerConfig) {
     pendingPairingRoutes(config)
     tokenRoutes(config)
     deviceRoutes(config)
+    adminRoutes(config)
     traceRoutes(config)
     gatewayRoutes(config)
 }
@@ -87,6 +90,7 @@ fun main() {
     val config = ServerConfig(
         version = version,
         auth = auth ?: AuthPort.DenyAll,
+        adminAuth = database?.let(::AdminAuth),
         devices = devices,
         registry = registry,
         db = database?.let(::PostgresProbe) ?: DbProbe.Unconfigured,

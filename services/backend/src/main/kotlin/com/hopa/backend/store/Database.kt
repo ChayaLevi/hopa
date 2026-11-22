@@ -35,6 +35,13 @@ class Database(internal val dataSource: HikariDataSource) : AutoCloseable {
         transaction(mapOf("hopa.token_hash" to tokenHashHex), block)
 
     /**
+     * A transaction with no GUCs, for the global tables that carry no policy
+     * (`admins`, `admin_sessions`, `accounts`). Never use it for a tenant table:
+     * with no household or token setting those policies default to deny.
+     */
+    fun <T> read(block: (Connection) -> T): T = transaction(emptyMap(), block)
+
+    /**
      * Both branches at once. A vouch presents the session's secret hash and is
      * checked against the vouching tenant, so the update is allowed by one
      * policy branch and validated by the other.

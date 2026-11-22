@@ -60,6 +60,14 @@ class TaskRouter(
     private val deadlineMs = 10 * 60 * 1000L
     private val maxDeadlineMs = 24L * 60 * 60 * 1000
 
+    private companion object {
+        /** The sender id a server-authored row carries instead of a device. */
+        const val SERVER = "server"
+
+        /** The only payloads that are plaintext by type; nothing else is routable here. */
+        val DIAG_TYPES = setOf("diag.ping", "diag.state", "diag.reset")
+    }
+
     fun route(
         identity: DeviceIdentity,
         envelope: Envelope,
@@ -87,6 +95,68 @@ class TaskRouter(
     /** How much work a device would find if it came online right now. */
     fun queuedFor(deviceId: String, householdId: String): Int =
         store.pendingFor(deviceId, householdId, now()).size
+
+    /**
+     * A task the server authors itself: an admin diagnostic. The target's
+     * household and member come from the looked-up device, [type] is confined
+     * to the plaintext diagnostic types, and the row, event, delivery or wake
+     * follow exactly the [create] path. Only identifiers reach the audit log.
+     */
+    fun createServerTask(
+        adminId: String,
+        target: DeviceIdentity,
+        type: String,
+        body: JsonObject,
+    ): RouteResult {
+        if (type !in DIAG_TYPES) {
+            return RouteResult.Refused(
+                GatewayError("E_SCHEMA", "not a diagnostic type: $type"),
+                null,
+            )
+        }
+
+        val trace = TraceIds.newTraceparent()
+        val task = TaskRecord(
+            id = newTaskId(),
+            householdId = target.householdId,
+            memberId = target.memberId,
+            from = SERVER,
+            to = target.deviceId,
+            messageId = UUID.randomUUID().toString(),
+            trace = trace,
+            ts = now(),
+            body = body,
+            state = if (registry.online(target.deviceId)) "delivered" else "queued",
+            deadlineAt = now() + deadlineMs,
+            type = type,
+        )
+        if (!store.remember(task.householdId, task.messageId, task)) {
+            return RouteResult.Refused(
+                GatewayError("E_QUEUE", "diagnostic task could not be queued"),
+                trace,
+            )
+        }
+        store.event(task.id, task.householdId, "create", body, now())
+
+        val routed = if (registry.online(target.deviceId)) {
+            deliver(task)
+        } else {
+            wake(task)
+            task
+        }
+
+        log.event(
+            "diag.send",
+            mapOf(
+                "admin_id" to adminId,
+                "household_id" to task.householdId,
+                "device_id" to task.to,
+                "task_id" to task.id,
+                "trace" to trace,
+            ),
+        )
+        return RouteResult.Accepted(routed, duplicate = false)
+    }
 
     private fun routeEnvelope(
         identity: DeviceIdentity,
@@ -159,24 +229,27 @@ class TaskRouter(
         val routed = if (registry.online(to)) {
             deliver(task)
         } else {
-            val pushToken = devices.pushToken(to, identity.householdId)
-            if (pushToken != null) {
-                val outcome = traces.span(
-                    identity.householdId,
-                    traceId(traceparent),
-                    "wake",
-                    identity.deviceId,
-                    task.id,
-                ) {
-                    push.wake(to, task.id, traceId(traceparent), pushToken)
-                }
-                if (outcome == PushOutcome.InvalidToken) {
-                    devices.clearPushToken(to, identity.householdId)
-                }
-            }
+            wake(task)
             task
         }
         return RouteResult.Accepted(routed, duplicate = false)
+    }
+
+    /** An offline target gets one data-only wake when it has a registration. */
+    private fun wake(task: TaskRecord) {
+        val pushToken = devices.pushToken(task.to, task.householdId) ?: return
+        val outcome = traces.span(
+            task.householdId,
+            traceId(task.trace),
+            "wake",
+            task.from,
+            task.id,
+        ) {
+            push.wake(task.to, task.id, traceId(task.trace), pushToken)
+        }
+        if (outcome == PushOutcome.InvalidToken) {
+            devices.clearPushToken(task.to, task.householdId)
+        }
     }
 
     private fun relay(identity: DeviceIdentity, envelope: Envelope): RouteResult {
@@ -215,7 +288,9 @@ class TaskRouter(
         store.event(task.id, identity.householdId, envelope.type, envelope.body, now())
 
         val other = if (identity.deviceId == task.from) task.to else task.from
-        val target = registry.sessionFor(other)
+        // A server-authored task has no sending socket to relay the result to;
+        // the row and its event are the whole record.
+        val target = if (other == SERVER) null else registry.sessionFor(other)
         val relayed = target?.outgoing?.trySend(
             GatewayCodec.encode(
                 envelope.copy(
@@ -256,7 +331,7 @@ class TaskRouter(
                     Envelope(
                         v = 1,
                         id = task.messageId,
-                        type = "task.create",
+                        type = task.type,
                         ts = task.ts,
                         trace = task.trace,
                         from = task.from,

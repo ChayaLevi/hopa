@@ -520,6 +520,107 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+  /v1/admin/devices:
+    get:
+      summary: A household's device inventory (admin console)
+      description: |
+        Requires an admin session token, never a device token. Lists every device
+        in the named household, revoked ones included, with `online` reflecting
+        the gateway registry on this process. It never returns tasks or turns.
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: household
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: The household's devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, platform, name, online]
+                  properties:
+                    id: { type: string, format: uuid }
+                    platform: { type: string, enum: [android, windows] }
+                    name: { type: string }
+                    lastSeenAt: { type: string, format: date-time, nullable: true }
+                    revokedAt: { type: string, format: date-time, nullable: true }
+                    online: { type: boolean }
+        "400":
+          description: The household query parameter is missing or not a uuid (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503":
+          description: This deployment has no SQL-backed device inventory (`E_UNSUPPORTED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/admin/devices/{id}/diag:
+    post:
+      summary: Send one diagnostic task to a device (admin console)
+      description: |
+        Requires an admin session token. `household` is explicit and must own the
+        device; a device in another household, an unknown device or a revoked one
+        answers `E_TENANT` as 403 and writes no task. `type` is one of the three
+        plaintext diagnostics; any other value, including `task.create`, is
+        refused with `E_SCHEMA`. An online device receives the frame immediately
+        (`state: delivered`); an offline one is queued and woken once through FCM
+        (`state: queued`). Every send writes a `diag.send` audit event naming the
+        admin, household, device, task and trace — never the body.
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [household, type]
+              properties:
+                household: { type: string, format: uuid }
+                type:
+                  type: string
+                  enum: [diag.ping, diag.state, diag.reset]
+                body:
+                  type: object
+                  description: Plaintext diagnostic payload, echoed to the device.
+                  default: {}
+      responses:
+        "202":
+          description: Task accepted (delivered now or queued for the next hello)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [taskId, trace, state]
+                properties:
+                  taskId: { type: string, format: uuid }
+                  trace: { type: string }
+                  state: { type: string, enum: [delivered, queued] }
+        "400":
+          description: Invalid body, type, or device id (`E_SCHEMA`), or a queue refusal (`E_QUEUE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: The device is unknown, revoked, or in another household (`E_TENANT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
   /v1/traces/{traceId}:
     get:
       summary: The path one message took, by trace id
@@ -569,6 +670,10 @@ components:
       type: http
       scheme: bearer
       description: Operator bootstrap token from the environment; creates pairing sessions only.
+    adminBearerAuth:
+      type: http
+      scheme: bearer
+      description: Admin console session token; never a device access token.
   schemas:
     ModelManifest:
       type: object

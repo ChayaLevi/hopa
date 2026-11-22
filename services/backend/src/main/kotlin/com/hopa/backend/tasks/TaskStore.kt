@@ -19,6 +19,8 @@ data class TaskRecord(
     val body: JsonObject,
     val state: String,
     val deadlineAt: Long,
+    /** The envelope type this task is delivered as; server diagnostics set it. */
+    val type: String = "task.create",
 )
 
 interface TaskStore {

@@ -1,5 +1,6 @@
 ﻿package com.hopa.backend
 
+import com.hopa.backend.admin.AdminAuth
 import com.hopa.backend.auth.AuthPort
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.http.RateLimiter
@@ -23,6 +24,8 @@ import com.hopa.backend.trace.TraceRecorder
 data class ServerConfig(
     val version: String,
     val auth: AuthPort = AuthPort.DenyAll,
+    /** Admin console tokens; absent when this deployment has no database. */
+    val adminAuth: AdminAuth? = null,
     val devices: DeviceDirectory = DeviceDirectory.Empty,
     /** The one in-memory presence registry shared by the gateway and device routes. */
     val registry: DeviceRegistry = DeviceRegistry(),

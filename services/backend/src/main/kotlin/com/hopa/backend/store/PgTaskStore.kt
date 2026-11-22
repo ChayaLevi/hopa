@@ -5,6 +5,7 @@ import com.hopa.backend.tasks.TaskStore
 import java.nio.charset.StandardCharsets
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.sql.Types
 import java.time.Instant
 import javax.sql.rowset.serial.SerialBlob
 import kotlinx.serialization.json.Json
@@ -50,23 +51,30 @@ class PgTaskStore(
                 """
                 insert into tasks(id, household_id, member_id, from_device, to_device,
                                   message_id, state, trace_id, body, deadline_at,
-                                  created_at, updated_at)
+                                  type, created_at, updated_at)
                 values (?::uuid, ?::uuid, ?::uuid, ?::uuid, ?::uuid, ?::uuid,
-                        ?, ?, ?, ?, ?, ?)
+                        ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
             ).use {
                 it.setString(1, task.id)
                 it.setString(2, task.householdId)
                 it.setString(3, task.memberId)
-                it.setString(4, task.from)
+                // A server-authored task has no originating device; V2 made the
+                // column nullable for exactly this row.
+                if (task.from == SERVER_FROM) {
+                    it.setNull(4, Types.OTHER)
+                } else {
+                    it.setString(4, task.from)
+                }
                 it.setString(5, task.to)
                 it.setString(6, task.messageId)
                 it.setString(7, task.state)
                 it.setString(8, task.trace)
                 it.setBytes(9, task.body.toString().toByteArray(StandardCharsets.UTF_8))
                 it.setTimestamp(10, timestamp(task.deadlineAt))
-                it.setTimestamp(11, timestamp(now))
+                it.setString(11, task.type)
                 it.setTimestamp(12, timestamp(now))
+                it.setTimestamp(13, timestamp(now))
                 it.executeUpdate()
             }
             true
@@ -165,7 +173,9 @@ class PgTaskStore(
         id = rows.getString("id"),
         householdId = rows.getString("household_id"),
         memberId = rows.getString("member_id"),
-        from = rows.getString("from_device"),
+        // A server-authored row has SQL NULL here; the in-memory model spells
+        // that as "server" rather than a nullable field.
+        from = rows.getString("from_device") ?: SERVER_FROM,
         to = rows.getString("to_device"),
         messageId = rows.getString("message_id"),
         trace = rows.getString("trace_id"),
@@ -175,14 +185,16 @@ class PgTaskStore(
         ).jsonObject,
         state = rows.getString("state"),
         deadlineAt = rows.getTimestamp("deadline_at").toInstant().toEpochMilli(),
+        type = rows.getString("type"),
     )
 
     private fun timestamp(millis: Long): Timestamp = Timestamp.from(Instant.ofEpochMilli(millis))
 
     private companion object {
         const val IDEMPOTENCY_MS = 24L * 60 * 60 * 1000
+        const val SERVER_FROM = "server"
         const val SELECT =
             "select id, household_id, member_id, from_device, to_device, message_id, " +
-                "state, trace_id, body, deadline_at, created_at from tasks"
+                "state, trace_id, body, deadline_at, type, created_at from tasks"
     }
 }

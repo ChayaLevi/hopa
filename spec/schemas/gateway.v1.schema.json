@@ -26,6 +26,9 @@
         "task.result",
         "task.error",
         "task.cancel",
+        "diag.ping",
+        "diag.state",
+        "diag.reset",
         "error",
         "ping",
         "pong"
@@ -67,7 +70,7 @@
       "if": {
         "required": ["type"],
         "properties": {
-          "type": { "pattern": "^task\\." }
+          "type": { "pattern": "^(task|diag)\\." }
         }
       },
       "then": {
