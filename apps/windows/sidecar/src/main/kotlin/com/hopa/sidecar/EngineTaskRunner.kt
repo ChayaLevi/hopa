@@ -3,9 +3,11 @@ package com.hopa.sidecar
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -20,32 +22,44 @@ import kotlin.coroutines.resumeWithException
  *
  * Turns are serialized with a lock because the engine runs one at a time;
  * the gateway may deliver a second `task.create` while the first is still
- * running.
+ * running. Each turn is bounded by [turnTimeoutMs] so a lost `onTurnEnd`
+ * releases the queue instead of wedging it.
  */
 class EngineTaskRunner(
     private val startTurn: (id: String, goal: String) -> Unit,
-    private val cancelTurn: () -> Unit = {},
+    private val cancelTurn: (id: String) -> Unit = {},
     private val newId: () -> String = { UUID.randomUUID().toString() },
+    private val turnTimeoutMs: Long = TURN_TIMEOUT_MS,
 ) {
-    private val pending = ConcurrentHashMap<String, CompletableDeferred<String>>()
+    private val pending = ConcurrentHashMap<String, PendingTurn>()
     private val turns = Mutex()
 
-    suspend fun run(goal: String): String = turns.withLock { awaitTurn(goal) }
+    /**
+     * A turn that never ends must not wedge the queue: the wait is bounded and
+     * a timeout is reported as a failure, not as cancellation.
+     */
+    suspend fun run(goal: String): String = turns.withLock {
+        try {
+            withTimeout(turnTimeoutMs) { awaitTurn(goal) }
+        } catch (timedOut: TimeoutCancellationException) {
+            throw IllegalStateException("the engine turn timed out", timedOut)
+        }
+    }
 
     private suspend fun awaitTurn(goal: String): String {
         val id = newId()
-        val answer = CompletableDeferred<String>()
-        pending[id] = answer
+        val turn = PendingTurn()
+        pending[id] = turn
         try {
             startTurn(id, goal)
             return suspendCancellableCoroutine { continuation ->
                 continuation.invokeOnCancellation {
                     pending.remove(id)
-                    cancelTurn()
+                    cancelTurn(id)
                 }
-                answer.invokeOnCompletion { cause ->
+                turn.done.invokeOnCompletion { cause ->
                     if (cause == null) {
-                        continuation.resume(answer.getCompleted())
+                        continuation.resume(turn.answer)
                     } else {
                         continuation.resumeWithException(cause)
                     }
@@ -59,6 +73,19 @@ class EngineTaskRunner(
 
     /** The engine's `onTurnEnd` hook; an unknown id is ignored. */
     fun complete(id: String, answer: String) {
-        pending.remove(id)?.complete(answer)
+        val turn = pending.remove(id) ?: return
+        turn.answer = answer
+        turn.done.complete(Unit)
+    }
+
+    private class PendingTurn {
+        val done = CompletableDeferred<Unit>()
+
+        @Volatile
+        var answer: String = ""
+    }
+
+    private companion object {
+        const val TURN_TIMEOUT_MS = 10 * 60 * 1000L
     }
 }

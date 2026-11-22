@@ -94,7 +94,7 @@ class BackendDeliveriesTest {
     }
 
     @Test
-    fun `a frame that is not a task create is never handed to onTask`() = runBlocking {
+    fun `a frame that is not a task or diagnostic is never handed to onTask`() = runBlocking {
         val calls = AtomicInteger()
         val server = MockWebServer()
         server.enqueue(
@@ -125,6 +125,36 @@ class BackendDeliveriesTest {
         withTimeout(5_000) { client.state.first { it is BackendState.Live } }
         delay(300) // a localhost frame is read in microseconds; this is ample
         assertEquals(0, calls.get())
+        client.stop()
+        server.shutdown()
+    }
+
+    @Test
+    fun `diagnostic frames are handed to onTask like a task create`() = runBlocking {
+        val handled = CompletableDeferred<Unit>()
+        val received = mutableListOf<String>()
+        val server = MockWebServer()
+        server.enqueue(
+            MockResponse().withWebSocketUpgrade(object : FakeGateway() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    webSocket.send(helloAck(id = "a1", queued = 0))
+                    webSocket.send(diag("diag.ping", "d1"))
+                    webSocket.send(diag("diag.state", "d2"))
+                    webSocket.send(diag("diag.reset", "d3"))
+                }
+            }),
+        )
+        val client = clientFor(server)
+        client.onTask = { frame ->
+            synchronized(received) {
+                received += frame.type
+                if (received.size == 3) handled.complete(Unit)
+            }
+            client.ack(frame)
+        }
+        client.start(this)
+        withTimeout(5_000) { handled.await() }
+        assertEquals(listOf("diag.ping", "diag.state", "diag.reset"), received)
         client.stop()
         server.shutdown()
     }
@@ -326,6 +356,11 @@ class BackendDeliveriesTest {
     private fun delivery(): String = """{"v":1,"id":"m1","type":"task.create","ts":2,"from":"dev-9","to":"dev-1",
         "task":"task-1","trace":"$TRACE","body":{"goal":"open settings"}}
     """.trimIndent()
+
+    private fun diag(type: String, task: String): String =
+        """{"v":1,"id":"msg-$task","type":"$type","ts":2,"from":"server","to":"dev-1",
+        "task":"$task","trace":"$TRACE","body":{}}
+        """.trimIndent()
 
     private fun deliveryFrame(): BackendEnvelope = BackendEnvelope(
         id = "m1",

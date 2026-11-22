@@ -34,8 +34,9 @@ import java.util.concurrent.TimeUnit
  * Holds one `/v1/gateway` WebSocket: bearer token in the handshake header,
  * `device.hello` as the first frame, `Live` once the ack arrives. A frame that
  * cannot be decoded is ignored so a malformed message never costs the socket.
- * A `task.create` is handed to [onTask] on the session's coroutine scope, so a
- * slow handler neither stalls the reader nor dies when the socket reconnects.
+ * A delivered `task.create` or `diag.*` is handed to [onTask] on the session's
+ * coroutine scope, so a slow handler neither stalls the reader nor dies when
+ * the socket reconnects.
  *
  * A `1008 E_AUTH` close refreshes the credentials once; a null refresh asks for
  * pairing instead of retrying, because a rotated token may never be presented
@@ -180,7 +181,7 @@ class BackendClient(
             )
             "pong" -> pongs.trySend(Unit)
             "ping" -> answerPing(webSocket, frame)
-            "task.create" -> dispatch(frame)
+            "task.create", "diag.ping", "diag.state", "diag.reset" -> dispatch(frame)
         }
     }
 

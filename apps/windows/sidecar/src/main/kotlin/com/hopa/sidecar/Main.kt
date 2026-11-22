@@ -8,6 +8,7 @@ import com.hopa.backend.pairing.BackendCredentials
 import com.hopa.backend.pairing.BackendPairing as CorePairing
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.json.HopaJson
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Base64
 import kotlinx.coroutines.CoroutineScope
@@ -15,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 fun main() {
     val io = Stdio()
@@ -30,10 +33,15 @@ fun main() {
     val attachments = Attachments(dataDir.resolve("attachments"))
     val engine = Engine(io, device, approval, store, records, config)
     val backendScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    val sessionStore = BackendSessionStore(dataDir.resolve("backend-session.json"))
+    val sessionPath = dataDir.resolve("backend-session.json")
+    val sessionStore = BackendSessionStore(sessionPath)
     val session = sessionStore.load()
     if (session == null) {
-        io.log("backend admission: none; encrypted tasks stay off until a phone pairs this PC")
+        if (Files.exists(sessionPath)) {
+            io.log("backend admission: stored session is unreadable; encrypted tasks stay off until this PC pairs again")
+        } else {
+            io.log("backend admission: none; encrypted tasks stay off until a phone pairs this PC")
+        }
     } else {
         val contentKey = runCatching { Base64.getDecoder().decode(session.contentKeyBase64) }.getOrNull()
         if (contentKey == null || contentKey.size != 32) {
@@ -71,6 +79,8 @@ fun main() {
                                 expiresAt = refreshed.expiresAt,
                             ),
                         )
+                    }.onFailure { failed ->
+                        io.log("backend session could not be saved (${failed.javaClass.simpleName}); reconnecting with memory only")
                     }
                     credentials
                 },
@@ -82,7 +92,18 @@ fun main() {
                 cancelTurn = engine::cancel,
             )
             engine.onTurnEnd = runner::complete
-            val gateway = BackendGateway(link = link, contentKey = contentKey, run = runner::run)
+            val gateway = BackendGateway(
+                link = link,
+                contentKey = contentKey,
+                run = runner::run,
+                onDiagState = {
+                    buildJsonObject {
+                        put("appVersion", Protocol.VERSION.toString())
+                        put("conversations", store.list(includeArchived = true).size)
+                        put("runs", records.count())
+                    }
+                },
+            )
             backendScope.launch { gateway.runForever(backendScope) }
         }
     }
@@ -178,7 +199,10 @@ fun main() {
                 io.send(Protocol.fileRemoved(message.text("id"), true))
             }
 
-            "turn.cancel" -> engine.cancel()
+            "turn.cancel" -> {
+                val turnId = message.text("id")
+                if (turnId.isBlank()) engine.cancel() else engine.cancel(turnId)
+            }
 
             "device.result" -> device.resolve(message.text("id"), message)
             "approval.result" -> approval.resolve(message.text("id"), message.text("allow").toBoolean())

@@ -3,6 +3,7 @@ package com.hopa.sidecar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,12 +39,12 @@ class EngineTaskRunnerTest {
     }
 
     @Test
-    fun `cancelling the caller cancels the engine turn`() = runTest {
-        var cancellations = 0
+    fun `cancelling the caller cancels only its own engine turn`() = runTest {
+        var cancelled: String? = null
         var started = false
         val runner = EngineTaskRunner(
             startTurn = { _, _ -> started = true },
-            cancelTurn = { cancellations++ },
+            cancelTurn = { id -> cancelled = id },
             newId = { "turn-2" },
         )
 
@@ -54,7 +55,7 @@ class EngineTaskRunnerTest {
         job.cancel()
         runCurrent()
 
-        assertEquals(1, cancellations)
+        assertEquals("turn-2", cancelled)
     }
 
     @Test
@@ -73,5 +74,90 @@ class EngineTaskRunnerTest {
         runner.complete("turn-3", "right")
 
         assertEquals("right", answer.await())
+    }
+
+    @Test
+    fun `a second complete does not overwrite the first answer`() = runTest {
+        val runner = EngineTaskRunner(startTurn = { _, _ -> }, newId = { "turn-1" })
+
+        val answer = async { runner.run("open settings") }
+        runCurrent()
+
+        runner.complete("turn-1", "first")
+        runner.complete("turn-1", "second")
+
+        assertEquals("first", answer.await())
+    }
+
+    @Test
+    fun `two runs are serialized one engine turn at a time`() = runTest {
+        val started = mutableListOf<String>()
+        var next = 0
+        val runner = EngineTaskRunner(
+            startTurn = { id, _ -> started += id },
+            newId = { "turn-${++next}" },
+        )
+
+        val first = async { runner.run("first") }
+        val second = async { runner.run("second") }
+        runCurrent()
+        assertEquals(listOf("turn-1"), started)
+
+        runner.complete("turn-1", "one")
+        runCurrent()
+        assertEquals(listOf("turn-1", "turn-2"), started)
+
+        runner.complete("turn-2", "two")
+        assertEquals("one", first.await())
+        assertEquals("two", second.await())
+    }
+
+    @Test
+    fun `a start that throws fails the run and releases the queue`() = runTest {
+        var attempts = 0
+        var next = 0
+        val runner = EngineTaskRunner(
+            startTurn = { _, _ ->
+                attempts++
+                if (attempts == 1) throw IllegalStateException("no model")
+            },
+            newId = { "turn-${++next}" },
+        )
+
+        val failed = async { runCatching { runner.run("first") } }
+        runCurrent()
+        assertTrue(failed.await().isFailure)
+
+        val second = async { runner.run("second") }
+        runCurrent()
+        assertEquals(2, attempts)
+
+        runner.complete("turn-2", "recovered")
+        assertEquals("recovered", second.await())
+    }
+
+    @Test
+    fun `a turn that never ends times out and releases the queue`() = runTest {
+        var next = 0
+        var cancelled: String? = null
+        val runner = EngineTaskRunner(
+            startTurn = { _, _ -> },
+            cancelTurn = { id -> cancelled = id },
+            newId = { "turn-${++next}" },
+            turnTimeoutMs = 1_000,
+        )
+
+        val timedOut = async { runCatching { runner.run("slow") } }
+        runCurrent()
+        advanceTimeBy(1_001)
+        runCurrent()
+
+        assertTrue(timedOut.await().isFailure)
+        assertEquals("turn-1", cancelled)
+
+        val second = async { runner.run("next") }
+        runCurrent()
+        runner.complete("turn-2", "after timeout")
+        assertEquals("after timeout", second.await())
     }
 }

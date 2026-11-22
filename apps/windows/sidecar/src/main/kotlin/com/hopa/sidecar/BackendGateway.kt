@@ -70,8 +70,8 @@ class BackendGateway(
     }
 
     private suspend fun handleCreate(frame: BackendEnvelope): BackendEnvelope {
-        acknowledge(frame)
         val sealedText = (frame.body["sealed"] as? JsonPrimitive)
+            ?.takeIf { it.isString }
             ?.contentOrNull
             ?.takeIf { it.isNotBlank() }
             ?: return error(frame, "E_SCHEMA", "task.create needs a sealed body")
@@ -91,7 +91,10 @@ class BackendGateway(
         }
         val goal = try {
             val body = Json.parseToJsonElement(String(plaintext, Charsets.UTF_8)).jsonObject
-            (body["goal"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() }
+            (body["goal"] as? JsonPrimitive)
+                ?.takeIf { it.isString }
+                ?.contentOrNull
+                ?.takeIf { it.isNotBlank() }
         } catch (malformed: Exception) {
             null
         } ?: return error(frame, "E_SCHEMA", "the sealed task body is not a goal")
@@ -115,7 +118,6 @@ class BackendGateway(
     }
 
     private suspend fun handleDiag(frame: BackendEnvelope): BackendEnvelope {
-        acknowledge(frame)
         val body = when (frame.type) {
             "diag.ping" -> JsonObject(frame.body + ("pong" to JsonPrimitive(clock())))
             "diag.state" -> {
@@ -127,7 +129,10 @@ class BackendGateway(
         return result(frame, body)
     }
 
-    /** A delivery is acknowledged before the turn runs, so a reconnect never repeats it. */
+    /**
+     * Sends the reply first and acks only then. A failed send leaves the task
+     * unacked, so the server redelivers it after a reconnect.
+     */
     private suspend fun acknowledge(frame: BackendEnvelope) {
         try {
             link.ack(frame)
@@ -140,7 +145,16 @@ class BackendGateway(
 
     private suspend fun dispatch(frame: BackendEnvelope) {
         try {
-            handle(frame)?.let { reply -> link.send(reply) }
+            val reply = handle(frame) ?: return
+            try {
+                link.send(reply)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failed: Exception) {
+                warn("send ${frame.type} task=${frame.task} failed (${failed.javaClass.simpleName})")
+                return
+            }
+            acknowledge(frame)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failed: Exception) {

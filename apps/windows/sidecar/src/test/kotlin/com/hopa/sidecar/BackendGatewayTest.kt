@@ -4,6 +4,9 @@ import com.hopa.backend.crypto.PayloadCipher
 import com.hopa.backend.link.BackendLink
 import com.hopa.backend.link.BackendState
 import com.hopa.backend.wire.BackendEnvelope
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
+import java.nio.charset.StandardCharsets
 import java.util.Base64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,9 +94,10 @@ class BackendGatewayTest {
     }
 
     @Test
-    fun `a body that is not a sealed envelope is a schema error`() = runBlocking {
+    fun `a body that is not a sealed envelope is a schema error and never runs`() = runBlocking {
         val link = FakeLink()
-        val gateway = BackendGateway(link, contentKey, run = { "never" }, clock = { 1_000 }, newId = { "reply" })
+        var runs = 0
+        val gateway = BackendGateway(link, contentKey, run = { runs++; "never" }, clock = { 1_000 }, newId = { "reply" })
         gateway.attach()
 
         link.onTask!!.invoke(
@@ -111,6 +115,30 @@ class BackendGatewayTest {
         val error = link.sent.single()
         assertEquals("task.error", error.type)
         assertEquals("E_SCHEMA", error.body["code"]!!.jsonPrimitive.content)
+        assertEquals(0, runs)
+    }
+
+    @Test
+    fun `a non-string sealed body is a schema error and never runs`() = runBlocking {
+        val link = FakeLink()
+        var runs = 0
+        val gateway = BackendGateway(link, contentKey, run = { runs++; "never" }, clock = { 1_000 }, newId = { "reply" })
+        gateway.attach()
+
+        link.onTask!!.invoke(
+            BackendEnvelope(
+                id = "m1",
+                type = "task.create",
+                ts = 1,
+                from = "phone-1",
+                to = "pc-1",
+                task = "task-1",
+                body = buildJsonObject { put("sealed", 42) },
+            ),
+        )
+
+        assertEquals("E_SCHEMA", link.sent.single().body["code"]!!.jsonPrimitive.content)
+        assertEquals(0, runs)
     }
 
     @Test
@@ -209,6 +237,52 @@ class BackendGatewayTest {
     }
 
     @Test
+    fun `a failed reply send leaves the task unacked and the handler alive`() = runBlocking {
+        val link = FakeLink().apply { sendFailures = 1 }
+        val gateway = BackendGateway(link, contentKey, run = { "done" }, clock = { 1_000 }, newId = { "reply" })
+        val stderr = ByteArrayOutputStream()
+        val original = System.err
+        System.setErr(PrintStream(stderr, true, StandardCharsets.UTF_8))
+        try {
+            gateway.attach()
+
+            link.onTask!!.invoke(taskCreate(seal("""{"goal":"first"}"""), task = "task-1"))
+            assertTrue(link.acked.isEmpty(), "a task whose reply never left must not be acked")
+            assertTrue(link.sent.isEmpty())
+
+            link.onTask!!.invoke(taskCreate(seal("""{"goal":"second"}"""), task = "task-2"))
+            assertEquals(1, link.sent.size)
+            assertEquals(1, link.acked.size)
+            assertEquals("task-2", link.acked.single().task)
+            assertTrue(stderr.toString(StandardCharsets.UTF_8).contains("send task.create task=task-1"))
+        } finally {
+            System.setErr(original)
+        }
+    }
+
+    @Test
+    fun `a failed ack still keeps the delivered reply and the handler alive`() = runBlocking {
+        val link = FakeLink().apply { ackFailures = 1 }
+        val gateway = BackendGateway(link, contentKey, run = { "done" }, clock = { 1_000 }, newId = { "reply" })
+        val stderr = ByteArrayOutputStream()
+        val original = System.err
+        System.setErr(PrintStream(stderr, true, StandardCharsets.UTF_8))
+        try {
+            gateway.attach()
+
+            link.onTask!!.invoke(taskCreate(seal("""{"goal":"first"}"""), task = "task-1"))
+            link.onTask!!.invoke(taskCreate(seal("""{"goal":"second"}"""), task = "task-2"))
+
+            assertEquals(2, link.sent.size)
+            assertEquals(1, link.acked.size)
+            assertEquals("task-2", link.acked.single().task)
+            assertTrue(stderr.toString(StandardCharsets.UTF_8).contains("task.ack task.create task=task-1"))
+        } finally {
+            System.setErr(original)
+        }
+    }
+
+    @Test
     fun `runForever attaches the handler and starts the link`() = runTest {
         val link = FakeLink()
         val gateway = BackendGateway(link, contentKey, run = { "never" })
@@ -267,6 +341,8 @@ class BackendGatewayTest {
         val sent = mutableListOf<BackendEnvelope>()
         val acked = mutableListOf<BackendEnvelope>()
         var starts = 0
+        var sendFailures = 0
+        var ackFailures = 0
 
         override fun start(scope: CoroutineScope) {
             starts++
@@ -275,10 +351,18 @@ class BackendGatewayTest {
         override suspend fun stop() = Unit
 
         override suspend fun send(frame: BackendEnvelope) {
+            if (sendFailures > 0) {
+                sendFailures--
+                throw IllegalStateException("the gateway link is not open")
+            }
             sent += frame
         }
 
         override suspend fun ack(task: BackendEnvelope) {
+            if (ackFailures > 0) {
+                ackFailures--
+                throw IllegalStateException("the gateway link is not open")
+            }
             acked += task
         }
 
