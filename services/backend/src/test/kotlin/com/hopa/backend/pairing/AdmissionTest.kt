@@ -21,6 +21,10 @@ import java.sql.Connection
 import java.util.Base64
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -485,6 +489,51 @@ class AdmissionTest {
         assertEquals(1, pcDevices(phone.household).size)
         assertEquals(1, storedWraps(phone.household).size)
         assertArrayEquals(pcKey, pcDevices(phone.household).single().publicKey)
+    }
+
+    @Test
+    fun `a claim cannot rename or re-platform the minted device`() = testApplication {
+        application { module(config()) }
+        val phone = seedPhone()
+        val secret = bodyOf(client.mintPending(name = "Studio", platform = "windows"))["secret"]!!
+            .jsonPrimitive.content
+        assertEquals(HttpStatusCode.OK, client.vouch(secret, bearer = phone.token).status)
+
+        val response = client.claim(secret, name = "Attacker", platform = "android")
+
+        assertEquals(HttpStatusCode.Created, response.status)
+        // pcDevices selects platform = windows and name = Studio.
+        assertEquals(1, pcDevices(phone.household).size)
+        assertEquals(1, storedWraps(phone.household).size)
+    }
+
+    @Test
+    fun `two claims racing create one device and one wrap`() = testApplication {
+        application { module(config()) }
+        val phone = seedPhone()
+        val secret = bodyOf(client.mintPending())["secret"]!!.jsonPrimitive.content
+        assertEquals(HttpStatusCode.OK, client.vouch(secret, bearer = phone.token).status)
+
+        val barrier = java.util.concurrent.CyclicBarrier(2)
+        val responses = coroutineScope {
+            (1..2).map { index ->
+                async(Dispatchers.IO) {
+                    barrier.await(5, java.util.concurrent.TimeUnit.SECONDS)
+                    client.claim(secret, address = "198.51.100.${40 + index}")
+                }
+            }.awaitAll()
+        }
+
+        assertEquals(1, responses.count { it.status == HttpStatusCode.Created })
+        assertEquals(
+            1,
+            responses.count {
+                it.status == HttpStatusCode.BadRequest &&
+                    errorCode(it) == "E_SCHEMA"
+            },
+        )
+        assertEquals(1, pcDevices(phone.household).size)
+        assertEquals(1, storedWraps(phone.household).size)
     }
 
     @Test

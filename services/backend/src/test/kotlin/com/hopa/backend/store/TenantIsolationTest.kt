@@ -25,6 +25,39 @@ class TenantIsolationTest {
 
     private fun deviceOf(household: String): String = devices.getValue(household)
 
+    private fun seedWrap(household: String) {
+        db.tenant(household) { connection ->
+            connection.prepareStatement(
+                "insert into household_key_wraps(household_id, device_id, wrapped_key) " +
+                    "values (?::uuid, ?::uuid, ?)",
+            ).use {
+                it.setString(1, household)
+                it.setString(2, deviceOf(household))
+                it.setBytes(3, ByteArray(60) { 9 })
+                it.executeUpdate()
+            }
+        }
+    }
+
+    private fun seedPending(household: String, id: String, codeHash: ByteArray) {
+        db.tenant(household) { connection ->
+            connection.prepareStatement(
+                """
+                insert into pending_pairings(id, code_hash, platform, name, public_key, alg,
+                                             household_id, expires_at)
+                values (?::uuid, ?, 'windows', 'Desk', ?, 'x25519', ?::uuid,
+                        now() + interval '5 minutes')
+                """.trimIndent(),
+            ).use {
+                it.setString(1, id)
+                it.setBytes(2, codeHash)
+                it.setBytes(3, ByteArray(32) { 4 })
+                it.setString(4, household)
+                it.executeUpdate()
+            }
+        }
+    }
+
     private fun seedTask(household: String, messageId: String): String {
         val task = UUID.randomUUID().toString()
         val device = deviceOf(household)
@@ -113,17 +146,41 @@ class TenantIsolationTest {
         val attempts = System.getenv("HOPA_ISOLATION_ATTEMPTS")?.toIntOrNull() ?: 1_000
         val (home, other) = twoHouseholds()
         val foreign = (1..50).map { seedTask(other, UUID.randomUUID().toString()) }
+        val foreignPending = (1..50).map { index ->
+            val id = UUID.randomUUID().toString()
+            seedPending(other, id, ByteArray(32) { (0x40 + index).toByte() })
+            id
+        }
+        seedWrap(other)
+        val foreignDevice = deviceOf(other)
         var checked = 0
 
         repeat(attempts) {
             val target = foreign.random()
-            val seen = db.tenant(home) { connection ->
-                connection.prepareStatement("select count(*) from tasks where id = ?::uuid").use {
-                    it.setString(1, target)
-                    it.executeQuery().use { rows -> rows.next(); rows.getInt(1) }
-                }
+            val pending = foreignPending.random()
+            val (taskSeen, pendingSeen, wrapSeen) = db.tenant(home) { connection ->
+                Triple(
+                    connection.prepareStatement("select count(*) from tasks where id = ?::uuid").use {
+                        it.setString(1, target)
+                        it.executeQuery().use { rows -> rows.next(); rows.getInt(1) }
+                    },
+                    connection.prepareStatement(
+                        "select count(*) from pending_pairings where id = ?::uuid",
+                    ).use {
+                        it.setString(1, pending)
+                        it.executeQuery().use { rows -> rows.next(); rows.getInt(1) }
+                    },
+                    connection.prepareStatement(
+                        "select count(*) from household_key_wraps where device_id = ?::uuid",
+                    ).use {
+                        it.setString(1, foreignDevice)
+                        it.executeQuery().use { rows -> rows.next(); rows.getInt(1) }
+                    },
+                )
             }
-            assertEquals(0, seen)
+            assertEquals(0, taskSeen)
+            assertEquals(0, pendingSeen)
+            assertEquals(0, wrapSeen)
             checked++
         }
 

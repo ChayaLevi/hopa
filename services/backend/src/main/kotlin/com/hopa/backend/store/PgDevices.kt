@@ -18,6 +18,12 @@ data class DeviceRow(
 interface DeviceInventory {
     fun list(householdId: String): List<DeviceRow>
 
+    /**
+     * The admin console's read, through the `admin_list_devices` definer
+     * function. It runs with no tenant GUC: the function's owner bypasses RLS.
+     */
+    fun adminList(householdId: String): List<DeviceRow> = list(householdId)
+
     /** False when the device is not in this household; true also when already revoked. */
     fun revokeDevice(deviceId: String, householdId: String): Boolean
 }
@@ -88,6 +94,36 @@ class PgDevices(private val db: Database) : DeviceDirectory, DeviceInventory {
             connection.prepareStatement(
                 "select id, platform, name, last_seen_at, revoked_at from devices " +
                     "where household_id = ?::uuid order by created_at, id",
+            ).use {
+                it.setString(1, householdId)
+                it.executeQuery().use { rows ->
+                    buildList {
+                        while (rows.next()) {
+                            add(
+                                DeviceRow(
+                                    id = rows.getString(1),
+                                    platform = rows.getString(2),
+                                    name = rows.getString(3),
+                                    lastSeenAt = rows.getTimestamp(4)?.toInstant()?.toString(),
+                                    revokedAt = rows.getTimestamp(5)?.toInstant()?.toString(),
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+    /**
+     * The admin read uses the definer function owned by `hopa_admin`; the
+     * request path keeps no tenant GUC. The household id is an explicit
+     * argument, so the same call cannot widen to another tenant.
+     */
+    override fun adminList(householdId: String): List<DeviceRow> =
+        db.read { connection ->
+            connection.prepareStatement(
+                "select device_id, platform, name, last_seen_at, revoked_at " +
+                    "from admin_list_devices(?::uuid)",
             ).use {
                 it.setString(1, householdId)
                 it.executeQuery().use { rows ->

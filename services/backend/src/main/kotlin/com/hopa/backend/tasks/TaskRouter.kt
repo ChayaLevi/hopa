@@ -69,6 +69,12 @@ class TaskRouter(
 
         /** Half the frame cap, leaving room for the envelope fields around it. */
         const val MAX_DIAG_BODY_BYTES = 32 * 1024
+
+        /** A result, error or cancel ends the task; nothing may move it again. */
+        val TERMINAL_STATES = setOf("done", "failed", "cancelled")
+
+        /** Late delivery signals that must not reopen a terminal task. */
+        val POST_TERMINAL_TYPES = setOf("task.ack", "task.progress")
     }
 
     fun route(
@@ -163,7 +169,23 @@ class TaskRouter(
         val routed = if (registry.online(target.deviceId)) {
             deliver(task)
         } else {
-            wake(task)
+            try {
+                wake(task)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (failed: Exception) {
+                // The row and audit are already durable. A dead push service
+                // must not fail the admin's 202: the hello catch-up delivers it.
+                log.event(
+                    "diag.wake.failed",
+                    mapOf(
+                        "admin_id" to adminId,
+                        "household_id" to task.householdId,
+                        "device_id" to task.to,
+                        "task_id" to task.id,
+                    ),
+                )
+            }
             task
         }
         return RouteResult.Accepted(routed, duplicate = false)
@@ -280,6 +302,14 @@ class TaskRouter(
                 identity.deviceId,
                 task.id,
             ) {}
+        }
+
+        // A client may ack after its result (the sidecar sends result then ack).
+        // Terminal means terminal: record the event, but never move the state
+        // back to acked/progress or relay a stale signal.
+        if (task.state in TERMINAL_STATES && envelope.type in POST_TERMINAL_TYPES) {
+            store.event(task.id, identity.householdId, envelope.type, envelope.body, now())
+            return RouteResult.Accepted(task, duplicate = false)
         }
 
         val next = when (envelope.type) {

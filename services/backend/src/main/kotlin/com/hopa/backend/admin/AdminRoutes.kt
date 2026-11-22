@@ -56,7 +56,7 @@ fun Application.adminRoutes(config: ServerConfig) {
 
     routing {
         get("/v1/admin/devices") {
-            call.adminIdentity(config) ?: return@get
+            val admin = call.adminIdentity(config) ?: return@get
             val raw = call.request.queryParameters["household"]
             val household = raw?.takeIf { UUID_PATTERN.matches(it) }?.let { UUID.fromString(it).toString() }
             if (household == null) {
@@ -75,7 +75,9 @@ fun Application.adminRoutes(config: ServerConfig) {
                 )
                 return@get
             }
-            val devices = inventory.list(household).map { row ->
+            // The admin read goes through admin_list_devices (owner hopa_admin,
+            // BYPASSRLS); the tenant GUC is no longer this path's mechanism.
+            val devices = inventory.adminList(household).map { row ->
                 AdminDeviceView(
                     id = row.id,
                     platform = row.platform,
@@ -85,6 +87,10 @@ fun Application.adminRoutes(config: ServerConfig) {
                     online = config.registry.online(row.id),
                 )
             }
+            config.log.event(
+                "admin.devices.read",
+                mapOf("admin_id" to admin.adminId, "household_id" to household),
+            )
             call.respond(HttpStatusCode.OK, devices)
         }
 

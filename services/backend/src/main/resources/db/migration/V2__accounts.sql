@@ -241,11 +241,29 @@ revoke hopa_admin from current_user;
 -- Postgres reports SET for them universally). A failure here rolls the whole
 -- migration back and names the operator line that removes the residual grant.
 do $$
+declare
+    has_admin_option boolean;
 begin
     if not (select rolsuper from pg_roles where rolname = current_user) then
         if pg_has_role(current_user, 'hopa_admin', 'set') then
             raise exception
                 'the deploy role can still SET ROLE to the BYPASSRLS owner. As a superuser: revoke hopa_admin from %;', current_user;
+        end if;
+        -- ADMIN OPTION is not SET, but it still lets this role re-grant the
+        -- BYPASSRLS owner to itself later. Refuse to finish the migration with
+        -- that residual capability.
+        select exists (
+            select 1
+            from pg_auth_members m
+            join pg_roles r on r.oid = m.roleid
+            join pg_roles member on member.oid = m.member
+            where r.rolname = 'hopa_admin'
+              and member.rolname = current_user
+              and m.admin_option
+        ) into has_admin_option;
+        if has_admin_option then
+            raise exception
+                'the deploy role still holds ADMIN OPTION on the BYPASSRLS owner. As a superuser: revoke admin option for hopa_admin from %;', current_user;
         end if;
     end if;
 end

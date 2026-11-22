@@ -306,8 +306,8 @@ internal fun claimPendingSession(
     val parked = db.token(codeHashHex) { connection ->
         connection.prepareStatement(
             "select id::text, household_id::text, member_id::text, public_key, " +
-                "expires_at, vouched_at, claimed_at, wrapped_key, voucher_device_id::text " +
-                "from pending_pairings where code_hash = decode(?, 'hex')",
+                "expires_at, vouched_at, claimed_at, wrapped_key, voucher_device_id::text, " +
+                "platform, name from pending_pairings where code_hash = decode(?, 'hex')",
         ).use { statement ->
             statement.setString(1, codeHashHex)
             statement.executeQuery().use { rows ->
@@ -324,6 +324,8 @@ internal fun claimPendingSession(
                         claimed = rows.getTimestamp(7) != null,
                         wrap = rows.getBytes(8),
                         voucherDeviceId = rows.getString(9),
+                        platform = rows.getString(10),
+                        name = rows.getString(11),
                     )
                 }
             }
@@ -384,8 +386,10 @@ internal fun claimPendingSession(
                 it.setString(1, device)
                 it.setString(2, householdId)
                 it.setString(3, memberId)
-                it.setString(4, request.platform)
-                it.setString(5, request.name)
+                // The minted row is authoritative: a claim cannot rename the
+                // device or change its platform after the phone saw the QR.
+                it.setString(4, parked.platform)
+                it.setString(5, parked.name)
                 it.setBytes(6, publicKey)
                 it.setString(7, request.alg)
                 it.setString(8, request.pushToken)
@@ -440,6 +444,8 @@ private data class ParkedRow(
     val claimed: Boolean,
     val wrap: ByteArray?,
     val voucherDeviceId: String?,
+    val platform: String,
+    val name: String,
 )
 
 private data class ClaimedTokens(

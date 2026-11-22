@@ -329,6 +329,12 @@ class DiagSendTest {
         assertEquals(true, online.jsonObject["online"]!!.jsonPrimitive.content.toBoolean())
         assertEquals(false, offline.jsonObject["online"]!!.jsonPrimitive.content.toBoolean())
         assertFalse(rows.any { it.jsonObject["id"]!!.jsonPrimitive.content == other })
+        val reads = events.filter { it.first == "admin.devices.read" }
+        assertEquals(1, reads.size)
+        assertEquals(
+            mapOf("admin_id" to admin.id, "household_id" to household),
+            reads.single().second,
+        )
         phoneWs.close()
     }
 
@@ -559,7 +565,7 @@ class DiagSendTest {
     }
 
     @Test
-    fun `the diag audit is durable when the wake fails`() = testApplication {
+    fun `the diag audit and queued row survive a failed wake with a 202`() = testApplication {
         val admin = seedAdmin()
         val household = newHousehold()
         val device = newDevice()
@@ -569,8 +575,18 @@ class DiagSendTest {
 
         val response = client.diag(admin.token, device, household, "diag.ping")
 
-        assertEquals(HttpStatusCode.InternalServerError, response.status)
+        // The row and audit are durable before the wake; a dead push service
+        // must not turn that into a 500 (the hello catch-up delivers it).
+        assertEquals(HttpStatusCode.Accepted, response.status)
+        val accepted = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        assertEquals("queued", accepted["state"]!!.jsonPrimitive.content)
         assertEquals(1, diagEvents().size, "the audit line must survive the failed wake")
+        val failed = events.filter { it.first == "diag.wake.failed" }
+        assertEquals(1, failed.size)
+        assertEquals(
+            setOf("admin_id", "household_id", "device_id", "task_id"),
+            failed.single().second.keys,
+        )
         assertEquals(1, taskCount(household), "the queued row must survive the failed wake")
     }
 

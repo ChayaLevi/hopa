@@ -76,7 +76,15 @@ object PostgresHarness {
                         "GRANT USAGE, CREATE ON SCHEMA public TO hopa_owner WITH GRANT OPTION",
                     )
                     statement.execute("GRANT USAGE ON SCHEMA public TO hopa_app")
-                    statement.execute("GRANT hopa_admin TO hopa_owner WITH ADMIN OPTION, SET FALSE")
+                    // Migrate through the superuser provisioning path the deploy
+                    // guide allows: hopa_owner is briefly SUPERUSER so it can
+                    // create the BYPASSRLS owner and alter function owners
+                    // without a bootstrap ADMIN OPTION. It is demoted below,
+                    // before any test runs, so FORCE RLS binds it again. A
+                    // non-superuser deploy role must instead hold ADMIN OPTION
+                    // only for the migration and lose it before the guard at
+                    // the end of V2.
+                    statement.execute("ALTER ROLE hopa_owner SUPERUSER")
                 }
             }
 
@@ -86,14 +94,7 @@ object PostgresHarness {
 
             admin.tenant(NO_HOUSEHOLD) { connection ->
                 connection.createStatement().use { statement ->
-                    // Models the operator provisioning the migration documents:
-                    // the bootstrap grant carries ADMIN OPTION (so the migration
-                    // can grant/revoke its own SET-capable row) but not SET. The
-                    // superuser removes it after migration, exactly as the
-                    // operator must when the deploy role is not a superuser
-                    // (Postgres tracks grants per grantor, so hopa_owner cannot
-                    // revoke this superuser-granted row itself).
-                    statement.execute("REVOKE hopa_admin FROM hopa_owner")
+                    statement.execute("ALTER ROLE hopa_owner NOSUPERUSER")
                     statement.execute(
                         "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO hopa_app",
                     )

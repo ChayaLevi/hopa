@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class TaskRoutingTest {
@@ -230,6 +231,50 @@ class TaskRoutingTest {
         third.send(hello("dev-pc"))
         third.expect("device.hello.ack")
         third.expectNothing("task.create")
+    }
+
+    @Test
+    fun `a late ack after a result leaves the task done`() = runBlocking {
+        val phone = identities.first { it.deviceId == "dev-phone" }
+        val pc = identities.first { it.deviceId == "dev-pc" }
+        val store = InMemoryTaskStore()
+        val router = TaskRouter(
+            store = store,
+            registry = DeviceRegistry(),
+            devices = MapDirectory(mapOf("dev-pc" to pc)),
+        )
+        val created = router.route(phone, create("dev-pc")) as RouteResult.Accepted
+        val taskId = created.task.id
+
+        val result = router.route(
+            pc,
+            Envelope(
+                v = 1,
+                id = UUID.randomUUID().toString(),
+                type = "task.result",
+                ts = 2,
+                to = "dev-phone",
+                task = taskId,
+                body = buildJsonObject { put("summary", "done") },
+            ),
+        )
+        assertTrue(result is RouteResult.Accepted)
+        assertEquals("done", store.find(taskId, "hh-1")!!.state)
+
+        val lateAck = router.route(
+            pc,
+            Envelope(
+                v = 1,
+                id = UUID.randomUUID().toString(),
+                type = "task.ack",
+                ts = 3,
+                to = "dev-phone",
+                task = taskId,
+                body = buildJsonObject { put("state", "delivered") },
+            ),
+        )
+        assertTrue(lateAck is RouteResult.Accepted)
+        assertEquals("done", store.find(taskId, "hh-1")!!.state)
     }
 
     @Test
