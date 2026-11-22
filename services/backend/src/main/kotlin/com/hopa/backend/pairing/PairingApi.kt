@@ -49,6 +49,12 @@ data class Claimed(
      * for an operator-minted session, which carries no wrap.
      */
     val wrappedKey: String? = null,
+    /**
+     * Base64url of the vouching phone's 32-byte X25519 public key. Present with
+     * `wrappedKey`; the PC needs it to derive the same static-static KEK. Null
+     * (and omitted) for an operator-minted session.
+     */
+    val voucherPublicKey: String? = null,
 )
 
 interface PairingApi {

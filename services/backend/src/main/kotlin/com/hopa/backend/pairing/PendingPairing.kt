@@ -228,14 +228,15 @@ class PendingPairingService(
         val sessionId = db.tenantAndToken(identity.householdId, hash) { connection ->
             connection.prepareStatement(
                 "update pending_pairings set household_id = ?::uuid, member_id = ?::uuid, " +
-                    "vouched_at = now(), wrapped_key = ? " +
+                    "vouched_at = now(), wrapped_key = ?, voucher_device_id = ?::uuid " +
                     "where code_hash = decode(?, 'hex') and vouched_at is null " +
                     "and claimed_at is null and expires_at > now() returning id::text",
             ).use { statement ->
                 statement.setString(1, identity.householdId)
                 statement.setString(2, identity.memberId)
                 statement.setBytes(3, wrapped)
-                statement.setString(4, hash)
+                statement.setString(4, identity.deviceId)
+                statement.setString(5, hash)
                 statement.executeQuery().use { rows ->
                     if (rows.next()) rows.getString(1) else null
                 }
@@ -305,7 +306,7 @@ internal fun claimPendingSession(
     val parked = db.token(codeHashHex) { connection ->
         connection.prepareStatement(
             "select id::text, household_id::text, member_id::text, public_key, " +
-                "expires_at, vouched_at, claimed_at, wrapped_key " +
+                "expires_at, vouched_at, claimed_at, wrapped_key, voucher_device_id::text " +
                 "from pending_pairings where code_hash = decode(?, 'hex')",
         ).use { statement ->
             statement.setString(1, codeHashHex)
@@ -322,6 +323,7 @@ internal fun claimPendingSession(
                         vouched = rows.getTimestamp(6) != null,
                         claimed = rows.getTimestamp(7) != null,
                         wrap = rows.getBytes(8),
+                        voucherDeviceId = rows.getString(9),
                     )
                 }
             }
@@ -348,8 +350,23 @@ internal fun claimPendingSession(
         ?: return PairingOutcome.Refused("E_SCHEMA", "pairing session has not been vouched")
 
     val device = UUID.randomUUID().toString()
-    val (access, refresh) = try {
+    val issued = try {
         db.tenantAndToken(householdId, codeHashHex) { connection ->
+            // R28: the PC needs the voucher's public key to derive the same
+            // static-static KEK. Read it in this tenant transaction; a missing
+            // device or key makes the session unusable.
+            val voucherPublicKey = parked.voucherDeviceId?.let { voucherDeviceId ->
+                connection.prepareStatement(
+                    "select public_key from devices where id = ?::uuid",
+                ).use {
+                    it.setString(1, voucherDeviceId)
+                    it.executeQuery().use { rows ->
+                        if (rows.next()) rows.getBytes(1) else null
+                    }
+                }
+            } ?: throw MissingVoucherKey()
+            if (voucherPublicKey.isEmpty()) throw MissingVoucherKey()
+
             val won = connection.prepareStatement(
                 "update pending_pairings set claimed_at = now() " +
                     "where id = ?::uuid and claimed_at is null " +
@@ -387,21 +404,28 @@ internal fun claimPendingSession(
                 it.executeUpdate()
             }
 
-            tokens.issueAccessOn(connection, device, householdId) to
-                tokens.issueRefreshOn(connection, device, householdId)
+            ClaimedTokens(
+                access = tokens.issueAccessOn(connection, device, householdId),
+                refresh = tokens.issueRefreshOn(connection, device, householdId),
+                voucherPublicKey = voucherPublicKey,
+            )
         }
     } catch (_: PendingTaken) {
         return PairingOutcome.Refused("E_SCHEMA", "pairing session already claimed")
+    } catch (_: MissingVoucherKey) {
+        return PairingOutcome.Refused("E_SCHEMA", "pairing session has no voucher public key")
     }
 
     return PairingOutcome.Ok(
         Claimed(
             deviceId = device,
             householdId = householdId,
-            accessToken = access.token,
-            refreshToken = refresh.token,
-            expiresAt = access.expiresAt,
+            accessToken = issued.access.token,
+            refreshToken = issued.refresh.token,
+            expiresAt = issued.access.expiresAt,
             wrappedKey = Base64.getUrlEncoder().withoutPadding().encodeToString(wrap),
+            voucherPublicKey = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(issued.voucherPublicKey),
         ),
     )
 }
@@ -415,9 +439,18 @@ private data class ParkedRow(
     val vouched: Boolean,
     val claimed: Boolean,
     val wrap: ByteArray?,
+    val voucherDeviceId: String?,
+)
+
+private data class ClaimedTokens(
+    val access: Issued,
+    val refresh: Issued,
+    val voucherPublicKey: ByteArray,
 )
 
 private class PendingTaken : RuntimeException()
+
+private class MissingVoucherKey : RuntimeException()
 
 fun Application.pendingPairingRoutes(config: ServerConfig) {
     val api = config.pendingPairings ?: return

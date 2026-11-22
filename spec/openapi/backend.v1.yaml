@@ -225,8 +225,9 @@ paths:
         Called by the new device. Resolves either an operator-minted pairing
         session or a pending session a phone vouched for. A vouched pending
         session requires the exact public key it was minted with and answers with
-        the household key wrap parked on it; other refusals name the session
-        state. An operator-minted session answers no `wrappedKey`.
+        the household key wrap parked on it plus the vouching phone's public key;
+        other refusals name the session state. An operator-minted session answers
+        neither `wrappedKey` nor `voucherPublicKey`.
       security: []
       requestBody:
         required: true
@@ -262,8 +263,16 @@ paths:
                       Base64url of the 60-byte household key wrap this device was
                       admitted with. Present only for a session that came through
                       `/v1/pair/vouch`; omitted for an operator-minted session.
+                  voucherPublicKey:
+                    type: string
+                    description: |
+                      Base64url of the vouching phone's 32-byte X25519 public key,
+                      needed to derive the same KEK as the wrap. Present exactly
+                      when `wrappedKey` is; omitted for an operator-minted session.
         "400":
-          description: Expired, unvouched or already claimed session, or a public key that does not match
+          description: |
+            Expired, unvouched or already claimed session, a public key that does
+            not match, or a vouched session whose voucher device/key is gone.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }

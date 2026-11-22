@@ -51,6 +51,7 @@ class AdmissionTest {
     private val otherWrap = ByteArray(60) { index -> (index + 7).toByte() }
     private val pcKey = ByteArray(32) { index -> (index + 1).toByte() }
     private val otherKey = ByteArray(32) { index -> (index + 101).toByte() }
+    private val phoneKey = ByteArray(32) { index -> (index * 5 + 3).toByte() }
 
     private data class Phone(
         val household: String,
@@ -72,6 +73,15 @@ class AdmissionTest {
         val member = UUID.randomUUID().toString()
         val device = newDevice()
         seedHousehold(db, household, device, member)
+        db.tenant(household) { connection ->
+            connection.prepareStatement(
+                "update devices set public_key = ?, alg = 'x25519' where id = ?::uuid",
+            ).use { statement ->
+                statement.setBytes(1, phoneKey)
+                statement.setString(2, device)
+                statement.executeUpdate()
+            }
+        }
         val token = TokenIssuer(db, clock::get).issueAccess(device, household, member).token
         return Phone(household, member, device, token)
     }
@@ -176,6 +186,7 @@ class AdmissionTest {
         val householdId: String?,
         val memberId: String?,
         val wrap: ByteArray?,
+        val voucherDeviceId: String?,
         val vouched: Boolean,
         val claimed: Boolean,
     )
@@ -184,7 +195,7 @@ class AdmissionTest {
         db.token(hashHex(secret)) { connection ->
             connection.prepareStatement(
                 "select household_id::text, member_id::text, wrapped_key, " +
-                    "vouched_at, claimed_at from pending_pairings " +
+                    "voucher_device_id::text, vouched_at, claimed_at from pending_pairings " +
                     "where code_hash = decode(?, 'hex')",
             ).use { statement ->
                 statement.setString(1, hashHex(secret))
@@ -194,8 +205,9 @@ class AdmissionTest {
                         householdId = rows.getString(1),
                         memberId = rows.getString(2),
                         wrap = rows.getBytes(3),
-                        vouched = rows.getTimestamp(4) != null,
-                        claimed = rows.getTimestamp(5) != null,
+                        voucherDeviceId = rows.getString(4),
+                        vouched = rows.getTimestamp(5) != null,
+                        claimed = rows.getTimestamp(6) != null,
                     )
                 }
             }
@@ -258,6 +270,7 @@ class AdmissionTest {
         assertEquals(phone.household, parked.householdId)
         assertEquals(phone.member, parked.memberId)
         assertArrayEquals(wrap, parked.wrap)
+        assertEquals(phone.device, parked.voucherDeviceId)
         assertTrue(parked.vouched)
         assertFalse(parked.claimed)
         // R25: no device exists yet, so no wrap row may exist yet either.
@@ -272,6 +285,10 @@ class AdmissionTest {
         assertArrayEquals(
             wrap,
             Base64.getUrlDecoder().decode(body["wrappedKey"]!!.jsonPrimitive.content),
+        )
+        assertArrayEquals(
+            phoneKey,
+            Base64.getUrlDecoder().decode(body["voucherPublicKey"]!!.jsonPrimitive.content),
         )
         assertTrue(body["accessToken"]!!.jsonPrimitive.content.length >= 43)
 
@@ -471,6 +488,33 @@ class AdmissionTest {
     }
 
     @Test
+    fun `a claim without the voucher public key is E_SCHEMA and admits nothing`() = testApplication {
+        application { module(config()) }
+        val phone = seedPhone()
+        val secret = bodyOf(client.mintPending())["secret"]!!.jsonPrimitive.content
+        assertEquals(HttpStatusCode.OK, client.vouch(secret, bearer = phone.token).status)
+
+        // A vouched session whose phone device lost its key cannot be unwrapped.
+        db.tenant(phone.household) { connection ->
+            connection.prepareStatement(
+                "update devices set public_key = null where id = ?::uuid",
+            ).use { statement ->
+                statement.setString(1, phone.device)
+                statement.executeUpdate()
+            }
+        }
+
+        val response = client.claim(secret)
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals("E_SCHEMA", errorCode(response))
+        assertEquals("pairing session has no voucher public key", errorMessage(response))
+        assertEquals(0, pcDevices(phone.household).size)
+        assertEquals(0, storedWraps(phone.household).size)
+        assertEquals("vouched", bodyOf(client.resolve(secret))["state"]!!.jsonPrimitive.content)
+    }
+
+    @Test
     fun `an operator minted session still claims without a wrapped key`() = testApplication {
         application { module(config()) }
         val qr = bodyOf(client.operatorMint())["qr"]!!.jsonPrimitive.content
@@ -481,6 +525,7 @@ class AdmissionTest {
         assertEquals(HttpStatusCode.Created, response.status)
         val body = bodyOf(response)
         assertFalse(body.containsKey("wrappedKey"))
+        assertFalse(body.containsKey("voucherPublicKey"))
         val household = body["householdId"]!!.jsonPrimitive.content
         assertEquals(0, storedWraps(household).size)
         assertEquals(1, count(household, "select count(*) from devices"))
