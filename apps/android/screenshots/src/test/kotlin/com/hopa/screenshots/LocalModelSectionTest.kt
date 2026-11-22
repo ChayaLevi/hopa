@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.hopa.feature.settings.LocalModelSection
@@ -52,6 +54,41 @@ class LocalModelSectionTest {
             }
         }
         compose.onRoot().captureRoboImage("src/test/screenshots/local-model-offered.png")
+    }
+
+    @Test
+    fun installedDetails() {
+        compose.setContent {
+            HopaTheme {
+                Column(
+                    modifier = Modifier
+                        .background(HopaColor.Bg)
+                        .padding(16.dp),
+                ) {
+                    LocalModelSection(
+                        state = LocalModelUiState(
+                            recommended = recommended,
+                            installed = listOf(
+                                InstalledModel(
+                                    id = "qwen3-1.7b",
+                                    file = File("qwen3-1.7b-1234.gguf"),
+                                    bytes = 1_282_439_264L,
+                                ),
+                            ),
+                            installedSpecs = mapOf("qwen3-1.7b" to recommended),
+                            totalBytes = 1_282_439_264L,
+                            ramGb = 6,
+                        ),
+                        onImport = {},
+                        onDownload = {},
+                        onDelete = {},
+                        onDeleteAll = {},
+                    )
+                }
+            }
+        }
+        compose.onNodeWithContentDescription("Show details").performClick()
+        compose.onRoot().captureRoboImage("src/test/screenshots/local-model-expanded.png")
     }
 
     @Test
