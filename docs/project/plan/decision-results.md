@@ -9,7 +9,7 @@ measured yet.
 
 ## What the harness measures
 
-`gradlew :decision-report:decisionReport` (from `apps/android`) runs every layer
+`gradlew :decision:decisionReport` (from `apps/android`) runs every layer
 the build ships over `spec/decisions/corpus.v1.json` and prints:
 
 - agreement with the reference answer;
@@ -65,7 +65,7 @@ conversation are not implemented.
 ## Known-app graphs (v0)
 
 A second path skips the model for a few apps written down by hand in
-`core/decision-graph`:
+`core/decision`:
 
 | App | What it can do |
 |---|---|

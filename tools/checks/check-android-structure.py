@@ -65,9 +65,9 @@ def is_contract(line: str) -> bool:
 
 # Third-party sources copied verbatim. They are not ours to restyle, they ship
 # with their own file layout and several declarations per file, and the adapter
-# around them is the only code this repository owns. See core/decision-laix/LAIX.md.
+# around them is the only code this repository owns. See core/decision/LAIX.md.
 VENDORED = (
-    "core/decision-laix/src/main/kotlin/dev/laix/",
+    "core/decision/src/main/kotlin/dev/laix/",
 )
 
 
