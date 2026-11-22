@@ -39,8 +39,9 @@ supersede it. Format:
 | [0019](0019-offline-and-model-network.md) | The model needs a network; the shell does not | accepted |
 | [0020](0020-android-is-the-active-client.md) | Android is the active client; Windows is next; Harmony is frozen | accepted |
 | [0021](0021-windows-client-stack.md) | Windows client: .NET shell over the Kotlin engine | accepted |
-| [0022](0022-backend-kotlin-and-shape.md) | Backend language and shape: Kotlin on the JVM, one build with `packages/` | proposed |
+| [0022](0022-backend-kotlin-and-shape.md) | Backend language and shape: Kotlin on the JVM, one build with `core/` | accepted |
 | [0023](0023-hidden-screen-without-staging.md) | The hidden screen keeps a shell helper and stops staging the dex | accepted |
+| [0025](0025-household-content-key.md) | Household content key: one key per household, wrapped per device; diag-only plaintext | accepted |
 
 Create the next ADR by copying the template below.
 
