@@ -7,9 +7,11 @@ import com.hopa.backend.http.knowledgeRoutes
 import com.hopa.backend.http.modelRoutes
 import com.hopa.backend.log.JsonEventLog
 import com.hopa.backend.pairing.PairingService
+import com.hopa.backend.pairing.PendingPairingService
 import com.hopa.backend.pairing.PgAuth
 import com.hopa.backend.pairing.TokenIssuer
 import com.hopa.backend.pairing.pairingRoutes
+import com.hopa.backend.pairing.pendingPairingRoutes
 import com.hopa.backend.pairing.tokenRoutes
 import com.hopa.backend.push.FcmSender
 import com.hopa.backend.push.GuardedPush
@@ -42,6 +44,7 @@ fun Application.module(config: ServerConfig) {
     knowledgeRoutes(config)
     modelRoutes(config)
     pairingRoutes(config)
+    pendingPairingRoutes(config)
     tokenRoutes(config)
     traceRoutes(config)
     gatewayRoutes(config)
@@ -87,6 +90,7 @@ fun main() {
         } else {
             null
         },
+        pendingPairings = database?.let(::PendingPairingService),
         bootstrapToken = System.getenv("HOPA_BOOTSTRAP_TOKEN"),
         tokenIssuer = tokens,
         tasks = database?.let { PgTaskStore(it) } ?: InMemoryTaskStore(),

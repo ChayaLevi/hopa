@@ -260,6 +260,103 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
         "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/pair/pending:
+    post:
+      summary: Mint a pending pairing session for a device that wants to join
+      description: |
+        Unauthenticated. The new device mints its own session, shows the QR to an
+        operator, then polls `/v1/pair/pending/resolve` with the secret. The secret
+        leaves the server exactly once; only its SHA-256 is stored. Sessions expire
+        in five minutes and are rate limited to five per minute per address
+        (`X-Forwarded-For` first hop).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [platform, name, publicKey, alg]
+              properties:
+                platform: { type: string, enum: [android, windows] }
+                name: { type: string, minLength: 1, maxLength: 100 }
+                publicKey:
+                  type: string
+                  description: Base64 or base64url X25519 public key, exactly 32 bytes
+                alg: { type: string, enum: [x25519] }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionId, secret, qr, expiresAt]
+                properties:
+                  sessionId: { type: string, format: uuid }
+                  secret:
+                    type: string
+                    description: Returned once; only its SHA-256 is stored.
+                  qr:
+                    type: string
+                    description: "hopa://pair?v=1&s=<secret>&u=<wss url>; carries no household id"
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Invalid platform, name, public key or algorithm
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/pair/pending/resolve:
+    post:
+      summary: Poll a pending pairing session by the secret from its QR
+      description: |
+        Unauthenticated. The poller holds only the secret, never a session id or a
+        household, so the row is visible through the token-hash policy alone.
+        Unknown secrets answer the same `E_SCHEMA` message; expired and claimed
+        sessions answer 200 with that `state` so the device can explain it. Rate
+        limited to five per minute per address.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionSecret]
+              properties:
+                sessionSecret: { type: string }
+      responses:
+        "200":
+          description: The session state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionId, state, name, platform, publicKey, fingerprint, expiresAt]
+                properties:
+                  sessionId: { type: string, format: uuid }
+                  state:
+                    type: string
+                    enum: [pending, vouched, claimed, expired]
+                  name: { type: string }
+                  platform: { type: string, enum: [android, windows] }
+                  publicKey:
+                    type: string
+                    description: Base64url without padding, 32 bytes
+                  fingerprint:
+                    type: string
+                    pattern: "^[0-9a-f]{8}$"
+                    description: First 8 lowercase hex characters of SHA-256 over the raw public key
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Unknown pairing session, or an invalid body
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
   /v1/token/refresh:
     post:
       summary: Rotate an access token

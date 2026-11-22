@@ -4,6 +4,7 @@ import com.hopa.backend.auth.AuthPort
 import com.hopa.backend.http.RateLimiter
 import com.hopa.backend.log.EventLog
 import com.hopa.backend.pairing.PairingApi
+import com.hopa.backend.pairing.PendingPairingService
 import com.hopa.backend.pairing.TokenIssuer
 import com.hopa.backend.push.PushPort
 import com.hopa.backend.store.DbProbe
@@ -24,6 +25,7 @@ data class ServerConfig(
     val devices: DeviceDirectory = DeviceDirectory.Empty,
     val db: DbProbe = DbProbe.Unconfigured,
     val pairing: PairingApi? = null,
+    val pendingPairings: PendingPairingService? = null,
     val bootstrapToken: String? = null,
     val tokenIssuer: TokenIssuer? = null,
     val tasks: TaskStore = InMemoryTaskStore(),

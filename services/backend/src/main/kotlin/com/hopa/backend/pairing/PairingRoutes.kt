@@ -75,7 +75,7 @@ fun Application.pairingRoutes(config: ServerConfig) {
     }
 }
 
-private suspend fun ApplicationCall.refuse(refusal: PairingOutcome.Refused) {
+internal suspend fun ApplicationCall.refuse(refusal: PairingOutcome.Refused) {
     val status = when (refusal.code) {
         "E_AUTH" -> HttpStatusCode.Unauthorized
         "E_RATE" -> HttpStatusCode.TooManyRequests
@@ -85,7 +85,7 @@ private suspend fun ApplicationCall.refuse(refusal: PairingOutcome.Refused) {
 }
 
 /** The first proxy hop is the client address; Render sets X-Forwarded-For. */
-private fun remoteAddress(call: ApplicationCall): String =
+internal fun remoteAddress(call: ApplicationCall): String =
     call.request.header("X-Forwarded-For")
         ?.substringBefore(",")
         ?.trim()
