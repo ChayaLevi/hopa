@@ -11,6 +11,11 @@
     task.create to the phone, and prints the ack, the task.result or task.error,
     and the traceparent. Tokens live in %TEMP% only and are never printed.
 
+    The access token lives about five minutes. When it is expired, or the
+    gateway refuses it with E_AUTH, the script trades the refresh token for a
+    new pair and retries once. A refresh token is single use, so the rotated
+    pair is written to the token file before the retry.
+
     The sender is SendTask.java, compiled on first use into %TEMP%\hopa-tools\
     with the JDK already on PATH; there is nothing to install.
 
@@ -110,6 +115,67 @@ function Protect-TokenFile([string]$Path) {
         & icacls $Path /inheritance:r /grant:r "$($who):(R,W)" 2>&1 | Out-Null
     } catch {
     }
+}
+
+# The refresh endpoint lives on the backend that issued the pair, not on
+# whatever HOPA_BACKEND_URL says now: a token file can outlive an address change.
+function Get-GatewayBase([string]$GatewayUrl) {
+    $base = $GatewayUrl.Trim()
+    $base = $base -replace '^wss://', 'https://'
+    $base = $base -replace '^ws://', 'http://'
+    $base = $base -replace '/v1/gateway/?$', ''
+    return $base.TrimEnd('/')
+}
+
+# A minute of skew covers a slow build between reading the file and connecting.
+function Test-TokenExpired($Tokens) {
+    $raw = [string]$Tokens.expiresAt
+    if (-not $raw) {
+        return $true
+    }
+    try {
+        $expires = [System.DateTimeOffset]::Parse(
+            $raw,
+            [System.Globalization.CultureInfo]::InvariantCulture).UtcDateTime
+    } catch {
+        return $false
+    }
+    return ((Get-Date).ToUniversalTime() -ge $expires.AddSeconds(-60))
+}
+
+function Write-Tokens([string]$Path, $Tokens) {
+    $json = $Tokens | ConvertTo-Json -Compress -Depth 4
+    $temp = "$Path.tmp"
+    [System.IO.File]::WriteAllText(
+        $temp,
+        $json,
+        (New-Object System.Text.UTF8Encoding($false)))
+    Move-Item -LiteralPath $temp -Destination $Path -Force
+    Protect-TokenFile $Path
+}
+
+function Update-TokensFromRefresh([string]$Path, $Tokens) {
+    $base = Get-GatewayBase ([string]$Tokens.gatewayUrl)
+    $body = @{ refreshToken = [string]$Tokens.refreshToken } | ConvertTo-Json -Compress
+    try {
+        $rotated = Invoke-RestMethod `
+            -Method POST `
+            -Uri "$base/v1/token/refresh" `
+            -ContentType "application/json" `
+            -Body $body `
+            -TimeoutSec 30
+    } catch {
+        Stop-WithMessage "the PC pair expired and could not be refreshed; run send-task.ps1 -Pair -Force"
+    }
+    if (-not $rotated.accessToken -or -not $rotated.refreshToken -or -not $rotated.expiresAt) {
+        Stop-WithMessage "the refresh response was missing a token; run send-task.ps1 -Pair -Force"
+    }
+    $Tokens.accessToken = [string]$rotated.accessToken
+    $Tokens.refreshToken = [string]$rotated.refreshToken
+    $Tokens.expiresAt = [string]$rotated.expiresAt
+    # Persist before the retry: this refresh token is already spent.
+    Write-Tokens $Path $Tokens
+    return $Tokens
 }
 
 function Build-Sender {
@@ -224,6 +290,11 @@ if (-not $To -and $tokens.to) {
     $To = [string]$tokens.to
 }
 
+if (Test-TokenExpired $tokens) {
+    Write-Output "access token expired; refreshing the PC pair"
+    $tokens = Update-TokensFromRefresh $tokensPath $tokens
+}
+
 Build-Sender
 $sendArgs = @(
     "send",
@@ -234,5 +305,14 @@ $sendArgs = @(
 if ($To) {
     $sendArgs += @("--to", $To)
 }
-& $java -cp $toolsDir SendTask @sendArgs
-exit $LASTEXITCODE
+$output = & $java -cp $toolsDir SendTask @sendArgs 2>&1
+$code = $LASTEXITCODE
+$output | ForEach-Object { Write-Output $_ }
+if ($code -ne 0 -and (($output | Out-String) -match 'gateway error E_AUTH')) {
+    Write-Output "access token refused; refreshing the PC pair and retrying once"
+    $tokens = Update-TokensFromRefresh $tokensPath $tokens
+    $output = & $java -cp $toolsDir SendTask @sendArgs 2>&1
+    $code = $LASTEXITCODE
+    $output | ForEach-Object { Write-Output $_ }
+}
+exit $code

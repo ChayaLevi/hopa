@@ -1,5 +1,11 @@
 package com.hopa.stores
 
+/**
+ * The gateway a fresh install points at. Pairing replaces it with the address
+ * carried by the hopa://pair link, and Disconnect restores this value.
+ */
+const val DEFAULT_BACKEND_URL = "wss://hopa-backend-test.onrender.com/v1/gateway"
+
 data class AppSettings(
     val provider: String = "stub",
     val endpoint: String = "https://api.deepseek.com/v1",
@@ -50,7 +56,7 @@ data class AppSettings(
      */
     val acceptedModelLicences: Set<String> = emptySet(),
     /** Address of the gateway this device is paired with. */
-    val backendUrl: String = "",
+    val backendUrl: String = DEFAULT_BACKEND_URL,
     /** Identity this device was given when it joined the household. */
     val backendDeviceId: String = "",
     val backendHouseholdId: String = "",
