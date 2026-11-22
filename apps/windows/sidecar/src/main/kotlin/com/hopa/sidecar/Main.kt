@@ -3,9 +3,17 @@ package com.hopa.sidecar
 import com.hopa.sidecar.Protocol.asObject
 import com.hopa.sidecar.Protocol.text
 import com.hopa.sidecar.Protocol.type
+import com.hopa.backend.link.BackendClient
+import com.hopa.backend.pairing.BackendCredentials
+import com.hopa.backend.pairing.BackendPairing as CorePairing
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.json.HopaJson
 import java.nio.file.Path
+import java.util.Base64
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 
 fun main() {
@@ -21,6 +29,63 @@ fun main() {
     val approval = HostApproval(io, approvals)
     val attachments = Attachments(dataDir.resolve("attachments"))
     val engine = Engine(io, device, approval, store, records, config)
+    val backendScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    val sessionStore = BackendSessionStore(dataDir.resolve("backend-session.json"))
+    val session = sessionStore.load()
+    if (session == null) {
+        io.log("backend admission: none; encrypted tasks stay off until a phone pairs this PC")
+    } else {
+        val contentKey = runCatching { Base64.getDecoder().decode(session.contentKeyBase64) }.getOrNull()
+        if (contentKey == null || contentKey.size != 32) {
+            io.log("backend admission: found device ${session.deviceId}, but its content key is invalid; encrypted tasks stay off")
+        } else {
+            io.log("backend admission: found device ${session.deviceId} in household ${session.householdId}")
+            var credentials = BackendCredentials(
+                deviceId = session.deviceId,
+                householdId = session.householdId,
+                accessToken = session.accessToken,
+                refreshToken = session.refreshToken,
+                expiresAt = session.expiresAt,
+                gatewayUrl = session.gatewayUrl,
+            )
+            val pairing = CorePairing(session.gatewayUrl)
+            val link = BackendClient(
+                credentials = { credentials },
+                pushToken = { null },
+                refresh = {
+                    // A refresh rotates the token pair but not the identity, so
+                    // the stored device and household are copied back in. An
+                    // unreachable backend is left as a throw for the client's
+                    // own backoff; only a successful rotation is persisted.
+                    val refreshed = pairing.refresh(credentials.refreshToken)
+                    credentials = refreshed.copy(
+                        deviceId = session.deviceId,
+                        householdId = session.householdId,
+                        gatewayUrl = session.gatewayUrl,
+                    )
+                    runCatching {
+                        sessionStore.save(
+                            session.copy(
+                                accessToken = refreshed.accessToken,
+                                refreshToken = refreshed.refreshToken,
+                                expiresAt = refreshed.expiresAt,
+                            ),
+                        )
+                    }
+                    credentials
+                },
+                deviceName = "Windows PC",
+                appVersion = Protocol.VERSION.toString(),
+            )
+            val runner = EngineTaskRunner(
+                startTurn = { id, goal -> engine.startTurn(id, goal, conversationId = null) },
+                cancelTurn = engine::cancel,
+            )
+            engine.onTurnEnd = runner::complete
+            val gateway = BackendGateway(link = link, contentKey = contentKey, run = runner::run)
+            backendScope.launch { gateway.runForever(backendScope) }
+        }
+    }
     io.send(Protocol.ready())
     val denied = approvals.restoreAndDeny()
     if (denied > 0) {

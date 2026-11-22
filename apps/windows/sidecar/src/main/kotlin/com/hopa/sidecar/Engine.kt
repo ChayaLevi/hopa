@@ -38,6 +38,14 @@ class Engine(
     @Volatile
     private var cancelled = false
 
+    /**
+     * Invoked next to `turn.end` with the turn id and its answer, so the
+     * backend gateway can resume a `task.create` (R31). One turn at a time is
+     * this engine's contract; the hook must not block.
+     */
+    @Volatile
+    var onTurnEnd: ((id: String, answer: String) -> Unit)? = null
+
     fun cancel() {
         cancelled = true
         io.log("turn cancelled by the user")
@@ -154,6 +162,12 @@ class Engine(
                     chainOk = chainOk,
                 ),
             )
+            try {
+                onTurnEnd?.invoke(id, answer)
+            } catch (failed: Exception) {
+                // A broken backend hook must not lose a host turn that already ended.
+                io.log("turn $id ended but its backend hook failed")
+            }
         }
     }
 }
