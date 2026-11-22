@@ -50,9 +50,12 @@ Each entry answers three questions for the person choosing: **strong at**,
 
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
+| SmolLM2 135M | 0.1 GB | downloads from inside the app; the smallest useful file | can only classify, English-centric | a filter, not a planner |
+| LFM2.5 350M | 0.2 GB | downloads from inside the app; designed for phones | tool choice, its own licence | the official LiquidAI quant |
 | Gemma 3 270M | 0.3 GB | downloads from inside the app; fastest answer, best instruction following at this size, multilingual | tool choice, multi-step plans | the cheapest first filter: "command or small talk" |
 | SmolLM2-360M | 0.4 GB | downloads from inside the app; speed, Apache-2.0, tiny memory | English-centric, weak plans | good fallback on 4 GB devices |
 | MiniCPM4 0.5B | 0.3 GB | downloads from inside the app; tiny memory, long context per byte | tool choice, tiny knowledge | community quant of OpenBMB weights |
+| Qwen2.5 0.5B | 0.5 GB | downloads from inside the app; mature, short answers | tool choice, long plans | the previous Qwen generation |
 | Qwen3-0.6B | 0.5 GB | downloads from inside the app; routing, short answers, thinking mode if wanted | anything multi-step | disable thinking for the loop or it burns the budget |
 
 ### Fast (0.8–1.2 GB)
@@ -60,6 +63,9 @@ Each entry answers three questions for the person choosing: **strong at**,
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
 | Qwen3-1.7B | 1.3 GB | downloads from inside the app; best all-round at this size, decent tool choice, Apache-2.0 | long plans, rare apps | the default for ≤6 GB phones; thinking off for turns |
+| LFM2 700M | 0.5 GB | downloads from inside the app; designed for phones, fast | tool choice, its own licence | the official LiquidAI quant |
+| Granite 4.0 1B | 1.0 GB | downloads from inside the app; tool calling, 128k context | smaller community, newer in llama.cpp | the dense 1B, not the hybrid |
+| Qwen2.5 1.5B | 1.1 GB | downloads from inside the app; tool-capable, multilingual | long plans, older generation | a stable fallback |
 | Gemma 3 1B | 0.8 GB | instructions, 32k context, 140+ languages; downloads from inside the app | tool choice, its own licence | the multilingual pick when Russian matters |
 | SmolLM2-1.7B | 1.1 GB | downloads from inside the app; speed, Apache-2.0 | planning, tool choice | lighter alternative when 1.7B Qwen is too slow |
 | LFM2.5 1.2B | 0.7 GB | downloads from inside the app; designed for phones, fast | tool choice, its own licence | the phone-first pick |
@@ -82,6 +88,8 @@ Each entry answers three questions for the person choosing: **strong at**,
 
 | Model | Size | Strong at | Weak at | Worth knowing |
 |---|---|---|---|---|
+| Hammer 2.1 0.5B | 0.4 GB | downloads from inside the app; function calling, very compact | non-commercial licence, general chat | community quant; research and personal use only |
+| Hammer 2.1 1.5B | 1.0 GB | downloads from inside the app; tool choice close to bigger models | non-commercial licence, conversation | community quant; research and personal use only |
 | xLAM-2-1B | 1.0 GB | downloads from inside the app; function calling, compact | general reasoning, chat | the cheapest way to get a correct tool choice |
 | xLAM-2-3B | 2.0 GB | tool choice close to big models | conversation, explanations | try it against Qwen3-4B on the bench |
 | Hammer 2.1-3B | 2.2 GB | tool calling on a Qwen base | breadth of knowledge | verify the GGUF template before adding |
