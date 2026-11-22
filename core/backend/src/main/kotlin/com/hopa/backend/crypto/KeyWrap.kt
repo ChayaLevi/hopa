@@ -1,17 +1,12 @@
 package com.hopa.backend.crypto
 
-import com.hopa.backend.pairing.X25519Keys
+import org.bouncycastle.crypto.agreement.X25519Agreement
 import org.bouncycastle.crypto.params.X25519PrivateKeyParameters
+import org.bouncycastle.crypto.params.X25519PublicKeyParameters
 import org.bouncycastle.crypto.util.PrivateKeyFactory
-import java.math.BigInteger
-import java.security.KeyFactory
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.security.spec.NamedParameterSpec
-import java.security.spec.PKCS8EncodedKeySpec
-import java.security.spec.XECPublicKeySpec
 import javax.crypto.Cipher
-import javax.crypto.KeyAgreement
 import javax.crypto.Mac
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -23,8 +18,8 @@ import javax.crypto.spec.SecretKeySpec
  * **Device wrap.** The wrapping device computes a static-static X25519 shared
  * secret between its own private key and the recipient's public key. Keys are
  * exchanged as:
- * - `peerPublicKey`: the raw 32-byte u-coordinate, exactly the bytes
- *   `X25519Keys.publicKeyBytes` returns for a device public key;
+ * - `peerPublicKey`: the raw 32-byte RFC 7748 u-coordinate octets, exactly
+ *   the bytes `X25519Keys.publicKeyBytes` returns for a device public key;
  * - `ownPrivateKey`: the PKCS#8 `PrivateKey.encoded` bytes, as clients store
  *   them (the recipient's matching public key is recovered from them).
  *
@@ -155,41 +150,29 @@ object KeyWrap {
     }
 
     private fun sharedSecret(peerPublicKey: ByteArray, ownPrivateKey: ByteArray): ByteArray = try {
-        val factory = KeyFactory.getInstance("XDH")
-        val publicKey = factory.generatePublic(
-            XECPublicKeySpec(NamedParameterSpec.X25519, BigInteger(1, peerPublicKey)),
-        )
-        val privateKey = factory.generatePrivate(PKCS8EncodedKeySpec(ownPrivateKey))
-        KeyAgreement.getInstance("X25519").run {
-            init(privateKey)
-            doPhase(publicKey, true)
-            generateSecret()
-        }
+        val privateKey = privateKeyOf(ownPrivateKey)
+        val publicKey = X25519PublicKeyParameters(peerPublicKey, 0)
+        val agreement = X25519Agreement().apply { init(privateKey) }
+        val secret = ByteArray(agreement.agreementSize)
+        agreement.calculateAgreement(publicKey, secret, 0)
+        secret
     } catch (e: Exception) {
         throw IllegalArgumentException("not an X25519 key pair", e)
     }
 
-    /** The 32 raw bytes of the public key that belongs to [ownPrivateKey]. */
-    private fun publicKeyOf(ownPrivateKey: ByteArray): ByteArray {
+    private fun privateKeyOf(ownPrivateKey: ByteArray): X25519PrivateKeyParameters {
         val parameters = try {
             PrivateKeyFactory.createKey(ownPrivateKey)
         } catch (e: Exception) {
             throw IllegalArgumentException("not a PKCS#8 X25519 private key", e)
         }
-        val privateKey = parameters as? X25519PrivateKeyParameters
+        return parameters as? X25519PrivateKeyParameters
             ?: throw IllegalArgumentException("not a PKCS#8 X25519 private key")
-        // BC emits the RFC 7748 octets; the JDK's XECPublicKey.u (and therefore
-        // X25519Keys.publicKeyBytes, the convention the contract uses) is the
-        // same integer in big-endian order, i.e. the octets reversed.
-        val u = BigInteger(1, privateKey.generatePublicKey().encoded.reversedArray())
-        val publicKey = try {
-            KeyFactory.getInstance("XDH").generatePublic(
-                XECPublicKeySpec(NamedParameterSpec.X25519, u),
-            )
-        } catch (e: Exception) {
-            throw IllegalArgumentException("not a PKCS#8 X25519 private key", e)
-        }
-        return X25519Keys.publicKeyBytes(publicKey)
+    }
+
+    /** The raw RFC 7748 octets of the public key that belongs to [ownPrivateKey]. */
+    private fun publicKeyOf(ownPrivateKey: ByteArray): ByteArray {
+        return privateKeyOf(ownPrivateKey).generatePublicKey().encoded
     }
 
     private fun seal(key: ByteArray, plaintext: ByteArray): ByteArray {
