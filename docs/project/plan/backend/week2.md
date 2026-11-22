@@ -1,7 +1,7 @@
 # Week 2 · 22–26 Nov 2026: accounts, PC admission, console, sync v0
 
 Status: **lane A implemented, 2026-11-22** — branch `backend-week2-A`
-(pushed to `amir-fork`), HEAD `118749e0`. Lane B and sync v0 remain planned.
+(pushed to `amir-fork`), HEAD `b92ee70c`. Lane B and sync v0 remain planned.
 Written 2026-11-22. Parent: [`weekly-plan.md`](weekly-plan.md),
 tracked in [#32](https://github.com/agents-demo/hopa/issues/32). Design source:
 [`docs/superpowers/specs/2026-11-22-pairing-accounts-design.md`](../../../superpowers/specs/2026-11-22-pairing-accounts-design.md)
@@ -158,9 +158,9 @@ Sync v0 never slides.
 
 Lane A ran subagent-driven: one implementer per task, a fresh task reviewer per
 diff, a final whole-branch review, then one fix wave. Task 0 is slice B Task 1
-pulled forward; Tasks 1–8 are lane A. 26 commits from `f9682f69` to `118749e0`
-on `backend-week2-A`. Nothing is deployed and no exit check is claimed without
-the evidence named here.
+pulled forward; Tasks 1–8 are lane A. 29 commits from `f9682f69` to `b92ee70c`
+on `backend-week2-A`, the last one the post-review fix (§9.3). Nothing is
+deployed and no exit check is claimed without the evidence named here.
 
 ### 9.1 Task status
 
@@ -176,6 +176,7 @@ the evidence named here.
 | 7 | Sidecar admission, QR, poll, claim, unwrap (V4) | `2e2914e2`, `93272f03`, `8d059231` | sidecar + core admission tests |
 | 8 | Sidecar encrypted gateway both directions | `60a1e3be`, `9c0176c0` | `BackendGatewayTest`, `PayloadCipherTest` |
 | — | Final-review fix wave | `99416bd4`, `e3c9be38`, `d4515c5d`, `809c97e2`, `118749e0` | see §9.5 |
+| — | Post-review fix (`b92ee70c`) | `b92ee70c` | claim-alg test; §9.3 post-review rows |
 
 ### 9.2 Decisions taken during execution
 
@@ -209,6 +210,9 @@ These are now part of the plan; Lane B and sync v0 build on them.
 | 7 | Pairing secret written to protocol stdout; credential `toString` unredacted | stderr/UI seam; redacted `toString`; atomic owner-only store; PNG deleted |
 | 8 | **Critical:** the shared link never dispatched `diag.*`; the goal was logged; a wedged turn held the mutex; a failed reply was not acked; cancel cross-talk | `onDiagnostic` + dispatch, log redaction, turn gate + timeout, reply-before-ack, id-aware cancel |
 | Final | No PC admission entry point; Android diag regression; reuse not a hard cut; rotate/revoke race; concurrent host/backend turns; unused definer; ack downgraded `done`; wake failure returned 500 | All fixed in the final wave (§9.1) |
+| Post-review (`b92ee70c`) | The pending claim wrote `request.alg` while the minted row was authoritative for every other field; both validate to `x25519` today, so no live behavior changed | `ParkedRow` now carries the minted `alg` and the claim writes it; a direct-claim test pins that `alg` cannot be swapped |
+| Post-review (retracted) | "Trim `publicKey` from the resolve response" — withdrawn after implementation analysis | The vouch wrap needs the PC public key (`KeyWrap.wrapForDevice`), and resolve is its only channel to the phone (slice B Task 8); a QR-carried key would reach a photographed-QR attacker just the same, so the residual stays as accepted (week-6 second claim secret) |
+| Post-review (deferred) | Android drops `diag.*` at the link layer while the server records `delivered`; concurrent `backend.pair` commands race the session file; turn goals no longer appear in sidecar logs | Moved to slice B Task 10 (`week2b.md`) |
 
 ### 9.4 Deferred and parked
 
@@ -216,7 +220,8 @@ These are now part of the plan; Lane B and sync v0 build on them.
   one encrypted task each way, trace ids in `docs/project/evidence/B2-accounts.md`.
   The entry point now exists; this is the only Lane A exit proof still missing.
 - **Lane B** — accounts/OTP, admin sign-in issuer, household lookup, console,
-  Android sign-in/local mode/camera scan, sync v0, `services/backend/README.md`.
+  Android sign-in/local mode/camera scan, sync v0, `services/backend/README.md`,
+  plus the review follow-ups in slice B Task 10.
 - **Parked design items** — the QR capability residual (accepted for the demo; a
   second claim secret lands with week-6 admission), server-side `sealed`
   enforcement (sync v0 hardening), expired-row/limiter sweeps and `X-Forwarded-For`
@@ -227,9 +232,9 @@ These are now part of the plan; Lane B and sync v0 build on them.
 
 | Command | Result |
 |---|---|
-| `apps\android\gradlew.bat -p services/backend :test --rerun-tasks` | BUILD SUCCESSFUL, 172 tests |
+| `apps\android\gradlew.bat -p services/backend :test --rerun-tasks` | BUILD SUCCESSFUL, 173 tests (172 at `118749e0`, +1 claim-alg test at `b92ee70c`) |
 | `apps\android\gradlew.bat -p apps/android :backend:test --rerun-tasks` | BUILD SUCCESSFUL, 97 tests |
-| `apps\android\gradlew.bat -p apps/windows/sidecar test --rerun-tasks` | BUILD SUCCESSFUL, 39 sidecar tests + dependency suites |
+| `apps\android\gradlew.bat -p apps/windows/sidecar test --rerun-tasks` | BUILD SUCCESSFUL, 42 sidecar tests + dependency suites |
 | `py -3 tools/checks/check-links.py` | 0 broken links |
 | `python tools/scripts/plan-status.py --plan docs/project/plan/backend` | green |
 

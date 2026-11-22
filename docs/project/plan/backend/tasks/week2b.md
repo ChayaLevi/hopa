@@ -393,6 +393,49 @@ git commit -m "docs(backend): README matches the service; week 2 evidence file"
 
 ---
 
+### Task 10: Review follow-ups from the lane A review
+
+**Files:**
+- Modify: `apps/android/app/src/main/kotlin/com/hopa/app/link/` (the `BackendClient` seam the app already holds)
+- Modify: `apps/windows/sidecar/src/main/kotlin/com/hopa/sidecar/Main.kt` (`backend.pair` command)
+- Modify: `apps/windows/README.md`
+- Test: an Android unit test asserting a `diag.*` delivery is acked; a sidecar test asserting a second `backend.pair` while one is in flight is refused
+
+Three findings from the whole-branch review of lane A, deferred here because
+none of them blocks a lane A exit check (full analysis in the review thread):
+
+1. **diag frames are dropped on Android.** `BackendClient.dispatch` returns
+   silently when `onDiagnostic` is null (the Android default), while the server
+   has already marked the task `delivered` and the console got a 202. Wire the
+   Android handler to the diag seam and ack each frame, so exit check #7's
+   "arrives" becomes true at the app level, not just the socket level.
+2. **Concurrent `backend.pair` commands race.** Two simultaneous commands each
+   run a full admission and both write `backend-session.json`; last writer wins
+   and the loser's pending session stays live until its TTL. Guard the command:
+   while an admission is in flight, reply `ok=false` ("already pairing")
+   immediately instead of starting a second one.
+3. **Turn goals are no longer logged.** `Engine` logs `turn <id> in
+   <conversation>` without the goal (privacy, landed with the lane A gateway
+   work). Note the redaction in `apps/windows/README.md` so operators do not
+   mistake it for lost output.
+
+- [ ] **Step 1: Write the failing tests** — Android: a delivered `diag.ping`
+  reaches the app handler and sends a `task.ack`; Sidecar: the second
+  `backend.pair` while the first is unresolved answers `ok=false` and mints no
+  second pending session.
+- [ ] **Step 2: Run to watch them fail.**
+- [ ] **Step 3: Implement** the Android `onDiagnostic` wiring + ack, the
+  sidecar in-flight guard, and the README note.
+- [ ] **Step 4: Run to watch them pass.**
+- [ ] **Step 5: Commit**
+
+```powershell
+git add apps/android/app apps/windows
+git commit -m "fix(clients): ack console diagnostics and guard concurrent pairing"
+```
+
+---
+
 ## Slice boundary
 
 Sync v0 is **not** in this slice: B writes its one-page mini-design Monday
