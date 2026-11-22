@@ -4,6 +4,7 @@ import com.hopa.sidecar.Protocol.asObject
 import com.hopa.sidecar.Protocol.text
 import com.hopa.sidecar.Protocol.type
 import com.hopa.backend.link.BackendClient
+import com.hopa.backend.link.BackendLink
 import com.hopa.backend.pairing.BackendCredentials
 import com.hopa.backend.pairing.BackendPairing as CorePairing
 import com.hopa.contracts.chat.Attachment
@@ -11,15 +12,19 @@ import com.hopa.contracts.json.HopaJson
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Base64
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-fun main() {
+fun main(args: Array<String>) {
     val io = Stdio()
     val device = HostDevice(io)
     val dataDir = System.getenv("HOPA_DATA_DIR")
@@ -35,78 +40,57 @@ fun main() {
     val backendScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val sessionPath = dataDir.resolve("backend-session.json")
     val sessionStore = BackendSessionStore(sessionPath)
-    val session = sessionStore.load()
-    if (session == null) {
-        if (Files.exists(sessionPath)) {
-            io.log("backend admission: stored session is unreadable; encrypted tasks stay off until this PC pairs again")
-        } else {
-            io.log("backend admission: none; encrypted tasks stay off until a phone pairs this PC")
+    val runner = EngineTaskRunner(
+        startTurn = { id, goal -> engine.startTurn(id, goal, conversationId = null) },
+        cancelTurn = engine::cancel,
+    )
+    engine.onTurnEnd = runner::complete
+    val gateways = GatewayHost(
+        io = io,
+        store = store,
+        records = records,
+        sessionStore = sessionStore,
+        runner = runner,
+        scope = backendScope,
+    )
+
+    fun startStoredSession(): Boolean {
+        val session = sessionStore.load()
+        if (session == null) {
+            if (Files.exists(sessionPath)) {
+                io.log("backend admission: stored session is unreadable; encrypted tasks stay off until this PC pairs again")
+            } else {
+                io.log("backend admission: none; encrypted tasks stay off until a phone pairs this PC")
+            }
+            return false
         }
-    } else {
-        val contentKey = runCatching { Base64.getDecoder().decode(session.contentKeyBase64) }.getOrNull()
-        if (contentKey == null || contentKey.size != 32) {
+        val contentKey = backendContentKey(session)
+        if (contentKey == null) {
             io.log("backend admission: found device ${session.deviceId}, but its content key is invalid; encrypted tasks stay off")
-        } else {
-            io.log("backend admission: found device ${session.deviceId} in household ${session.householdId}")
-            var credentials = BackendCredentials(
-                deviceId = session.deviceId,
-                householdId = session.householdId,
-                accessToken = session.accessToken,
-                refreshToken = session.refreshToken,
-                expiresAt = session.expiresAt,
-                gatewayUrl = session.gatewayUrl,
-            )
-            val pairing = CorePairing(session.gatewayUrl)
-            val link = BackendClient(
-                credentials = { credentials },
-                pushToken = { null },
-                refresh = {
-                    // A refresh rotates the token pair but not the identity, so
-                    // the stored device and household are copied back in. An
-                    // unreachable backend is left as a throw for the client's
-                    // own backoff; only a successful rotation is persisted.
-                    val refreshed = pairing.refresh(credentials.refreshToken)
-                    credentials = refreshed.copy(
-                        deviceId = session.deviceId,
-                        householdId = session.householdId,
-                        gatewayUrl = session.gatewayUrl,
-                    )
-                    runCatching {
-                        sessionStore.save(
-                            session.copy(
-                                accessToken = refreshed.accessToken,
-                                refreshToken = refreshed.refreshToken,
-                                expiresAt = refreshed.expiresAt,
-                            ),
-                        )
-                    }.onFailure { failed ->
-                        io.log("backend session could not be saved (${failed.javaClass.simpleName}); reconnecting with memory only")
-                    }
-                    credentials
-                },
-                deviceName = "Windows PC",
-                appVersion = Protocol.VERSION.toString(),
-            )
-            val runner = EngineTaskRunner(
-                startTurn = { id, goal -> engine.startTurn(id, goal, conversationId = null) },
-                cancelTurn = engine::cancel,
-            )
-            engine.onTurnEnd = runner::complete
-            val gateway = BackendGateway(
-                link = link,
-                contentKey = contentKey,
-                run = runner::run,
-                onDiagState = {
-                    buildJsonObject {
-                        put("appVersion", Protocol.VERSION.toString())
-                        put("conversations", store.list(includeArchived = true).size)
-                        put("runs", records.count())
-                    }
-                },
-            )
-            backendScope.launch { gateway.runForever(backendScope) }
+            return false
+        }
+        io.log("backend admission: found device ${session.deviceId} in household ${session.householdId}")
+        gateways.start(session, contentKey)
+        return true
+    }
+
+    // `--pair-backend <url>` admits synchronously before the stdio loop, so a
+    // host can launch the sidecar and watch stderr for the QR. A failure keeps
+    // an existing stored session and lets the protocol command retry later.
+    val pairUrl = pairBackendUrl(args)
+    var started = false
+    if (pairUrl != null) {
+        try {
+            runBlocking { BackendPairing(dataDir).admit(pairUrl, "Windows PC") }
+            started = startStoredSession()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failed: Exception) {
+            io.log("backend admission failed (${failed.javaClass.simpleName})")
         }
     }
+    if (!started) startStoredSession()
+
     io.send(Protocol.ready())
     val denied = approvals.restoreAndDeny()
     if (denied > 0) {
@@ -206,8 +190,132 @@ fun main() {
 
             "device.result" -> device.resolve(message.text("id"), message)
             "approval.result" -> approval.resolve(message.text("id"), message.text("allow").toBoolean())
+
+            // Pairing polls and prints the QR on stderr, so it must not block
+            // the stdin loop. The reply carries identifiers only.
+            "backend.pair" -> {
+                val url = message.text("url").trim()
+                val name = message.text("name").trim().ifBlank { "Windows PC" }
+                backendScope.launch {
+                    val reply = if (url.isBlank()) {
+                        Protocol.backendPair(ok = false, error = "IllegalArgumentException")
+                    } else {
+                        try {
+                            BackendPairing(dataDir).admit(url, name)
+                            val saved = sessionStore.load()
+                                ?: throw IllegalStateException("admission did not store a session")
+                            val key = backendContentKey(saved)
+                                ?: throw IllegalStateException("admission stored an invalid content key")
+                            gateways.start(saved, key)
+                            Protocol.backendPair(ok = true)
+                        } catch (cancelled: CancellationException) {
+                            throw cancelled
+                        } catch (failed: Exception) {
+                            io.log("backend pairing failed (${failed.javaClass.simpleName})")
+                            Protocol.backendPair(ok = false, error = failed.javaClass.simpleName)
+                        }
+                    }
+                    io.send(reply)
+                }
+            }
+
             "shutdown" -> return
             else -> io.log("unknown message: ${message.type()}")
         }
     }
 }
+
+/** `--pair-backend <url>`; a missing or flag-looking value is ignored. */
+internal fun pairBackendUrl(args: Array<String>): String? {
+    val index = args.indexOf("--pair-backend")
+    if (index < 0) return null
+    return args.getOrNull(index + 1)?.takeIf { it.isNotBlank() && !it.startsWith("--") }
+}
+
+/**
+ * Builds and starts the gateway from a stored session. Both the boot path and
+ * the `backend.pair` command go through this one helper, so refresh, diag state
+ * and the turn adapter cannot drift between them.
+ */
+private class GatewayHost(
+    private val io: Stdio,
+    private val store: ChatStore,
+    private val records: RecordStore,
+    private val sessionStore: BackendSessionStore,
+    private val runner: EngineTaskRunner,
+    private val scope: CoroutineScope,
+) {
+    private var current: CoroutineScope? = null
+
+    @Synchronized
+    fun start(session: BackendSession, contentKey: ByteArray) {
+        require(contentKey.size == CONTENT_KEY_BYTES) { "content key must be $CONTENT_KEY_BYTES bytes" }
+        current?.cancel()
+        var credentials = BackendCredentials(
+            deviceId = session.deviceId,
+            householdId = session.householdId,
+            accessToken = session.accessToken,
+            refreshToken = session.refreshToken,
+            expiresAt = session.expiresAt,
+            gatewayUrl = session.gatewayUrl,
+        )
+        val pairing = CorePairing(session.gatewayUrl)
+        val link: BackendLink = BackendClient(
+            credentials = { credentials },
+            pushToken = { null },
+            refresh = {
+                // A refresh rotates the token pair but not the identity, so the
+                // stored device and household are copied back in. An unreachable
+                // backend is left as a throw for the client's own backoff; only
+                // a successful rotation is persisted.
+                val refreshed = pairing.refresh(credentials.refreshToken)
+                credentials = refreshed.copy(
+                    deviceId = session.deviceId,
+                    householdId = session.householdId,
+                    gatewayUrl = session.gatewayUrl,
+                )
+                runCatching {
+                    sessionStore.save(
+                        session.copy(
+                            accessToken = refreshed.accessToken,
+                            refreshToken = refreshed.refreshToken,
+                            expiresAt = refreshed.expiresAt,
+                        ),
+                    )
+                }.onFailure { failed ->
+                    io.log("backend session could not be saved (${failed.javaClass.simpleName}); reconnecting with memory only")
+                }
+                credentials
+            },
+            deviceName = "Windows PC",
+            appVersion = Protocol.VERSION.toString(),
+        )
+        val gateway = BackendGateway(
+            link = link,
+            contentKey = contentKey,
+            run = runner::run,
+            onDiagState = {
+                buildJsonObject {
+                    put("appVersion", Protocol.VERSION.toString())
+                    put("conversations", store.list(includeArchived = true).size)
+                    put("runs", records.count())
+                }
+            },
+        )
+        val live = CoroutineScope(scope.coroutineContext + SupervisorJob(scope.coroutineContext[Job]))
+        current = live
+        live.launch { gateway.runForever(live) }
+    }
+
+    private companion object {
+        const val CONTENT_KEY_BYTES = 32
+    }
+}
+
+private const val CONTENT_KEY_BYTES = 32
+
+/** Decodes the stored content key; null means the file cannot be used. */
+internal fun backendContentKey(session: BackendSession): ByteArray? =
+    runCatching { Base64.getDecoder().decode(session.contentKeyBase64) }
+        .getOrNull()
+        ?.takeIf { it.size == CONTENT_KEY_BYTES }

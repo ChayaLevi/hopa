@@ -1,6 +1,7 @@
 package com.hopa.sidecar
 
 import com.hopa.backend.crypto.KeyWrap
+import com.hopa.backend.pairing.AdmissionLinks
 import com.hopa.backend.pairing.BackendCredentials
 import com.hopa.backend.pairing.BackendPairingFailure
 import com.hopa.backend.pairing.BackendPairing as CorePairing
@@ -51,6 +52,13 @@ class BackendPairing(
         val qrPath = dataDir.resolve(QR_PNG)
         try {
             val pending = client.mintPending(name, publicKeyText)
+            // The gateway URL is server-authoritative: it comes back in the
+            // minted QR, not from whatever URL the caller typed.
+            val admission = AdmissionLinks.parse(pending.qr)
+                ?: throw IllegalStateException("mint returned a malformed pairing link")
+            if (admission.session != pending.secret) {
+                throw IllegalStateException("mint returned a QR for a different session")
+            }
             val matrix = QrRender.matrix(pending.qr)
             out("Scan this QR with the HOPA phone:")
             out(pending.qr)
@@ -83,13 +91,16 @@ class BackendPairing(
                     accessToken = claimed.credentials.accessToken,
                     refreshToken = claimed.credentials.refreshToken,
                     expiresAt = claimed.credentials.expiresAt,
-                    gatewayUrl = claimed.credentials.gatewayUrl,
+                    gatewayUrl = admission.gatewayUrl,
                     contentKeyBase64 = Base64.getEncoder().encodeToString(contentKey),
                     privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey),
                 ),
             )
             out("admitted as ${claimed.credentials.deviceId} to household ${claimed.credentials.householdId}")
-            return AdmissionResult(claimed.credentials, contentKey)
+            return AdmissionResult(
+                claimed.credentials.copy(gatewayUrl = admission.gatewayUrl),
+                contentKey,
+            )
         } finally {
             // The PNG holds the live secret until the session ends; the claim,
             // expiry, a failure or a timeout is terminal, so it never outlives

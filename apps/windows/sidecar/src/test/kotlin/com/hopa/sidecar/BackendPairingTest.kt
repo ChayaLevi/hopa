@@ -62,7 +62,8 @@ class BackendPairingTest {
             assertEquals("d1", result.credentials.deviceId)
             assertEquals("h1", result.credentials.householdId)
             assertEquals("a1", result.credentials.accessToken)
-            assertEquals(backendUrl(server), result.credentials.gatewayUrl)
+            // The mint's QR is authoritative over the URL the caller typed.
+            assertEquals("wss://example.test/v1/gateway", result.credentials.gatewayUrl)
 
             assertEquals(1, server.claimCount)
             assertEquals(2, server.resolveCount)
@@ -87,6 +88,7 @@ class BackendPairingTest {
             val stored = BackendSessionStore(dataDir.resolve("backend-session.json")).load()!!
             assertEquals("d1", stored.deviceId)
             assertEquals("h1", stored.householdId)
+            assertEquals("wss://example.test/v1/gateway", stored.gatewayUrl)
             assertArrayEquals(contentKey, Base64.getDecoder().decode(stored.contentKeyBase64))
             assertArrayEquals(
                 server.pcPublicKey,

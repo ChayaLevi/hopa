@@ -123,6 +123,13 @@ object Protocol {
         } ?: "")
     }
 
+    /** The reply to `backend.pair`; never carries a secret, key or token. */
+    fun backendPair(ok: Boolean, error: String? = null): JsonObject = buildJsonObject {
+        put("type", "backend.pair")
+        put("ok", ok)
+        if (!ok) put("error", error ?: "unknown")
+    }
+
     fun deviceRequest(id: String, op: String, fields: JsonObjectBuilder.() -> Unit): JsonObject =
         buildJsonObject {
             put("type", "device.request")
