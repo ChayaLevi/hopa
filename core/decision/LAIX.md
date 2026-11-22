@@ -41,8 +41,8 @@ reviewed commit rather than a version range. The adapter
 
 1. Check out the new LAIX commit.
 2. Copy the files above again, without edits.
-3. Run `:decision-laix:test` (conformance kit plus the comparison corpus) and
-   `:decision-report:decisionReport`.
+3. Run `:decision:test` (conformance kit plus the comparison corpus) and
+   `:decision:decisionReport`.
 4. Update the commit and version in this file and the adapter's metadata.
 5. A dump of the decision fields in the run log must stay the same shape.
 

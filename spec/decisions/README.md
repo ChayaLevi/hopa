@@ -6,8 +6,8 @@ answers that are at least defensible.
 
 The same file is used by:
 
-- `:decision` / `:decision-rules` unit tests (`RulesDecisionLayerTest`);
-- `gradlew :decision-rules:decisionReport` in `apps/android`, which prints the
+- `:decision` unit tests (`RulesDecisionLayerTest`);
+- `gradlew :decision:decisionReport` in `apps/android`, which prints the
   comparison table for every layer the build ships;
 - a future capture run that fills the optional `model` field with what the
   model-only path returned on a device.

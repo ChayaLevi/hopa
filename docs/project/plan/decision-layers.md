@@ -171,7 +171,7 @@ No `latest`, no SNAPSHOT.
 
 Done in D4: the vendored copy is a subset (the action policy, its contracts and
 three support files) at a pinned commit, with the Apache-2.0 text beside it, an
-entry in the root `NOTICE`, and `core/decision-laix/LAIX.md` describing the
+entry in the root `NOTICE`, and `core/decision/LAIX.md` describing the
 provenance and the update procedure. The structure check skips that directory
 on purpose; `ktlint` does too.
 
@@ -179,12 +179,7 @@ on purpose; `ktlint` does too.
 
 | Where | What |
 |---|---|
-| `core/decision` (`:decision`) | `DecisionLayer`, `LayerMetadata`, `DecisionContext`, `LayerDecision`, `DecisionRegistry`, `DecisionSelector`, `DecisionCoordinator`, `DecisionVote`, `ConformanceKit`, `ComparisonHarness` |
-| `core/decision-rules` (`:decision-rules`) | `RulesDecisionLayer` |
-| `core/decision-laix` (`:decision-laix`) | LAIX 0.18 action policy vendored at a pinned commit; `LaixDecisionLayer` is the only code that imports `dev.laix.*` |
-| `core/decision-report` (`:decision-report`) | the `decisionReport` task; the one list of shipped layers |
-| `core/decision-classifier` (`:decision-classifier`) | `IntentClassifier`: launch, back, home, scroll and wait, with a confidence threshold |
-| `core/decision-graph` (`:decision-graph`) | hand-written graphs for Settings, Clock and Camera; unknown screen or goal goes to the model |
+| `core/decision` (`:decision`) | `DecisionLayer`, `LayerMetadata`, `DecisionContext`, `LayerDecision`, `DecisionRegistry`, `DecisionSelector`, `DecisionCoordinator`, `DecisionVote`, `ConformanceKit`, `ComparisonHarness`; `RulesDecisionLayer`; the LAIX 0.18 action policy vendored at a pinned commit with `LaixDecisionLayer` as its only importer of `dev.laix.*`; `IntentClassifier`; the hand-written Settings/Clock/Camera graphs; the `decisionReport` task and the one list of shipped layers |
 | `core/agent/.../TurnRunner` | runs a recognized command before the model; a miss falls through unchanged |
 | `core/agent/.../AgentLoop` | applies the selected layer to `READ` steps: ACT proceeds, VERIFY re-reads, WAIT/ASK/ESCALATE stop the step |
 | `apps/android/stores` | `AppSettings.instantCommands` (on by default) |
@@ -200,8 +195,8 @@ on purpose; `ktlint` does too.
 Commands, from `apps/android`:
 
 ```
-gradlew :decision:test :decision-rules:test :decision-laix:test
-gradlew :decision-report:decisionReport             # the comparison table
+gradlew :decision:test
+gradlew :decision:decisionReport             # the comparison table
 ```
 
 Both shipped layers match all 17 reference answers, make no dangerous `ACT`,
@@ -229,7 +224,7 @@ data class LayerDecision(..., val chosen: String? = null)
   adapter maps it back to `chosen`.
 - `failures` is the hook for graph statistics; nothing fills it yet.
 
-A first graph source exists in `core/decision-graph` (`:decision-graph`): three
+A first graph source exists in `core/decision` (`:decision`): three
 hand-written apps (Settings, Clock, Camera), matched by package and visible text,
 with a tap resolved from the control's label. A node counts only inside its own
 app; an unknown screen inside a known app can have an `any` edge (Settings uses
@@ -254,9 +249,9 @@ Nothing is wired into the loop.
 
 ### D2 - the rules layer and the harness (1 PR) - done
 
-`:decision-rules`: heuristics for the known commands (the fallback when no other
-layer is available). The corpus in `spec/decisions/` and the runner that prints
-the comparison table for any layer.
+`:decision` (`com.hopa.decision.rules`): heuristics for the known commands (the
+fallback when no other layer is available). The corpus in `spec/decisions/` and
+the runner that prints the comparison table for any layer.
 
 ### D3 - shadow logging (1 PR) - done
 
@@ -268,7 +263,7 @@ now produces one row per step per layer.
 
 ### D4 - LAIX adapter (1 PR) - done
 
-Vendored `:decision-laix` (`core/decision-laix`) at
+Vendored `:decision` (`core/decision`, `dev/laix/`) at
 `3ccc8add90dbd019197a990393600bbe1c1647d7`, the mapping from
 `Action`/`ApprovalRequest` to LAIX's request and back, the conformance kit, and
 its row in the comparison table. Only the action policy and the shapes it
