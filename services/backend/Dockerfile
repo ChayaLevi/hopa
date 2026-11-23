@@ -4,7 +4,7 @@ WORKDIR /src
 COPY . .
 RUN sed -i 's/\r$//' apps/android/gradlew \
     && chmod +x apps/android/gradlew \
-    && ./apps/android/gradlew -p services/backend installDist --no-daemon
+    && ./apps/android/gradlew -p services/backend installDist --no-daemon --refresh-dependencies
 
 FROM gcr.io/distroless/java21-debian12:nonroot
 WORKDIR /app
