@@ -1,6 +1,7 @@
 package com.hopa.runlog.record
 
 import com.hopa.contracts.wire.Action
+import com.hopa.contracts.wire.Approver
 
 data class RunRecordDraft(
     val runId: String,
@@ -9,7 +10,9 @@ data class RunRecordDraft(
     val traceId: String,
     val action: Action,
     val classification: String,
+    val tier: String = "",
     val approved: Boolean? = null,
+    val approver: Approver? = null,
     val observationHash: String,
     val beforeHash: String? = null,
     val afterHash: String? = null,

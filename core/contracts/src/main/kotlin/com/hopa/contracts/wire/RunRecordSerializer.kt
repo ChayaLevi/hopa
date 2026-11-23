@@ -41,7 +41,12 @@ internal object RunRecordSerializer : KSerializer<RunRecord> {
                     HopaJson.element.encodeToJsonElement(Action.serializer(), value.action),
                 )
                 put("classification", value.classification)
+                value.tier.takeIf { it.isNotEmpty() }?.let { put("tier", it) }
                 put("approved", value.approved?.let { JsonPrimitive(it) } ?: JsonNull)
+                // Omitted when absent: old records keep their hash and stay verifyable.
+                value.approver?.let {
+                    put("approver", HopaJson.element.encodeToJsonElement(Approver.serializer(), it))
+                }
                 put("observationHash", value.observationHash)
                 value.beforeHash?.let { put("beforeHash", it) }
                 value.afterHash?.let { put("afterHash", it) }
@@ -73,7 +78,11 @@ internal object RunRecordSerializer : KSerializer<RunRecord> {
                 requireNotNull(payload["action"]) { "run record without an action" },
             ),
             classification = text("classification").orEmpty(),
+            tier = text("tier").orEmpty(),
             approved = flag("approved"),
+            approver = payload["approver"]?.let {
+                HopaJson.element.decodeFromJsonElement(Approver.serializer(), it)
+            },
             observationHash = text("observationHash").orEmpty(),
             beforeHash = text("beforeHash"),
             afterHash = text("afterHash"),

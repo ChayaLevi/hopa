@@ -49,7 +49,7 @@ re-open.
 | User identity | `accounts.id` UUID; phone E.164 unique column, argon2id hash, `verified_at` null while SMS is off | Numbers change and recycle; they are login lookup only, never keys, never on the wire |
 | Member link | `members.account_id` nullable | Week-4 invites join an existing account to a household without re-keying |
 | SMS OTP | `HOPA_SMS_ENABLED` (default false), log-only `SmsPort`; alternative credential; verified login takes over an unverified account | No vendor surface until wanted; squatters never block the real owner |
-| Household key | One 256-bit content key per household, stored only as `household_key_wraps` rows (X25519 ECDH → HKDF → AES-GCM) | ADR-0025; the server is content-blind by construction |
+| Household key | One 256-bit content key per household, stored only as `household_key_wraps` rows (X25519 ECDH → HKDF → AES-GCM) | ADR-0026; the server is content-blind by construction |
 | PC admission | Unauthenticated pending session (5/min/IP, 5-min TTL) + authenticated vouch from the phone + single-use claim with tokens and wrapped key in one transaction | A QR never becomes a device unless an authenticated device says yes |
 | QR content | `hopa://pair?v=1&s=<secret>&u=wss://…` — no household id | Binding happens at vouch; no tenant ids leak to a screen |
 | Console tasks | `diag.ping`, `diag.state`, `diag.reset` only; plaintext, admin-only, audit-logged | The console holds no household keys; the exemption is written into the key model |
@@ -115,8 +115,8 @@ Monday; otherwise a `V3` follows mid-week.
 
 | Day | Lane A (Amir) | Lane B (Batya) |
 |---|---|---|
-| Sun 22 | Read the design; ADR-0025 drafted | Read the design; `V2__accounts.sql` drafted |
-| Mon 23 | **ADR-0025 agreed**; `KeyWrap` primitives (X25519+HKDF+AES-GCM, recovery-code derivation) with unit tests | V2 migration + Testcontainers tests (RLS on `household_key_wraps`, non-tenant accounts/admins, definer functions); E.164 + argon2 utilities; **sync v0 mini-design written** |
+| Sun 22 | Read the design; ADR-0026 drafted | Read the design; `V2__accounts.sql` drafted |
+| Mon 23 | **ADR-0026 agreed**; `KeyWrap` primitives (X25519+HKDF+AES-GCM, recovery-code derivation) with unit tests | V2 migration + Testcontainers tests (RLS on `household_key_wraps`, non-tenant accounts/admins, definer functions); E.164 + argon2 utilities; **sync v0 mini-design written** |
 | Tue 24 | pending-session + vouch + claim-with-wrap endpoints (spec in the same PR) | accounts sign-up/sign-in endpoints (rate limits, no enumeration, uniform `E_AUTH`); admin seed + `POST /v1/admin/session` |
 | Wed 25 | admin presence + diag-send endpoints; `diag.*` in the validator; server-authored tasks | console health page on the admin API; lookup page; access log |
 | Thu 26 | device list / revoke / refresh (original item); admission end-to-end with a real PC — sidecar: pending session, QR render, poll, claim, unwrap | **sync v0 implementation (protected)**; console lookup wired to live presence |
@@ -168,7 +168,7 @@ deployed and no exit check is claimed without the evidence named here.
 | Task | Scope | Commits | Proof |
 |---|---|---|---|
 | 0 | V2 accounts/wraps/admins/pending pairings + the four definer functions | `68bfb7d1`, `07229282`, `f2f81dd2` | `V2SchemaTest` (10), full module suite |
-| 1 | ADR-0025 + ADR-0022 accepted | `054fd423`, `3fc7b944` | ADR review, `check-links` 0 |
+| 1 | ADR-0026 + ADR-0022 accepted | `054fd423`, `3fc7b944` | ADR review, `check-links` 0 |
 | 2 | `KeyWrap`, `Argon2`, RFC 7748 key helpers | `0b7ef05b`, `0cbfa980` | 97 `:backend` tests, RFC 7748 vectors |
 | 3 | Pending sessions: mint, resolve-by-secret | `40197f2f`, `aeb5e796` | `PendingPairingTest` (16) |
 | 4 | Vouch, claim-with-wrap, parked wrap (V3) | `7616ddcb` | `AdmissionTest` (13) |
@@ -258,7 +258,7 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 
 ### W2.0 Design and ADR — Monday
 
-- [x] `docs/design/decisions/0025-household-content-key.md` written and indexed in
+- [x] `docs/design/decisions/0026-household-content-key.md` written and indexed in
       `docs/design/decisions/README.md`. *(Lane A, `054fd423`/`3fc7b944`.)*
 - [x] ADR-0022 status flipped to accepted; stale version/module references fixed.
       *(Lane A, `054fd423`/`3fc7b944`.)*

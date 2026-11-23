@@ -33,6 +33,7 @@ public partial class MainWindow : Window
     private System.Windows.Forms.ToolStripItem? trayStop;
     private string lastAnswer = "";
     private SidecarClient? client;
+    private GatewayClient? gateway;
     private Task? connecting;
     private string? currentId;
     private JsonArray? lastSteps;
@@ -87,6 +88,7 @@ public partial class MainWindow : Window
             speech?.Dispose();
             voice.Dispose();
             device.Dispose();
+            _ = gateway?.StopAsync();
         };
         Loaded += async (_, _) => await ConnectAsync();
     }
@@ -903,7 +905,18 @@ public partial class MainWindow : Window
                     Log("bridge session rotated; the host stored the new pair");
                 }
             };
+            started.StepReceived += message =>
+            {
+                var index = message["index"]?.GetValue<int>() ?? 0;
+                var action = message["action"]?.GetValue<string>() ?? "?";
+                var tier = message["tier"]?.GetValue<string>() ?? "";
+                var executed = message["executed"]?.GetValue<bool>() == true;
+                Log($"step {index}: {action} tier={tier} executed={executed}");
+            };
             client = started;
+
+            gateway = CreateGateway();
+
             StatusText.Text = "Ready";
             UpdateRailBridge();
             await RefreshAsync();
@@ -916,6 +929,20 @@ public partial class MainWindow : Window
             StatusText.Text = error.Message;
             Log($"error: {error.Message}");
         }
+    }
+
+    private GatewayClient CreateGateway()
+    {
+        var created = new GatewayClient();
+        created.StateChanged += () => Dispatcher.BeginInvoke(() =>
+        {
+            client?.SendGatewayState(created.Paired, created.HasPhone);
+            Log($"gateway: {created.Status}; phone={(created.HasPhone ? "online" : "offline")}");
+        });
+        created.TaskReceived += message => Dispatcher.BeginInvoke(() =>
+            Log($"gateway task: {(message["body"] as JsonObject)?["goal"]?.GetValue<string>() ?? message["task"]?.GetValue<string>()}"));
+        created.Start();
+        return created;
     }
 
     private async Task RefreshAsync()
@@ -1588,6 +1615,12 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog() == true)
         {
             await ApplySettingsAsync();
+            if (gateway != null)
+            {
+                await gateway.StopAsync();
+                await gateway.DisposeAsync();
+            }
+            gateway = CreateGateway();
             StatusText.Text = "Settings saved";
         }
     }
@@ -1669,6 +1702,41 @@ public partial class MainWindow : Window
             return;
         }
 
+        var phone = gateway?.PhoneDeviceId ?? "";
+        if (gateway != null && gateway.IsLive && phone.Length > 0)
+        {
+            var requestId = message["id"]?.GetValue<string>() ?? "";
+            _ = Task.Run(async () =>
+            {
+                var allow = false;
+                var source = "pc";
+                try
+                {
+                    var result = await gateway.RequestApprovalAsync(
+                        BuildApproval(message),
+                        phone,
+                        TimeSpan.FromSeconds(100));
+                    allow = ApprovalAllowed(result);
+                    source = result == null ? "pc" : "phone";
+                    if (result == null)
+                    {
+                        Log("approval: the phone did not answer; deny");
+                    }
+                }
+                catch (Exception error)
+                {
+                    Log($"approval: the phone link failed ({error.Message}); deny");
+                }
+                finally
+                {
+                    client?.SendApprovalResult(requestId, allow, source);
+                    _ = Dispatcher.BeginInvoke(() =>
+                        Log($"approval: {(allow ? "allow" : "deny")} from {source}: {message["title"]?.GetValue<string>()}"));
+                }
+            });
+            return;
+        }
+
         Dispatcher.Invoke(() =>
         {
             var allow = false;
@@ -1682,6 +1750,26 @@ public partial class MainWindow : Window
             client?.SendApprovalResult(message["id"]?.GetValue<string>() ?? "", allow);
         });
     }
+
+    private static JsonObject BuildApproval(JsonObject message) => new()
+    {
+        ["title"] = message["title"]?.GetValue<string>() ?? "Allow this action?",
+        ["body"] = message["body"]?.GetValue<string>() ?? "",
+        ["amount"] = message["amount"]?.GetValue<string>() ?? "",
+        ["merchant"] = message["merchant"]?.GetValue<string>() ?? "",
+        ["consequence"] = message["consequence"]?.GetValue<string>() ?? "",
+        ["isPayment"] = message["isPayment"]?.GetValue<bool>() ?? false,
+        ["action"] = new JsonObject
+        {
+            ["schemaVersion"] = "1",
+            ["kind"] = message["action"]?.GetValue<string>() ?? "ui.tap",
+            ["timeoutMs"] = 3000,
+        },
+    };
+
+    private static bool ApprovalAllowed(JsonObject? result) =>
+        (result?["body"] as JsonObject)?["approval"] is JsonObject approval &&
+        (approval["allow"]?.GetValue<bool>() ?? false);
 
     private void Details_Click(object sender, RoutedEventArgs e)
     {
@@ -1792,9 +1880,49 @@ public partial class MainWindow : Window
                 return;
             }
 
+            if (op == "screenshot")
+            {
+                var png = device.CaptureWindow();
+                if (png == null)
+                {
+                    Log("device: no frame (protected or not capturable)");
+                    client.SendDeviceResult(id, true);
+                    return;
+                }
+
+                client.SendDeviceResult(id, true, image: Convert.ToBase64String(png));
+                return;
+            }
+
+            if (op == "apps")
+            {
+                var entries = device.Apps();
+                var array = new JsonArray();
+                foreach (var entry in entries)
+                {
+                    array.Add(new JsonObject
+                    {
+                        ["package"] = entry.Package,
+                        ["label"] = entry.Label,
+                    });
+                }
+
+                Log($"device: {entries.Count} apps");
+                client.SendDeviceResult(id, true, apps: array);
+                return;
+            }
+
+            if (op == "openLink")
+            {
+                var opened = device.OpenLink(message["url"]?.GetValue<string>() ?? "");
+                Log($"device: {opened}");
+                client.SendDeviceResult(id, true, text: opened);
+                return;
+            }
+
             var info = device.Act(op, message);
             Log($"device: {info}");
-            client.SendDeviceResult(id, true);
+            client.SendDeviceResult(id, true, text: info);
         }
         catch (Exception error)
         {

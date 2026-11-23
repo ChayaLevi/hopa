@@ -55,10 +55,10 @@ Each line has a test in Task 4 or Task 6.
 
 ---
 
-### Task 1: ADR-0025 and the ADR-0022 housekeeping
+### Task 1: ADR-0026 and the ADR-0022 housekeeping
 
 **Files:**
-- Create: `docs/design/decisions/0025-household-content-key.md`
+- Create: `docs/design/decisions/0026-household-content-key.md`
 - Modify: `docs/design/decisions/README.md` (index row for 0025; flip 0022's status)
 - Modify: `docs/design/decisions/0022-backend-kotlin-and-shape.md` (status →
   accepted; fix the stale Kotlin 2.0.21/Ktor 3.0.3 pins and `packages/` module
@@ -68,7 +68,7 @@ Each line has a test in Task 4 or Task 6.
 - Consumes: design doc §2.
 - Produces: the ADR text later tasks cite; no code.
 
-- [ ] **Step 1: Write ADR-0025** — status *accepted*, deciding: one 256-bit content
+- [ ] **Step 1: Write ADR-0026** — status *accepted*, deciding: one 256-bit content
   key per household generated on the first phone; stored only as
   `household_key_wraps(household_id, device_id, wrapped_key, wrapped_at)`; X25519 →
   HKDF-SHA256 (salt `SHA-256("hopa.v1.keywrap" || recipientPublicKey)`, info
@@ -85,7 +85,7 @@ Each line has a test in Task 4 or Task 6.
 
 ```powershell
 git add docs/design/decisions
-git commit -m "docs(backend): ADR-0025 household content key; ADR-0022 accepted"
+git commit -m "docs(backend): ADR-0026 household content key; ADR-0022 accepted"
 ```
 
 ---
@@ -128,7 +128,7 @@ object Argon2 {
 - [ ] **Step 2: Run to watch them fail** — Run:
   `apps\android\gradlew.bat -p apps/android :backend:test --tests "*KeyWrapTest*"`
   Expected: compile error — unresolved `KeyWrap`.
-- [ ] **Step 3: Implement** — `KeyWrap` per the ADR-0025 parameters; HKDF is
+- [ ] **Step 3: Implement** — `KeyWrap` per the ADR-0026 parameters; HKDF is
   extract-then-expand with `Mac("HmacSHA256")`; `Argon2` delegates to BouncyCastle's
   `Argon2BytesGenerator` with the ADR parameters and encodes as
   `argon2id$m,t,p$salt$hash` (base64url, no `=` padding).

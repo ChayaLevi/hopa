@@ -3,6 +3,7 @@ package com.hopa.runlog.record
 import com.hopa.contracts.json.ObservationHasher
 import com.hopa.contracts.ports.Clock
 import com.hopa.contracts.wire.Action
+import com.hopa.contracts.wire.Approver
 import com.hopa.contracts.wire.Observation
 import java.time.Instant
 
@@ -15,7 +16,9 @@ class RunRecordFactory(
         traceId: String,
         action: Action,
         classification: String,
+        tier: String = "",
         approved: Boolean?,
+        approver: Approver? = null,
         observation: Observation,
         beforeHash: String?,
         afterHash: String?,
@@ -30,7 +33,9 @@ class RunRecordFactory(
         traceId = traceId,
         action = action,
         classification = classification,
+        tier = tier,
         approved = approved,
+        approver = approver,
         observationHash = ObservationHasher.hashOf(observation),
         beforeHash = beforeHash,
         afterHash = afterHash,

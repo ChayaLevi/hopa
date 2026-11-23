@@ -1,5 +1,11 @@
 package com.hopa.stores
 
+/**
+ * The gateway a fresh install points at. Pairing replaces it with the address
+ * carried by the hopa://pair link, and Disconnect restores this value.
+ */
+const val DEFAULT_BACKEND_URL = "wss://hopa-backend-test.onrender.com/v1/gateway"
+
 data class AppSettings(
     val provider: String = "stub",
     val endpoint: String = "https://api.deepseek.com/v1",
@@ -23,10 +29,15 @@ data class AppSettings(
     /** Run a recognized command (open, back, home, scroll, wait) without a model. */
     val instantCommands: Boolean = true,
     /**
-     * Where a step comes from: `auto` (a written graph for known apps, the model
-     * otherwise), `model` (the model only) or `graph` (written paths only).
+     * Where a step comes from: `auto` (a graph for known apps, the model
+     * otherwise), `model` (the model only) or `graph` (graphs only).
      */
     val stepSource: String = "auto",
+    /**
+     * When the on-device model is not sure, ask the API model with the same
+     * request. Off by default: it means the screen and the goal leave the phone.
+     */
+    val cloudFallback: Boolean = false,
     /** Attach a screenshot to each model call (needs a model that sees images). */
     val vision: Boolean = false,
     /**
@@ -50,7 +61,7 @@ data class AppSettings(
      */
     val acceptedModelLicences: Set<String> = emptySet(),
     /** Address of the gateway this device is paired with. */
-    val backendUrl: String = "",
+    val backendUrl: String = DEFAULT_BACKEND_URL,
     /** Identity this device was given when it joined the household. */
     val backendDeviceId: String = "",
     val backendHouseholdId: String = "",

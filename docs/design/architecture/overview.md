@@ -290,3 +290,10 @@ user: "Order the usual coffee"
 ```
 
 If the user denies any payment step, the loop stops that branch and reports it.
+
+## 10. One turn today
+
+The diagrams above describe the shared contract. The **current** per-turn flow on
+the phone - the source ladder (graph, command, recipe, plan, model), the decision
+layers, the on-device models and the receipt - is drawn in
+[`turn-flow.md`](turn-flow.md).

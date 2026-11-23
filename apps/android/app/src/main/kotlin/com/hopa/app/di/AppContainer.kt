@@ -30,6 +30,7 @@ import com.hopa.capabilities.accessibility.tree.AccessibilityDevice
 import com.hopa.capabilities.system.AndroidClock
 import com.hopa.capabilities.system.AndroidPackageCatalog
 import com.hopa.capabilities.system.AndroidSystemPort
+import com.hopa.contracts.model.ModelPort
 import com.hopa.contracts.ports.DevicePort
 import com.hopa.data.database.HopaDatabase
 import com.hopa.data.store.DataStoreSettingsRepository
@@ -252,7 +253,7 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     /** Canonical commands that need no model at all. */
     val commands: IntentClassifier = IntentClassifier()
 
-    /** Hand-written paths for a few known apps; a miss goes to the model. */
+    /** Hand-written graphs for a few known apps; a miss goes to the model. */
     val graphs: GraphStepSource = HandGraphSource(GraphCatalog.load())
 
     override val decisionLayers: List<LayerMetadata>
@@ -319,12 +320,6 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         )
     }
 
-    init {
-        // A delivered task runs on the surface the person configured. The
-        // runner answers on the socket the delivery arrived on.
-        backend.onTask = { task -> remoteRunner.handle(task) }
-    }
-
     /** The surface stack for the person's screenPath setting, shared by chat and remote runs. */
     override val surfaces: suspend (AppSettings) -> ScreenSourceDevice = { Surfaces.resolve(this, it) }
 
@@ -354,6 +349,30 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
             taskStarted = { backend.taskStarted() },
             taskFinished = { backend.taskFinished() },
         )
+    }
+
+    /**
+     * P4: a PC action can ask this phone to approve it. The same sheet as a
+     * local run is used, and the answer travels back on the gateway socket.
+     */
+    val remoteApproval by lazy {
+        com.hopa.app.link.remote.RemoteApprovalRunner(
+            deviceId = { backend.deviceId },
+            link = { backend.currentLink() },
+            approval = approval,
+            foreground = { AppVisibility.foreground },
+            postApproval = { Notifier.postApproval(context) },
+            taskStarted = { backend.taskStarted() },
+            taskFinished = { backend.taskFinished() },
+        )
+    }
+
+    init {
+        // A delivered task runs on the surface the person configured. An
+        // approval request is different: it only shows the question and sends
+        // the answer back, so it must not claim the screen or run a turn.
+        backend.onTask = { task -> remoteRunner.handle(task) }
+        backend.onApproval = { task -> remoteApproval.handle(task) }
     }
 
     private fun startRunServiceInternal() {
@@ -481,6 +500,8 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     override val localTokens: kotlinx.coroutines.flow.Flow<String> = localEngine.tokens
 
     val model = SettingsModelPort(settings, modelFactory, ProviderChoiceRules())
+    /** The last rung: the API model, used only when the turn allows it. */
+    val cloudModel: ModelPort = CloudModelPort(settings, modelFactory)
     /** Shared by the settings screen's "Test the model" button. */
 
     /** A bridge-backed device when Settings has an address and a token. */

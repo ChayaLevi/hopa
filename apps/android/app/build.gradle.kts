@@ -105,8 +105,6 @@ android {
 dependencies {
     implementation(project(":agent"))
     implementation(project(":decision"))
-    implementation(project(":decision-rules"))
-    implementation(project(":decision-laix"))
     implementation(project(":observation"))
     implementation(project(":runlog"))
     implementation(project(":runtime"))

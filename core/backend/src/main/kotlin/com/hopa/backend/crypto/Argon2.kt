@@ -6,7 +6,7 @@ import java.security.MessageDigest
 import java.util.Base64
 
 /**
- * Argon2id password hashing and the recovery-code key derivation of ADR-0025.
+ * Argon2id password hashing and the recovery-code key derivation of ADR-0026.
  *
  * The encoded form is
  * `argon2id$<m>,<t>,<p>$<salt>$<hash>`, where the salt and hash are unpadded

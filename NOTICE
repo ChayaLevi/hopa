@@ -27,8 +27,8 @@ Third-party components
 4. LAIX (Live AI Experience)
    Project: https://github.com/michaelatamuk/laix
    License: Apache-2.0.
-   The Kotlin action policy is vendored under core/decision-laix at the pinned
-   commit recorded in core/decision-laix/LAIX.md; the license text is copied
+   The Kotlin action policy is vendored under core/decision (dev/laix) at the
+   pinned commit recorded in core/decision/LAIX.md; the license text is copied
    beside it. No changes to the copied files.
 
 5. HarmonyOS, ArkTS, ArkUI, ArkWeb, DevEco Studio and related marks are

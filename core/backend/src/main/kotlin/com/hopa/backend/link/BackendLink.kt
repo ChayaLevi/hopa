@@ -22,6 +22,8 @@ interface BackendLink {
         get() = null
         set(@Suppress("UNUSED_PARAMETER") value) {}
 
+    /** A `task.needs_approval` delivery: show the question, not run a goal. */
+    var onApproval: (suspend (BackendEnvelope) -> Unit)?
     fun start(scope: CoroutineScope)
     suspend fun stop()
 

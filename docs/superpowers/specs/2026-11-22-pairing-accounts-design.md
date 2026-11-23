@@ -118,7 +118,7 @@ never sees conversation contents.
   `DeviceIdentity(deviceId, householdId, memberId)` as today. The number never appears on the
   wire, in a token, or in a foreign key.
 
-### 2 · Household key model (accepted 22 Nov 2026 — becomes ADR-0025)
+### 2 · Household key model (accepted 22 Nov 2026 — becomes ADR-0026)
 
 - One **256-bit symmetric content key per household**, generated on the phone at sign-up. The
   backend stores it **only wrapped**: table `household_key_wraps(household_id, device_id,
@@ -207,7 +207,7 @@ PC:      polls GET /v1/pair/pending/{id} → on vouch: claims
 
 - `spec/openapi/backend.v1.yaml`: `/v1/accounts`, `/v1/session` (+`/otp`), `/v1/pair/pending`
   (+poll), `/v1/pair/vouch`, `/v1/admin/*`.
-- ADR-0025 *household content key* (accepted). Housekeeping folded in: `services/backend/README.md`
+- ADR-0026 *household content key* (accepted). Housekeeping folded in: `services/backend/README.md`
   rewritten to match reality (it still sketches a Python service); ADR-0022 flipped to accepted
   with stale version/module refs fixed; stale schema-path comments in `backend.v1.yaml` fixed.
 
@@ -222,7 +222,7 @@ dedupe/title/tombstone rules) and gets its own short design by B on Monday befor
 
 | Day | A: gateway, tasks, security | B: accounts, data, console |
 | --- | --- | --- |
-| Mon | ADR-0025 written + wrap/unwrap primitives (X25519+HKDF+AES-GCM, recovery code) | `V2__accounts.sql` (+`household_key_wraps`, `admins`); E.164 + argon2id utilities; sync v0 mini-design |
+| Mon | ADR-0026 written + wrap/unwrap primitives (X25519+HKDF+AES-GCM, recovery code) | `V2__accounts.sql` (+`household_key_wraps`, `admins`); E.164 + argon2id utilities; sync v0 mini-design |
 | Tue–Wed | pending-session + vouch + claim-with-wrap endpoints; admin presence + diag-send endpoints | accounts sign-up/sign-in endpoints (rate limits, no enumeration); console admin sign-in + health |
 | Thu | device list / revoke / token refresh (original week-2 item); admission end-to-end with a real PC — Kotlin sidecar: pending session, QR render, poll, claim | console lookup page; **sync v0 (protected)** |
 | Fri | sidecar gateway envelopes both directions + wrap-on-revoke | diag sender UI; Android sign-in screen + local-only mode + camera QR scanner |
@@ -251,14 +251,14 @@ lowered.
 2. **Week-2 row**: Deliverables become — `Sign-in by phone number + password with a household of
    one (E.164, argon2; SMS OTP behind a flag, off); device list, revoke, token refresh; sync v0
    of threads and turns (cursors, tombstones, ciphertext only); PC admitted by a phone-scanned
-   QR (vouch + household-key wrap, ADR-0025); console: admin sign-in, health, household and
+   QR (vouch + household-key wrap, ADR-0026); console: admin sign-in, health, household and
    device lookup (moved from week 4), diagnostic task sender`. Exit check gains: `a PC admitted
    by a camera-scanned QR runs one task in each direction (fallback: operator QR, gap carried)`.
 3. **Week-4 row**: remove `console: household and device lookup` (moved to week 2).
 4. **Week-6 row**: `a new device admitted by an existing one` → `admission generalized to any
    device (third+ device, re-wrap), shared household threads` — the admission *basics* moved to
    week 2.
-5. **Decisions list**: tick the key-model box — decided 22 Nov (§2); ADR-0025 lands with the
+5. **Decisions list**: tick the key-model box — decided 22 Nov (§2); ADR-0026 lands with the
    first week-2 PR.
 6. **Risks table**: add `Console shows phone numbers (PII)` → `Admin-only role, separate from
    household accounts; every read access-logged`.
@@ -273,7 +273,7 @@ Post as a comment on #32 (and tick the three Phase-1 decision boxes in the body)
 >
 > - **Key model decided** (tick `Key model for end-to-end encryption`): one household content
 >   key, wrapped per device X25519 key; recovery code at the owner; `diag.*` tasks are the only
->   plaintext payloads, exempt in the key model. → ADR-0025.
+>   plaintext payloads, exempt in the key model. → ADR-0026.
 > - **Sign-in is phone number + password** (E.164 unique, argon2id), not email/passkey. SMS OTP
 >   is optional behind `HOPA_SMS_ENABLED` (default off, log-only sender); a verified login takes
 >   over an unverified account on the same number. `user_id` stays a UUID — the number is only

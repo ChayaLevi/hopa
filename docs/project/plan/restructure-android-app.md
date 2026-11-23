@@ -398,7 +398,7 @@ feature/
     the app module.
 27. Done: `:screenshots` renders Settings, Activity and Runs through Robolectric
     and Roborazzi on the JVM; CI runs `verifyRoborazziDebug`.
-28. Done: Hilt is the graph (ADR-0024 revision); the narrow interfaces are the
+28. Done: Hilt is the graph (ADR-0025 revision); the narrow interfaces are the
     boundaries and the seam for tests.
 29. Done for the caches: the configuration cache is on and reused in CI (which
     halved the Android job), and the build cache was already on. Baseline

@@ -340,6 +340,7 @@ class BackendGatewayTest {
         override val state: StateFlow<BackendState> = _state
         override var onTask: (suspend (BackendEnvelope) -> Unit)? = null
         override var onDiagnostic: (suspend (BackendEnvelope) -> Unit)? = null
+        override var onApproval: (suspend (BackendEnvelope) -> Unit)? = null
         val sent = mutableListOf<BackendEnvelope>()
         val acked = mutableListOf<BackendEnvelope>()
         var starts = 0

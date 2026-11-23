@@ -12,7 +12,7 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * The household content-key wrap of ADR-0025, with the byte layout pinned by
+ * The household content-key wrap of ADR-0026, with the byte layout pinned by
  * ruling R8a.
  *
  * **Device wrap.** The wrapping device computes a static-static X25519 shared
