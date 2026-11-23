@@ -5,8 +5,9 @@ Status: **lane A implemented, 2026-11-22** — branch `backend-week2-A`
 Written 2026-11-22. Parent: [`weekly-plan.md`](weekly-plan.md),
 tracked in [#32](https://github.com/agents-demo/hopa/issues/32). Design source:
 [`docs/superpowers/specs/2026-11-22-pairing-accounts-design.md`](../../../superpowers/specs/2026-11-22-pairing-accounts-design.md)
-(decisions below argue from it, not from this file). Verification guide:
-[`week2-lane-a.html`](week2-lane-a.html).
+(decisions below argue from it, not from this file). Verification guides:
+[`week2-lane-a.html`](week2-lane-a.html) (backend/Windows) and
+[`week2-lane-b.html`](week2-lane-b.html) (accounts, console and Android).
 
 The week replaces the operator bootstrap flow with a real user: the phone signs up
 with a phone number and password and becomes the household's first device, the PC
@@ -468,7 +469,6 @@ After lane A's PR #140 merged to `main`, `backend-week2-B` was rebased onto the
 updated `main` and reconciled with lane A's post-`450f65b4` change that made the
 admin lookups optional (`11d7cb36`). The rebase resolved three text conflicts and
 the sync made these lane B pieces consistent with that refactor:
-
 - The `account_id` column on `admin_resolve_member`/`admin_resolve_household`
   folded into the optional `db/admin/V5__admin_lookups.sql` (the three resolvers
   now all return `account_id`); the core `V5__admin_account_id.sql` was removed
@@ -490,3 +490,10 @@ the sync made these lane B pieces consistent with that refactor:
   lane B's content-key clear; `onDiagnostic` folded into the single `init` block
   beside lane A's `onApproval`; the sidecar README keeps both the P1–P4 guide and
   the turn-goal redaction note.
+
+A second rebase onto `main` at `fc79e1f6` (the sidecar/Windows refactors #147–#149)
+moved the sidecar `backend.pair` handler from `Main.kt` into
+`protocol/handlers/BackendHandler.kt`; the `PairingGate` guard moved with it, and
+`PairingGateTest` still covers the gate directly. At the rebased head (`0180b4c0`)
+the four suites are green — 228 backend, 98 core/backend, 91 app, 91 sidecar — and
+`check-links` and `plan-status` are clean.
