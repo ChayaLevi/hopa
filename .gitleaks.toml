@@ -6,6 +6,7 @@ description = "Test fixtures and documentation examples"
 paths = [
   '''services/evals/baseline/tests/.*''',
   '''services/backend/src/test/.*''',
+  '''apps/windows/sidecar/src/test/.*''',
   '''scripts/test_plan_status\.py''',
   '''docs/.*''',
   '''README\.md''',

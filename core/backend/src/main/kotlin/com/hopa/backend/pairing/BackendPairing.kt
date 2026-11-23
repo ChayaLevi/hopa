@@ -16,34 +16,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-/** The one-time answer to a pending mint; the secret lives only in the QR. */
-data class PendingSession(
-    val sessionId: String,
-    val secret: String,
-    val qr: String,
-    val expiresAt: String,
-) {
-    /** The secret and QR contents are capabilities until the session ends. */
-    override fun toString(): String = "PendingSession(sessionId=$sessionId, secret=<redacted>, qr=<redacted>, " +
-        "expiresAt=$expiresAt)"
-}
-
-/** What a poller may learn by presenting the session secret. */
-data class PendingState(
-    val state: String,
-    val name: String,
-    val publicKey: String,
-    val fingerprint: String,
-    val expiresAt: String,
-)
-
-/** A claim's tokens plus the household key wrap and the phone key it names. */
-data class ClaimedSession(
-    val credentials: BackendCredentials,
-    val wrappedKey: String?,
-    val voucherPublicKey: String?,
-)
-
 /**
  * The unauthenticated half of the backend: trade a pairing session for device
  * tokens and rotate them later. Neither call puts a secret in a message, and
