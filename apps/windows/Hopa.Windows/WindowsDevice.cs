@@ -42,6 +42,9 @@ public sealed class WindowsDevice : IDisposable
     private static extern bool SetForegroundWindow(IntPtr hwnd);
 
     [DllImport("user32.dll")]
+    private static extern void keybd_event(byte virtualKey, byte scan, uint flags, UIntPtr extra);
+
+    [DllImport("user32.dll")]
     private static extern bool ShowWindow(IntPtr hwnd, int command);
 
     [DllImport("user32.dll")]
@@ -85,19 +88,52 @@ public sealed class WindowsDevice : IDisposable
     /// <summary>The lock screen and the logon desktop refuse input by design.</summary>
     private bool IsSecureSurface(out string processName)
     {
-        var hwnd = GetForegroundWindow();
-        GetWindowThreadProcessId(hwnd, out var pid);
         processName = "";
+        var hwnd = GetForegroundWindow();
+        if (hwnd == IntPtr.Zero)
+        {
+            return true;
+        }
+
+        var thread = GetWindowThreadProcessId(hwnd, out var pid);
+        if (thread == 0 || pid == 0)
+        {
+            // The lock screen and the UAC desktop belong to Winlogon on another
+            // desktop; a normal caller sees a zero handle or PID. That is the
+            // boundary, not an app without a tree.
+            return true;
+        }
+
         try
         {
             processName = Process.GetProcessById((int)pid).ProcessName;
         }
         catch
         {
-            return false;
+            // A process we cannot even name is not one we can drive.
+            return true;
         }
 
         return SecureProcesses.Contains(processName.ToLowerInvariant());
+    }
+
+    /// <summary>
+    /// The refusal the current foreground would produce, or null when it is
+    /// usable. Cheap and read-only: it checks the process, never UI Automation,
+    /// so a wait loop can poll it while the session locks.
+    /// </summary>
+    public string? UnreadableReason()
+    {
+        try
+        {
+            RefuseSecureSurface();
+            RefuseElevatedBoundary();
+            return null;
+        }
+        catch (InvalidOperationException error)
+        {
+            return error.Message;
+        }
     }
 
     private void RefuseSecureSurface()
@@ -105,7 +141,9 @@ public sealed class WindowsDevice : IDisposable
         if (IsSecureSurface(out var processName))
         {
             throw new InvalidOperationException(
-                $"the screen is '{processName}' (locked or secure); HOPA cannot see or touch it");
+                processName.Length == 0
+                    ? "the screen is locked or secure; HOPA cannot see or touch it"
+                    : $"the screen is '{processName}' (locked or secure); HOPA cannot see or touch it");
         }
     }
 
@@ -204,6 +242,217 @@ public sealed class WindowsDevice : IDisposable
         }
     }
 
+    /// <summary>
+    /// Open a URI through the shell. Only the schemes an assistant has a reason
+    /// to use are allowed: a web page or a Windows settings page. Anything else
+    /// is refused instead of handing an arbitrary handler to the OS.
+    /// </summary>
+    public string OpenLink(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            throw new InvalidOperationException($"'{url}' is not an absolute URI");
+        }
+
+        var scheme = uri.Scheme.ToLowerInvariant();
+        if (scheme is not ("http" or "https" or "ms-settings"))
+        {
+            throw new InvalidOperationException(
+                $"the '{scheme}' scheme is not allowed; only http, https and ms-settings");
+        }
+
+        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+        Thread.Sleep(900);
+        if (scheme == "ms-settings")
+        {
+            // The Settings app is a packaged app; wait for its window and bring
+            // it forward so the observation can actually verify the page.
+            var handle = WaitForSettingsWindow(TimeSpan.FromSeconds(10));
+            if (handle != IntPtr.Zero)
+            {
+                ForceForeground(handle);
+                Thread.Sleep(500);
+            }
+        }
+
+        return $"opened {url} (foreground={ForegroundApp()})";
+    }
+
+    /// <summary>One app the Start menu offers: a launchable target and a label.</summary>
+    public sealed record AppEntry(string Package, string Label);
+
+    private List<AppEntry>? appsCache;
+    private DateTime appsCachedAt;
+
+    /// <summary>
+    /// The apps a person can actually start, read from the Start menu shortcuts.
+    /// A shortcut is only offered when its target exists and is an executable;
+    /// the list is cached for a minute because the shell walk is not free.
+    /// </summary>
+    public List<AppEntry> Apps()
+    {
+        if (appsCache != null && DateTime.UtcNow - appsCachedAt < TimeSpan.FromMinutes(1))
+        {
+            return appsCache;
+        }
+
+        var found = new Dictionary<string, AppEntry>(StringComparer.OrdinalIgnoreCase);
+        object? shell = null;
+        try
+        {
+            var type = System.Type.GetTypeFromProgID("WScript.Shell");
+            shell = type == null ? null : Activator.CreateInstance(type);
+            foreach (var root in StartMenuRoots())
+            {
+                if (!Directory.Exists(root))
+                {
+                    continue;
+                }
+
+                IEnumerable<string> files;
+                try
+                {
+                    files = Directory.GetFiles(root, "*.lnk", SearchOption.AllDirectories);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        var label = Path.GetFileNameWithoutExtension(file);
+                        if (label.Length == 0 ||
+                            label.Contains("uninstall", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        var target = ShortcutTarget(shell, file);
+                        if (target.Length == 0 ||
+                            !target.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ||
+                            !File.Exists(target))
+                        {
+                            continue;
+                        }
+
+                        found.TryAdd(target, new AppEntry(target, label));
+                    }
+                    catch
+                    {
+                        // One broken shortcut is not a reason to lose the list.
+                    }
+                }
+            }
+        }
+        finally
+        {
+            if (shell != null)
+            {
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(shell);
+            }
+        }
+
+        appsCache = found.Values
+            .OrderBy(entry => entry.Label, StringComparer.CurrentCultureIgnoreCase)
+            .Take(200)
+            .ToList();
+        appsCachedAt = DateTime.UtcNow;
+        return appsCache;
+    }
+
+    private static IEnumerable<string> StartMenuRoots()
+    {
+        yield return Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
+        yield return Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+    }
+
+    private static string ShortcutTarget(object? shell, string path)
+    {
+        if (shell == null)
+        {
+            return "";
+        }
+
+        try
+        {
+            // dynamic, not reflection: a shortcut is a COM object reached through
+            // IDispatch, and InvokeMember on the RCW does not dispatch it.
+            dynamic dynamicShell = shell;
+            dynamic shortcut = dynamicShell.CreateShortcut(path);
+            var target = (string)(shortcut.TargetPath ?? "");
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(shortcut);
+            return target;
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    /// <summary>
+    /// Close an app by asking its window to close. A save prompt or a stubborn
+    /// process is reported, never killed: an unsaved document is the person's.
+    /// </summary>
+    public string Stop(string app)
+    {
+        var needle = Path.GetFileNameWithoutExtension(app.Trim());
+        if (needle.Length == 0)
+        {
+            throw new InvalidOperationException("stop needs an app");
+        }
+
+        var processes = Process.GetProcessesByName(needle);
+        if (processes.Length == 0)
+        {
+            throw new InvalidOperationException($"'{app}' is not running");
+        }
+
+        var asked = 0;
+        foreach (var process in processes)
+        {
+            try
+            {
+                if (process.CloseMainWindow())
+                {
+                    asked += 1;
+                    process.WaitForExit(3000);
+                }
+            }
+            catch
+            {
+                // The process may have exited between enumeration and the close.
+            }
+            finally
+            {
+                process.Dispose();
+            }
+        }
+
+        if (asked == 0)
+        {
+            throw new InvalidOperationException($"'{app}' has no window to close");
+        }
+
+        Thread.Sleep(300);
+        var still = Process.GetProcessesByName(needle);
+        var remaining = still.Length;
+        foreach (var process in still)
+        {
+            process.Dispose();
+        }
+
+        if (remaining > 0)
+        {
+            throw new InvalidOperationException(
+                $"'{app}' is still running; it may be asking to save a document");
+        }
+
+        return $"stopped {app}";
+    }
+
     /// <summary>Builds the observation JSON the Kotlin contract decodes.</summary>
     public (JsonObject Observation, int Nodes) Observe()
     {
@@ -221,6 +470,12 @@ public sealed class WindowsDevice : IDisposable
         var app = ForegroundApp();
         var screen = ScreenSize();
         var text = ObservationRules.JoinText(lines, out var textTruncated);
+        if (ObservationRules.IsTreeOnlyRoot(counter, text))
+        {
+            throw new InvalidOperationException(
+                $"'{app}' exposes no UI Automation tree; HOPA cannot see its controls");
+        }
+
         var dpi = DpiFor(GetForegroundWindow());
         var observation = new JsonObject
         {
@@ -282,6 +537,14 @@ public sealed class WindowsDevice : IDisposable
                 }
 
                 return Launch(app);
+            case "stop":
+                var target = message["app"]?.GetValue<string>() ?? "";
+                if (target.Length == 0)
+                {
+                    throw new InvalidOperationException("stop needs an app");
+                }
+
+                return Stop(target);
             default:
                 throw new InvalidOperationException($"the Windows adapter cannot '{op}' yet");
         }
@@ -619,17 +882,18 @@ public sealed class WindowsDevice : IDisposable
             needle = "";
         }
 
-        var deadline = DateTime.UtcNow.AddSeconds(8);
-        IntPtr handle = IntPtr.Zero;
-        while (DateTime.UtcNow < deadline && handle == IntPtr.Zero)
+        // A packaged app (Calculator, Settings) can lose its first activation on
+        // a cold start. Wait for the window, then try once more before failing.
+        var handle = WaitForWindow(needle, TimeSpan.FromSeconds(12));
+        if (handle == IntPtr.Zero)
         {
-            Thread.Sleep(400);
-            handle = FindWindowFor(needle);
+            Process.Start(start);
+            handle = WaitForWindow(needle, TimeSpan.FromSeconds(8));
         }
 
         if (handle == IntPtr.Zero)
         {
-            throw new InvalidOperationException($"launched {app}, but no window appeared");
+            throw new InvalidOperationException($"launched {app}, but no window appeared within 12 s");
         }
 
         ForceForeground(handle);
@@ -669,7 +933,71 @@ public sealed class WindowsDevice : IDisposable
         }
     }
 
+    /// <summary>The Settings app, by its real process. A VS Code window whose
+    /// title mentions settings must never be mistaken for it.</summary>
+    private IntPtr WaitForSettingsWindow(TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            var handle = FindSettingsWindow();
+            if (handle != IntPtr.Zero)
+            {
+                return handle;
+            }
+
+            Thread.Sleep(300);
+        }
+
+        return IntPtr.Zero;
+    }
+
+    private IntPtr FindSettingsWindow()
+    {
+        try
+        {
+            foreach (var window in automation.GetDesktop()
+                         .FindAllChildren(cf => cf.ByControlType(ControlType.Window)))
+            {
+                var process = ProcessNameFor(window);
+                var title = Property(() => window.Properties.Name.ValueOrDefault ?? "", "");
+                var isSettings = process.Equals("SystemSettings", StringComparison.OrdinalIgnoreCase) ||
+                                 (process.Equals("ApplicationFrameHost", StringComparison.OrdinalIgnoreCase) &&
+                                  title.Equals("Settings", StringComparison.OrdinalIgnoreCase));
+                if (!isSettings)
+                {
+                    continue;
+                }
+
+                var handle = Property(() => window.Properties.NativeWindowHandle.Value, 0);
+                if (handle != 0)
+                {
+                    return (IntPtr)handle;
+                }
+            }
+        }
+        catch
+        {
+            // The desktop enumeration can throw mid-change; the caller retries.
+        }
+
+        return IntPtr.Zero;
+    }
+
     /// <summary>An empty needle means "the first real window that appeared after launch".</summary>
+    private IntPtr WaitForWindow(string needle, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        var handle = IntPtr.Zero;
+        while (DateTime.UtcNow < deadline && handle == IntPtr.Zero)
+        {
+            Thread.Sleep(400);
+            handle = FindWindowFor(needle);
+        }
+
+        return handle;
+    }
+
     private IntPtr FindWindowFor(string needle)
     {
         try
@@ -711,10 +1039,17 @@ public sealed class WindowsDevice : IDisposable
 
     /// <summary>Windows blocks a background process from stealing focus; attaching
     /// to the thread that currently owns the input queue is the standard way
-    /// around it.</summary>
+    /// around it. A bare ALT press first releases the foreground lock, which is
+    /// what Windows needs when the caller was started from a terminal.</summary>
     private static void ForceForeground(IntPtr handle)
     {
         ShowWindow(handle, 9);
+        if (SetForegroundWindow(handle))
+        {
+            return;
+        }
+
+        UnlockForeground();
         if (SetForegroundWindow(handle))
         {
             return;
@@ -728,6 +1063,16 @@ public sealed class WindowsDevice : IDisposable
             SetForegroundWindow(handle);
             AttachThreadInput(current, foregroundThread, false);
         }
+    }
+
+    /// <summary>A down/up of ALT and nothing else: it releases the foreground lock
+    /// without typing into the target window.</summary>
+    private static void UnlockForeground()
+    {
+        const byte vkMenu = 0x12;
+        const uint keyUp = 0x0002;
+        keybd_event(vkMenu, 0, 0, UIntPtr.Zero);
+        keybd_event(vkMenu, 0, keyUp, UIntPtr.Zero);
     }
 
     private string Type(JsonObject message)
@@ -805,6 +1150,13 @@ public static class ObservationRules
     public const int MaxTextLines = 40;
     public const int MaxTextChars = 200;
     public const int MaxTotalChars = 4000;
+
+    /// <summary>
+    /// A window that produced one anonymous node and no text exposes no usable
+    /// tree. Saying so is better than handing the loop an empty screen.
+    /// </summary>
+    public static bool IsTreeOnlyRoot(int nodes, string text) =>
+        nodes <= 1 && string.IsNullOrWhiteSpace(text);
 
     /// <summary>Long labels are cut, not dropped: the hash must not depend on luck.</summary>
     public static string Cap(string text) =>

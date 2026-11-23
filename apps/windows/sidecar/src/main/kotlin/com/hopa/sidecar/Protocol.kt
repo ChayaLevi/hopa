@@ -49,6 +49,121 @@ object Protocol {
             })
         }
 
+    /** One action finished; the rail can fill before the turn ends. */
+    fun step(
+        turnId: String,
+        index: Int,
+        record: RunRecord,
+        at: Long,
+        durationMs: Long,
+    ): JsonObject = buildJsonObject {
+        put("type", "step")
+        put("id", turnId)
+        put("index", index)
+        put("action", record.action.kind)
+        put("classification", record.classification)
+        put("tier", record.tier)
+        put("approved", record.approved)
+        // P4: who answered, so the rail can name the phone before turn.end.
+        record.approver?.let { approver ->
+            put("approver", buildJsonObject {
+                put("device", approver.device)
+                put("at", approver.at)
+            })
+        }
+        put("executed", record.executed)
+        put("verified", record.verified)
+        put("error", record.error)
+        put("at", at)
+        put("durationMs", durationMs)
+    }
+
+    /** `--turn` prints one of these on stdout; there is no host to talk to. */
+    fun headlessTurn(id: String, outcome: TurnOutcome): JsonObject = buildJsonObject {
+        put("type", "turn.end")
+        put("id", id)
+        put("conversationId", outcome.conversationId)
+        put("title", outcome.title)
+        put("answer", outcome.answer)
+        put("chainOk", outcome.chainOk)
+        put("error", outcome.error)
+        put("records", outcome.records.size)
+        put("executed", outcome.records.count { it.executed })
+        put("denied", outcome.records.count { it.approved == false && !it.executed })
+        put("steps", buildJsonArray {
+            outcome.records.forEach {
+                add(json.encodeToJsonElement(RunRecord.serializer(), it))
+            }
+        })
+        put("narration", buildJsonArray {
+            outcome.narration.forEach { add(kotlinx.serialization.json.JsonPrimitive(it)) }
+        })
+    }
+
+    /** v1 freezes the task shapes but refuses them until P4. */
+    fun taskRefused(id: String, type: String, error: String): JsonObject = buildJsonObject {
+        put("type", "task.error")
+        put("id", id)
+        put("request", type)
+        put("ok", false)
+        put("code", "E_UNSUPPORTED")
+        put("error", error)
+    }
+
+    /** P4: the frozen task shape from protocol.md, echoed on every task reply. */
+    fun task(id: String, task: HandoffTask, type: String = "task.start"): JsonObject =
+        buildJsonObject {
+            put("type", type)
+            put("id", id)
+            put("ok", true)
+            put("task", taskJson(task))
+        }
+
+    fun taskList(id: String, tasks: List<HandoffTask>): JsonObject = buildJsonObject {
+        put("type", "task.list")
+        put("id", id)
+        put("ok", true)
+        put("tasks", buildJsonArray { tasks.forEach { add(taskJson(it)) } })
+    }
+
+    fun taskError(id: String, request: String, code: String, error: String): JsonObject =
+        buildJsonObject {
+            put("type", "task.error")
+            put("id", id)
+            put("request", request)
+            put("ok", false)
+            put("code", code)
+            put("error", error)
+        }
+
+    private fun taskJson(task: HandoffTask): JsonObject = buildJsonObject {
+        put("id", task.id)
+        put("goal", task.goal)
+        put("state", task.state)
+        put("from", task.from)
+        task.to?.let { put("to", it) }
+        put("events", buildJsonArray {
+            task.events.forEach { event ->
+                add(buildJsonObject {
+                    put("index", event.index)
+                    put("type", event.type)
+                    put("from", event.from)
+                    put("at", event.at)
+                })
+            }
+        })
+        put("postconditions", buildJsonArray {
+            task.postconditions.forEach { add(kotlinx.serialization.json.JsonPrimitive(it)) }
+        })
+        task.approver?.let {
+            put("approver", buildJsonObject {
+                put("device", it.device)
+                put("at", it.at)
+            })
+        }
+        task.error?.let { put("error", it) }
+    }
+
     fun approvalRequest(id: String, request: ApprovalRequest): JsonObject = buildJsonObject {
         put("type", "approval.request")
         put("id", id)
