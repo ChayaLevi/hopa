@@ -23,6 +23,11 @@ object EnvelopeValidator {
         "task.result",
         "task.error",
         "task.cancel",
+        // Server-authored diagnostics. These are the only plaintext payloads:
+        // the admin route refuses any other type and the body is not encrypted.
+        "diag.ping",
+        "diag.state",
+        "diag.reset",
         "error",
         "ping",
         "pong",
@@ -54,7 +59,8 @@ object EnvelopeValidator {
             envelope.task?.isBlank() == true ->
             GatewayError("E_SCHEMA", "blank device or task id")
 
-        envelope.type.startsWith("task.") && envelope.to == null ->
+        (envelope.type.startsWith("task.") || envelope.type.startsWith("diag.")) &&
+            envelope.to == null ->
             GatewayError("E_SCHEMA", "a task message needs a target device")
 
         else -> null

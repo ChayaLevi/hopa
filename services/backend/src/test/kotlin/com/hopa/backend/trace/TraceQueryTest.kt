@@ -50,7 +50,7 @@ class TraceQueryTest {
     @BeforeEach
     fun setUp() {
         auth = PgAuth(db, clock = clock::get)
-        tokens = TokenIssuer(db, clock = clock::get, onRevoke = auth::revoke)
+        tokens = TokenIssuer(db, clock = clock::get, onRevoke = { deviceId, _ -> auth.revoke(deviceId) })
         pairing = PairingService(db, clock = clock::get, tokens = tokens)
         devices = PgDevices(db)
         traces = PgTraceStore(db, clock::get)

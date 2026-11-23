@@ -46,7 +46,7 @@ class ExitRunTest {
         val db = PostgresHarness.appDatabase()
         val clock = AtomicLong(1_763_212_800_000)
         val auth = PgAuth(db, clock = clock::get)
-        val tokens = TokenIssuer(db, clock = clock::get, onRevoke = auth::revoke)
+        val tokens = TokenIssuer(db, clock = clock::get, onRevoke = { deviceId, _ -> auth.revoke(deviceId) })
         val pairing = PairingService(db, clock = clock::get, tokens = tokens)
         val traces = PgTraceStore(db, clock::get)
         val config = ServerConfig(

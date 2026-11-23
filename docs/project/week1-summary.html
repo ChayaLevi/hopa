@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Week 1 backend summary and runbook for HOPA: what shipped, how the phone and PC pair with the gateway, and how to send a task.">
+<title>HOPA backend — Week 1 runbook</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --surface: #ffffff;
+    --surface-2: #eef0ea;
+    --text: #1b1e1a;
+    --muted: #596155;
+    --border: #d8dcd2;
+    --accent: #1f6b4a;
+    --on-accent: #ffffff;
+    --accent-weak: #e7f2ec;
+    --warn: #7a5300;
+    --warn-weak: #fff3d6;
+    --danger: #9d2f2f;
+    --danger-weak: #fdecec;
+    --code-bg: #151a16;
+    --code-text: #e9eee9;
+    --code-border: #2c3530;
+    --shadow: 0 1px 2px rgb(0 0 0 / 5%), 0 10px 30px rgb(0 0 0 / 4%);
+    --radius: 14px;
+    color-scheme: light dark;
+    accent-color: var(--accent);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1211;
+      --surface: #171b18;
+      --surface-2: #1e2420;
+      --text: #e9ede8;
+      --muted: #a7afa6;
+      --border: #2b332e;
+      --accent: #74d6a7;
+      --on-accent: #082015;
+      --accent-weak: #163025;
+      --warn: #f0c46d;
+      --warn-weak: #332a14;
+      --danger: #ffa1a1;
+      --danger-weak: #3b1e1e;
+      --code-bg: #0a0d0b;
+      --code-text: #e9eee9;
+      --code-border: #2c3530;
+      --shadow: 0 1px 2px rgb(0 0 0 / 35%), 0 10px 30px rgb(0 0 0 / 25%);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+  }
+
+  a {
+    color: var(--accent);
+    text-underline-offset: 0.16em;
+  }
+
+  a:hover { text-decoration-thickness: 2px; }
+
+  :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .skip-link {
+    position: absolute;
+    inset-block-start: -100px;
+    inset-inline-start: 1rem;
+    z-index: 10;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
+  }
+
+  .skip-link:focus { inset-block-start: 1rem; }
+
+  .visually-hidden {
+    position: absolute !important;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .shell {
+    display: grid;
+    gap: 2rem;
+    max-inline-size: 1280px;
+    margin-inline: auto;
+    padding: 1.25rem clamp(1rem, 3vw, 2.5rem) 5rem;
+  }
+
+  @media (min-width: 900px) {
+    .shell {
+      grid-template-columns: 232px minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    .sidebar { position: sticky; inset-block-start: 1.25rem; }
+  }
+
+  @media (min-width: 1180px) {
+    .shell { gap: 3.5rem; }
+  }
+
+  .sidebar {
+    font-size: 0.88rem;
+  }
+
+  .toc {
+    scroll-target-group: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 1rem 1rem 0.85rem;
+    box-shadow: var(--shadow);
+  }
+
+  .toc-title {
+    margin: 0 0 0.6rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .toc a {
+    display: block;
+    padding: 0.28rem 0.5rem;
+    border-radius: 7px;
+    color: var(--muted);
+    text-decoration: none;
+    line-height: 1.35;
+  }
+
+  .toc a:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .toc a:is(:target-current, .target-current) {
+    background: var(--accent-weak);
+    color: var(--accent);
+    font-weight: 700;
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .sidebar-note {
+    margin-block-start: 0.85rem;
+    padding-inline: 0.5rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 899px) {
+    .toc { padding: 0.7rem 0.75rem 0.75rem; }
+    .toc-title { margin-block-end: 0.4rem; }
+    .toc ol {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .toc a {
+      padding: 0.16rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+    .toc a:is(:target-current, .target-current) {
+      background: var(--accent);
+      color: var(--on-accent);
+      box-shadow: none;
+    }
+    .sidebar-note { display: none; }
+  }
+
+  main { min-inline-size: 0; }
+
+  .hero {
+    background:
+      radial-gradient(circle at 15% 0%, var(--accent-weak), transparent 55%),
+      linear-gradient(135deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: clamp(1.4rem, 4vw, 2.9rem);
+    box-shadow: var(--shadow);
+  }
+
+  .eyebrow {
+    margin: 0;
+    color: var(--accent);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0.45rem 0 0.7rem;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .lede {
+    max-inline-size: 64ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.6vw, 1.14rem);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-block-start: 1.2rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .chip::before {
+    content: "✓";
+    color: var(--accent);
+    font-weight: 800;
+  }
+
+  .chip.warn::before { content: "!"; color: var(--warn); }
+
+  .hero-meta {
+    margin-block-start: 1.2rem;
+    padding-block-start: 0.9rem;
+    border-block-start: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  section {
+    scroll-margin-block-start: 1.5rem;
+    margin-block-start: 3.4rem;
+  }
+
+  h2 {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.45rem, 2.6vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1.02rem;
+    line-height: 1.35;
+  }
+
+  .section-intro {
+    max-inline-size: 72ch;
+    margin: 0 0 1.2rem;
+    color: var(--muted);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    gap: 0.8rem;
+    margin-block-start: 1.4rem;
+  }
+
+  .stat {
+    padding: 1rem 1.05rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .stat strong {
+    display: block;
+    font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .stat span {
+    display: block;
+    margin-block-start: 0.25rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 0.9rem;
+  }
+
+  .card {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .card p + p { margin-block-start: 0.5rem; }
+
+  .tag {
+    display: inline-block;
+    margin-block-end: 0.55rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: var(--accent-weak);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .callout {
+    margin: 1.2rem 0;
+    padding: 1rem 1.2rem;
+    border-inline-start: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    background: var(--accent-weak);
+  }
+
+  .callout.warn {
+    border-inline-start-color: var(--warn);
+    background: var(--warn-weak);
+  }
+
+  .callout.danger {
+    border-inline-start-color: var(--danger);
+    background: var(--danger-weak);
+  }
+
+  .callout p { margin: 0; }
+  .callout p + p { margin-block-start: 0.55rem; }
+
+  .callout-title {
+    margin: 0 0 0.35rem;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    margin: 1.1rem 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.15rem;
+  }
+
+  .steps > li {
+    counter-increment: step;
+    position: relative;
+    min-inline-size: 0;
+    padding-inline-start: 2.85rem;
+  }
+
+  .steps > li::before {
+    content: counter(step);
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.05rem;
+    display: grid;
+    place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  .steps h3 { margin-block-start: 0.15rem; }
+
+  .steps p { margin: 0.2rem 0 0.55rem; color: var(--muted); }
+
+  .code-block {
+    position: relative;
+    min-inline-size: 0;
+    margin: 0.85rem 0 1.1rem;
+  }
+
+  /* Long code lines scroll under the copy control; fade them out before the
+     button so the text never peeks out beside it. */
+  .code-block::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 1px;
+    inset-inline-end: 1px;
+    inline-size: 6.6rem;
+    block-size: 2.6rem;
+    border-start-end-radius: 12px;
+    background: linear-gradient(to right, transparent, var(--code-bg) 34%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .code-block pre {
+    margin: 0;
+    max-inline-size: 100%;
+    padding: 1rem 1.1rem;
+    padding-inline-end: 5.4rem;
+    overflow: auto;
+    border: 1px solid var(--code-border);
+    border-radius: 12px;
+    background: var(--code-bg);
+    color: var(--code-text);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    tab-size: 2;
+  }
+
+  .code-block code {
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, "Liberation Mono", monospace;
+    white-space: pre;
+  }
+
+  .code-block > .copy-button {
+    position: absolute;
+    inset-block-start: 0.55rem;
+    inset-inline-end: 0.55rem;
+    z-index: 1;
+  }
+
+  .code-block > .tip {
+    position: absolute;
+    inset-block-start: 0.55rem;
+    inset-inline-end: 4.4rem;
+    z-index: 1;
+  }
+
+  .copy-button {
+    min-inline-size: 2.6rem;
+    min-block-size: 2rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    background: #232b26;
+    color: #e9eee9;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .copy-button:hover { background: #303b34; }
+  .copy-button:active { transform: translateY(1px); }
+  .copy-button[data-copied] { background: var(--accent); color: var(--on-accent); }
+  .copy-button[data-failed] { background: var(--danger); color: #fff; }
+
+  .tip {
+    padding: 0.2rem 0.45rem;
+    border-radius: 6px;
+    background: #232b26;
+    color: #e9eee9;
+    font-size: 0.74rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .copy-button[data-copied] + .tip,
+  .copy-button[data-failed] + .tip { opacity: 1; }
+
+  .table-wrap {
+    container-type: inline-size;
+    overflow: auto;
+    max-inline-size: 100%;
+    margin: 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  table {
+    inline-size: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+  }
+
+  caption {
+    padding: 0.8rem 1rem 0.2rem;
+    text-align: start;
+    font-weight: 700;
+    font-size: 0.88rem;
+  }
+
+  th, td {
+    padding: 0.65rem 0.9rem;
+    text-align: start;
+    vertical-align: top;
+    border-block-start: 1px solid var(--border);
+  }
+
+  thead th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  tbody th { font-weight: 700; }
+
+  /* Only the short option names must stay on one line. Long sentence row
+     headers wrap so the table stays inside its card. */
+  .fit-headers tbody th { white-space: nowrap; }
+  .fit-headers tbody th code { white-space: nowrap; }
+
+  tbody tr:first-child th,
+  tbody tr:first-child td { border-block-start: 0; }
+
+  @container (width < 620px) {
+    table, tbody, tr, th, td { display: block; }
+    thead { display: none; }
+    caption { padding-block-end: 0.45rem; }
+    tr {
+      padding-block: 0.45rem;
+      border-block-start: 1px solid var(--border);
+    }
+    tbody tr:first-child { border-block-start: 0; }
+    th, td { border: 0; padding: 0.3rem 1rem; }
+    tbody th {
+      background: var(--surface-2);
+      padding-block: 0.5rem;
+    }
+    td[data-label]::before {
+      content: attr(data-label) ": ";
+      color: var(--muted);
+      font-weight: 700;
+    }
+  }
+
+  code:not(pre code) {
+    padding: 0.1em 0.35em;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface-2);
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, "Liberation Mono", monospace;
+    font-size: 0.88em;
+    overflow-wrap: anywhere;
+  }
+
+  .topology {
+    display: grid;
+    gap: 0.9rem;
+    margin: 1.2rem 0;
+  }
+
+  @media (min-width: 1180px) {
+    .topology {
+      grid-template-columns: 1fr auto 1.15fr auto 1fr;
+      align-items: stretch;
+    }
+    .topology-notes { grid-column: 1 / -1; }
+  }
+
+  .node {
+    padding: 1rem 1.05rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .node.primary {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-weak);
+  }
+
+  .node h3 { margin-block-end: 0.3rem; }
+
+  .node p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .node .mono {
+    display: block;
+    margin-block-start: 0.45rem;
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+    font-size: 0.74rem;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  .link {
+    display: grid;
+    place-items: center;
+    gap: 0.15rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    padding: 0.2rem;
+  }
+
+  .link::before {
+    content: "⟷";
+    color: var(--accent);
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  @media (max-width: 1179px) {
+    .link::before { content: "↓"; }
+  }
+
+  .topology-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 0.9rem;
+  }
+
+  .note {
+    padding: 0.85rem 1rem;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    font-size: 0.84rem;
+  }
+
+  .note strong { display: block; margin-block-end: 0.15rem; }
+
+  .cycle {
+    counter-reset: hop;
+    list-style: none;
+    margin: 1rem 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .cycle li {
+    counter-increment: hop;
+    position: relative;
+    min-inline-size: 0;
+    padding-inline-start: 2.5rem;
+    color: var(--muted);
+  }
+
+  .cycle li::before {
+    content: counter(hop);
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.05rem;
+    display: grid;
+    place-items: center;
+    inline-size: 1.7rem;
+    block-size: 1.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .cycle strong { color: var(--text); }
+
+  .plain-list {
+    margin: 0.8rem 0;
+    padding-inline-start: 1.15rem;
+    color: var(--muted);
+  }
+
+  .plain-list li { margin-block: 0.3rem; }
+
+  .plain-list strong { color: var(--text); }
+
+  details {
+    margin: 1rem 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 0.85rem 1rem;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  summary::marker { color: var(--accent); }
+
+  details[open] summary { margin-block-end: 0.7rem; }
+
+  .footer {
+    margin-block-start: 3.5rem;
+    padding-block-start: 1.2rem;
+    border-block-start: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .footer p { margin: 0.35rem 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  @media print {
+    :root { color-scheme: light; }
+    body { background: #fff; color: #000; }
+    .sidebar, .copy-wrap, .skip-link { display: none !important; }
+    .shell { display: block; max-inline-size: none; padding: 0; }
+    .hero, .card, .stat, .node, table, details { box-shadow: none; break-inside: avoid; }
+    .code-block pre { white-space: pre-wrap; }
+    a { color: #000; text-decoration: underline; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="shell">
+  <aside class="sidebar">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc-title">On this page</p>
+      <ol>
+        <li><a href="#glance">At a glance</a></li>
+        <li><a href="#shipped">What shipped</a></li>
+        <li><a href="#topology">How it fits</a></li>
+        <li><a href="#phone">Connect the Phone App</a></li>
+        <li><a href="#qr">Is there a QR code?</a></li>
+        <li><a href="#pc-app">Open the PC App</a></li>
+        <li><a href="#pc-backend">PC App and the backend</a></li>
+        <li><a href="#pc">PC as a backend device</a></li>
+        <li><a href="#pc-action">Send action to the PC</a></li>
+        <li><a href="#send">Send action to the Phone</a></li>
+        <li><a href="#on-phone">What the phone does</a></li>
+        <li><a href="#render">Check the deployment</a></li>
+        <li><a href="#trouble">Troubleshooting</a></li>
+        <li><a href="#not-week1">Not in week 1</a></li>
+        <li><a href="#evidence">Evidence</a></li>
+      </ol>
+    </nav>
+    <p class="sidebar-note">
+      Static page. Open it directly in a browser; it needs no server and no network.
+    </p>
+  </aside>
+
+  <main id="main">
+    <header class="hero">
+      <p class="eyebrow">Week 1 · 15–19 November 2026</p>
+      <h1>The relay is live.</h1>
+      <p class="lede">
+        What week 1 shipped, and how to connect a phone and a PC to the deployed gateway.
+        Everything described here was run against the test stack on Render in Frankfurt.
+      </p>
+      <div class="chips">
+        <span class="chip">Gateway live</span>
+        <span class="chip"><code>main</code> 1c481a5a</span>
+        <span class="chip">20/20 round-trips</span>
+        <span class="chip">FCM wake proven</span>
+        <span class="chip warn">No backend UI yet</span>
+      </div>
+      <p class="hero-meta">
+        Last verified 19 Nov 2026 · free Render plan · one household, two device types
+      </p>
+    </header>
+
+    <section id="glance" tabindex="-1" aria-labelledby="glance-title">
+      <h2 id="glance-title">At a glance</h2>
+      <p class="section-intro">
+        Week 1 built the base relay: pairing, a WebSocket gateway, Postgres with tenant
+        isolation, wake-up, traces and a deploy. It is a working test stack, not a beta.
+      </p>
+      <div class="stats">
+        <div class="stat">
+          <strong>20/20</strong>
+          <span>scripted round-trips, twice in a row against the deployed EU instance</span>
+        </div>
+        <div class="stat">
+          <strong>117 ms</strong>
+          <span>p95 route latency, warm run; p50 23 ms</span>
+        </div>
+        <div class="stat">
+          <strong>1,000</strong>
+          <span>cross-household attempts refused, zero rows leaked</span>
+        </div>
+        <div class="stat">
+          <strong>94</strong>
+          <span>backend tests, 0 failures; plus 55 <code>:transport</code> and 75 app tests</span>
+        </div>
+        <div class="stat">
+          <strong>103 ms</strong>
+          <span>fastest proven FCM wake to a backgrounded phone</span>
+        </div>
+        <div class="stat">
+          <strong>10</strong>
+          <span>Postgres tables with forced row-level security</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="shipped" tabindex="-1" aria-labelledby="shipped-title">
+      <h2 id="shipped-title">What shipped</h2>
+      <p class="section-intro">
+        The week-1 definition of done, reduced to the parts an operator actually touches.
+        Each box below has a test, a CI run, a deployed trace or a device run behind it.
+      </p>
+      <div class="card-grid">
+        <article class="card">
+          <span class="tag">Protocol</span>
+          <h3>Protocol v0, frozen</h3>
+          <p>
+            One envelope, one schema and 20 replayable fixtures. The OpenAPI file covers
+            health, version, knowledge, pairing, token refresh and traces.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Gateway</span>
+          <h3>WebSocket relay</h3>
+          <p>
+            Bearer token on connect, <code>device.hello</code>, 25 s heartbeat and 90 s
+            timeout. Tasks route only inside a household, with a 24-hour idempotency window.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Pairing</span>
+          <h3>Links and opaque tokens</h3>
+          <p>
+            A 5-minute single-use pairing session mints the device identity. Tokens are stored
+            as SHA-256 hashes: 15-minute access, 30-day rotating refresh, reuse rejected.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Data</span>
+          <h3>Postgres v0 with RLS</h3>
+          <p>
+            Ten tables, <code>household_id</code> and <code>member_id</code> on every tenant
+            table, row-level security enabled and forced. Flyway applies V1 at boot.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Wake</span>
+          <h3>FCM wake-up</h3>
+          <p>
+            Data-only, high-priority push with a 5-minute TTL and no body content. Sent only
+            to offline devices, capped at 6 per minute, deduplicated per task.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Tasks</span>
+          <h3>Route, queue, ack</h3>
+          <p>
+            <code>task.create</code>, <code>ack</code>, <code>progress</code>,
+            <code>result</code>, <code>error</code> and <code>cancel</code>. Offline targets
+            queue and are delivered on the next hello, within a 10-minute default deadline.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Traces</span>
+          <h3>One id per hop</h3>
+          <p>
+            Ingress assigns or validates <code>traceparent</code>. Spans record accept,
+            route, wake, deliver and ack. Trace lookup is household-only; logs carry no
+            token or body.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Deploy</span>
+          <h3>Render, Frankfurt</h3>
+          <p>
+            Docker on a distroless Java 21 runtime, 512 MB free plan, Postgres 16 in the same
+            region. Health returns <code>{"ok":true,"db":"ok"}</code>.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Clients</span>
+          <h3>Phone and PC halves</h3>
+          <p>
+            Android pairs, opens the socket, registers FCM, runs a delivered task and returns
+            a terminal frame. The Windows App runs the loop locally and can drive the PC or the
+            phone through a bridge; <code>send-task.ps1</code> is the separate backend sender.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">Fixes</span>
+          <h3>Two real bugs closed</h3>
+          <p>
+            A silent 15-minute outage after token expiry, fixed by treating the
+            <code>E_AUTH</code> frame as the refresh signal. A duplicate delivery on one
+            socket, fixed by remembering what that session already sent.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="topology" tabindex="-1" aria-labelledby="topology-title">
+      <h2 id="topology-title">How it fits</h2>
+      <p class="section-intro">
+        The backend carries task messages between devices. It never sends device commands:
+        no <code>adb</code>, no screen taps, no conversation payloads inside a push.
+      </p>
+
+      <div class="topology" role="group" aria-label="Phone and PC connect to the gateway over WebSockets; the gateway uses Postgres and FCM">
+        <div class="node">
+          <h3>Phone</h3>
+          <p>HOPA for Android. Pairs once, keeps a socket while awake, receives an FCM push when the socket is gone.</p>
+          <span class="mono">BackendSession · RemoteTaskRunner</span>
+        </div>
+        <div class="link">WSS<br>bearer token</div>
+        <div class="node primary">
+          <h3>Gateway · Render Frankfurt</h3>
+          <p>Authenticates, checks tenant and limits, routes, queues, wakes and records spans.</p>
+          <span class="mono">wss://hopa-backend-test.onrender.com/v1/gateway</span>
+        </div>
+        <div class="link">WSS<br>bearer token</div>
+        <div class="node">
+          <h3>PC</h3>
+          <p>The backend device is a script, not the PC App. The Windows App runs the loop locally or drives the phone through a LAN bridge; it does not open this socket.</p>
+          <span class="mono">send-task.ps1 · SendTask.java</span>
+        </div>
+        <div class="topology-notes">
+          <div class="note">
+            <strong>Postgres 16</strong>
+            Devices, households, tasks, events, tokens and trace spans. Row-level security
+            scopes every read to the caller's household.
+          </div>
+          <div class="note">
+            <strong>FCM</strong>
+            A data-only push wakes the phone when it is offline. It carries a task id, never
+            the task body. The phone then reconnects and asks for the task.
+          </div>
+          <div class="note">
+            <strong>What is not here yet</strong>
+            Approvals, sync, file transfer and the operations console are later weeks. The
+            Windows App is a local client that can drive the phone through a bridge; it is not
+            a backend client.
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-block-start:1.6rem">One task, end to end</h3>
+      <ol class="cycle">
+        <li>
+          <strong>The PC sends <code>task.create</code>.</strong> The gateway authenticates
+          the token, refuses a target outside the household before writing, applies limits,
+          and records the task plus an <code>accept</code> span.
+        </li>
+        <li>
+          <strong>The gateway routes.</strong> If the target is online, the frame goes down
+          its socket and the task is <code>delivered</code>. If not, it stays
+          <code>queued</code> and an FCM wake is attempted.
+        </li>
+        <li>
+          <strong>The phone acks, then runs.</strong> The runner resolves the surface, plans,
+          executes and returns a <code>task.result</code> or a named error.
+        </li>
+        <li>
+          <strong>One trace id covers every hop.</strong> Look it up with
+          <code>GET /v1/traces/{traceId}</code> using the caller's own token.
+        </li>
+      </ol>
+    </section>
+
+    <section id="phone" tabindex="-1" aria-labelledby="phone-title">
+      <h2 id="phone-title">Connect the Phone App</h2>
+      <p class="section-intro">
+        Pairing is one paste. The app stores the identity, opens the socket itself and
+        refreshes its own token; you do not repeat this after a reboot. This is the backend
+        route; the PC App has a separate route below.
+      </p>
+
+      <div class="callout">
+        <p class="callout-title">Current test-stack values</p>
+        <p>
+          <strong>Gateway:</strong> <code>wss://hopa-backend-test.onrender.com/v1/gateway</code><br>
+          <strong>Household:</strong> <code>8d21f337-c740-4425-b990-741f584fda85</code><br>
+          <strong>Bootstrap token file:</strong> <code>%TEMP%\opencode\hopa-test-bootstrap.txt</code>
+        </p>
+        <p>
+          The household id changes if the database is rebuilt. The examples below use
+          <code>%TEMP%\hopa-bootstrap.txt</code> as a readable placeholder for the token file.
+        </p>
+      </div>
+
+      <h3>Before you start</h3>
+      <ul class="plain-list">
+        <li>Your shell is at the repository root, the folder containing <code>tools\scripts</code>.</li>
+        <li>The app is installed (<code>.\tools\scripts\android-device-checks.ps1 -InstallOnly</code> after building the APK).</li>
+        <li>Notifications are allowed, so the app can obtain an FCM token.</li>
+        <li>Android's accessibility service and HOPA's own screen-access switch are on if the phone should <em>run</em> tasks, not only receive them.</li>
+        <li>USB debugging is on if you will use the adb shortcut instead of pasting by hand.</li>
+      </ul>
+
+      <details>
+        <summary>Build and install the debug APK</summary>
+        <p>
+          The installer stages the APK over a raw adb channel because host security software
+          can refuse <code>adb install</code>. HyperOS still needs <strong>Install via USB</strong>
+          enabled and one confirmation tap on the phone.
+        </p>
+        <div class="code-block">
+          <button type="button" class="copy-button" command="--copy" commandfor="code-build-apk">Copy<span class="visually-hidden"> the build and install commands</span></button><span class="tip" role="status"></span>
+          <pre role="region" aria-labelledby="code-build-apk-label" tabindex="0"><code id="code-build-apk">cd apps\android
+.\gradlew.bat :app:assembleDebug
+cd ..\..
+.\tools\scripts\android-device-checks.ps1 -InstallOnly</code></pre>
+          <span id="code-build-apk-label" hidden>Build and install commands</span>
+        </div>
+      </details>
+
+      <ol class="steps">
+        <li>
+          <h3>Mint a pairing link on the PC</h3>
+          <p>
+            The bootstrap token is read from a local file and is never printed. A session is
+            single-use and expires after five minutes.
+          </p>
+          <div class="code-block">
+            <button type="button" class="copy-button" command="--copy" commandfor="code-pair-phone">Copy<span class="visually-hidden"> the pairing command</span></button><span class="tip" role="status"></span>
+            <pre role="region" aria-labelledby="code-pair-phone-label" tabindex="0"><code id="code-pair-phone"># One shell per session. Never commit or paste the token itself.
+$env:HOPA_BOOTSTRAP_TOKEN = (Get-Content "$env:TEMP\hopa-bootstrap.txt" -Raw).Trim()
+
+# First device: omit -HouseholdId. An extra phone joins the existing household.
+.\tools\scripts\pair-device.ps1 -HouseholdId &lt;phone-household-id&gt;</code></pre>
+            <span id="code-pair-phone-label" hidden>Pairing command</span>
+          </div>
+          <p>
+            It prints a <code>hopa://pair?...</code> link and the expiry. Use the household id
+            printed by the first device's run; a second household cannot exchange tasks with
+            the first.
+          </p>
+        </li>
+
+        <li>
+          <h3>Paste it into the phone</h3>
+          <p>
+            Open <strong>Act → How HOPA acts → My computer</strong>, then <strong>Set up the
+            bridge</strong> (or <strong>Bridge settings</strong>). The <strong>HOPA
+            gateway</strong> card is on the <strong>My computer</strong> screen, below the
+            bridge card. This is the only route to it in week 1.
+          </p>
+          <ul class="plain-list">
+            <li><strong>Gateway address:</strong> <code>wss://hopa-backend-test.onrender.com/v1/gateway</code>. A whole link fills this in automatically.</li>
+            <li><strong>Pairing link, or the session alone:</strong> paste all of it, or only the <code>p=</code> value if the address is already filled in.</li>
+            <li>Tap <strong>Pair</strong>. The card should move to <strong>Live</strong> and show a device id.</li>
+          </ul>
+        </li>
+
+        <li>
+          <h3>Or hand the link to the app over adb</h3>
+          <p>
+            Faster when the phone is attached. Quote the link <em>inside</em> the adb command:
+            the link contains <code>&amp;</code>, and an unquoted device shell splits it at the
+            first ampersand, leaving the app with a link that looks unpaired.
+          </p>
+          <div class="code-block">
+            <button type="button" class="copy-button" command="--copy" commandfor="code-adb-pair">Copy<span class="visually-hidden"> the adb pairing command</span></button><span class="tip" role="status"></span>
+            <pre role="region" aria-labelledby="code-adb-pair-label" tabindex="0"><code id="code-adb-pair">$link = .\tools\scripts\pair-device.ps1 -HouseholdId &lt;phone-household-id&gt; -LinkOnly
+adb shell "am start -n com.hopa.android/com.hopa.app.MainActivity --es hopa.backendPair '$link'"</code></pre>
+            <span id="code-adb-pair-label" hidden>adb pairing command</span>
+          </div>
+        </li>
+
+        <li>
+          <h3>Confirm four things</h3>
+          <p>
+            <strong>Connection: Live</strong>, a device id, an FCM token (not “waiting for a
+            token”), and screen access on if the phone should execute. The backend records the
+            push token on the next <code>device.hello</code>.
+          </p>
+        </li>
+
+        <li>
+          <h3>Let it run</h3>
+          <p>
+            The socket stays open in the foreground and for 30 seconds after backgrounding.
+            After that, the gateway pushes a data-only wake. When an access token expires, the
+            app refreshes it by itself and returns to <strong>Live</strong>.
+          </p>
+        </li>
+      </ol>
+
+      <div class="table-wrap" role="region" tabindex="0" aria-labelledby="phone-table-caption">
+        <table>
+          <caption id="phone-table-caption">Phone runtime, week 1</caption>
+          <thead>
+            <tr>
+              <th scope="col">Behaviour</th>
+              <th scope="col">Value</th>
+              <th scope="col">What you notice</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Access token</th>
+              <td data-label="Value">15 minutes</td>
+              <td data-label="What you notice">The app refreshes on its own; no re-pair</td>
+            </tr>
+            <tr>
+              <th scope="row">Refresh token</th>
+              <td data-label="Value">30 days, rotated on use</td>
+              <td data-label="What you notice">A reused refresh token is rejected</td>
+            </tr>
+            <tr>
+              <th scope="row">Foreground socket</th>
+              <td data-label="Value">open</td>
+              <td data-label="What you notice">Tasks arrive immediately</td>
+            </tr>
+            <tr>
+              <th scope="row">Background grace</th>
+              <td data-label="Value">30 seconds</td>
+              <td data-label="What you notice">After that, an FCM wake brings the socket back</td>
+            </tr>
+            <tr>
+              <th scope="row">Locked phone</th>
+              <td data-label="Value">refused with <code>E_DEVICE</code></td>
+              <td data-label="What you notice">Delivery and wake still work; execution does not</td>
+            </tr>
+            <tr>
+              <th scope="row">Screen access off</th>
+              <td data-label="Value">refused with <code>E_CAPABILITY</code></td>
+              <td data-label="What you notice">The message names HOPA's screen access</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="qr" tabindex="-1" aria-labelledby="qr-title">
+      <h2 id="qr-title">Is there a QR code?</h2>
+      <div class="callout warn">
+        <p class="callout-title">The payload exists; the camera scanner does not — yet.</p>
+        <p>
+          The backend mints exactly what a QR code would carry, but the Android app has no
+          scanner in week 1. In practice you <strong>paste the link</strong> into the HOPA
+          gateway card, or send it with the adb command above.
+        </p>
+      </div>
+      <p>The link the backend returns has this shape:</p>
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-qr-shape">Copy<span class="visually-hidden"> the pairing link format</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-qr-shape-label" tabindex="0"><code id="code-qr-shape">hopa://pair?v=1&amp;h=&lt;household-id&gt;&amp;p=&lt;single-use-session&gt;&amp;u=&lt;gateway-url&gt;</code></pre>
+        <span id="code-qr-shape-label" hidden>Pairing link format</span>
+      </div>
+      <ul class="plain-list">
+        <li><strong><code>h</code></strong> is the household the new device joins.</li>
+        <li><strong><code>p</code></strong> is the single-use session. It expires in five minutes and is consumed by the first claim.</li>
+        <li><strong><code>u</code></strong> is the gateway the app will connect to. Without it, the app uses the address already on screen and accepts a bare session.</li>
+        <li>Parameter order and percent-encoding do not matter; anything that is not a recognised link or bare session is refused rather than guessed.</li>
+      </ul>
+      <p class="section-intro" style="margin-block-start:1rem">
+        A future QR scanner only needs to hand this same string to the same parser. No backend
+        change is required for that page; the gap is entirely in the Android UI.
+      </p>
+    </section>
+
+    <section id="pc-app" tabindex="-1" aria-labelledby="pc-app-title">
+      <h2 id="pc-app-title">Open the PC App</h2>
+      <p class="section-intro">
+        The PC App is the Windows client in <code>apps/windows</code>: a WPF window plus a
+        Kotlin sidecar that runs the same loop as the other clients. It can act on the PC
+        itself and, through a bridge, on the phone. It is <strong>not</strong> a backend client.
+      </p>
+
+      <div class="callout warn">
+        <p class="callout-title">The sidecar must be built before the window starts</p>
+        <p>
+          The app finds the sidecar at
+          <code>apps/windows/sidecar/build/install/hopa-windows-sidecar/lib</code>. If that
+          folder is missing, the window opens but cannot answer. Build the sidecar first.
+        </p>
+      </div>
+
+      <h3>Build and run</h3>
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-pc-build">Copy<span class="visually-hidden"> the PC App build and run commands</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-pc-build-label" tabindex="0"><code id="code-pc-build"># 1. Kotlin sidecar: the loop and the device adapters.
+cd apps\android
+.\gradlew.bat -p ..\windows\sidecar installDist --no-daemon
+
+# 2. WPF app.
+cd ..\windows\Hopa.Windows
+dotnet build -c Debug
+
+# 3. Start the window.
+.\bin\Debug\net8.0-windows\Hopa.Windows.exe</code></pre>
+        <span id="code-pc-build-label" hidden>PC App build and run commands</span>
+      </div>
+      <ul class="plain-list">
+        <li><strong>Prerequisites:</strong> Windows 10 or 11, the .NET 8 SDK, a JDK, and the repo's Gradle wrapper.</li>
+        <li><strong>If <code>dotnet</code> is not on <code>PATH</code>:</strong> run
+          <code>&amp; "C:\Program Files\dotnet\dotnet.exe" build -c Debug</code> instead.</li>
+        <li><strong>First start:</strong> the window shows a chat column and a target chip at the
+          bottom-left. The chip starts as <strong>Laptop</strong>; Settings holds the model and
+          bridge values.</li>
+        <li><strong>No model key:</strong> the sidecar uses its demo model and answers with text
+          instead of planning actions. Add a provider key in Settings for real PC control.</li>
+      </ul>
+
+      <details>
+        <summary>Package the app for another PC</summary>
+        <p>
+          The packaging script publishes a self-contained Windows build, copies the sidecar and
+          a jlink runtime, then writes a zip under <code>out/windows</code>. It needs the sidecar
+          build and a JDK with <code>jlink</code>.
+        </p>
+        <div class="code-block">
+          <button type="button" class="copy-button" command="--copy" commandfor="code-pc-package">Copy<span class="visually-hidden"> the PC App packaging command</span></button><span class="tip" role="status"></span>
+          <pre role="region" aria-labelledby="code-pc-package-label" tabindex="0"><code id="code-pc-package">.\tools\scripts\windows-package.ps1 -SkipMsi</code></pre>
+          <span id="code-pc-package-label" hidden>PC App packaging command</span>
+        </div>
+        <p>
+          Drop <code>-SkipMsi</code> only when WiX is installed. The output is
+          <code>out/windows/hopa-windows-0.1.0.zip</code>.
+        </p>
+      </details>
+
+      <h3>Headless check</h3>
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-pc-headless">Copy<span class="visually-hidden"> the PC App headless check command</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-pc-headless-label" tabindex="0"><code id="code-pc-headless"># One turn without clicking the window.
+.\bin\Debug\net8.0-windows\Hopa.Windows.exe --turn "say hello" --out turn.txt</code></pre>
+        <span id="code-pc-headless-label" hidden>PC App headless check command</span>
+      </div>
+      <p>
+        Verified with the current tree: exit code 0, and <code>turn.txt</code> receives the
+        sidecar's answer. This proves the window, sidecar and IPC are wired; it does not touch
+        the backend.
+      </p>
+    </section>
+
+    <section id="pc-backend" tabindex="-1" aria-labelledby="pc-backend-title">
+      <h2 id="pc-backend-title">Connect the PC App to the backend</h2>
+      <div class="callout danger">
+        <p class="callout-title">There is no script for this in week 1.</p>
+        <p>
+          The PC App never opens <code>/v1/gateway</code>. It has no backend bearer token, no
+          <code>device.hello</code> and no inbox. The only backend client that stays connected
+          and receives tasks is the Android app; <code>send-task.ps1</code> is a one-shot sender
+          identity, not the app.
+        </p>
+      </div>
+
+      <div class="table-wrap" role="region" tabindex="0" aria-labelledby="pc-routes-caption">
+        <table>
+          <caption id="pc-routes-caption">Which PC route works in week 1</caption>
+          <thead>
+            <tr>
+              <th scope="col">Route</th>
+              <th scope="col">What it uses</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">PC App → this PC</th>
+              <td data-label="What it uses">The local Kotlin sidecar over stdio, then Windows UI Automation.</td>
+              <td data-label="Status">Works. This is how you send an action to the PC.</td>
+            </tr>
+            <tr>
+              <th scope="row">PC App → phone</th>
+              <td data-label="What it uses">HTTP bridge plus <code>adb</code>; the target chip says <strong>Phone</strong>.</td>
+              <td data-label="Status">Works when the bridge is running and paired.</td>
+            </tr>
+            <tr>
+              <th scope="row">PC App → backend</th>
+              <td data-label="What it uses">Nothing: the app has no gateway client.</td>
+              <td data-label="Status"><strong>Not implemented.</strong></td>
+            </tr>
+            <tr>
+              <th scope="row"><code>send-task.ps1</code> → backend</th>
+              <td data-label="What it uses">WSS as a <code>windows</code> device; sends one task.</td>
+              <td data-label="Status">Works, send only. It cannot receive tasks.</td>
+            </tr>
+            <tr>
+              <th scope="row">Phone App → backend</th>
+              <td data-label="What it uses">WSS with its paired device identity.</td>
+              <td data-label="Status">Works.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The PC App's <code>--pair</code> argument pairs it to a <strong>LAN bridge</strong>, not
+        to the backend. The bridge address and token live in the app's Settings, and the code is
+        printed by the bridge program:
+      </p>
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-pc-pair-bridge">Copy<span class="visually-hidden"> the PC App bridge pairing command</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-pc-pair-bridge-label" tabindex="0"><code id="code-pc-pair-bridge"># Bridge pairing, NOT backend pairing.
+.\bin\Debug\net8.0-windows\Hopa.Windows.exe --pair http://127.0.0.1:8765 123456 pair.txt</code></pre>
+        <span id="code-pc-pair-bridge-label" hidden>PC App bridge pairing command</span>
+      </div>
+      <p class="section-intro" style="margin-block-start:0.8rem">
+        For backend sends, use <a href="#pc">the PC-as-a-backend-device section</a>. For a
+        backend-to-PC action, the integration does not exist yet; the PC App can only act
+        locally or drive the phone through its bridge.
+      </p>
+    </section>
+
+    <section id="pc" tabindex="-1" aria-labelledby="pc-title">
+      <h2 id="pc-title">PC as a backend device</h2>
+      <div class="callout">
+        <p class="callout-title">This is the script, not the PC App.</p>
+        <p>
+          <code>send-task.ps1</code> plus <code>SendTask.java</code> pairs a
+          <code>windows</code> identity with the backend and speaks the same gateway protocol
+          as the phone. It is a sender: it cannot receive or run a task. It does not start the
+          PC App and it does not share the app's bridge settings. See
+          <a href="#pc-app">Open the PC App</a> for the GUI.
+        </p>
+      </div>
+
+      <h3>Before you start</h3>
+      <ul class="plain-list">
+        <li>PowerShell 5.1 or later.</li>
+        <li>A JDK on <code>PATH</code>. The sender compiles itself into <code>%TEMP%\hopa-tools</code> on first use; nothing to install in the repo.</li>
+        <li>The bootstrap token, in the same local file the phone flow uses.</li>
+        <li>The phone's household id if this is not the first device. Otherwise the script creates a fresh household and the two devices cannot exchange tasks.</li>
+      </ul>
+
+      <ol class="steps">
+        <li>
+          <h3>Pair the PC once</h3>
+          <p>
+            This claims a fresh session as a <code>windows</code> device, says hello and stores
+            the tokens in <code>%TEMP%\hopa-pc-tokens.json</code>. A pasted link or an explicit
+            household forces a fresh pairing even if a token file already exists.
+          </p>
+          <div class="code-block">
+            <button type="button" class="copy-button" command="--copy" commandfor="code-pair-pc">Copy<span class="visually-hidden"> the PC pairing command</span></button><span class="tip" role="status"></span>
+            <pre role="region" aria-labelledby="code-pair-pc-label" tabindex="0"><code id="code-pair-pc">$env:HOPA_BOOTSTRAP_TOKEN = (Get-Content "$env:TEMP\hopa-bootstrap.txt" -Raw).Trim()
+
+# Join the phone's household; omit -HouseholdId for a brand-new household.
+.\tools\scripts\send-task.ps1 -Pair -HouseholdId &lt;phone-household-id&gt;
+
+# Already paired? Re-pair without moving households:
+.\tools\scripts\send-task.ps1 -Pair -Force</code></pre>
+            <span id="code-pair-pc-label" hidden>PC pairing command</span>
+          </div>
+          <p>
+            Expected shape: <code>paired device=… household=… expires=…</code>. The tokens are
+            never printed. The file is ACL-restricted, but it still lives in
+            <code>%TEMP%</code>, so treat it as a credential.
+          </p>
+        </li>
+        <li>
+          <h3>Know the expiry</h3>
+          <p>
+            The access token lasts <strong>15 minutes</strong>. This sender does not refresh it
+            (the refresh token is stored for the next slice), so a send after the window fails
+            with <code>E_AUTH</code>. Re-pair with <code>-Pair -Force</code>; it keeps the
+            stored household unless you pass <code>-HouseholdId</code> or <code>-Link</code>.
+          </p>
+        </li>
+        <li>
+          <h3>Confirm the target</h3>
+          <p>
+            <code>-Pair</code> records the phone's device id when it is the only other device
+            online. Otherwise pass <code>-To</code> on each send, or use the phone's id from
+            the HOPA gateway card.
+          </p>
+        </li>
+      </ol>
+
+      <div class="callout">
+        <p class="callout-title">Override the backend</p>
+        <p>
+          Both scripts read <code>HOPA_BACKEND_URL</code>. With it unset they use
+          <code>https://hopa-backend-test.onrender.com</code>. Set it once per shell to point
+          at a local stack:
+          <code>$env:HOPA_BACKEND_URL = "http://127.0.0.1:8080"</code>.
+        </p>
+      </div>
+    </section>
+
+    <section id="pc-action" tabindex="-1" aria-labelledby="pc-action-title">
+      <h2 id="pc-action-title">Send action to the PC</h2>
+      <p class="section-intro">
+        This runs on the PC itself through the PC App and its sidecar. It is local work, not a
+        backend task, and it never leaves the machine.
+      </p>
+
+      <div class="callout warn">
+        <p class="callout-title">A real model is required for actions</p>
+        <p>
+          With no provider key, the sidecar uses its demo model: it answers with text and does
+          not plan taps or launches. Add a model in <strong>Settings → Model</strong> before
+          expecting the PC to open or type into an app.
+        </p>
+      </div>
+
+      <ol class="steps">
+        <li>
+          <h3>Open the PC App</h3>
+          <p>
+            Build the sidecar and the window as shown in
+            <a href="#pc-app">Open the PC App</a>, then start
+            <code>Hopa.Windows.exe</code>.
+          </p>
+        </li>
+        <li>
+          <h3>Choose the Laptop target</h3>
+          <p>
+            The chip at the bottom-left of the composer says <strong>Laptop</strong> or
+            <strong>Phone</strong>. Click it until it says <strong>Laptop</strong>; the subtitle
+            then reads “Running on this laptop”. Do not use the Phone target for PC work.
+          </p>
+        </li>
+        <li>
+          <h3>Configure the model once</h3>
+          <p>
+            Open <strong>Settings</strong>, pick the provider, and fill <strong>Base URL</strong>,
+            <strong>Model name</strong> and the <strong>Model key</strong>. The key goes into
+            Windows Credential Manager, not the repository. Save.
+          </p>
+        </li>
+        <li>
+          <h3>Ask for the action</h3>
+          <p>
+            Type a goal in the composer, for example <code>open notepad</code> or
+            <code>type hello in notepad</code>, then press Enter or the send arrow. The sidecar
+            observes the desktop, plans, calls Windows UI Automation, and returns the result.
+            Payment and destructive steps ask first, with a 120-second wait.
+          </p>
+        </li>
+        <li>
+          <h3>Read the refusal, not a fake success</h3>
+          <p>
+            Elevated windows and secure screens cannot be driven by this build. The app says so
+            instead of pretending the action ran.
+          </p>
+        </li>
+      </ol>
+
+      <h3>Headless PC check</h3>
+      <p>
+        The app has a built-in PC-action check. It sets the target to Laptop, asks for
+        <code>open notepad</code> and <code>type hello in notepad</code>, and writes the log.
+        Run it only when an open Notepad is acceptable; it needs the same model key as the
+        window.
+      </p>
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-pc-action">Copy<span class="visually-hidden"> the PC action check command</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-pc-action-label" tabindex="0"><code id="code-pc-action"># Opens Notepad and types "hello", then writes the log.
+.\bin\Debug\net8.0-windows\Hopa.Windows.exe --pc-check pc-check.txt
+
+# Any other goal:
+.\bin\Debug\net8.0-windows\Hopa.Windows.exe --turn "open calculator" --out turn.txt</code></pre>
+        <span id="code-pc-action-label" hidden>PC action check commands</span>
+      </div>
+    </section>
+
+    <section id="send" tabindex="-1" aria-labelledby="send-title">
+      <h2 id="send-title">Send action to the Phone</h2>
+      <p class="section-intro">
+        There are three routes to the phone. The first is the deployed backend; the other two
+        stay on the LAN. Only the first needs a paired device on the gateway.
+      </p>
+
+      <div class="table-wrap" role="region" tabindex="0" aria-labelledby="phone-routes-caption">
+        <table>
+          <caption id="phone-routes-caption">Ways to send an action to the phone</caption>
+          <thead>
+            <tr>
+              <th scope="col">Route</th>
+              <th scope="col">Use it when</th>
+              <th scope="col">Needs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Backend → phone</th>
+              <td data-label="Use it when">You want the deployed relay, wake-up and trace. This is the week-1 path.</td>
+              <td data-label="Needs">The phone paired to the gateway and <code>send-task.ps1</code> on the PC.</td>
+            </tr>
+            <tr>
+              <th scope="row">PC App → phone</th>
+              <td data-label="Use it when">You want the PC window to drive the phone's visible screen over the LAN.</td>
+              <td data-label="Needs">The bridge running, its address and token in Settings, <code>adb</code>, and the target chip on <strong>Phone</strong>.</td>
+            </tr>
+            <tr>
+              <th scope="row">Phone → phone</th>
+              <td data-label="Use it when">You are already holding the phone and want the simplest run.</td>
+              <td data-label="Needs">HOPA's screen access and the <strong>This phone</strong> choice in Act.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Route 1: backend → phone</h3>
+      <p>
+        One command sends one task and waits for the terminal frame. The default timeout is
+        200 seconds, long enough to cover a free-plan cold start plus a wake.
+      </p>
+
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-send-basic">Copy<span class="visually-hidden"> the send command</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-send-basic-label" tabindex="0"><code id="code-send-basic"># The common case: -To comes from the pairing that discovered the phone.
+.\tools\scripts\send-task.ps1 -Goal "open settings"</code></pre>
+        <span id="code-send-basic-label" hidden>Basic send command</span>
+      </div>
+
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-send-full">Copy<span class="visually-hidden"> the full send command</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-send-full-label" tabindex="0"><code id="code-send-full"># Explicit target and timeout.
+.\tools\scripts\send-task.ps1 `
+  -Goal "open settings" `
+  -To &lt;phone-device-id&gt; `
+  -TimeoutSec 200</code></pre>
+        <span id="code-send-full-label" hidden>Full send command</span>
+      </div>
+
+      <div class="table-wrap" role="region" tabindex="0" aria-labelledby="send-table-caption">
+        <table class="fit-headers">
+          <caption id="send-table-caption">send-task.ps1 options</caption>
+          <thead>
+            <tr>
+              <th scope="col">Option</th>
+              <th scope="col">Use it when</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><code>-Goal</code></th>
+              <td data-label="Use it when">Required for a send. Plain language, for example <code>"open settings"</code>.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>-To</code></th>
+              <td data-label="Use it when">The phone was not recorded at pairing, or more than one device is online. Defaults to the stored id, then the only other device online.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>-TimeoutSec</code></th>
+              <td data-label="Use it when">The wait for <code>task.result</code> or <code>task.error</code>. Default 200.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>-Pair</code></th>
+              <td data-label="Use it when">This PC has no stored identity, or you want a fresh one. Stops after pairing.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>-HouseholdId</code></th>
+              <td data-label="Use it when">The PC must join the phone's household. Ignored with <code>-Link</code>.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>-Link</code></th>
+              <td data-label="Use it when">You already minted a fresh <code>hopa://pair</code> link. Only with <code>-Pair</code>.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>-Name</code></th>
+              <td data-label="Use it when">The device name shown in the household. Defaults to the computer name.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>-Force</code></th>
+              <td data-label="Use it when">Pair again despite an existing token file. Keeps the stored household unless overridden.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What you should see</h3>
+      <p>The sender prints the ack first, then one terminal frame, then the trace to look up:</p>
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-send-output">Copy<span class="visually-hidden"> the example output</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-send-output-label" tabindex="0"><code id="code-send-output">ack task=&lt;uuid&gt; trace=00-…-…-01 state=delivered
+result summary="Settings is open"
+trace=00-…-…-01</code></pre>
+        <span id="code-send-output-label" hidden>Example sender output</span>
+      </div>
+      <ul class="plain-list">
+        <li><strong><code>state=delivered</code></strong> means the phone's socket took the frame. It does not yet mean the task succeeded.</li>
+        <li><strong><code>state=queued</code></strong> means the phone was offline. A wake was attempted; the task is delivered on the next hello, inside the deadline.</li>
+        <li><strong><code>result summary=…</code></strong> is the model or stub's answer. Week 1 has no provider key on the phone, so this is the stub's text.</li>
+        <li><strong><code>error code=… message=…</code></strong> is a named refusal or failure, not a timeout. Exit code 1.</li>
+        <li><strong>Exit codes:</strong> 0 success; 2 no paired PC (run <code>-Pair</code> first); 1 any other failure.</li>
+      </ul>
+
+      <details>
+        <summary>Read the trace for that task</summary>
+        <p>
+          Send the same bearer token the device uses (read it from the token file; do not print
+          it). The response is scoped to the caller's household, so a token from another
+          household gets a 404.
+        </p>
+        <div class="code-block">
+          <button type="button" class="copy-button" command="--copy" commandfor="code-trace">Copy<span class="visually-hidden"> the trace lookup command</span></button><span class="tip" role="status"></span>
+          <pre role="region" aria-labelledby="code-trace-label" tabindex="0"><code id="code-trace">$tokens = Get-Content "$env:TEMP\hopa-pc-tokens.json" -Raw | ConvertFrom-Json
+Invoke-RestMethod `
+  -Uri "https://hopa-backend-test.onrender.com/v1/traces/&lt;trace-id&gt;" `
+  -Headers @{ Authorization = "Bearer $($tokens.accessToken)" }</code></pre>
+          <span id="code-trace-label" hidden>Trace lookup command</span>
+        </div>
+      </details>
+
+      <h3>Route 2: PC App → phone over the bridge</h3>
+      <p>
+        This route keeps the run on the LAN. The PC App sends the goal to a bridge, the bridge
+        drives the phone's visible screen with <code>adb</code>, and the phone does not need
+        Android's accessibility service for it.
+      </p>
+      <ol class="steps">
+        <li>
+          <h3>Start the bridge</h3>
+          <p>
+            Install the bridge once from the repo (<code>python -m pip install -e
+            services\bridge</code>), put <code>adb</code> on <code>PATH</code>, then run it and
+            keep the terminal open. It prints the address and a one-time pair code:
+          </p>
+          <div class="code-block">
+            <button type="button" class="copy-button" command="--copy" commandfor="code-bridge-start">Copy<span class="visually-hidden"> the bridge start command</span></button><span class="tip" role="status"></span>
+            <pre role="region" aria-labelledby="code-bridge-start-label" tabindex="0"><code id="code-bridge-start">hopa-bridge --platform android bridge --host 0.0.0.0 --port 8765
+
+# In another terminal, the phone must be listed:
+adb devices</code></pre>
+            <span id="code-bridge-start-label" hidden>Bridge start command</span>
+          </div>
+        </li>
+        <li>
+          <h3>Pair the phone and the app</h3>
+          <p>
+            Pair the phone from <strong>Act → How HOPA acts → My computer</strong> with the
+            address and pair code. Then put the same bridge address and its token in the PC
+            App's <strong>Settings → Bridge</strong>, or pair the app from the command line:
+          </p>
+          <div class="code-block">
+            <button type="button" class="copy-button" command="--copy" commandfor="code-bridge-pair">Copy<span class="visually-hidden"> the bridge pairing example</span></button><span class="tip" role="status"></span>
+            <pre role="region" aria-labelledby="code-bridge-pair-label" tabindex="0"><code id="code-bridge-pair"># The pair code comes from the bridge console; this is not the backend.
+.\bin\Debug\net8.0-windows\Hopa.Windows.exe --pair http://127.0.0.1:8765 123456 pair.txt</code></pre>
+            <span id="code-bridge-pair-label" hidden>Bridge pairing example</span>
+          </div>
+        </li>
+        <li>
+          <h3>Switch the target and ask</h3>
+          <p>
+            In the PC App, click the target chip until it says <strong>Phone</strong>, then ask
+            for the action, for example <code>open settings</code>. The phone's screen opens
+            visibly. If the chip says <strong>Laptop</strong>, the app acts on the PC instead.
+          </p>
+        </li>
+      </ol>
+      <p>
+        Full bridge setup and failure modes are in
+        <a href="../guides/android/run-modes.md">the Android run-modes guide, section 5</a>.
+      </p>
+
+      <h3>Route 3: on the phone itself</h3>
+      <p>
+        Open HOPA on the phone, choose <strong>This phone</strong> in Act, and ask directly.
+        This needs HOPA's screen-access switch and Android's accessibility service, but no PC
+        and no backend. It is the simplest check when the phone is already in your hand.
+      </p>
+    </section>
+
+    <section id="on-phone" tabindex="-1" aria-labelledby="on-phone-title">
+      <h2 id="on-phone-title">What the phone does with a task</h2>
+      <p class="section-intro">
+        A delivered frame is not a remote command. The phone decides how to act, using its own
+        <strong>How apps open</strong> setting, and the backend only sees the result.
+      </p>
+      <div class="table-wrap" role="region" tabindex="0" aria-labelledby="modes-table-caption">
+        <table>
+          <caption id="modes-table-caption">HOPA's own “How apps open” setting</caption>
+          <thead>
+            <tr>
+              <th scope="col">Mode</th>
+              <th scope="col">What happens</th>
+              <th scope="col">What it needs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><code>auto</code></th>
+              <td data-label="What happens">The runner picks a surface that can work now.</td>
+              <td data-label="What it needs">Screen access or the bridge, depending on the choice.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>hidden</code></th>
+              <td data-label="What happens">Runs in the background without showing the app.</td>
+              <td data-label="What it needs">Screen access; a locked phone is refused.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>onscreen</code></th>
+              <td data-label="What happens">Brings the work to the visible screen.</td>
+              <td data-label="What it needs">Android's accessibility service and HOPA's switch on.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>bridge</code></th>
+              <td data-label="What happens">Sends the work to the paired PC over the LAN bridge.</td>
+              <td data-label="What it needs">A running bridge on the same network.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ul class="plain-list">
+        <li><strong>Delivery → ack → plan → run → terminal frame.</strong> The user sees a task as it arrives; there are no approvals in week 1.</li>
+        <li><strong>No provider key on the test phone.</strong> An awake run returns the stub model's answer. That proves delivery, screen resolution and the terminal frame, not model-driven taps.</li>
+        <li><strong>Honest refusals.</strong> A locked phone answers <code>E_DEVICE</code>; screen access off answers <code>E_CAPABILITY</code> with instructions instead of pretending to run.</li>
+        <li><strong>Background runs are noisy and quiet in the wrong places.</strong> Every background run can raise an approval-style notification even when no approval is needed, and a background result has no notification. Both are known UX defects, not protocol behaviour.</li>
+      </ul>
+    </section>
+
+    <section id="render" tabindex="-1" aria-labelledby="render-title">
+      <h2 id="render-title">Check and fix the deployment</h2>
+      <p class="section-intro">
+        <a href="../../tools/scripts/render-check.ps1"><code>tools/scripts/render-check.ps1</code></a> answers the three questions the dashboard
+        answers: is the gateway healthy, is its database reachable, and is the live commit the
+        one on <code>main</code>? It wakes a sleeping free instance and can redeploy without a
+        dashboard visit.
+      </p>
+
+      <h3>What it reads</h3>
+      <ul class="plain-list">
+        <li><code>GET /v1/health</code> — status, version and the database state the app reports.</li>
+        <li>The Render API — service state, the live deploy and its commit, whether
+          <code>DATABASE_URL</code> is present, and the Postgres instance.</li>
+        <li>The local git checkout — branch and HEAD, so “stale” means the live commit differs.</li>
+      </ul>
+
+      <h3>Commands</h3>
+      <div class="code-block">
+        <button type="button" class="copy-button" command="--copy" commandfor="code-render">Copy<span class="visually-hidden"> the deployment check commands</span></button><span class="tip" role="status"></span>
+        <pre role="region" aria-labelledby="code-render-label" tabindex="0"><code id="code-render"># Check, waking the service if it is asleep.
+.\tools\scripts\render-check.ps1
+
+# Redeploy only when the live commit differs from local HEAD.
+.\tools\scripts\render-check.ps1 -RedeployIfStale
+
+# Redeploy now, optionally clearing the build cache.
+.\tools\scripts\render-check.ps1 -Redeploy -ClearCache
+
+# Deploy a specific commit.
+.\tools\scripts\render-check.ps1 -Redeploy -Commit &lt;sha&gt;
+
+# Show what a deploy would send, without sending it.
+.\tools\scripts\render-check.ps1 -RedeployIfStale -DryRun
+
+# Health only: no Render API, no key needed.
+.\tools\scripts\render-check.ps1 -NoApi -Url https://hopa-backend-test.onrender.com</code></pre>
+        <span id="code-render-label" hidden>Deployment check commands</span>
+      </div>
+
+      <div class="callout warn">
+        <p class="callout-title">The API half needs a key</p>
+        <p>
+          Service, deploy and database checks read <code>RENDER_API_KEY</code> from the
+          environment. The script never prints it. Without a key, use <code>-NoApi</code> and
+          pass <code>-Url</code>; you still get the health check and the wake-up.
+        </p>
+      </div>
+
+      <h3>Reading the result</h3>
+      <ul class="plain-list">
+        <li><strong>Exit 0</strong> — the service is healthy and the database answers.</li>
+        <li><strong>Exit 1</strong> — a check failed; the lines above say which one.</li>
+        <li><strong>Exit 2</strong> — the service name or the API key could not be resolved.</li>
+        <li><strong><code>-Json</code></strong> — one machine-readable object instead of the report.</li>
+      </ul>
+      <p>
+        The database line shows <code>expires in N day(s)</code> when the free Postgres instance
+        is close to its expiry. That is a release gate, not a warning to ignore; move the web
+        service and the database to paid plans before beta.
+      </p>
+    </section>
+
+    <section id="trouble" tabindex="-1" aria-labelledby="trouble-title">
+      <h2 id="trouble-title">Troubleshooting</h2>
+      <p class="section-intro">
+        The failures seen while bringing up the phone and the PC, with the fix that worked.
+      </p>
+      <div class="table-wrap" role="region" tabindex="0" aria-labelledby="trouble-table-caption">
+        <table>
+          <caption id="trouble-table-caption">Symptom → cause → fix</caption>
+          <thead>
+            <tr>
+              <th scope="col">Symptom</th>
+              <th scope="col">Likely cause</th>
+              <th scope="col">Fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">PC fails with <code>E_AUTH</code> after roughly 15 minutes</th>
+              <td data-label="Likely cause">The PC sender does not refresh its access token.</td>
+              <td data-label="Fix">Re-pair: <code>.\tools\scripts\send-task.ps1 -Pair -Force</code>. It keeps the stored household.</td>
+            </tr>
+            <tr>
+              <th scope="row">Phone goes silent after about 15 minutes, but wake notifications still appear</th>
+              <td data-label="Likely cause">An old build ignored the <code>E_AUTH</code> frame and retried the dead token.</td>
+              <td data-label="Fix">Use a build containing the refresh fix; the app should refresh and return to <strong>Live</strong> without a re-pair.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>ack state=queued</code>, then <code>E_DEVICE phone is locked</code></th>
+              <td data-label="Likely cause">The wake worked, but the runner refuses to execute while locked.</td>
+              <td data-label="Fix">Unlock for local execution. The delivery and wake half is already proven.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>E_CAPABILITY screen control is off</code></th>
+              <td data-label="Likely cause">HOPA's screen-access switch, Android's accessibility service, or both are off.</td>
+              <td data-label="Fix">Turn both on and confirm the Screen access page says <em>Android service: On</em> and <em>Connection: Live</em>.</td>
+            </tr>
+            <tr>
+              <th scope="row">The phone looks unpaired after an adb launch</th>
+              <td data-label="Likely cause">The device shell split the link at <code>&amp;</code>, so the app saw only <code>hopa://pair?v=1</code>.</td>
+              <td data-label="Fix">Quote the link inside the adb command, exactly as in the example above.</td>
+            </tr>
+            <tr>
+              <th scope="row">Pairing does nothing, or says the session is invalid</th>
+              <td data-label="Likely cause">The session is single-use and expires in five minutes; it may already be claimed.</td>
+              <td data-label="Fix">Mint a fresh link and paste the whole thing.</td>
+            </tr>
+            <tr>
+              <th scope="row">Task stays queued forever</th>
+              <td data-label="Likely cause">Phone offline past the deadline, wrong target id, or a different household.</td>
+              <td data-label="Fix">Check presence and household; the default deadline is 10 minutes. Re-pair both devices into one household if needed.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>E_TENANT</code> on a send</th>
+              <td data-label="Likely cause">The target belongs to another household. The gateway refuses before writing.</td>
+              <td data-label="Fix">Pair into the phone's household; do not create a second one by accident.</td>
+            </tr>
+            <tr>
+              <th scope="row">First send takes 30–60 seconds</th>
+              <td data-label="Likely cause">The free Render service was asleep; the first request includes a cold start.</td>
+              <td data-label="Fix">Warm <code>/v1/health</code> before a demo. A paid instance removes the sleep.</td>
+            </tr>
+            <tr>
+              <th scope="row">Screen access disappears after force-stop or reinstall</th>
+              <td data-label="Likely cause">HyperOS clears <code>enabled_accessibility_services</code>.</td>
+              <td data-label="Fix">Set it again from adb and toggle HOPA's switch off/on; a reboot is the reliable reset.</td>
+            </tr>
+            <tr>
+              <th scope="row">The Windows app's <code>--pair</code> does not reach the backend</th>
+              <td data-label="Likely cause">That pairing is for the LAN bridge, not the gateway.</td>
+              <td data-label="Fix">Use <code>send-task.ps1</code> for backend sends; keep the Windows app for the bridge path.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>dotnet</code> is not recognized by PowerShell</th>
+              <td data-label="Likely cause">The .NET 8 SDK is installed but its directory is not on <code>PATH</code>.</td>
+              <td data-label="Fix">Use <code>&amp; "C:\Program Files\dotnet\dotnet.exe" build -c Debug</code>, or add that folder to <code>PATH</code>.</td>
+            </tr>
+            <tr>
+              <th scope="row">The PC App opens but cannot answer</th>
+              <td data-label="Likely cause">The Kotlin sidecar was not built, or the app cannot find it.</td>
+              <td data-label="Fix">Run the sidecar <code>installDist</code> from <a href="#pc-app">Open the PC App</a>; set <code>HOPA_SIDECAR_LIB</code> if it lives elsewhere.</td>
+            </tr>
+            <tr>
+              <th scope="row">Sidecar build fails: “Unable to delete contracts.jar”</th>
+              <td data-label="Likely cause">A Gradle daemon still holds the jar on Windows.</td>
+              <td data-label="Fix">Run <code>.\gradlew.bat --stop</code>, then retry <code>installDist</code>.</td>
+            </tr>
+            <tr>
+              <th scope="row">The PC App says “Demo model” and does nothing</th>
+              <td data-label="Likely cause">No model provider key is configured, so the stub only answers with text.</td>
+              <td data-label="Fix">Settings → Model: fill provider, base URL, model name and key, then save.</td>
+            </tr>
+            <tr>
+              <th scope="row">The PC App acts on the wrong machine</th>
+              <td data-label="Likely cause">The target chip is on the other device.</td>
+              <td data-label="Fix">Click the chip until it says <strong>Laptop</strong> for PC work or <strong>Phone</strong> for the bridge.</td>
+            </tr>
+            <tr>
+              <th scope="row">An elevated window refuses the PC action</th>
+              <td data-label="Likely cause">UI Automation cannot cross the elevation boundary in this build.</td>
+              <td data-label="Fix">Expected; the app reports the refusal. A signed <code>uiAccess</code> helper is not built yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <details>
+        <summary>Repair commands for the phone</summary>
+        <div class="code-block">
+          <button type="button" class="copy-button" command="--copy" commandfor="code-repair">Copy<span class="visually-hidden"> the phone repair commands</span></button><span class="tip" role="status"></span>
+          <pre role="region" aria-labelledby="code-repair-label" tabindex="0"><code id="code-repair"># Install the current debug APK (build it first, if needed).
+.\tools\scripts\android-device-checks.ps1 -InstallOnly
+
+# Re-enable Android's accessibility service for HOPA after a force-stop.
+adb shell settings put secure enabled_accessibility_services com.hopa.android/com.hopa.capabilities.accessibility.HopaAccessibilityService
+adb shell settings put secure accessibility_enabled 1
+
+# Check what the system thinks is bound.
+adb shell dumpsys accessibility | Select-String "Bound services" -Context 0,3</code></pre>
+          <span id="code-repair-label" hidden>Phone repair commands</span>
+        </div>
+      </details>
+    </section>
+
+    <section id="not-week1" tabindex="-1" aria-labelledby="not-week1-title">
+      <h2 id="not-week1-title">Not in week 1</h2>
+      <p class="section-intro">
+        Keep the scope honest. These are planned, not missing by accident.
+      </p>
+      <div class="table-wrap" role="region" tabindex="0" aria-labelledby="later-table-caption">
+        <table>
+          <caption id="later-table-caption">What comes later</caption>
+          <thead>
+            <tr>
+              <th scope="col">Thing</th>
+              <th scope="col">Where it lands</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Operations console (first page: team sign-in and health)</th>
+              <td data-label="Where it lands">Week 2</td>
+            </tr>
+            <tr>
+              <th scope="row">Sign-in, device list, revoke, sync v0</th>
+              <td data-label="Where it lands">Week 2</td>
+            </tr>
+            <tr>
+              <th scope="row">Task state machine, retries, cancel/resume, file transfer, demo</th>
+              <td data-label="Where it lands">Week 3</td>
+            </tr>
+            <tr>
+              <th scope="row">Households, invites, roles; console lookup</th>
+              <td data-label="Where it lands">Week 4</td>
+            </tr>
+            <tr>
+              <th scope="row">Family approvals: ask a person, 120-second wait, refusal reported</th>
+              <td data-label="Where it lands">Week 5</td>
+            </tr>
+            <tr>
+              <th scope="row">E2E encryption key model and new-device admission</th>
+              <td data-label="Where it lands">Decision due by 19 Nov; sync work follows</td>
+            </tr>
+            <tr>
+              <th scope="row">QR camera scanner in the Android app</th>
+              <td data-label="Where it lands">Not scheduled; the payload and parser already exist</td>
+            </tr>
+            <tr>
+              <th scope="row">PC App gateway client (backend → PC)</th>
+              <td data-label="Where it lands">Not implemented; the PC App has no <code>/v1/gateway</code> client. It acts locally or drives the phone through the bridge.</td>
+            </tr>
+            <tr>
+              <th scope="row">A script that pairs the PC App with the backend</th>
+              <td data-label="Where it lands">Does not exist. <code>send-task.ps1</code> pairs a separate sender identity, not the app.</td>
+            </tr>
+            <tr>
+              <th scope="row">HOPA-Bench 20/20 no-regression run</th>
+              <td data-label="Where it lands">Carried to the week-3 demo gate: it needs a HarmonyOS device</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="evidence" tabindex="-1" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">Evidence</h2>
+      <p class="section-intro">
+        Every claim above comes from one of these. The gateway evidence file is the place to
+        start; it records the command and the trace id for each check.
+      </p>
+      <ul class="plain-list">
+        <li><a href="plan/backend/week1.md">Week 1 plan and checklist</a> — the definition of done and the eight exit checks.</li>
+        <li><a href="plan/backend/weekly-plan.md">Eight-week plan</a> — where the console, approvals and sync land.</li>
+        <li><a href="evidence/B1-gateway.md">B1 gateway evidence</a> — deployed instance, 20/20 run, phone runs, wake traces, latency, migrations.</li>
+        <li><a href="../../tools/scripts/send-task.ps1"><code>send-task.ps1</code></a> and <a href="../../tools/scripts/SendTask.java"><code>SendTask.java</code></a> — the PC half.</li>
+        <li><a href="../../tools/scripts/pair-device.ps1"><code>pair-device.ps1</code></a> — mints the pairing link.</li>
+        <li><a href="../../tools/scripts/android-device-checks.ps1"><code>android-device-checks.ps1</code></a> — install and device checks.</li>
+        <li><a href="../../tools/scripts/render-check.ps1"><code>render-check.ps1</code></a> — health, wake-up, redeploy and database check.</li>
+        <li><a href="../../services/docs/guides/backend-deploy.md">Backend deploy guide</a> — Render setup, secrets, smoke and rollback.</li>
+        <li><a href="../../apps/windows/README.md">Windows App README</a> — sidecar build, window run and headless turn.</li>
+        <li><a href="../../services/bridge/README.md">Bridge README</a> — install and CLI for the LAN bridge.</li>
+        <li><a href="../guides/android/run-modes.md">Android run modes</a> — screen paths and bridge pairing, section 5.</li>
+        <li><a href="../../spec/openapi/backend.v1.yaml">Backend OpenAPI</a> - the HTTP surface.</li>
+        <li><a href="../../services/backend">Service source</a> — gateway, pairing, tasks, push, traces.</li>
+        <li><a href="https://github.com/agents-demo/hopa/pull/52">PR #52</a> · <a href="https://github.com/agents-demo/hopa/pull/54">PR #54</a> · <a href="https://github.com/agents-demo/hopa/pull/57">PR #57</a> — week 1, token refresh, duplicate-delivery race.</li>
+        <li><a href="https://github.com/agents-demo/hopa/actions/runs/44482291219">CI on <code>main</code>, run 44482291219</a> — Backend, Android, brain, bridge, HAP, Windows and secret scan all green at <code>1c481a5a</code>.</li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      <p>
+        Repository <code>main</code> at <code>1c481a5a</code> (19 Nov 2026). The backend code
+        under <code>services/backend/src</code> is unchanged between <code>ce6b7805</code>
+        and <code>1c481a5a</code>; the live deploy
+        <code>dep-dbv9pq9srm7s73bs2h4g</code> still runs <code>ce6b7805</code>. Health
+        <code>{"ok":true,"version":"0.1.0","db":"ok"}</code>.
+      </p>
+      <p>
+        This page contains no access token, refresh token, bootstrap token, FCM credential or
+        conversation content. Device ids and the household id are test-stack identifiers.
+      </p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  // ---- Copy buttons -------------------------------------------------------
+  const copyTimers = new WeakMap();
+  let lastMessage = '';
+
+  async function copyText(button, target) {
+    const text = target.matches('input, textarea') ? target.value : target.innerText.trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      report(button, true);
+    } catch {
+      try {
+        legacyCopy(text);
+        report(button, true);
+      } catch {
+        report(button, false);
+      }
+    }
+  }
+
+  function legacyCopy(text) {
+    const field = Object.assign(document.createElement('textarea'), { value: text });
+    field.setAttribute('readonly', '');
+    field.style.cssText = 'position:fixed;inset-block-start:0;opacity:0';
+    document.body.append(field);
+    field.select();
+    try {
+      if (!document.execCommand('copy')) throw new Error('copy failed');
+    } finally {
+      field.remove();
+    }
+  }
+
+  function report(button, ok) {
+    const tip = button.nextElementSibling;
+    clearTimeout(copyTimers.get(button));
+    button.removeAttribute('data-copied');
+    button.removeAttribute('data-failed');
+    let message = ok ? 'Copied' : 'Copy failed';
+    if (message === lastMessage) message += '\u00A0';
+    lastMessage = message;
+    if (tip) tip.textContent = '';
+    void button.offsetWidth;
+    button.setAttribute(ok ? 'data-copied' : 'data-failed', '');
+    requestAnimationFrame(() => { if (tip) tip.textContent = message; });
+    copyTimers.set(button, setTimeout(() => {
+      button.removeAttribute('data-copied');
+      button.removeAttribute('data-failed');
+      if (tip) tip.textContent = '';
+    }, 2000));
+  }
+
+  document.addEventListener('command', (event) => {
+    if (event.command && event.command.startsWith('--copy')) {
+      copyText(event.source, event.target);
+    }
+  }, true);
+
+  if (!('CommandEvent' in window)) {
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('button[command^="--copy"]');
+      if (!button) return;
+      const target = document.getElementById(button.getAttribute('commandfor'));
+      if (target) copyText(button, target);
+    });
+  }
+
+  // ---- Table of contents --------------------------------------------------
+  const toc = document.querySelector('.toc');
+  const links = Array.from(toc.querySelectorAll('a[href^="#"]'));
+  const sections = links
+    .map((link) => document.getElementById(link.hash.slice(1)))
+    .filter(Boolean);
+
+  // Native `:target-current` paints the active link where it is supported.
+  // The observer mirrors the same state into `aria-current` for assistive
+  // technology, and supplies the visual class where the native property is not
+  // available.
+  const nativeScrollspy = CSS.supports('scroll-target-group: auto');
+
+  function setCurrent(id) {
+    for (const link of links) {
+      const isCurrent = link.hash === '#' + id;
+      if (isCurrent) {
+        link.setAttribute('aria-current', 'true');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+      if (!nativeScrollspy) {
+        link.classList.toggle('target-current', isCurrent);
+      }
+    }
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) setCurrent(entry.target.id);
+    }
+  }, { rootMargin: '-42% 0px -52% 0px', threshold: 0 });
+
+  for (const section of sections) observer.observe(section);
+
+  if (location.hash) {
+    setCurrent(location.hash.slice(1));
+  } else if (sections.length) {
+    setCurrent(sections[0].id);
+  }
+</script>
+</body>
+</html>

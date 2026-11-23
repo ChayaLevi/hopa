@@ -10,6 +10,10 @@
 databases:
   - name: hopa-backend-db
     databaseName: hopa
+    # Runtime login for the app. It is deliberately not the database superuser:
+    # FORCE RLS and the hopa_admin definer functions rely on that. The migration
+    # role must be a superuser (or hold hopa_admin only for the migration); see
+    # services/docs/guides/backend-deploy.md.
     user: hopa_app
     plan: free
     region: frankfurt

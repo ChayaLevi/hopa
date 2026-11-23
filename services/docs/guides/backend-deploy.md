@@ -45,6 +45,52 @@ It must return `false`. If it returns `true`, the Render user owns the cluster a
 the tenant policies are not protecting anything; create a non-superuser role
 before the beta.
 
+## Provision `hopa_admin` (required before the first V2 migration)
+
+Admin lookups read tenant rows through four `SECURITY DEFINER` functions owned by
+`hopa_admin`, a non-login role with `BYPASSRLS`. `FORCE ROW LEVEL SECURITY` binds
+the table owner too, so the functions cannot be owned by the normal migration or
+runtime role. Provision the role once as a **superuser** (creating a
+`BYPASSRLS` role needs more than `CREATEROLE` in PostgreSQL 16):
+
+```sql
+create role hopa_admin nologin bypassrls;
+```
+
+The migration also requires the role running Flyway to be able to alter function
+owners. Either:
+
+- run the migration as a database **superuser**; or
+- grant the migration role `hopa_admin` **with admin option, set false** for the
+  duration of the migration, and revoke it afterwards.
+
+The latter path is only temporary. Before the migration's final guard, the
+deploy role must have no residual `ADMIN OPTION` on `hopa_admin`; otherwise V2
+fails loudly with the operator line to run. After the migration, verify both
+roles:
+
+```sql
+-- hopa_admin must be nologin + bypassrls; the runtime role must not be superuser.
+select rolname, rolsuper, rolbypassrls, rolcanlogin
+from pg_roles
+where rolname in ('hopa_admin', current_user);
+
+-- Neither the runtime role nor the migration role may be able to SET ROLE into
+-- the BYPASSRLS owner, or re-grant it.
+select r.rolname, m.roleid::regrole, m.admin_option
+from pg_auth_members m
+join pg_roles r on r.oid = m.member
+where m.roleid = 'hopa_admin'::regrole;
+
+-- If a non-superuser row remains, remove it as a superuser:
+revoke hopa_admin from <deploy_role>;
+revoke admin option for hopa_admin from <deploy_role>;
+```
+
+The runtime login (`hopa_app` in `render.yaml`) must not be a superuser and must
+not hold `hopa_admin` membership: a SQL injection that can `SET ROLE` into the
+BYPASSRLS owner defeats RLS.
+
 ## Free tier
 
 A free web service sleeps after roughly 15 minutes without traffic, dropping every
@@ -57,6 +103,44 @@ curl https://hopa-backend.onrender.com/v1/health
 
 The free Postgres instance is also time-limited. Move both to paid plans before
 beta; the evidence file records this as a release gate.
+
+## Check and repair from the terminal
+
+`tools/scripts/render-check.ps1` reads the same facts the dashboard shows:
+health, the live deploy and its commit, the service state, `DATABASE_URL`, and
+the Postgres instance. It wakes a sleeping service, waits for a deploy, and can
+redeploy `main` when the live commit is behind.
+
+```powershell
+# Health, live commit, database and free-tier expiry. Wakes the service if needed.
+.\tools\scripts\render-check.ps1
+
+# Wait longer than the default 150 s for a cold start.
+.\tools\scripts\render-check.ps1 -WakeTimeoutSec 300
+
+# Deploy the current branch HEAD only when the live commit differs from local.
+.\tools\scripts\render-check.ps1 -RedeployIfStale
+
+# Deploy now, optionally clearing the build cache.
+.\tools\scripts\render-check.ps1 -Redeploy -ClearCache
+
+# A specific commit, then wait for it to go live.
+.\tools\scripts\render-check.ps1 -Redeploy -Commit <sha>
+
+# Show the deploy request without sending it.
+.\tools\scripts\render-check.ps1 -RedeployIfStale -DryRun
+
+# No Render API: health only, for a machine without the key.
+.\tools\scripts\render-check.ps1 -NoApi -Url https://hopa-backend-test.onrender.com
+```
+
+The Render API half needs `RENDER_API_KEY` in the environment; the script never
+prints it. Exit code `0` means the service is healthy and the database answers,
+`1` means a check failed, and `2` means the service or key could not be resolved.
+`-Json` emits one machine-readable object with the same fields.
+
+The database line shows `expires in N day(s)` when the free instance is close to
+its expiry date. Treat that as a release gate, not a warning to ignore.
 
 ## Smoke the image locally
 

@@ -222,8 +222,12 @@ paths:
     post:
       summary: Trade a pairing session for device tokens
       description: |
-        Called by the new device. The public key is stored now and used for
-        household-key wrapping in week 2; nothing is wrapped in week 1.
+        Called by the new device. Resolves either an operator-minted pairing
+        session or a pending session a phone vouched for. A vouched pending
+        session requires the exact public key it was minted with and answers with
+        the household key wrap parked on it plus the vouching phone's public key;
+        other refusals name the session state. An operator-minted session answers
+        neither `wrappedKey` nor `voucherPublicKey`.
       security: []
       requestBody:
         required: true
@@ -253,11 +257,183 @@ paths:
                   accessToken: { type: string }
                   refreshToken: { type: string }
                   expiresAt: { type: string, format: date-time }
+                  wrappedKey:
+                    type: string
+                    description: |
+                      Base64url of the 60-byte household key wrap this device was
+                      admitted with. Present only for a session that came through
+                      `/v1/pair/vouch`; omitted for an operator-minted session.
+                  voucherPublicKey:
+                    type: string
+                    description: |
+                      Base64url of the vouching phone's 32-byte X25519 public key,
+                      needed to derive the same KEK as the wrap. Present exactly
+                      when `wrappedKey` is; omitted for an operator-minted session.
         "400":
-          description: Expired or already claimed session
+          description: |
+            Expired, unvouched or already claimed session, a public key that does
+            not match, or a vouched session whose voucher device/key is gone.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/pair/pending:
+    post:
+      summary: Mint a pending pairing session for a device that wants to join
+      description: |
+        Unauthenticated. The new device mints its own session, shows the QR to the
+        phone, then polls `/v1/pair/pending/resolve` with the secret. The secret
+        leaves the server exactly once; only its SHA-256 is stored. Sessions expire
+        in five minutes and minting is rate limited to five per minute per address
+        (`X-Forwarded-For` first hop).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [platform, name, publicKey, alg]
+              properties:
+                platform: { type: string, enum: [android, windows] }
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  pattern: '\S'
+                  description: Non-blank, at most 100 characters
+                publicKey:
+                  type: string
+                  description: Base64 or base64url X25519 public key, exactly 32 bytes
+                alg: { type: string, enum: [x25519] }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionId, secret, qr, expiresAt]
+                properties:
+                  sessionId: { type: string, format: uuid }
+                  secret:
+                    type: string
+                    description: Returned once; only its SHA-256 is stored.
+                  qr:
+                    type: string
+                    description: "hopa://pair?v=1&s=<secret>&u=<wss url>; carries no household id"
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Invalid platform, name, public key, algorithm or JSON body
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429":
+          description: More than five mints per minute from one address
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/pair/pending/resolve:
+    post:
+      summary: Poll a pending pairing session by the secret from its QR
+      description: |
+        Unauthenticated. The poller holds only the secret, never a session id or a
+        household, so the row is visible through the token-hash policy alone.
+        Unknown secrets answer the same `E_SCHEMA` message; expired and claimed
+        sessions answer 200 with that `state` so the device can explain it. Polling
+        is rate limited to thirty per minute per address, which covers a five-second
+        poll loop for the whole five-minute session.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionSecret]
+              properties:
+                sessionSecret: { type: string }
+      responses:
+        "200":
+          description: The session state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionId, state, name, platform, publicKey, fingerprint, expiresAt]
+                properties:
+                  sessionId: { type: string, format: uuid }
+                  state:
+                    type: string
+                    enum: [pending, vouched, claimed, expired]
+                  name: { type: string }
+                  platform: { type: string, enum: [android, windows] }
+                  publicKey:
+                    type: string
+                    description: Base64url without padding, 32 bytes
+                  fingerprint:
+                    type: string
+                    pattern: "^[0-9a-f]{8}$"
+                    description: First 8 lowercase hex characters of SHA-256 over the raw public key
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Unknown pairing session, or an invalid body
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429":
+          description: More than thirty polls per minute from one address
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/pair/vouch:
+    post:
+      summary: Admit a pending pairing with a wrapped household key
+      description: |
+        Called by a phone that already belongs to the household. The body carries
+        the pending session's secret and the household content key wrapped to the
+        pending device's X25519 key (base64 or base64url, exactly 60 bytes:
+        12-byte IV, 32-byte ciphertext, 16-byte tag). The server stores the
+        ciphertext and never unwraps it. The wrap parks on the pending row until
+        the device claims; the claim moves it to `household_key_wraps` in the same
+        transaction that creates the device. Vouching is rate limited to ten per
+        minute per device. Unknown, expired, claimed and already-vouched secrets
+        answer the same `E_SCHEMA` message.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionSecret, wrappedKey]
+              properties:
+                sessionSecret: { type: string }
+                wrappedKey:
+                  type: string
+                  description: Base64 or base64url of exactly 60 bytes
+      responses:
+        "200":
+          description: Vouched
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionId, householdId, memberId]
+                properties:
+                  sessionId: { type: string, format: uuid }
+                  householdId: { type: string, format: uuid }
+                  memberId: { type: string, format: uuid }
+        "400":
+          description: Invalid wrap, or an unknown, expired or already vouched session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
         "429": { $ref: "#/components/responses/RateLimited" }
   /v1/token/refresh:
@@ -287,6 +463,172 @@ paths:
                   refreshToken: { type: string }
                   expiresAt: { type: string, format: date-time }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+  /v1/devices:
+    get:
+      summary: The caller's paired devices
+      description: |
+        Every device in the caller's household, revoked ones included, ordered by
+        creation time then id. `current` marks the device whose token made the
+        call. Another household's devices never appear.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The household's devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, platform, name, current]
+                  properties:
+                    id: { type: string, format: uuid }
+                    platform: { type: string, enum: [android, windows] }
+                    name: { type: string }
+                    lastSeenAt: { type: string, format: date-time, nullable: true }
+                    revokedAt: { type: string, format: date-time, nullable: true }
+                    current: { type: boolean }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503":
+          description: This deployment has no SQL-backed device inventory (`E_UNSUPPORTED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/devices/{id}:
+    delete:
+      summary: Revoke a device
+      description: |
+        Revokes the device and its whole token family, deletes its household key
+        wrap and closes its live gateway socket within five seconds. Revoking an
+        already-revoked device in the household answers 204.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: Revoked (or already revoked)
+        "400":
+          description: The id is not a uuid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: Unknown device, or one belonging to another household (`E_TENANT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: This deployment has no SQL-backed device inventory (`E_UNSUPPORTED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/admin/devices:
+    get:
+      summary: A household's device inventory (admin console)
+      description: |
+        Requires an admin session token, never a device token. Lists every device
+        in the named household, revoked ones included, with `online` reflecting
+        the gateway registry on this process. It never returns tasks or turns.
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: household
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: The household's devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, platform, name, online]
+                  properties:
+                    id: { type: string, format: uuid }
+                    platform: { type: string, enum: [android, windows] }
+                    name: { type: string }
+                    lastSeenAt: { type: string, format: date-time, nullable: true }
+                    revokedAt: { type: string, format: date-time, nullable: true }
+                    online: { type: boolean }
+        "400":
+          description: The household query parameter is missing or not a uuid (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503":
+          description: This deployment has no SQL-backed device inventory (`E_UNSUPPORTED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/admin/devices/{id}/diag:
+    post:
+      summary: Send one diagnostic task to a device (admin console)
+      description: |
+        Requires an admin session token. `household` is explicit and must own the
+        device; a device in another household, an unknown device or a revoked one
+        answers `E_TENANT` as 403 and writes no task. `type` is one of the three
+        plaintext diagnostics; any other value, including `task.create`, is
+        refused with `E_SCHEMA`. An online device receives the frame immediately
+        (`state: delivered`); an offline one is queued and woken once through FCM
+        (`state: queued`). Every send writes a `diag.send` audit event naming the
+        admin, household, device, task and trace — never the body.
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [household, type]
+              properties:
+                household: { type: string, format: uuid }
+                type:
+                  type: string
+                  enum: [diag.ping, diag.state, diag.reset]
+                body:
+                  type: object
+                  description: Plaintext diagnostic payload, echoed to the device.
+                  default: {}
+      responses:
+        "202":
+          description: Task accepted (delivered now or queued for the next hello)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [taskId, trace, state]
+                properties:
+                  taskId: { type: string, format: uuid }
+                  trace: { type: string }
+                  state: { type: string, enum: [delivered, queued] }
+        "400":
+          description: Invalid body, type, or device id (`E_SCHEMA`), or a queue refusal (`E_QUEUE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: The device is unknown, revoked, or in another household (`E_TENANT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
   /v1/traces/{traceId}:
     get:
@@ -337,6 +679,10 @@ components:
       type: http
       scheme: bearer
       description: Operator bootstrap token from the environment; creates pairing sessions only.
+    adminBearerAuth:
+      type: http
+      scheme: bearer
+      description: Admin console session token; never a device access token.
   schemas:
     ModelManifest:
       type: object

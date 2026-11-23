@@ -9,18 +9,41 @@ import java.sql.Connection
 import org.flywaydb.core.Flyway
 
 /**
- * The pool and the only two ways to touch SQL.
+ * The pool and the only ways to touch SQL.
  *
  * [tenant] sets `hopa.household_id` for the transaction; [token] sets
  * `hopa.token_hash` so a token row can only be read by a caller who already
- * holds that token. Both are `SET LOCAL` (`set_config(..., true)`), so the value
- * cannot leak to the next borrower of a pooled connection. A query outside these
- * helpers sees nothing, because the policies default to deny.
+ * holds that token; [tenantAndToken] sets both when one statement must be
+ * allowed by the presented-hash branch and checked by the tenant branch (a
+ * vouch binding a pending pairing to its household). All are `SET LOCAL`
+ * (`set_config(..., true)`), so the value cannot leak to the next borrower of a
+ * pooled connection. A query outside these helpers sees nothing, because the
+ * policies default to deny.
  */
 class Database(internal val dataSource: HikariDataSource) : AutoCloseable {
-    fun migrate(): Int =
+    fun migrate(locations: List<String> = listOf("classpath:db/migration")): Int =
         Flyway.configure()
             .dataSource(dataSource)
+            .locations(*locations.toTypedArray())
+            .load()
+            .migrate()
+            .migrationsExecuted
+
+    /**
+     * Applies the optional admin-lookup migration through its own history table.
+     * The core schema never depends on it: a managed Postgres that cannot create
+     * the BYPASSRLS owner sets HOPA_ADMIN_LOOKUPS=false and skips this entirely.
+     */
+    fun applyAdminLookups(): Int =
+        Flyway.configure()
+            .dataSource(dataSource)
+            .locations("classpath:db/admin")
+            .table("hopa_admin_schema_history")
+            // The core schema is already present; this history is new. Baseline
+            // at 0 so Flyway records the admin migration instead of refusing a
+            // non-empty schema.
+            .baselineOnMigrate(true)
+            .baselineVersion("0")
             .load()
             .migrate()
             .migrationsExecuted
@@ -30,6 +53,30 @@ class Database(internal val dataSource: HikariDataSource) : AutoCloseable {
 
     fun <T> token(tokenHashHex: String, block: (Connection) -> T): T =
         transaction(mapOf("hopa.token_hash" to tokenHashHex), block)
+
+    /**
+     * A transaction with no GUCs, for the global tables that carry no policy
+     * (`admins`, `admin_sessions`, `accounts`). Never use it for a tenant table:
+     * with no household or token setting those policies default to deny.
+     */
+    fun <T> read(block: (Connection) -> T): T = transaction(emptyMap(), block)
+
+    /**
+     * Both branches at once. A vouch presents the session's secret hash and is
+     * checked against the vouching tenant, so the update is allowed by one
+     * policy branch and validated by the other.
+     */
+    fun <T> tenantAndToken(
+        householdId: String,
+        tokenHashHex: String,
+        block: (Connection) -> T,
+    ): T = transaction(
+        mapOf(
+            "hopa.household_id" to householdId,
+            "hopa.token_hash" to tokenHashHex,
+        ),
+        block,
+    )
 
     override fun close() {
         dataSource.close()

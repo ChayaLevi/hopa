@@ -13,6 +13,15 @@ interface BackendLink {
     val state: StateFlow<BackendState>
     var onTask: (suspend (BackendEnvelope) -> Unit)?
 
+    /**
+     * Plaintext `diag.*` deliveries. Android leaves this null: a diagnostic is
+     * not a goal-bearing task and must not become a `task.create`. The sidecar
+     * gateway wires it to its diagnostic handler.
+     */
+    var onDiagnostic: (suspend (BackendEnvelope) -> Unit)?
+        get() = null
+        set(@Suppress("UNUSED_PARAMETER") value) {}
+
     /** A `task.needs_approval` delivery: show the question, not run a goal. */
     var onApproval: (suspend (BackendEnvelope) -> Unit)?
     fun start(scope: CoroutineScope)

@@ -23,6 +23,8 @@ import com.hopa.runlog.record.RunRecordFactory
 import com.hopa.runlog.store.InMemoryRunRecorder
 import com.hopa.runlog.store.RunRecorder
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,6 +49,9 @@ data class TurnOutcome(
  * P1 adds `runTurn`, a suspend function that returns the outcome instead of
  * writing to stdout. The window path (`startTurn`) and the headless path
  * (`--turn`) share it, so there is exactly one execution path.
+ *
+ * The window path goes through [runSerialized]: host and backend turns share
+ * one loop, one screen and one chat store, so they must not interleave.
  */
 class Engine(
     private val io: Stdio,
@@ -66,9 +71,62 @@ class Engine(
     @Volatile
     private var cancelled = false
 
+    /** The turn currently on the engine; cancel(id) must not hit another one. */
+    @Volatile
+    private var runningTurn: String? = null
+
+    /**
+     * Host and backend turns share one loop, one screen and one chat store, so
+     * they must not interleave. The gate is held for the whole turn body; a
+     * queued turn waits here rather than starting a second loop.
+     */
+    private val turnGate = Mutex()
+
+    /** Ids waiting for [turnGate]; a cancel before the start is remembered. */
+    private val queuedTurns: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val cancelledBeforeStart: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    /**
+     * Invoked next to `turn.end` with the turn id and its answer, so the
+     * backend gateway can resume a `task.create` (R31). One turn at a time is
+     * this engine's contract; the hook must not block.
+     */
+    @Volatile
+    var onTurnEnd: ((id: String, answer: String) -> Unit)? = null
+
+    /** Shutdown/no-id cancel: stops whatever turn is running. */
+    @Synchronized
     fun cancel() {
         cancelled = true
         io.log("turn cancelled by the user")
+    }
+
+    /** Cancels only the named turn, so a backend task cannot stop a host turn. */
+    @Synchronized
+    fun cancel(id: String) {
+        if (runningTurn == id) {
+            cancelled = true
+            io.log("turn $id cancelled by the user")
+            return
+        }
+        // The turn is still waiting for the gate. Keep the request so the turn
+        // starts already cancelled instead of silently ignoring the user.
+        if (queuedTurns.remove(id)) {
+            cancelledBeforeStart += id
+            io.log("turn $id cancelled before it started")
+        }
+    }
+
+    @Synchronized
+    private fun beginTurn(id: String) {
+        queuedTurns.remove(id)
+        cancelled = cancelledBeforeStart.remove(id)
+        runningTurn = id
+    }
+
+    @Synchronized
+    private fun finishTurn(id: String) {
+        if (runningTurn == id) runningTurn = null
     }
 
     /**
@@ -88,29 +146,74 @@ class Engine(
         conversationId: String?,
         attachment: Attachment? = null,
     ) {
+        queuedTurns += id
         scope.launch {
-            var lastAt = System.currentTimeMillis()
-            val outcome = runTurn(id, goal, conversationId, attachment) { index, record ->
-                val now = System.currentTimeMillis()
-                io.send(Protocol.step(id, index, record, now, now - lastAt))
-                lastAt = now
+            runSerialized(id) {
+                var lastAt = System.currentTimeMillis()
+                val outcome = runTurn(id, goal, conversationId, attachment) { index, record ->
+                    val now = System.currentTimeMillis()
+                    io.send(Protocol.step(id, index, record, now, now - lastAt))
+                    lastAt = now
+                }
+                io.send(
+                    Protocol.turnEnd(
+                        id = id,
+                        conversationId = outcome.conversationId,
+                        title = outcome.title,
+                        answer = outcome.answer,
+                        steps = outcome.records,
+                        chainOk = outcome.chainOk,
+                    ),
+                )
+                outcome.answer
             }
-            io.send(
-                Protocol.turnEnd(
-                    id = id,
-                    conversationId = outcome.conversationId,
-                    title = outcome.title,
-                    answer = outcome.answer,
-                    steps = outcome.records,
-                    chainOk = outcome.chainOk,
-                ),
-            )
+        }
+    }
+
+    /**
+     * The one gate every turn goes through. Extracted so the serialization is
+     * testable with fake turn bodies: the second body does not run until the
+     * first has finished and released the gate.
+     */
+    internal suspend fun runSerialized(id: String, turn: suspend () -> String) {
+        turnGate.withLock {
+            beginTurn(id)
+            try {
+                guardedTurn(id, turn)
+            } finally {
+                cancelledBeforeStart.remove(id)
+            }
+        }
+    }
+
+    /**
+     * Runs one turn and guarantees exactly one `onTurnEnd`, even when the turn
+     * throws before it reaches `turn.end`. Extracted so the failure contract is
+     * testable without a model or a host.
+     */
+    internal suspend fun guardedTurn(id: String, turn: suspend () -> String) {
+        var ending: String? = null
+        try {
+            ending = turn()
+        } catch (cancelledTurn: CancellationException) {
+            ending = CANCELLED_ANSWER
+            throw cancelledTurn
+        } catch (failed: Exception) {
+            // The failure text may quote the goal or model output; log the
+            // turn id only and answer generically.
+            io.log("turn $id failed before it ended")
+            ending = FAILED_ANSWER
+        } finally {
+            finishTurn(id)
+            ending?.let { answer -> notifyTurnEnd(id, answer) }
         }
     }
 
     /**
      * The one execution path. Serialised: a second turn waits for the first, so
-     * two windows cannot interleave device actions or records.
+     * two windows cannot interleave device actions or records. The window path
+     * also holds [turnGate] so a cancelling host turn and a backend task cannot
+     * start together.
      */
     suspend fun runTurn(
         id: String,
@@ -119,7 +222,6 @@ class Engine(
         attachment: Attachment? = null,
         onRecord: ((Int, RunRecord) -> Unit)? = null,
     ): TurnOutcome = turnLock.withLock {
-        cancelled = false
         val requested = conversationId?.takeIf { it.isNotBlank() }
         val existing = requested?.let { store.get(it) }
         if (requested != null && existing == null) {
@@ -128,7 +230,8 @@ class Engine(
         val conversation = existing ?: store.create()
         val history = conversation.messages.map { ModelMessage(it.role, it.text) }
         store.append(conversation.id, "user", goal, attachment)
-        io.log("turn $id in ${conversation.id}: $goal")
+        // The goal may be private; it is persisted in the chat store, never logged.
+        io.log("turn $id in ${conversation.id}")
 
         val device = device()
         val model = model()
@@ -239,6 +342,20 @@ class Engine(
         } else {
             StubModel()
         }
+
+    private fun notifyTurnEnd(id: String, answer: String) {
+        try {
+            onTurnEnd?.invoke(id, answer)
+        } catch (failed: Exception) {
+            // A broken backend hook must not lose a host turn that already ended.
+            io.log("turn $id ended but its backend hook failed")
+        }
+    }
+
+    private companion object {
+        const val FAILED_ANSWER = "The sidecar failed before it could finish the turn."
+        const val CANCELLED_ANSWER = "The turn was cancelled."
+    }
 }
 
 /** Emits each sealed record as it happens; the chain still lives in the inner recorder. */

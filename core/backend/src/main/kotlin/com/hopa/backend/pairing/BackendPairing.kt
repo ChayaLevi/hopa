@@ -51,6 +51,75 @@ class BackendPairing(
         identityRequired = false,
     )
 
+    /**
+     * Mint a pending session for this PC. It carries no household: an
+     * authenticated phone chooses one when it vouches for this secret.
+     */
+    suspend fun mintPending(name: String, publicKey: String): PendingSession {
+        val payload = post(
+            path = "/v1/pair/pending",
+            body = buildJsonObject {
+                put("platform", WINDOWS)
+                put("name", name)
+                put("publicKey", publicKey)
+                put("alg", ALG)
+            }.toString(),
+            secrets = emptyList(),
+        )
+        val pending = PendingSession(
+            sessionId = payload["sessionId"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            secret = payload["secret"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            qr = payload["qr"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            expiresAt = payload["expiresAt"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+        )
+        if (pending.sessionId.isBlank() || pending.secret.isBlank() ||
+            pending.qr.isBlank() || pending.expiresAt.isBlank()
+        ) {
+            throw IllegalStateException("pending response is incomplete")
+        }
+        return pending
+    }
+
+    /** Poll by the secret the PC minted; the server never echoes it back. */
+    suspend fun pollPending(secret: String): PendingState {
+        val payload = post(
+            path = "/v1/pair/pending/resolve",
+            body = buildJsonObject { put("sessionSecret", secret) }.toString(),
+            secrets = listOf(secret),
+        )
+        val state = PendingState(
+            state = payload["state"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            name = payload["name"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            publicKey = payload["publicKey"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            fingerprint = payload["fingerprint"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+            expiresAt = payload["expiresAt"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+        )
+        if (state.state.isBlank() || state.expiresAt.isBlank()) {
+            throw IllegalStateException("pending state is incomplete")
+        }
+        return state
+    }
+
+    /** Claim a vouched pending session and receive the wrap parked for this key. */
+    suspend fun claimPending(secret: String, name: String, publicKey: String): ClaimedSession {
+        val payload = post(
+            path = "/v1/pair/claim",
+            body = buildJsonObject {
+                put("session", secret)
+                put("platform", WINDOWS)
+                put("name", name)
+                put("publicKey", publicKey)
+                put("alg", ALG)
+            }.toString(),
+            secrets = listOf(secret),
+        )
+        return ClaimedSession(
+            credentials = credentials(payload, identityRequired = true),
+            wrappedKey = payload["wrappedKey"]?.jsonPrimitive?.contentOrNull,
+            voucherPublicKey = payload["voucherPublicKey"]?.jsonPrimitive?.contentOrNull,
+        )
+    }
+
     private fun credentials(payload: JsonObject, identityRequired: Boolean): BackendCredentials {
         val credentials = BackendCredentials(
             deviceId = payload["deviceId"]?.jsonPrimitive?.contentOrNull.orEmpty(),
@@ -90,10 +159,10 @@ class BackendPairing(
                 val text = it.body?.string().orEmpty()
                 if (!it.isSuccessful) {
                     val message = scrub(refusal(it.code, text), secrets)
-                    throw if (it.code in 400..499) {
-                        BackendPairingFailure.Refused(it.code, message)
-                    } else {
-                        BackendPairingFailure.Unavailable(message)
+                    throw when {
+                        it.code == 429 -> BackendPairingFailure.Unavailable(message)
+                        it.code in 400..499 -> BackendPairingFailure.Refused(it.code, message)
+                        else -> BackendPairingFailure.Unavailable(message)
                     }
                 }
                 parse(text)
@@ -122,5 +191,7 @@ class BackendPairing(
     private companion object {
         val JSON = "application/json; charset=utf-8".toMediaType()
         const val TIMEOUT_SECONDS = 20L
+        const val WINDOWS = "windows"
+        const val ALG = "x25519"
     }
 }

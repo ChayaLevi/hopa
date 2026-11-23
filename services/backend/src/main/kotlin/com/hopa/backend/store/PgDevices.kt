@@ -5,8 +5,31 @@ import com.hopa.backend.tasks.DeviceDirectory
 import java.sql.Timestamp
 import java.time.Instant
 
+/** One device as the inventory lists it. */
+data class DeviceRow(
+    val id: String,
+    val platform: String,
+    val name: String,
+    val lastSeenAt: String? = null,
+    val revokedAt: String? = null,
+)
+
+/** Listing and revocation are SQL-backed; the gateway's [DeviceDirectory] stays read-only. */
+interface DeviceInventory {
+    fun list(householdId: String): List<DeviceRow>
+
+    /**
+     * The admin console's read, through the `admin_list_devices` definer
+     * function. It runs with no tenant GUC: the function's owner bypasses RLS.
+     */
+    fun adminList(householdId: String): List<DeviceRow> = list(householdId)
+
+    /** False when the device is not in this household; true also when already revoked. */
+    fun revokeDevice(deviceId: String, householdId: String): Boolean
+}
+
 /** The paired-device directory, read and written behind row-level security. */
-class PgDevices(private val db: Database) : DeviceDirectory {
+class PgDevices(private val db: Database) : DeviceDirectory, DeviceInventory {
     override fun lookup(deviceId: String, householdId: String): DeviceIdentity? =
         db.tenant(householdId) { connection ->
             connection.prepareStatement(
@@ -65,4 +88,114 @@ class PgDevices(private val db: Database) : DeviceDirectory {
             }
         }
     }
+
+    override fun list(householdId: String): List<DeviceRow> =
+        db.tenant(householdId) { connection ->
+            connection.prepareStatement(
+                "select id, platform, name, last_seen_at, revoked_at from devices " +
+                    "where household_id = ?::uuid order by created_at, id",
+            ).use {
+                it.setString(1, householdId)
+                it.executeQuery().use { rows ->
+                    buildList {
+                        while (rows.next()) {
+                            add(
+                                DeviceRow(
+                                    id = rows.getString(1),
+                                    platform = rows.getString(2),
+                                    name = rows.getString(3),
+                                    lastSeenAt = rows.getTimestamp(4)?.toInstant()?.toString(),
+                                    revokedAt = rows.getTimestamp(5)?.toInstant()?.toString(),
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+    /**
+     * The admin read uses the definer function owned by `hopa_admin`; the
+     * request path keeps no tenant GUC. The household id is an explicit
+     * argument, so the same call cannot widen to another tenant.
+     */
+    override fun adminList(householdId: String): List<DeviceRow> =
+        db.read { connection ->
+            connection.prepareStatement(
+                "select device_id, platform, name, last_seen_at, revoked_at " +
+                    "from admin_list_devices(?::uuid)",
+            ).use {
+                it.setString(1, householdId)
+                it.executeQuery().use { rows ->
+                    buildList {
+                        while (rows.next()) {
+                            add(
+                                DeviceRow(
+                                    id = rows.getString(1),
+                                    platform = rows.getString(2),
+                                    name = rows.getString(3),
+                                    lastSeenAt = rows.getTimestamp(4)?.toInstant()?.toString(),
+                                    revokedAt = rows.getTimestamp(5)?.toInstant()?.toString(),
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+    /**
+     * Every effect of a revoke commits together: the device row, its access
+     * tokens, its refresh family and its household key wrap. The first read is
+     * also the tenancy check; row-level security hides another household's id.
+     */
+    override fun revokeDevice(deviceId: String, householdId: String): Boolean =
+        db.tenant(householdId) { connection ->
+            val present = connection.prepareStatement(
+                "select 1 from devices " +
+                    "where id = ?::uuid and household_id = ?::uuid",
+            ).use {
+                it.setString(1, deviceId)
+                it.setString(2, householdId)
+                it.executeQuery().use { rows -> rows.next() }
+            }
+            if (!present) return@tenant false
+
+            // RLS already scopes these; the explicit household predicate is a
+            // second, independent guard so a future policy change cannot turn
+            // a revoke into a cross-tenant operation.
+            connection.prepareStatement(
+                "update devices set revoked_at = now() " +
+                    "where id = ?::uuid and household_id = ?::uuid and revoked_at is null",
+            ).use {
+                it.setString(1, deviceId)
+                it.setString(2, householdId)
+                it.executeUpdate()
+            }
+            connection.prepareStatement(
+                "delete from access_tokens " +
+                    "where device_id = ?::uuid and household_id = ?::uuid",
+            ).use {
+                it.setString(1, deviceId)
+                it.setString(2, householdId)
+                it.executeUpdate()
+            }
+            connection.prepareStatement(
+                "update refresh_tokens set revoked_at = now() " +
+                    "where device_id = ?::uuid and household_id = ?::uuid and revoked_at is null",
+            ).use {
+                it.setString(1, deviceId)
+                it.setString(2, householdId)
+                it.executeUpdate()
+            }
+            connection.prepareStatement(
+                "delete from household_key_wraps " +
+                    "where device_id = ?::uuid and household_id = ?::uuid",
+            ).use {
+                it.setString(1, deviceId)
+                it.setString(2, householdId)
+                it.executeUpdate()
+            }
+            true
+        }
 }

@@ -1,9 +1,12 @@
 ﻿package com.hopa.backend
 
+import com.hopa.backend.admin.AdminAuth
 import com.hopa.backend.auth.AuthPort
+import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.http.RateLimiter
 import com.hopa.backend.log.EventLog
 import com.hopa.backend.pairing.PairingApi
+import com.hopa.backend.pairing.PendingPairingService
 import com.hopa.backend.pairing.TokenIssuer
 import com.hopa.backend.push.PushPort
 import com.hopa.backend.store.DbProbe
@@ -21,9 +24,16 @@ import com.hopa.backend.trace.TraceRecorder
 data class ServerConfig(
     val version: String,
     val auth: AuthPort = AuthPort.DenyAll,
+    /** Admin console tokens; absent when this deployment has no database. */
+    val adminAuth: AdminAuth? = null,
+    /** True only when the admin lookup functions were provisioned on this database. */
+    val adminLookups: Boolean = true,
     val devices: DeviceDirectory = DeviceDirectory.Empty,
+    /** The one in-memory presence registry shared by the gateway and device routes. */
+    val registry: DeviceRegistry = DeviceRegistry(),
     val db: DbProbe = DbProbe.Unconfigured,
     val pairing: PairingApi? = null,
+    val pendingPairings: PendingPairingService? = null,
     val bootstrapToken: String? = null,
     val tokenIssuer: TokenIssuer? = null,
     val tasks: TaskStore = InMemoryTaskStore(),

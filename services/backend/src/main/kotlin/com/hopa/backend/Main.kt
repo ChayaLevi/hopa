@@ -1,15 +1,21 @@
 package com.hopa.backend
 
+import com.hopa.backend.admin.AdminAuth
+import com.hopa.backend.admin.adminRoutes
 import com.hopa.backend.auth.AuthPort
+import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.gateway.gatewayRoutes
 import com.hopa.backend.http.healthRoutes
 import com.hopa.backend.http.knowledgeRoutes
 import com.hopa.backend.http.modelRoutes
 import com.hopa.backend.log.JsonEventLog
 import com.hopa.backend.pairing.PairingService
+import com.hopa.backend.pairing.PendingPairingService
 import com.hopa.backend.pairing.PgAuth
 import com.hopa.backend.pairing.TokenIssuer
+import com.hopa.backend.pairing.deviceRoutes
 import com.hopa.backend.pairing.pairingRoutes
+import com.hopa.backend.pairing.pendingPairingRoutes
 import com.hopa.backend.pairing.tokenRoutes
 import com.hopa.backend.push.FcmSender
 import com.hopa.backend.push.GuardedPush
@@ -42,7 +48,10 @@ fun Application.module(config: ServerConfig) {
     knowledgeRoutes(config)
     modelRoutes(config)
     pairingRoutes(config)
+    pendingPairingRoutes(config)
     tokenRoutes(config)
+    deviceRoutes(config)
+    adminRoutes(config)
     traceRoutes(config)
     gatewayRoutes(config)
 }
@@ -50,16 +59,35 @@ fun Application.module(config: ServerConfig) {
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
     val version = System.getenv("HOPA_VERSION") ?: "0.1.0"
+    val adminLookups = when (val raw = System.getenv("HOPA_ADMIN_LOOKUPS")) {
+        null -> true
+        else -> raw.toBooleanStrictOrNull()
+            ?: error("HOPA_ADMIN_LOOKUPS must be true or false")
+    }
 
     // Migrations finish before the listener opens: a container that cannot
     // migrate must fail its health check, not serve against half a schema.
+    // The admin lookups are a separate, optional history: managed Postgres
+    // providers without a superuser set HOPA_ADMIN_LOOKUPS=false.
     val database = Database.fromEnvironment()
     database?.migrate()
+    if (database != null && adminLookups) database.applyAdminLookups()
 
     val auth: PgAuth? = database?.let(::PgAuth)
-    val devices: DeviceDirectory = database?.let(::PgDevices) ?: DeviceDirectory.Empty
+    // The registry exists before the issuer: a reused refresh token must both
+    // cut the durable device and close its live socket.
+    val registry = DeviceRegistry()
+    val pgDevices: PgDevices? = database?.let(::PgDevices)
+    val devices: DeviceDirectory = pgDevices ?: DeviceDirectory.Empty
     val tokens = database?.let { db ->
-        TokenIssuer(db, onRevoke = { deviceId -> auth?.revoke(deviceId) })
+        TokenIssuer(
+            db,
+            onRevoke = { deviceId, householdId ->
+                pgDevices?.revokeDevice(deviceId, householdId)
+                auth?.revoke(deviceId)
+                registry.kick(deviceId)
+            },
+        )
     }
 
     val fcmProject = System.getenv("HOPA_FCM_PROJECT")
@@ -80,13 +108,17 @@ fun main() {
     val config = ServerConfig(
         version = version,
         auth = auth ?: AuthPort.DenyAll,
+        adminAuth = database?.let(::AdminAuth),
+        adminLookups = adminLookups,
         devices = devices,
+        registry = registry,
         db = database?.let(::PostgresProbe) ?: DbProbe.Unconfigured,
         pairing = if (database != null && tokens != null) {
             PairingService(database, tokens = tokens)
         } else {
             null
         },
+        pendingPairings = database?.let(::PendingPairingService),
         bootstrapToken = System.getenv("HOPA_BOOTSTRAP_TOKEN"),
         tokenIssuer = tokens,
         tasks = database?.let { PgTaskStore(it) } ?: InMemoryTaskStore(),

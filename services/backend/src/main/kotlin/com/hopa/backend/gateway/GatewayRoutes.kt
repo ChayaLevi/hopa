@@ -25,8 +25,11 @@ import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
@@ -34,9 +37,34 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
+/** How long a revoked socket gets to complete the close handshake. */
+internal const val KICK_CLOSE_GRACE_MS = 1_000L
+
+/**
+ * Waits for a kick, offers the peer a bounded time to answer the Close frame,
+ * then cancels the incoming channel unconditionally. Ktor's `close()` only
+ * sends and flushes the frame; the read loop ends when `incoming` ends, which a
+ * peer that never answers would otherwise postpone indefinitely.
+ */
+internal suspend fun closeKickedSession(
+    closed: Deferred<Unit>,
+    graceMs: Long = KICK_CLOSE_GRACE_MS,
+    sendClose: suspend () -> Unit,
+    cancelIncoming: () -> Unit,
+) {
+    closed.await()
+    try {
+        withTimeoutOrNull(graceMs) { sendClose() }
+    } finally {
+        // Even a close() that returned (or threw) leaves incoming open until
+        // the peer answers; cancel it so the read loop cannot outlive the kick.
+        cancelIncoming()
+    }
+}
+
 fun Application.gatewayRoutes(
     config: ServerConfig,
-    registry: DeviceRegistry = DeviceRegistry(),
+    registry: DeviceRegistry = config.registry,
     router: TaskRouter = TaskRouter(
         store = config.tasks,
         registry = registry,
@@ -76,8 +104,24 @@ fun Application.gatewayRoutes(
                 }
             }
             val session = DeviceRegistry.Session(identity, outgoing)
+            val attached = registry.attach(session)
+            // A revoke completes the session's close signal from another
+            // coroutine. Close with a bounded grace: a peer that stalls the
+            // close handshake must not hold the read loop to the ping timeout.
+            val kicked = launch {
+                closeKickedSession(
+                    closed = session.closed,
+                    sendClose = {
+                        close(CloseReason(CloseReason.Codes.GOING_AWAY, "revoked"))
+                    },
+                    cancelIncoming = { incoming.cancel(CancellationException("revoked")) },
+                )
+            }
 
             try {
+                // Revoked between deviceFor and attach: the tombstone already
+                // completed the close signal, so leave without attaching.
+                if (!attached) return@webSocket
                 for (frame in incoming) {
                     if (frame !is Frame.Text) continue
                     val raw = frame.readText()
@@ -111,7 +155,8 @@ fun Application.gatewayRoutes(
 
                     when (envelope.type) {
                         "device.hello" -> {
-                            registry.join(session)
+                            // A revoke landed after attach: never join presence.
+                            if (!registry.join(session)) return@webSocket
                             config.devices.touch(
                                 identity.deviceId,
                                 identity.householdId,
@@ -173,6 +218,8 @@ fun Application.gatewayRoutes(
                     }
                 }
             } finally {
+                kicked.cancel()
+                registry.detach(session)
                 registry.leave(session)
                 // A reconnect replaces the session; the old socket closing then
                 // must not tell peers that a live device went away.

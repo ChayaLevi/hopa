@@ -42,7 +42,7 @@ Twelve areas make v1, including the operations console. Each is listed with the 
 
 | Area | Functions | Week |
 | --- | --- | --- |
-| Accounts and households | Sign-in (email link or passkey) with a household of one created automatically; later, invites, members and roles (owner, adult, elder, child) | 2 (one user), 4 |
+| Accounts and households | Sign-in (phone number + password; SMS OTP optional, off by default; verified wins) with a household of one created automatically; later, invites, members and roles (owner, adult, elder, child) | 2 (one user), 4 |
 | Devices and pairing | QR pairing; a device key made on pairing; device list, rename, revoke; short-lived access tokens with refresh (“renew access codes”) | 1, 2 |
 | Presence and routing | WebSocket gateway; `device.hello` with capabilities (OS, apps, battery); online state; routing only between devices of the same household; rate limits | 1, 4 |
 | Wake-up | FCM high-priority push to Android; a Windows tray app keeps its socket; messages queued until the ack | 1, 3 |
@@ -98,11 +98,11 @@ The demo proves the single-user path. Gate 1 is the 1,000-attempt cross-househol
 | Week | Focus | Deliverables | Exit check |
 | --- | --- | --- | --- |
 | 1 · 15–19 Nov | Base relay (the attached plan) | Protocol v0 frozen Mon 16:00; WebSocket gateway; Postgres schema v0 with `household_id` and `member_id` on every table; QR pairing; trace ids; idempotent messages; FCM wake; deployed in the EU | The week plan’s Thursday definition of done: 20 of 20 runs |
-| 2 · 22–26 Nov | One user: accounts and sync v0 | Sign-in, with a household of one created automatically; device list, revoke, token refresh; sync v0 of threads and turns across one user’s devices (cursors, tombstones, ciphertext only); console: team sign-in and a health page | A turn typed on the phone shows on the PC, and back, within 2 s (target, to measure); a revoked device is cut off within 5 s |
+| 2 · 22–26 Nov | One user: accounts and sync v0 | Sign-in by phone number + password with a household of one (E.164, argon2; SMS OTP behind a flag, off); device list, revoke, token refresh; sync v0 of threads and turns across one user's devices (cursors, tombstones, ciphertext only); PC admitted by a phone-scanned QR (vouch + household-key wrap, ADR-0026); console: admin sign-in, health, household and device lookup (moved from week 4), diagnostic task sender | A turn typed on the phone shows on the PC, and back, within 2 s (target, to measure); a revoked device is cut off within 5 s; a PC admitted by a camera-scanned QR runs one task in each direction (fallback: operator QR, gap carried) |
 | 3 · 29 Nov–3 Dec | Durable tasks and the demo | Task state machine with retries, deadlines, cancel and resume; phone → PC (find a file, draft the email) and PC → phone (**send a file**: encrypted upload, the phone saves it and opens the share sheet; or a system action such as a calendar event); the approval card on the user’s own device; console: task trace view | **Demo Thu 3 Dec.** 20 of 20 runs in each direction, including a 10 MB file sent PC → phone with a matching hash; app or PC killed mid-task in 20 runs: each task resumes or ends with a named error |
-| 4 · 6–10 Dec | Households | Invite and remove members; roles; routing only inside a household; console: household and device lookup | Gate 1: 1,000 cross-household attempts in CI all refused. No second real user goes on before this passes |
+| 4 · 6–10 Dec | Households | Invite and remove members; roles; routing only inside a household | Gate 1: 1,000 cross-household attempts in CI all refused. No second real user goes on before this passes |
 | 5 · 13–17 Dec | Family approvals | Approval routing by role (“a child’s purchase goes to a parent”); signed decisions verified; expiry and reminders; audit trail per task | Gate 2: a child’s task reaches the parent’s phone, is approved and completes; the audit shows every hop with its trace id |
-| 6 · 20–24 Dec | Sync v1 and journals | Chat attachments, reusing week 3’s file storage; a new device admitted by an existing one; shared household threads; opt-in run-record upload, redacted and chain-checked | Three devices edit offline and reconnect with no lost or duplicate turn; a new device reads history only after approval |
+| 6 · 20–24 Dec | Sync v1 and journals | Chat attachments, reusing week 3's file storage; admission generalized to any device (third+ device, re-wrap) — basics landed in week 2; shared household threads; opt-in run-record upload, redacted and chain-checked | Three devices edit offline and reconnect with no lost or duplicate turn; a new device reads history only after approval |
 | 7 · 27–31 Dec | Operations and recipe delivery | Metrics, alerts, nightly backups, data export and account deletion; signed recipe packages with staged rollout; console: alerts, rollout and rollback controls | Restore in under 1 hour; a deleted account leaves no row or file; a 10% rollout rolls back with versions reported within 10 minutes |
 | 8 · 3–7 Jan | Hardening and beta gate | Threat-model review; load test (target to measure: 1,000 households, 5,000 sockets); service levels and runbook; staging and production split; console security review | Load test meets the agreed targets; no open high-severity finding; beta households onboarded |
 
@@ -112,9 +112,9 @@ Two defaults to confirm: the demo date, and what the phone does in the PC → ph
 
 Three decisions block later weeks and should be made in week 1. The rest are risks with an owner.
 
-- [ ] **Key model for end-to-end encryption, by Thu 19 Nov (sync v0 in week 2 needs it).** Proposal: one household content key, wrapped for each device’s public key; a new device is admitted by scanning a QR code on an existing device, which re-wraps the key. Lost all devices means lost history, unless the owner keeps a recovery code.
-- [ ] **Backend language and owner, week 1.** Go or Kotlin (shared with the clients’ data types) are both reasonable; pick the one P1 and the second engineer will maintain.
-- [ ] **Hosting, week 1.** An EU region with managed Postgres, Redis (or Postgres) for presence, and S3-compatible object storage. Move off the free Singapore tier before any real user data.
+- [x] **Key model for end-to-end encryption, by Thu 19 Nov (sync v0 in week 2 needs it).** Decided 22 Nov: one household content key, wrapped for each device's public key; a new device is admitted by scanning a QR code on an existing device, which re-wraps the key; `diag.*` server tasks are the only plaintext payloads. Lost all devices means lost history, unless the owner keeps a recovery code. Design: [`docs/superpowers/specs/2026-11-22-pairing-accounts-design.md`](../../../superpowers/specs/2026-11-22-pairing-accounts-design.md) §2; ADR-0026 lands with the first week-2 PR.
+- [x] **Backend language and owner, week 1.** Kotlin (shared with the clients' data types), per ADR-0022; implemented since week 1.
+- [x] **Hosting, week 1.** Render (Frankfurt) with managed Postgres 16, Postgres for presence, object storage deferred to week 3's file work; off the free Singapore tier since week 1.
 
 | Risk | Effect | Mitigation |
 | --- | --- | --- |
@@ -122,7 +122,8 @@ Three decisions block later weeks and should be made in week 1. The rest are ris
 | One household reaches another’s device or data | A privacy breach | Household id on every route and query; a cross-tenant test suite in CI from week 2 |
 | Protocol changes break clients already in the field | Older apps stop working | A version field on every message; the backend accepts the current and the previous version |
 | Sync conflicts on edited turns | Lost or duplicated messages | Turns are append-only; only titles and deletes change, with the rules the bridge store already uses |
-| Two engineers cover backend and console | One absence stalls a lane | Each reviews the other’s pull requests, so either can cover; P7 owns the cross-tenant and soak tests |
+| Two engineers cover backend and console | One absence stalls a lane | Each reviews the other's pull requests, so either can cover; P7 owns the cross-tenant and soak tests |
+| Console shows phone numbers (PII) | A privacy breach inside the team | Admin-only role, separate from household accounts; every read access-logged |
 
 ## Who does what: two engineers
 
@@ -131,7 +132,7 @@ Split the work by lane, not by week: **A** owns the live path between devices (g
 | Week | A: gateway, tasks, security | B: accounts, data, console |
 | --- | --- | --- |
 | 1 · 15–19 Nov | Protocol v0; WebSocket gateway; QR pairing; trace ids; FCM wake | Postgres schema v0 with household ids; EU hosting; CI deploy and migrations; logs and trace storage |
-| 2 · 22–26 Nov | Device list, revoke, token refresh; key model written and agreed | Sign-in with a household of one; sync v0; console sign-in and health page |
+| 2 · 22–26 Nov | Mon: ADR-0026 + wrap/unwrap primitives. Tue–Wed: pending-session, vouch, claim-with-wrap; admin presence + diag-send. Thu: device list, revoke, refresh; admission end-to-end with a real PC (Kotlin sidecar). Fri: sidecar gateway envelopes both ways + wrap-on-revoke | Mon: `V2__accounts.sql` (+wraps, admins); E.164 + argon2 utilities; sync v0 mini-design. Tue–Wed: accounts sign-up/sign-in; console admin sign-in + health. Thu: console lookup page; sync v0 (protected). Fri: diag sender UI; Android sign-in + local-only mode + camera QR scanner |
 | 3 · 29 Nov–3 Dec | Durable tasks; both task directions, including a `file.send` task; own-device approval card messages | File storage: encrypted upload, expiring download links, a 25 MB limit; console task trace view; sync fixes found in rehearsal; demo data reset script |
 | 4 · 6–10 Dec | Routing only inside a household; the 1,000-attempt isolation suite | Invites, members, roles; console household and device lookup |
 | 5 · 13–17 Dec | Approval routing by role; signed decisions; expiry | Audit trail storage; reminder pushes; console audit view |

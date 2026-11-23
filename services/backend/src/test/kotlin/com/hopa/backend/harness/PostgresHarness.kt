@@ -11,7 +11,9 @@ import org.testcontainers.containers.PostgreSQLContainer
  * are owned by a role the policies actually apply to — that is what makes
  * `FORCE ROW LEVEL SECURITY` a real assertion rather than decoration. The app
  * under test connects as `hopa_app`, a second non-superuser role. The container
- * superuser is used only to create the two roles.
+ * superuser is used only to create the two login roles and the non-login
+ * `hopa_admin` role (BYPASSRLS) that owns the admin lookup functions; the
+ * migration grants and then revokes its own temporary membership in it.
  */
 object PostgresHarness {
     private const val NO_HOUSEHOLD = "00000000-0000-0000-0000-000000000000"
@@ -64,20 +66,36 @@ object PostgresHarness {
                           IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'hopa_app') THEN
                             CREATE ROLE hopa_app LOGIN PASSWORD 'hopa_app' NOSUPERUSER NOBYPASSRLS;
                           END IF;
+                          IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'hopa_admin') THEN
+                            CREATE ROLE hopa_admin NOLOGIN BYPASSRLS;
+                          END IF;
                         END $$;
                         """.trimIndent(),
                     )
-                    statement.execute("GRANT USAGE, CREATE ON SCHEMA public TO hopa_owner")
+                    statement.execute(
+                        "GRANT USAGE, CREATE ON SCHEMA public TO hopa_owner WITH GRANT OPTION",
+                    )
                     statement.execute("GRANT USAGE ON SCHEMA public TO hopa_app")
+                    // Migrate through the superuser provisioning path the deploy
+                    // guide allows: hopa_owner is briefly SUPERUSER so it can
+                    // create the BYPASSRLS owner and alter function owners
+                    // without a bootstrap ADMIN OPTION. It is demoted below,
+                    // before any test runs, so FORCE RLS binds it again. A
+                    // non-superuser deploy role must instead hold ADMIN OPTION
+                    // only for the migration and lose it before the guard at
+                    // the end of V2.
+                    statement.execute("ALTER ROLE hopa_owner SUPERUSER")
                 }
             }
 
             Database.connect(container.jdbcUrl, "hopa_owner", "hopa_owner").use { owner ->
                 owner.migrate()
+                owner.applyAdminLookups()
             }
 
             admin.tenant(NO_HOUSEHOLD) { connection ->
                 connection.createStatement().use { statement ->
+                    statement.execute("ALTER ROLE hopa_owner NOSUPERUSER")
                     statement.execute(
                         "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO hopa_app",
                     )

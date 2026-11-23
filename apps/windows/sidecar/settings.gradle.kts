@@ -41,4 +41,6 @@ include(":inference")
 project(":inference").projectDir = file("../../../core/inference")
 include(":bridge")
 project(":bridge").projectDir = file("../../../core/bridge")
+include(":backend")
+project(":backend").projectDir = file("../../../core/backend")
 

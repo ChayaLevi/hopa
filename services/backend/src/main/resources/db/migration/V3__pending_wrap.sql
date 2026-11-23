@@ -1,0 +1,13 @@
+-- Schema v3: the household key wrap parks on the pending pairing row.
+--
+-- `household_key_wraps.device_id` is a NOT NULL foreign key to `devices`, and no
+-- device row exists when a phone vouches: the claim creates it. The vouch writes
+-- the ciphertext here, in the same transaction that binds the session to a
+-- household, and the claim copies it into `household_key_wraps` when it creates
+-- the device. A pending pairing that is never admitted therefore never leaves a
+-- stray wrap behind.
+--
+-- The column is tenant-visible only. `pending_pairings` keeps its FORCE RLS
+-- policies from v2, and the resolve response never returns this column: a
+-- poller holding only the secret can see that its row is vouched, not the bytes.
+alter table pending_pairings add column wrapped_key bytea null;

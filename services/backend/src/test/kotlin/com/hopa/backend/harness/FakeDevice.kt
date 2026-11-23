@@ -102,6 +102,24 @@ class FakeDevice(
     suspend fun close() {
         session.close()
     }
+
+    /**
+     * Waits for the server to close this socket. A revocation must end the
+     * live connection, not merely refuse the next one.
+     */
+    suspend fun awaitClosed(timeoutMs: Long = 5_000) {
+        try {
+            withTimeout(timeoutMs) {
+                while (true) {
+                    val result = session.incoming.receiveCatching()
+                    if (result.isClosed) return@withTimeout
+                    if (result.getOrNull() is Frame.Close) return@withTimeout
+                }
+            }
+        } catch (timeout: TimeoutCancellationException) {
+            throw AssertionError("$deviceId: socket did not close within $timeoutMs ms", timeout)
+        }
+    }
 }
 
 /** The string value of a body field, or null when it is absent. */

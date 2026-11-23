@@ -1,4 +1,4 @@
-# ADR-0024 - Dependency injection in the Android app
+# ADR-0025 - Dependency injection in the Android app
 
 Status: accepted (2026-11-19), revised (2026-11-20): Hilt is the final standard
 

@@ -1,6 +1,6 @@
-# ADR-0022 - Backend language and shape: Kotlin on the JVM, one build with `packages/`
+# ADR-0022 - Backend language and shape: Kotlin on the JVM, one build with `core/`
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-11-15
 - Owners: Amir (lane A), Batya (lane B)
 - Relates to: ADR-0011 (what a backend owns), ADR-0016 (clients own the loop),
@@ -17,15 +17,17 @@ The choice of language was weighed against what the repository already holds,
 not against general taste:
 
 - The clients are **Kotlin** (Android) and **.NET over a Kotlin sidecar**
-  (Windows). `packages/core` (2,659 lines) and `packages/data` (229 lines) are
-  pure JVM Kotlin with no Android imports, enforced by
-  `packages/core/build.gradle.kts` and CI.
-- Those packages already implement the pieces hardest to keep in sync: the
+  (Windows). The shared JVM modules under `core/*` - `catalog`, `contracts`,
+  `observation`, `runlog`, `agent`, `decision*` and `inference` - are pure
+  Kotlin with no Android imports, enforced by
+  `build-logic/src/main/kotlin/hopa.no-android.gradle.kts` in each module's
+  build.
+- Those modules already implement the pieces hardest to keep in sync: the
   approval gate and classifier, the run-record chain and factory, the decision
   parser, the observation hasher, the loop, and `ConversationStore` with the
   dedupe, last-writer-wins title and tombstone rules the weekly plan asks sync to
   preserve.
-- `apps/windows/sidecar` already builds those packages in its **own** Gradle
+- `apps/windows/sidecar` already builds those modules in its **own** Gradle
   build, so a second non-Android JVM deployable is an established pattern.
 - CI already runs JDK 17, Gradle and ktlint.
 - The existing services are Python standard library, and `services/wire` carries
@@ -35,15 +37,16 @@ not against general taste:
 
 ## Decision
 
-1. **Kotlin 2.0.21 on the JVM, Ktor 3.0.3** (Netty, WebSockets, content
+1. **Kotlin 2.4.21 on the JVM, Ktor 3.6.1** (Netty, WebSockets, content
    negotiation), kotlinx.serialization, `jvmToolchain(17)`; JDK 21 may run Gradle
-   and the deployed JRE. Ktor is pinned to 3.0.3 because it is the release
-   compiled with Kotlin 2.0.21, the version the shared catalog already uses; no
-   second Kotlin toolchain enters the repository.
-2. **One Gradle build under `services/backend` that includes `:core` and `:data`
-   from `packages/`**, the way `apps/windows/sidecar` does. The backend imports
-   the gate, records, contracts and session rules rather than re-deriving them
-   from JSON.
+   and the deployed JRE. Kotlin 2.4.21 and Ktor 3.6.1 are the pins the shared
+   version catalog already carries, so no second Kotlin toolchain enters the
+   repository.
+2. **One Gradle build under `services/backend` that includes the `core/*`
+   modules it needs by path** (`:catalog`, `:contracts`, `:observation`,
+   `:runlog`, `:agent`, the `:decision*` modules and `:inference`), the way
+   `apps/windows/sidecar` does. The backend imports the gate, records, contracts
+   and session rules rather than re-deriving them from JSON.
 3. **Postgres is the queue and the record.** A task is a row with a state
    machine, not an in-memory map; Redis is not introduced for presence in v1.
 4. **Row-level security on every tenant table**, with the household set per
@@ -69,7 +72,7 @@ not against general taste:
 - A JVM process costs more memory idle than a Go binary; the target is a 512 MB
   container, measured in the week-1 evidence file.
 - Two Gradle builds (Android, backend) must both stay green; CI gains one job.
-- If `packages/` ever needs to run on iOS, Kotlin Multiplatform is the natural
+- If `core/*` ever needs to run on iOS, Kotlin Multiplatform is the natural
   continuation rather than a rewrite.
 
 ## Alternatives considered

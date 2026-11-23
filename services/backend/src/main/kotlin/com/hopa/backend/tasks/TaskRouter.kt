@@ -62,6 +62,23 @@ class TaskRouter(
     private val deadlineMs = 10 * 60 * 1000L
     private val maxDeadlineMs = 24L * 60 * 60 * 1000
 
+    private companion object {
+        /** The sender id a server-authored row carries instead of a device. */
+        const val SERVER = "server"
+
+        /** The only payloads that are plaintext by type; nothing else is routable here. */
+        val DIAG_TYPES = setOf("diag.ping", "diag.state", "diag.reset")
+
+        /** Half the frame cap, leaving room for the envelope fields around it. */
+        const val MAX_DIAG_BODY_BYTES = 32 * 1024
+
+        /** A result, error or cancel ends the task; nothing may move it again. */
+        val TERMINAL_STATES = setOf("done", "failed", "cancelled")
+
+        /** Late delivery signals that must not reopen a terminal task. */
+        val POST_TERMINAL_TYPES = setOf("task.ack", "task.progress")
+    }
+
     fun route(
         identity: DeviceIdentity,
         envelope: Envelope,
@@ -89,6 +106,92 @@ class TaskRouter(
     /** How much work a device would find if it came online right now. */
     fun queuedFor(deviceId: String, householdId: String): Int =
         store.pendingFor(deviceId, householdId, now()).size
+
+    /**
+     * A task the server authors itself: an admin diagnostic. The target's
+     * household and member come from the looked-up device, [type] is confined
+     * to the plaintext diagnostic types, and the row, event, delivery or wake
+     * follow exactly the [create] path. Only identifiers reach the audit log.
+     */
+    fun createServerTask(
+        adminId: String,
+        target: DeviceIdentity,
+        type: String,
+        body: JsonObject,
+    ): RouteResult {
+        if (type !in DIAG_TYPES) {
+            return RouteResult.Refused(GatewayError("E_SCHEMA", "not a diagnostic type"), null)
+        }
+        // The body becomes the delivered frame's body; cap it well under the
+        // frame limit so the envelope's own fields can never push it over.
+        if (body.toString().toByteArray(Charsets.UTF_8).size > MAX_DIAG_BODY_BYTES) {
+            return RouteResult.Refused(
+                GatewayError("E_SCHEMA", "diagnostic body is larger than $MAX_DIAG_BODY_BYTES bytes"),
+                null,
+            )
+        }
+
+        val trace = TraceIds.newTraceparent()
+        val task = TaskRecord(
+            id = newTaskId(),
+            householdId = target.householdId,
+            memberId = target.memberId,
+            from = SERVER,
+            to = target.deviceId,
+            messageId = UUID.randomUUID().toString(),
+            trace = trace,
+            ts = now(),
+            body = body,
+            state = if (registry.online(target.deviceId)) "delivered" else "queued",
+            deadlineAt = now() + deadlineMs,
+            type = type,
+        )
+        if (!store.remember(task.householdId, task.messageId, task)) {
+            return RouteResult.Refused(
+                GatewayError("E_QUEUE", "diagnostic task could not be queued"),
+                trace,
+            )
+        }
+        store.event(task.id, task.householdId, "create", body, now())
+
+        // The audit is written as soon as the row is durable and before the
+        // delivery or wake: a push failure after this point must not leave a
+        // task whose only admin linkage never reached the log.
+        log.event(
+            "diag.send",
+            mapOf(
+                "admin_id" to adminId,
+                "household_id" to task.householdId,
+                "device_id" to task.to,
+                "task_id" to task.id,
+                "trace" to trace,
+            ),
+        )
+
+        val routed = if (registry.online(target.deviceId)) {
+            deliver(task)
+        } else {
+            try {
+                wake(task)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (failed: Exception) {
+                // The row and audit are already durable. A dead push service
+                // must not fail the admin's 202: the hello catch-up delivers it.
+                log.event(
+                    "diag.wake.failed",
+                    mapOf(
+                        "admin_id" to adminId,
+                        "household_id" to task.householdId,
+                        "device_id" to task.to,
+                        "task_id" to task.id,
+                    ),
+                )
+            }
+            task
+        }
+        return RouteResult.Accepted(routed, duplicate = false)
+    }
 
     private fun routeEnvelope(
         identity: DeviceIdentity,
@@ -165,24 +268,27 @@ class TaskRouter(
         val routed = if (registry.online(to)) {
             deliver(task)
         } else {
-            val pushToken = devices.pushToken(to, identity.householdId)
-            if (pushToken != null) {
-                val outcome = traces.span(
-                    identity.householdId,
-                    traceId(traceparent),
-                    "wake",
-                    identity.deviceId,
-                    task.id,
-                ) {
-                    push.wake(to, task.id, traceId(traceparent), pushToken)
-                }
-                if (outcome == PushOutcome.InvalidToken) {
-                    devices.clearPushToken(to, identity.householdId)
-                }
-            }
+            wake(task)
             task
         }
         return RouteResult.Accepted(routed, duplicate = false)
+    }
+
+    /** An offline target gets one data-only wake when it has a registration. */
+    private fun wake(task: TaskRecord) {
+        val pushToken = devices.pushToken(task.to, task.householdId) ?: return
+        val outcome = traces.span(
+            task.householdId,
+            traceId(task.trace),
+            "wake",
+            spanDevice(task),
+            task.id,
+        ) {
+            push.wake(task.to, task.id, traceId(task.trace), pushToken)
+        }
+        if (outcome == PushOutcome.InvalidToken) {
+            devices.clearPushToken(task.to, task.householdId)
+        }
     }
 
     private fun relay(identity: DeviceIdentity, envelope: Envelope): RouteResult {
@@ -204,6 +310,14 @@ class TaskRouter(
             ) {}
         }
 
+        // A client may ack after its result (the sidecar sends result then ack).
+        // Terminal means terminal: record the event, but never move the state
+        // back to acked/progress or relay a stale signal.
+        if (task.state in TERMINAL_STATES && envelope.type in POST_TERMINAL_TYPES) {
+            store.event(task.id, identity.householdId, envelope.type, envelope.body, now())
+            return RouteResult.Accepted(task, duplicate = false)
+        }
+
         val next = when (envelope.type) {
             "task.ack" -> task.copy(state = "acked")
             "task.progress" -> task.copy(state = "progress")
@@ -223,7 +337,9 @@ class TaskRouter(
         store.event(task.id, identity.householdId, envelope.type, envelope.body, now())
 
         val other = if (identity.deviceId == task.from) task.to else task.from
-        val target = registry.sessionFor(other)
+        // A server-authored task has no sending socket to relay the result to;
+        // the row and its event are the whole record.
+        val target = if (other == SERVER) null else registry.sessionFor(other)
         val relayed = target?.outgoing?.trySend(
             GatewayCodec.encode(
                 envelope.copy(
@@ -250,7 +366,7 @@ class TaskRouter(
             task.householdId,
             traceId(task.trace),
             "deliver",
-            task.from,
+            spanDevice(task),
             task.id,
         ) {
             val session = registry.sessionFor(task.to) ?: return@span task
@@ -259,10 +375,11 @@ class TaskRouter(
             // would duplicate the frame; a reconnect gets a fresh session, so an
             // unacked task is still redelivered then.
             if (!session.sent.add(task.id)) return@span task
-            // An approval request is its own frame type; a normal handoff is
-            // still `task.create`. The state survives delivery so a reconnect
-            // can send the same request again until the target acks it.
-            val type = if (task.state == "needs_approval") "task.needs_approval" else "task.create"
+            // An approval request is its own frame type; a server diagnostic
+            // keeps the type it was authored with; a normal handoff is still
+            // `task.create`. The state survives delivery so a reconnect can send
+            // the same request again until the target acks it.
+            val type = if (task.state == "needs_approval") "task.needs_approval" else task.type
             val sent = session.outgoing.trySend(
                 GatewayCodec.encode(
                     Envelope(
@@ -292,6 +409,14 @@ class TaskRouter(
             store.event(task.id, task.householdId, "deliver", JsonObject(emptyMap()), now())
             task.copy(state = "delivered")
         }
+
+    /**
+     * `trace_spans.device_id` is a uuid, so a server-authored task's span must
+     * name the target device; the literal "server" would make the insert fail
+     * and the trace silently disappear.
+     */
+    private fun spanDevice(task: TaskRecord): String =
+        if (task.from == SERVER) task.to else task.from
 
     /** Null when the result is not an approval; false is a denial. */
     private fun JsonObject.approvalAllowed(): Boolean? =

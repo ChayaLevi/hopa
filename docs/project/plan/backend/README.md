@@ -11,11 +11,15 @@ as it lands.
 | Week | File | Status |
 |---|---|---|
 | 1 · 15–19 Nov | [`week1.md`](week1.md) | planned |
-| 2–8 | not written yet | — |
+| 2 · 22–26 Nov | [`week2.md`](week2.md) | planned |
 
 Executable slices: [`tasks/week1.md`](tasks/week1.md) is slice A (contracts,
 skeleton, codec, mock clients); [`tasks/week1b.md`](tasks/week1b.md) is slice B
-(Postgres, RLS, pairing, wake, traces, Render deploy).
+(Postgres, RLS, pairing, wake, traces, Render deploy). Week 2's slices are
+[`tasks/week2a.md`](tasks/week2a.md) (key model, admission, diag, sidecar) and
+[`tasks/week2b.md`](tasks/week2b.md) (accounts, console, Android); sync v0 gets its
+own slice written Monday from the mini-design. Design source for week 2:
+[`docs/superpowers/specs/2026-11-22-pairing-accounts-design.md`](../../../superpowers/specs/2026-11-22-pairing-accounts-design.md).
 
 Count a week with:
 

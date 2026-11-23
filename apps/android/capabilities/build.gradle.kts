@@ -36,7 +36,11 @@ dependencies {
 
     // Wireless-debugging pairing inside the app: adb pair (SPAKE2) and the TLS
     // connection to adbd. Apache-2.0 (dual licensed with GPL).
-    implementation("com.github.MuntashirAkon:libadb-android:3.1.1")
+    implementation("com.github.MuntashirAkon:libadb-android:3.1.1") {
+        // libadb pins bcprov-jdk15to18; core/backend supplies bcprov-jdk18on.
+        // Both jars carry the same org.bouncycastle classes, so keep one.
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk15to18")
+    }
     // Pairing derives a key with a Conscrypt method that Android 17 removed from
     // the platform jar. The public library keeps it, and libadb uses it when it
     // is on the classpath (SslUtils.isCustomConscrypt).

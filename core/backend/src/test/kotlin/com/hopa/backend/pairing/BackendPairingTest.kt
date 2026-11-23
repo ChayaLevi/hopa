@@ -208,6 +208,140 @@ class BackendPairingTest {
     }
 
     @Test
+    fun `mintPending posts a windows x25519 session and returns it`() = runBlocking {
+        val server = MockWebServer().apply {
+            enqueue(
+                MockResponse().setResponseCode(201).setBody(
+                    """{"sessionId":"sid","secret":"s1","qr":"hopa://pair?v=1&s=s1&u=wss://a/v1/gateway",""" +
+                        """"expiresAt":"2026-11-17T00:05:00Z"}""",
+                ),
+            )
+            start()
+        }
+        try {
+            val pending = BackendPairing(gateway(server)).mintPending("Studio", "pk")
+
+            assertEquals("sid", pending.sessionId)
+            assertEquals("s1", pending.secret)
+            assertEquals("hopa://pair?v=1&s=s1&u=wss://a/v1/gateway", pending.qr)
+            assertEquals("2026-11-17T00:05:00Z", pending.expiresAt)
+            assertFalse(pending.toString().contains("s1"))
+            assertTrue(pending.toString().contains("sessionId=sid"))
+            assertTrue(pending.toString().contains("secret=<redacted>"))
+
+            val request = server.takeRequest()
+            assertEquals("/v1/pair/pending", request.path)
+            val body = request.body.readUtf8()
+            assertTrue(body.contains("\"platform\":\"windows\""))
+            assertTrue(body.contains("\"name\":\"Studio\""))
+            assertTrue(body.contains("\"publicKey\":\"pk\""))
+            assertTrue(body.contains("\"alg\":\"x25519\""))
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
+    fun `pollPending resolves by the secret and returns the state`() = runBlocking {
+        val server = MockWebServer().apply {
+            enqueue(
+                MockResponse().setResponseCode(200).setBody(
+                    """{"sessionId":"sid","state":"vouched","name":"Studio","platform":"windows",""" +
+                        """"publicKey":"pk","fingerprint":"abcd1234","expiresAt":"2026-11-17T00:05:00Z"}""",
+                ),
+            )
+            start()
+        }
+        try {
+            val state = BackendPairing(gateway(server)).pollPending("s1")
+
+            assertEquals("vouched", state.state)
+            assertEquals("Studio", state.name)
+            assertEquals("pk", state.publicKey)
+            assertEquals("abcd1234", state.fingerprint)
+            assertEquals("2026-11-17T00:05:00Z", state.expiresAt)
+
+            val request = server.takeRequest()
+            assertEquals("/v1/pair/pending/resolve", request.path)
+            assertEquals("""{"sessionSecret":"s1"}""", request.body.readUtf8())
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
+    fun `claimPending returns the tokens and the wrapped and voucher keys`() = runBlocking {
+        val server = MockWebServer().apply {
+            enqueue(
+                MockResponse().setResponseCode(201).setBody(
+                    """{"deviceId":"d1","householdId":"h1","accessToken":"a1","refreshToken":"r1",""" +
+                        """"expiresAt":"2026-11-17T00:05:00Z","wrappedKey":"d3JhcA",""" +
+                        """"voucherPublicKey":"cGhvbmU"}""",
+                ),
+            )
+            start()
+        }
+        try {
+            val claimed = BackendPairing(gateway(server)).claimPending("s1", "Studio", "pk")
+
+            assertEquals("d1", claimed.credentials.deviceId)
+            assertEquals("a1", claimed.credentials.accessToken)
+            assertEquals("d3JhcA", claimed.wrappedKey)
+            assertEquals("cGhvbmU", claimed.voucherPublicKey)
+            assertFalse(claimed.credentials.toString().contains("a1"))
+            assertFalse(claimed.credentials.toString().contains("r1"))
+            assertTrue(claimed.credentials.toString().contains("accessToken=<redacted>"))
+
+            val request = server.takeRequest()
+            assertEquals("/v1/pair/claim", request.path)
+            val body = request.body.readUtf8()
+            assertTrue(body.contains("\"session\":\"s1\""))
+            assertTrue(body.contains("\"platform\":\"windows\""))
+            assertTrue(body.contains("\"alg\":\"x25519\""))
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
+    fun `a refused poll never prints the secret`() = runBlocking {
+        val server = MockWebServer().apply {
+            enqueue(
+                MockResponse().setResponseCode(400)
+                    .setBody("""{"code":"E_SCHEMA","message":"unknown s1"}"""),
+            )
+            start()
+        }
+        try {
+            val message = messageOf { BackendPairing(gateway(server)).pollPending("s1") }
+
+            assertEquals("pairing refused: E_SCHEMA unknown <redacted>", message)
+            assertFalse(message.contains("s1"))
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
+    fun `a 429 is a retryable failure`() = runBlocking {
+        val server = MockWebServer().apply {
+            enqueue(
+                MockResponse().setResponseCode(429)
+                    .setBody("""{"code":"E_RATE","message":"too many pending pairing polls","retryable":true}"""),
+            )
+            start()
+        }
+        try {
+            val failure = failureOf { BackendPairing(gateway(server)).pollPending("s1") }
+
+            assertTrue(failure is BackendPairingFailure.Unavailable)
+            assertEquals("pairing refused: E_RATE too many pending pairing polls", failure.message)
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
     fun `an x25519 public key is thirty two bytes and a private key round-trips`() {
         val pair = X25519Keys.generate()
         assertEquals(32, X25519Keys.publicKeyBytes(pair.public).size)
@@ -251,6 +385,13 @@ class BackendPairingTest {
         "no error"
     } catch (error: IllegalStateException) {
         error.message.orEmpty()
+    }
+
+    private suspend fun failureOf(block: suspend () -> Unit): BackendPairingFailure = try {
+        block()
+        fail("expected a pairing failure")
+    } catch (error: BackendPairingFailure) {
+        error
     }
 
     private fun link(server: MockWebServer) = PairingLink(
