@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="Week 2 lane A verification guide for HOPA: what the backend and Windows sidecar shipped, how to prove it now, and what waits for the phone.">
-<title>HOPA backend — Week 2 lane A verification</title>
+<title>HOPA backend â€” Week 2 lane A verification</title>
 <style>
   :root {
     --bg: #f6f6f3;
@@ -851,7 +851,7 @@
       <h1>Lane A is ready.<br>The phone is the missing witness.</h1>
       <p class="lede">
         Week 2 built the household key model, the PC admission path, device revocation,
-        admin diagnostics and the Windows sidecar’s encrypted gateway. This page separates
+        admin diagnostics and the Windows sidecarâ€™s encrypted gateway. This page separates
         what you can prove today, what is live on Render, and what genuinely waits for
         Lane B or an admin-lookup database.
       </p>
@@ -863,10 +863,10 @@
         <span class="status" data-state="later"><span class="dot" aria-hidden="true"></span>Lane B pending</span>
       </div>
       <p class="hero-meta">
-        Branch <code>backend-week2-A</code> · code head <code>11d7cb36</code>
-        (<code>fa792171</code> lane A + image fix + optional admin lookups) ·
-        <a href="https://github.com/agents-demo/hopa/pull/140">PR #140</a> · recorded 23 Nov 2026<br>
-        Render <code>hopa-backend-test</code> · live commit <code>11d7cb36</code> ·
+        Branch <code>backend-week2-A</code> Â· code head <code>11d7cb36</code>
+        (<code>fa792171</code> lane A + image fix + optional admin lookups) Â·
+        <a href="https://github.com/agents-demo/hopa/pull/140">PR #140</a> Â· recorded 23 Nov 2026<br>
+        Render <code>hopa-backend-test</code> Â· live commit <code>11d7cb36</code> Â·
         <code>/v1/pair/pending</code> returns 400 <code>E_SCHEMA</code> (route live);
         admin lookups return 503
       </p>
@@ -875,7 +875,7 @@
     <section id="clocks" tabindex="-1" aria-labelledby="clocks-title">
       <h2 id="clocks-title">Two clocks, one branch</h2>
       <p class="section-intro">
-        Lane A is backend and Windows sidecar only. The phone’s sign-in, camera scan and
+        Lane A is backend and Windows sidecar only. The phoneâ€™s sign-in, camera scan and
         vouch UI are Lane B. Treat that as a dependency, not a reason to leave Lane A
         unproven: the contracts below run today, and a later cross-lane failure is cheaper
         to diagnose when the Lane A half is already green. The Render service is a separate
@@ -887,7 +887,7 @@
         <section class="clock now" aria-labelledby="clock-now-title">
           <p class="clock-label" id="clock-now-title">Runnable today</p>
           <strong>313 tests</strong>
-          <p>174 <code>services/backend</code> · 97 shared <code>core/backend</code> · 42 sidecar</p>
+          <p>174 <code>services/backend</code> Â· 97 shared <code>core/backend</code> Â· 42 sidecar</p>
           <ul>
             <li>Key wrap, Argon2id and RFC 7748 vectors</li>
             <li>Pending session, vouch, claim and revoke</li>
@@ -903,13 +903,13 @@
         <section class="clock later" aria-labelledby="clock-later-title">
           <p class="clock-label" id="clock-later-title">Admin + Lane B</p>
           <strong>6 exit checks</strong>
-          <p>Camera scan · sign-up · sync · console lookup · SMS · log grep</p>
+          <p>Camera scan Â· sign-up Â· sync Â· console lookup Â· SMS Â· log grep</p>
           <ul>
             <li>An admin-lookup database for the console</li>
             <li>A real phone vouches and unwraps the key</li>
             <li>One encrypted task each way on the live core</li>
             <li>Console lookup by phone, member or household</li>
-            <li>No plaintext payload or phone number in the week’s logs</li>
+            <li>No plaintext payload or phone number in the weekâ€™s logs</li>
           </ul>
           <span class="clock-foot">
             Core lane A is live on Render. Admin diag/lookup stays off there
@@ -923,7 +923,7 @@
       <div class="callout">
         <p class="callout-label">The rule for this page</p>
         <p>
-          “Proven” means a command you can run and a result you can read. Contract tests
+          â€œProvenâ€ means a command you can run and a result you can read. Contract tests
           are local by design and prove the branch, not the Render service. Deployed checks
           use <code>hopa-backend-test.onrender.com</code> and are labelled
           <strong>blocked on deploy</strong> until the lane A commit is live. Nothing on
@@ -936,8 +936,8 @@
       <h2 id="shipped-title">What shipped</h2>
       <p class="section-intro">
         Eight contracts, each with a named test class and a file you can open. The
-        execution record in <a href="plan/backend/week2.md">the week-2 plan</a> carries the
-        full review history; this is the operator’s view.
+        execution record in <a href="week2.md">the week-2 plan</a> carries the
+        full review history; this is the operatorâ€™s view.
       </p>
 
       <ol class="ledger">
@@ -946,7 +946,7 @@
           <div>
             <h3>Household key wrap and Argon2id</h3>
             <p>
-              One 256-bit content key per household. X25519 ECDH → HKDF-SHA256 →
+              One 256-bit content key per household. X25519 ECDH â†’ HKDF-SHA256 â†’
               AES-256-GCM produces a 60-byte wrap; the recovery-code primitive uses
               Argon2id (m=64 MiB, t=3, p=4). Canonical keys are RFC 7748 octets and ECDH
               is BouncyCastle-only.
@@ -962,7 +962,7 @@
         <li>
           <span class="num" aria-hidden="true">02</span>
           <div>
-            <h3>V2–V4 schema and tenancy</h3>
+            <h3>V2â€“V4 schema and tenancy</h3>
             <p>
               Accounts, household wraps, admins, admin sessions, pending pairings,
               <code>members.account_id</code>, <code>tasks.type</code> and a nullable
@@ -984,8 +984,8 @@
             <h3>Pending pairing sessions</h3>
             <p>
               An unauthenticated PC mints a five-minute session and polls by the secret it
-              holds. The server stores only the secret’s SHA-256, the QR is
-              <code>hopa://pair?v=1&amp;s=…&amp;u=…</code> with no household, and the
+              holds. The server stores only the secretâ€™s SHA-256, the QR is
+              <code>hopa://pair?v=1&amp;s=â€¦&amp;u=â€¦</code> with no household, and the
               budgets are 5 mints and 30 resolves per minute per address.
             </p>
             <p class="meta">
@@ -1004,7 +1004,7 @@
               A signed-in phone wraps the household key to the pending PC and posts the
               60-byte blob. The wrap parks on the pending row, then moves to
               <code>household_key_wraps</code> in the same transaction that creates the
-              device and issues tokens. Claim returns the wrap and the voucher’s public
+              device and issues tokens. Claim returns the wrap and the voucherâ€™s public
               key; the session is single-use.
             </p>
             <p class="meta">
@@ -1038,7 +1038,7 @@
           <div>
             <h3>Admin diagnostics and presence</h3>
             <p>
-              Admin tokens read the household’s device inventory with live presence and
+              Admin tokens read the householdâ€™s device inventory with live presence and
               send only <code>diag.ping</code>, <code>diag.state</code> or
               <code>diag.reset</code>. Those three are the only plaintext bodies, every
               send is audit-logged with the admin id, and a server-authored task has no
@@ -1130,7 +1130,7 @@
           <div>
             <strong>The phone resolves the secret.</strong>
             <p>
-              <code>POST /v1/pair/pending/resolve</code> returns the PC’s name, platform,
+              <code>POST /v1/pair/pending/resolve</code> returns the PCâ€™s name, platform,
               public key and fingerprint. The phone shows the fingerprint before it
               approves; the resolve response never names a household.
             </p>
@@ -1140,7 +1140,7 @@
           <div>
             <strong>The phone vouches.</strong>
             <p>
-              The phone wraps the household content key to the PC’s public key with
+              The phone wraps the household content key to the PCâ€™s public key with
               <code>KeyWrap.wrapForDevice</code> and posts the 60-byte blob to
               <code>POST /v1/pair/vouch</code>. The server parks the ciphertext on the
               pending row.
@@ -1154,7 +1154,7 @@
               <code>POST /v1/pair/claim</code> presents the same secret and public key. One
               transaction creates the device, moves the wrap into
               <code>household_key_wraps</code> and issues the token pair. The response
-              carries the wrap and the voucher’s public key.
+              carries the wrap and the voucherâ€™s public key.
             </p>
           </div>
         </li>
@@ -1164,7 +1164,7 @@
             <p>
               The sidecar derives the same static-static secret, unwraps the 32-byte content
               key, stores it owner-only and opens the gateway. Incoming task bodies are
-              <code>{"sealed": …}</code> under that key; diagnostics stay plaintext.
+              <code>{"sealed": â€¦}</code> under that key; diagnostics stay plaintext.
             </p>
           </div>
         </li>
@@ -1173,7 +1173,7 @@
       <div class="callout">
         <p class="callout-label">What the server can see</p>
         <p>
-          The secret’s hash, the pending device’s public key, the wrap bytes, the household
+          The secretâ€™s hash, the pending deviceâ€™s public key, the wrap bytes, the household
           binding after a vouch, and the task metadata. It cannot read the content key, a
           sealed task body, or a conversation. The phone number is a login column, not a
           key; Lane A has no route that returns it.
@@ -1184,7 +1184,7 @@
     <section id="now" tabindex="-1" aria-labelledby="now-title">
       <h2 id="now-title">Verify now</h2>
       <p class="section-intro">
-        Open a contract, run its command, and compare the result with “green means”. Every
+        Open a contract, run its command, and compare the result with â€œgreen meansâ€. Every
         command is from the repository root on Windows PowerShell. Backend tests need Docker
         because they start Postgres 16 with Testcontainers; the shared client and sidecar
         suites do not.
@@ -1205,7 +1205,7 @@
         <p class="callout-label">If you only run one pass</p>
         <p>
           Run <code>AdmissionTest</code> (the whole server-side journey),
-          <code>KeyWrapTest</code> (the crypto layout), and the sidecar’s
+          <code>KeyWrapTest</code> (the crypto layout), and the sidecarâ€™s
           <code>BackendPairingTest</code> plus <code>BackendGatewayTest</code> (the PC half).
           Those four classes cover the failure that would end the demo.
         </p>
@@ -1213,7 +1213,7 @@
 
       <details class="proof">
         <summary>
-          <span class="proof-title">01 · Household key wrap and Argon2id</span>
+          <span class="proof-title">01 Â· Household key wrap and Argon2id</span>
           <span class="proof-count">28 tests</span>
         </summary>
         <div class="proof-body">
@@ -1242,7 +1242,7 @@
 
       <details class="proof">
         <summary>
-          <span class="proof-title">02 · V2–V4 schema and tenancy</span>
+          <span class="proof-title">02 Â· V2â€“V4 schema and tenancy</span>
           <span class="proof-count">18 tests</span>
         </summary>
         <div class="proof-body">
@@ -1273,7 +1273,7 @@
 
       <details class="proof">
         <summary>
-          <span class="proof-title">03 · Pending pairing sessions</span>
+          <span class="proof-title">03 Â· Pending pairing sessions</span>
           <span class="proof-count">16 tests</span>
         </summary>
         <div class="proof-body">
@@ -1288,9 +1288,9 @@
             <strong>Green means</strong> the mint rejects a non-<code>x25519</code>
             algorithm, a key that is not 32 bytes, a blank name and a bad platform; the
             sixth mint from one address in a minute is <code>E_RATE</code>; the QR matches
-            <code>^hopa://pair\?v=1&amp;s=…&amp;u=wss://…/v1/gateway$</code> and contains no
-            <code>h=</code>; the database holds only the secret’s hash; and
-            pending → vouched → claimed → expired resolve correctly.
+            <code>^hopa://pair\?v=1&amp;s=â€¦&amp;u=wss://â€¦/v1/gateway$</code> and contains no
+            <code>h=</code>; the database holds only the secretâ€™s hash; and
+            pending â†’ vouched â†’ claimed â†’ expired resolve correctly.
           </p>
           <p>
             <strong>Try to break it:</strong> resolve an unknown secret (uniform
@@ -1302,7 +1302,7 @@
 
       <details class="proof">
         <summary>
-          <span class="proof-title">04 · Phone vouch and claim-with-wrap</span>
+          <span class="proof-title">04 Â· Phone vouch and claim-with-wrap</span>
           <span class="proof-count">15 tests</span>
         </summary>
         <div class="proof-body">
@@ -1336,7 +1336,7 @@
 
       <details class="proof">
         <summary>
-          <span class="proof-title">05 · Device list and five-second revocation</span>
+          <span class="proof-title">05 Â· Device list and five-second revocation</span>
           <span class="proof-count">12 tests</span>
         </summary>
         <div class="proof-body">
@@ -1352,7 +1352,7 @@
           <p>
             <strong>Green means</strong> the list is household-scoped and marks the caller;
             revoking a connected device closes its socket inside five seconds, refuses its
-            refresh token and deletes its wrap; another household’s device id is
+            refresh token and deletes its wrap; another householdâ€™s device id is
             <code>E_TENANT</code> and changes nothing; a refresh family already rotated once
             is still cut off; and a rotate/revoke race leaves no live refresh token.
           </p>
@@ -1366,7 +1366,7 @@
 
       <details class="proof">
         <summary>
-          <span class="proof-title">06 · Admin diagnostics and presence</span>
+          <span class="proof-title">06 Â· Admin diagnostics and presence</span>
           <span class="proof-count">17 tests</span>
         </summary>
         <div class="proof-body">
@@ -1398,7 +1398,7 @@
 
       <details class="proof">
         <summary>
-          <span class="proof-title">07 · Sidecar admission</span>
+          <span class="proof-title">07 Â· Sidecar admission</span>
           <span class="proof-count">12 sidecar + 18 core tests</span>
         </summary>
         <div class="proof-body">
@@ -1433,7 +1433,7 @@ apps\android\gradlew.bat -p apps\android :backend:test `
 
       <details class="proof">
         <summary>
-          <span class="proof-title">08 · Sidecar encrypted gateway</span>
+          <span class="proof-title">08 Â· Sidecar encrypted gateway</span>
           <span class="proof-count">12 + 4 tests</span>
         </summary>
         <div class="proof-body">
@@ -1450,7 +1450,7 @@ apps\android\gradlew.bat -p apps\android :backend:test `
           <p>
             <strong>Green means</strong> an encrypted <code>task.create</code> is acked once
             and answered with a ciphertext <code>task.result</code> that decrypts to the
-            engine’s answer; a tampered ciphertext becomes a <code>task.error</code> and the
+            engineâ€™s answer; a tampered ciphertext becomes a <code>task.error</code> and the
             next frame still runs; a body that is not a sealed envelope is a schema error and
             never runs; <code>diag.ping</code>, <code>diag.state</code> and
             <code>diag.reset</code> answer in plaintext on the diagnostic seam; a failed send
@@ -1458,7 +1458,7 @@ apps\android\gradlew.bat -p apps\android :backend:test `
           </p>
           <p>
             <strong>Try to break it:</strong> flip a ciphertext byte, send a plaintext
-            <code>{"goal": …}</code> as <code>task.create</code>, or send a
+            <code>{"goal": â€¦}</code> as <code>task.create</code>, or send a
             <code>diag.ping</code> and assert the task handler never sees it.
           </p>
         </div>
@@ -1487,7 +1487,7 @@ apps\android\gradlew.bat -p apps\windows\sidecar test --rerun-tasks</code></pre>
         This walks the real routes against the deployed Render service. It proves the wire
         contract, the transaction boundaries and the refusals on the same host the sidecar
         uses. It deliberately uses a placeholder 60-byte wrap, so it does <strong>not</strong>
-        prove that a real key unwraps; the sidecar’s <code>BackendPairingTest</code> does
+        prove that a real key unwraps; the sidecarâ€™s <code>BackendPairingTest</code> does
         that today, and the phone will do it after Lane B. The commands use
         <code>hopa-backend-test</code>; change <code>$base</code> if your service has a
         different host.
@@ -1508,7 +1508,7 @@ apps\android\gradlew.bat -p apps\windows\sidecar test --rerun-tasks</code></pre>
           <strong>503 E_UNSUPPORTED</strong>. The optional admin SQL lives in
           <code>db/admin/V5__admin_lookups.sql</code> and is applied only when
           <code>HOPA_ADMIN_LOOKUPS=true</code> on a database where a superuser can create
-          the <code>BYPASSRLS</code> owner. Render’s managed Postgres is not that database.
+          the <code>BYPASSRLS</code> owner. Renderâ€™s managed Postgres is not that database.
         </p>
       </div>
 
@@ -1540,7 +1540,7 @@ curl.exe -sS -i -X POST "$base/v1/pair/pending" `
         <span id="render-preflight-label" hidden>Render preflight commands</span>
       </div>
       <ul class="plain-list">
-        <li><strong>Health:</strong> <code>ok true</code> and <code>db ok</code>. The first call on the free plan can take 30–60 s.</li>
+        <li><strong>Health:</strong> <code>ok true</code> and <code>db ok</code>. The first call on the free plan can take 30â€“60 s.</li>
         <li><strong>Route probe:</strong> 400 <code>E_SCHEMA</code> means the core route exists. 404 means the core build is not live: stop and deploy.</li>
         <li><strong>Live commit:</strong> <code>render-check.ps1 -Json</code> must show the lane A commit as <code>liveCommit</code> and <code>stale: false</code>. Read the <code>newestDeployStatus</code> too. Without <code>RENDER_API_KEY</code>, read the same fields in the Render dashboard.</li>
       </ul>
@@ -1556,7 +1556,7 @@ curl.exe -sS -i -X POST "$base/v1/pair/pending" `
         <p>
           The admin SQL lives in <code>db/admin/V5__admin_lookups.sql</code>. It creates
           <code>hopa_admin</code>, a <code>BYPASSRLS</code> role, and PostgreSQL only lets a
-          superuser create one. Render’s managed Postgres does not give the app that role,
+          superuser create one. Renderâ€™s managed Postgres does not give the app that role,
           so the core deployment sets <code>HOPA_ADMIN_LOOKUPS=false</code> and the admin
           routes answer 503 <code>E_UNSUPPORTED</code>. The pairing, vouch, claim, revoke
           and sidecar routes do not need it.
@@ -1596,7 +1596,7 @@ grant hopa_admin to hopa_user with admin option, set false;</code></pre>
         <li>Windows PowerShell 5.1 or later, at the repository root, with <code>$base</code> set to the Render service.</li>
         <li>The <code>HOPA_BOOTSTRAP_TOKEN</code> from the Render dashboard. It is a secret: never paste it into evidence.</li>
         <li>Optional: a Postgres connection for the admin seed and wrap-row checks. The core Render smoke does not need database access; use the local fallback or a database you control for those checks.</li>
-        <li>Warm the free service first. Do steps 3–5 inside the five-minute pending-session window.</li>
+        <li>Warm the free service first. Do steps 3â€“5 inside the five-minute pending-session window.</li>
       </ul>
 
       <ol class="steps">
@@ -1621,7 +1621,7 @@ Invoke-RestMethod "$base/v1/health" -TimeoutSec 120</code></pre>
         <li>
           <h3>Mint and resolve a pending session</h3>
           <p>
-            The QR is the server’s, not yours. Check that its <code>u=</code> host matches
+            The QR is the serverâ€™s, not yours. Check that its <code>u=</code> host matches
             this service; a mismatch means <code>HOPA_PUBLIC_HOST</code> on Render is wrong.
           </p>
           <div class="code-block">
@@ -1678,7 +1678,7 @@ Invoke-RestMethod -Uri "$base/v1/devices" -Headers $phoneHeaders |
         <li>
           <h3>Vouch, claim, and prove the session is single-use</h3>
           <p>
-            The vouch binds the pending session to the phone’s household. The claim creates
+            The vouch binds the pending session to the phoneâ€™s household. The claim creates
             the PC device, the wrap row and the tokens in one transaction.
           </p>
           <div class="code-block">
@@ -1721,8 +1721,8 @@ $pc | Select-Object deviceId, householdId, wrappedKey, voucherPublicKey</code></
         <li>
           <h3>Revoke the phone and watch its credentials die</h3>
           <p>
-            The PC’s token revokes the phone. The list keeps the row with
-            <code>revokedAt</code>, and the phone’s refresh token must be refused.
+            The PCâ€™s token revokes the phone. The list keeps the row with
+            <code>revokedAt</code>, and the phoneâ€™s refresh token must be refused.
           </p>
           <div class="code-block">
             <button type="button" class="copy-button" command="--copy" commandfor="render-revoke-phone" aria-label="Copy the Render phone revocation commands">Copy<span class="visually-hidden"> the Render phone revocation commands</span></button><span class="tip" role="status"></span>
@@ -1947,7 +1947,7 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/pending/resolve" `
           </div>
           <p>
             <strong>Expected:</strong> the mint returns a session id, a secret, a
-            <code>hopa://pair?v=1&amp;s=…&amp;u=wss://127.0.0.1:8080/v1/gateway</code> link
+            <code>hopa://pair?v=1&amp;s=â€¦&amp;u=wss://127.0.0.1:8080/v1/gateway</code> link
             and an expiry about five minutes out. Resolve returns
             <code>state pending</code>, the name, platform, public key and fingerprint, and
             <strong>no household</strong>.
@@ -2003,9 +2003,9 @@ Invoke-RestMethod -Uri "$base/v1/devices" -Headers $phoneHeaders |
         <li>
           <h3>Vouch, claim, and prove the session is single-use</h3>
           <p>
-            The vouch binds the pending session to the phone’s household and parks the
+            The vouch binds the pending session to the phoneâ€™s household and parks the
             placeholder wrap. The claim then creates the PC device, the wrap row and the
-            tokens. Note that the PC’s household becomes the phone’s household.
+            tokens. Note that the PCâ€™s household becomes the phoneâ€™s household.
           </p>
           <div class="code-block">
             <button type="button" class="copy-button" command="--copy" commandfor="smoke-vouch" aria-label="Copy the vouch and claim commands">Copy<span class="visually-hidden"> the vouch and claim commands</span></button><span class="tip" role="status"></span>
@@ -2031,7 +2031,7 @@ $pc | Select-Object deviceId, householdId, wrappedKey, voucherPublicKey</code></
             <strong>Expected:</strong> the vouch returns the session, household and member;
             resolve now says <code>vouched</code>; claim returns a device id, the same
             household as the phone, a 60-byte wrap (80 base64url characters) and the
-            phone’s public key. A second claim must refuse:
+            phoneâ€™s public key. A second claim must refuse:
           </p>
           <div class="code-block">
             <button type="button" class="copy-button" command="--copy" commandfor="smoke-claim-twice" aria-label="Copy the second-claim refusal command">Copy<span class="visually-hidden"> the second-claim refusal command</span></button><span class="tip" role="status"></span>
@@ -2047,8 +2047,8 @@ $pc | Select-Object deviceId, householdId, wrappedKey, voucherPublicKey</code></
         <li>
           <h3>Revoke the phone and watch its credentials die</h3>
           <p>
-            The PC’s token revokes the phone. The list keeps the row with
-            <code>revokedAt</code> set, and the phone’s refresh token must be refused. The
+            The PCâ€™s token revokes the phone. The list keeps the row with
+            <code>revokedAt</code> set, and the phoneâ€™s refresh token must be refused. The
             phone has no wrap here; step 8 checks the wrap deletion on the PC.
           </p>
           <div class="code-block">
@@ -2186,7 +2186,7 @@ try {
       <p class="section-intro">
         The sidecar is the first real PC caller. Its admission path is the one a phone will
         drive after Lane B. Against Render you can run the mint, QR and polling half today;
-        the successful unwrap needs the phone’s private key, which is covered by
+        the successful unwrap needs the phoneâ€™s private key, which is covered by
         <code>BackendPairingTest</code> until the phone ships. Core lane A is live on
         Render; the preflight above passes, and sidecar admission does not need the
         optional admin lookups.
@@ -2260,10 +2260,10 @@ fingerprint: 1a2b3c4d</code></pre>
       </ul>
 
       <details>
-        <summary>Drive the sidecar’s vouch by hand with the placeholder wrap</summary>
+        <summary>Drive the sidecarâ€™s vouch by hand with the placeholder wrap</summary>
         <p>
           This is optional. Run the Render smoke through step 4 first, keep a live phone
-          token, and do not revoke it yet. Copy the <code>s=</code> value from the sidecar’s
+          token, and do not revoke it yet. Copy the <code>s=</code> value from the sidecarâ€™s
           QR, then vouch it with the same 60-zero-byte placeholder:
         </p>
         <div class="code-block">
@@ -2330,7 +2330,7 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
       <p class="section-intro">
         These are the week-2 exit checks that genuinely need the phone, the account
         endpoints, a deploy, or all three. Keep them separate from the Lane A result: three
-        are already proven, one is partially proven, and five are Lane B’s. The core deploy
+        are already proven, one is partially proven, and five are Lane Bâ€™s. The core deploy
         gate is passed; the admin console still has a separate database gate.
       </p>
 
@@ -2365,13 +2365,13 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
             </tr>
             <tr>
               <th scope="row">1</th>
-              <td data-label="Check">A turn typed on the phone appears on the PC, and back, in ≤ 2 s.</td>
+              <td data-label="Check">A turn typed on the phone appears on the PC, and back, in â‰¤ 2 s.</td>
               <td data-label="Status">Needs Lane B + sync v0</td>
               <td data-label="What to run or record">Record both timestamps and the trace ids in <code>docs/project/evidence/B2-accounts.md</code>.</td>
             </tr>
             <tr>
               <th scope="row">2</th>
-              <td data-label="Check">A revoked device is cut off: in-flight socket closed ≤ 5 s, refresh refused, wrap gone.</td>
+              <td data-label="Check">A revoked device is cut off: in-flight socket closed â‰¤ 5 s, refresh refused, wrap gone.</td>
               <td data-label="Status">Proven in Lane A; core live</td>
               <td data-label="What to run or record"><code>DeviceRevokeTest</code>, <code>KickTeardownTest</code>; add a manual stopwatch line against the live core.</td>
             </tr>
@@ -2383,9 +2383,9 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
             </tr>
             <tr>
               <th scope="row">4</th>
-              <td data-label="Check">Sign-up → sign-in round trip on the phone; second sign-in gets a signed-in device.</td>
+              <td data-label="Check">Sign-up â†’ sign-in round trip on the phone; second sign-in gets a signed-in device.</td>
               <td data-label="Status">Needs Lane B</td>
-              <td data-label="What to run or record">Lane B’s account endpoints and Android sign-in; integration test plus a device run.</td>
+              <td data-label="What to run or record">Lane Bâ€™s account endpoints and Android sign-in; integration test plus a device run.</td>
             </tr>
             <tr>
               <th scope="row">5</th>
@@ -2413,9 +2413,9 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
             </tr>
             <tr>
               <th scope="row">9</th>
-              <td data-label="Check">No plaintext payload or phone number in the week’s logs.</td>
+              <td data-label="Check">No plaintext payload or phone number in the weekâ€™s logs.</td>
               <td data-label="Status">Needs Lane B + full week logs</td>
-              <td data-label="What to run or record">Grep the live Render logs now for the lane A routes; repeat after Lane B for the full week. Paste the command and the clean result into the evidence file. Lane A’s new log lines carry identifiers only.</td>
+              <td data-label="What to run or record">Grep the live Render logs now for the lane A routes; repeat after Lane B for the full week. Paste the command and the clean result into the evidence file. Lane Aâ€™s new log lines carry identifiers only.</td>
             </tr>
           </tbody>
         </table>
@@ -2441,7 +2441,7 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
 
       <div class="table-wrap" role="region" tabindex="0" aria-labelledby="trouble-caption">
         <table>
-          <caption id="trouble-caption">Symptom → cause → fix</caption>
+          <caption id="trouble-caption">Symptom â†’ cause â†’ fix</caption>
           <thead>
             <tr>
               <th scope="col">Symptom</th>
@@ -2458,7 +2458,7 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
             <tr>
               <th scope="row">The container exits with <code>NoClassDefFoundError: io/ktor/server/application/Application</code></th>
               <td data-label="Likely cause">The distroless runtime is nonroot, but the Gradle distribution was copied as root and is unreadable to it.</td>
-              <td data-label="Fix">Use <code>COPY --from=build --chown=65532:65532 … /app/</code>. This is fixed at <code>3bbba95b</code>; without it the Ktor jar is present in the build stage but invisible at runtime.</td>
+              <td data-label="Fix">Use <code>COPY --from=build --chown=65532:65532 â€¦ /app/</code>. This is fixed at <code>3bbba95b</code>; without it the Ktor jar is present in the build stage but invisible at runtime.</td>
             </tr>
             <tr>
               <th scope="row">The newest Render deploy is <code>update_failed</code> after the image starts</th>
@@ -2468,7 +2468,7 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
             <tr>
               <th scope="row">The minted QR names the wrong host</th>
               <td data-label="Likely cause"><code>HOPA_PUBLIC_HOST</code> on the Render service points at production instead of the test host.</td>
-              <td data-label="Fix">Set <code>HOPA_PUBLIC_HOST=hopa-backend-test.onrender.com</code> on the test service and redeploy. The QR’s <code>u=</code> must match <code>$base</code>.</td>
+              <td data-label="Fix">Set <code>HOPA_PUBLIC_HOST=hopa-backend-test.onrender.com</code> on the test service and redeploy. The QRâ€™s <code>u=</code> must match <code>$base</code>.</td>
             </tr>
             <tr>
               <th scope="row">Admin routes return 401 or 503 on Render</th>
@@ -2517,7 +2517,7 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
             </tr>
             <tr>
               <th scope="row">Sidecar admits but cannot connect the gateway locally</th>
-              <td data-label="Likely cause">The local fallback’s QR names <code>wss://</code>, but its backend is plain HTTP.</td>
+              <td data-label="Likely cause">The local fallbackâ€™s QR names <code>wss://</code>, but its backend is plain HTTP.</td>
               <td data-label="Fix">Use Render for the WSS gateway. The local fallback stops at admission by design.</td>
             </tr>
             <tr>
@@ -2558,7 +2558,7 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
             <tr>
               <th scope="row">Diag returns 403 <code>E_TENANT</code></th>
               <td data-label="Likely cause">The device is revoked, or the named household is wrong.</td>
-              <td data-label="Fix">Use the device’s real household and a live row. A revoked device is hidden from the lookup on purpose.</td>
+              <td data-label="Fix">Use the deviceâ€™s real household and a live row. A revoked device is hidden from the lookup on purpose.</td>
             </tr>
             <tr>
               <th scope="row">Diag stays <code>queued</code> locally or on Render</th>
@@ -2583,20 +2583,20 @@ Invoke-RestMethod -Method Post -Uri "$base/v1/pair/vouch" -Headers $phoneHeaders
       </p>
 
       <ul class="plain-list">
-        <li><a href="plan/backend/week2.md">Week 2 plan and execution record</a> — tasks, review findings, deferred items and the exit checks.</li>
-        <li><a href="plan/backend/tasks/week2a.md">Lane A slice</a> — the task-by-task plan with interfaces and commands.</li>
-        <li><a href="../superpowers/specs/2026-11-22-pairing-accounts-design.md">Pairing and accounts design</a> — the source decisions behind the key model and admission flow.</li>
-        <li><a href="../design/decisions/0025-household-content-key.md">ADR-0025</a> — household content key, wrap layout, recovery primitive and the rejected alternatives.</li>
-        <li><a href="../../spec/openapi/backend.v1.yaml">Backend OpenAPI</a> and <a href="../../spec/schemas/gateway.v1.schema.json">gateway schema</a> — the HTTP and envelope contracts.</li>
-        <li><a href="../../services/backend/src/test/kotlin/com/hopa/backend/pairing/AdmissionTest.kt"><code>AdmissionTest</code></a> — the server-side journey and every admission refusal.</li>
-        <li><a href="../../core/backend/src/test/kotlin/com/hopa/backend/crypto/KeyWrapTest.kt"><code>KeyWrapTest</code></a> — the byte layout, tamper cases and RFC 7748 vector.</li>
-        <li><a href="../../apps/windows/sidecar/src/test/kotlin/com/hopa/sidecar/BackendPairingTest.kt"><code>BackendPairingTest</code></a> and <a href="../../apps/windows/sidecar/src/test/kotlin/com/hopa/sidecar/BackendGatewayTest.kt"><code>BackendGatewayTest</code></a> — the PC half.</li>
-        <li><a href="https://github.com/agents-demo/hopa/pull/140">PR #140</a> — the branch, its checks and the review history.</li>
-        <li><a href="https://github.com/agents-demo/hopa/actions/runs/45141868831">CI run 45141868831</a> — all jobs green at <code>fa792171</code>.</li>
-        <li><a href="https://hopa-backend-test.onrender.com/v1/health">Render service health</a> — <code>hopa-backend-test</code>, live commit <code>11d7cb36</code>, deploy <code>dep-dc24dfifngtc739691sg</code>; core lane A live, admin lookups disabled.</li>
-        <li><a href="../../services/backend/src/main/resources/db/admin/V5__admin_lookups.sql"><code>db/admin/V5__admin_lookups.sql</code></a> — optional admin role and functions, separate Flyway history; enabled only with <code>HOPA_ADMIN_LOOKUPS=true</code>.</li>
-        <li><a href="../../tools/scripts/render-check.ps1"><code>render-check.ps1</code></a> — health, live commit, deploy status and redeploy.</li>
-        <li><a href="week1-summary.html">Week 1 runbook</a> — the sibling page and the visual system this one extends.</li>
+        <li><a href="week2.md">Week 2 plan and execution record</a> â€” tasks, review findings, deferred items and the exit checks.</li>
+        <li><a href="tasks/week2a.md">Lane A slice</a> â€” the task-by-task plan with interfaces and commands.</li>
+        <li><a href="../../../superpowers/specs/2026-11-22-pairing-accounts-design.md">Pairing and accounts design</a> â€” the source decisions behind the key model and admission flow.</li>
+        <li><a href="../../../design/decisions/0025-household-content-key.md">ADR-0025</a> â€” household content key, wrap layout, recovery primitive and the rejected alternatives.</li>
+        <li><a href="../../../../spec/openapi/backend.v1.yaml">Backend OpenAPI</a> and <a href="../../../../spec/schemas/gateway.v1.schema.json">gateway schema</a> â€” the HTTP and envelope contracts.</li>
+        <li><a href="../../../../services/backend/src/test/kotlin/com/hopa/backend/pairing/AdmissionTest.kt"><code>AdmissionTest</code></a> â€” the server-side journey and every admission refusal.</li>
+        <li><a href="../../../../core/backend/src/test/kotlin/com/hopa/backend/crypto/KeyWrapTest.kt"><code>KeyWrapTest</code></a> â€” the byte layout, tamper cases and RFC 7748 vector.</li>
+        <li><a href="../../../../apps/windows/sidecar/src/test/kotlin/com/hopa/sidecar/BackendPairingTest.kt"><code>BackendPairingTest</code></a> and <a href="../../../../apps/windows/sidecar/src/test/kotlin/com/hopa/sidecar/BackendGatewayTest.kt"><code>BackendGatewayTest</code></a> â€” the PC half.</li>
+        <li><a href="https://github.com/agents-demo/hopa/pull/140">PR #140</a> â€” the branch, its checks and the review history.</li>
+        <li><a href="https://github.com/agents-demo/hopa/actions/runs/45141868831">CI run 45141868831</a> â€” all jobs green at <code>fa792171</code>.</li>
+        <li><a href="https://hopa-backend-test.onrender.com/v1/health">Render service health</a> â€” <code>hopa-backend-test</code>, live commit <code>11d7cb36</code>, deploy <code>dep-dc24dfifngtc739691sg</code>; core lane A live, admin lookups disabled.</li>
+        <li><a href="../../../../services/backend/src/main/resources/db/admin/V5__admin_lookups.sql"><code>db/admin/V5__admin_lookups.sql</code></a> â€” optional admin role and functions, separate Flyway history; enabled only with <code>HOPA_ADMIN_LOOKUPS=true</code>.</li>
+        <li><a href="../../../../tools/scripts/render-check.ps1"><code>render-check.ps1</code></a> â€” health, live commit, deploy status and redeploy.</li>
+        <li><a href="../../week1-summary.html">Week 1 runbook</a> â€” the sibling page and the visual system this one extends.</li>
       </ul>
 
       <div class="callout">
