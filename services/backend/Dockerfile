@@ -4,7 +4,11 @@ WORKDIR /src
 COPY . .
 RUN sed -i 's/\r$//' apps/android/gradlew \
     && chmod +x apps/android/gradlew \
-    && ./apps/android/gradlew -p services/backend installDist --no-daemon --refresh-dependencies
+    && ./apps/android/gradlew -p services/backend installDist --no-daemon
+
+RUN test -f /src/services/backend/build/install/hopa-backend/lib/ktor-server-core-jvm-3.6.1.jar \
+    && echo "ktor-server-core present" \
+    || (ls -l /src/services/backend/build/install/hopa-backend/lib && exit 1)
 
 FROM gcr.io/distroless/java21-debian12:nonroot
 WORKDIR /app
