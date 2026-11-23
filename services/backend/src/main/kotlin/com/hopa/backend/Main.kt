@@ -59,11 +59,19 @@ fun Application.module(config: ServerConfig) {
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
     val version = System.getenv("HOPA_VERSION") ?: "0.1.0"
+    val adminLookups = when (val raw = System.getenv("HOPA_ADMIN_LOOKUPS")) {
+        null -> true
+        else -> raw.toBooleanStrictOrNull()
+            ?: error("HOPA_ADMIN_LOOKUPS must be true or false")
+    }
 
     // Migrations finish before the listener opens: a container that cannot
     // migrate must fail its health check, not serve against half a schema.
+    // The admin lookups are a separate, optional history: managed Postgres
+    // providers without a superuser set HOPA_ADMIN_LOOKUPS=false.
     val database = Database.fromEnvironment()
     database?.migrate()
+    if (database != null && adminLookups) database.applyAdminLookups()
 
     val auth: PgAuth? = database?.let(::PgAuth)
     // The registry exists before the issuer: a reused refresh token must both
@@ -101,6 +109,7 @@ fun main() {
         version = version,
         auth = auth ?: AuthPort.DenyAll,
         adminAuth = database?.let(::AdminAuth),
+        adminLookups = adminLookups,
         devices = devices,
         registry = registry,
         db = database?.let(::PostgresProbe) ?: DbProbe.Unconfigured,

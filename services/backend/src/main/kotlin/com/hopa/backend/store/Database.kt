@@ -21,9 +21,29 @@ import org.flywaydb.core.Flyway
  * policies default to deny.
  */
 class Database(internal val dataSource: HikariDataSource) : AutoCloseable {
-    fun migrate(): Int =
+    fun migrate(locations: List<String> = listOf("classpath:db/migration")): Int =
         Flyway.configure()
             .dataSource(dataSource)
+            .locations(*locations.toTypedArray())
+            .load()
+            .migrate()
+            .migrationsExecuted
+
+    /**
+     * Applies the optional admin-lookup migration through its own history table.
+     * The core schema never depends on it: a managed Postgres that cannot create
+     * the BYPASSRLS owner sets HOPA_ADMIN_LOOKUPS=false and skips this entirely.
+     */
+    fun applyAdminLookups(): Int =
+        Flyway.configure()
+            .dataSource(dataSource)
+            .locations("classpath:db/admin")
+            .table("hopa_admin_schema_history")
+            // The core schema is already present; this history is new. Baseline
+            // at 0 so Flyway records the admin migration instead of refusing a
+            // non-empty schema.
+            .baselineOnMigrate(true)
+            .baselineVersion("0")
             .load()
             .migrate()
             .migrationsExecuted

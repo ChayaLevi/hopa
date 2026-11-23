@@ -90,6 +90,7 @@ object PostgresHarness {
 
             Database.connect(container.jdbcUrl, "hopa_owner", "hopa_owner").use { owner ->
                 owner.migrate()
+                owner.applyAdminLookups()
             }
 
             admin.tenant(NO_HOUSEHOLD) { connection ->

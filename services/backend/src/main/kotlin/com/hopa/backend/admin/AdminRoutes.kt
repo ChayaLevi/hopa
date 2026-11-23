@@ -57,6 +57,7 @@ fun Application.adminRoutes(config: ServerConfig) {
     routing {
         get("/v1/admin/devices") {
             val admin = call.adminIdentity(config) ?: return@get
+            if (!call.adminLookupsAvailable(config)) return@get
             val raw = call.request.queryParameters["household"]
             val household = raw?.takeIf { UUID_PATTERN.matches(it) }?.let { UUID.fromString(it).toString() }
             if (household == null) {
@@ -96,6 +97,7 @@ fun Application.adminRoutes(config: ServerConfig) {
 
         post("/v1/admin/devices/{id}/diag") {
             val admin = call.adminIdentity(config) ?: return@post
+            if (!call.adminLookupsAvailable(config)) return@post
             val rawId = call.parameters["id"].orEmpty()
             val deviceId = rawId
                 .takeIf { UUID_PATTERN.matches(it) }
@@ -170,6 +172,22 @@ fun Application.adminRoutes(config: ServerConfig) {
             }
         }
     }
+}
+
+/**
+ * The admin lookup functions are optional: they need a superuser-provisioned
+ * BYPASSRLS role, which some managed Postgres providers do not allow. The
+ * deployment says whether they were provisioned; without them the routes
+ * answer a stable E_UNSUPPORTED instead of calling a missing function.
+ */
+private suspend fun ApplicationCall.adminLookupsAvailable(config: ServerConfig): Boolean {
+    if (config.adminLookups) return true
+    respondError(
+        HttpStatusCode.ServiceUnavailable,
+        "E_UNSUPPORTED",
+        "admin lookups are not provisioned on this database",
+    )
+    return false
 }
 
 /** Resolves the admin bearer, answering 401 E_AUTH and returning null when it is unknown. */

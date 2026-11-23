@@ -167,7 +167,7 @@ class DiagSendTest {
 
     private val traceStore = PgTraceStore(db)
 
-    private fun config(push: PushPort = PushPort.None) =
+    private fun config(push: PushPort = PushPort.None, adminLookups: Boolean = true) =
         ServerConfig(
             version = "0.1.0",
             auth = PgAuth(db),
@@ -179,6 +179,7 @@ class DiagSendTest {
             traces = traceStore,
             traceQuery = traceStore,
             adminAuth = AdminAuth(db),
+            adminLookups = adminLookups,
         )
 
     private fun hello(deviceId: String) = Envelope(
@@ -305,6 +306,17 @@ class DiagSendTest {
         assertEquals("E_AUTH", code(response.bodyAsText()))
         assertEquals(0, taskCount(household))
         assertNotNull(admin.token)
+    }
+
+    @Test
+    fun `admin lookups report unsupported when the database cannot provision them`() = testApplication {
+        val admin = seedAdmin()
+        application { module(config(adminLookups = false)) }
+
+        val response = client.devices(admin.token, newHousehold())
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
+        assertEquals("E_UNSUPPORTED", code(response.bodyAsText()))
     }
 
     @Test

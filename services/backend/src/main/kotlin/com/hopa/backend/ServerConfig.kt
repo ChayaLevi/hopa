@@ -26,6 +26,8 @@ data class ServerConfig(
     val auth: AuthPort = AuthPort.DenyAll,
     /** Admin console tokens; absent when this deployment has no database. */
     val adminAuth: AdminAuth? = null,
+    /** True only when the admin lookup functions were provisioned on this database. */
+    val adminLookups: Boolean = true,
     val devices: DeviceDirectory = DeviceDirectory.Empty,
     /** The one in-memory presence registry shared by the gateway and device routes. */
     val registry: DeviceRegistry = DeviceRegistry(),
