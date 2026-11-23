@@ -1,5 +1,6 @@
 package com.hopa.sidecar.protocol.handler
 
+import com.hopa.sidecar.PairingGate
 import com.hopa.sidecar.backend.BackendAdmission
 import com.hopa.sidecar.backend.BackendSessionStore
 import com.hopa.sidecar.backend.GatewayHost
@@ -17,7 +18,10 @@ import kotlinx.serialization.json.JsonObject
  * Pairing this PC with the gateway.
  *
  * It polls and prints the QR on stderr, so it runs on its own scope and never
- * blocks the stdin loop; the reply carries identifiers only.
+ * blocks the stdin loop; the reply carries identifiers only. Only one admission
+ * runs at a time: a second command while the first is unresolved is refused
+ * immediately, so two sessions are never minted and the store is never written
+ * twice.
  */
 internal class BackendHandler(
     private val io: Stdio,
@@ -25,31 +29,40 @@ internal class BackendHandler(
     private val sessionStore: BackendSessionStore,
     private val gateways: GatewayHost,
     private val scope: CoroutineScope,
+    private val pairingGate: PairingGate = PairingGate(),
 ) : MessageHandler {
     override fun handle(type: String, message: JsonObject): Boolean {
         if (type != "backend.pair") return false
         val url = message.text("url").trim()
         val name = message.text("name").trim().ifBlank { "Windows PC" }
+        if (!pairingGate.tryStart()) {
+            io.send(Protocol.backendPair(ok = false, error = "already pairing"))
+            return true
+        }
         scope.launch {
-            val reply = if (url.isBlank()) {
-                Protocol.backendPair(ok = false, error = "IllegalArgumentException")
-            } else {
-                try {
-                    BackendAdmission(dataDir).admit(url, name)
-                    val saved = sessionStore.load()
-                        ?: throw IllegalStateException("admission did not store a session")
-                    val key = backendContentKey(saved)
-                        ?: throw IllegalStateException("admission stored an invalid content key")
-                    gateways.start(saved, key)
-                    Protocol.backendPair(ok = true)
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (failed: Exception) {
-                    io.log("backend pairing failed (${failed.javaClass.simpleName})")
-                    Protocol.backendPair(ok = false, error = failed.javaClass.simpleName)
+            try {
+                val reply = if (url.isBlank()) {
+                    Protocol.backendPair(ok = false, error = "IllegalArgumentException")
+                } else {
+                    try {
+                        BackendAdmission(dataDir).admit(url, name)
+                        val saved = sessionStore.load()
+                            ?: throw IllegalStateException("admission did not store a session")
+                        val key = backendContentKey(saved)
+                            ?: throw IllegalStateException("admission stored an invalid content key")
+                        gateways.start(saved, key)
+                        Protocol.backendPair(ok = true)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (failed: Exception) {
+                        io.log("backend pairing failed (${failed.javaClass.simpleName})")
+                        Protocol.backendPair(ok = false, error = failed.javaClass.simpleName)
+                    }
                 }
+                io.send(reply)
+            } finally {
+                pairingGate.finish()
             }
-            io.send(reply)
         }
         return true
     }

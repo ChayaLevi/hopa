@@ -193,6 +193,13 @@ Small sizes use a face crop so the icon still reads in the title bar and tray;
 128/256 use the full character. The script writes a multi-size PNG-compressed
 ICO.
 
+## Logging
+
+Turn logs are deliberately redacted. The sidecar logs `turn <id> in
+<conversation>` without the goal text, because a goal may be private; it is
+persisted in the conversation store only, never written to the log. A turn log
+line that carries no goal is not lost output — it is an intentional redaction.
+
 ## Rules
 
 1. The loop, the gate and the records live in `packages/`, inside the sidecar.
