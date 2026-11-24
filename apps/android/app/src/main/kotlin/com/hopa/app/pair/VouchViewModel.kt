@@ -16,20 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** The PC a scan found, as the phone will show it before vouching. */
-data class PendingConfirm(
-    val name: String,
-    val fingerprint: String,
-)
-
-/** The scan-and-vouch screen: a scan state, a confirm state, or a refusal. */
-data class VouchUiState(
-    val busy: Boolean = false,
-    val confirm: PendingConfirm? = null,
-    val error: String? = null,
-    val vouched: Boolean = false,
-)
-
 /**
  * Vouch for a pending PC by wrapping this phone's household content key for the
  * PC's X25519 key and posting the wrap. The session secret lives only in the

@@ -17,13 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** The sign-in screen's state: one busy flag and one error, no phone/password split. */
-data class AccountUiState(
-    val busy: Boolean = false,
-    val error: String? = null,
-    val signedIn: Boolean = false,
-)
-
 /**
  * Phone + password sign-in and sign-up. Sign-up generates the phone's X25519
  * keypair and a 32-byte content key, wraps the content key for itself and posts

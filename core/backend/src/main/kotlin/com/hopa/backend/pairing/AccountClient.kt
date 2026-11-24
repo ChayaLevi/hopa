@@ -18,24 +18,6 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
- * The answer to a phone + password sign-up or sign-in: the account and the
- * freshly admitted device's tokens. Tokens are bearer capabilities and are
- * redacted from [toString].
- */
-data class SignedInAccount(
-    val accountId: String,
-    val deviceId: String,
-    val householdId: String,
-    val accessToken: String,
-    val refreshToken: String,
-    val expiresAt: String,
-) {
-    override fun toString(): String = "SignedInAccount(accountId=$accountId, deviceId=$deviceId, " +
-        "householdId=$householdId, accessToken=<redacted>, refreshToken=<redacted>, " +
-        "expiresAt=$expiresAt)"
-}
-
-/**
  * The unauthenticated account half of the backend: create an account
  * (`/v1/accounts`) or sign into one (`/v1/session`). The phone is E.164
  * normalized by the caller and is only ever a login lookup; it is scrubbed from
