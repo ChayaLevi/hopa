@@ -491,9 +491,14 @@ the sync made these lane B pieces consistent with that refactor:
   beside lane A's `onApproval`; the sidecar README keeps both the P1–P4 guide and
   the turn-goal redaction note.
 
-A second rebase onto `main` at `fc79e1f6` (the sidecar/Windows refactors #147–#149)
-moved the sidecar `backend.pair` handler from `Main.kt` into
-`protocol/handlers/BackendHandler.kt`; the `PairingGate` guard moved with it, and
-`PairingGateTest` still covers the gate directly. At the rebased head (`0180b4c0`)
-the four suites are green — 228 backend, 98 core/backend, 91 app, 91 sidecar — and
-`check-links` and `plan-status` are clean.
+A second rebase onto `main` at `3cf49be5` (the sidecar/Windows refactors
+#147–#180) moved the sidecar `backend.pair` handler from `Main.kt` into
+`protocol/handler/BackendHandler.kt` and renamed the admission type to
+`BackendAdmission`; the `PairingGate` guard moved with it, and `PairingGateTest`
+still covers the gate directly. The same pass split the Android files the
+repository's structure check rejected (one behaviour per file):
+`AccountUiState.kt`, `SignInRoute.kt`, `VouchUiState.kt` and `SignedInAccount.kt`
+now own the contracts, and `ScanScreen.kt` became `ScanRoute.kt`. At the rebased
+head (`43111e5f`) the four suites are green — 228 backend, 98 core/backend,
+91 app, 91 sidecar — and `check-android-structure`, `check-links` and
+`plan-status` are clean.

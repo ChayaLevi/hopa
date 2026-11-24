@@ -299,8 +299,10 @@ git commit -m "feat(backend): team console - sign-in, health, lookup, diag sende
 ### Task 7: Android — sign-in and the two modes
 
 **Files:**
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/SignInRoute.kt`
 - Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/SignInScreen.kt`
 - Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/AccountViewModel.kt`
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/AccountUiState.kt`
 - Modify: `apps/android/app/build.gradle.kts` (`buildConfigField` from `local.properties`), the app's settings store and launch navigation (the `backendUrl == null` path `LaunchPairingTest` already covers)
 - Test: `apps/android/app/src/test/kotlin/com/hopa/app/account/SignInViewModelTest.kt`, `LaunchModeTest.kt`
 
@@ -337,8 +339,9 @@ git commit -m "feat(android): phone-and-password sign-in and the two modes"
 ### Task 8: Android — camera QR scan and vouch
 
 **Files:**
-- Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/ScanScreen.kt`
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/ScanRoute.kt`
 - Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/VouchViewModel.kt`
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/VouchUiState.kt`
 - Modify: `apps/android/app/build.gradle.kts` (CameraX + ML Kit `barcode-scanning`), `AndroidManifest.xml` (`CAMERA`), the pairing input screen (paste fallback stays)
 - Test: `apps/android/app/src/test/kotlin/com/hopa/app/pair/VouchViewModelTest.kt`
 

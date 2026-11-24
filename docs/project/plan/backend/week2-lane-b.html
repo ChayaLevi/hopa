@@ -864,9 +864,9 @@
         <span class="status" data-state="later"><span class="dot" aria-hidden="true"></span>Real camera scan pending</span>
       </div>
       <p class="hero-meta">
-        Branch <code>backend-week2-B</code> · code head <code>0180b4c0</code>, rebased onto
-        <code>main</code> at <code>fc79e1f6</code> (lane A’s PR #140 merged, plus the
-        sidecar/Windows refactors #147–#149) · recorded 23 Nov 2026<br>
+        Branch <code>backend-week2-B</code> · code head <code>43111e5f</code>, rebased onto
+        <code>main</code> at <code>3cf49be5</code> (lane A’s PR #140 merged, plus the
+        sidecar/Windows refactors #147–#180) · recorded 23 Nov 2026<br>
         Synced with lane A's optional admin lookups: the resolvers live in
         <code>db/admin/V5__admin_lookups.sql</code>, and the lookup route answers 503
         <code>E_UNSUPPORTED</code> when <code>HOPA_ADMIN_LOOKUPS=false</code>.
@@ -1053,7 +1053,8 @@
             </p>
             <p class="meta">
               <span class="meta-label">Where</span>
-              <code>app/account/SignInScreen.kt</code>, <code>app/account/AccountViewModel.kt</code>,
+              <code>app/account/SignInRoute.kt</code>, <code>app/account/SignInScreen.kt</code>,
+              <code>app/account/AccountViewModel.kt</code>, <code>app/account/AccountUiState.kt</code>,
               <code>app/navigation/LaunchMode.kt</code>, <code>HopaNavHost.kt</code>
               <span class="meta-label">Proof</span>
               <code>SignInViewModelTest</code>, <code>LaunchModeTest</code>,
@@ -1073,7 +1074,8 @@
             </p>
             <p class="meta">
               <span class="meta-label">Where</span>
-              <code>app/pair/ScanScreen.kt</code>, <code>app/pair/VouchViewModel.kt</code>
+              <code>app/pair/ScanRoute.kt</code>, <code>app/pair/VouchViewModel.kt</code>,
+              <code>app/pair/VouchUiState.kt</code>
               <span class="meta-label">Proof</span>
               <code>VouchViewModelTest</code>
             </p>
@@ -1092,7 +1094,8 @@
             <p class="meta">
               <span class="meta-label">Where</span>
               <code>app/link/session/BackendSession.kt</code>,
-              <code>apps/windows/sidecar/.../PairingGate.kt</code>, <code>apps/windows/README.md</code>
+              <code>apps/windows/sidecar/.../PairingGate.kt</code>,
+              <code>.../protocol/handler/BackendHandler.kt</code>, <code>apps/windows/README.md</code>
               <span class="meta-label">Proof</span>
               <code>BackendSessionTest</code>, <code>PairingGateTest</code>
             </p>
@@ -1111,7 +1114,11 @@
           colliding core <code>V5</code>; <code>GET /v1/admin/households</code> now gates on
           the same <code>adminLookupsAvailable</code> helper as the device and diag routes,
           so it answers 503 <code>E_UNSUPPORTED</code> on a database without the superuser
-          role. The full note is in <a href="week2.md">the plan</a> §11.7.
+          role. A later rebase onto <code>main</code> at <code>3cf49be5</code> (the
+          sidecar/Windows refactors #147–#180) moved the <code>backend.pair</code> handler to
+          <code>protocol/handler/BackendHandler.kt</code> and renamed the admission type to
+          <code>BackendAdmission</code>; the <code>PairingGate</code> guard moved with it. The
+          full note is in <a href="week2.md">the plan</a> §11.7.
         </p>
       </div>
     </section>
@@ -1772,7 +1779,7 @@ apps\android\gradlew.bat -p services\backend run</code></pre>
         <li><a href="../../../../apps/android/app/src/test/kotlin/com/hopa/app/account/SignInViewModelTest.kt"><code>SignInViewModelTest</code></a> and <a href="../../../../apps/android/app/src/test/kotlin/com/hopa/app/pair/VouchViewModelTest.kt"><code>VouchViewModelTest</code></a> — the Android sign-in and scan.</li>
         <li><a href="../../../../services/backend/src/main/resources/db/admin/V5__admin_lookups.sql"><code>db/admin/V5__admin_lookups.sql</code></a> — the optional admin role and the three resolvers that return <code>account_id</code>.</li>
         <li><a href="../../../../docs/project/evidence/B2-accounts.md"><code>B2-accounts.md</code></a> — the evidence file the manual checks fill in.</li>
-        <li><a href="https://github.com/agents-demo/hopa/pull/140">PR #140</a> — lane A, merged to <code>main</code> at <code>27737540</code>; the later sidecar/Windows refactors (#147–#149) are the rest of what this branch rebased onto.</li>
+        <li><a href="https://github.com/agents-demo/hopa/pull/140">PR #140</a> - lane A, merged to <code>main</code> at <code>27737540</code>; the later sidecar/Windows refactors (#147-#180) are the rest of what this branch rebased onto.</li>
       </ul>
 
       <div class="callout">
@@ -1789,8 +1796,8 @@ apps\android\gradlew.bat -p services\backend run</code></pre>
 
     <footer class="footer">
       <p>
-        Code head <code>0180b4c0</code> on <code>backend-week2-B</code> (23 Nov 2026),
-        rebased onto <code>main</code> at <code>fc79e1f6</code> after lane A’s PR #140 merged.
+        Code head <code>43111e5f</code> on <code>backend-week2-B</code> (23 Nov 2026),
+        rebased onto <code>main</code> at <code>3cf49be5</code> after lane A’s PR #140 merged.
         The lane A sync (§11.7) folds the <code>account_id</code> resolvers into the optional
         <code>db/admin</code> migration and gates the lookup route behind
         <code>adminLookupsAvailable</code>.
