@@ -28,6 +28,7 @@ shared `Json`, and `ObservationHasher` walks wire types. They are one layer.
 | package | what lives here | depends on |
 |---|---|---|
 | `approval` | `ApprovalRequest`, `ApprovalGateway`, `PaymentContext`, `RiskLevel`: the question a payment asks | wire |
+| `a2ui` | `A2uiCodec`, `A2uiSession`, `A2uiSurface`, `ApprovalSurfaces`, `ChoiceSurfaces`: approval and choice cards as A2UI 1.0 surfaces (ADR-0027). Strict decode, the graph rules, and the only builders of approval cards | approval, wire |
 | `chat` | `Conversation`, `ChatMessage`, `Attachment`, `AttachmentRules`, `MessageProof`: the client's own chat shapes | - |
 | `turn` | `TurnContext`, `TurnResult`, `ExecutionResult`: a client describes a request without depending on `agent` | error, model, ports, wire |
 

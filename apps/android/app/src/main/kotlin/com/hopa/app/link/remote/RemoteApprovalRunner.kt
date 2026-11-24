@@ -1,9 +1,13 @@
 package com.hopa.app.link.remote
 
+import com.hopa.approval.ApprovalAnswer
 import com.hopa.backend.link.BackendLink
 import com.hopa.backend.wire.BackendEnvelope
 import com.hopa.backend.wire.BackendReplies
-import com.hopa.contracts.approval.ApprovalGateway
+import com.hopa.contracts.a2ui.A2uiCodec
+import com.hopa.contracts.a2ui.A2uiSurface
+import com.hopa.contracts.a2ui.ApprovalCard
+import com.hopa.contracts.a2ui.ApprovalSurfaces
 import com.hopa.contracts.approval.ApprovalRequest
 import com.hopa.contracts.json.HopaJson
 import kotlinx.coroutines.CancellationException
@@ -18,11 +22,18 @@ import kotlinx.serialization.json.JsonObject
  * The request is a `task.needs_approval` frame from the PC. It never runs a
  * goal and never touches the screen: the person's decision is the whole task.
  * The socket stays open while the sheet waits, and a timeout is a denial.
+ *
+ * ADR-0027: when the frame carries an `a2ui` card, the card is checked with
+ * `ApprovalSurfaces.receive` (A2UI rules, approval rules, and that it shows
+ * the typed request) and drawn as sent. A card that fails is never drawn: the
+ * answer is deny, with the A2UI `error`. Allow then counts only with the
+ * `approve` tap from that card, which travels back as `approval.action`.
+ * A frame without `a2ui` keeps the old path.
  */
 class RemoteApprovalRunner(
     private val deviceId: () -> String,
     private val link: () -> BackendLink?,
-    private val approval: ApprovalGateway,
+    private val ask: suspend (ApprovalRequest, A2uiSurface?) -> ApprovalAnswer,
     private val foreground: () -> Boolean,
     private val postApproval: () -> Unit,
     private val taskStarted: () -> Unit = {},
@@ -51,6 +62,15 @@ class RemoteApprovalRunner(
             )
             return
         }
+        val card = task.body["a2ui"]?.let { ApprovalSurfaces.receive(it, request) }
+        if (card is ApprovalCard.Refused) {
+            // Nothing is drawn, so nobody was asked: the answer is deny.
+            live.send(
+                BackendReplies.approval(task, deviceId(), false, error = card.error?.let(A2uiCodec::encodeReply)),
+            )
+            return
+        }
+        val surface = (card as? ApprovalCard.Shown)?.surface
 
         gate.withLock {
             taskStarted()
@@ -60,18 +80,25 @@ class RemoteApprovalRunner(
                     // is the way back to it while another app is in front.
                     runCatching { postApproval() }
                 }
-                val allow = try {
-                    withTimeoutOrNull(timeoutMillis) { approval.approve(request) } ?: false
+                val answer = try {
+                    withTimeoutOrNull(timeoutMillis) { ask(request, surface) } ?: ApprovalAnswer.DENY
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (_: Exception) {
-                    false
+                    ApprovalAnswer.DENY
                 }
-                live.send(BackendReplies.approval(task, deviceId(), allow))
+                live.send(reply(task, surface, answer))
             } finally {
                 taskFinished()
             }
         }
+    }
+
+    /** With a card, allow needs this card's approve tap; the tap goes back so the PC can check it too. */
+    private fun reply(task: BackendEnvelope, surface: A2uiSurface?, answer: ApprovalAnswer): BackendEnvelope {
+        if (surface == null) return BackendReplies.approval(task, deviceId(), answer.allow)
+        val tap = answer.action?.takeIf { ApprovalSurfaces.allowed(answer.allow, it, surface.id) }
+        return BackendReplies.approval(task, deviceId(), tap != null, action = tap?.let(A2uiCodec::encodeReply))
     }
 
     private fun decode(payload: JsonObject): ApprovalRequest? = runCatching {

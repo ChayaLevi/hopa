@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2UI for HOPA</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --text:#1d1d1b; --muted:#5f5e58; --line:#e4e1d8;
+  --accent:#2f5bd3; --accent-soft:#e8eefc; --ok:#1f7a4d; --ok-soft:#e3f3ea;
+  --warn:#a35c00; --warn-soft:#fbf0de; --bad:#b3261e; --bad-soft:#fbe6e4; --code:#f3f1eb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151514; --surface:#1e1e1c; --text:#ecebe6; --muted:#a8a69e; --line:#34332f;
+    --accent:#8aa8ff; --accent-soft:#1f2a47; --ok:#6fcf9b; --ok-soft:#173326;
+    --warn:#f0b35c; --warn-soft:#3a2a12; --bad:#ff8a80; --bad-soft:#3d1c1a; --code:#262523;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151514; --surface:#1e1e1c; --text:#ecebe6; --muted:#a8a69e; --line:#34332f;
+  --accent:#8aa8ff; --accent-soft:#1f2a47; --ok:#6fcf9b; --ok-soft:#173326;
+  --warn:#f0b35c; --warn-soft:#3a2a12; --bad:#ff8a80; --bad-soft:#3d1c1a; --code:#262523;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:40px 16px 80px}
+header.top{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:28px}
+.eyebrow{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:34px;line-height:1.2;margin:6px 0 10px}
+h2{font-size:24px;margin:48px 0 12px;padding-top:8px}
+h3{font-size:18px;margin:28px 0 8px}
+p,li{max-width:72ch}
+a{color:var(--accent)}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px;word-break:break-word}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto;font:13px/1.5 ui-monospace,Consolas,monospace}
+pre code{background:none;padding:0}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+nav.toc ol{margin:6px 0 0;padding-left:20px}
+.lead{font-size:18px;color:var(--muted)}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:18px 0}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout.bad{border-color:var(--bad);background:var(--bad-soft)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h4{margin:0 0 4px;font-size:15px}
+.card p{margin:0;font-size:14.5px;color:var(--muted)}
+.table-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.part{background:var(--warn-soft);color:var(--warn)}
+.tag.no{background:var(--bad-soft);color:var(--bad)}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.phase h3{margin:0 0 4px}
+.phase .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+.phase ul{margin:6px 0;padding-left:20px}
+.phase .done{font-size:14px;border-top:1px dashed var(--line);margin-top:10px;padding-top:8px}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+figure{margin:18px 0}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+
+<header class="top">
+  <div class="eyebrow">HOPA · design note · 22 Nov 2026</div>
+  <h1>A2UI for HOPA: what it is, what we have, and how to add it</h1>
+  <p class="lead">A plain-language guide to A2UI (Agent-to-User Interface), a review of what HOPA's code already has, and a phased plan to use A2UI for approval and choice cards on any device in the household.</p>
+</header>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#what">A2UI in simple words</a></li>
+    <li><a href="#how">How it works, step by step</a></li>
+    <li><a href="#why">Why HOPA wants it</a></li>
+    <li><a href="#exists">What exists in the code today</a></li>
+    <li><a href="#gaps">What has to be built</a></li>
+    <li><a href="#plan">Implementation plan</a></li>
+    <li><a href="#risks">Risks and open questions</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="what">1. A2UI in simple words</h2>
+
+<p><strong>A2UI lets an agent ask for a screen without sending any code.</strong> The agent sends a short JSON description, something like "a card with a title, two lines of text and two buttons". The app on the phone or PC reads that description and draws it with its <em>own</em> native buttons, fonts and colours.</p>
+
+<p>Think of a restaurant order. The agent is the customer: it can only order dishes that are on the menu. The app is the kitchen: it cooks each dish its own way. The menu is called the <strong>catalog</strong>. If the agent orders something that isn't on the menu, the app refuses it.</p>
+
+<div class="grid">
+  <div class="card"><h4>It's data, not code</h4><p>No HTML, no JavaScript, no iframes. A message can describe a UI but can't run anything, so it's safe to accept from a model or from another device.</p></div>
+  <div class="card"><h4>Native look</h4><p>The same message becomes Compose on Android, ArkUI on HarmonyOS and WinUI on Windows. Each one keeps its own theme and accessibility.</p></div>
+  <div class="card"><h4>Can stream and update</h4><p>The agent can send part of a card first and fill it in later, or just change the data under it (for example "the price is now ¥12").</p></div>
+  <div class="card"><h4>Any transport</h4><p>A2UI only defines the message shapes. They can travel over A2A, SSE, a WebSocket, or inside our gateway envelope.</p></div>
+</div>
+
+<p>A2UI is an open project that Google started (Apache-2.0, at <a href="https://a2ui.org">a2ui.org</a> and <a href="https://github.com/a2ui-project/a2ui">github.com/a2ui-project/a2ui</a>). Upstream versions: v0.8 is deprecated, v0.9 is closed, v0.9.1 is a closed patch, and 1.0 is current and stable. <strong>HOPA pins 1.0</strong> (ADR-0027, <code>spec/a2ui/VERSION</code>).</p>
+
+<h3>The five words you need</h3>
+<div class="table-wrap"><table>
+<tr><th>Word</th><th>Meaning</th><th>HOPA example</th></tr>
+<tr><td><strong>Surface</strong></td><td>One piece of UI the agent controls, with an id. A card, a sheet or a panel.</td><td>"approval card for task tsk-42"</td></tr>
+<tr><td><strong>Component</strong></td><td>One element on the surface: Text, Button, Row, Column, Card, TextField, CheckBox, MultipleChoice, Image and so on. Each has an id. Components point to their children by id, so the list is flat and easy to stream.</td><td><code>title</code>, <code>allow-btn</code>, <code>deny-btn</code></td></tr>
+<tr><td><strong>Catalog</strong></td><td>The list of components a client agrees to draw. The client owns it. A client can add its own components to it.</td><td>A small "HOPA catalog" with <code>ApprovalCard</code> and <code>ChoiceList</code></td></tr>
+<tr><td><strong>Data model</strong></td><td>The values the UI shows, stored apart from the layout. Components bind to them by path, such as <code>/payment/amount</code>.</td><td>amount, merchant, the options</td></tr>
+<tr><td><strong>User action</strong></td><td>What the client sends back when someone taps: the action name, the surface, the component and the bound values.</td><td><code>approve</code> on surface <code>appr_tsk42_1</code></td></tr>
+</table></div>
+
+<h3>How it compares to things you may have heard of</h3>
+<div class="table-wrap"><table>
+<tr><th></th><th>What it is</th><th>Relation to A2UI</th></tr>
+<tr><td>A2A</td><td>Agent-to-agent messaging</td><td>A common transport. A2UI can travel as an A2A extension.</td></tr>
+<tr><td>MCP</td><td>A standard way for agents to call tools</td><td>A separate layer. Tools return data, and A2UI shows it to a person.</td></tr>
+<tr><td>MCP Apps / iframe widgets</td><td>The agent ships real HTML that runs in a sandbox</td><td>The opposite approach. They're more flexible but run code. A2UI is limited and safe.</td></tr>
+<tr><td>AG-UI</td><td>An event stream between an agent backend and a front end</td><td>A transport. It can carry A2UI messages.</td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2 id="how">2. How it works, step by step</h2>
+
+<figure>
+<svg viewBox="0 0 760 250" width="100%" role="img" aria-label="A2UI message flow between agent and client">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ok)"/></marker>
+  </defs>
+  <rect x="10" y="20" width="170" height="210" rx="10" fill="var(--surface)" stroke="var(--line)"/>
+  <text x="95" y="48" text-anchor="middle" font-size="15" font-weight="600" fill="var(--text)">Agent</text>
+  <text x="95" y="68" text-anchor="middle" font-size="12" fill="var(--muted)">(HOPA engine on the</text>
+  <text x="95" y="83" text-anchor="middle" font-size="12" fill="var(--muted)">acting device)</text>
+  <rect x="580" y="20" width="170" height="210" rx="10" fill="var(--surface)" stroke="var(--line)"/>
+  <text x="665" y="48" text-anchor="middle" font-size="15" font-weight="600" fill="var(--text)">Client renderer</text>
+  <text x="665" y="68" text-anchor="middle" font-size="12" fill="var(--muted)">(the phone or PC</text>
+  <text x="665" y="83" text-anchor="middle" font-size="12" fill="var(--muted)">in someone's hand)</text>
+  <line x1="185" y1="110" x2="575" y2="110" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="380" y="102" text-anchor="middle" font-size="13" fill="var(--text)">1 · createSurface: surface id + catalog</text>
+  <line x1="185" y1="145" x2="575" y2="145" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="380" y="137" text-anchor="middle" font-size="13" fill="var(--text)">2 · updateComponents: what to draw (by id)</text>
+  <line x1="185" y1="180" x2="575" y2="180" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="380" y="172" text-anchor="middle" font-size="13" fill="var(--text)">3 · updateDataModel: the values to show</text>
+  <line x1="575" y1="215" x2="185" y2="215" stroke="var(--ok)" stroke-width="2" marker-end="url(#ar2)"/>
+  <text x="380" y="207" text-anchor="middle" font-size="13" fill="var(--text)">4 · action: "approve" was tapped</text>
+</svg>
+<figcaption>Step 1 comes first. Steps 2 and 3 can repeat, and nothing is drawn until a component with id <code>root</code> exists. <code>deleteSurface</code> closes the card.</figcaption>
+</figure>
+
+<p>In 1.0, the version we pin, there are four messages from the agent (<code>createSurface</code>, <code>updateComponents</code>, <code>updateDataModel</code>, <code>deleteSurface</code>) and one back for a tap (<code>action</code>). Components are a flat list, ids are plain identifiers (no hyphens), one component must have the id <code>root</code>, and bindings are written <code>{"@path": ...}</code>. Here is roughly what a HOPA approval card looks like (shortened):</p>
+
+<pre><code>{"version":"1.0","createSurface":{"surfaceId":"appr_tsk42_1",
+  "catalogId":"https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json"}}
+{"version":"1.0","updateComponents":{"surfaceId":"appr_tsk42_1","components":[
+  {"id":"root","component":"Card","child":"col"},
+  {"id":"col","component":"Column","children":["title","pay","btns"]},
+  {"id":"title","component":"Text","text":"Pay for the Meituan order?"},
+  {"id":"pay","component":"PaymentNotice","amount":{"@path":"/payment/amount"}},
+  {"id":"btns","component":"Row","children":["deny","allow"]},
+  {"id":"allow","component":"Button","child":"allowTxt","action":{"event":{"name":"approve"}}},
+  ...
+]}}
+{"version":"1.0","updateDataModel":{"surfaceId":"appr_tsk42_1","path":"/payment","value":{"amount":"¥12.40"}}}
+
+// back from the phone that was tapped:
+{"version":"1.0","action":{"name":"approve","surfaceId":"appr_tsk42_1","sourceComponentId":"allow",
+  "timestamp":"2026-11-22T10:15:00Z","context":{}}}</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="why">3. Why HOPA wants it</h2>
+
+<p>The backend plan already names this as a future function (<code>docs/project/plan/backend/weekly-plan.md</code>, "Future functions"):</p>
+<div class="callout">"<strong>A2UI relay</strong>: Approval and choice cards as A2UI surfaces, drawn on whichever device is in hand; the tap goes back to the acting device."</div>
+
+<p>Today a question can only be answered on the device that is doing the work. If the PC is running a task and needs a "yes", you have to walk to the PC. When a child's purchase needs a parent (week 5, "Family approvals"), the parent's phone has to draw a card for an action that happens on a different device. We need one neutral card format for that, which all three clients can draw and which the server never has to read. A2UI fits:</p>
+<ul>
+  <li><strong>Three native clients.</strong> Android is Compose, HarmonyOS is ArkUI, Windows is WinUI/C#. Sharing a web view or shipping code to each is out. Data that each one draws natively fits.</li>
+  <li><strong>The server must not read bodies.</strong> Bodies become ciphertext from week 2. An A2UI message is just JSON inside the encrypted <code>body</code>, and the server only routes it.</li>
+  <li><strong>Safe by construction.</strong> A message from another device or from a model can't run code. It can only use the components in our catalog.</li>
+</ul>
+
+<div class="callout bad"><strong>What A2UI must not change:</strong> golden rules 1 and 2 in <code>CLAUDE.md</code>. A remote tap is a <em>signed answer</em>. The acting device checks it, and its own <code>ActionExecutor</code> still runs <code>guards → payment approval → execute → verify → record</code>. The card is only how the question is shown. The decision is still made on the acting device.</div>
+
+<!-- ============================================================ -->
+<h2 id="exists">4. What exists in the code today</h2>
+
+<p>A search for "a2ui" finds a single line, the roadmap row above. There's no A2UI code yet. What does exist is the plumbing A2UI would sit on: a typed approval model, approval UIs on all three platforms, a choice mechanism, and a task envelope that already reserves <code>task.needs_approval</code>.</p>
+
+<div class="table-wrap"><table>
+<tr><th>Piece</th><th>Where</th><th>State</th><th>Notes for A2UI</th></tr>
+<tr><td>Approval model</td><td><code>core/contracts/.../approval/ApprovalRequest.kt</code>, <code>ApprovalGateway.kt</code>, <code>RiskLevel.kt</code></td><td><span class="tag ok">exists</span></td><td>title, body, amount, merchant, consequence, isPayment, action, highlight, rememberPackage. This is the input to the card builder.</td></tr>
+<tr><td>Android approval UI</td><td><code>apps/android/platform/approval/UiApprovalGateway.kt</code>, <code>platform/ui/component/ApprovalSheet.kt</code></td><td><span class="tag ok">exists</span></td><td>One question at a time, a 120 s timeout that denies, and a payment "I understand" checkbox. Since Phase 2 the sheet is drawn from an A2UI surface built locally.</td></tr>
+<tr><td>Pending approval persistence</td><td><code>apps/android/data/.../PendingApprovalEntity.kt</code>, <code>DbPendingApprovalStore.kt</code></td><td><span class="tag ok">exists</span></td><td>Survives process death. It can hold a surface id later.</td></tr>
+<tr><td>HarmonyOS approval UI</td><td><code>apps/harmony/phone/.../chat/ApprovalSheet.ets</code>, <code>laptop/.../LaptopApprovals.ets</code>, <code>core/.../gate/ApprovalGateway.ets</code></td><td><span class="tag ok">exists</span></td><td>Separate ArkTS approval contract (<code>requestApproval(action, screen)</code>).</td></tr>
+<tr><td>Windows approval</td><td><code>apps/windows/sidecar/.../Protocol.kt</code> (<code>approval.request</code> / <code>approval.result</code>), <code>HostApproval.kt</code>, <code>DenyAllApproval.kt</code>, <code>Hopa.Windows/Host/ApprovalRouter.cs</code>, <code>Dialogs/ApprovalWindow.xaml</code></td><td><span class="tag part">partial</span></td><td>The sidecar sends typed fields to the window over stdio and waits 120 s. <code>ApprovalRouter</code> decides who answers: an automation override, the paired phone (100 s, failure is deny), or the person at the PC. Headless <code>--turn</code> mode always denies. A WinUI card renderer would replace <code>ApprovalWindow</code>.</td></tr>
+<tr><td>PC → phone approval relay</td><td><code>Hopa.Windows/Gateway/GatewayClient.Requests.cs</code> (<code>RequestApprovalAsync</code>), Android <code>app/.../link/remote/RemoteApprovalRunner.kt</code></td><td><span class="tag ok">exists</span></td><td>Since #144 and #158. The PC sends <code>task.needs_approval</code> with the typed <code>approval</code> body; the phone shows the sheet (90 s timeout) and answers with <code>BackendReplies.approval</code>. Since Phase 3 it also carries the A2UI card out and the tap back, and the sidecar checks the tap.</td></tr>
+<tr><td>Choice ("which one?")</td><td><code>core/agent/.../decision/Decision.kt</code> (<code>Decision.Ask(answer, options)</code>) → <code>TurnOutcome.options</code> → Android <code>ChatScreen.kt</code> chips</td><td><span class="tag ok">exists</span></td><td>Local only. The source for a <code>ChoiceList</code> surface.</td></tr>
+<tr><td>Gateway envelope v1</td><td><code>spec/schemas/gateway.v1.schema.json</code>, <code>services/backend/.../protocol/</code>, <code>core/backend/.../wire/</code></td><td><span class="tag ok">exists</span></td><td>Closed <code>type</code> enum, a <code>body</code> the server never renders, idempotent ids and trace ids.</td></tr>
+<tr><td><code>task.needs_approval</code></td><td><code>spec/schemas/gateway.v1.schema.json</code>, <code>TaskRouter.kt</code>, <code>BackendClient.dispatchApproval</code>, <code>BackendReplies.approval</code></td><td><span class="tag ok">exists</span></td><td>Routed since ADR-0024. The body carries a typed <code>approval</code> object, and the answer is <code>task.result</code> with <code>body.approval.allow</code>. ADR-0027 adds an optional <code>a2ui</code> array and <code>approval.action</code> on top.</td></tr>
+<tr><td>Remote task runner</td><td><code>apps/android/app/.../link/remote/RemoteTaskRunner.kt</code></td><td><span class="tag part">partial</span></td><td>When the phone runs a remote task, its approval is a dialog on the phone plus a notification. A refusal becomes <code>E_POLICY</code>. The phone does not ask another device (the reverse direction, PC → phone, is the relay above).</td></tr>
+<tr><td>Device keys</td><td><code>core/backend/.../pairing/X25519Keys.kt</code></td><td><span class="tag part">partial</span></td><td>X25519 is for encryption. Signing a decision needs a signing key (for example Ed25519) per device, which the plan expects in week 5.</td></tr>
+<tr><td>Routing approvals to a member</td><td><code>services/backend/.../tasks/TaskRouter.kt</code></td><td><span class="tag no">missing</span></td><td>Week 5 in the backend plan: route by role, expiry, audit.</td></tr>
+<tr><td>A2UI types, catalog, renderers</td><td>none</td><td><span class="tag no">missing</span></td><td>No official Kotlin, ArkTS or C# renderer exists. Official renderers are web (Lit, Angular) and Flutter. We write our own three, but only for our small catalog.</td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2 id="gaps">5. What has to be built</h2>
+
+<ol>
+  <li><strong>A pinned A2UI subset and a HOPA catalog</strong> in <code>spec/</code>: the message shapes we accept, plus a catalog of around 10 components (Text, Row, Column, Card, Button, CheckBox, Divider, Image, MultipleChoice, and our own <code>PaymentNotice</code>).</li>
+  <li><strong>A shared Kotlin model</strong> in <code>core/contracts</code> (UI-free, per golden rule 5): types, codec, a validator that rejects anything outside the catalog, and a <em>deterministic</em> builder from <code>ApprovalRequest</code> and <code>Decision.Ask</code> to a surface.</li>
+  <li><strong>Protocol</strong>: allow <code>task.needs_approval</code> and add a choice and an answer type to the gateway enum, with fixtures.</li>
+  <li><strong>Signed answers</strong>: a per-device signing key, and an answer bound to task id, surface id, action hash, nonce and expiry. The acting device verifies it before it counts as consent.</li>
+  <li><strong>An approval gateway that races local and remote</strong>: show the local sheet <em>and</em> publish the surface, and the first valid answer wins. A timeout still means deny.</li>
+  <li><strong>Three renderers</strong> for the HOPA catalog: Compose, ArkUI and WinUI. Each maps catalog entries to existing components so the cards look like today's sheets.</li>
+  <li><strong>Backend routing</strong>: deliver a surface to the right member's devices, expire it, close it on the others once answered, and audit it.</li>
+  <li><strong>Housekeeping</strong>: a <code>NOTICE</code> entry crediting A2UI (idea and format, no code copied), an ADR, and conformance fixtures shared by all clients.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="plan">6. Implementation plan</h2>
+
+<p>The phases are lined up with the backend weeks so nothing is built twice. Week 3 already plans "own-device approval card messages" and week 5 plans family approvals. <strong>My recommendation is to make those approval card messages A2UI from the start.</strong> Then the post-beta "A2UI relay" becomes a widening of what we already have, not a rewrite.</p>
+
+<div class="phase">
+  <h3>Phase 0: Decide and pin <span class="tag ok">written, ADR proposed</span></h3>
+  <div class="meta">Owner: lane A · before week 3 starts</div>
+  <ul>
+    <li>ADR-0027, "Approval and choice cards are A2UI 1.0 surfaces" (<code>docs/design/decisions/0027-a2ui-approval-and-choice-cards.md</code>): the version, the subset, the catalog id, the transport inside the existing <code>task.needs_approval</code> and <code>task.result</code> bodies, and the safety rules.</li>
+    <li><code>spec/a2ui/VERSION</code> = <code>1.0</code>, plus <code>spec/a2ui/README.md</code>.</li>
+    <li>The <code>NOTICE</code> credit (item 6) and a row in the ADR index.</li>
+  </ul>
+  <div class="done">Done when: ADR-0027 is accepted and merged.</div>
+</div>
+
+<div class="phase">
+  <h3>Phase 1: Spec and shared core model <span class="tag ok">done</span></h3>
+  <div class="meta">Owner: lane A · week 3</div>
+  <ul>
+    <li><code>spec/a2ui/hopa-catalog.v1.json</code>: Text, Row, Column, Card, Button, Divider, Icon and <code>PaymentNotice</code>, with allowed parents and children. It is a valid A2UI 1.0 catalog.</li>
+    <li><code>spec/a2ui/messages.schema.json</code>: the HOPA subset of 1.0 in both directions. <code>spec/a2ui/upstream/</code>: the upstream 1.0 schemas at commit <code>d4f2761b</code>.</li>
+    <li><code>spec/fixtures/a2ui/</code>:
+      <ul>
+        <li><code>surfaces.json</code>: 34 cases accepted or refused with code and path, plus 8 approval-rule cases;</li>
+        <li><code>replies.json</code>: taps and errors, plus how an answer and a choice are read;</li>
+        <li><code>builders.json</code>: golden cards.</li>
+      </ul>
+    </li>
+    <li><code>core/contracts/.../a2ui/</code>:
+      <ul>
+        <li><code>A2uiCodec</code>: strict decode and encode;</li>
+        <li><code>A2uiSession</code>: surfaces for a renderer's lifetime, applied all or nothing, with the graph rules;</li>
+        <li><code>A2uiSurface</code>: what a renderer draws, plus <code>tap()</code>;</li>
+        <li><code>ApprovalSurfaces</code>: <code>build</code>, <code>problem</code> and <code>allowed</code>;</li>
+        <li><code>ChoiceSurfaces</code>: <code>build</code> and <code>chosen</code>.</li>
+      </ul>
+    </li>
+    <li>15 host tests replay the fixtures. <code>tools/checks/check-a2ui.py</code> runs in CI and validates every message against both our schema and upstream's.</li>
+  </ul>
+  <div class="done">Done: every fixture matches, refusals name a code and a JSON Pointer, and the builder output is pinned by goldens.</div>
+</div>
+
+<div class="phase">
+  <h3>Phase 2: Android renderer, local only <span class="tag ok">done</span></h3>
+  <div class="meta">Owner: Android · week 3</div>
+  <ul>
+    <li><code>apps/android/platform/ui/.../a2ui/</code>:
+      <ul>
+        <li><code>A2uiSurfaceView</code>: the general renderer for the HOPA catalog;</li>
+        <li><code>A2uiApprovalSheet</code>: an approval surface drawn as today's dialog;</li>
+        <li><code>ChoiceChips</code>: a choice surface drawn as today's chips.</li>
+      </ul>
+    </li>
+    <li><code>ApprovalSheet</code> keeps its signature but now builds a card with <code>ApprovalSurfaces</code> and runs it through the full codec and <code>A2uiSession</code>. Allow is only an <code>approve</code> tap on this surface. A card that fails a check is denied.</li>
+    <li><code>ChatScreen</code> draws its chips from a choice surface, and a tap is read back with <code>ChoiceSurfaces.chosen</code>.</li>
+    <li>Goldens were recorded from the old code first. The new rendering matches all five pixel for pixel: three sheets, the acknowledged payment sheet, and the chips. Two new tests cover the generic view and the deny when a card can't be built.</li>
+  </ul>
+  <div class="done">Done: nothing changes for the user, and the goldens and approval behaviour tests pass.</div>
+</div>
+
+<div class="phase">
+  <h3>Phase 3: The card on the existing PC → phone relay <span class="tag ok">code done</span></h3>
+  <div class="meta">Owner: lane A + Android + Windows · week 3 → 4</div>
+  <p>The relay itself already worked (#144, #158): the PC sends <code>task.needs_approval</code>, the phone's <code>RemoteApprovalRunner</code> shows the sheet, and the answer comes back as <code>task.result</code>. This phase put the A2UI card and its answer on that path. It built no new transport.</p>
+  <ul>
+    <li>No new envelope types for approvals (ADR-0027). The <code>task.needs_approval</code> body gains an <code>a2ui</code> array next to the typed <code>approval</code>. The <code>task.result</code> answer gains <code>approval.action</code>, or <code>approval.error</code> when a card was refused. All of it stays inside the encrypted body.</li>
+    <li><strong>Sidecar (Kotlin):</strong> <code>HostApproval</code> gives each question its own surface id, unique across restarts, and builds the card with <code>ApprovalSurfaces.wire</code>. <code>Protocol.approvalRequest</code> carries it to the window as an <code>a2ui</code> field.</li>
+    <li><strong>Window (C#):</strong> <code>ApprovalRouter</code> copies <code>a2ui</code> unchanged into the phone's body, and passes the phone's <code>approval.action</code> back to the sidecar in <code>approval.result</code>. The C# side never judges a card.</li>
+    <li><strong>The check exists once:</strong> <code>HostApproval.resolve</code> runs <code>ApprovalSurfaces.answered(allow, action, surfaceId)</code>. A mismatched, malformed or wrong-surface tap is deny. There is no C# port of the rule.</li>
+    <li><strong>Phone (Android):</strong> <code>RemoteApprovalRunner</code> checks the sent card with <code>ApprovalSurfaces.receive</code> and draws it as sent. The checks run in order: the A2UI rules, <code>problem()</code>, then <code>matches()</code>, which confirms the card shows the typed request (option C, ADR-0027 section 5). A card that fails is never drawn: the answer is deny with the A2UI <code>error</code>. With a card, allow counts only with that card's approve tap, which goes back as <code>approval.action</code>. A frame without <code>a2ui</code> keeps the old path, so old PCs keep working.</li>
+    <li><code>UiApprovalGateway.ask(request, card)</code> puts the checked card on the one sheet, and <code>ApprovalSheet</code> draws it in place of a locally built one. Timeouts are unchanged: phone 90 s &lt; window 100 s &lt; sidecar 120 s, and every one of them means deny.</li>
+    <li>Shared fixtures for every client: <code>surfaces.json</code> <code>receivedCases</code> (23 cards shown or refused, with the reason) and <code>replies.json</code> <code>wireAnswers</code> (8 answers as <code>task.result</code> carries them).</li>
+    <li>Deferred: the capability gate in <code>device.hello</code>. The gateway doesn't yet tell the PC what the phone advertised, so the card is always attached, and an old phone ignores it. Moved to Phase 6: backend expiry and closing the card on the other devices, which only matters once there is more than one answering device, and the Android <code>RemoteApprovalGateway</code> for the reverse direction (the phone acts and asks).</li>
+  </ul>
+  <div class="done">Code done and tested: 7 contract fixture tests, 6 phone runner tests, 6 sidecar tests and 2 window tests cover a matching tap, a deny tap, a tap for another surface, a malformed tap, a card that shows another amount, a card that is not valid A2UI, and an old client on either side. <strong>Still to do:</strong> the end-to-end demo, where a PC task asks and the phone answers, and its trace showing <code>needs_approval → answer → result</code>.</div>
+</div>
+
+<div class="phase">
+  <h3>Phase 4: Signed answers (3 days)</h3>
+  <div class="meta">Owner: lane A · week 4 → 5</div>
+  <ul>
+    <li>Ed25519 signing key per device, created at pairing, public key registered with the backend and shared within the household.</li>
+    <li><code>task.answer</code> carries <code>sig</code> over <code>(task, surfaceId, requestId, actionHash, decision, nonce, ts)</code>.</li>
+    <li>The acting device checks the signature, that the signer is allowed to answer this risk level, that the action hash matches the pending action, that it hasn't expired, and that the nonce hasn't been used. If any check fails, the answer is treated as deny.</li>
+    <li>Conformance tests for replays, a changed amount, an expired answer and a wrong signer.</li>
+  </ul>
+  <div class="done">Done when: a tampered answer can't approve anything, as shown by tests in <code>core/agent</code> conformance.</div>
+</div>
+
+<div class="phase">
+  <h3>Phase 5: Windows and HarmonyOS renderers (4–6 days, can run in parallel)</h3>
+  <div class="meta">Owner: Windows · HarmonyOS · weeks 4–5</div>
+  <ul>
+    <li>Windows: the card already reaches the window inside <code>approval.request</code> (Phase 3), so no new stdio event is needed. <code>Hopa.Windows</code> gets a XAML renderer for the HOPA catalog that replaces <code>Dialogs/ApprovalWindow</code>. <code>ApprovalRouter</code> still decides who answers, and its automation override keeps answering without a card. Headless stays <code>DenyAllApproval</code>.</li>
+    <li>HarmonyOS: an ArkTS port of the validator (or codegen from the schema), plus an ArkUI <code>SurfaceView</code> used by <code>ApprovalSheet.ets</code> and the laptop's <code>ChatRail</code>.</li>
+    <li>All three clients run the same <code>spec/fixtures/a2ui</code> suite.</li>
+  </ul>
+  <div class="done">Done when: the same fixture renders on all three and returns the same <code>action</code> JSON.</div>
+</div>
+
+<div class="phase">
+  <h3>Phase 6: Family approvals over A2UI (week 5, Gate 2)</h3>
+  <div class="meta">Owner: lane A + B</div>
+  <ul>
+    <li>Routing by role: a child's payment surface goes to the parents' devices, and an elder's goes to the caregiver, by consent.</li>
+    <li>Backend <code>TaskRouter</code> (moved from Phase 3): expire a card at its deadline, and close it on the other devices when one answers. Sending a choice card across devices needs a new envelope type, which gets its own decision.</li>
+    <li>Advertise and honour <code>a2uiRendererCapabilities</code> in <code>device.hello</code> once the gateway shares it between devices.</li>
+    <li><code>RemoteApprovalGateway</code> (Android, moved from Phase 3): wraps <code>UiApprovalGateway</code> so a phone that acts can publish its card to other devices and take the first valid answer.</li>
+    <li>The card shows who asked and from which device. That text comes from the builder, never from the model.</li>
+    <li>Audit row per surface: shown, answered by, signed, verified, outcome. Reminder push before expiry.</li>
+  </ul>
+  <div class="done">Done when: Gate 2 passes. A child's task is approved on a parent's phone, with the signed answer verified on the child's device and an audit trail.</div>
+</div>
+
+<div class="phase">
+  <h3>Phase 7 (after beta): Wider A2UI</h3>
+  <div class="meta">Optional</div>
+  <ul>
+    <li>Richer result cards (a list of found files, a draft email with an "edit" field) in the chat.</li>
+    <li>Letting outside agents (the MCP/A2A gateway row) send A2UI surfaces, still limited to our catalog.</li>
+    <li>Model-authored layouts for <em>non-approval</em> content only, after validation.</li>
+  </ul>
+</div>
+
+<h3>Rough size</h3>
+<div class="table-wrap"><table>
+<tr><th>Phase</th><th>Effort</th><th>Backend week</th></tr>
+<tr><td>0 · ADR and pin</td><td>1–2 d</td><td>before 3</td></tr>
+<tr><td>1 · Spec and core</td><td>3–4 d</td><td>3</td></tr>
+<tr><td>2 · Android renderer</td><td>3–4 d</td><td>3</td></tr>
+<tr><td>3 · Card on the PC → phone relay</td><td>2–3 d (code done)</td><td>3–4</td></tr>
+<tr><td>4 · Signed answers</td><td>3 d</td><td>4–5</td></tr>
+<tr><td>5 · Windows and HarmonyOS</td><td>4–6 d each, in parallel</td><td>4–5</td></tr>
+<tr><td>6 · Family approvals</td><td>part of the week 5 plan</td><td>5</td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2 id="risks">7. Risks and open questions</h2>
+
+<div class="callout warn"><strong>Rule: the model never writes an approval card.</strong> If the LLM could make the layout, it could put "Allow" where "Deny" belongs, or hide the amount. Approval and payment surfaces are built only by deterministic code from <code>ApprovalRequest</code>. The validator on the receiving device rejects an approval surface that lacks the required parts (amount, merchant, consequence, both buttons).</div>
+
+<ul>
+  <li><strong>The spec will keep moving.</strong> 1.0 is stable, but later versions will come. Mitigation: pin the version, keep our subset small, and wrap it behind our own types so a rename touches one codec.</li>
+  <li><strong>We write three renderers.</strong> There's no official Compose, ArkUI or WinUI renderer. Mitigation: a small catalog (around 10 components) and a shared fixture suite.</li>
+  <li><strong>The payment gate.</strong> A remote "yes" is input, not permission. The acting device still decides, and when it's unsure it denies. Never add a "trust remote" flag (golden rule 2).</li>
+  <li><strong>Encryption timing.</strong> Surfaces carry amounts and merchants, so they must ride in the encrypted body. If week 2 encryption slips, cross-device surfaces wait for it.</li>
+  <li><strong>Two answers at once.</strong> When the phone and PC both tap, the first valid signed answer wins. The acting device closes the others with a delete-surface message, and late answers are ignored.</li>
+  <li><strong>Settled (ADR-0027):</strong> a receiver draws the card it was sent, after checking that it shows the typed request (option C). Rebuilding and comparing was rejected, because every wording change would break older receivers.</li>
+  <li><strong>Settled (ADR-0027):</strong> approvals reuse <code>task.needs_approval</code> and <code>task.result</code>, with no new envelope types. <strong>Still open:</strong> the envelope type for sending a choice card to another device.</li>
+  <li><strong>1.0 is wider than we need:</strong> it adds function calls, multiple catalogs and templates. Our receivers refuse everything outside the HOPA subset, so a newer sender can't widen what we draw.</li>
+  <li><strong>Open:</strong> should HarmonyOS reuse the Kotlin core through codegen from the JSON schema, or keep a hand-written ArkTS port with the shared fixtures as the check?</li>
+</ul>
+
+<footer>
+  Written from the HOPA repository as of 22 Nov 2026 (branch HEAD after merge #134), revised 24 Nov 2026 against merge #165. A2UI details follow the pinned 1.0 spec (ADR-0027).
+</footer>
+
+</main>
+</body>
+</html>

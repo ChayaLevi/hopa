@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hopa.dev/contracts/a2ui/messages.schema.json",
+  "title": "HOPA A2UI 1.0 message subset",
+  "description": "One A2UI 1.0 message as HOPA sends and accepts it (ADR-0027). Stricter than upstream: the HOPA catalog only, no function RPC, no templates, no sendDataModel, no metadata, no per-component catalog ids. Every message that passes this schema also passes the upstream 1.0 schema with the HOPA catalog in place of the catalog (checked by tools/checks/check-a2ui.py). Graph rules (root, references, tree shape, allowed parents and children, bindings) are not expressible here; core/contracts' A2uiSession enforces them.",
+  "oneOf": [
+    { "$ref": "#/$defs/CreateSurfaceMessage" },
+    { "$ref": "#/$defs/UpdateComponentsMessage" },
+    { "$ref": "#/$defs/UpdateDataModelMessage" },
+    { "$ref": "#/$defs/DeleteSurfaceMessage" },
+    { "$ref": "#/$defs/ActionMessage" },
+    { "$ref": "#/$defs/ErrorMessage" }
+  ],
+  "$defs": {
+    "Version": { "const": "1.0" },
+    "SurfaceId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,128}$" },
+    "Component": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": { "$ref": "hopa-catalog.v1.json#/$defs/HopaId" },
+            "@accessibility": {
+              "type": "object",
+              "properties": {
+                "label": { "$ref": "hopa-catalog.v1.json#/$defs/HopaString" },
+                "description": { "$ref": "hopa-catalog.v1.json#/$defs/HopaString" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": ["id"]
+        },
+        { "$ref": "hopa-catalog.v1.json#/$defs/anyComponent" }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Components": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Component" },
+      "minItems": 1,
+      "maxItems": 64
+    },
+    "CreateSurfaceMessage": {
+      "type": "object",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "createSurface": {
+          "type": "object",
+          "properties": {
+            "surfaceId": { "$ref": "#/$defs/SurfaceId" },
+            "catalogId": { "const": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json" },
+            "sendDataModel": { "const": false },
+            "components": { "$ref": "#/$defs/Components" },
+            "dataModel": { "type": "object" }
+          },
+          "required": ["surfaceId", "catalogId"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["version", "createSurface"],
+      "additionalProperties": false
+    },
+    "UpdateComponentsMessage": {
+      "type": "object",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "updateComponents": {
+          "type": "object",
+          "properties": {
+            "surfaceId": { "$ref": "#/$defs/SurfaceId" },
+            "components": { "$ref": "#/$defs/Components" }
+          },
+          "required": ["surfaceId", "components"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["version", "updateComponents"],
+      "additionalProperties": false
+    },
+    "UpdateDataModelMessage": {
+      "type": "object",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "updateDataModel": {
+          "type": "object",
+          "properties": {
+            "surfaceId": { "$ref": "#/$defs/SurfaceId" },
+            "path": { "type": "string", "pattern": "^/", "maxLength": 256 },
+            "value": {}
+          },
+          "required": ["surfaceId", "value"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["version", "updateDataModel"],
+      "additionalProperties": false
+    },
+    "DeleteSurfaceMessage": {
+      "type": "object",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "deleteSurface": {
+          "type": "object",
+          "properties": { "surfaceId": { "$ref": "#/$defs/SurfaceId" } },
+          "required": ["surfaceId"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["version", "deleteSurface"],
+      "additionalProperties": false
+    },
+    "ActionMessage": {
+      "type": "object",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "action": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "pattern": "^[a-z][A-Za-z]{0,31}$" },
+            "surfaceId": { "$ref": "#/$defs/SurfaceId" },
+            "sourceComponentId": { "$ref": "hopa-catalog.v1.json#/$defs/HopaId" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "context": {
+              "type": "object",
+              "maxProperties": 8,
+              "additionalProperties": { "type": "string", "maxLength": 1000 }
+            }
+          },
+          "required": ["name", "surfaceId", "sourceComponentId", "timestamp", "context"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["version", "action"],
+      "additionalProperties": false
+    },
+    "ErrorMessage": {
+      "type": "object",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "error": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "code": { "enum": ["VALIDATION_FAILED", "UNALLOWED_PARENT", "UNALLOWED_CHILD"] },
+                "surfaceId": { "$ref": "#/$defs/SurfaceId" },
+                "path": { "type": "string" },
+                "message": { "type": "string", "maxLength": 500 }
+              },
+              "required": ["code", "path", "message", "surfaceId"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "code": { "enum": ["INTEGRITY_ERROR", "UNSUPPORTED"] },
+                "surfaceId": { "$ref": "#/$defs/SurfaceId" },
+                "message": { "type": "string", "maxLength": 500 }
+              },
+              "required": ["code", "message", "surfaceId"],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": ["version", "error"],
+      "additionalProperties": false
+    }
+  }
+}

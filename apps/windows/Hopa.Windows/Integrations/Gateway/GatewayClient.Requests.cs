@@ -19,7 +19,8 @@ public sealed partial class GatewayClient
     public async Task<JsonObject?> RequestApprovalAsync(
         JsonObject approval,
         string phoneDeviceId,
-        TimeSpan timeout)
+        TimeSpan timeout,
+        JsonArray? a2ui = null)
     {
         if (!HasPhone || phoneDeviceId.Length == 0)
         {
@@ -34,6 +35,16 @@ public sealed partial class GatewayClient
 
         try
         {
+            var body = new JsonObject
+            {
+                ["goal"] = approval["title"]?.GetValue<string>() ?? "approve this action",
+                ["approval"] = approval.DeepClone(),
+            };
+            if (a2ui != null)
+            {
+                body["a2ui"] = a2ui.DeepClone();
+            }
+
             await SendAsync(new JsonObject
             {
                 ["v"] = 1,
@@ -41,11 +52,7 @@ public sealed partial class GatewayClient
                 ["type"] = "task.needs_approval",
                 ["ts"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 ["to"] = phoneDeviceId,
-                ["body"] = new JsonObject
-                {
-                    ["goal"] = approval["title"]?.GetValue<string>() ?? "approve this action",
-                    ["approval"] = approval.DeepClone(),
-                },
+                ["body"] = body,
             });
             _ = await pending.Ack.Task.WaitAsync(TimeSpan.FromSeconds(15));
             return await pending.Result.Task.WaitAsync(timeout);

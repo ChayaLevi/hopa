@@ -1,120 +1,50 @@
 package com.hopa.ui.component
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.hopa.ui.theme.HopaColor
+import com.hopa.contracts.a2ui.A2uiAction
+import com.hopa.contracts.a2ui.A2uiCodec
+import com.hopa.contracts.a2ui.A2uiOutcome
+import com.hopa.contracts.a2ui.A2uiSession
+import com.hopa.contracts.a2ui.A2uiSurface
+import com.hopa.contracts.a2ui.ApprovalSurfaces
 import com.hopa.contracts.approval.ApprovalRequest
+import com.hopa.ui.a2ui.A2uiApprovalSheet
 
+/**
+ * The approval question on this device. Since ADR-0027 it is an A2UI surface:
+ * built by [ApprovalSurfaces] from the typed request, checked by
+ * [A2uiSession] and HOPA's approval rules, drawn by [A2uiApprovalSheet].
+ * A question from another device brings its own [card], which the caller has
+ * already checked with `ApprovalSurfaces.receive`.
+ * Allow is only an `approve` tap on the allow button of this surface, and
+ * [onAllow] gets that tap; anything else, or a card that fails a check, is deny.
+ */
 @Composable
 fun ApprovalSheet(
     request: ApprovalRequest,
     onDeny: () -> Unit,
-    onAllow: () -> Unit,
+    onAllow: (A2uiAction) -> Unit,
+    card: A2uiSurface? = null,
 ) {
-    var understood by remember(request) { mutableStateOf(!request.isPayment) }
-    AlertDialog(
-        onDismissRequest = onDeny,
-        title = {
-            Column {
-                if (request.isPayment) {
-                    Surface(
-                        color = HopaColor.Danger.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Text(
-                            "PAYMENT",
-                            color = HopaColor.Danger,
-                            fontSize = 10.sp,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        )
-                    }
-                }
-                Text(
-                    request.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(request.body, fontSize = 14.sp, color = HopaColor.TextSecondary)
-                if (request.amount.isNotEmpty()) {
-                    Text("Amount: ${request.amount}", fontSize = 14.sp)
-                }
-                if (request.merchant.isNotEmpty()) {
-                    Text("Merchant: ${request.merchant}", fontSize = 14.sp)
-                }
-                if (request.isPayment && request.consequence.isNotEmpty()) {
-                    Text(
-                        request.consequence,
-                        color = HopaColor.Danger,
-                        fontSize = 12.sp,
-                    )
-                }
-                Text(
-                    "Action: ${request.action.kind}",
-                    fontSize = 11.sp,
-                    color = HopaColor.TextHint,
-                )
-                if (request.isPayment) {
-                    Row(
-                        modifier = Modifier
-                            .clickable { understood = !understood }
-                            .padding(top = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(
-                            checked = understood,
-                            onCheckedChange = { understood = it },
-                        )
-                        Text(
-                            "I understand money may leave my account.",
-                            fontSize = 12.sp,
-                            color = HopaColor.TextPrimary,
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onAllow,
-                enabled = understood,
-            ) {
-                Text(
-                    "Allow",
-                    color = when {
-                        !understood -> HopaColor.TextHint
-                        request.isPayment -> HopaColor.Danger
-                        else -> HopaColor.Primary
-                    },
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDeny) {
-                Text("Deny", color = HopaColor.TextSecondary)
-            }
-        },
-    )
+    val surface = remember(request, card) { card ?: localSurface(request) }
+    if (surface == null) {
+        LaunchedEffect(request) { onDeny() }
+        return
+    }
+    A2uiApprovalSheet(surface) { action ->
+        if (ApprovalSurfaces.allowed(allow = true, action = action, surfaceId = surface.id)) {
+            onAllow(action)
+        } else {
+            onDeny()
+        }
+    }
+}
+
+private fun localSurface(request: ApprovalRequest): A2uiSurface? {
+    val surfaceId = ApprovalSurfaces.surfaceId("local", 1)
+    val message = ApprovalSurfaces.build(request, surfaceId).single()
+    val surface = (A2uiSession().apply(A2uiCodec.encode(message)) as? A2uiOutcome.Ready)?.surface ?: return null
+    return surface.takeIf { ApprovalSurfaces.problem(it, request.isPayment) == null }
 }

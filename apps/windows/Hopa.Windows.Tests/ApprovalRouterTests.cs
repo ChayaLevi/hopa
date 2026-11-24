@@ -21,7 +21,7 @@ public sealed class ApprovalRouterTests
                 return false;
             },
             phone: () => phone,
-            reply: (id, allow, source) => replies.Add((id, allow, source)),
+            reply: (id, allow, source, _) => replies.Add((id, allow, source)),
             log: _ => { },
             autoApproval: "allow");
 
@@ -41,7 +41,7 @@ public sealed class ApprovalRouterTests
         var router = new ApprovalRouter(
             askUser: _ => true,
             phone: () => null,
-            reply: (id, allow, source) => replies.Add((id, allow, source)),
+            reply: (id, allow, source, _) => replies.Add((id, allow, source)),
             log: _ => { },
             autoApproval: null);
 
@@ -65,7 +65,7 @@ public sealed class ApprovalRouterTests
         var router = new ApprovalRouter(
             askUser: _ => false,
             phone: () => phone,
-            reply: (id, allow, source) => replies.Add((id, allow, source)),
+            reply: (id, allow, source, _) => replies.Add((id, allow, source)),
             log: _ => { },
             autoApproval: null);
 
@@ -95,7 +95,7 @@ public sealed class ApprovalRouterTests
             var router = new ApprovalRouter(
                 askUser: _ => true,
                 phone: () => phone,
-                reply: (id, allow, source) => replies.Add((id, allow, source)),
+                reply: (id, allow, source, _) => replies.Add((id, allow, source)),
                 log: _ => { },
                 autoApproval: null);
 
@@ -136,7 +136,7 @@ public sealed class ApprovalRouterTests
         var router = new ApprovalRouter(
             askUser: _ => true,
             phone: () => null,
-            reply: (_, _, _) => { },
+            reply: (_, _, _, _) => { },
             log: logs.Add,
             autoApproval: null);
 
@@ -149,6 +149,51 @@ public sealed class ApprovalRouterTests
 
         Assert.Contains(logs, line => line.StartsWith("approval:", StringComparison.Ordinal));
         Assert.DoesNotContain(logs, line => line.Contains("hunter2", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task TheCardGoesToThePhoneAndTheTapComesBackUnchanged()
+    {
+        var tap = new JsonObject
+        {
+            ["version"] = "1.0",
+            ["action"] = new JsonObject { ["name"] = "approve", ["surfaceId"] = "appr_ap_1_x_1" },
+        };
+        var result = Approval(allow: true);
+        result["body"]!["approval"]!["action"] = tap.DeepClone();
+        var phone = new FakePhone { IsLive = true, PhoneDeviceId = "p1", Result = result };
+        var replies = new List<JsonObject?>();
+        var router = new ApprovalRouter(
+            askUser: _ => false,
+            phone: () => phone,
+            reply: (_, _, _, action) => replies.Add(action),
+            log: _ => { },
+            autoApproval: null);
+        var message = Message();
+        message["a2ui"] = new JsonArray(new JsonObject { ["version"] = "1.0" });
+
+        await router.HandleAsync(message);
+
+        Assert.True(JsonNode.DeepEquals(message["a2ui"], phone.Card), "the card is copied, not rebuilt");
+        Assert.True(JsonNode.DeepEquals(tap, Assert.Single(replies)), "the sidecar gets the tap to check");
+    }
+
+    [Fact]
+    public async Task WithoutACardOrATapNothingExtraTravels()
+    {
+        var phone = new FakePhone { IsLive = true, PhoneDeviceId = "p1", Result = Approval(allow: true) };
+        var replies = new List<JsonObject?>();
+        var router = new ApprovalRouter(
+            askUser: _ => false,
+            phone: () => phone,
+            reply: (_, _, _, action) => replies.Add(action),
+            log: _ => { },
+            autoApproval: null);
+
+        await router.HandleAsync(Message());
+
+        Assert.Null(phone.Card);
+        Assert.Null(Assert.Single(replies));
     }
 
     [Fact]
@@ -186,12 +231,16 @@ public sealed class ApprovalRouterTests
 
         public int Calls { get; private set; }
 
+        public JsonArray? Card { get; private set; }
+
         public Task<JsonObject?> RequestApprovalAsync(
             JsonObject approval,
             string phoneDeviceId,
-            TimeSpan timeout)
+            TimeSpan timeout,
+            JsonArray? a2ui = null)
         {
             Calls++;
+            Card = a2ui;
             return Failure != null
                 ? Task.FromException<JsonObject?>(Failure)
                 : Task.FromResult(Result);

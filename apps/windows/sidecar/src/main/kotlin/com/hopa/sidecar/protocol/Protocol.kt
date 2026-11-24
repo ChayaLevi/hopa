@@ -5,6 +5,7 @@ import com.hopa.contracts.wire.RunRecord
 import com.hopa.contracts.chat.Attachment
 import com.hopa.contracts.chat.Conversation
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.buildJsonArray
@@ -195,7 +196,12 @@ object Protocol {
         task.error?.let { put("error", it) }
     }
 
-    fun approvalRequest(id: String, request: ApprovalRequest): JsonObject = buildJsonObject {
+    /**
+     * [a2ui] is the approval card (ADR-0027): the window copies it, unchanged,
+     * into the phone's `task.needs_approval` body. The window's own dialog
+     * still draws from the typed fields.
+     */
+    fun approvalRequest(id: String, request: ApprovalRequest, a2ui: JsonArray? = null): JsonObject = buildJsonObject {
         put("type", "approval.request")
         put("id", id)
         put("title", request.title)
@@ -205,6 +211,7 @@ object Protocol {
         put("consequence", request.consequence)
         put("isPayment", request.isPayment)
         put("action", request.action.kind)
+        a2ui?.let { put("a2ui", it) }
     }
 
     fun conversationList(id: String, items: List<Conversation>): JsonObject = buildJsonObject {

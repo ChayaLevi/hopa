@@ -98,6 +98,10 @@ jobs:
         run: python tools/checks/check-conformance.py
       - name: Gateway fixtures
         run: python tools/checks/check-gateway-fixtures.py
+      - name: A2UI catalog and fixtures
+        run: python tools/checks/check-a2ui.py
+      - name: Generated A2UI fixtures are current
+        run: python tools/scripts/build-a2ui-fixtures.py --check
       - name: Wire types match the schemas
         run: python tools/checks/check-wire-types.py
       - name: Routing fixtures

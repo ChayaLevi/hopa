@@ -359,7 +359,7 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
         com.hopa.app.link.remote.RemoteApprovalRunner(
             deviceId = { backend.deviceId },
             link = { backend.currentLink() },
-            approval = approval,
+            ask = approval::ask,
             foreground = { AppVisibility.foreground },
             postApproval = { Notifier.postApproval(context) },
             taskStarted = { backend.taskStarted() },

@@ -9,8 +9,13 @@ public interface IApprovalPhone
 
     string PhoneDeviceId { get; }
 
+    /// <summary>
+    /// Asks the phone. <paramref name="a2ui"/> is the sidecar's approval card
+    /// (ADR-0027), sent beside the typed approval; null sends none.
+    /// </summary>
     Task<JsonObject?> RequestApprovalAsync(
         JsonObject approval,
         string phoneDeviceId,
-        TimeSpan timeout);
+        TimeSpan timeout,
+        JsonArray? a2ui = null);
 }

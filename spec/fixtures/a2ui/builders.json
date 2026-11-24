@@ -1,0 +1,614 @@
+{
+  "version": "1.0",
+  "approvals": [
+    {
+      "name": "a plain approval",
+      "surfaceId": "appr_tsk_42_1",
+      "request": {
+        "title": "Open Settings?",
+        "body": "HOPA wants to open Wi-Fi settings on your phone.",
+        "amount": "",
+        "merchant": "",
+        "consequence": "",
+        "isPayment": false,
+        "action": {
+          "kind": "launch"
+        }
+      },
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "appr_tsk_42_1",
+            "catalogId": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "content"
+              },
+              {
+                "id": "content",
+                "component": "Column",
+                "children": [
+                  "title",
+                  "body",
+                  "actionLine",
+                  "buttons"
+                ]
+              },
+              {
+                "id": "title",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/title"
+                }
+              },
+              {
+                "id": "body",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/body"
+                }
+              },
+              {
+                "id": "actionLine",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/actionLine"
+                },
+                "variant": "caption"
+              },
+              {
+                "id": "buttons",
+                "component": "Row",
+                "children": [
+                  "deny",
+                  "allow"
+                ],
+                "justify": "end"
+              },
+              {
+                "id": "deny",
+                "component": "Button",
+                "child": "denyLabel",
+                "variant": "borderless",
+                "action": {
+                  "event": {
+                    "name": "deny"
+                  }
+                }
+              },
+              {
+                "id": "denyLabel",
+                "component": "Text",
+                "text": "Deny"
+              },
+              {
+                "id": "allow",
+                "component": "Button",
+                "child": "allowLabel",
+                "variant": "primary",
+                "action": {
+                  "event": {
+                    "name": "approve"
+                  }
+                }
+              },
+              {
+                "id": "allowLabel",
+                "component": "Text",
+                "text": "Allow"
+              }
+            ],
+            "dataModel": {
+              "approval": {
+                "title": "Open Settings?",
+                "body": "HOPA wants to open Wi-Fi settings on your phone.",
+                "actionLine": "Action: launch"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "a payment with every detail",
+      "surfaceId": "appr_tsk_01h_2_1",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "tap"
+        }
+      },
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "appr_tsk_01h_2_1",
+            "catalogId": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "content"
+              },
+              {
+                "id": "content",
+                "component": "Column",
+                "children": [
+                  "title",
+                  "body",
+                  "notice",
+                  "actionLine",
+                  "buttons"
+                ]
+              },
+              {
+                "id": "title",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/title"
+                }
+              },
+              {
+                "id": "body",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/body"
+                }
+              },
+              {
+                "id": "notice",
+                "component": "PaymentNotice",
+                "amount": {
+                  "@path": "/payment/amount"
+                },
+                "merchant": {
+                  "@path": "/payment/merchant"
+                },
+                "consequence": {
+                  "@path": "/payment/consequence"
+                },
+                "acknowledge": "I understand money may leave my account."
+              },
+              {
+                "id": "actionLine",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/actionLine"
+                },
+                "variant": "caption"
+              },
+              {
+                "id": "buttons",
+                "component": "Row",
+                "children": [
+                  "deny",
+                  "allow"
+                ],
+                "justify": "end"
+              },
+              {
+                "id": "deny",
+                "component": "Button",
+                "child": "denyLabel",
+                "variant": "borderless",
+                "action": {
+                  "event": {
+                    "name": "deny"
+                  }
+                }
+              },
+              {
+                "id": "denyLabel",
+                "component": "Text",
+                "text": "Deny"
+              },
+              {
+                "id": "allow",
+                "component": "Button",
+                "child": "allowLabel",
+                "variant": "primary",
+                "action": {
+                  "event": {
+                    "name": "approve"
+                  }
+                }
+              },
+              {
+                "id": "allowLabel",
+                "component": "Text",
+                "text": "Allow"
+              }
+            ],
+            "dataModel": {
+              "approval": {
+                "title": "Confirm payment",
+                "body": "Money may leave your account.",
+                "actionLine": "Action: tap"
+              },
+              "payment": {
+                "amount": "12.40",
+                "merchant": "Example Shop",
+                "consequence": "HOPA cannot undo a payment."
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "a payment with no details still shows the notice",
+      "surfaceId": "appr_t_3",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "",
+        "merchant": "",
+        "consequence": "",
+        "isPayment": true,
+        "action": {
+          "kind": "tap"
+        }
+      },
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "appr_t_3",
+            "catalogId": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "content"
+              },
+              {
+                "id": "content",
+                "component": "Column",
+                "children": [
+                  "title",
+                  "body",
+                  "notice",
+                  "actionLine",
+                  "buttons"
+                ]
+              },
+              {
+                "id": "title",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/title"
+                }
+              },
+              {
+                "id": "body",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/body"
+                }
+              },
+              {
+                "id": "notice",
+                "component": "PaymentNotice",
+                "amount": {
+                  "@path": "/payment/amount"
+                },
+                "acknowledge": "I understand money may leave my account."
+              },
+              {
+                "id": "actionLine",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/actionLine"
+                },
+                "variant": "caption"
+              },
+              {
+                "id": "buttons",
+                "component": "Row",
+                "children": [
+                  "deny",
+                  "allow"
+                ],
+                "justify": "end"
+              },
+              {
+                "id": "deny",
+                "component": "Button",
+                "child": "denyLabel",
+                "variant": "borderless",
+                "action": {
+                  "event": {
+                    "name": "deny"
+                  }
+                }
+              },
+              {
+                "id": "denyLabel",
+                "component": "Text",
+                "text": "Deny"
+              },
+              {
+                "id": "allow",
+                "component": "Button",
+                "child": "allowLabel",
+                "variant": "primary",
+                "action": {
+                  "event": {
+                    "name": "approve"
+                  }
+                }
+              },
+              {
+                "id": "allowLabel",
+                "component": "Text",
+                "text": "Allow"
+              }
+            ],
+            "dataModel": {
+              "approval": {
+                "title": "Confirm payment",
+                "body": "Money may leave your account.",
+                "actionLine": "Action: tap"
+              },
+              "payment": {
+                "amount": ""
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "a non-payment with an amount shows plain lines",
+      "surfaceId": "appr_t_4",
+      "request": {
+        "title": "Send the message?",
+        "body": "To Dana: on my way",
+        "amount": "5",
+        "merchant": "Bank",
+        "consequence": "",
+        "isPayment": false,
+        "action": {
+          "kind": "type"
+        }
+      },
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "appr_t_4",
+            "catalogId": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "content"
+              },
+              {
+                "id": "content",
+                "component": "Column",
+                "children": [
+                  "title",
+                  "body",
+                  "amountLine",
+                  "merchantLine",
+                  "actionLine",
+                  "buttons"
+                ]
+              },
+              {
+                "id": "title",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/title"
+                }
+              },
+              {
+                "id": "body",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/body"
+                }
+              },
+              {
+                "id": "amountLine",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/amountLine"
+                }
+              },
+              {
+                "id": "merchantLine",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/merchantLine"
+                }
+              },
+              {
+                "id": "actionLine",
+                "component": "Text",
+                "text": {
+                  "@path": "/approval/actionLine"
+                },
+                "variant": "caption"
+              },
+              {
+                "id": "buttons",
+                "component": "Row",
+                "children": [
+                  "deny",
+                  "allow"
+                ],
+                "justify": "end"
+              },
+              {
+                "id": "deny",
+                "component": "Button",
+                "child": "denyLabel",
+                "variant": "borderless",
+                "action": {
+                  "event": {
+                    "name": "deny"
+                  }
+                }
+              },
+              {
+                "id": "denyLabel",
+                "component": "Text",
+                "text": "Deny"
+              },
+              {
+                "id": "allow",
+                "component": "Button",
+                "child": "allowLabel",
+                "variant": "primary",
+                "action": {
+                  "event": {
+                    "name": "approve"
+                  }
+                }
+              },
+              {
+                "id": "allowLabel",
+                "component": "Text",
+                "text": "Allow"
+              }
+            ],
+            "dataModel": {
+              "approval": {
+                "title": "Send the message?",
+                "body": "To Dana: on my way",
+                "amountLine": "Amount: 5",
+                "merchantLine": "Merchant: Bank",
+                "actionLine": "Action: type"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "choices": [
+    {
+      "name": "three options",
+      "surfaceId": "ask_turn_7_1",
+      "question": "Which account?",
+      "options": [
+        "Personal",
+        "Work",
+        "Family"
+      ],
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "ask_turn_7_1",
+            "catalogId": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
+            "components": [
+              {
+                "id": "root",
+                "component": "Card",
+                "child": "content"
+              },
+              {
+                "id": "content",
+                "component": "Column",
+                "children": [
+                  "question",
+                  "option0",
+                  "option1",
+                  "option2"
+                ]
+              },
+              {
+                "id": "question",
+                "component": "Text",
+                "text": {
+                  "@path": "/ask/question"
+                }
+              },
+              {
+                "id": "option0",
+                "component": "Button",
+                "child": "option0Label",
+                "action": {
+                  "event": {
+                    "name": "choose",
+                    "context": {
+                      "value": "Personal"
+                    }
+                  }
+                }
+              },
+              {
+                "id": "option0Label",
+                "component": "Text",
+                "text": {
+                  "@path": "/ask/options/0"
+                }
+              },
+              {
+                "id": "option1",
+                "component": "Button",
+                "child": "option1Label",
+                "action": {
+                  "event": {
+                    "name": "choose",
+                    "context": {
+                      "value": "Work"
+                    }
+                  }
+                }
+              },
+              {
+                "id": "option1Label",
+                "component": "Text",
+                "text": {
+                  "@path": "/ask/options/1"
+                }
+              },
+              {
+                "id": "option2",
+                "component": "Button",
+                "child": "option2Label",
+                "action": {
+                  "event": {
+                    "name": "choose",
+                    "context": {
+                      "value": "Family"
+                    }
+                  }
+                }
+              },
+              {
+                "id": "option2Label",
+                "component": "Text",
+                "text": {
+                  "@path": "/ask/options/2"
+                }
+              }
+            ],
+            "dataModel": {
+              "ask": {
+                "question": "Which account?",
+                "options": [
+                  "Personal",
+                  "Work",
+                  "Family"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

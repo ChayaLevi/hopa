@@ -6,6 +6,9 @@ namespace Hopa.Windows.Host;
 /// <summary>
 /// Where one approval goes: the automation override, the paired phone, or the
 /// person at this PC. The failure of the phone link is a deny, never an allow.
+/// ADR-0027: the sidecar's A2UI card goes to the phone unchanged, and the
+/// phone's tap comes back to the sidecar unchanged. The sidecar checks the
+/// tap; this router never judges a card.
 /// </summary>
 public sealed class ApprovalRouter
 {
@@ -13,14 +16,14 @@ public sealed class ApprovalRouter
 
     private readonly Func<JsonObject, bool> askUser;
     private readonly Func<IApprovalPhone?> phone;
-    private readonly Action<string, bool, string> reply;
+    private readonly Action<string, bool, string, JsonObject?> reply;
     private readonly Action<string> log;
     private readonly string? autoApproval;
 
     public ApprovalRouter(
         Func<JsonObject, bool> askUser,
         Func<IApprovalPhone?> phone,
-        Action<string, bool, string> reply,
+        Action<string, bool, string, JsonObject?> reply,
         Action<string> log,
         string? autoApproval)
     {
@@ -38,7 +41,7 @@ public sealed class ApprovalRouter
         if (autoApproval != null)
         {
             var allowed = autoApproval == "allow";
-            reply(id, allowed, "pc");
+            reply(id, allowed, "pc", null);
             log($"approval: auto-{(allowed ? "allow" : "deny")}");
             return;
         }
@@ -51,7 +54,7 @@ public sealed class ApprovalRouter
         }
 
         var allow = askUser(message);
-        reply(id, allow, "pc");
+        reply(id, allow, "pc", null);
         log($"approval: {(allow ? "allow" : "deny")}");
     }
 
@@ -62,13 +65,16 @@ public sealed class ApprovalRouter
     {
         var allow = false;
         var source = "pc";
+        JsonObject? tap = null;
         try
         {
             var result = await live.RequestApprovalAsync(
                 BuildApproval(message),
                 live.PhoneDeviceId,
-                PhoneTimeout);
+                PhoneTimeout,
+                Card(message));
             allow = ApprovalAllowed(result);
+            tap = ApprovalAction(result);
             source = result == null ? "pc" : "phone";
             if (result == null)
             {
@@ -81,7 +87,7 @@ public sealed class ApprovalRouter
         }
         finally
         {
-            reply(id, allow, source);
+            reply(id, allow, source, tap);
             log($"approval: {(allow ? "allow" : "deny")} from {source}");
         }
     }
@@ -102,6 +108,17 @@ public sealed class ApprovalRouter
             ["timeoutMs"] = 3000,
         },
     };
+
+    /// <summary>The sidecar's A2UI card for this question, copied as it came; null when it sent none.</summary>
+    public static JsonArray? Card(JsonObject message) =>
+        message["a2ui"] is JsonArray card ? card.DeepClone().AsArray() : null;
+
+    /// <summary>The phone's A2UI tap, copied as it came, for the sidecar to check; null when it sent none.</summary>
+    public static JsonObject? ApprovalAction(JsonObject? result) =>
+        (result?["body"] as JsonObject)?["approval"] is JsonObject approval &&
+        approval["action"] is JsonObject action
+            ? action.DeepClone().AsObject()
+            : null;
 
     public static bool ApprovalAllowed(JsonObject? result) =>
         (result?["body"] as JsonObject)?["approval"] is JsonObject approval &&

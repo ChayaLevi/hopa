@@ -292,14 +292,21 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
     /// <summary>Resume after a takeover; the sidecar re-observes before deciding.</summary>
     public void ResumeTurn() => Send(new JsonObject { ["type"] = "turn.resume" });
 
-    public void SendApprovalResult(string id, bool allow, string device = "pc")    {
-        Send(new JsonObject
+    /// <summary><paramref name="action"/> is the phone's A2UI tap, passed on for the sidecar to check (ADR-0027).</summary>
+    public void SendApprovalResult(string id, bool allow, string device = "pc", JsonObject? action = null)    {
+        var message = new JsonObject
         {
             ["type"] = "approval.result",
             ["id"] = id,
             ["allow"] = allow,
             ["device"] = device,
-        });
+        };
+        if (action != null)
+        {
+            message["action"] = action;
+        }
+
+        Send(message);
     }
 
     /// <summary>
