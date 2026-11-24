@@ -49,6 +49,8 @@ fun ComputerScreen(
     onPairBackend: (String, String) -> Unit,
     onDisconnectBackend: () -> Unit,
     onRefreshBackend: () -> Unit,
+    showGatewayPairing: Boolean = true,
+    onScanPc: () -> Unit = {},
 ) {
     var url by rememberSaveable { mutableStateOf(state.settings.bridgeUrl) }
     var code by rememberSaveable { mutableStateOf("") }
@@ -97,10 +99,13 @@ fun ComputerScreen(
                 .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            BackendCard(
-                state = state, onPair = onPairBackend,
-                onDisconnect = onDisconnectBackend, onRefresh = onRefreshBackend,
-            )
+            if (showGatewayPairing) {
+                BackendCard(
+                    state = state, onPair = onPairBackend,
+                    onDisconnect = onDisconnectBackend, onRefresh = onRefreshBackend,
+                    onScanPc = onScanPc,
+                )
+            }
 
             Surface(
                 color = HopaColor.Surface,

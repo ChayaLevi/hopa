@@ -78,10 +78,12 @@ Each line has a test in Task 3, Task 4, Task 5 or Task 7.
   `alter table tasks alter column from_device drop not null` (server-authored diag
   tasks); RLS enable+force + household policy on `household_key_wraps` and
   `pending_pairings`; **no** RLS on `accounts`/`admins`/`admin_sessions`; four
-  functions owned by the non-login `hopa_admin` (`BYPASSRLS`) role:
-  `admin_resolve_member(uuid)` and `admin_resolve_household(uuid)` return
-  `(household_id, member_id, display_name)`, `admin_resolve_phone(text)` returns
-  those plus `account_id`, and `admin_list_devices(uuid)` returns
+  functions owned by the non-login `hopa_admin` (`BYPASSRLS`) role, living in the
+  optional `db/admin/V5__admin_lookups.sql` migration (applied only when
+  `HOPA_ADMIN_LOOKUPS=true`): `admin_resolve_member(uuid)`,
+  `admin_resolve_household(uuid)` and `admin_resolve_phone(text)` each return
+  `(household_id, member_id, display_name, account_id)`, and
+  `admin_list_devices(uuid)` returns
   `(device_id, platform, name, last_seen_at, revoked_at)`. All are
   `SECURITY DEFINER`, `search_path = public, pg_temp`, and return minimum columns.
 
@@ -297,8 +299,10 @@ git commit -m "feat(backend): team console - sign-in, health, lookup, diag sende
 ### Task 7: Android — sign-in and the two modes
 
 **Files:**
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/SignInRoute.kt`
 - Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/SignInScreen.kt`
 - Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/AccountViewModel.kt`
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/account/AccountUiState.kt`
 - Modify: `apps/android/app/build.gradle.kts` (`buildConfigField` from `local.properties`), the app's settings store and launch navigation (the `backendUrl == null` path `LaunchPairingTest` already covers)
 - Test: `apps/android/app/src/test/kotlin/com/hopa/app/account/SignInViewModelTest.kt`, `LaunchModeTest.kt`
 
@@ -335,8 +339,9 @@ git commit -m "feat(android): phone-and-password sign-in and the two modes"
 ### Task 8: Android — camera QR scan and vouch
 
 **Files:**
-- Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/ScanScreen.kt`
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/ScanRoute.kt`
 - Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/VouchViewModel.kt`
+- Create: `apps/android/app/src/main/kotlin/com/hopa/app/pair/VouchUiState.kt`
 - Modify: `apps/android/app/build.gradle.kts` (CameraX + ML Kit `barcode-scanning`), `AndroidManifest.xml` (`CAMERA`), the pairing input screen (paste fallback stays)
 - Test: `apps/android/app/src/test/kotlin/com/hopa/app/pair/VouchViewModelTest.kt`
 

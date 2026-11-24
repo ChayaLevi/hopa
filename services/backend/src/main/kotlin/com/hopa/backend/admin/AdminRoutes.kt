@@ -5,14 +5,9 @@ import com.hopa.backend.http.BodyTooLarge
 import com.hopa.backend.http.receiveBounded
 import com.hopa.backend.http.respondError
 import com.hopa.backend.store.DeviceInventory
-import com.hopa.backend.tasks.RouteResult
-import com.hopa.backend.tasks.TaskRouter
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.request.header
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -43,9 +38,6 @@ data class DiagRequest(
 @Serializable
 data class DiagAccepted(val taskId: String, val trace: String, val state: String)
 
-private val UUID_PATTERN =
-    Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-
 /**
  * The operations console: the household's device inventory and the diagnostic
  * sender. It can list devices and send one of three plaintext diagnostics; it
@@ -53,6 +45,7 @@ private val UUID_PATTERN =
  */
 fun Application.adminRoutes(config: ServerConfig) {
     val inventory = config.devices as? DeviceInventory
+    val diag = DiagSender.from(config)
 
     routing {
         get("/v1/admin/devices") {
@@ -127,78 +120,25 @@ fun Application.adminRoutes(config: ServerConfig) {
                 return@post
             }
 
-            // The device lookup is also the tenancy check: it only sees the
-            // named household and hides a revoked device, so both answer the
-            // same refusal and no row is written.
-            val target = config.devices.lookup(deviceId, household)
-            // The directory is already tenant-scoped; comparing the returned
-            // household is a second, independent guard against a future
-            // directory implementation drifting from that contract.
-            if (target == null || target.householdId != household) {
-                call.respondError(
-                    HttpStatusCode.Forbidden,
-                    "E_TENANT",
-                    "no such live device in this household",
-                )
-                return@post
-            }
-
-            val router = TaskRouter(
-                store = config.tasks,
-                registry = config.registry,
-                devices = config.devices,
-                log = config.log,
-                push = config.push,
-                traces = config.traces,
-            )
             when (
-                val routed =
-                    router.createServerTask(admin.adminId, target, request.type, request.body ?: JsonObject(emptyMap()))
+                val result =
+                    diag.send(admin.adminId, deviceId, household, request.type, request.body ?: JsonObject(emptyMap()))
             ) {
-                is RouteResult.Accepted -> call.respond(
+                is DiagSender.Result.Accepted -> call.respond(
                     HttpStatusCode.Accepted,
                     DiagAccepted(
-                        taskId = routed.task.id,
-                        trace = routed.task.trace,
-                        state = routed.task.state,
+                        taskId = result.taskId,
+                        trace = result.trace,
+                        state = result.state,
                     ),
                 )
 
-                is RouteResult.Refused -> call.respondError(
-                    HttpStatusCode.BadRequest,
-                    routed.error.code,
-                    routed.error.message,
+                is DiagSender.Result.Refused -> call.respondError(
+                    result.status,
+                    result.code,
+                    result.message,
                 )
             }
         }
     }
-}
-
-/**
- * The admin lookup functions are optional: they need a superuser-provisioned
- * BYPASSRLS role, which some managed Postgres providers do not allow. The
- * deployment says whether they were provisioned; without them the routes
- * answer a stable E_UNSUPPORTED instead of calling a missing function.
- */
-private suspend fun ApplicationCall.adminLookupsAvailable(config: ServerConfig): Boolean {
-    if (config.adminLookups) return true
-    respondError(
-        HttpStatusCode.ServiceUnavailable,
-        "E_UNSUPPORTED",
-        "admin lookups are not provisioned on this database",
-    )
-    return false
-}
-
-/** Resolves the admin bearer, answering 401 E_AUTH and returning null when it is unknown. */
-private suspend fun ApplicationCall.adminIdentity(config: ServerConfig): AdminIdentity? {
-    val token = request.header(HttpHeaders.Authorization)
-        ?.removePrefix("Bearer ")
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
-    val identity = token?.let { config.adminAuth?.adminFor(it) }
-    if (identity == null) {
-        respondError(HttpStatusCode.Unauthorized, "E_AUTH", "unknown or expired admin token")
-    }
-    return identity
 }

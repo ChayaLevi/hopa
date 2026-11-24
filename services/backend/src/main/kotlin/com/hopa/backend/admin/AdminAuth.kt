@@ -1,12 +1,22 @@
 package com.hopa.backend.admin
 
+import com.hopa.backend.ServerConfig
+import com.hopa.backend.http.respondError
 import com.hopa.backend.pairing.Tokens
 import com.hopa.backend.store.Database
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.header
 import java.sql.Timestamp
 import java.time.Instant
 
 /** One authenticated console operator. */
 data class AdminIdentity(val adminId: String, val email: String, val role: String)
+
+/** A canonical UUID string, as the admin routes accept it. */
+internal val UUID_PATTERN =
+    Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 /**
  * Resolves an admin bearer token. `admins` and `admin_sessions` are global
@@ -42,4 +52,40 @@ class AdminAuth(
             }
         }
     }
+}
+
+/**
+ * The shared admin bearer check. The admin resolver only knows `admin_sessions`,
+ * so a household device token is refused here exactly like an unknown token.
+ * Answers 401 `E_AUTH` and returns null when the identity cannot be resolved.
+ */
+internal suspend fun ApplicationCall.adminIdentity(config: ServerConfig): AdminIdentity? {
+    val token = request.header(HttpHeaders.Authorization)
+        ?.removePrefix("Bearer ")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+    val identity = token?.let { config.adminAuth?.adminFor(it) }
+    if (identity == null) {
+        respondError(HttpStatusCode.Unauthorized, "E_AUTH", "unknown or expired admin token")
+    }
+    return identity
+}
+
+/**
+ * The admin lookup functions are optional: they need a superuser-provisioned
+ * BYPASSRLS role, which some managed Postgres providers do not allow. The
+ * deployment says whether they were provisioned; without them the admin routes
+ * that read tenant rows through a definer function answer a stable
+ * `E_UNSUPPORTED` instead of calling a missing function. The sign-in route
+ * (`POST /v1/admin/session`) only touches the global `admins`/`admin_sessions`
+ * tables and is deliberately not gated here.
+ */
+internal suspend fun ApplicationCall.adminLookupsAvailable(config: ServerConfig): Boolean {
+    if (config.adminLookups) return true
+    respondError(
+        HttpStatusCode.ServiceUnavailable,
+        "E_UNSUPPORTED",
+        "admin lookups are not provisioned on this database",
+    )
+    return false
 }

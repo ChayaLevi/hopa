@@ -436,6 +436,228 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
         "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/accounts:
+    post:
+      summary: Sign up a phone-number account with a household of one
+      description: |
+        Creates an account, a household of one, the owner member and the phone's
+        first device, all in one transaction, plus a household key wrap for that
+        device. The phone is E.164-normalized server-side and is only a login
+        lookup — it is never returned. Rate limited to five per minute per
+        address and per phone. A phone that is already registered (live or
+        deleted) answers the same uniform `E_AUTH` as a wrong password.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, password, platform, name, publicKey, alg, selfWrappedKey]
+              properties:
+                phone: { type: string, description: E.164 phone number }
+                password: { type: string }
+                platform: { type: string, enum: [android, windows] }
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  pattern: '\S'
+                  description: Non-blank, at most 100 characters
+                publicKey:
+                  type: string
+                  description: Base64 or base64url X25519 public key, exactly 32 bytes
+                alg: { type: string, enum: [x25519] }
+                selfWrappedKey:
+                  type: string
+                  description: Base64 or base64url household key wrap, 1 to 1024 bytes; the server stores the bytes and never unwraps them
+                pushToken: { type: string, nullable: true, maxLength: 4096 }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accountId, deviceId, householdId, accessToken, refreshToken, expiresAt]
+                properties:
+                  accountId: { type: string, format: uuid }
+                  deviceId: { type: string, format: uuid }
+                  householdId: { type: string, format: uuid }
+                  accessToken: { type: string }
+                  refreshToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Invalid phone, platform, name, public key, algorithm, wrap or JSON body
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: The phone is already registered (`E_AUTH`, indistinguishable from a wrong password)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/session:
+    post:
+      summary: Sign in with a phone number and password
+      description: |
+        Creates a signed-in device for an existing account and returns its
+        tokens. No household key wrap is written and no history is returned. The
+        phone is only a login lookup and is never returned. A wrong phone and a
+        wrong password answer the same `E_AUTH`. Rate limited to five per minute
+        per address and per phone.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, password, platform, name, publicKey]
+              properties:
+                phone: { type: string, description: E.164 phone number }
+                password: { type: string }
+                platform: { type: string, enum: [android, windows] }
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  pattern: '\S'
+                  description: Non-blank, at most 100 characters
+                publicKey:
+                  type: string
+                  description: Base64 or base64url X25519 public key, exactly 32 bytes
+                pushToken: { type: string, nullable: true, maxLength: 4096 }
+      responses:
+        "201":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accountId, deviceId, householdId, accessToken, refreshToken, expiresAt]
+                properties:
+                  accountId: { type: string, format: uuid }
+                  deviceId: { type: string, format: uuid }
+                  householdId: { type: string, format: uuid }
+                  accessToken: { type: string }
+                  refreshToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Invalid phone, platform, name, public key or JSON body
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/session/otp:
+    post:
+      summary: Request a one-time SMS code
+      description: |
+        Mints a 6-digit single-use code and sends it to the phone. The phone is
+        E.164-normalized server-side and is only a login lookup — it is never
+        returned and never logged. The answer is always 202 with the same body
+        whether or not the phone has an account, so the phone cannot be
+        enumerated. When SMS is disabled (`HOPA_SMS_ENABLED` is not `true`) the
+        route answers `E_UNSUPPORTED`. Rate limited to five per minute per
+        address and per phone, and three codes per phone per hour.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, description: E.164 phone number }
+      responses:
+        "202":
+          description: Accepted (whether or not the phone has an account)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted]
+                properties:
+                  accepted: { type: boolean }
+        "400":
+          description: Invalid phone or JSON body (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503":
+          description: SMS OTP is not enabled on this deployment (`E_UNSUPPORTED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/session/otp/verify:
+    post:
+      summary: Verify a one-time code and sign in
+      description: |
+        Verifies the code and, when it matches, signs in or provisions the
+        account: an existing account (verified or not) binds to that account and
+        signs in, and a phone with no account is provisioned on the spot. A
+        wrong, expired or used code answers the same uniform `E_AUTH` as an
+        unknown phone; a `deleted_at` account is refused, never resurrected. The
+        device algorithm is always x25519. The phone is only a login lookup and
+        is never returned. Rate limited to five per minute per address and per
+        phone.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code, platform, name, publicKey]
+              properties:
+                phone: { type: string, description: E.164 phone number }
+                code: { type: string, description: Six decimal digits }
+                platform: { type: string, enum: [android, windows] }
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  pattern: '\S'
+                  description: Non-blank, at most 100 characters
+                publicKey:
+                  type: string
+                  description: Base64 or base64url X25519 public key, exactly 32 bytes
+                pushToken: { type: string, nullable: true, maxLength: 4096 }
+      responses:
+        "201":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accountId, deviceId, householdId, accessToken, refreshToken, expiresAt]
+                properties:
+                  accountId: { type: string, format: uuid }
+                  deviceId: { type: string, format: uuid }
+                  householdId: { type: string, format: uuid }
+                  accessToken: { type: string }
+                  refreshToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Invalid phone, code, platform, name, public key or JSON body (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503":
+          description: SMS OTP is not enabled on this deployment (`E_UNSUPPORTED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /v1/token/refresh:
     post:
       summary: Rotate an access token
@@ -630,6 +852,84 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
+  /v1/admin/session:
+    post:
+      summary: Sign in to the admin console
+      description: |
+        Unauthenticated. Exchanges an admin email and password for an 8-hour
+        opaque session token, stored only as SHA-256. An unknown email and a
+        wrong password answer the same uniform `E_AUTH`; sign-in is rate limited
+        to five per minute per address and per email.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "201":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, expiresAt]
+                properties:
+                  token: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        "400":
+          description: Invalid JSON body or a blank email (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /v1/admin/households:
+    get:
+      summary: Look up a household by phone, member id or household id (admin console)
+      description: |
+        Requires an admin session token, never a device token. The `query` is an
+        E.164 phone number, a member id or a household id; a uuid resolves as a
+        member first, then as a household. A well-formed query with no match
+        answers `[]`; a missing, blank or malformed query is `E_SCHEMA`. Every
+        lookup writes an `admin.pii.read` access-log line (a hash of the query,
+        never the raw phone or uuid) before any account read.
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: The matching rows (possibly empty)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [householdId, memberId, displayName, verified, accountStatus]
+                  properties:
+                    householdId: { type: string, format: uuid }
+                    memberId: { type: string, format: uuid }
+                    displayName: { type: string }
+                    phone: { type: string, nullable: true }
+                    verified: { type: boolean }
+                    accountStatus: { type: string, enum: [verified, unverified, none] }
+        "400":
+          description: The query is missing, blank or malformed (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
   /v1/traces/{traceId}:
     get:
       summary: The path one message took, by trace id

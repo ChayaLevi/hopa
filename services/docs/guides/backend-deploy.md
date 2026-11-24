@@ -45,29 +45,42 @@ It must return `false`. If it returns `true`, the Render user owns the cluster a
 the tenant policies are not protecting anything; create a non-superuser role
 before the beta.
 
-## Provision `hopa_admin` (required before the first V2 migration)
+## Rate limits and the edge
+
+The per-IP rate limits on unauthenticated routes key on the **first
+`X-Forwarded-For` hop** (`remoteAddress` in the gateway). That is only
+meaningful if the edge overwrites a client-supplied `X-Forwarded-For`; confirm
+this at the Render edge before the demo, or record the trusted proxy hop and
+change the limiter key to match.
+
+## Admin lookups (optional)
 
 Admin lookups read tenant rows through four `SECURITY DEFINER` functions owned by
 `hopa_admin`, a non-login role with `BYPASSRLS`. `FORCE ROW LEVEL SECURITY` binds
 the table owner too, so the functions cannot be owned by the normal migration or
-runtime role. Provision the role once as a **superuser** (creating a
-`BYPASSRLS` role needs more than `CREATEROLE` in PostgreSQL 16):
+runtime role. The functions live in `db/admin/V5__admin_lookups.sql` — outside the
+core `db/migration` path — and are applied only when `HOPA_ADMIN_LOOKUPS=true`
+through `applyAdminLookups()`, which uses its own Flyway history
+(`hopa_admin_schema_history`). The core schema never depends on them: on a managed
+Postgres that cannot create the `BYPASSRLS` owner (like Render's), set
+`HOPA_ADMIN_LOOKUPS=false` and the admin routes answer 503 `E_UNSUPPORTED`.
+
+Provision the role once as a **superuser** (creating a `BYPASSRLS` role needs
+more than `CREATEROLE` in PostgreSQL 16):
 
 ```sql
 create role hopa_admin nologin bypassrls;
 ```
 
 The migration also requires the role running Flyway to be able to alter function
-owners. Either:
-
-- run the migration as a database **superuser**; or
-- grant the migration role `hopa_admin` **with admin option, set false** for the
-  duration of the migration, and revoke it afterwards.
-
-The latter path is only temporary. Before the migration's final guard, the
-deploy role must have no residual `ADMIN OPTION` on `hopa_admin`; otherwise V2
-fails loudly with the operator line to run. After the migration, verify both
-roles:
+owners, so **run the migration as a database superuser** (the Render database
+owner). A non-superuser deploy role cannot satisfy both requirements at once:
+it must hold `hopa_admin` membership to alter the function owners, but the
+migration's final residual-capability guard refuses any non-superuser that can
+still `SET ROLE` into `hopa_admin` or still holds `ADMIN OPTION` on it, and the
+migration can revoke only its own self-grant — an operator's temporary grant
+stays visible to `pg_has_role(..., 'set')` and the `pg_auth_members` scan, so it
+trips the guard. After the migration, verify both roles:
 
 ```sql
 -- hopa_admin must be nologin + bypassrls; the runtime role must not be superuser.
@@ -89,7 +102,10 @@ revoke admin option for hopa_admin from <deploy_role>;
 
 The runtime login (`hopa_app` in `render.yaml`) must not be a superuser and must
 not hold `hopa_admin` membership: a SQL injection that can `SET ROLE` into the
-BYPASSRLS owner defeats RLS.
+BYPASSRLS owner defeats RLS. The three resolvers
+(`admin_resolve_member`, `admin_resolve_household`, `admin_resolve_phone`) each
+return `account_id`, so a lookup by member, household or phone id renders the
+account fields without a second tenant read.
 
 ## Free tier
 

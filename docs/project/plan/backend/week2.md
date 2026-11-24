@@ -5,8 +5,9 @@ Status: **lane A implemented, 2026-11-22** — branch `backend-week2-A`
 Written 2026-11-22. Parent: [`weekly-plan.md`](weekly-plan.md),
 tracked in [#32](https://github.com/agents-demo/hopa/issues/32). Design source:
 [`docs/superpowers/specs/2026-11-22-pairing-accounts-design.md`](../../../superpowers/specs/2026-11-22-pairing-accounts-design.md)
-(decisions below argue from it, not from this file). Verification guide:
-[`week2-lane-a.html`](week2-lane-a.html).
+(decisions below argue from it, not from this file). Verification guides:
+[`week2-lane-a.html`](week2-lane-a.html) (backend/Windows) and
+[`week2-lane-b.html`](week2-lane-b.html) (accounts, console and Android).
 
 The week replaces the operator bootstrap flow with a real user: the phone signs up
 with a phone number and password and becomes the household's first device, the PC
@@ -100,12 +101,19 @@ Follow-up migrations landed by lane A (V2 is the base schema above):
 nullable and additive. `tasks.type` / nullable `from_device` are in V2 (R1, R11).
 
 Plus four `SECURITY DEFINER` functions owned by the non-login `hopa_admin`
-(`BYPASSRLS`) role, each returning minimum columns and audit-logged by the caller:
-`admin_resolve_member(member uuid)` and `admin_resolve_household(household uuid)`
-return `(household_id, member_id, display_name)`; `admin_resolve_phone(phone text)`
-also returns `account_id` (four columns); `admin_list_devices(household uuid)`
-returns `(device_id, platform, name, last_seen_at, revoked_at)`. The app role has
-no `BYPASSRLS` and no blanket tenant GUC.
+(`BYPASSRLS`) role, each returning minimum columns and audit-logged by the caller.
+They live in the optional `db/admin/V5__admin_lookups.sql` migration, applied only
+when `HOPA_ADMIN_LOOKUPS=true` through `applyAdminLookups()` and its own Flyway
+history (`hopa_admin_schema_history`), because creating the BYPASSRLS owner needs
+a superuser (managed Postgres without one sets `HOPA_ADMIN_LOOKUPS=false` and the
+admin routes answer 503 `E_UNSUPPORTED`). The three resolvers —
+`admin_resolve_member(member uuid)`, `admin_resolve_household(household uuid)` and
+`admin_resolve_phone(phone text)` — each return `(household_id, member_id,
+display_name, account_id)`, so a lookup by member, household or phone id also
+returns the account fields (phone, verified, account status);
+`admin_list_devices(household uuid)` returns `(device_id, platform, name,
+last_seen_at, revoked_at)`. The app role has no `BYPASSRLS` and no blanket tenant
+GUC.
 
 Sync v0's tables (`threads`, `turns`, `device_cursors` — naming to be settled by
 Monday's mini-design) land in the same migration only if that design is agreed
@@ -137,7 +145,7 @@ Sync v0 never slides.
 | `SECURITY DEFINER` functions widen access by mistake | Tenant leak — the one bug that ends the beta | Four functions return minimum columns only; CI calls them as the app role and asserts the shape; every call is audit-logged | B |
 | Plaintext `diag.*` becomes a smuggling channel | Server-readable task bodies reappear | Validator allows plaintext for the three `diag.*` types only; admin-auth required; audit per send | A |
 | QR capability: a photographed QR claimed in the vouch→claim window | The claimant obtains household **device tokens** (not the content key, which stays wrapped to the PC) | 5-min TTL, the phone shows the key fingerprint before vouching, and the residual is accepted for the demo (R32); a second claim secret, returned only to the PC, lands with week-6 admission | both |
-| `hopa_admin` needs superuser provisioning once | V2 fails at boot on a deploy role that cannot create a `BYPASSRLS` role | Probe the role at migration time with an actionable error; deploy guide documents the SQL and the temporary ADMIN OPTION; the runtime role is not superuser (R21/R21a) | A |
+| `hopa_admin` needs superuser provisioning once | V2 fails at boot on a deploy role that cannot create a `BYPASSRLS` role | Probe the role at migration time with an actionable error; deploy guide documents the superuser run; the runtime role is not superuser (R21/R21a) | A |
 | Phone-number enumeration via sign-up errors | Account discovery before any SMS | Uniform `E_AUTH` for wrong phone and wrong password; per-IP and per-phone rate limits | B |
 | Sync v0 redesign mid-week (mini-design slips past Monday) | B loses Thursday | The mini-design is one page, Monday-only; if it slips, sync v0 keeps the bridge store's rules verbatim and the design lands as a PR comment | B |
 
@@ -273,8 +281,10 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 - [x] Testcontainers: migration applies fresh and idempotent; app-role reads of
       `household_key_wraps` outside the tenant return zero rows; definer functions
       return exactly their minimum columns. *(`V2SchemaTest`, 10 tests.)*
-- [ ] E.164 normalization + argon2id hashing utilities with unit tests.
-- [ ] Admin seed from `HOPA_ADMIN_EMAIL`/`HOPA_ADMIN_PASSWORD` at boot, upsert.
+- [x] E.164 normalization + argon2id hashing utilities with unit tests.
+      *(Lane B Task 2, `c2d33f9a`; `AccountsUtilTest`.)*
+- [x] Admin seed from `HOPA_ADMIN_EMAIL`/`HOPA_ADMIN_PASSWORD` at boot, upsert.
+      *(Lane B Task 2, `c2d33f9a`.)*
 
 ### W2.2 Key wrapping — Monday/Tuesday
 
@@ -285,13 +295,15 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
 
 ### W2.3 Accounts and sessions — Tuesday
 
-- [ ] `POST /v1/accounts` and `POST /v1/session` per §4; uniform `E_AUTH`; rate
+- [x] `POST /v1/accounts` and `POST /v1/session` per §4; uniform `E_AUTH`; rate
       limits per IP and per phone; `spec/openapi/backend.v1.yaml` updated in the
-      same PR.
-- [ ] `POST /v1/session/otp` + `/verify` behind `HOPA_SMS_ENABLED` with the
-      log-only `SmsPort`; clash policy test.
-- [ ] Integration: sign-up creates account + household + member + device + own
-      wrap in one transaction (failure leaves nothing).
+      same PR. *(Lane B Task 3, `5d671046`; `AccountRoutesTest`.)*
+- [x] `POST /v1/session/otp` + `/verify` behind `HOPA_SMS_ENABLED` with the
+      log-only `SmsPort`; clash policy test. *(Lane B Task 4, `a1b9a366`;
+      `OtpTest`.)*
+- [x] Integration: sign-up creates account + household + member + device + own
+      wrap in one transaction (failure leaves nothing). *(Lane B Task 3;
+      trigger-forced rollback in `AccountRoutesTest`.)*
 
 ### W2.4 Admission — Tuesday/Wednesday
 
@@ -309,16 +321,19 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
       Task 5, `6523d033`, `d436b8ca`, `46cdd1b8`; hard cut on reuse in `99416bd4`.)*
 - [x] `GET /v1/admin/devices?household=` (live presence) — lane A Task 6, `92272bd2`,
       now read through `admin_list_devices` (`809c97e2`).
-- [ ] `POST /v1/admin/session` and `GET /v1/admin/households?query=` with the
-      access log on every phone-number read — **lane B Task 5**.
+- [x] `POST /v1/admin/session` and `GET /v1/admin/households?query=` with the
+      access log on every phone-number read. *(Lane B Task 5, `3fb56b2c`/`70fe854b`;
+      `LookupTest`; V5 extends the member/household resolvers with `account_id`.)*
 - [x] `diag.ping/state/reset` in the validator; server-authored tasks through
       `TaskRouter`; audit row names the admin. *(Lane A Task 6, `92272bd2`/`400126b1`.)*
 
 ### W2.6 Console — Wednesday/Thursday
 
-- [ ] Admin sign-in page, health page, household & device lookup page (member-id,
-      household-id, phone, connected devices), diag sender button (last).
-- [ ] No conversation contents anywhere in the console (asserted by test).
+- [x] Admin sign-in page, health page, household & device lookup page (member-id,
+      household-id, phone, connected devices), diag sender button. *(Lane B Task 6,
+      `e29fd206`/`85eb5e43`; `ConsoleTest`.)*
+- [x] No conversation contents anywhere in the console (asserted by test).
+      *(`ConsoleTest` sentinel scan of every route.)*
 
 ### W2.7 Clients — Thursday/Friday
 
@@ -327,14 +342,163 @@ Every box is a change, a test or an artifact, not a meeting. Slices:
       credentials stored, gateway envelopes both directions. *(Lane A Tasks 7–8,
       `2e2914e2`, `93272f03`, `8d059231`, `60a1e3be`, `9c0176c0`; entry point
       `--pair-backend`/`backend.pair` in `e3c9be38`.)*
-- [ ] Android: sign-in screen, local-only mode when `backendUrl` is null, debug
+- [x] Android: sign-in screen, local-only mode when `backendUrl` is null, debug
       `buildConfigField` from `local.properties`, camera QR scanner with paste
-      fallback, vouch sends the wrapped key.
+      fallback, vouch sends the wrapped key. *(Lane B Tasks 7–8, `1b994122`,
+      `d3f1cf07`, `2695a52d`, `7db884c5`; the manual camera run is still pending.)*
 
 ### W2.8 Evidence — Friday
 
 - [ ] `docs/project/evidence/B2-accounts.md` records §8 with commands, trace ids
       and timestamps; `python tools/scripts/plan-status.py --plan
       docs/project/plan/backend` stays green.
-- [ ] `services/backend/README.md` rewritten to match the shipped Kotlin/Ktor
-      service (it still sketches a Python layout).
+- [x] `services/backend/README.md` rewritten to match the shipped Kotlin/Ktor
+      service. *(Lane B Task 9, `8c4eec3b`; no Python sketch remains.)*
+
+## 11. Lane B execution record (23 Nov 2026)
+
+Lane B ran subagent-driven on `backend-week2-B`, stacked on `backend-week2-A`
+(BASE `450f65b4`): one implementer per plan task, a fresh task reviewer per diff,
+and one scoped re-review per fix round. Task 1 was already delivered by lane A and
+was verified rather than re-run. Sync v0 stays outside this slice per the
+[`week2b.md`](tasks/week2b.md) boundary; it becomes `tasks/week2-sync.md`.
+
+### 11.1 Task status
+
+| Plan task | Commit(s) | Review |
+|---|---|---|
+| 1. V2 migration | lane A `68bfb7d1`, V3/V4 | satisfied by lane A; verified |
+| 2. E.164, argon2, admin seed | `c2d33f9a` | approved, no fix |
+| 3. Sign-up and sign-in | `5d671046` | approved, no fix |
+| 4. Optional SMS OTP | `a1b9a366` | approved, no fix |
+| 5. Admin session and lookup | `3fb56b2c`, `70fe854b` | fix round 1 (tombstoned accounts, query kind) |
+| 6. Console pages | `e29fd206`, `85eb5e43` | fix round 1 (console catch-all) |
+| 7. Android sign-in and modes | `1b994122`, `d3f1cf07` | fix round 1 (429 message, pairing entry) |
+| 8. Android scan and vouch | `2695a52d`, `7db884c5`, `7b3b5642` | fix round 1 (non-pending states, ktlint) |
+| 9. README and evidence skeleton | `8c4eec3b` | approved, no fix |
+| 10. Review follow-ups | `99f7e39f` | approved, no fix |
+| Final whole-branch fix wave | `2294a55c`, `975328b0`, `8979cb07`, `332f2ccc`, `e32aa6d7` | one scoped re-review, all findings addressed |
+
+### 11.2 Decisions taken during execution
+
+- The phone is normalized in one shared place: `Phones` moved to `core/backend`
+  under the same package; sign-up, sign-in and OTP all use it.
+- Sign-up's tombstoned-phone refusal is carried by the service (any row with the
+  phone), while V2's partial unique index stays as the race backstop.
+- OTP verify for an unknown phone creates a verified household-of-one with a
+  throwaway password hash and no wrap; the flag stays false by default.
+- Admin lookup by member/household needed the account id, so `V5__admin_account_id.sql`
+  extends the two resolvers; `accounts` is then read by id in the admin path.
+- Admin PII logging records `query_kind` and a truncated SHA-256 of the query, never
+  the phone or uuid (exit check #9 forbids phones in logs).
+- The console calls the same services as the JSON routes, is cookie-gated, and
+  renders text nodes only; unknown `/console*` paths redirect unauthenticated callers.
+- Android keeps two modes; an unreachable gateway degrades to local-only with a
+  banner, and the gateway pairing card hides only when no gateway is configured.
+- The scan confirm refuses non-`pending` sessions (the server reports
+  expired/claimed/vouched as 200 with a `state`, not `E_SCHEMA`).
+- Android acks a delivered `diag.*` on the link it arrived on; the sidecar refuses a
+  second concurrent `backend.pair` with `ok=false, error="already pairing"`.
+
+### 11.3 Review findings that changed the code
+
+- Task 5: a tombstoned account still disclosed phone/verified on member and household
+  lookups; the account read now filters `deleted_at` and falls back to status `none`.
+- Task 6: unknown `/console/*` sub-paths answered 404 instead of the required 302 for
+  unauthenticated callers; a trailing catch-all now handles them.
+- Task 7: a 429 was shown as "gateway unreachable" and `hidePairingEntry` was never
+  wired; 429 now has its own message and the card is threaded from the launch decision.
+- Task 8: expired/claimed sessions still reached the confirm screen; the state is now
+  checked first and the test uses the server's real 200-with-state response.
+- Final review: concurrent duplicate sign-up could surface a 500; both sign-up and
+  OTP-create now map SQLState 23505 to the uniform `E_AUTH` (trigger-pinned test).
+  V5 had no existing-database test and the deploy guide only covered "before V2";
+  `V5UpgradeTest` now applies V5 to a V1–V4 database and pins the unprovisioned
+  refusal, and the guide states the superuser requirement.
+- Final review: the guide's non-superuser "temporary ADMIN OPTION" path was proven
+  impossible (the pre-existing grant survives the migration's self-revoke and trips
+  the residual guard), so the guide now says V2 and V5 need a superuser run. V2's
+  header comment is left untouched because editing a live migration changes its
+  Flyway checksum; V5's comment is corrected because V5 is new on this branch.
+- Final review: `X-Forwarded-For` is now load-bearing for four unauthenticated rate
+  limits; the evidence file carries an unticked pre-demo check that the edge
+  overwrites it. `Phones` now accepts ASCII digits only.
+
+### 11.4 Deferred and parked
+
+- Manual/deployed exit checks 1, 3, the manual part of 2 and 9 remain unproven; the
+  evidence file's rows stay unticked.
+- Parked minors for the final review: concurrent duplicate sign-up can still surface a
+  500 instead of `E_AUTH`; Unicode digits pass `Phones`; admin email is
+  case-sensitive; sign-in spans three transactions; `ScanScreen`/`AccountViewModel`
+  use `remember`; the unreachable banner can overlap the top bar.
+- Sync v0 is not in this slice (its mini-design and implementation remain week 3 work).
+- From the final fix wave: the 23505 catch is blanket (any future unique violation in
+  that transaction would read as `E_AUTH`); the `PostgresHarness` comment still
+  repeats the disproven ADMIN OPTION path; the earlier per-task minors remain as
+  listed above.
+
+### 11.5 Verification at `e32aa6d7` (after the final fix wave)
+
+| Command | Result |
+|---|---|
+| `apps\android\gradlew.bat -p services/backend :test --rerun-tasks` | 223 tests, 0 failures |
+| `apps\android\gradlew.bat -p apps/android :backend:test --rerun-tasks` | 97 tests, 0 failures |
+| `apps\android\gradlew.bat -p apps/android :app:testDebugUnitTest --rerun-tasks` | 89 tests, 0 failures |
+| `apps\android\gradlew.bat -p apps/windows/sidecar test --rerun-tasks` | 44 tests, 0 failures |
+| `py -3 tools/checks/check-links.py` | 0 broken links |
+| `python tools/scripts/plan-status.py --plan docs/project/plan/backend` | green |
+
+### 11.6 Exit-check status
+
+| # | Status |
+|---|---|
+| 1 | pending: deployed round-trip with timestamps |
+| 2 | automated half proven (`DeviceRevokeTest`, `TokenRotationTest`); manual timing pending |
+| 3 | pending: real camera scan + encrypted task each way |
+| 4 | proven (`AccountRoutesTest`) |
+| 5 | proven (`OtpTest`) |
+| 6 | proven (`LookupTest`, `ConsoleTest`) |
+| 7 | automated half proven (`DiagSendTest`); device-level ack proven by `BackendSessionTest`; deployed arrival pending |
+| 8 | proven (`TenantIsolationTest`, 1,000 attempts) |
+| 9 | pending: grep of the deployed week's logs |
+
+### 11.7 Post-rebase sync with lane A (23 Nov 2026)
+
+After lane A's PR #140 merged to `main`, `backend-week2-B` was rebased onto the
+updated `main` and reconciled with lane A's post-`450f65b4` change that made the
+admin lookups optional (`11d7cb36`). The rebase resolved three text conflicts and
+the sync made these lane B pieces consistent with that refactor:
+- The `account_id` column on `admin_resolve_member`/`admin_resolve_household`
+  folded into the optional `db/admin/V5__admin_lookups.sql` (the three resolvers
+  now all return `account_id`); the core `V5__admin_account_id.sql` was removed
+  because it collided with `main`'s `V5__task_needs_approval.sql` and the
+  resolvers no longer live in the core migration.
+- `V5UpgradeTest` was removed: its "existing V1–V4 database" upgrade scenario no
+  longer exists once the resolvers live in a separate Flyway history and are
+  created fresh with `account_id`. The four-column shape and `hopa_admin`
+  ownership are asserted by `V2SchemaTest` through the harness's
+  `applyAdminLookups()`.
+- `GET /v1/admin/households` is now gated behind `adminLookupsAvailable` (503
+  `E_UNSUPPORTED` when `HOPA_ADMIN_LOOKUPS=false`), matching the device and diag
+  routes; `POST /v1/admin/session` stays ungated (it only touches the global
+  `admins`/`admin_sessions` tables).
+- `adminIdentity` and `adminLookupsAvailable` are shared `internal` helpers in
+  `AdminAuth.kt`, so the session, lookup, device and diag routes reuse one bearer
+  check and one gate.
+- Android: `clearBackend()` keeps lane A's reset to `DEFAULT_BACKEND_URL` and
+  lane B's content-key clear; `onDiagnostic` folded into the single `init` block
+  beside lane A's `onApproval`; the sidecar README keeps both the P1–P4 guide and
+  the turn-goal redaction note.
+
+A second rebase onto `main` at `3cf49be5` (the sidecar/Windows refactors
+#147–#180) moved the sidecar `backend.pair` handler from `Main.kt` into
+`protocol/handler/BackendHandler.kt` and renamed the admission type to
+`BackendAdmission`; the `PairingGate` guard moved with it, and `PairingGateTest`
+still covers the gate directly. The same pass split the Android files the
+repository's structure check rejected (one behaviour per file):
+`AccountUiState.kt`, `SignInRoute.kt`, `VouchUiState.kt` and `SignedInAccount.kt`
+now own the contracts, and `ScanScreen.kt` became `ScanRoute.kt`. At the rebased
+head (`43111e5f`) the four suites are green — 228 backend, 98 core/backend,
+91 app, 91 sidecar — and `check-android-structure`, `check-links` and
+`plan-status` are clean.

@@ -1,8 +1,20 @@
 package com.hopa.backend
 
+import com.hopa.backend.accounts.AccountService
+import com.hopa.backend.accounts.AdminSeed
+import com.hopa.backend.accounts.LogSmsPort
+import com.hopa.backend.accounts.OtpService
+import com.hopa.backend.accounts.SmsPort
+import com.hopa.backend.accounts.accountRoutes
+import com.hopa.backend.accounts.otpRoutes
 import com.hopa.backend.admin.AdminAuth
+import com.hopa.backend.admin.AdminSessions
+import com.hopa.backend.admin.HouseholdLookup
 import com.hopa.backend.admin.adminRoutes
+import com.hopa.backend.admin.adminSessionRoutes
+import com.hopa.backend.admin.lookupRoutes
 import com.hopa.backend.auth.AuthPort
+import com.hopa.backend.console.consoleRoutes
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.gateway.gatewayRoutes
 import com.hopa.backend.http.healthRoutes
@@ -49,9 +61,14 @@ fun Application.module(config: ServerConfig) {
     modelRoutes(config)
     pairingRoutes(config)
     pendingPairingRoutes(config)
+    accountRoutes(config)
+    otpRoutes(config)
     tokenRoutes(config)
     deviceRoutes(config)
     adminRoutes(config)
+    adminSessionRoutes(config)
+    lookupRoutes(config)
+    consoleRoutes(config)
     traceRoutes(config)
     gatewayRoutes(config)
 }
@@ -72,6 +89,12 @@ fun main() {
     val database = Database.fromEnvironment()
     database?.migrate()
     if (database != null && adminLookups) database.applyAdminLookups()
+    database?.let { db ->
+        AdminSeed(db).upsertFromEnv(
+            System.getenv("HOPA_ADMIN_EMAIL"),
+            System.getenv("HOPA_ADMIN_PASSWORD"),
+        )
+    }
 
     val auth: PgAuth? = database?.let(::PgAuth)
     // The registry exists before the issuer: a reused refresh token must both
@@ -104,12 +127,32 @@ fun main() {
     }
 
     val traceStore = database?.let { PgTraceStore(it) }
+    val eventLog = JsonEventLog()
+
+    val accountService: AccountService? = if (database != null && tokens != null) {
+        AccountService(database, tokens = tokens)
+    } else {
+        null
+    }
+
+    // SMS OTP is off by default: no transport is wired and the routes answer
+    // E_UNSUPPORTED. Enabling it also swaps in the dev-only LogSmsPort, which is
+    // the only transport this deployment ships.
+    val smsEnabled = System.getenv("HOPA_SMS_ENABLED") == "true"
+    val sms: SmsPort? = if (smsEnabled) LogSmsPort() else null
+    val otp: OtpService? = if (smsEnabled && sms != null && accountService != null) {
+        OtpService(accountService, sms)
+    } else {
+        null
+    }
 
     val config = ServerConfig(
         version = version,
         auth = auth ?: AuthPort.DenyAll,
         adminAuth = database?.let(::AdminAuth),
         adminLookups = adminLookups,
+        adminSessions = database?.let(::AdminSessions),
+        householdLookup = database?.let { HouseholdLookup(it, eventLog) },
         devices = devices,
         registry = registry,
         db = database?.let(::PostgresProbe) ?: DbProbe.Unconfigured,
@@ -119,13 +162,17 @@ fun main() {
             null
         },
         pendingPairings = database?.let(::PendingPairingService),
+        accounts = accountService,
+        smsEnabled = smsEnabled,
+        sms = sms,
+        otp = otp,
         bootstrapToken = System.getenv("HOPA_BOOTSTRAP_TOKEN"),
         tokenIssuer = tokens,
         tasks = database?.let { PgTaskStore(it) } ?: InMemoryTaskStore(),
         push = push,
         traces = traceStore ?: TraceRecorder.None,
         traceQuery = traceStore,
-        log = JsonEventLog(),
+        log = eventLog,
     )
 
     embeddedServer(Netty, port = port, host = "0.0.0.0") {

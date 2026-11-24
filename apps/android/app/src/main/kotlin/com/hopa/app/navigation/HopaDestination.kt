@@ -13,6 +13,9 @@ sealed interface HopaDestination {
     data object Chat : HopaDestination
 
     @Serializable
+    data object SignIn : HopaDestination
+
+    @Serializable
     data object Settings : HopaDestination
 
     @Serializable
@@ -56,6 +59,9 @@ sealed interface HopaDestination {
 
     @Serializable
     data object Computer : HopaDestination
+
+    @Serializable
+    data object Scan : HopaDestination
 
     @Serializable
     data object SelfCheck : HopaDestination
