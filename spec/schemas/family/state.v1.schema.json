@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hopa.dev/contracts/schemas/family/state.v1.schema.json",
+  "title": "Family board state v1",
+  "description": "The board as one device holds it after replaying the op log through the reducer. Stored on the device only, never on the server. Ported from the board part of Homemind's HomemindState (server/homemind/types.ts): the family roster, the items, and the activity log Undo needs. Reminders, rules, preferences, shopping, group claims and the rest come in later versions (schemaVersion goes up, with a migration). The state is split into scopes (D11): a teen device holds only `family`, a parent device holds both, and the `family` part must be identical on both. An item has no visibility field: the scope it sits in is its visibility. Nothing here is read from a clock or minted by the reducer (D10): ids and times come from the ops. Unknown fields are refused.",
+  "type": "object",
+  "required": ["schemaVersion", "family", "scopes"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "description": "Version of this stored shape. A device that loads an older one migrates it first."
+    },
+    "family": { "$ref": "#/$defs/family" },
+    "scopes": {
+      "type": "object",
+      "required": ["family"],
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "$ref": "#/$defs/partition",
+          "description": "Seen by every member. Never references an id that lives in parents (D11)."
+        },
+        "parents": {
+          "$ref": "#/$defs/partition",
+          "description": "Present only on devices that hold the parents key."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "$ref": "op.v1.schema.json#/$defs/id" },
+    "instant": { "$ref": "op.v1.schema.json#/$defs/instant" },
+    "localDate": { "$ref": "op.v1.schema.json#/$defs/localDate" },
+    "memberIds": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "member": {
+      "type": "object",
+      "required": ["id", "name", "role", "hasAccount"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "nameZh": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "role": {
+          "enum": ["parent", "teen", "child"],
+          "description": "Family role (open question O2: who sets it). Only a parent may own or create a parents item."
+        },
+        "hasAccount": {
+          "type": "boolean",
+          "description": "A member without an account (a small child) can be on items but cannot own or act."
+        }
+      }
+    },
+    "family": {
+      "type": "object",
+      "required": ["id", "name", "timezone", "members"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "nameZh": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "description": "IANA zone, for example `Asia/Jerusalem`. Recurring items and local dates are read in it."
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/member" }
+        }
+      }
+    },
+    "partition": {
+      "type": "object",
+      "required": ["items", "activity"],
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/item" },
+          "description": "In the order the reducer added them. Order is part of the state (and of its hash)."
+        },
+        "activity": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/activity" },
+          "description": "One entry per applied op, oldest first."
+        }
+      }
+    },
+    "ownership": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["state"],
+          "additionalProperties": false,
+          "properties": { "state": { "const": "none" } }
+        },
+        {
+          "type": "object",
+          "required": ["state", "candidateIds"],
+          "additionalProperties": false,
+          "properties": {
+            "state": { "const": "open" },
+            "candidateIds": { "$ref": "#/$defs/memberIds" },
+            "handedBackBy": {
+              "$ref": "#/$defs/id",
+              "description": "Set when the owner handed it back."
+            },
+            "note": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "The owner's note when handing back, shown as written."
+            },
+            "reason": { "$ref": "op.v1.schema.json#/$defs/openReason" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["state", "ownerId", "confirmed"],
+          "additionalProperties": false,
+          "properties": {
+            "state": { "const": "assigned" },
+            "ownerId": { "$ref": "#/$defs/id" },
+            "confirmed": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "item": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "title",
+        "forMemberIds",
+        "ownership",
+        "sensitive",
+        "importance",
+        "unavailableMemberIds",
+        "status",
+        "source",
+        "createdBy",
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "$ref": "op.v1.schema.json#/$defs/itemType" },
+        "title": { "$ref": "op.v1.schema.json#/$defs/title" },
+        "titleZh": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Seeded demo data only; dropped when the title is edited."
+        },
+        "notes": { "$ref": "op.v1.schema.json#/$defs/notes" },
+        "start": { "$ref": "#/$defs/instant" },
+        "end": { "$ref": "#/$defs/instant" },
+        "allDay": { "type": "boolean" },
+        "forMemberIds": { "$ref": "#/$defs/memberIds" },
+        "ownership": { "$ref": "#/$defs/ownership" },
+        "sensitive": { "type": "boolean" },
+        "importance": { "$ref": "op.v1.schema.json#/$defs/importance" },
+        "unavailableMemberIds": {
+          "$ref": "#/$defs/memberIds",
+          "description": "Members this event makes unavailable for its duration."
+        },
+        "parentEventId": {
+          "$ref": "#/$defs/id",
+          "description": "For a preparation: its event, in the same scope."
+        },
+        "recurrence": { "$ref": "op.v1.schema.json#/$defs/recurrence" },
+        "status": { "enum": ["proposed", "open", "done", "cancelled"] },
+        "source": { "$ref": "op.v1.schema.json#/$defs/source" },
+        "createdBy": {
+          "$ref": "#/$defs/id",
+          "description": "The server-attested member of the create op (D12)."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Goes up by one on every change, Undo included."
+        }
+      }
+    },
+    "undoEntry": {
+      "type": "object",
+      "required": ["itemId", "before", "afterVersion"],
+      "additionalProperties": false,
+      "properties": {
+        "itemId": { "$ref": "#/$defs/id" },
+        "before": {
+          "anyOf": [{ "$ref": "#/$defs/item" }, { "type": "null" }],
+          "description": "The item as it was before the op; null when the op created it."
+        },
+        "afterVersion": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The item's version right after the op (0 when the op removed it). Undo refuses if it moved on since."
+        }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "required": ["id", "at", "actor", "what", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "The opId of the op that wrote it (D10)."
+        },
+        "at": {
+          "$ref": "#/$defs/instant",
+          "description": "The op's `at`."
+        },
+        "actor": {
+          "$ref": "#/$defs/id",
+          "description": "The server-attested member for that seq (D12)."
+        },
+        "what": {
+          "type": "string",
+          "description": "Short neutral English summary, for logs. Screens render from `kind` and the fields below."
+        },
+        "kind": {
+          "enum": [
+            "create",
+            "edit",
+            "assign",
+            "open",
+            "unassign",
+            "claim",
+            "confirm",
+            "handback",
+            "done",
+            "cancel",
+            "cancel_occurrence",
+            "approve",
+            "dismiss",
+            "undo"
+          ],
+          "description": "A split is recorded as `edit`, as in Homemind."
+        },
+        "itemId": { "$ref": "#/$defs/id" },
+        "memberId": {
+          "$ref": "#/$defs/id",
+          "description": "The member the change names: the new owner, or who handed it back."
+        },
+        "note": { "type": "string", "maxLength": 500 },
+        "ref": {
+          "type": "string",
+          "description": "For cancel_occurrence: the local date. For undo: the opId that was undone."
+        },
+        "undo": {
+          "type": "object",
+          "required": ["items"],
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/undoEntry" }
+            }
+          },
+          "description": "Enough to restore every item the op touched. Absent on an undo entry."
+        },
+        "undone": {
+          "type": "object",
+          "required": ["at", "by", "activityId"],
+          "additionalProperties": false,
+          "properties": {
+            "at": { "$ref": "#/$defs/instant" },
+            "by": { "$ref": "#/$defs/id" },
+            "activityId": { "$ref": "#/$defs/id" }
+          },
+          "description": "Set once the op was undone, so it cannot be undone twice."
+        }
+      }
+    }
+  }
+}
