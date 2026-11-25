@@ -1,0 +1,2073 @@
+{
+  "description": "Family board fixtures, group \"scopes\". Each case starts from seed.state.json, replays `log` in seq order through the board reducer on a parent device (both scopes), and must end with `results` (one per applied or rejected entry; none from `stoppedAt` on) and `after`. A family-only device replaying the family entries reaches the same `hashes.family`. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures (ChayaLevi/digitalmate-web, branch feat/family-fixtures), running Homemind core.ts applyChange",
+  "seed": "seed.state.json",
+  "hash": "Lowercase hex SHA-256 of the UTF-8 canonical JSON: object keys sorted, no whitespace, strings escaped as JSON.stringify does, integers in decimal (RFC 8785 for these types). `state` hashes the whole state, `family` and `parents` the scope partitions (`scopes.family`, `scopes.parents`).",
+  "cases": [
+    {
+      "name": "family-op-on-parents-item-rejected",
+      "covers": [
+        "cross-scope",
+        "claim"
+      ],
+      "description": "A family op naming a parents item finds nothing (not_found, never forbidden, so no trace leaks).",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "kind": "claim",
+            "opId": "op1-family-op-on-parents-item-rejected",
+            "at": "2026-11-11T12:31:00.000Z",
+            "itemId": "counselor-meeting",
+            "version": 1
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "rejected",
+          "code": "not_found"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": []
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ],
+            "activity": []
+          }
+        }
+      },
+      "hashes": {
+        "state": "1fbb1b1def751aa3391ced3a849663beb0180cb34d2870151a91e538772840f0",
+        "family": "3587ef39af77b651c97d103a7863148ce16921a620335cdea3de9ed03c0dd1d6",
+        "parents": "c0d7f801a2d7f3c72ad50cf349d7f17b8f5960cd71767f1c6dbe4b6e9ba39f62"
+      }
+    },
+    {
+      "name": "family-preparation-under-parents-event-rejected",
+      "covers": [
+        "cross-scope",
+        "create"
+      ],
+      "description": "A family preparation cannot hang under a parents event.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op1-family-preparation-under-parents-event-rejected",
+            "at": "2026-11-11T12:31:00.000Z",
+            "item": {
+              "id": "counselor-notes",
+              "type": "preparation",
+              "title": "Write questions",
+              "parentEventId": "counselor-meeting"
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "rejected",
+          "code": "not_found"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": []
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ],
+            "activity": []
+          }
+        }
+      },
+      "hashes": {
+        "state": "1fbb1b1def751aa3391ced3a849663beb0180cb34d2870151a91e538772840f0",
+        "family": "3587ef39af77b651c97d103a7863148ce16921a620335cdea3de9ed03c0dd1d6",
+        "parents": "c0d7f801a2d7f3c72ad50cf349d7f17b8f5960cd71767f1c6dbe4b6e9ba39f62"
+      }
+    },
+    {
+      "name": "family-open-reason-names-parents-event-rejected",
+      "covers": [
+        "cross-scope",
+        "open"
+      ],
+      "description": "Mom's parents-only appointment makes her unavailable. A family open may not cite it; the parent device writes the family op without the reason.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op1-family-open-reason-names-parents-event-rejected",
+            "at": "2026-11-11T12:31:00.000Z",
+            "item": {
+              "id": "mom-doctor",
+              "type": "event",
+              "title": "Doctor appointment",
+              "start": "2026-11-11T14:00:00.000Z",
+              "end": "2026-11-11T15:30:00.000Z",
+              "unavailableMemberIds": [
+                "mom"
+              ]
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "open",
+            "opId": "op2-family-open-reason-names-parents-event-rejected",
+            "at": "2026-11-11T12:32:00.000Z",
+            "itemId": "pickup-today",
+            "version": 1,
+            "reason": {
+              "kind": "unavailable",
+              "memberId": "mom",
+              "eventId": "mom-doctor",
+              "date": "2026-11-11"
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "open",
+            "opId": "op3-family-open-reason-names-parents-event-rejected",
+            "at": "2026-11-11T12:33:00.000Z",
+            "itemId": "pickup-today",
+            "version": 1,
+            "candidateIds": [
+              "dad",
+              "maya"
+            ]
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "rejected",
+          "code": "invalid"
+        },
+        {
+          "seq": 3,
+          "outcome": "applied"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op3-family-open-reason-names-parents-event-rejected",
+                "at": "2026-11-11T12:33:00.000Z",
+                "actor": "mom",
+                "what": "Asked who is taking this",
+                "kind": "open",
+                "itemId": "pickup-today",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "pickup-today",
+                      "before": {
+                        "forMemberIds": [
+                          "noa"
+                        ],
+                        "ownership": {
+                          "state": "none"
+                        },
+                        "sensitive": false,
+                        "importance": "critical",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 1,
+                        "id": "pickup-today",
+                        "type": "event",
+                        "title": "Kindergarten pickup",
+                        "titleZh": "幼儿园接孩子",
+                        "start": "2026-11-11T14:30:00.000Z",
+                        "end": "2026-11-11T15:00:00.000Z"
+                      },
+                      "afterVersion": 2
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              },
+              {
+                "id": "mom-doctor",
+                "type": "event",
+                "title": "Doctor appointment",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [
+                  "mom"
+                ],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-11T14:00:00.000Z",
+                "end": "2026-11-11T15:30:00.000Z"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op1-family-open-reason-names-parents-event-rejected",
+                "at": "2026-11-11T12:31:00.000Z",
+                "actor": "mom",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "mom-doctor",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "mom-doctor",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "hashes": {
+        "state": "b96687f5d0214bd067b7c85a5cb901305ede73ab977b3759376f113aea676a72",
+        "family": "dcef6ccf161b18080f2f78cabcb4901cbc8976da0184d791cdbf7521cf0184a7",
+        "parents": "abb5f0dc846c301c2e7e8fac5fdf6f95e46f0b236974e153747897f3b427f1ec"
+      }
+    },
+    {
+      "name": "family-undo-of-parents-op-rejected",
+      "covers": [
+        "cross-scope",
+        "undo"
+      ],
+      "description": "An undo in family cannot name a parents op; the same undo in parents works.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "parents",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "kind": "assign",
+            "opId": "op1-family-undo-of-parents-op-rejected",
+            "at": "2026-11-11T12:31:00.000Z",
+            "itemId": "counselor-meeting",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "kind": "undo",
+            "opId": "op2-family-undo-of-parents-op-rejected",
+            "at": "2026-11-11T12:32:00.000Z",
+            "targetOpId": "op1-family-undo-of-parents-op-rejected"
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "parents",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "kind": "undo",
+            "opId": "op3-family-undo-of-parents-op-rejected",
+            "at": "2026-11-11T12:33:00.000Z",
+            "targetOpId": "op1-family-undo-of-parents-op-rejected"
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "rejected",
+          "code": "not_found"
+        },
+        {
+          "seq": 3,
+          "outcome": "applied"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": []
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 3,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op1-family-undo-of-parents-op-rejected",
+                "at": "2026-11-11T12:31:00.000Z",
+                "actor": "dad",
+                "what": "Assigned to Dad",
+                "kind": "assign",
+                "itemId": "counselor-meeting",
+                "memberId": "dad",
+                "undone": {
+                  "at": "2026-11-11T12:33:00.000Z",
+                  "by": "dad",
+                  "activityId": "op3-family-undo-of-parents-op-rejected"
+                },
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "counselor-meeting",
+                      "before": {
+                        "forMemberIds": [
+                          "mom",
+                          "dad"
+                        ],
+                        "ownership": {
+                          "state": "assigned",
+                          "ownerId": "mom",
+                          "confirmed": true
+                        },
+                        "sensitive": true,
+                        "importance": "normal",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 1,
+                        "id": "counselor-meeting",
+                        "type": "event",
+                        "title": "Meeting with Maya's school counselor",
+                        "titleZh": "与玛雅的学校辅导老师见面",
+                        "start": "2026-11-13T08:00:00.000Z",
+                        "end": "2026-11-13T09:00:00.000Z"
+                      },
+                      "afterVersion": 2
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "op3-family-undo-of-parents-op-rejected",
+                "at": "2026-11-11T12:33:00.000Z",
+                "actor": "dad",
+                "what": "Undid a change",
+                "kind": "undo",
+                "itemId": "counselor-meeting",
+                "ref": "op1-family-undo-of-parents-op-rejected"
+              }
+            ]
+          }
+        }
+      },
+      "hashes": {
+        "state": "d4a702a3ace82739cac68a41adaa2b588eeac3d3688487cb5d3bca3a1795e699",
+        "family": "3587ef39af77b651c97d103a7863148ce16921a620335cdea3de9ed03c0dd1d6",
+        "parents": "6295cb1915e127d79e3756a3d5b165103911e4a70acc3f43e94da2f318e786e9"
+      }
+    },
+    {
+      "name": "parents-op-on-family-item-rejected",
+      "covers": [
+        "cross-scope",
+        "create",
+        "claim"
+      ],
+      "description": "The owner's choice for v1: no references across scopes in either direction. A parents preparation cannot hang under a family event, and a parents op cannot change a family item.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op1-parents-op-on-family-item-rejected",
+            "at": "2026-11-11T12:31:00.000Z",
+            "item": {
+              "id": "dinner-gift",
+              "type": "preparation",
+              "title": "Secret gift for Grandma",
+              "parentEventId": "family-dinner"
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "claim",
+            "opId": "op2-parents-op-on-family-item-rejected",
+            "at": "2026-11-11T12:32:00.000Z",
+            "itemId": "library-books",
+            "version": 1
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "rejected",
+          "code": "not_found"
+        },
+        {
+          "seq": 2,
+          "outcome": "rejected",
+          "code": "not_found"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": []
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ],
+            "activity": []
+          }
+        }
+      },
+      "hashes": {
+        "state": "1fbb1b1def751aa3391ced3a849663beb0180cb34d2870151a91e538772840f0",
+        "family": "3587ef39af77b651c97d103a7863148ce16921a620335cdea3de9ed03c0dd1d6",
+        "parents": "c0d7f801a2d7f3c72ad50cf349d7f17b8f5960cd71767f1c6dbe4b6e9ba39f62"
+      }
+    },
+    {
+      "name": "same-id-in-both-scopes-allowed",
+      "covers": [
+        "cross-scope",
+        "create"
+      ],
+      "description": "A teen device cannot see parents ids, so a family create whose id exists in parents must be accepted on every device, or the devices would diverge. Ids are minted as UUIDs in practice.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op1-same-id-in-both-scopes-allowed",
+            "at": "2026-11-11T12:31:00.000Z",
+            "item": {
+              "id": "counselor-meeting",
+              "type": "task",
+              "title": "A family task that happens to reuse the id"
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              },
+              {
+                "id": "counselor-meeting",
+                "type": "task",
+                "title": "A family task that happens to reuse the id",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1
+              }
+            ],
+            "activity": [
+              {
+                "id": "op1-same-id-in-both-scopes-allowed",
+                "at": "2026-11-11T12:31:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "counselor-meeting",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "counselor-meeting",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ],
+            "activity": []
+          }
+        }
+      },
+      "hashes": {
+        "state": "631288fa4fbeb303f561758e72fd9258a204525fa18fb3976db68ed1756f2beb",
+        "family": "38bbac4bca49996d9e950f8df401ca84fa69621ef73aae1088882d162ef0220c",
+        "parents": "c0d7f801a2d7f3c72ad50cf349d7f17b8f5960cd71767f1c6dbe4b6e9ba39f62"
+      }
+    }
+  ]
+}
