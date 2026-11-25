@@ -11,7 +11,10 @@ paths = [
   '''docs/.*''',
   '''README\.md''',
   '''CHANGELOG\.md''',
-  '''services/evals/bench/tasks/.*'''
+  '''services/evals/bench/tasks/.*''',
+  # Ed25519 test vectors: public keys and signatures derived from fixed,
+  # published seeds by tools/scripts/build-approval-signature-fixtures.py.
+  '''spec/fixtures/approval-signatures\.json'''
 ]
 regexes = [
   '''harmony-clt-[0-9A-Za-z.\-]+''',
