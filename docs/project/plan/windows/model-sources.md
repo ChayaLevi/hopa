@@ -1,6 +1,6 @@
 # MODEL-XX: answer sources, anchors and local models
 
-Status: **MODEL-01…MODEL-06 done; MODEL-07…MODEL-20 pending.** This plan makes
+Status: **MODEL-01…MODEL-10 and MODEL-12 done; MODEL-11, MODEL-13…MODEL-20 pending.** This plan makes
 the Windows model-source choices explicit instead of hiding platform
 differences behind a single API provider.
 
@@ -21,7 +21,7 @@ the rest of the sequence stays.
 |---|---|---|---|---|
 | Anchors / graph | UIA tree + labels | no | no | ✅ Windows graph v1 |
 | Tree model | UIA tree | API/LAN | no | ✅ same as API model; named mode pending |
-| Small local model | UIA tree | no | yes | ❌ no runtime/model |
+| Small local model | UIA tree | no | yes | installed in Settings; loopback llama.cpp |
 | API model | UIA tree | yes | no | ✅ DeepSeek/OpenAI/LAN |
 | Demo | none | no | no | ✅ `stub` |
 
@@ -36,7 +36,7 @@ skips graphs, recipes and commands.
 - [x] Step source is documented as `auto`/`anchors`/`model`; graph is a
       Windows catalogue, not an Android screen.
 - [x] `W10-model-source.md` records the Demo provider and step source.
-- [ ] ADR for local runtime (MODEL-07) and a final scope decision: API-only or
+- [x] ADR for local runtime (MODEL-07) and a final scope decision: API-only or
       local model.
 
 ## 3. Anchors on Windows (MODEL-03…06)
@@ -65,18 +65,31 @@ HOPA: Opened Notepad.
 
 ## 4. On-device small model (MODEL-07…13)
 
-- [ ] **MODEL-07** ADR: ONNX Runtime / llama.cpp / Windows ML, model format.
-- [ ] **MODEL-08** catalogue: size, licence, RAM/CPU budget, model cards.
-- [ ] **MODEL-09** download/import/delete/quota UI, like Android
-      `LocalModelSection`.
-- [ ] **MODEL-10** `LocalEngine` in sidecar, provider `on-device`; no
-      `ModelNotLoaded` placeholder.
+- [x] **MODEL-07** ADR: ONNX Runtime / llama.cpp / Windows ML, model format.
+      Decided in [ADR-0030](../../../design/decisions/0030-windows-on-device-runtime.md):
+      llama.cpp, GGUF, loopback `llama-server`.
+- [x] **MODEL-08** catalogue: size, licence, RAM/CPU budget, model cards.
+      Windows ships one curated card (Qwen3 1.7B, Apache-2.0, 1.28 GB, 32k);
+      the full Android catalogue is the next size, not a blocker.
+- [x] **MODEL-09** download/import/delete UI, like Android `LocalModelSection`.
+      Settings → Answers: licence confirmation, install, import a `.gguf`,
+      delete, status. A per-model quota is unnecessary while one curated
+      model is offered.
+- [x] **MODEL-10** `LocalEngine` in sidecar, provider `on-device`; no
+      `ModelNotLoaded` placeholder. `HttpLocalEngine` reaches the window's
+      loopback server; a non-loopback endpoint still fails visibly.
 - [ ] **MODEL-11** local→API fallback only with consent; no silent cloud.
-- [ ] **MODEL-12** model files separate from the MSI; installer size budget.
+      Not implemented: a local failure is an error, never a hidden retry.
+- [x] **MODEL-12** model files separate from the MSI; installer size budget.
+      Runtime and weights download to `%LOCALAPPDATA%\HOPA`; the MSI is unchanged.
 - [ ] **MODEL-13** offline/performance evidence on a clean VM.
+      Measured here: a 49-node screen finished two steps in 256.5 s; a
+      200-node screen executed one step and then hit the ten-minute deadline.
+      A clean VM and a prompt budget for local models are still open.
 
-This is the long pole (4–6 weeks) and a product/privacy decision, not a combo
-box. Until then the explicit `on-device` provider fails visibly.
+The runtime works end to end. What remains is consent-based fallback
+(MODEL-11), clean-VM evidence (MODEL-13), and the progress UI that makes a
+multi-minute local turn legible.
 
 ## 5. Tree model (MODEL-14…15)
 
