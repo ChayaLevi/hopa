@@ -152,15 +152,12 @@ public sealed class ApprovalRouterTests
     }
 
     [Fact]
-    public async Task TheCardGoesToThePhoneAndTheTapComesBackUnchanged()
+    public async Task TheRelayGoesToThePhoneAndTheAnswerComesBackUnchanged()
     {
-        var tap = new JsonObject
-        {
-            ["version"] = "1.0",
-            ["action"] = new JsonObject { ["name"] = "approve", ["surfaceId"] = "appr_ap_1_x_1" },
-        };
         var result = Approval(allow: true);
-        result["body"]!["approval"]!["action"] = tap.DeepClone();
+        result["from"] = "p1";
+        result["body"]!["approval"]!["action"] = new JsonObject { ["version"] = "1.0" };
+        result["body"]!["approval"]!["signature"] = new JsonObject { ["v"] = 1, ["alg"] = "Ed25519" };
         var phone = new FakePhone { IsLive = true, PhoneDeviceId = "p1", Result = result };
         var replies = new List<JsonObject?>();
         var router = new ApprovalRouter(
@@ -170,16 +167,24 @@ public sealed class ApprovalRouterTests
             log: _ => { },
             autoApproval: null);
         var message = Message();
-        message["a2ui"] = new JsonArray(new JsonObject { ["version"] = "1.0" });
+        message["relay"] = new JsonObject
+        {
+            ["a2ui"] = new JsonArray(new JsonObject { ["version"] = "1.0" }),
+            ["challenge"] = new JsonObject { ["v"] = 1, ["nonce"] = "n", ["expiresAt"] = 1 },
+        };
 
         await router.HandleAsync(message);
 
-        Assert.True(JsonNode.DeepEquals(message["a2ui"], phone.Card), "the card is copied, not rebuilt");
-        Assert.True(JsonNode.DeepEquals(tap, Assert.Single(replies)), "the sidecar gets the tap to check");
+        Assert.True(JsonNode.DeepEquals(message["relay"], phone.Relay), "the relay is copied, not rebuilt");
+        var answer = Assert.Single(replies)!;
+        Assert.Equal("p1", answer["from"]!.GetValue<string>());
+        Assert.True(
+            JsonNode.DeepEquals(result["body"]!["approval"], answer["approval"]),
+            "the sidecar gets the phone's whole answer to check");
     }
 
     [Fact]
-    public async Task WithoutACardOrATapNothingExtraTravels()
+    public async Task WithoutARelayNothingExtraTravels()
     {
         var phone = new FakePhone { IsLive = true, PhoneDeviceId = "p1", Result = Approval(allow: true) };
         var replies = new List<JsonObject?>();
@@ -192,8 +197,11 @@ public sealed class ApprovalRouterTests
 
         await router.HandleAsync(Message());
 
-        Assert.Null(phone.Card);
-        Assert.Null(Assert.Single(replies));
+        Assert.Null(phone.Relay);
+        // An older phone's answer still reaches the sidecar, which reads it from allow alone.
+        var answer = Assert.Single(replies)!;
+        Assert.True(answer["approval"]!["allow"]!.GetValue<bool>());
+        Assert.Null(answer["approval"]!["signature"]);
     }
 
     [Fact]
@@ -231,16 +239,16 @@ public sealed class ApprovalRouterTests
 
         public int Calls { get; private set; }
 
-        public JsonArray? Card { get; private set; }
+        public JsonObject? Relay { get; private set; }
 
         public Task<JsonObject?> RequestApprovalAsync(
             JsonObject approval,
             string phoneDeviceId,
             TimeSpan timeout,
-            JsonArray? a2ui = null)
+            JsonObject? relay = null)
         {
             Calls++;
-            Card = a2ui;
+            Relay = relay;
             return Failure != null
                 ? Task.FromException<JsonObject?>(Failure)
                 : Task.FromResult(Result);

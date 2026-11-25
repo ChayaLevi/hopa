@@ -360,6 +360,7 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
             deviceId = { backend.deviceId },
             link = { backend.currentLink() },
             ask = approval::ask,
+            sign = approvalSigner::sign,
             foreground = { AppVisibility.foreground },
             postApproval = { Notifier.postApproval(context) },
             taskStarted = { backend.taskStarted() },
@@ -640,6 +641,11 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
     override fun fcmAvailable(): Boolean = FirebaseApp.getApps(context).isNotEmpty()
 
     override fun backendName(): String = BackendLaunchName.value
+
+    /** Signs this phone's approval answers (ADR-0028); the key is created on first use. */
+    val approvalSigner by lazy { com.hopa.app.link.remote.ApprovalSigner(settings) }
+
+    override suspend fun approvalKeyFingerprint(): String = approvalSigner.fingerprint()
 
     override fun pairWirelessFromScreen() {
         PairingService.start(context, PairingService.MODE_AUTO)

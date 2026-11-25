@@ -17,7 +17,7 @@ public partial class MainWindow : Window
             askUser: request => Dispatcher.Invoke(
                 () => new ApprovalWindow(request) { Owner = this }.ShowDialog() == true),
             phone: () => session?.Gateway,
-            reply: (id, allow, source, tap) => client?.SendApprovalResult(id, allow, source, tap),
+            reply: (id, allow, source, answer) => client?.SendApprovalResult(id, allow, source, answer),
             log: Log,
             autoApproval: autoApproval);
         _ = router.HandleAsync(message);

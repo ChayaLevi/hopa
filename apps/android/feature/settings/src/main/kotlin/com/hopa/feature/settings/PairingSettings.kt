@@ -21,6 +21,7 @@ internal class PairingSettings(
         backendUrl = settings.backendUrl,
         backendDeviceId = settings.backendDeviceId,
         backendName = deps.backendName(),
+        approvalKeyFingerprint = if (settings.backendDeviceId.isBlank()) "" else deps.approvalKeyFingerprint(),
         backendToken = deps.backendToken(),
         fcmAvailable = deps.fcmAvailable(),
         bridgeKey = deps.settings.bridgeToken(),

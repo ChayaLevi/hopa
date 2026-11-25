@@ -43,6 +43,16 @@ interface SettingsRepository {
 
     suspend fun setBackendContentKey(value: String)
 
+    /**
+     * The Ed25519 seed that signs this phone's approval answers (ADR-0028),
+     * base64. Blank until the first answer creates it. A store that cannot
+     * keep it returns blank: each answer then signs with a new key, which the
+     * asking PC refuses once it pinned one, so forgetting fails closed.
+     */
+    suspend fun approvalSigningKey(): String = ""
+
+    suspend fun setApprovalSigningKey(value: String) = Unit
+
     /** Forget the gateway pairing: tokens and key, plus the identity fields. */
     suspend fun clearBackend()
 }

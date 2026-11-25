@@ -25,8 +25,8 @@ internal class ApprovalHandler(
             io.log("refused an approval claiming the phone: no phone link is attached")
             approval.resolve(id, false, "pc")
         } else {
-            // ADR-0027: the phone's A2UI tap, when it sent one; HostApproval checks it.
-            approval.resolve(id, allow, claimed, message["action"])
+            // ADR-0027/0028: what the phone sent (its sender, tap and signature); HostApproval checks it.
+            approval.resolve(id, allow, claimed, message["phone"] as? JsonObject)
         }
         return true
     }

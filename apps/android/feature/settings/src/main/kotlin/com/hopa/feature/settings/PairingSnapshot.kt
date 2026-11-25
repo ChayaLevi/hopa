@@ -5,6 +5,7 @@ internal data class PairingSnapshot(
     val backendUrl: String,
     val backendDeviceId: String,
     val backendName: String,
+    val approvalKeyFingerprint: String,
     val backendToken: String?,
     val fcmAvailable: Boolean,
     val bridgeKey: String,

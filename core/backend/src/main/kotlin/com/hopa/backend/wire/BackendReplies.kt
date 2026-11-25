@@ -37,6 +37,9 @@ object BackendReplies {
      * message for the tap that answered it, and [error] the A2UI `error`
      * message for a card that was refused. The asker checks [action] against
      * [allow]; both stay inside the encrypted body.
+     *
+     * ADR-0028: [signature] is this device's signature over the asker's
+     * challenge and this decision; the asker pins the key on first use.
      */
     fun approval(
         task: BackendEnvelope,
@@ -44,6 +47,7 @@ object BackendReplies {
         allow: Boolean,
         action: JsonObject? = null,
         error: JsonObject? = null,
+        signature: JsonObject? = null,
     ): BackendEnvelope = reply(
         delivery = task,
         deviceId = deviceId,
@@ -55,6 +59,7 @@ object BackendReplies {
                     put("allow", allow)
                     action?.let { put("action", it) }
                     error?.let { put("error", it) }
+                    signature?.let { put("signature", it) }
                 },
             )
             put("summary", if (allow) "approved" else "denied")

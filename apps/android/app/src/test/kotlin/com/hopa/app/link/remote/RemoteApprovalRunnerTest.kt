@@ -1,6 +1,9 @@
 package com.hopa.app.link.remote
 
 import com.hopa.approval.ApprovalAnswer
+import com.hopa.backend.approval.AnswerSignature
+import com.hopa.backend.approval.ApprovalChallenge
+import com.hopa.backend.approval.SignedAnswer
 import com.hopa.backend.link.BackendLink
 import com.hopa.backend.link.BackendState
 import com.hopa.backend.wire.BackendEnvelope
@@ -130,10 +133,57 @@ class RemoteApprovalRunnerTest {
         assertEquals("UNSUPPORTED", answer["error"]!!.jsonObject["error"]!!.jsonObject["code"]!!.jsonPrimitive.content)
     }
 
-    private fun runner(link: RecordingLink, asker: Asker) = RemoteApprovalRunner(
+    @Test
+    fun `a challenge is answered with a signature over the card and the decision sent`() = runBlocking {
+        val link = RecordingLink()
+        val challenge = ApprovalChallenge.fresh(expiresAt = Long.MAX_VALUE)
+        val asker = Asker { _, card -> ApprovalAnswer(true, card!!.tap(ApprovalSurfaces.ALLOW_ID, Instant.EPOCH)) }
+
+        runner(link, asker, sign = ::signer).handle(task(ApprovalSurfaces.wire(request, surfaceId), challenge))
+
+        val signature = AnswerSignature.parse(approval(link.frames.last())["signature"])!!
+        assertTrue(SignedAnswer.verify(signature, challenge, surfaceId, request, allow = true))
+        assertFalse(SignedAnswer.verify(signature, challenge, surfaceId, request.copy(amount = "1"), allow = true))
+    }
+
+    @Test
+    fun `an allow without the approve tap is signed as the deny it becomes`() = runBlocking {
+        val link = RecordingLink()
+        val challenge = ApprovalChallenge.fresh(expiresAt = Long.MAX_VALUE)
+
+        runner(link, Asker { _, _ -> ApprovalAnswer(true) }, sign = ::signer)
+            .handle(task(ApprovalSurfaces.wire(request, surfaceId), challenge))
+
+        val answer = approval(link.frames.last())
+        assertFalse(answer["allow"]!!.jsonPrimitive.boolean)
+        val signature = AnswerSignature.parse(answer["signature"])!!
+        assertTrue(SignedAnswer.verify(signature, challenge, surfaceId, request, allow = false))
+        assertFalse(SignedAnswer.verify(signature, challenge, surfaceId, request, allow = true))
+    }
+
+    @Test
+    fun `without a challenge nothing is signed`() = runBlocking {
+        val link = RecordingLink()
+
+        runner(link, Asker { _, _ -> ApprovalAnswer(true) }, sign = ::signer).handle(task())
+
+        assertNull(approval(link.frames.last())["signature"])
+    }
+
+    private val seed = ByteArray(32) { it.toByte() }
+
+    private fun signer(challenge: ApprovalChallenge, request: ApprovalRequest, surfaceId: String?, allow: Boolean) =
+        SignedAnswer.sign(seed, challenge, surfaceId, request, allow).toJson()
+
+    private fun runner(
+        link: RecordingLink,
+        asker: Asker,
+        sign: suspend (ApprovalChallenge, ApprovalRequest, String?, Boolean) -> JsonObject? = { _, _, _, _ -> null },
+    ) = RemoteApprovalRunner(
         deviceId = { "dev-phone" },
         link = { link },
         ask = asker::ask,
+        sign = sign,
         foreground = { true },
         postApproval = {},
         timeoutMillis = 2_000,
@@ -141,7 +191,7 @@ class RemoteApprovalRunnerTest {
 
     private fun approval(frame: BackendEnvelope) = frame.body["approval"]!!.jsonObject
 
-    private fun task(a2ui: JsonElement? = null): BackendEnvelope = BackendEnvelope(
+    private fun task(a2ui: JsonElement? = null, challenge: ApprovalChallenge? = null): BackendEnvelope = BackendEnvelope(
         id = "m-1",
         type = "task.needs_approval",
         ts = 1,
@@ -151,6 +201,7 @@ class RemoteApprovalRunnerTest {
         body = buildJsonObject {
             put("approval", HopaJson.element.encodeToJsonElement(ApprovalRequest.serializer(), request))
             a2ui?.let { put("a2ui", it) }
+            challenge?.let { put("challenge", it.toJson()) }
         },
     )
 

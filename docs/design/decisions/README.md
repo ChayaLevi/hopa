@@ -49,6 +49,7 @@ supersede it. Format:
 | [0029](0029-windows-signing.md) | Windows signing: exe+MSI, timestamp, PFX/store/Trusted Signing | accepted |
 | [0030](0030-windows-on-device-runtime.md) | Windows on-device model: llama.cpp, GGUF, loopback engine | accepted |
 | [0027](0027-a2ui-approval-and-choice-cards.md) | Approval and choice cards are A2UI 1.0 surfaces | proposed |
+| [0028](0028-signed-approval-answers.md) | Signed approval answers, keys pinned on first use | proposed |
 
 Create the next ADR by copying the template below.
 

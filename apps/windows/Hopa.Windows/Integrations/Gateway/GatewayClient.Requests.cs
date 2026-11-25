@@ -20,7 +20,7 @@ public sealed partial class GatewayClient
         JsonObject approval,
         string phoneDeviceId,
         TimeSpan timeout,
-        JsonArray? a2ui = null)
+        JsonObject? relay = null)
     {
         if (!HasPhone || phoneDeviceId.Length == 0)
         {
@@ -40,9 +40,13 @@ public sealed partial class GatewayClient
                 ["goal"] = approval["title"]?.GetValue<string>() ?? "approve this action",
                 ["approval"] = approval.DeepClone(),
             };
-            if (a2ui != null)
+            foreach (var (key, value) in relay ?? new JsonObject())
             {
-                body["a2ui"] = a2ui.DeepClone();
+                // The relay adds fields; it never replaces the typed approval.
+                if (!body.ContainsKey(key))
+                {
+                    body[key] = value?.DeepClone();
+                }
             }
 
             await SendAsync(new JsonObject

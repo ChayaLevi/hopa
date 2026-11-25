@@ -1,0 +1,166 @@
+# ADR-0028 — Signed approval answers, keys pinned on first use
+
+- Status: proposed
+- Date: 2026-11-25
+- Owners: backend lane A; Android and Windows client leads
+- Relates to: ADR-0024 (device identity and approval provenance), ADR-0026
+  (household content key), ADR-0027 (approval cards), Phase 4 of
+  `docs/project/plan/a2ui-plan.html`
+
+## Context
+
+Since ADR-0024 a PC can ask the paired phone to approve an action. The phone
+answers with a `task.result` whose `body.approval.allow` is true or false, and
+ADR-0027 adds the A2UI tap. The PC believes that answer for two reasons only:
+the gateway says which device sent it, and the body says "allow".
+
+Neither proves that the phone said yes to this question:
+
+- the gateway is the party that names the sender, and it relays the body;
+- ADR-0026 makes bodies ciphertext under the household key, but clients do
+  not seal them yet, so today the server can read and change a body;
+- even sealed, any device in the household holds the same content key, so a
+  body is not proof of which device wrote it;
+- an earlier "allow" could be replayed against a later question.
+
+A payment approval is exactly where that matters (CLAUDE.md golden rule 2).
+
+The phone and the PC never talk directly. Each pairs with the server on its
+own, through a one-time link, so there is no channel between them that the
+server does not carry.
+
+## Decision
+
+**Every answer is signed by the answering device, over the exact question and
+decision. The asking device pins each answering device's key the first time
+it verifies one, and from then on accepts an allow only with a signature from
+that key.**
+
+### 1. Keys
+
+- Ed25519, one key per answering device, created on its first approval
+  answer. The 32-byte seed stays on the device: Android keeps it in the
+  encrypted settings store (`approval_signing_key`). It is cleared when the
+  phone forgets its pairing, so a phone paired again is a new signer.
+- Bouncy Castle provides it on both sides (`core/backend/.../approval/`), so
+  Android API 29–32 needs no JCA Ed25519 provider.
+
+### 2. The question carries a challenge
+
+`task.needs_approval` gains `challenge`, beside `approval` and `a2ui`:
+
+```json
+{ "v": 1, "nonce": "<16 random bytes, base64url>", "expiresAt": 1795000000000 }
+```
+
+The asker creates a fresh nonce for every question and keeps it with the
+pending question. `expiresAt` is the asker's own deadline in epoch
+milliseconds.
+
+### 3. The answer carries a signature
+
+`body.approval.signature` in the `task.result`:
+
+```json
+{ "v": 1, "alg": "Ed25519", "key": "<32 bytes, base64url>", "sig": "<64 bytes, base64url>" }
+```
+
+The signed bytes are these fields, each as UTF-8 prefixed by its length in 4
+big-endian bytes, so no client has to agree on JSON formatting:
+
+```
+"hopa.approval.answer.v1" | nonce | expiresAt | surfaceId | actionHash | "allow" or "deny"
+```
+
+- `surfaceId` is the A2UI card's surface (ADR-0027), or empty without a card.
+- `actionHash` is the lowercase hex SHA-256 of the same encoding over
+  `"hopa.approval.action.v1" | title | body | amount | merchant | consequence | isPayment | action.kind`,
+  the fields a person consents to. Change one character of the amount and the
+  signature no longer verifies.
+
+The phone signs the decision it actually sends. With a card, an allow that
+lacks the approve tap is sent, and signed, as deny.
+
+### 4. How the asker reads an answer
+
+A deny needs no proof and is always deny. An allow counts only when every
+check passes (`AnswerCheck`):
+
+| Answer | Result |
+|---|---|
+| after `expiresAt` | deny (`expired`) |
+| signature present but malformed, or not Ed25519 | deny (`malformed`) |
+| signed, but the gateway named no sender | deny (`no_sender`) |
+| signature does not verify over this question and "allow" | deny (`bad_signature`) |
+| verifies, sender has no pinned key | allow, and the key is pinned (`pinned`) |
+| verifies with the pinned key | allow (`verified`) |
+| verifies with another key | deny (`key_changed`) |
+| unsigned, sender has a pinned key | deny (`unsigned`) |
+| unsigned, sender never signed | allow (`legacy`), as before this ADR |
+
+A replay fails by construction: the nonce belongs to one question, which is
+removed when answered. These checks run after ADR-0027's tap check, never
+instead of it.
+
+### 5. Pinning, and changing a key
+
+The PC keeps the pins in `phone-keys.json` in its data directory, by gateway
+device id. Public keys only. It logs the fingerprint when it pins (the first
+8 bytes of SHA-256(key), as four groups of four hex digits), and the phone
+shows the same fingerprint on its gateway card in Settings, so a person can
+compare them. A pin never changes by itself. After pairing a phone again, the
+person runs `hopa-sidecar --forget-phone-key`, and the next signed answer
+pins the new key. An unreadable pin file denies every phone allow until it is
+forgotten.
+
+### 6. Shared vectors
+
+`spec/fixtures/approval-signatures.json`, generated by
+`tools/scripts/build-approval-signature-fixtures.py` from the Python
+`cryptography` package, independently of the Kotlin code, holds:
+
+- fixed seeds with the exact action hash, signed bytes and signature;
+- every row of the table above.
+
+CI checks that the file is current, and the Kotlin tests reproduce it byte
+for byte. A future C# or ArkTS client passes the same file.
+
+## Consequences
+
+- A server, a relay or another household device can't approve anything on a
+  phone's behalf after the first answer: forging an allow needs the phone's
+  seed. A changed amount, another card, a replay, a late answer and a swapped
+  key are each denied.
+- The first answer is trust on first use. A server that forged the very
+  first allow, before the real phone ever answered, would get its own key
+  pinned. Comparing the fingerprints closes that gap. The gap is the price of
+  needing no server change and no new pairing screen.
+- Old phones keep working until the PC pins a key for them. A phone that
+  signed once can never be downgraded to unsigned answers.
+- This proves who answered and that they answered this question. It does not
+  decide who may answer. Role checks ("a parent may approve a child's
+  payment") are Phase 6, and need keys a whole household can verify.
+- The gate does not move. A verified allow is still input to
+  `guards → payment approval → execute → verify → record` on the acting
+  device (golden rules 1 and 2).
+- Forgetting a key has no button yet. The Windows settings window does not
+  talk to the sidecar, so for now it is a command-line flag. A settings button
+  comes with Phase 5's Windows work.
+
+## Alternatives considered
+
+- **The server hands out each device's key.** Rejected for now. It is the
+  simplest to use, but a server that could swap a key could forge answers,
+  which is the threat this ADR addresses. It can come back in Phase 6 as a
+  household key directory whose entries are signed by devices already
+  trusted.
+- **A direct "link this PC" step: the phone scans a code on the PC and they
+  swap keys.** Stronger than first-use pinning, with no first-answer gap.
+  Deferred, because it needs new screens on both apps and can't be tried
+  without both devices. The pin format here doesn't change if it is added.
+- **A MAC from the existing X25519 pairing keys.** Rejected. The PC learns
+  the key of the phone that vouched for it, which needn't be the phone that
+  answers. And a MAC can't be checked by a third party, which family audit
+  will need.
+- **Sign the JSON body.** Rejected. Three stacks would have to agree on byte-
+  exact JSON. Length-prefixed fields are trivial to reproduce everywhere.

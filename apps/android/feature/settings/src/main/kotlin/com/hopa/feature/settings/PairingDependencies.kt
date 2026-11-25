@@ -23,6 +23,9 @@ interface PairingDependencies {
 
     fun backendName(): String
 
+    /** The fingerprint of the key this phone signs approvals with (ADR-0028), to compare with the PC. */
+    suspend fun approvalKeyFingerprint(): String = ""
+
     fun pairWirelessFromScreen()
 
     fun pairWirelessWaiting()

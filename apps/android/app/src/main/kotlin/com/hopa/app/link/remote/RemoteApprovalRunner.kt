@@ -1,6 +1,7 @@
 package com.hopa.app.link.remote
 
 import com.hopa.approval.ApprovalAnswer
+import com.hopa.backend.approval.ApprovalChallenge
 import com.hopa.backend.link.BackendLink
 import com.hopa.backend.wire.BackendEnvelope
 import com.hopa.backend.wire.BackendReplies
@@ -29,11 +30,17 @@ import kotlinx.serialization.json.JsonObject
  * answer is deny, with the A2UI `error`. Allow then counts only with the
  * `approve` tap from that card, which travels back as `approval.action`.
  * A frame without `a2ui` keeps the old path.
+ *
+ * ADR-0028: when the frame carries a `challenge`, every answer is signed over
+ * it, the card and the typed request, so the PC can tell this phone said it
+ * about this question. A frame without one is answered unsigned, as before.
  */
 class RemoteApprovalRunner(
     private val deviceId: () -> String,
     private val link: () -> BackendLink?,
     private val ask: suspend (ApprovalRequest, A2uiSurface?) -> ApprovalAnswer,
+    private val sign: suspend (ApprovalChallenge, ApprovalRequest, String?, Boolean) -> JsonObject? =
+        { _, _, _, _ -> null },
     private val foreground: () -> Boolean,
     private val postApproval: () -> Unit,
     private val taskStarted: () -> Unit = {},
@@ -62,11 +69,18 @@ class RemoteApprovalRunner(
             )
             return
         }
+        val challenge = ApprovalChallenge.parse(task.body["challenge"])
         val card = task.body["a2ui"]?.let { ApprovalSurfaces.receive(it, request) }
         if (card is ApprovalCard.Refused) {
             // Nothing is drawn, so nobody was asked: the answer is deny.
             live.send(
-                BackendReplies.approval(task, deviceId(), false, error = card.error?.let(A2uiCodec::encodeReply)),
+                BackendReplies.approval(
+                    task,
+                    deviceId(),
+                    false,
+                    error = card.error?.let(A2uiCodec::encodeReply),
+                    signature = signed(challenge, request, card.error?.surfaceId, false),
+                ),
             )
             return
         }
@@ -87,7 +101,7 @@ class RemoteApprovalRunner(
                 } catch (_: Exception) {
                     ApprovalAnswer.DENY
                 }
-                live.send(reply(task, surface, answer))
+                live.send(reply(task, request, challenge, surface, answer))
             } finally {
                 taskFinished()
             }
@@ -95,10 +109,46 @@ class RemoteApprovalRunner(
     }
 
     /** With a card, allow needs this card's approve tap; the tap goes back so the PC can check it too. */
-    private fun reply(task: BackendEnvelope, surface: A2uiSurface?, answer: ApprovalAnswer): BackendEnvelope {
-        if (surface == null) return BackendReplies.approval(task, deviceId(), answer.allow)
+    private suspend fun reply(
+        task: BackendEnvelope,
+        request: ApprovalRequest,
+        challenge: ApprovalChallenge?,
+        surface: A2uiSurface?,
+        answer: ApprovalAnswer,
+    ): BackendEnvelope {
+        if (surface == null) {
+            return BackendReplies.approval(
+                task,
+                deviceId(),
+                answer.allow,
+                signature = signed(challenge, request, null, answer.allow),
+            )
+        }
         val tap = answer.action?.takeIf { ApprovalSurfaces.allowed(answer.allow, it, surface.id) }
-        return BackendReplies.approval(task, deviceId(), tap != null, action = tap?.let(A2uiCodec::encodeReply))
+        return BackendReplies.approval(
+            task,
+            deviceId(),
+            tap != null,
+            action = tap?.let(A2uiCodec::encodeReply),
+            signature = signed(challenge, request, surface.id, tap != null),
+        )
+    }
+
+    /** The signature over exactly the decision sent; none without a challenge, or if signing fails. */
+    private suspend fun signed(
+        challenge: ApprovalChallenge?,
+        request: ApprovalRequest,
+        surfaceId: String?,
+        allow: Boolean,
+    ): JsonObject? = challenge?.let {
+        try {
+            sign(it, request, surfaceId, allow)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            // Unsigned is never an allow once the PC pinned this phone; it fails closed there.
+            null
+        }
     }
 
     private fun decode(payload: JsonObject): ApprovalRequest? = runCatching {

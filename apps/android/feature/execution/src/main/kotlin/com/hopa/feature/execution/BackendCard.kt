@@ -140,6 +140,14 @@ fun BackendCard(
                 fontSize = 12.sp,
                 color = HopaColor.TextPrimary,
             )
+            if (state.approvalKeyFingerprint.isNotBlank()) {
+                // The same four groups the PC logs when it pins this phone's key.
+                Text(
+                    "Approval key " + state.approvalKeyFingerprint,
+                    fontSize = 12.sp,
+                    color = HopaColor.TextSecondary,
+                )
+            }
             FcmLine(
                 available = state.fcmAvailable,
                 token = state.backendToken,

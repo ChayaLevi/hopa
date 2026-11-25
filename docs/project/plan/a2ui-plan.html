@@ -301,15 +301,18 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
 </div>
 
 <div class="phase">
-  <h3>Phase 4: Signed answers (3 days)</h3>
-  <div class="meta">Owner: lane A · week 4 → 5</div>
+  <h3>Phase 4: Signed answers <span class="tag ok">code done</span></h3>
+  <div class="meta">Owner: lane A + Android + Windows · week 4 → 5 · ADR-0028</div>
+  <p>Decided: keys are <strong>pinned on first use</strong>. The phone and PC never talk directly (each pairs with the server), and bodies are not sealed yet, so a key handed out by the server would not stop a forged answer.</p>
   <ul>
-    <li>Ed25519 signing key per device, created at pairing, public key registered with the backend and shared within the household.</li>
-    <li><code>task.answer</code> carries <code>sig</code> over <code>(task, surfaceId, requestId, actionHash, decision, nonce, ts)</code>.</li>
-    <li>The acting device checks the signature, that the signer is allowed to answer this risk level, that the action hash matches the pending action, that it hasn't expired, and that the nonce hasn't been used. If any check fails, the answer is treated as deny.</li>
-    <li>Conformance tests for replays, a changed amount, an expired answer and a wrong signer.</li>
+    <li><strong>Each question carries a challenge</strong> (<code>task.needs_approval</code> <code>challenge</code>): a fresh 16-byte nonce and the asker's deadline. The sidecar creates it, and the window copies the whole <code>relay</code> (card and challenge) to the phone unchanged.</li>
+    <li><strong>Each answer is signed</strong> (<code>body.approval.signature</code>): Ed25519 over length-prefixed fields: the nonce, the deadline, the card's surface id, a hash of the request's title, body, amount, merchant, consequence, payment flag and action, and the decision. The phone's key is created on its first answer and kept in the encrypted settings store (<code>ApprovalSigner</code>).</li>
+    <li><strong>The PC checks every phone allow</strong> (<code>AnswerCheck</code> in <code>core/backend</code>, run by <code>HostApproval</code>). The first verified key per phone is pinned in <code>phone-keys.json</code>, and later allows need that key. Deny for: a changed amount, another card, a replayed answer, a late answer, a deny presented as allow, another key, an unsigned answer from a phone that signs, and a broken pin file. Phones from before signing keep working until they sign once.</li>
+    <li><strong>Compare and reset:</strong> the PC logs the fingerprint it pins, and the phone shows its fingerprint on the gateway card in Settings. After pairing a phone again, <code>hopa-sidecar --forget-phone-key</code> lets the new key pin.</li>
+    <li><strong>Shared vectors:</strong> <code>spec/fixtures/approval-signatures.json</code> (3 signature vectors and 15 answer checks), generated in Python by <code>tools/scripts/build-approval-signature-fixtures.py</code>, independently of the Kotlin code, which reproduces it byte for byte.</li>
+    <li>Not in this phase: who may answer (role checks are Phase 6), a key directory the whole household can verify, a settings button to forget a key on Windows (Phase 5), and the stronger direct "link this PC" key exchange.</li>
   </ul>
-  <div class="done">Done when: a tampered answer can't approve anything, as shown by tests in <code>core/agent</code> conformance.</div>
+  <div class="done">Code done and tested: a tampered, replayed, late or re-keyed answer can't approve anything (core/backend fixtures, sidecar <code>HostApprovalTest</code>, phone <code>RemoteApprovalRunnerTest</code>). <strong>Still to do:</strong> the end-to-end run on a paired phone and PC, checking that both screens show the same fingerprint.</div>
 </div>
 
 <div class="phase">
@@ -354,7 +357,7 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
 <tr><td>1 · Spec and core</td><td>3–4 d</td><td>3</td></tr>
 <tr><td>2 · Android renderer</td><td>3–4 d</td><td>3</td></tr>
 <tr><td>3 · Card on the PC → phone relay</td><td>2–3 d (code done)</td><td>3–4</td></tr>
-<tr><td>4 · Signed answers</td><td>3 d</td><td>4–5</td></tr>
+<tr><td>4 · Signed answers</td><td>3 d (code done)</td><td>4–5</td></tr>
 <tr><td>5 · Windows and HarmonyOS</td><td>4–6 d each, in parallel</td><td>4–5</td></tr>
 <tr><td>6 · Family approvals</td><td>part of the week 5 plan</td><td>5</td></tr>
 </table></div>

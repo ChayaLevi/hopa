@@ -7,6 +7,7 @@ Usage:
   hopa-sidecar                              speak NDJSON on stdin/stdout (the window)
   hopa-sidecar --turn "say hello"           run one turn headless and print JSON
   hopa-sidecar --pair-backend <url>         admit this PC to the backend, then speak NDJSON
+  hopa-sidecar --forget-phone-key           forget the phones' pinned signing keys, then exit
   hopa-sidecar --version
 
 Options:
@@ -14,6 +15,7 @@ Options:
   --data-dir <path>      conversations, records and attachments (default ~/.hopa/windows)
   --conversation <id>    continue that conversation instead of creating one
   --pair-backend <url>   admit synchronously before the stdio loop, printing the QR on stderr
+  --forget-phone-key     after pairing a phone again: its next signed answer pins its new key
   --help                 print this text
 
 Headless is deterministic by construction: no model key is loaded, so the engine

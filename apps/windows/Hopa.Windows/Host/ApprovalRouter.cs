@@ -6,9 +6,10 @@ namespace Hopa.Windows.Host;
 /// <summary>
 /// Where one approval goes: the automation override, the paired phone, or the
 /// person at this PC. The failure of the phone link is a deny, never an allow.
-/// ADR-0027: the sidecar's A2UI card goes to the phone unchanged, and the
-/// phone's tap comes back to the sidecar unchanged. The sidecar checks the
-/// tap; this router never judges a card.
+/// ADR-0027 and ADR-0028: the sidecar's relay (the card and the challenge)
+/// goes to the phone unchanged, and the phone's answer (its tap and signature,
+/// with the sender the gateway names) comes back to the sidecar unchanged. The
+/// sidecar checks it; this router never judges a card or a signature.
 /// </summary>
 public sealed class ApprovalRouter
 {
@@ -65,16 +66,16 @@ public sealed class ApprovalRouter
     {
         var allow = false;
         var source = "pc";
-        JsonObject? tap = null;
+        JsonObject? answer = null;
         try
         {
             var result = await live.RequestApprovalAsync(
                 BuildApproval(message),
                 live.PhoneDeviceId,
                 PhoneTimeout,
-                Card(message));
+                Relay(message));
             allow = ApprovalAllowed(result);
-            tap = ApprovalAction(result);
+            answer = PhoneAnswer(result);
             source = result == null ? "pc" : "phone";
             if (result == null)
             {
@@ -87,7 +88,7 @@ public sealed class ApprovalRouter
         }
         finally
         {
-            reply(id, allow, source, tap);
+            reply(id, allow, source, answer);
             log($"approval: {(allow ? "allow" : "deny")} from {source}");
         }
     }
@@ -109,15 +110,22 @@ public sealed class ApprovalRouter
         },
     };
 
-    /// <summary>The sidecar's A2UI card for this question, copied as it came; null when it sent none.</summary>
-    public static JsonArray? Card(JsonObject message) =>
-        message["a2ui"] is JsonArray card ? card.DeepClone().AsArray() : null;
+    /// <summary>The sidecar's fields for the phone, copied as they came; null when it sent none.</summary>
+    public static JsonObject? Relay(JsonObject message) =>
+        message["relay"] is JsonObject relay ? relay.DeepClone().AsObject() : null;
 
-    /// <summary>The phone's A2UI tap, copied as it came, for the sidecar to check; null when it sent none.</summary>
-    public static JsonObject? ApprovalAction(JsonObject? result) =>
-        (result?["body"] as JsonObject)?["approval"] is JsonObject approval &&
-        approval["action"] is JsonObject action
-            ? action.DeepClone().AsObject()
+    /// <summary>
+    /// What the phone answered, for the sidecar to check: the gateway's
+    /// <c>from</c> and the phone's <c>approval</c> object, copied as they came.
+    /// Null when the phone did not answer.
+    /// </summary>
+    public static JsonObject? PhoneAnswer(JsonObject? result) =>
+        (result?["body"] as JsonObject)?["approval"] is JsonObject approval
+            ? new JsonObject
+            {
+                ["from"] = result["from"]?.DeepClone(),
+                ["approval"] = approval.DeepClone(),
+            }
             : null;
 
     public static bool ApprovalAllowed(JsonObject? result) =>

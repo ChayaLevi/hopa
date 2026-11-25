@@ -1,5 +1,8 @@
 package com.hopa.sidecar.approval
 
+import com.hopa.backend.approval.AnswerSigning
+import com.hopa.backend.approval.ApprovalChallenge
+import com.hopa.backend.approval.SignedAnswer
 import com.hopa.contracts.a2ui.A2uiCodec
 import com.hopa.contracts.a2ui.A2uiSurface
 import com.hopa.contracts.a2ui.ApprovalCard
@@ -9,9 +12,11 @@ import com.hopa.contracts.approval.ApprovalRequest
 import com.hopa.contracts.wire.Action
 import com.hopa.sidecar.protocol.Stdio
 import com.hopa.sidecar.store.PendingApprovals
+import com.hopa.sidecar.store.PhoneKeys
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Instant
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -19,14 +24,23 @@ import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-/** ADR-0027 on the PC: the question carries its card, and a phone tap must agree with it. */
+/**
+ * The PC side of ADR-0027 and ADR-0028: each question carries its card and a
+ * fresh challenge, and a phone allow counts only with this card's approve tap
+ * and a signature over this question from the phone's pinned key.
+ */
 class HostApprovalTest {
     private val request = ApprovalRequest(
         title = "Confirm payment",
@@ -37,13 +51,22 @@ class HostApprovalTest {
         isPayment = true,
         action = Action(kind = "payment.pay", text = "100"),
     )
+    private val phoneSeed = ByteArray(32) { it.toByte() }
+    private val otherSeed = ByteArray(32) { (it + 32).toByte() }
     private val out = ByteArrayOutputStream()
     private lateinit var original: PrintStream
+    private lateinit var dir: Path
+    private lateinit var pins: PhoneKeys
+
+    /** What a phone sees: the typed request, the checked card and the challenge. */
+    private class Asked(val id: String, val card: A2uiSurface, val challenge: ApprovalChallenge, val message: JsonObject)
 
     @BeforeEach
-    fun capture() {
+    fun setUp() {
         original = System.out
         System.setOut(PrintStream(out, true, Charsets.UTF_8))
+        dir = Files.createTempDirectory("host-approval")
+        pins = PhoneKeys(dir.resolve("phone-keys.json"))
     }
 
     @AfterEach
@@ -52,50 +75,105 @@ class HostApprovalTest {
     }
 
     @Test
-    fun the_request_carries_a_card_that_shows_the_typed_request() {
-        val (message, card) = ask { _, _ -> null }.second
-        assertEquals("approval.request", message["type"]!!.jsonPrimitive.content)
-        assertEquals(request.amount, message["amount"]!!.jsonPrimitive.content, "the window keeps its typed fields")
-        assertEquals(true, card.id.startsWith("appr_ap_1_"), card.id)
+    fun the_request_relays_a_card_and_a_challenge_and_keeps_its_typed_fields() {
+        val (_, asked) = ask { null }
+        assertEquals("approval.request", asked.message["type"]!!.jsonPrimitive.content)
+        assertEquals(request.amount, asked.message["amount"]!!.jsonPrimitive.content, "the window keeps its fields")
+        assertTrue(asked.card.id.startsWith("appr_ap_1_"), asked.card.id)
+        assertTrue(asked.challenge.expiresAt > System.currentTimeMillis())
     }
 
     @Test
-    fun the_phone_approve_tap_allows() {
-        val decision = ask { card, _ -> tap(card, ApprovalSurfaces.ALLOW_ID) }.first
-        assertEquals(ApprovalDecision(true, "phone"), decision)
+    fun a_first_signed_allow_pins_the_phone_key_and_the_next_one_verifies() {
+        assertEquals(ApprovalDecision(true, "phone"), ask { phone(it, signed(phoneSeed, it)) }.first)
+        assertNotNull(pins.pinned("dev-phone"))
+        assertEquals(ApprovalDecision(true, "phone"), ask { phone(it, signed(phoneSeed, it)) }.first)
     }
 
     @Test
-    fun allow_with_a_deny_tap_is_deny() {
-        val decision = ask { card, _ -> tap(card, ApprovalSurfaces.DENY_ID) }.first
+    fun a_signature_from_another_key_after_the_pin_is_deny() {
+        ask { phone(it, signed(phoneSeed, it)) }
+        assertEquals(ApprovalDecision(false, "phone"), ask { phone(it, signed(otherSeed, it)) }.first)
+    }
+
+    @Test
+    fun an_unsigned_allow_after_the_pin_is_deny() {
+        ask { phone(it, signed(phoneSeed, it)) }
+        assertEquals(ApprovalDecision(false, "phone"), ask { phone(it, signature = null) }.first)
+    }
+
+    @Test
+    fun a_signature_over_another_amount_is_deny() {
+        val decision = ask { phone(it, signed(phoneSeed, it, request.copy(amount = "1"))) }.first
+        assertEquals(ApprovalDecision(false, "phone"), decision)
+        assertNull(pins.pinned("dev-phone"), "a refused signature pins nothing")
+    }
+
+    @Test
+    fun a_signature_over_another_question_is_deny() {
+        val replay = ApprovalChallenge.fresh(expiresAt = Long.MAX_VALUE)
+        val decision = ask { phone(it, SignedAnswer.sign(phoneSeed, replay, it.card.id, request, true).toJson()) }.first
         assertEquals(ApprovalDecision(false, "phone"), decision)
     }
 
     @Test
-    fun allow_with_a_tap_on_another_surface_is_deny() {
-        val decision = ask { card, _ -> tap(card.copy(id = "appr_ap_1_old_1"), ApprovalSurfaces.ALLOW_ID) }.first
+    fun a_late_answer_is_deny_even_when_signed() {
+        var clock = 1_000L
+        val decision = ask(now = { clock }) { asked ->
+            clock = asked.challenge.expiresAt + 1
+            phone(asked, signed(phoneSeed, asked))
+        }.first
         assertEquals(ApprovalDecision(false, "phone"), decision)
     }
 
     @Test
-    fun allow_with_a_malformed_tap_is_deny() {
-        val decision = ask { _, _ -> Json.parseToJsonElement("""{"version":"1.0","action":{"name":"approve"}}""") }
-            .first
+    fun a_deny_tap_is_deny_whatever_the_signature() {
+        val decision = ask { phone(it, signed(phoneSeed, it), button = ApprovalSurfaces.DENY_ID) }.first
         assertEquals(ApprovalDecision(false, "phone"), decision)
     }
 
     @Test
-    fun a_phone_without_a2ui_keeps_the_old_answer() {
-        val decision = ask { _, _ -> null }.first
-        assertEquals(ApprovalDecision(true, "phone"), decision)
+    fun a_phone_from_before_signing_keeps_the_old_answer() {
+        assertEquals(ApprovalDecision(true, "phone"), ask { phone(it, signature = null) }.first)
+        assertEquals(ApprovalDecision(true, "phone"), ask { null }.first, "no tap and no signature: before A2UI too")
     }
 
-    /** Asks once and answers allow from the phone with the tap [answer] makes from the card that was sent. */
+    @Test
+    fun the_person_at_the_pc_needs_no_signature() {
+        ask { phone(it, signed(phoneSeed, it)) }
+        assertEquals(ApprovalDecision(true, "pc"), ask(device = "pc") { null }.first)
+    }
+
+    @Test
+    fun forgetting_the_keys_lets_a_phone_paired_again_pin_its_new_key() {
+        ask { phone(it, signed(phoneSeed, it)) }
+        assertEquals(1, pins.forgetAll())
+        assertEquals(ApprovalDecision(true, "phone"), ask { phone(it, signed(otherSeed, it)) }.first)
+    }
+
+    @Test
+    fun an_unreadable_key_file_denies_every_phone_allow() {
+        val file = dir.resolve("broken-keys.json")
+        Files.writeString(file, "{not json")
+        pins = PhoneKeys(file)
+        assertEquals(ApprovalDecision(false, "phone"), ask { phone(it, signed(phoneSeed, it)) }.first)
+        assertEquals(ApprovalDecision(false, "phone"), ask { phone(it, signature = null) }.first)
+    }
+
+    /** Asks once; the phone answers allow with what [answer] builds, or the window answers when it is null. */
     private fun ask(
-        answer: (A2uiSurface, JsonObject) -> JsonElement?,
-    ): Pair<ApprovalDecision, Pair<JsonObject, A2uiSurface>> = runBlocking {
-        val dir = Files.createTempDirectory("host-approval")
-        val approval = HostApproval(Stdio(), PendingApprovals(dir.resolve("approvals.json")), timeoutMillis = 5_000)
+        device: String = "phone",
+        now: () -> Long = System::currentTimeMillis,
+        answer: (Asked) -> JsonObject?,
+    ): Pair<ApprovalDecision, Asked> = runBlocking {
+        out.reset()
+        val approval = HostApproval(
+            Stdio(),
+            PendingApprovals(dir.resolve("approvals.json")),
+            pins,
+            timeoutMillis = 5_000,
+            now = now,
+        )
         val decision = async { approval.decide(request) }
         var line: String? = null
         while (line == null) {
@@ -103,11 +181,31 @@ class HostApprovalTest {
             line = out.toString(Charsets.UTF_8).lineSequence().firstOrNull { "approval.request" in it }
         }
         val message = Json.parseToJsonElement(line).jsonObject
-        val card = (ApprovalSurfaces.receive(message["a2ui"]!!, request) as ApprovalCard.Shown).surface
-        approval.resolve(message["id"]!!.jsonPrimitive.content, true, "phone", answer(card, message))
-        decision.await() to (message to card)
+        val relay = message["relay"]!!.jsonObject
+        val card = (ApprovalSurfaces.receive(relay["a2ui"]!!, request) as ApprovalCard.Shown).surface
+        val asked = Asked(
+            message["id"]!!.jsonPrimitive.content,
+            card,
+            ApprovalChallenge.parse(relay["challenge"])!!,
+            message,
+        )
+        approval.resolve(asked.id, true, device, answer(asked))
+        decision.await() to asked
     }
 
-    private fun tap(card: A2uiSurface, button: String): JsonElement =
-        A2uiCodec.encodeReply(card.tap(button, Instant.EPOCH)!!)
+    private fun phone(asked: Asked, signature: JsonElement?, button: String = ApprovalSurfaces.ALLOW_ID) =
+        buildJsonObject {
+            put("from", "dev-phone")
+            put(
+                "approval",
+                buildJsonObject {
+                    put("allow", true)
+                    put("action", A2uiCodec.encodeReply(asked.card.tap(button, Instant.EPOCH)!!))
+                    signature?.let { put("signature", it) }
+                },
+            )
+        }
+
+    private fun signed(seed: ByteArray, asked: Asked, what: ApprovalRequest = request): JsonElement =
+        SignedAnswer.sign(seed, asked.challenge, asked.card.id, what, allow = true).toJson()
 }
