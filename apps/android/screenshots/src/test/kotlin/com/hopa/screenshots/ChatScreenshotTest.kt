@@ -52,7 +52,7 @@ class ChatScreenshotTest {
         compose.onRoot().captureRoboImage("src/test/screenshots/chat-empty.png")
     }
 
-    /** The answer chips of a choice; since ADR-0027 phase 2 they come from an A2UI surface. */
+    /** The answer chips of a choice; since ADR-0031 phase 2 they come from an A2UI surface. */
     @Test
     fun options() {
         val chosen = mutableListOf<String>()

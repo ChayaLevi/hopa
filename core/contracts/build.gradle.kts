@@ -7,7 +7,7 @@ plugins {
 
 sourceSets {
     test {
-        // The A2UI fixtures in spec/ are the cross-client contract (ADR-0027).
+        // The A2UI fixtures in spec/ are the cross-client contract (ADR-0031).
         resources.srcDir(file("../../spec"))
     }
 }

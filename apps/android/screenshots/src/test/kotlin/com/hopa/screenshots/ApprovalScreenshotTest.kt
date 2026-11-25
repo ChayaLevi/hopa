@@ -21,7 +21,7 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * The approval sheet, pinned before and after it became an A2UI surface
- * (ADR-0027 phase 2): the pictures must not move, and neither may the rules -
+ * (ADR-0031 phase 2): the pictures must not move, and neither may the rules -
  * deny on dismiss, and no allow on a payment until it is acknowledged.
  */
 @OptIn(ExperimentalRoborazziApi::class)

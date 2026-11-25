@@ -1,4 +1,4 @@
-# ADR-0027 — Approval and choice cards are A2UI 1.0 surfaces
+# ADR-0031 — Approval and choice cards are A2UI 1.0 surfaces
 
 - Status: proposed
 - Date: 2026-11-22

@@ -33,12 +33,12 @@ object BackendReplies {
      * the server attributes the sender from the authenticated socket, never
      * from a device name supplied here.
      *
-     * ADR-0027: when the request carried a card, [action] is the A2UI `action`
+     * ADR-0031: when the request carried a card, [action] is the A2UI `action`
      * message for the tap that answered it, and [error] the A2UI `error`
      * message for a card that was refused. The asker checks [action] against
      * [allow]; both stay inside the encrypted body.
      *
-     * ADR-0028: [signature] is this device's signature over the asker's
+     * ADR-0032: [signature] is this device's signature over the asker's
      * challenge and this decision; the asker pins the key on first use.
      */
     fun approval(

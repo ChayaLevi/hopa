@@ -36,7 +36,7 @@ internal abstract record ApprovalCard
 }
 
 /// <summary>
-/// HOPA's approval-card rules on top of A2UI (ADR-0027), a port of the
+/// HOPA's approval-card rules on top of A2UI (ADR-0031), a port of the
 /// receiving half of <c>ApprovalSurfaces.kt</c>. The reasons are the same
 /// strings, so <c>spec/fixtures/a2ui/surfaces.json</c> checks both.
 /// </summary>

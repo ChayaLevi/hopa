@@ -37,7 +37,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /**
- * The PC side of ADR-0027 and ADR-0028: each question carries its card and a
+ * The PC side of ADR-0031 and ADR-0032: each question carries its card and a
  * fresh challenge, and a phone allow counts only with this card's approve tap
  * and a signature over this question from the phone's pinned key.
  */

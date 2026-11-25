@@ -102,7 +102,7 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
   <div class="card"><h4>Any transport</h4><p>A2UI only defines the message shapes. They can travel over A2A, SSE, a WebSocket, or inside our gateway envelope.</p></div>
 </div>
 
-<p>A2UI is an open project that Google started (Apache-2.0, at <a href="https://a2ui.org">a2ui.org</a> and <a href="https://github.com/a2ui-project/a2ui">github.com/a2ui-project/a2ui</a>). Upstream versions: v0.8 is deprecated, v0.9 is closed, v0.9.1 is a closed patch, and 1.0 is current and stable. <strong>HOPA pins 1.0</strong> (ADR-0027, <code>spec/a2ui/VERSION</code>).</p>
+<p>A2UI is an open project that Google started (Apache-2.0, at <a href="https://a2ui.org">a2ui.org</a> and <a href="https://github.com/a2ui-project/a2ui">github.com/a2ui-project/a2ui</a>). Upstream versions: v0.8 is deprecated, v0.9 is closed, v0.9.1 is a closed patch, and 1.0 is current and stable. <strong>HOPA pins 1.0</strong> (ADR-0031, <code>spec/a2ui/VERSION</code>).</p>
 
 <h3>The five words you need</h3>
 <div class="table-wrap"><table>
@@ -201,7 +201,7 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
 <tr><td>PC → phone approval relay</td><td><code>Hopa.Windows/Gateway/GatewayClient.Requests.cs</code> (<code>RequestApprovalAsync</code>), Android <code>app/.../link/remote/RemoteApprovalRunner.kt</code></td><td><span class="tag ok">exists</span></td><td>Since #144 and #158. The PC sends <code>task.needs_approval</code> with the typed <code>approval</code> body; the phone shows the sheet (90 s timeout) and answers with <code>BackendReplies.approval</code>. Since Phase 3 it also carries the A2UI card out and the tap back, and the sidecar checks the tap.</td></tr>
 <tr><td>Choice ("which one?")</td><td><code>core/agent/.../decision/Decision.kt</code> (<code>Decision.Ask(answer, options)</code>) → <code>TurnOutcome.options</code> → Android <code>ChatScreen.kt</code> chips</td><td><span class="tag ok">exists</span></td><td>Local only. The source for a <code>ChoiceList</code> surface.</td></tr>
 <tr><td>Gateway envelope v1</td><td><code>spec/schemas/gateway.v1.schema.json</code>, <code>services/backend/.../protocol/</code>, <code>core/backend/.../wire/</code></td><td><span class="tag ok">exists</span></td><td>Closed <code>type</code> enum, a <code>body</code> the server never renders, idempotent ids and trace ids.</td></tr>
-<tr><td><code>task.needs_approval</code></td><td><code>spec/schemas/gateway.v1.schema.json</code>, <code>TaskRouter.kt</code>, <code>BackendClient.dispatchApproval</code>, <code>BackendReplies.approval</code></td><td><span class="tag ok">exists</span></td><td>Routed since ADR-0024. The body carries a typed <code>approval</code> object, and the answer is <code>task.result</code> with <code>body.approval.allow</code>. ADR-0027 adds an optional <code>a2ui</code> array and <code>approval.action</code> on top.</td></tr>
+<tr><td><code>task.needs_approval</code></td><td><code>spec/schemas/gateway.v1.schema.json</code>, <code>TaskRouter.kt</code>, <code>BackendClient.dispatchApproval</code>, <code>BackendReplies.approval</code></td><td><span class="tag ok">exists</span></td><td>Routed since ADR-0024. The body carries a typed <code>approval</code> object, and the answer is <code>task.result</code> with <code>body.approval.allow</code>. ADR-0031 adds an optional <code>a2ui</code> array and <code>approval.action</code> on top.</td></tr>
 <tr><td>Remote task runner</td><td><code>apps/android/app/.../link/remote/RemoteTaskRunner.kt</code></td><td><span class="tag part">partial</span></td><td>When the phone runs a remote task, its approval is a dialog on the phone plus a notification. A refusal becomes <code>E_POLICY</code>. The phone does not ask another device (the reverse direction, PC → phone, is the relay above).</td></tr>
 <tr><td>Device keys</td><td><code>core/backend/.../pairing/X25519Keys.kt</code></td><td><span class="tag part">partial</span></td><td>X25519 is for encryption. Signing a decision needs a signing key (for example Ed25519) per device, which the plan expects in week 5.</td></tr>
 <tr><td>Routing approvals to a member</td><td><code>services/backend/.../tasks/TaskRouter.kt</code></td><td><span class="tag no">missing</span></td><td>Week 5 in the backend plan: route by role, expiry, audit.</td></tr>
@@ -231,11 +231,11 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
   <h3>Phase 0: Decide and pin <span class="tag ok">written, ADR proposed</span></h3>
   <div class="meta">Owner: lane A · before week 3 starts</div>
   <ul>
-    <li>ADR-0027, "Approval and choice cards are A2UI 1.0 surfaces" (<code>docs/design/decisions/0027-a2ui-approval-and-choice-cards.md</code>): the version, the subset, the catalog id, the transport inside the existing <code>task.needs_approval</code> and <code>task.result</code> bodies, and the safety rules.</li>
+    <li>ADR-0031, "Approval and choice cards are A2UI 1.0 surfaces" (<code>docs/design/decisions/0031-a2ui-approval-and-choice-cards.md</code>): the version, the subset, the catalog id, the transport inside the existing <code>task.needs_approval</code> and <code>task.result</code> bodies, and the safety rules.</li>
     <li><code>spec/a2ui/VERSION</code> = <code>1.0</code>, plus <code>spec/a2ui/README.md</code>.</li>
     <li>The <code>NOTICE</code> credit (item 6) and a row in the ADR index.</li>
   </ul>
-  <div class="done">Done when: ADR-0027 is accepted and merged.</div>
+  <div class="done">Done when: ADR-0031 is accepted and merged.</div>
 </div>
 
 <div class="phase">
@@ -288,11 +288,11 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
   <div class="meta">Owner: lane A + Android + Windows · week 3 → 4</div>
   <p>The relay itself already worked (#144, #158): the PC sends <code>task.needs_approval</code>, the phone's <code>RemoteApprovalRunner</code> shows the sheet, and the answer comes back as <code>task.result</code>. This phase put the A2UI card and its answer on that path. It built no new transport.</p>
   <ul>
-    <li>No new envelope types for approvals (ADR-0027). The <code>task.needs_approval</code> body gains an <code>a2ui</code> array next to the typed <code>approval</code>. The <code>task.result</code> answer gains <code>approval.action</code>, or <code>approval.error</code> when a card was refused. All of it stays inside the encrypted body.</li>
+    <li>No new envelope types for approvals (ADR-0031). The <code>task.needs_approval</code> body gains an <code>a2ui</code> array next to the typed <code>approval</code>. The <code>task.result</code> answer gains <code>approval.action</code>, or <code>approval.error</code> when a card was refused. All of it stays inside the encrypted body.</li>
     <li><strong>Sidecar (Kotlin):</strong> <code>HostApproval</code> gives each question its own surface id, unique across restarts, and builds the card with <code>ApprovalSurfaces.wire</code>. <code>Protocol.approvalRequest</code> carries it to the window as an <code>a2ui</code> field.</li>
     <li><strong>Window (C#):</strong> <code>ApprovalRouter</code> copies <code>a2ui</code> unchanged into the phone's body, and passes the phone's <code>approval.action</code> back to the sidecar in <code>approval.result</code>. The C# side never judges a card.</li>
     <li><strong>The check exists once:</strong> <code>HostApproval.resolve</code> runs <code>ApprovalSurfaces.answered(allow, action, surfaceId)</code>. A mismatched, malformed or wrong-surface tap is deny. There is no C# port of the rule.</li>
-    <li><strong>Phone (Android):</strong> <code>RemoteApprovalRunner</code> checks the sent card with <code>ApprovalSurfaces.receive</code> and draws it as sent. The checks run in order: the A2UI rules, <code>problem()</code>, then <code>matches()</code>, which confirms the card shows the typed request (option C, ADR-0027 section 5). A card that fails is never drawn: the answer is deny with the A2UI <code>error</code>. With a card, allow counts only with that card's approve tap, which goes back as <code>approval.action</code>. A frame without <code>a2ui</code> keeps the old path, so old PCs keep working.</li>
+    <li><strong>Phone (Android):</strong> <code>RemoteApprovalRunner</code> checks the sent card with <code>ApprovalSurfaces.receive</code> and draws it as sent. The checks run in order: the A2UI rules, <code>problem()</code>, then <code>matches()</code>, which confirms the card shows the typed request (option C, ADR-0031 section 5). A card that fails is never drawn: the answer is deny with the A2UI <code>error</code>. With a card, allow counts only with that card's approve tap, which goes back as <code>approval.action</code>. A frame without <code>a2ui</code> keeps the old path, so old PCs keep working.</li>
     <li><code>UiApprovalGateway.ask(request, card)</code> puts the checked card on the one sheet, and <code>ApprovalSheet</code> draws it in place of a locally built one. Timeouts are unchanged: phone 90 s &lt; window 100 s &lt; sidecar 120 s, and every one of them means deny.</li>
     <li>Shared fixtures for every client: <code>surfaces.json</code> <code>receivedCases</code> (23 cards shown or refused, with the reason) and <code>replies.json</code> <code>wireAnswers</code> (8 answers as <code>task.result</code> carries them).</li>
     <li>Deferred: the capability gate in <code>device.hello</code>. The gateway doesn't yet tell the PC what the phone advertised, so the card is always attached, and an old phone ignores it. Moved to Phase 6: backend expiry and closing the card on the other devices, which only matters once there is more than one answering device, and the Android <code>RemoteApprovalGateway</code> for the reverse direction (the phone acts and asks).</li>
@@ -302,7 +302,7 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
 
 <div class="phase">
   <h3>Phase 4: Signed answers <span class="tag ok">code done</span></h3>
-  <div class="meta">Owner: lane A + Android + Windows · week 4 → 5 · ADR-0028</div>
+  <div class="meta">Owner: lane A + Android + Windows · week 4 → 5 · ADR-0032</div>
   <p>Decided: keys are <strong>pinned on first use</strong>. The phone and PC never talk directly (each pairs with the server), and bodies are not sealed yet, so a key handed out by the server would not stop a forged answer.</p>
   <ul>
     <li><strong>Each question carries a challenge</strong> (<code>task.needs_approval</code> <code>challenge</code>): a fresh 16-byte nonce and the asker's deadline. The sidecar creates it, and the window copies the whole <code>relay</code> (card and challenge) to the phone unchanged.</li>
@@ -375,14 +375,14 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
   <li><strong>The payment gate.</strong> A remote "yes" is input, not permission. The acting device still decides, and when it's unsure it denies. Never add a "trust remote" flag (golden rule 2).</li>
   <li><strong>Encryption timing.</strong> Surfaces carry amounts and merchants, so they must ride in the encrypted body. If week 2 encryption slips, cross-device surfaces wait for it.</li>
   <li><strong>Two answers at once.</strong> When the phone and PC both tap, the first valid signed answer wins. The acting device closes the others with a delete-surface message, and late answers are ignored.</li>
-  <li><strong>Settled (ADR-0027):</strong> a receiver draws the card it was sent, after checking that it shows the typed request (option C). Rebuilding and comparing was rejected, because every wording change would break older receivers.</li>
-  <li><strong>Settled (ADR-0027):</strong> approvals reuse <code>task.needs_approval</code> and <code>task.result</code>, with no new envelope types. <strong>Still open:</strong> the envelope type for sending a choice card to another device.</li>
+  <li><strong>Settled (ADR-0031):</strong> a receiver draws the card it was sent, after checking that it shows the typed request (option C). Rebuilding and comparing was rejected, because every wording change would break older receivers.</li>
+  <li><strong>Settled (ADR-0031):</strong> approvals reuse <code>task.needs_approval</code> and <code>task.result</code>, with no new envelope types. <strong>Still open:</strong> the envelope type for sending a choice card to another device.</li>
   <li><strong>1.0 is wider than we need:</strong> it adds function calls, multiple catalogs and templates. Our receivers refuse everything outside the HOPA subset, so a newer sender can't widen what we draw.</li>
   <li><strong>Open:</strong> should HarmonyOS reuse the Kotlin core through codegen from the JSON schema, or keep a hand-written ArkTS port with the shared fixtures as the check?</li>
 </ul>
 
 <footer>
-  Written from the HOPA repository as of 22 Nov 2026 (branch HEAD after merge #134), revised 24 Nov 2026 against merge #165. A2UI details follow the pinned 1.0 spec (ADR-0027).
+  Written from the HOPA repository as of 22 Nov 2026 (branch HEAD after merge #134), revised 24 Nov 2026 against merge #165. A2UI details follow the pinned 1.0 spec (ADR-0031).
 </footer>
 
 </main>

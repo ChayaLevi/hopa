@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 
 /**
- * The bytes an approval answer is signed over (ADR-0028). Every field is
+ * The bytes an approval answer is signed over (ADR-0032). Every field is
  * UTF-8, prefixed by its length as 4 big-endian bytes, so no client has to
  * agree on JSON formatting and no two different answers share the bytes:
  *

@@ -70,7 +70,7 @@ Screenshots so far (all rendered by the app itself, not captured by hand):
 |---|---|
 | `docs/media/windows-w4.png` | rail, conversation row, composer, empty state |
 | `docs/media/windows-w6-settings.png` | settings, provider fields, orange Save |
-| `docs/media/windows-w6-approval.png` | approval sheet drawn from its A2UI card (ADR-0027): payment badge, amount, merchant, consequence, and Allow disabled until the acknowledgement is ticked |
+| `docs/media/windows-w6-approval.png` | approval sheet drawn from its A2UI card (ADR-0031): payment badge, amount, merchant, consequence, and Allow disabled until the acknowledgement is ticked |
 | `docs/media/windows-w6-steps.png` | run details, one line per step |
 
 Also rendered: `docs/media/windows-w6-chat.png` — bubbles with real content, a

@@ -9,7 +9,7 @@ using Xunit;
 namespace Hopa.Windows.Tests;
 
 /// <summary>
-/// The PC's approval window is drawn from the sidecar's card (ADR-0027). A card
+/// The PC's approval window is drawn from the sidecar's card (ADR-0031). A card
 /// that is missing or doesn't show the request is denied without a window; a
 /// payment's Allow waits for the acknowledgement.
 /// </summary>

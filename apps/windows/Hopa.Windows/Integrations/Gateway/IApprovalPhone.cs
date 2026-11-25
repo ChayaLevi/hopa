@@ -11,7 +11,7 @@ public interface IApprovalPhone
 
     /// <summary>
     /// Asks the phone. <paramref name="relay"/> holds the sidecar's fields for
-    /// the phone (the A2UI card, ADR-0027, and the challenge, ADR-0028); each
+    /// the phone (the A2UI card, ADR-0031, and the challenge, ADR-0032); each
     /// is sent beside the typed approval, unchanged. Null sends none.
     /// </summary>
     Task<JsonObject?> RequestApprovalAsync(

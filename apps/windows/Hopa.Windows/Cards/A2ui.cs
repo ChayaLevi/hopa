@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 namespace Hopa.Windows.Cards;
 
 /// <summary>
-/// HOPA's pinned A2UI contract (ADR-0027), the same values as
+/// HOPA's pinned A2UI contract (ADR-0031), the same values as
 /// <c>core/contracts/.../a2ui/A2ui.kt</c>. The shared fixtures in
 /// <c>spec/fixtures/a2ui/</c> keep the two in step.
 /// </summary>

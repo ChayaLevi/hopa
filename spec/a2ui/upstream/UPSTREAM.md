@@ -4,7 +4,7 @@ Unmodified copies of the A2UI 1.0 JSON schemas and basic catalog, used only by
 `tools/checks/check-a2ui.py` to prove that the HOPA catalog and every accepted
 fixture are valid A2UI 1.0. No HOPA code loads them at runtime. A2UI is
 Apache-2.0: the licence text is in `A2UI-LICENSE.txt`, and the root `NOTICE`
-names the project (ADR-0027).
+names the project (ADR-0031).
 
 | Field | Value |
 |---|---|

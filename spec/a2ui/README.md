@@ -1,6 +1,6 @@
 # A2UI
 
-HOPA's approval and choice cards are A2UI surfaces (ADR-0027).
+HOPA's approval and choice cards are A2UI surfaces (ADR-0031).
 
 | File | What it is |
 |---|---|

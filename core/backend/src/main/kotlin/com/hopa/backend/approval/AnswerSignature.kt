@@ -9,7 +9,7 @@ import kotlinx.serialization.json.put
 import java.util.Base64
 
 /**
- * `body.approval.signature` in a `task.result` (ADR-0028): the answering
+ * `body.approval.signature` in a `task.result` (ADR-0032): the answering
  * device's Ed25519 public [key] and its [sig] over [SignedAnswer.message],
  * both base64url without padding.
  */

@@ -3,7 +3,7 @@ package com.hopa.sidecar.startup
 import com.hopa.sidecar.store.PhoneKeys
 
 /**
- * `--forget-phone-key` (ADR-0028): a phone paired again has a new signing
+ * `--forget-phone-key` (ADR-0032): a phone paired again has a new signing
  * key, which this PC refuses until the old pin is gone. Prints what it did
  * on stderr and returns the exit code.
  */

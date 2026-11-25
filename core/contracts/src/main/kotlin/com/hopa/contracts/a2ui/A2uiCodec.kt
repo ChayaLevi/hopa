@@ -12,7 +12,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
 
 /**
- * The one way in and out of A2UI JSON. Decoding is strict (ADR-0027): the HOPA
+ * The one way in and out of A2UI JSON. Decoding is strict (ADR-0031): the HOPA
  * catalog, the 1.0 subset, nothing else. A refusal carries the code and the
  * JSON Pointer to send back in an `error` message.
  */

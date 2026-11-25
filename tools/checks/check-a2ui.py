@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check HOPA's A2UI 1.0 contract (ADR-0027).
+"""Check HOPA's A2UI 1.0 contract (ADR-0031).
 
 1. `spec/a2ui/VERSION` is the version the catalog and the schema name.
 2. The HOPA catalog is a valid A2UI 1.0 catalog (upstream catalog_definition),

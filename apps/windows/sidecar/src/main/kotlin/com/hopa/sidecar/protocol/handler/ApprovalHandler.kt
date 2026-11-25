@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonObject
  * when no phone link exists — there is no path for the phone to have answered,
  * so it is refused instead of believed (fail closed).
  *
- * `phonekeys.forget` (ADR-0028) is the Settings window's "Forget phone keys":
+ * `phonekeys.forget` (ADR-0032) is the Settings window's "Forget phone keys":
  * after a phone is paired again, its next signed answer pins its new key.
  */
 internal class ApprovalHandler(
@@ -34,7 +34,7 @@ internal class ApprovalHandler(
             io.log("refused an approval claiming the phone: no phone link is attached")
             approval.resolve(id, false, "pc")
         } else {
-            // ADR-0027/0028: what the phone sent (its sender, tap and signature); HostApproval checks it.
+            // ADR-0031/0032: what the phone sent (its sender, tap and signature); HostApproval checks it.
             approval.resolve(id, allow, claimed, message["phone"] as? JsonObject)
         }
         return true

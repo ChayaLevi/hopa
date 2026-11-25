@@ -7,7 +7,7 @@ namespace Hopa.Windows.Tests;
 
 /// <summary>
 /// Replays <c>spec/fixtures/a2ui/</c>, the cases every HOPA renderer must agree
-/// on (ADR-0027). The Kotlin core replays the same files, so a card the phone
+/// on (ADR-0031). The Kotlin core replays the same files, so a card the phone
 /// refuses is refused here with the same code, path and reason.
 /// </summary>
 public sealed class A2uiFixtureTests

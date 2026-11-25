@@ -1,17 +1,17 @@
-# ADR-0028 — Signed approval answers, keys pinned on first use
+# ADR-0032 — Signed approval answers, keys pinned on first use
 
 - Status: proposed
 - Date: 2026-11-25
 - Owners: backend lane A; Android and Windows client leads
 - Relates to: ADR-0024 (device identity and approval provenance), ADR-0026
-  (household content key), ADR-0027 (approval cards), Phase 4 of
+  (household content key), ADR-0031 (approval cards), Phase 4 of
   `docs/project/plan/a2ui-plan.html`
 
 ## Context
 
 Since ADR-0024 a PC can ask the paired phone to approve an action. The phone
 answers with a `task.result` whose `body.approval.allow` is true or false, and
-ADR-0027 adds the A2UI tap. The PC believes that answer for two reasons only:
+ADR-0031 adds the A2UI tap. The PC believes that answer for two reasons only:
 the gateway says which device sent it, and the body says "allow".
 
 Neither proves that the phone said yes to this question:
@@ -72,7 +72,7 @@ big-endian bytes, so no client has to agree on JSON formatting:
 "hopa.approval.answer.v1" | nonce | expiresAt | surfaceId | actionHash | "allow" or "deny"
 ```
 
-- `surfaceId` is the A2UI card's surface (ADR-0027), or empty without a card.
+- `surfaceId` is the A2UI card's surface (ADR-0031), or empty without a card.
 - `actionHash` is the lowercase hex SHA-256 of the same encoding over
   `"hopa.approval.action.v1" | title | body | amount | merchant | consequence | isPayment | action.kind`,
   the fields a person consents to. Change one character of the amount and the
@@ -99,7 +99,7 @@ check passes (`AnswerCheck`):
 | unsigned, sender never signed | allow (`legacy`), as before this ADR |
 
 A replay fails by construction: the nonce belongs to one question, which is
-removed when answered. These checks run after ADR-0027's tap check, never
+removed when answered. These checks run after ADR-0031's tap check, never
 instead of it.
 
 ### 5. Pinning, and changing a key

@@ -7,7 +7,7 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 
 /**
- * Ed25519 for approval answers (ADR-0028), on Bouncy Castle so Android API
+ * Ed25519 for approval answers (ADR-0032), on Bouncy Castle so Android API
  * 29-32 needs no JCA provider. A device's signing key is its 32-byte seed;
  * it never leaves the device.
  */

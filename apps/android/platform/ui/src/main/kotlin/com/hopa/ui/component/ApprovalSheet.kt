@@ -13,7 +13,7 @@ import com.hopa.contracts.approval.ApprovalRequest
 import com.hopa.ui.a2ui.A2uiApprovalSheet
 
 /**
- * The approval question on this device. Since ADR-0027 it is an A2UI surface:
+ * The approval question on this device. Since ADR-0031 it is an A2UI surface:
  * built by [ApprovalSurfaces] from the typed request, checked by
  * [A2uiSession] and HOPA's approval rules, drawn by [A2uiApprovalSheet].
  * A question from another device brings its own [card], which the caller has

@@ -1,7 +1,7 @@
 package com.hopa.contracts.a2ui
 
 /**
- * HOPA's pinned A2UI contract (ADR-0027): the wire version, the catalog every
+ * HOPA's pinned A2UI contract (ADR-0031): the wire version, the catalog every
  * HOPA card uses, and the limits a receiver enforces. `spec/a2ui/` holds the
  * same values as JSON; `tools/checks/check-a2ui.py` keeps the two in step.
  */

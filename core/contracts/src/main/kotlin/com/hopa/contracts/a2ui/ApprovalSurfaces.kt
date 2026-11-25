@@ -9,7 +9,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /**
- * Approval cards (ADR-0027). The only code that writes one: deterministic, from
+ * Approval cards (ADR-0031). The only code that writes one: deterministic, from
  * the typed [ApprovalRequest], never from a model. The typed request stays the
  * source of truth; the card only shows it.
  *
@@ -106,7 +106,7 @@ object ApprovalSurfaces {
 
     /**
      * Whether a card someone else sent shows the typed [request] it came with
-     * (ADR-0027, "a sent card is checked against the request"). The sender
+     * (ADR-0031, "a sent card is checked against the request"). The sender
      * decides the layout; consent decides these: the title and body are shown,
      * the money is the request's money, and the buttons say what they do.
      * Call it on a surface that already passed [problem]. Returns why it

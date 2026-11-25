@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonObject
 import java.util.Base64
 
 /**
- * This phone's approval signing key (ADR-0028). Created on first use and kept
+ * This phone's approval signing key (ADR-0032). Created on first use and kept
  * in the encrypted settings store; it never leaves the phone. The PC pins its
  * public half the first time this phone answers.
  */

@@ -642,7 +642,7 @@ class AppContainer @Inject constructor(@ApplicationContext context: Context) : C
 
     override fun backendName(): String = BackendLaunchName.value
 
-    /** Signs this phone's approval answers (ADR-0028); the key is created on first use. */
+    /** Signs this phone's approval answers (ADR-0032); the key is created on first use. */
     val approvalSigner by lazy { com.hopa.app.link.remote.ApprovalSigner(settings) }
 
     override suspend fun approvalKeyFingerprint(): String = approvalSigner.fingerprint()

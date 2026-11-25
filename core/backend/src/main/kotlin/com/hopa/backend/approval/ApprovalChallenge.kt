@@ -10,7 +10,7 @@ import java.security.SecureRandom
 import java.util.Base64
 
 /**
- * What the asking device sends with a `task.needs_approval` (ADR-0028) so the
+ * What the asking device sends with a `task.needs_approval` (ADR-0032) so the
  * answer can be bound to this one question: a fresh random [nonce] and the
  * time the question stops counting, [expiresAt] in epoch milliseconds. The
  * asker keeps both; an answer signed over anything else is deny.

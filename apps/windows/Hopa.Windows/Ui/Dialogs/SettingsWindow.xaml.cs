@@ -753,7 +753,7 @@ public partial class SettingsWindow : Window
         }
     }
 
-    /// <summary>ADR-0028: after a phone is paired again, its next signed answer pins its new key.</summary>
+    /// <summary>ADR-0032: after a phone is paired again, its next signed answer pins its new key.</summary>
     private void ForgetPhoneKeys_Click(object sender, RoutedEventArgs e)
     {
         engine?.ForgetPhoneKeys();

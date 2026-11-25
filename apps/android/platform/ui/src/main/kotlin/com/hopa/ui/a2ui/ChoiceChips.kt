@@ -18,7 +18,7 @@ import java.time.Instant
 
 /**
  * The answers to a choice, as chips under the conversation. They come from a
- * choice surface (ADR-0027): the question is already in the chat, so only the
+ * choice surface (ADR-0031): the question is already in the chat, so only the
  * option buttons are drawn, and a tap is read back with
  * [ChoiceSurfaces.chosen]. Options a card cannot carry (more than eight,
  * repeats, or too long) are shown as plain chips, as before.

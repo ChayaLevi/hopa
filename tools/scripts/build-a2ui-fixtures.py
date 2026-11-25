@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the shared A2UI fixtures (ADR-0027).
+"""Generate the shared A2UI fixtures (ADR-0031).
 
 Writes ``spec/fixtures/a2ui/surfaces.json``, ``replies.json`` and
 ``builders.json``. Every HOPA client replays them: the Kotlin core in

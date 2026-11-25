@@ -24,14 +24,14 @@ import kotlinx.serialization.json.JsonObject
  * goal and never touches the screen: the person's decision is the whole task.
  * The socket stays open while the sheet waits, and a timeout is a denial.
  *
- * ADR-0027: when the frame carries an `a2ui` card, the card is checked with
+ * ADR-0031: when the frame carries an `a2ui` card, the card is checked with
  * `ApprovalSurfaces.receive` (A2UI rules, approval rules, and that it shows
  * the typed request) and drawn as sent. A card that fails is never drawn: the
  * answer is deny, with the A2UI `error`. Allow then counts only with the
  * `approve` tap from that card, which travels back as `approval.action`.
  * A frame without `a2ui` keeps the old path.
  *
- * ADR-0028: when the frame carries a `challenge`, every answer is signed over
+ * ADR-0032: when the frame carries a `challenge`, every answer is signed over
  * it, the card and the typed request, so the PC can tell this phone said it
  * about this question. A frame without one is answered unsigned, as before.
  */

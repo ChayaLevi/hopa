@@ -6,7 +6,7 @@ namespace Hopa.Windows.Host;
 /// <summary>
 /// Where one approval goes: the automation override, the paired phone, or the
 /// person at this PC. The failure of the phone link is a deny, never an allow.
-/// ADR-0027 and ADR-0028: the sidecar's relay (the card and the challenge)
+/// ADR-0031 and ADR-0032: the sidecar's relay (the card and the challenge)
 /// goes to the phone unchanged, and the phone's answer (its tap and signature,
 /// with the sender the gateway names) comes back to the sidecar unchanged. The
 /// sidecar checks it; this router never judges a card or a signature.

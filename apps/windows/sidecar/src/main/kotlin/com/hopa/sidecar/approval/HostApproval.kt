@@ -27,8 +27,8 @@ import com.hopa.sidecar.protocol.Stdio
  *
  * Each question also carries what a phone needs to answer it safely, in
  * `relay`, which the window copies unchanged into the phone's request:
- * the A2UI card built here from the typed request (ADR-0027) and a fresh
- * challenge (ADR-0028). A phone's answer is checked here, not in the window:
+ * the A2UI card built here from the typed request (ADR-0031) and a fresh
+ * challenge (ADR-0032). A phone's answer is checked here, not in the window:
  * its A2UI tap must agree with `allow` and name this card, and its signature
  * must be over this question and from the key pinned for that phone.
  * Anything else is deny.

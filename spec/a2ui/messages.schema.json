@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hopa.dev/contracts/a2ui/messages.schema.json",
   "title": "HOPA A2UI 1.0 message subset",
-  "description": "One A2UI 1.0 message as HOPA sends and accepts it (ADR-0027). Stricter than upstream: the HOPA catalog only, no function RPC, no templates, no sendDataModel, no metadata, no per-component catalog ids. Every message that passes this schema also passes the upstream 1.0 schema with the HOPA catalog in place of the catalog (checked by tools/checks/check-a2ui.py). Graph rules (root, references, tree shape, allowed parents and children, bindings) are not expressible here; core/contracts' A2uiSession enforces them.",
+  "description": "One A2UI 1.0 message as HOPA sends and accepts it (ADR-0031). Stricter than upstream: the HOPA catalog only, no function RPC, no templates, no sendDataModel, no metadata, no per-component catalog ids. Every message that passes this schema also passes the upstream 1.0 schema with the HOPA catalog in place of the catalog (checked by tools/checks/check-a2ui.py). Graph rules (root, references, tree shape, allowed parents and children, bindings) are not expressible here; core/contracts' A2uiSession enforces them.",
   "oneOf": [
     { "$ref": "#/$defs/CreateSurfaceMessage" },
     { "$ref": "#/$defs/UpdateComponentsMessage" },

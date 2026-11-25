@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the signed-answer fixtures (ADR-0028).
+"""Generate the signed-answer fixtures (ADR-0032).
 
 Writes ``spec/fixtures/approval-signatures.json``:
 

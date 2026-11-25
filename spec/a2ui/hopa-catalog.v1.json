@@ -4,7 +4,7 @@
   "catalogId": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
   "protocolVersion": "1.0",
   "title": "HOPA catalog v1",
-  "description": "The components HOPA renders on every client for approval and choice cards (ADR-0027). A narrowed subset of the A2UI 1.0 basic catalog plus one HOPA component, PaymentNotice. No functions: no @call, no functionCall actions.",
+  "description": "The components HOPA renders on every client for approval and choice cards (ADR-0031). A narrowed subset of the A2UI 1.0 basic catalog plus one HOPA component, PaymentNotice. No functions: no @call, no functionCall actions.",
   "instructions": "Approval and payment cards are built only by HOPA's deterministic builder from an ApprovalRequest, never by a model. Text is rendered as plain text, never as Markdown. A surface that contains a PaymentNotice keeps its approve button disabled until the person ticks the notice's acknowledgement; that state is local to the renderer and is never sent back.",
   "components": {
     "Text": {

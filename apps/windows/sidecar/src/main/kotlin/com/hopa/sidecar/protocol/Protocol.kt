@@ -197,7 +197,7 @@ object Protocol {
 
     /**
      * [relay] is what a phone needs to answer safely: the A2UI card
-     * (ADR-0027) and the challenge (ADR-0028). The window copies its fields,
+     * (ADR-0031) and the challenge (ADR-0032). The window copies its fields,
      * unchanged, into the phone's `task.needs_approval` body. The window's own
      * dialog still draws from the typed fields.
      */

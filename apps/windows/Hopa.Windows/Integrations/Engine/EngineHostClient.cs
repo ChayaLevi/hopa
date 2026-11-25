@@ -294,7 +294,7 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
 
     /// <summary>
     /// <paramref name="phone"/> is what the phone answered (its sender, tap and
-    /// signature), passed on for the sidecar to check (ADR-0027, ADR-0028).
+    /// signature), passed on for the sidecar to check (ADR-0031, ADR-0032).
     /// </summary>
     public void SendApprovalResult(string id, bool allow, string device = "pc", JsonObject? phone = null)    {
         var message = new JsonObject
@@ -312,7 +312,7 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
         Send(message);
     }
 
-    /// <summary>ADR-0028: forget the phones' pinned signing keys, after a phone was paired again.</summary>
+    /// <summary>ADR-0032: forget the phones' pinned signing keys, after a phone was paired again.</summary>
     public void ForgetPhoneKeys()
     {
         Send(new JsonObject { ["type"] = "phonekeys.forget" });

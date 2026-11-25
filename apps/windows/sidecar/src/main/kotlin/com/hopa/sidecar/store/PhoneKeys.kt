@@ -12,7 +12,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 
 /**
- * The phones' signing keys this PC pinned on first use (ADR-0028), by gateway
+ * The phones' signing keys this PC pinned on first use (ADR-0032), by gateway
  * device id. A pin never changes by itself: a phone that shows up with another
  * key is denied until the person runs `hopa-sidecar --forget-phone-key`.
  * Public keys only; nothing here is secret.

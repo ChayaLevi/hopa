@@ -7,7 +7,7 @@ using Hopa.Windows.Cards;
 namespace Hopa.Windows.Ui.Dialogs;
 
 /// <summary>
-/// Draws the HOPA catalog in WPF (ADR-0027). It only ever receives a surface
+/// Draws the HOPA catalog in WPF (ADR-0031). It only ever receives a surface
 /// that passed <see cref="ApprovalCards.Receive"/>. Text is plain text, never
 /// markup, and an icon is one of a fixed set of Segoe glyphs.
 /// </summary>

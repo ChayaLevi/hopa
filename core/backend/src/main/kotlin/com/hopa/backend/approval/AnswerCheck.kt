@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 
 /**
- * How the asking device reads a signed answer (ADR-0028). It only ever turns
+ * How the asking device reads a signed answer (ADR-0032). It only ever turns
  * an allow into a deny; a deny needs no proof. Keys are pinned on first use:
  * the first verified answer from a device fixes its key, and from then on
  * that device's allow must carry a signature from that key.

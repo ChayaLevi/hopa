@@ -12,7 +12,7 @@ internal static class ComponentShot
 {
     /// <summary>
     /// A payment approval as the sidecar sends it: the typed fields, and the
-    /// card <c>ApprovalSurfaces.build</c> makes from them (ADR-0027).
+    /// card <c>ApprovalSurfaces.build</c> makes from them (ADR-0031).
     /// </summary>
     private static JsonObject SampleApproval()
     {

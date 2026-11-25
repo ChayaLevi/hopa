@@ -39,7 +39,7 @@ Third-party components
    Project: https://github.com/a2ui-project/a2ui (spec: https://a2ui.org)
    License: Apache-2.0.
    HOPA's approval and choice cards follow the A2UI 1.0 message format and
-   component model (ADR-0027). The codec, validator, catalog and renderers are
+   component model (ADR-0031). The codec, validator, catalog and renderers are
    HOPA's own code. Unmodified copies of the A2UI 1.0 JSON schemas and basic
    catalog are vendored under spec/a2ui/upstream/ at the commit recorded in
    spec/a2ui/upstream/UPSTREAM.md, with the license text beside them

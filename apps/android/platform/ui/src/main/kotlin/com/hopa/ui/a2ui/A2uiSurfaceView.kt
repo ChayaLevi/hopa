@@ -40,7 +40,7 @@ import java.time.Instant
 
 /**
  * Draws a validated [A2uiSurface] with HOPA's own Compose components
- * (ADR-0027). It only ever receives a surface that `A2uiSession` accepted,
+ * (ADR-0031). It only ever receives a surface that `A2uiSession` accepted,
  * so every child exists and every binding is a string. Text is plain text,
  * never Markdown. A tap becomes an A2UI `action` through [A2uiSurface.tap].
  *

@@ -6,7 +6,7 @@ namespace Hopa.Windows.Ui.Dialogs;
 
 /// <summary>
 /// The approval question on this PC, drawn from the sidecar's A2UI card
-/// (ADR-0027) after the same checks the phone runs. Allow is only a press of
+/// (ADR-0031) after the same checks the phone runs. Allow is only a press of
 /// the card's approve button; a payment's Allow stays disabled until its
 /// notice is acknowledged; closing the window is deny. A request whose card
 /// is missing or fails a check is denied without being shown.
