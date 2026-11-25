@@ -66,7 +66,8 @@ internal fun runProtocol(options: CliOptions) {
     val recipes = RecipeStore(dataDir.resolve("recipes.txt").toFile())
     val config = RuntimeConfig()
     val capabilities = CapabilitiesCollector(config, memory, skills, recipes, records)
-    val approval = HostApproval(io, approvals, PhoneKeys(dataDir.resolve(PHONE_KEYS)))
+    val phoneKeys = PhoneKeys(dataDir.resolve(PHONE_KEYS))
+    val approval = HostApproval(io, approvals, phoneKeys)
     val attachments = Attachments(dataDir.resolve("attachments"))
     val tasks = TaskStore()
     val engine = TurnEngine(
@@ -165,7 +166,7 @@ internal fun runProtocol(options: CliOptions) {
             TaskHandler(io, tasks),
             BrowserHandler(browser),
             DeviceHandler(io, device, config),
-            ApprovalHandler(io, approval, config),
+            ApprovalHandler(io, approval, config, phoneKeys),
             BackendHandler(io, dataDir, sessionStore, gateways, backendScope),
         ),
     )

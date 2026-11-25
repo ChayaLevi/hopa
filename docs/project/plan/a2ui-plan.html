@@ -316,14 +316,16 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
 </div>
 
 <div class="phase">
-  <h3>Phase 5: Windows and HarmonyOS renderers (4–6 days, can run in parallel)</h3>
-  <div class="meta">Owner: Windows · HarmonyOS · weeks 4–5</div>
+  <h3>Phase 5: Windows renderer <span class="tag ok">code done</span> · HarmonyOS <span class="tag no">deferred</span></h3>
+  <div class="meta">Owner: Windows · week 4 → 5</div>
   <ul>
-    <li>Windows: the card already reaches the window inside <code>approval.request</code> (Phase 3), so no new stdio event is needed. <code>Hopa.Windows</code> gets a XAML renderer for the HOPA catalog that replaces <code>Dialogs/ApprovalWindow</code>. <code>ApprovalRouter</code> still decides who answers, and its automation override keeps answering without a card. Headless stays <code>DenyAllApproval</code>.</li>
-    <li>HarmonyOS: an ArkTS port of the validator (or codegen from the schema), plus an ArkUI <code>SurfaceView</code> used by <code>ApprovalSheet.ets</code> and the laptop's <code>ChatRail</code>.</li>
-    <li>All three clients run the same <code>spec/fixtures/a2ui</code> suite.</li>
+    <li><strong>A C# port of the card rules</strong> (<code>Hopa.Windows/Cards/</code>): the strict decoder, <code>A2uiSession</code> with the graph rules, and the approval checks (<code>problem</code>, <code>matches</code>, <code>receive</code>). It replays <code>spec/fixtures/a2ui</code>: all 34 surface cases with the same code and path, the approval cases, the 23 received cards with the same reasons, and the built cards.</li>
+    <li><strong>The approval window is drawn from the card</strong> (<code>Dialogs/CardView</code>, <code>ApprovalWindow</code>), and keeps the app's look. New: a payment shows the PAYMENT badge and the "I understand" tick, and Allow stays disabled until it is ticked. The old window had no tick. A question whose card is missing or fails a check is denied without a window. The automation override and the phone path are unchanged.</li>
+    <li><strong>Settings → Phone link → Forget phone keys</strong> sends <code>phonekeys.forget</code> to the sidecar, the button Phase 4 deferred.</li>
+    <li>The W6 parity screenshot (<code>docs/media/windows-w6-approval.png</code>) is re-rendered from the app's own <code>--shot-components</code> mode.</li>
+    <li><strong>HarmonyOS: not built.</strong> It is frozen under ADR-0020 (no new features), so a card renderer is part of any future revival, together with the conformance adapter that ADR already requires.</li>
   </ul>
-  <div class="done">Done when: the same fixture renders on all three and returns the same <code>action</code> JSON.</div>
+  <div class="done">Code done and tested: 4 fixture tests and 4 window tests in <code>Hopa.Windows.Tests</code> (89 in all), and the real window rendered from the app. The PC window answers locally, so it sends no A2UI <code>action</code>; the shared fixtures are the cross-client check.</div>
 </div>
 
 <div class="phase">
@@ -358,7 +360,7 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding-top:14px;font-si
 <tr><td>2 · Android renderer</td><td>3–4 d</td><td>3</td></tr>
 <tr><td>3 · Card on the PC → phone relay</td><td>2–3 d (code done)</td><td>3–4</td></tr>
 <tr><td>4 · Signed answers</td><td>3 d (code done)</td><td>4–5</td></tr>
-<tr><td>5 · Windows and HarmonyOS</td><td>4–6 d each, in parallel</td><td>4–5</td></tr>
+<tr><td>5 · Windows (HarmonyOS frozen)</td><td>4–6 d (code done)</td><td>4–5</td></tr>
 <tr><td>6 · Family approvals</td><td>part of the week 5 plan</td><td>5</td></tr>
 </table></div>
 

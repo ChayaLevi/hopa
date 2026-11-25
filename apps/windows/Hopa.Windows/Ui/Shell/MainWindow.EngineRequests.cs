@@ -14,8 +14,7 @@ public partial class MainWindow : Window
     private void OnApprovalRequested(JsonObject message)
     {
         var router = new ApprovalRouter(
-            askUser: request => Dispatcher.Invoke(
-                () => new ApprovalWindow(request) { Owner = this }.ShowDialog() == true),
+            askUser: request => Dispatcher.Invoke(() => ApprovalWindow.Ask(request, this, Log)),
             phone: () => session?.Gateway,
             reply: (id, allow, source, answer) => client?.SendApprovalResult(id, allow, source, answer),
             log: Log,

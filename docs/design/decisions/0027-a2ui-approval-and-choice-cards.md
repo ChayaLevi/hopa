@@ -257,6 +257,13 @@ fixture are valid upstream A2UI 1.0. No HOPA code loads them.
 - On the PC → phone path the Kotlin sidecar builds the card and checks the
   answer. The C# window only carries the card to the phone and the tap back,
   so the rule exists once, in `core/contracts`.
+- On Windows the window checks the sidecar's card with a C# port of the same
+  rules (`Hopa.Windows/Cards/`) and draws it in WPF. The port replays the
+  shared fixtures, so it refuses exactly what the phone refuses. A question
+  whose card is missing or fails is denied without a window.
+- HarmonyOS is frozen (ADR-0020), so it has no card renderer. Its renderer is
+  part of any revival, together with the conformance adapter ADR-0020 already
+  requires.
 - Three renderers have to be kept in step. The fixture suite is the contract,
   and a client that fails it doesn't ship the A2UI path.
 

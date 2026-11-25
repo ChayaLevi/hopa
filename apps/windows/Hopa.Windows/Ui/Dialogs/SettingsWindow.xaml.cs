@@ -38,6 +38,7 @@ public partial class SettingsWindow : Window
         this.engine = engine;
         this.device = device;
         InitializeComponent();
+        ForgetPhoneKeysButton.IsEnabled = engine != null;
         LoadSettings();
         SettingsNav.SelectedIndex = 0;
         Loaded += async (_, _) => await RefreshAllAsync();
@@ -750,6 +751,13 @@ public partial class SettingsWindow : Window
         {
             PairGatewayButton.IsEnabled = true;
         }
+    }
+
+    /// <summary>ADR-0028: after a phone is paired again, its next signed answer pins its new key.</summary>
+    private void ForgetPhoneKeys_Click(object sender, RoutedEventArgs e)
+    {
+        engine?.ForgetPhoneKeys();
+        PhoneKeyStatusText.Text = "Forgotten. The phone's next signed answer is trusted as its key.";
     }
 
     private void Header_Drag(object sender, MouseButtonEventArgs e)

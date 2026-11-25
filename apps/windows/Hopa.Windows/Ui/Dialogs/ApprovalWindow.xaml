@@ -3,34 +3,39 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Approval"
         Icon="pack://application:,,,/Hopa.Windows;component/Assets/hopa.ico"
-        Height="380" Width="520"
+        Width="520" MinHeight="240" MaxHeight="640"
+        SizeToContent="Height"
         Background="#F7F4EE"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
+    <!-- Drawn from an A2UI approval card (ADR-0027); CardView fills the body. -->
     <Grid Margin="22">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <StackPanel>
-            <TextBlock x:Name="TitleLabel" FontSize="15" FontWeight="SemiBold" Foreground="#1C1B18" />
-            <TextBlock x:Name="BodyLabel" FontSize="12.5" Foreground="#6B665C" TextWrapping="Wrap"
-                       Margin="0,8,0,0" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" Margin="0,16,0,0">
-            <TextBlock x:Name="AmountLabel" FontSize="12.5" Foreground="#1C1B18" Margin="0,0,0,6" />
-            <TextBlock x:Name="MerchantLabel" FontSize="12.5" Foreground="#6B665C" Margin="0,0,0,6" />
-            <TextBlock x:Name="ConsequenceLabel" FontSize="11.5" Foreground="#B26A00"
+            <Border x:Name="PaymentBadge" Visibility="Collapsed" Background="#FBE6E4" CornerRadius="6"
+                    HorizontalAlignment="Left" Padding="8,2" Margin="0,0,0,8">
+                <TextBlock Text="PAYMENT" FontSize="10" FontWeight="SemiBold" Foreground="#B3261E" />
+            </Border>
+            <TextBlock x:Name="TitleLabel" FontSize="15" FontWeight="SemiBold" Foreground="#1C1B18"
                        TextWrapping="Wrap" />
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button x:Name="DenyButton" Content="Deny" Width="96" Height="34" Margin="0,0,8,0"
-                    Click="Deny_Click" />
-            <Button x:Name="AllowButton" Content="Allow" Width="96" Height="34"
+        <ScrollViewer Grid.Row="1" Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="BodyPanel" />
+        </ScrollViewer>
+
+        <CheckBox x:Name="AcknowledgeBox" Grid.Row="2" Visibility="Collapsed" Margin="0,10,0,0"
+                  Foreground="#1C1B18" Checked="Acknowledge_Changed" Unchecked="Acknowledge_Changed" />
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="DenyButton" Width="96" Height="34" Margin="0,0,8,0" Click="Deny_Click" />
+            <Button x:Name="AllowButton" Width="96" Height="34"
                     Background="#0A59F7" Foreground="#FFFFFF" BorderThickness="0"
                     Click="Allow_Click" />
         </StackPanel>

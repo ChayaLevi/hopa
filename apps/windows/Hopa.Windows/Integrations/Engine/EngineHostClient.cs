@@ -312,6 +312,12 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
         Send(message);
     }
 
+    /// <summary>ADR-0028: forget the phones' pinned signing keys, after a phone was paired again.</summary>
+    public void ForgetPhoneKeys()
+    {
+        Send(new JsonObject { ["type"] = "phonekeys.forget" });
+    }
+
     /// <summary>
     /// P4: the host owns the gateway socket; the sidecar only learns whether a
     /// phone peer is reachable, so it can attribute an approval honestly.

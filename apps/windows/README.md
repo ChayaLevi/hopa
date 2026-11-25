@@ -29,7 +29,8 @@ Inside `Hopa.Windows/`:
 | `Ui/Shell/` | the main window, its parts, the tray, placement and the automation harness |
 | `Ui/Panes/` | the window's panes and their view models: rail, sidebar, chat |
 | `Ui/Chat/` | the rows and the mark a conversation is drawn from |
-| `Ui/Dialogs/` | approval, settings, rename, run details |
+| `Ui/Dialogs/` | approval (drawn from its A2UI card by `CardView`), settings, rename, run details |
+| `Cards/` | A2UI approval cards with no UI (ADR-0027): the strict decoder, session and approval checks, replaying `spec/fixtures/a2ui` |
 | `Themes/` | the shared product styles, merged by the app and by DevTools |
 | `Integrations/Engine/` | the Kotlin engine host: client, transport, `IChatEngine`, process, turn result |
 | `Integrations/Gateway/` | the phone/backend link: credentials, pairing, socket |

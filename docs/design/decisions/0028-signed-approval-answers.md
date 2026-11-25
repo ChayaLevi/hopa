@@ -143,9 +143,9 @@ for byte. A future C# or ArkTS client passes the same file.
 - The gate does not move. A verified allow is still input to
   `guards → payment approval → execute → verify → record` on the acting
   device (golden rules 1 and 2).
-- Forgetting a key has no button yet. The Windows settings window does not
-  talk to the sidecar, so for now it is a command-line flag. A settings button
-  comes with Phase 5's Windows work.
+- Forgetting a key: **Settings → Phone link → Forget phone keys** on Windows
+  (the window sends `phonekeys.forget` to the sidecar), or
+  `hopa-sidecar --forget-phone-key` from a terminal.
 
 ## Alternatives considered
 
