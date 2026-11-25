@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -65,6 +64,7 @@ import com.hopa.feature.chat.component.Composer
 import com.hopa.feature.chat.component.MessageBubble
 import com.hopa.feature.chat.component.PendingAttachmentRow
 import com.hopa.feature.chat.component.ThinkingIndicator
+import com.hopa.ui.a2ui.ChoiceChips
 import com.hopa.ui.component.HopaBottomBar
 import com.hopa.ui.component.HopaBottomBarEasy
 import com.hopa.ui.component.HopaMascot
@@ -253,19 +253,13 @@ fun ChatScreen(
                     .background(HopaColor.Bg),
             ) {
                 if (state.options.isNotEmpty()) {
-                    Row(
+                    ChoiceChips(
+                        options = state.options,
+                        onOption = onOption,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        state.options.forEach { option ->
-                            AssistChip(
-                                onClick = { onOption(option) },
-                                label = { Text(option) },
-                            )
-                        }
-                    }
+                    )
                 }
                 state.attachment?.let { attachment ->
                     PendingAttachmentRow(

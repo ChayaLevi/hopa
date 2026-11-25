@@ -2,6 +2,7 @@ package com.hopa.sidecar
 
 import com.hopa.sidecar.startup.CliOptions
 import com.hopa.sidecar.startup.USAGE
+import com.hopa.sidecar.startup.forgetPhoneKeys
 import com.hopa.sidecar.startup.runHeadless
 import com.hopa.sidecar.startup.runProtocol
 import com.hopa.sidecar.protocol.Protocol
@@ -24,6 +25,9 @@ fun main(args: Array<String>) {
     if (options.version) {
         println("hopa-sidecar protocol v${Protocol.VERSION}")
         return
+    }
+    if (options.forgetPhoneKey) {
+        exitProcess(forgetPhoneKeys(options))
     }
     if (options.turn != null) {
         exitProcess(runHeadless(options))

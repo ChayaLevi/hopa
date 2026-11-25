@@ -5,8 +5,16 @@ plugins {
     `java-test-fixtures`
 }
 
+sourceSets {
+    test {
+        // The A2UI fixtures in spec/ are the cross-client contract (ADR-0031).
+        resources.srcDir(file("../../spec"))
+    }
+}
+
 dependencies {
-    implementation(libs.kotlinx.serialization.json)
+    // api: the A2UI types (A2uiSurface, A2uiCodec) expose JsonObject.
+    api(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit)

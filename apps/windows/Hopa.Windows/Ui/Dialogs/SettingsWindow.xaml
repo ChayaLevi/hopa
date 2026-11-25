@@ -69,6 +69,12 @@
                         <Button x:Name="PairGatewayButton" Content="Pair this PC" Width="120" Height="32"
                                 HorizontalAlignment="Left" Click="PairGateway_Click" />
                         <TextBlock x:Name="GatewayStatusText" FontSize="10" Foreground="#6B665C"
+                                   Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="The PC remembers the phone's approval key the first time it answers. Paired the phone again? Forget its key, then compare the fingerprint the log shows with the phone's Settings."
+                                   FontSize="9.5" Foreground="#9A9488" TextWrapping="Wrap" Margin="0,0,0,4" />
+                        <Button x:Name="ForgetPhoneKeysButton" Content="Forget phone keys" Width="140" Height="30"
+                                HorizontalAlignment="Left" Click="ForgetPhoneKeys_Click" />
+                        <TextBlock x:Name="PhoneKeyStatusText" FontSize="10" Foreground="#6B665C"
                                    Margin="0,4,0,12" TextWrapping="Wrap" />
 
                         <TextBlock Text="Bridge" FontSize="11.5" Foreground="#6B665C" />

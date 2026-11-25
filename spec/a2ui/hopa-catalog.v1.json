@@ -1,0 +1,166 @@
+{
+  "$schema": "https://a2ui.org/specification/v1_0/catalog_definition.json",
+  "$id": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
+  "catalogId": "https://hopa.dev/contracts/a2ui/hopa-catalog.v1.json",
+  "protocolVersion": "1.0",
+  "title": "HOPA catalog v1",
+  "description": "The components HOPA renders on every client for approval and choice cards (ADR-0031). A narrowed subset of the A2UI 1.0 basic catalog plus one HOPA component, PaymentNotice. No functions: no @call, no functionCall actions.",
+  "instructions": "Approval and payment cards are built only by HOPA's deterministic builder from an ApprovalRequest, never by a model. Text is rendered as plain text, never as Markdown. A surface that contains a PaymentNotice keeps its approve button disabled until the person ticks the notice's acknowledgement; that state is local to the renderer and is never sent back.",
+  "components": {
+    "Text": {
+      "type": "object",
+      "description": "A line of plain text. HOPA renderers do not interpret Markdown.",
+      "properties": {
+        "component": { "const": "Text" },
+        "text": { "$ref": "#/$defs/HopaString" },
+        "variant": { "type": "string", "enum": ["caption", "body"], "default": "body" }
+      },
+      "required": ["component", "text"]
+    },
+    "Row": {
+      "type": "object",
+      "description": "Children side by side.",
+      "properties": {
+        "component": { "const": "Row" },
+        "children": { "$ref": "#/$defs/HopaChildren" },
+        "justify": { "type": "string", "enum": ["start", "center", "end", "spaceBetween"], "default": "start" },
+        "align": { "type": "string", "enum": ["start", "center", "end", "stretch"], "default": "stretch" }
+      },
+      "required": ["component", "children"]
+    },
+    "Column": {
+      "type": "object",
+      "description": "Children stacked top to bottom.",
+      "properties": {
+        "component": { "const": "Column" },
+        "children": { "$ref": "#/$defs/HopaChildren" },
+        "justify": { "type": "string", "enum": ["start", "center", "end", "spaceBetween"], "default": "start" },
+        "align": { "type": "string", "enum": ["start", "center", "end", "stretch"], "default": "stretch" }
+      },
+      "required": ["component", "children"]
+    },
+    "Card": {
+      "type": "object",
+      "description": "The frame of a question card. Only ever the surface's root.",
+      "allowedParents": ["Surface"],
+      "properties": {
+        "component": { "const": "Card" },
+        "child": { "$ref": "#/$defs/HopaId" }
+      },
+      "required": ["component", "child"]
+    },
+    "Button": {
+      "type": "object",
+      "description": "A tap that sends one named event back to the asking device.",
+      "allowedChildren": ["Text", "Icon"],
+      "properties": {
+        "component": { "const": "Button" },
+        "child": { "$ref": "#/$defs/HopaId" },
+        "variant": { "type": "string", "enum": ["default", "primary", "borderless"], "default": "default" },
+        "action": { "$ref": "#/$defs/HopaEventAction" }
+      },
+      "required": ["component", "child", "action"]
+    },
+    "Divider": {
+      "type": "object",
+      "properties": {
+        "component": { "const": "Divider" },
+        "axis": { "type": "string", "enum": ["horizontal", "vertical"], "default": "horizontal" }
+      },
+      "required": ["component"]
+    },
+    "Icon": {
+      "type": "object",
+      "description": "One of a fixed set of icon names; no SVG paths, no bindings.",
+      "properties": {
+        "component": { "const": "Icon" },
+        "name": {
+          "type": "string",
+          "enum": ["check", "close", "error", "help", "info", "lock", "payment", "send", "shoppingCart", "warning"]
+        }
+      },
+      "required": ["component", "name"]
+    },
+    "PaymentNotice": {
+      "type": "object",
+      "description": "HOPA's payment block: amount, merchant, consequence and an acknowledgement the person must tick before approving. Renderers draw it at full size and in the danger style; it can only sit directly in a Column.",
+      "allowedParents": ["Column"],
+      "properties": {
+        "component": { "const": "PaymentNotice" },
+        "amount": { "$ref": "#/$defs/HopaString" },
+        "merchant": { "$ref": "#/$defs/HopaString" },
+        "consequence": { "$ref": "#/$defs/HopaString" },
+        "acknowledge": { "$ref": "#/$defs/HopaString" }
+      },
+      "required": ["component", "amount", "acknowledge"]
+    }
+  },
+  "$defs": {
+    "anyComponent": {
+      "oneOf": [
+        { "$ref": "#/components/Text" },
+        { "$ref": "#/components/Row" },
+        { "$ref": "#/components/Column" },
+        { "$ref": "#/components/Card" },
+        { "$ref": "#/components/Button" },
+        { "$ref": "#/components/Divider" },
+        { "$ref": "#/components/Icon" },
+        { "$ref": "#/components/PaymentNotice" }
+      ],
+      "discriminator": { "propertyName": "component" }
+    },
+    "anyFunction": {
+      "description": "HOPA's catalog defines no functions.",
+      "not": {}
+    },
+    "HopaId": {
+      "type": "string",
+      "description": "A component id: an ASCII identifier, a strict subset of A2UI's UAX #31 rule.",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$"
+    },
+    "HopaChildren": {
+      "type": "array",
+      "description": "A fixed list of child ids. Templates are not used.",
+      "items": { "$ref": "#/$defs/HopaId" },
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "HopaString": {
+      "description": "A literal string or a binding to a string in the data model. No function calls.",
+      "oneOf": [
+        { "type": "string", "maxLength": 1000 },
+        { "$ref": "#/$defs/HopaBinding" }
+      ]
+    },
+    "HopaBinding": {
+      "type": "object",
+      "properties": {
+        "@path": { "type": "string", "pattern": "^/", "maxLength": 256 }
+      },
+      "required": ["@path"],
+      "additionalProperties": false
+    },
+    "HopaEventAction": {
+      "type": "object",
+      "description": "An agent-side event only. functionCall actions are refused.",
+      "properties": {
+        "event": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "pattern": "^[a-z][A-Za-z]{0,31}$" },
+            "context": {
+              "type": "object",
+              "maxProperties": 8,
+              "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,31}$" },
+              "additionalProperties": { "$ref": "#/$defs/HopaString" }
+            }
+          },
+          "required": ["name"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["event"],
+      "additionalProperties": false
+    }
+  }
+}

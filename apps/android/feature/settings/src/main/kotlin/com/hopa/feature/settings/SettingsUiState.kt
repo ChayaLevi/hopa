@@ -36,6 +36,8 @@ data class SettingsUiState(
     val backendTask: BackendTaskState = BackendTaskState(),
     /** The label a launch config gave this phone, if any. */
     val backendName: String = "",
+    /** The approval signing key's fingerprint, to compare with the PC's log; blank before pairing. */
+    val approvalKeyFingerprint: String = "",
     /** The last pairing attempt's answer, shown under the card's buttons. */
     val backendStatus: String? = null,
     /** The layers this build ships, for the Decisions page. */

@@ -35,7 +35,17 @@ Third-party components
    trademarks of Huawei Technologies Co., Ltd. This project is not affiliated
    with or endorsed by Huawei.
 
-6. Python packages and JavaScript libraries used at build/runtime are listed in
+6. A2UI (Agent-to-User Interface)
+   Project: https://github.com/a2ui-project/a2ui (spec: https://a2ui.org)
+   License: Apache-2.0.
+   HOPA's approval and choice cards follow the A2UI 1.0 message format and
+   component model (ADR-0031). The codec, validator, catalog and renderers are
+   HOPA's own code. Unmodified copies of the A2UI 1.0 JSON schemas and basic
+   catalog are vendored under spec/a2ui/upstream/ at the commit recorded in
+   spec/a2ui/upstream/UPSTREAM.md, with the license text beside them
+   (A2UI-LICENSE.txt); they are used only by tools/checks/check-a2ui.py.
+
+7. Python packages and JavaScript libraries used at build/runtime are listed in
    their respective package manifests (pyproject.toml, oh-package.json5) and are
    distributed under their own licenses. Keep an SBOM current for the project's
    configuration-management deliverables.

@@ -6,6 +6,10 @@ namespace Hopa.Windows.Host;
 /// <summary>
 /// Where one approval goes: the automation override, the paired phone, or the
 /// person at this PC. The failure of the phone link is a deny, never an allow.
+/// ADR-0031 and ADR-0032: the sidecar's relay (the card and the challenge)
+/// goes to the phone unchanged, and the phone's answer (its tap and signature,
+/// with the sender the gateway names) comes back to the sidecar unchanged. The
+/// sidecar checks it; this router never judges a card or a signature.
 /// </summary>
 public sealed class ApprovalRouter
 {
@@ -13,14 +17,14 @@ public sealed class ApprovalRouter
 
     private readonly Func<JsonObject, bool> askUser;
     private readonly Func<IApprovalPhone?> phone;
-    private readonly Action<string, bool, string> reply;
+    private readonly Action<string, bool, string, JsonObject?> reply;
     private readonly Action<string> log;
     private readonly string? autoApproval;
 
     public ApprovalRouter(
         Func<JsonObject, bool> askUser,
         Func<IApprovalPhone?> phone,
-        Action<string, bool, string> reply,
+        Action<string, bool, string, JsonObject?> reply,
         Action<string> log,
         string? autoApproval)
     {
@@ -38,7 +42,7 @@ public sealed class ApprovalRouter
         if (autoApproval != null)
         {
             var allowed = autoApproval == "allow";
-            reply(id, allowed, "pc");
+            reply(id, allowed, "pc", null);
             log($"approval: auto-{(allowed ? "allow" : "deny")}");
             return;
         }
@@ -51,7 +55,7 @@ public sealed class ApprovalRouter
         }
 
         var allow = askUser(message);
-        reply(id, allow, "pc");
+        reply(id, allow, "pc", null);
         log($"approval: {(allow ? "allow" : "deny")}");
     }
 
@@ -62,13 +66,16 @@ public sealed class ApprovalRouter
     {
         var allow = false;
         var source = "pc";
+        JsonObject? answer = null;
         try
         {
             var result = await live.RequestApprovalAsync(
                 BuildApproval(message),
                 live.PhoneDeviceId,
-                PhoneTimeout);
+                PhoneTimeout,
+                Relay(message));
             allow = ApprovalAllowed(result);
+            answer = PhoneAnswer(result);
             source = result == null ? "pc" : "phone";
             if (result == null)
             {
@@ -81,7 +88,7 @@ public sealed class ApprovalRouter
         }
         finally
         {
-            reply(id, allow, source);
+            reply(id, allow, source, answer);
             log($"approval: {(allow ? "allow" : "deny")} from {source}");
         }
     }
@@ -102,6 +109,24 @@ public sealed class ApprovalRouter
             ["timeoutMs"] = 3000,
         },
     };
+
+    /// <summary>The sidecar's fields for the phone, copied as they came; null when it sent none.</summary>
+    public static JsonObject? Relay(JsonObject message) =>
+        message["relay"] is JsonObject relay ? relay.DeepClone().AsObject() : null;
+
+    /// <summary>
+    /// What the phone answered, for the sidecar to check: the gateway's
+    /// <c>from</c> and the phone's <c>approval</c> object, copied as they came.
+    /// Null when the phone did not answer.
+    /// </summary>
+    public static JsonObject? PhoneAnswer(JsonObject? result) =>
+        (result?["body"] as JsonObject)?["approval"] is JsonObject approval
+            ? new JsonObject
+            {
+                ["from"] = result["from"]?.DeepClone(),
+                ["approval"] = approval.DeepClone(),
+            }
+            : null;
 
     public static bool ApprovalAllowed(JsonObject? result) =>
         (result?["body"] as JsonObject)?["approval"] is JsonObject approval &&

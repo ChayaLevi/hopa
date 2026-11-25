@@ -195,7 +195,13 @@ object Protocol {
         task.error?.let { put("error", it) }
     }
 
-    fun approvalRequest(id: String, request: ApprovalRequest): JsonObject = buildJsonObject {
+    /**
+     * [relay] is what a phone needs to answer safely: the A2UI card
+     * (ADR-0031) and the challenge (ADR-0032). The window copies its fields,
+     * unchanged, into the phone's `task.needs_approval` body. The window's own
+     * dialog still draws from the typed fields.
+     */
+    fun approvalRequest(id: String, request: ApprovalRequest, relay: JsonObject? = null): JsonObject = buildJsonObject {
         put("type", "approval.request")
         put("id", id)
         put("title", request.title)
@@ -205,6 +211,7 @@ object Protocol {
         put("consequence", request.consequence)
         put("isPayment", request.isPayment)
         put("action", request.action.kind)
+        relay?.let { put("relay", it) }
     }
 
     fun conversationList(id: String, items: List<Conversation>): JsonObject = buildJsonObject {
