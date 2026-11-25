@@ -7,6 +7,7 @@ import com.hopa.sidecar.protocol.Stdio
 import com.hopa.sidecar.store.ChatStore
 import com.hopa.sidecar.store.MemoryFileStore
 import com.hopa.sidecar.store.PendingApprovals
+import com.hopa.sidecar.store.PhoneKeys
 import com.hopa.sidecar.store.RecordStore
 import com.hopa.sidecar.store.SkillFileStore
 import java.nio.file.Files
@@ -41,7 +42,11 @@ class TurnTakeoverTest {
         return TurnEngine(
             io = io,
             hostDevice = HeadlessDevice(),
-            approval = HostApproval(io, PendingApprovals(directory.resolve("approvals.json"))),
+            approval = HostApproval(
+                io,
+                PendingApprovals(directory.resolve("approvals.json")),
+                PhoneKeys(directory.resolve("phone-keys.json")),
+            ),
             store = ChatStore(directory.resolve("conversations.json")),
             recordStore = RecordStore(directory.resolve("records.json")),
             config = RuntimeConfig(),
