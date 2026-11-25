@@ -1,6 +1,6 @@
 # core - the client engine
 
-Ten Kotlin modules the Android app and the Windows sidecar both build. Plain
+Eleven Kotlin modules the Android app and the Windows sidecar both build. Plain
 JVM: no UI, no Android SDK, no `main`.
 
 Modules are listed **bottom first, by dependency**. A module only uses the ones
@@ -20,12 +20,13 @@ above it; inside one layer the order is alphabetical.
 | `bridge` | the PC companion link: websocket client, sessions, `AdbDevice`, observation over the bridge | `contracts` |
 | `catalog` | what apps and sites exist, what needs approval, how HOPA should speak, and the router that picks an app for a goal. Mostly generated. | `contracts` |
 | `decision` | decision layers (rules, hand graph, LAIX), the coordinator/selector, and the comparison/conformance corpus | `contracts` |
+| `family` | the family board: the state one device holds (`model`) and the pure reducer that replays the encrypted op log into it (`board`). No clock, no ids minted, no crypto | `contracts` |
 | `inference` | model adapters: the OpenAI-compatible client, the demo client, and later a local runtime | `contracts` |
 | `observation` | the screen as a tree with anchors: `ObservationProducer`, `NodeAnchor`, `ScreenPath`, `ScreenSource` | `contracts` |
 | `runlog` | the run journal: build a record per step, chain it, hand it to a recorder | `contracts` |
 | `runtime` | `RunGate`, `RunState`, `RunSource`: who owns the phone for the current run | nothing |
 
-These eight do not import each other. A model API change never touches the bridge;
+These nine do not import each other. A model API change never touches the bridge;
 a bridge change never touches a record.
 
 ## Layer 2 - the engine
