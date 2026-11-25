@@ -48,6 +48,7 @@ supersede it. Format:
 | [0028](0028-windows-modernization.md) | Windows modernization: .NET 10, Kotlin 2.4/JDK 21 runtime, JSON Schema frames | accepted |
 | [0029](0029-windows-signing.md) | Windows signing: exe+MSI, timestamp, PFX/store/Trusted Signing | accepted |
 | [0030](0030-windows-on-device-runtime.md) | Windows on-device model: llama.cpp, GGUF, loopback engine | accepted |
+| [0031](0031-family-board-encrypted-op-log.md) | Family board: an encrypted op log with scope keys | proposed |
 
 Create the next ADR by copying the template below.
 
