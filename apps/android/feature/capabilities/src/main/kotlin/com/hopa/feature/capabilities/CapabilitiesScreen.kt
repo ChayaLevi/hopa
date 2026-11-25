@@ -51,6 +51,9 @@ fun CapabilitiesScreen(
     onOpenRuns: () -> Unit,
     onOpenMemory: () -> Unit,
     onOpenSkills: () -> Unit,
+    accountTitle: String = "Sign in",
+    accountHint: String = "Connect this phone with your computer",
+    onOpenAccount: () -> Unit = {},
 ) {
     val ready = accessibilityEnabled
     Scaffold(
@@ -155,12 +158,20 @@ fun CapabilitiesScreen(
             }
 
             SectionLabel("HOPA")
-            Tile(
-                title = "Settings",
-                subtitle = "Keys, models and privacy",
-                onClick = onOpenSettings,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Tile(
+                    title = accountTitle,
+                    subtitle = accountHint,
+                    onClick = onOpenAccount,
+                    modifier = Modifier.weight(1f),
+                )
+                Tile(
+                    title = "Settings",
+                    subtitle = "Keys, models and privacy",
+                    onClick = onOpenSettings,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
