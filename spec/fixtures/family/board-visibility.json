@@ -1608,6 +1608,1906 @@
         "family": "499ba924a6b0eb6eb277b34c29d1897499809ffcf971df301ce0f5e32b3e2ffa",
         "parents": "99286d7564345a398481292af4fc1b745f534aeb044a915a1cc4bf2507864a11"
       }
+    },
+    {
+      "name": "move-open-task-to-parents-narrows-candidates",
+      "covers": [
+        "visibility-change",
+        "cancel",
+        "create"
+      ],
+      "description": "Moving a task open to Mom, Dad and Maya into parents keeps only the parents as candidates, and keeps its time, all-day flag and source.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "kind": "cancel",
+            "opId": "op1-move-open-task-to-parents-narrows-candidates",
+            "at": "2026-11-11T12:31:00.000Z",
+            "itemId": "library-books",
+            "version": 1
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "parents",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op2-move-open-task-to-parents-narrows-candidates",
+            "at": "2026-11-11T12:32:00.000Z",
+            "item": {
+              "id": "library-books-p",
+              "type": "task",
+              "title": "Return the library books",
+              "start": "2026-11-11T22:00:00.000Z",
+              "allDay": true,
+              "ownership": {
+                "state": "open",
+                "candidateIds": [
+                  "mom",
+                  "dad"
+                ]
+              },
+              "source": {
+                "kind": "manual",
+                "label": "Added by Mom"
+              }
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "applied"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op1-move-open-task-to-parents-narrows-candidates",
+                "at": "2026-11-11T12:31:00.000Z",
+                "actor": "dad",
+                "what": "Removed",
+                "kind": "cancel",
+                "itemId": "library-books",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "library-books",
+                      "before": {
+                        "forMemberIds": [],
+                        "ownership": {
+                          "state": "open",
+                          "candidateIds": [
+                            "mom",
+                            "dad",
+                            "maya"
+                          ]
+                        },
+                        "sensitive": false,
+                        "importance": "normal",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 1,
+                        "id": "library-books",
+                        "type": "task",
+                        "title": "Return the library books",
+                        "titleZh": "还图书馆的书",
+                        "start": "2026-11-11T22:00:00.000Z",
+                        "allDay": true
+                      },
+                      "afterVersion": 2
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              },
+              {
+                "id": "library-books-p",
+                "type": "task",
+                "title": "Return the library books",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "dad",
+                "version": 1,
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              }
+            ],
+            "activity": [
+              {
+                "id": "op2-move-open-task-to-parents-narrows-candidates",
+                "at": "2026-11-11T12:32:00.000Z",
+                "actor": "dad",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "library-books-p",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "library-books-p",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "hashes": {
+        "state": "5e11b551cbe95b58ae578cfcf311ba4f2acdf2941a913dcd6be653286f161316",
+        "family": "975fed145bda977ec987c5efca34f8988dec32c71b6b8f5f4ff2eed6e7be2757",
+        "parents": "a15f962db8dfa8d7e1d8505be14584efb203472d6a89f314124adf6fd093fc4c"
+      }
+    },
+    {
+      "name": "move-task-owned-by-teen-opens-to-parents",
+      "covers": [
+        "visibility-change",
+        "assign",
+        "cancel",
+        "create"
+      ],
+      "description": "Maya cannot own a parents item, so moving her task into parents opens it to the parents instead of dropping it silently.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "assign",
+            "opId": "op1-move-task-owned-by-teen-opens-to-parents",
+            "at": "2026-11-11T12:31:00.000Z",
+            "itemId": "library-books",
+            "version": 1,
+            "ownerId": "maya"
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "cancel",
+            "opId": "op2-move-task-owned-by-teen-opens-to-parents",
+            "at": "2026-11-11T12:32:00.000Z",
+            "itemId": "library-books",
+            "version": 2
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op3-move-task-owned-by-teen-opens-to-parents",
+            "at": "2026-11-11T12:33:00.000Z",
+            "item": {
+              "id": "library-books-p",
+              "type": "task",
+              "title": "Return the library books",
+              "start": "2026-11-11T22:00:00.000Z",
+              "allDay": true,
+              "ownership": {
+                "state": "open"
+              },
+              "source": {
+                "kind": "manual",
+                "label": "Added by Mom"
+              }
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "applied"
+        },
+        {
+          "seq": 3,
+          "outcome": "applied"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": false
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 3,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op1-move-task-owned-by-teen-opens-to-parents",
+                "at": "2026-11-11T12:31:00.000Z",
+                "actor": "mom",
+                "what": "Assigned to Maya",
+                "kind": "assign",
+                "itemId": "library-books",
+                "memberId": "maya",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "library-books",
+                      "before": {
+                        "forMemberIds": [],
+                        "ownership": {
+                          "state": "open",
+                          "candidateIds": [
+                            "mom",
+                            "dad",
+                            "maya"
+                          ]
+                        },
+                        "sensitive": false,
+                        "importance": "normal",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 1,
+                        "id": "library-books",
+                        "type": "task",
+                        "title": "Return the library books",
+                        "titleZh": "还图书馆的书",
+                        "start": "2026-11-11T22:00:00.000Z",
+                        "allDay": true
+                      },
+                      "afterVersion": 2
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "op2-move-task-owned-by-teen-opens-to-parents",
+                "at": "2026-11-11T12:32:00.000Z",
+                "actor": "mom",
+                "what": "Removed",
+                "kind": "cancel",
+                "itemId": "library-books",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "library-books",
+                      "before": {
+                        "forMemberIds": [],
+                        "ownership": {
+                          "state": "assigned",
+                          "ownerId": "maya",
+                          "confirmed": false
+                        },
+                        "sensitive": false,
+                        "importance": "normal",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 2,
+                        "id": "library-books",
+                        "type": "task",
+                        "title": "Return the library books",
+                        "titleZh": "还图书馆的书",
+                        "start": "2026-11-11T22:00:00.000Z",
+                        "allDay": true
+                      },
+                      "afterVersion": 3
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              },
+              {
+                "id": "library-books-p",
+                "type": "task",
+                "title": "Return the library books",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              }
+            ],
+            "activity": [
+              {
+                "id": "op3-move-task-owned-by-teen-opens-to-parents",
+                "at": "2026-11-11T12:33:00.000Z",
+                "actor": "mom",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "library-books-p",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "library-books-p",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "hashes": {
+        "state": "20f31aeea04a5b5bb020d1bd1501be752f62bb6c6ddaaa33fc9487d188def5b1",
+        "family": "a9292a34caabc0681b3fd877a81a8790cc3ebdaa650fa98718c182ee5fa94dc0",
+        "parents": "2e8c0d8db323ff4cd70ec318587d26d2ede067fbeb4804240dce03281a2c3d1e"
+      }
+    },
+    {
+      "name": "move-recurring-event-keeps-exceptions",
+      "covers": [
+        "visibility-change",
+        "cancel_occurrence",
+        "cancel",
+        "create"
+      ],
+      "description": "A weekly event moves with its repetition and its cancelled dates.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op1-move-recurring-event-keeps-exceptions",
+            "at": "2026-11-11T12:31:00.000Z",
+            "item": {
+              "id": "swim-weekly",
+              "type": "event",
+              "title": "Swimming",
+              "start": "2026-11-11T15:30:00.000Z",
+              "end": "2026-11-11T16:30:00.000Z",
+              "recurrence": {
+                "freq": "weekly",
+                "byWeekday": [
+                  3
+                ]
+              }
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "cancel_occurrence",
+            "opId": "op2-move-recurring-event-keeps-exceptions",
+            "at": "2026-11-11T12:32:00.000Z",
+            "itemId": "swim-weekly",
+            "version": 1,
+            "date": "2026-11-18"
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "cancel",
+            "opId": "op3-move-recurring-event-keeps-exceptions",
+            "at": "2026-11-11T12:33:00.000Z",
+            "itemId": "swim-weekly",
+            "version": 2
+          }
+        },
+        {
+          "seq": 4,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op4-move-recurring-event-keeps-exceptions",
+            "at": "2026-11-11T12:34:00.000Z",
+            "item": {
+              "id": "swim-weekly-p",
+              "type": "event",
+              "title": "Swimming",
+              "start": "2026-11-11T15:30:00.000Z",
+              "end": "2026-11-11T16:30:00.000Z",
+              "recurrence": {
+                "freq": "weekly",
+                "byWeekday": [
+                  3
+                ],
+                "exceptions": [
+                  "2026-11-18"
+                ]
+              },
+              "source": {
+                "kind": "manual",
+                "label": "Added by Mom"
+              }
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "applied"
+        },
+        {
+          "seq": 3,
+          "outcome": "applied"
+        },
+        {
+          "seq": 4,
+          "outcome": "applied"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              },
+              {
+                "id": "swim-weekly",
+                "type": "event",
+                "title": "Swimming",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 3,
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z",
+                "recurrence": {
+                  "freq": "weekly",
+                  "byWeekday": [
+                    3
+                  ],
+                  "exceptions": [
+                    "2026-11-18"
+                  ]
+                }
+              }
+            ],
+            "activity": [
+              {
+                "id": "op1-move-recurring-event-keeps-exceptions",
+                "at": "2026-11-11T12:31:00.000Z",
+                "actor": "mom",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "swim-weekly",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "swim-weekly",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "op2-move-recurring-event-keeps-exceptions",
+                "at": "2026-11-11T12:32:00.000Z",
+                "actor": "mom",
+                "what": "Cancelled one occurrence",
+                "kind": "cancel_occurrence",
+                "itemId": "swim-weekly",
+                "ref": "2026-11-18",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "swim-weekly",
+                      "before": {
+                        "id": "swim-weekly",
+                        "type": "event",
+                        "title": "Swimming",
+                        "forMemberIds": [],
+                        "ownership": {
+                          "state": "none"
+                        },
+                        "sensitive": false,
+                        "importance": "normal",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 1,
+                        "start": "2026-11-11T15:30:00.000Z",
+                        "end": "2026-11-11T16:30:00.000Z",
+                        "recurrence": {
+                          "freq": "weekly",
+                          "byWeekday": [
+                            3
+                          ]
+                        }
+                      },
+                      "afterVersion": 2
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "op3-move-recurring-event-keeps-exceptions",
+                "at": "2026-11-11T12:33:00.000Z",
+                "actor": "mom",
+                "what": "Removed",
+                "kind": "cancel",
+                "itemId": "swim-weekly",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "swim-weekly",
+                      "before": {
+                        "id": "swim-weekly",
+                        "type": "event",
+                        "title": "Swimming",
+                        "forMemberIds": [],
+                        "ownership": {
+                          "state": "none"
+                        },
+                        "sensitive": false,
+                        "importance": "normal",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 2,
+                        "start": "2026-11-11T15:30:00.000Z",
+                        "end": "2026-11-11T16:30:00.000Z",
+                        "recurrence": {
+                          "freq": "weekly",
+                          "byWeekday": [
+                            3
+                          ],
+                          "exceptions": [
+                            "2026-11-18"
+                          ]
+                        }
+                      },
+                      "afterVersion": 3
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              },
+              {
+                "id": "swim-weekly-p",
+                "type": "event",
+                "title": "Swimming",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z",
+                "recurrence": {
+                  "freq": "weekly",
+                  "byWeekday": [
+                    3
+                  ],
+                  "exceptions": [
+                    "2026-11-18"
+                  ]
+                }
+              }
+            ],
+            "activity": [
+              {
+                "id": "op4-move-recurring-event-keeps-exceptions",
+                "at": "2026-11-11T12:34:00.000Z",
+                "actor": "mom",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "swim-weekly-p",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "swim-weekly-p",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "hashes": {
+        "state": "e973d2c69c4f8e5d5a43498a0c7db0ec8b051e98a72c9173e7e652912b14a6f7",
+        "family": "ae510e7a9ec69c4acef65859a34c0ae4c08fd7110d55490a118fd8c01f20fde7",
+        "parents": "c0bb2617ff15ff4302fd34a66db7e5f0df2b362d1461e5d213097f90201e72da"
+      }
+    },
+    {
+      "name": "undo-a-move-is-two-undos",
+      "covers": [
+        "visibility-change",
+        "undo"
+      ],
+      "description": "Undoing a move undoes its two ops, newest first: the parents copy goes, then the family item comes back.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "cancel",
+            "opId": "op1-undo-a-move-is-two-undos",
+            "at": "2026-11-11T12:31:00.000Z",
+            "itemId": "pickup-tuesday",
+            "version": 1
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "create",
+            "opId": "op2-undo-a-move-is-two-undos",
+            "at": "2026-11-11T12:32:00.000Z",
+            "item": {
+              "id": "pickup-tuesday-p",
+              "type": "event",
+              "title": "Kindergarten pickup",
+              "start": "2026-11-17T14:30:00.000Z",
+              "end": "2026-11-17T15:00:00.000Z",
+              "forMemberIds": [
+                "noa"
+              ],
+              "importance": "critical",
+              "ownership": {
+                "state": "assigned",
+                "ownerId": "mom"
+              },
+              "source": {
+                "kind": "manual",
+                "label": "Added by Mom"
+              }
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "undo",
+            "opId": "op3-undo-a-move-is-two-undos",
+            "at": "2026-11-11T12:33:00.000Z",
+            "targetOpId": "op2-undo-a-move-is-two-undos"
+          }
+        },
+        {
+          "seq": 4,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "kind": "undo",
+            "opId": "op4-undo-a-move-is-two-undos",
+            "at": "2026-11-11T12:34:00.000Z",
+            "targetOpId": "op1-undo-a-move-is-two-undos"
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "applied"
+        },
+        {
+          "seq": 3,
+          "outcome": "applied"
+        },
+        {
+          "seq": 4,
+          "outcome": "applied"
+        }
+      ],
+      "after": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "nameZh": "我们家",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "nameZh": "妈妈",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "dad",
+              "name": "Dad",
+              "nameZh": "爸爸",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "nameZh": "玛雅",
+              "role": "teen",
+              "hasAccount": true
+            },
+            {
+              "id": "noa",
+              "name": "Noa",
+              "nameZh": "诺娅",
+              "role": "child",
+              "hasAccount": false
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 3,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op1-undo-a-move-is-two-undos",
+                "at": "2026-11-11T12:31:00.000Z",
+                "actor": "mom",
+                "what": "Removed",
+                "kind": "cancel",
+                "itemId": "pickup-tuesday",
+                "undone": {
+                  "at": "2026-11-11T12:34:00.000Z",
+                  "by": "mom",
+                  "activityId": "op4-undo-a-move-is-two-undos"
+                },
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "pickup-tuesday",
+                      "before": {
+                        "forMemberIds": [
+                          "noa"
+                        ],
+                        "ownership": {
+                          "state": "assigned",
+                          "ownerId": "mom",
+                          "confirmed": true
+                        },
+                        "sensitive": false,
+                        "importance": "critical",
+                        "unavailableMemberIds": [],
+                        "status": "open",
+                        "source": {
+                          "kind": "manual",
+                          "label": "Added by Mom"
+                        },
+                        "createdBy": "mom",
+                        "version": 1,
+                        "id": "pickup-tuesday",
+                        "type": "event",
+                        "title": "Kindergarten pickup",
+                        "titleZh": "幼儿园接孩子",
+                        "start": "2026-11-17T14:30:00.000Z",
+                        "end": "2026-11-17T15:00:00.000Z"
+                      },
+                      "afterVersion": 2
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "op4-undo-a-move-is-two-undos",
+                "at": "2026-11-11T12:34:00.000Z",
+                "actor": "mom",
+                "what": "Undid a change",
+                "kind": "undo",
+                "itemId": "pickup-tuesday",
+                "ref": "op1-undo-a-move-is-two-undos"
+              }
+            ]
+          },
+          "parents": {
+            "items": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op2-undo-a-move-is-two-undos",
+                "at": "2026-11-11T12:32:00.000Z",
+                "actor": "mom",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "pickup-tuesday-p",
+                "undone": {
+                  "at": "2026-11-11T12:33:00.000Z",
+                  "by": "mom",
+                  "activityId": "op3-undo-a-move-is-two-undos"
+                },
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "pickup-tuesday-p",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "op3-undo-a-move-is-two-undos",
+                "at": "2026-11-11T12:33:00.000Z",
+                "actor": "mom",
+                "what": "Undid a change",
+                "kind": "undo",
+                "itemId": "pickup-tuesday-p",
+                "ref": "op2-undo-a-move-is-two-undos"
+              }
+            ]
+          }
+        }
+      },
+      "hashes": {
+        "state": "7029f379734efe1bfe7cc8a3bddf30eb7ea76fce622a0c847f14df4d433f61b3",
+        "family": "5f372acc7230ff22b8ce532049844d6a1d5485d4202fdddab2baacd0821095c1",
+        "parents": "faecdc8532c77a533909e9a9e9bfe57e0f91738ed52da7dd35035028cca501e4"
+      }
     }
   ]
 }

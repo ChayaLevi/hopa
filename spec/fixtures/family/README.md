@@ -17,7 +17,7 @@ through the same pure reducer, so these files are what keeps the clients in step
 | --- | --- |
 | [`seed.state.json`](seed.state.json) | Homemind's demo seed (`seedState` in `server/homemind/seed.ts`, branch `feat/homemind` of `ChayaLevi/digitalmate-web`), at the demo clock 2026-11-11 14:30 `Asia/Jerusalem`, in the v1 shape: each item moved into the scope named by its `visibility` (and the field dropped), the family roster cut to `id`, `name`, `nameZh`, `timezone` and members' `id`, `name`, `nameZh`, `role`, `hasAccount`; reminders, rules, preferences, shopping and the other non-board parts left out. |
 | [`schema-cases.json`](schema-cases.json) | Shape cases: an accepted op of every kind, ops and states that must be refused (each says why), and log entries. |
-| `board-*.json` | Behaviour cases for the board reducer, grouped by topic (`create`, `ownership`, `done`, `undo`, `stale`, `scopes`, `visibility`, `split`, `versioning`). Generated, never edited by hand (see below). |
+| `board-*.json` | Behaviour cases for the board reducer, grouped by topic (`create`, `ownership`, `done`, `undo`, `stale`, `scopes`, `visibility`, `split`, `time`, `versioning`). Generated, never edited by hand (see below). |
 
 ## Board cases
 
@@ -88,3 +88,13 @@ them, not the schema cases:
 
 The files are versioned. Adding a field or an op kind means a new `v` (ops) or
 `schemaVersion` (state), so an older client stops instead of guessing (D15).
+
+## Scope helpers
+
+The move cases in `board-visibility.json` (`move-open-task-to-parents-narrows-candidates`,
+`move-task-owned-by-teen-opens-to-parents`, `move-recurring-event-keeps-exceptions`,
+`undo-a-move-is-two-undos`) and `derive-busy-event-for-family` in `board-scopes.json` are
+the exact ops a client's scope helpers write: a move is a cancel in the old scope and a
+create of a copy in the new one; undoing it is two undos, newest first; a busy event
+copies only the times and the unavailable members of a parents event into `family`.
+`core/family` (`com.hopa.family.scope`) rebuilds these ops and compares them byte for byte.

@@ -40,7 +40,7 @@ class BoardFixturesTest {
 
     @Test
     fun `the fixtures are there`() {
-        assertTrue(files().size >= 9, "board fixture files: ${files().map { it.name }}")
+        assertTrue(files().size >= 10, "board fixture files: ${files().map { it.name }}")
         assertTrue(cases().size >= MIN_CASES, "board cases: ${cases().size}")
     }
 
@@ -90,6 +90,6 @@ class BoardFixturesTest {
 
     private companion object {
         const val DIR = "/fixtures/family"
-        const val MIN_CASES = 25
+        const val MIN_CASES = 60
     }
 }
