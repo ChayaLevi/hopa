@@ -31,6 +31,9 @@ interface DeviceDirectory {
     /** An unregistered FCM token is cleared until the next hello replaces it. */
     fun clearPushToken(deviceId: String, householdId: String) {}
 
+    /** Every device of the household that is not revoked, online or not. */
+    fun householdDevices(householdId: String): List<DeviceIdentity> = emptyList()
+
     companion object {
         val Empty = object : DeviceDirectory {
             override fun lookup(deviceId: String, householdId: String): DeviceIdentity? = null

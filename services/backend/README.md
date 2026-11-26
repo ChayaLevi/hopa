@@ -17,6 +17,7 @@ tasks.
 | Accounts | `accounts` table (phone unique, argon2id), sign-up → household-of-one in one transaction, uniform `E_AUTH` |
 | Admin console | server-rendered pages under `/console` (sign-in, health, household & device lookup, diag sender), never conversation contents |
 | Diag tasks | `diag.ping` / `diag.state` / `diag.reset` — the only plaintext bodies, admin-only, audit-logged |
+| Family board | `board.op` / `board.op.ack` / `board.changed` on the gateway, `/v1/board/*` and `/v1/scope-keys/{scope}`: an encrypted op log per household with a `family` and a `parents` scope ([ADR-0033](../../docs/design/decisions/0033-family-board-encrypted-op-log.md), [how it is served](../../docs/design/architecture/family-board.md)) |
 | Health | `GET /v1/health` → `{ok, version, db, queueDepth?}`; `GET /v1/version` → `{version, protocol}` |
 
 ## What it explicitly does not store
@@ -25,6 +26,11 @@ tasks.
   only `household_key_wraps` rows — the key wrapped to each device's X25519
   public key (X25519 ECDH → HKDF-SHA256 → AES-256-GCM). The server is
   content-blind by construction.
+- **Family board content.** Board ops are stored as ciphertext only
+  (`board_ops.body`), sealed on the devices with the household key or the
+  parents key; the parents key is stored only as `scope_key_wraps` rows wrapped
+  to each parent device. The server sees the routing metadata (scope, seq, key
+  epoch, author, time, size), never an op.
 - **Plaintext task bodies.** Every task body is encrypted (`{"sealed": …}`).
   The only plaintext bodies are the three admin-authored `diag.*` envelopes,
   and those carry no user content.
@@ -54,6 +60,7 @@ fails the health check instead of serving half a schema.
 | `V3__pending_wrap.sql` | `pending_pairings.wrapped_key` |
 | `V4__voucher_key.sql` | `pending_pairings.voucher_device_id` |
 | `V5__task_needs_approval.sql` | the `needs_approval` task state |
+| `V6__family_board.sql` | board_heads, board_ops, board_cursors, scope_key_wraps (RLS `FORCE`); `members.family_role` |
 
 The four `hopa_admin`-owned `SECURITY DEFINER` lookup functions live in a separate
 optional location, `db/admin/V5__admin_lookups.sql`, applied only when
@@ -102,6 +109,7 @@ Package `com.hopa.backend`:
 | `pairing` | pending sessions, vouch, claim, token issuance and rotation, device list/revoke |
 | `gateway` | the WebSocket gateway and the live `DeviceRegistry` |
 | `tasks` | task store/router and the server-authored `diag.*` path |
+| `board` | the family board: store, service (scope rule), gateway fan-out and wakes, `/v1/board/*` and scope-key routes, wrap rules, family role changes |
 | `push` | FCM sender and the guarded push port |
 | `trace` | trace span store, recorder and query routes |
 | `store` | the `Database` pool, Flyway, probes, device and task persistence |
@@ -127,6 +135,15 @@ into).
 - **Phone numbers stay out of logs, tokens and the wire.** The E.164 number is a
   login lookup only and is never returned, never written to a token, and never
   logged.
+
+- **Board smoke run.** `apps\android\gradlew.bat -p services/backend boardSmoke
+  --args="--url https://<host> --token <device access token> --ops 100"` appends
+  N random `family` ops over the gateway, pulls them back and prints p50/p95. The
+  ops stay in that household's board and no device can decrypt them: use a test
+  household.
+- **Board wakes are process-local too.** The coalescing window and the board
+  wake budget live in `GuardedPush`; a restart forgets them, which at worst sends
+  one extra wake.
 
 ## Deploy
 

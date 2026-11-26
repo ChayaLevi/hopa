@@ -4,9 +4,12 @@ import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.harness.newDevice
 import com.hopa.backend.harness.newHousehold
 import com.hopa.backend.harness.seedHousehold
+import java.sql.Connection
+import java.sql.SQLException
 import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class TenantIsolationTest {
     private val db = PostgresHarness.appDatabase()
@@ -185,6 +188,117 @@ class TenantIsolationTest {
         }
 
         assertEquals(attempts, checked)
+    }
+
+    private fun memberOf(household: String): String =
+        db.tenant(household) { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery("select id from members limit 1").use { rows ->
+                    rows.next()
+                    rows.getString(1)
+                }
+            }
+        }
+
+    private fun insertBoardRows(connection: Connection, household: String, device: String, member: String) {
+        connection.prepareStatement(
+            "insert into board_heads(household_id, last_seq) values (?::uuid, 1)",
+        ).use {
+            it.setString(1, household)
+            it.executeUpdate()
+        }
+        connection.prepareStatement(
+            """
+            insert into board_ops(household_id, seq, scope, op_id, from_device, member_id,
+                                  key_epoch, body, body_hash, size)
+            values (?::uuid, 1, 'family', gen_random_uuid(), ?::uuid, ?::uuid, 0, ?, ?, 3)
+            """.trimIndent(),
+        ).use {
+            it.setString(1, household)
+            it.setString(2, device)
+            it.setString(3, member)
+            it.setBytes(4, ByteArray(3) { 1 })
+            it.setBytes(5, ByteArray(32) { 2 })
+            it.executeUpdate()
+        }
+        connection.prepareStatement(
+            "insert into board_cursors(household_id, device_id, scope, last_seq) " +
+                "values (?::uuid, ?::uuid, 'family', 1)",
+        ).use {
+            it.setString(1, household)
+            it.setString(2, device)
+            it.executeUpdate()
+        }
+        connection.prepareStatement(
+            "insert into scope_key_wraps(household_id, scope, key_epoch, device_id, wrapped_key) " +
+                "values (?::uuid, 'parents', 0, ?::uuid, ?)",
+        ).use {
+            it.setString(1, household)
+            it.setString(2, device)
+            it.setBytes(3, ByteArray(60) { 9 })
+            it.executeUpdate()
+        }
+    }
+
+    private fun Connection.changed(sql: String, household: String): Int =
+        prepareStatement(sql).use {
+            it.setString(1, household)
+            it.executeUpdate()
+        }
+
+    @Test
+    fun `a household can neither read nor write another household's board`() {
+        val (home, other) = twoHouseholds()
+        db.tenant(other) { connection -> insertBoardRows(connection, other, deviceOf(other), memberOf(other)) }
+        val tables = listOf("board_heads", "board_ops", "board_cursors", "scope_key_wraps")
+
+        val seen = db.tenant(home) { connection ->
+            tables.map { table ->
+                connection.prepareStatement("select count(*) from $table where household_id = ?::uuid").use {
+                    it.setString(1, other)
+                    it.executeQuery().use { rows -> rows.next(); rows.getInt(1) }
+                }
+            }
+        }
+        val updated = db.tenant(home) { connection ->
+            listOf(
+                connection.changed("update board_heads set last_seq = 99 where household_id = ?::uuid", other),
+                connection.changed(
+                    "update board_ops set body = decode('00', 'hex') where household_id = ?::uuid",
+                    other,
+                ),
+                connection.changed("update board_cursors set last_seq = 99 where household_id = ?::uuid", other),
+                connection.changed(
+                    "update scope_key_wraps set wrapped_key = decode('00', 'hex') where household_id = ?::uuid",
+                    other,
+                ),
+            )
+        }
+        val deleted = db.tenant(home) { connection ->
+            tables.map { table -> connection.changed("delete from $table where household_id = ?::uuid", other) }
+        }
+        // Writing rows that name the other household is refused by the policy's check.
+        assertThrows<SQLException> {
+            db.tenant(home) { connection -> insertBoardRows(connection, other, deviceOf(home), memberOf(home)) }
+        }
+        val stillThere = db.tenant(other) { connection ->
+            tables.map { table ->
+                connection.createStatement().use { statement ->
+                    statement.executeQuery("select count(*) from $table").use { rows -> rows.next(); rows.getInt(1) }
+                }
+            }
+        }
+        val unchanged = db.tenant(other) { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery("select last_seq from board_heads").use { rows -> rows.next(); rows.getLong(1) }
+            }
+        }
+
+        assertEquals(listOf(0, 0, 0, 0), seen)
+        assertEquals(listOf(0, 0, 0, 0), updated)
+        assertEquals(listOf(0, 0, 0, 0), deleted)
+        assertEquals(listOf(1, 1, 1, 1), stillThere)
+        assertEquals(1L, unchanged)
     }
 
     @Test

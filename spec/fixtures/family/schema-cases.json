@@ -1,0 +1,1693 @@
+{
+  "description": "Schema cases for the family board contracts (op.v1, its logEntry, state.v1). Replayed by tools/checks/check-family-schemas.py. Every op kind has at least one accepted case. A state case may name a file in this folder instead of an inline value. These cases check shape only; what the reducer accepts or refuses (stale versions, scope references, permissions) belongs to the board fixtures.",
+  "cases": [
+    {
+      "name": "op-create-task",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-create-recurring-event",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0002",
+        "at": "2026-11-11T13:02:00.000Z",
+        "item": {
+          "id": "item-judo",
+          "type": "event",
+          "title": "Judo",
+          "start": "2026-11-16T15:00:00.000Z",
+          "end": "2026-11-16T16:00:00.000Z",
+          "forMemberIds": [
+            "noa"
+          ],
+          "recurrence": {
+            "freq": "weekly",
+            "byWeekday": [
+              1,
+              3
+            ]
+          },
+          "ownership": {
+            "state": "open"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-create-proposed-preparation",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0003",
+        "at": "2026-11-11T13:03:00.000Z",
+        "item": {
+          "id": "item-dinner-cake",
+          "type": "preparation",
+          "title": "Bake a cake",
+          "parentEventId": "family-dinner",
+          "start": "2026-11-15T12:00:00.000Z",
+          "source": {
+            "kind": "screenshot",
+            "label": "From a screenshot"
+          },
+          "proposed": true
+        }
+      }
+    },
+    {
+      "name": "op-edit-title-and-clear-end",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "edit",
+        "opId": "op-0004",
+        "at": "2026-11-11T13:04:00.000Z",
+        "itemId": "piano-tomorrow",
+        "version": 1,
+        "patch": {
+          "title": "Piano lesson (moved)",
+          "end": "",
+          "notes": "Room 2"
+        }
+      }
+    },
+    {
+      "name": "op-edit-stop-recurrence",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "edit",
+        "opId": "op-0005",
+        "at": "2026-11-11T13:05:00.000Z",
+        "itemId": "item-judo",
+        "version": 1,
+        "patch": {
+          "recurrence": null
+        }
+      }
+    },
+    {
+      "name": "op-assign",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "assign",
+        "opId": "op-0006",
+        "at": "2026-11-11T13:06:00.000Z",
+        "itemId": "pickup-today",
+        "version": 1,
+        "ownerId": "dad"
+      }
+    },
+    {
+      "name": "op-open-with-candidates",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "open",
+        "opId": "op-0007",
+        "at": "2026-11-11T13:07:00.000Z",
+        "itemId": "piano-tomorrow",
+        "version": 2,
+        "candidateIds": [
+          "mom",
+          "dad"
+        ]
+      }
+    },
+    {
+      "name": "op-open-with-reason",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "open",
+        "opId": "op-0008",
+        "at": "2026-11-11T13:08:00.000Z",
+        "itemId": "family-dinner",
+        "version": 1,
+        "reason": {
+          "kind": "unavailable",
+          "memberId": "mom",
+          "eventId": "pickup-tuesday",
+          "date": "2026-11-17"
+        }
+      }
+    },
+    {
+      "name": "op-unassign",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "unassign",
+        "opId": "op-0009",
+        "at": "2026-11-11T13:09:00.000Z",
+        "itemId": "swim-today",
+        "version": 1
+      }
+    },
+    {
+      "name": "op-claim",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "claim",
+        "opId": "op-0010",
+        "at": "2026-11-11T13:10:00.000Z",
+        "itemId": "library-books",
+        "version": 1
+      }
+    },
+    {
+      "name": "op-confirm",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "confirm",
+        "opId": "op-0011",
+        "at": "2026-11-11T13:11:00.000Z",
+        "itemId": "item-milk",
+        "version": 1
+      }
+    },
+    {
+      "name": "op-handback-with-note",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "handback",
+        "opId": "op-0012",
+        "at": "2026-11-11T13:12:00.000Z",
+        "itemId": "pickup-tuesday",
+        "version": 1,
+        "note": "I have a late meeting"
+      }
+    },
+    {
+      "name": "op-done",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "done",
+        "opId": "op-0013",
+        "at": "2026-11-11T13:13:00.000Z",
+        "itemId": "library-books",
+        "version": 2
+      }
+    },
+    {
+      "name": "op-cancel-event",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "cancel",
+        "opId": "op-0014",
+        "at": "2026-11-11T13:14:00.000Z",
+        "itemId": "family-dinner",
+        "version": 2
+      }
+    },
+    {
+      "name": "op-cancel-occurrence",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "cancel_occurrence",
+        "opId": "op-0015",
+        "at": "2026-11-11T13:15:00.000Z",
+        "itemId": "item-judo",
+        "version": 1,
+        "date": "2026-11-18"
+      }
+    },
+    {
+      "name": "op-approve",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "approve",
+        "opId": "op-0016",
+        "at": "2026-11-11T13:16:00.000Z",
+        "itemId": "item-dinner-cake",
+        "version": 1
+      }
+    },
+    {
+      "name": "op-dismiss",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "dismiss",
+        "opId": "op-0017",
+        "at": "2026-11-11T13:17:00.000Z",
+        "itemId": "item-dinner-cake",
+        "version": 1
+      }
+    },
+    {
+      "name": "op-split-in-three",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "split",
+        "opId": "op-0018",
+        "at": "2026-11-11T13:18:00.000Z",
+        "itemId": "family-dinner-flowers",
+        "version": 1,
+        "parts": [
+          {
+            "title": "Choose flowers"
+          },
+          {
+            "id": "item-vase",
+            "title": "Find a vase"
+          },
+          {
+            "id": "item-water",
+            "title": "Fill the vase",
+            "start": "2026-11-15T15:00:00.000Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "op-undo",
+      "schema": "op",
+      "ok": true,
+      "value": {
+        "v": 1,
+        "kind": "undo",
+        "opId": "op-0019",
+        "at": "2026-11-11T13:19:00.000Z",
+        "targetOpId": "op-0006"
+      }
+    },
+    {
+      "name": "op-actor-inside-op",
+      "schema": "op",
+      "ok": false,
+      "why": "D12: the actor comes from the server, never from the op",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        },
+        "actor": "mom"
+      }
+    },
+    {
+      "name": "op-member-inside-op",
+      "schema": "op",
+      "ok": false,
+      "why": "D12: the actor comes from the server, never from the op",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        },
+        "memberId": "mom"
+      }
+    },
+    {
+      "name": "op-no-op-id",
+      "schema": "op",
+      "ok": false,
+      "why": "D10: the proposer mints the op id",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-no-at",
+      "schema": "op",
+      "ok": false,
+      "why": "D10: the op carries its time",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-at-without-millis",
+      "schema": "op",
+      "ok": false,
+      "why": "one spelling per instant",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-higher-version",
+      "schema": "op",
+      "ok": false,
+      "why": "D15: a v1 reader refuses v2",
+      "value": {
+        "v": 2,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-unknown-kind",
+      "schema": "op",
+      "ok": false,
+      "why": "D15: an unknown kind is refused",
+      "value": {
+        "v": 1,
+        "kind": "snooze",
+        "opId": "op-0020",
+        "at": "2026-11-11T13:20:00.000Z",
+        "itemId": "library-books",
+        "version": 1
+      }
+    },
+    {
+      "name": "op-source-sync-not-in-v1",
+      "schema": "op",
+      "ok": false,
+      "why": "source_sync is not in v1",
+      "value": {
+        "v": 1,
+        "kind": "source_sync",
+        "opId": "op-0021",
+        "at": "2026-11-11T13:21:00.000Z",
+        "changeId": "chg-1",
+        "note": "marked",
+        "updates": [
+          {
+            "itemId": "library-books",
+            "version": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "op-create-without-item-id",
+      "schema": "op",
+      "ok": false,
+      "why": "D10: the proposer mints the item id",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-create-with-visibility",
+      "schema": "op",
+      "ok": false,
+      "why": "D11: the scope is the visibility",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          },
+          "visibility": "parents"
+        }
+      }
+    },
+    {
+      "name": "op-create-with-created-by",
+      "schema": "op",
+      "ok": false,
+      "why": "D12: the creator comes from the server",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          },
+          "createdBy": "mom"
+        }
+      }
+    },
+    {
+      "name": "op-create-with-confirmed-ownership",
+      "schema": "op",
+      "ok": false,
+      "why": "confirmed is set by the reducer",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya",
+            "confirmed": true
+          }
+        }
+      }
+    },
+    {
+      "name": "op-create-with-mailbox",
+      "schema": "op",
+      "ok": false,
+      "why": "mailbox-private items are not in v1",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          },
+          "mailboxIds": [
+            "mom"
+          ]
+        }
+      }
+    },
+    {
+      "name": "op-title-too-long",
+      "schema": "op",
+      "ok": false,
+      "why": "a title is 1 to 200 characters",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-empty-title",
+      "schema": "op",
+      "ok": false,
+      "why": "a title is 1 to 200 characters",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          }
+        }
+      }
+    },
+    {
+      "name": "op-edit-visibility",
+      "schema": "op",
+      "ok": false,
+      "why": "D11: a visibility change is a cancel plus a create",
+      "value": {
+        "v": 1,
+        "kind": "edit",
+        "opId": "op-0022",
+        "at": "2026-11-11T13:22:00.000Z",
+        "itemId": "piano-tomorrow",
+        "version": 1,
+        "patch": {
+          "visibility": "parents"
+        }
+      }
+    },
+    {
+      "name": "op-edit-empty-patch",
+      "schema": "op",
+      "ok": false,
+      "why": "an edit changes something",
+      "value": {
+        "v": 1,
+        "kind": "edit",
+        "opId": "op-0023",
+        "at": "2026-11-11T13:23:00.000Z",
+        "itemId": "piano-tomorrow",
+        "version": 1,
+        "patch": {}
+      }
+    },
+    {
+      "name": "op-change-without-version",
+      "schema": "op",
+      "ok": false,
+      "why": "D8: every change names the version it saw",
+      "value": {
+        "v": 1,
+        "kind": "claim",
+        "opId": "op-0024",
+        "at": "2026-11-11T13:24:00.000Z",
+        "itemId": "library-books"
+      }
+    },
+    {
+      "name": "op-change-version-zero",
+      "schema": "op",
+      "ok": false,
+      "why": "versions start at 1",
+      "value": {
+        "v": 1,
+        "kind": "claim",
+        "opId": "op-0025",
+        "at": "2026-11-11T13:25:00.000Z",
+        "itemId": "library-books",
+        "version": 0
+      }
+    },
+    {
+      "name": "op-split-one-part",
+      "schema": "op",
+      "ok": false,
+      "why": "a split makes 2 to 4 items",
+      "value": {
+        "v": 1,
+        "kind": "split",
+        "opId": "op-0026",
+        "at": "2026-11-11T13:26:00.000Z",
+        "itemId": "library-books",
+        "version": 1,
+        "parts": [
+          {
+            "title": "Only one"
+          }
+        ]
+      }
+    },
+    {
+      "name": "op-split-new-part-without-id",
+      "schema": "op",
+      "ok": false,
+      "why": "D10: each new part carries its id",
+      "value": {
+        "v": 1,
+        "kind": "split",
+        "opId": "op-0027",
+        "at": "2026-11-11T13:27:00.000Z",
+        "itemId": "library-books",
+        "version": 1,
+        "parts": [
+          {
+            "title": "First"
+          },
+          {
+            "title": "Second"
+          }
+        ]
+      }
+    },
+    {
+      "name": "op-undo-by-activity-id",
+      "schema": "op",
+      "ok": false,
+      "why": "the undo names the target op",
+      "value": {
+        "v": 1,
+        "kind": "undo",
+        "opId": "op-0028",
+        "at": "2026-11-11T13:28:00.000Z",
+        "activityId": "op-0006"
+      }
+    },
+    {
+      "name": "op-cancel-occurrence-bad-date",
+      "schema": "op",
+      "ok": false,
+      "why": "a local date is YYYY-MM-DD",
+      "value": {
+        "v": 1,
+        "kind": "cancel_occurrence",
+        "opId": "op-0029",
+        "at": "2026-11-11T13:29:00.000Z",
+        "itemId": "item-judo",
+        "version": 1,
+        "date": "18/11/2026"
+      }
+    },
+    {
+      "name": "op-handback-note-too-long",
+      "schema": "op",
+      "ok": false,
+      "why": "a note is at most 500 characters",
+      "value": {
+        "v": 1,
+        "kind": "handback",
+        "opId": "op-0030",
+        "at": "2026-11-11T13:30:00.000Z",
+        "itemId": "pickup-tuesday",
+        "version": 1,
+        "note": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "name": "op-weekday-out-of-range",
+      "schema": "op",
+      "ok": false,
+      "why": "weekdays are 0 to 6",
+      "value": {
+        "v": 1,
+        "kind": "create",
+        "opId": "op-0001",
+        "at": "2026-11-11T13:01:00.000Z",
+        "item": {
+          "id": "item-milk",
+          "type": "task",
+          "title": "Buy milk",
+          "start": "2026-11-11T16:00:00.000Z",
+          "forMemberIds": [
+            "maya"
+          ],
+          "ownership": {
+            "state": "assigned",
+            "ownerId": "maya"
+          },
+          "recurrence": {
+            "freq": "weekly",
+            "byWeekday": [
+              7
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "entry-family",
+      "schema": "entry",
+      "ok": true,
+      "value": {
+        "seq": 1,
+        "scope": "family",
+        "memberId": "mom",
+        "fromDevice": "dev-mom-phone",
+        "op": {
+          "v": 1,
+          "kind": "create",
+          "opId": "op-0001",
+          "at": "2026-11-11T13:01:00.000Z",
+          "item": {
+            "id": "item-milk",
+            "type": "task",
+            "title": "Buy milk",
+            "start": "2026-11-11T16:00:00.000Z",
+            "forMemberIds": [
+              "maya"
+            ],
+            "ownership": {
+              "state": "assigned",
+              "ownerId": "maya"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "entry-parents-uuid-ids",
+      "schema": "entry",
+      "ok": true,
+      "value": {
+        "seq": 2,
+        "scope": "parents",
+        "memberId": "0b4f6a8e-3c2d-4e1f-9a7b-5c6d7e8f9a0b",
+        "fromDevice": "0b4f6a8e-3c2d-4e1f-9a7b-5c6d7e8f9a0b",
+        "op": {
+          "v": 1,
+          "kind": "create",
+          "opId": "op-0001",
+          "at": "2026-11-11T13:01:00.000Z",
+          "item": {
+            "id": "item-milk",
+            "type": "task",
+            "title": "Buy milk",
+            "start": "2026-11-11T16:00:00.000Z",
+            "forMemberIds": [
+              "maya"
+            ],
+            "ownership": {
+              "state": "assigned",
+              "ownerId": "maya"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "entry-without-member",
+      "schema": "entry",
+      "ok": false,
+      "why": "D12: the server attests the member",
+      "value": {
+        "seq": 1,
+        "scope": "family",
+        "fromDevice": "dev-mom-phone",
+        "op": {
+          "v": 1,
+          "kind": "create",
+          "opId": "op-0001",
+          "at": "2026-11-11T13:01:00.000Z",
+          "item": {
+            "id": "item-milk",
+            "type": "task",
+            "title": "Buy milk",
+            "start": "2026-11-11T16:00:00.000Z",
+            "forMemberIds": [
+              "maya"
+            ],
+            "ownership": {
+              "state": "assigned",
+              "ownerId": "maya"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "entry-unknown-scope",
+      "schema": "entry",
+      "ok": false,
+      "why": "scopes are family and parents",
+      "value": {
+        "seq": 1,
+        "scope": "everyone",
+        "memberId": "mom",
+        "fromDevice": "dev-mom-phone",
+        "op": {
+          "v": 1,
+          "kind": "create",
+          "opId": "op-0001",
+          "at": "2026-11-11T13:01:00.000Z",
+          "item": {
+            "id": "item-milk",
+            "type": "task",
+            "title": "Buy milk",
+            "start": "2026-11-11T16:00:00.000Z",
+            "forMemberIds": [
+              "maya"
+            ],
+            "ownership": {
+              "state": "assigned",
+              "ownerId": "maya"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "entry-seq-zero",
+      "schema": "entry",
+      "ok": false,
+      "why": "seq starts at 1",
+      "value": {
+        "seq": 0,
+        "scope": "family",
+        "memberId": "mom",
+        "fromDevice": "dev-mom-phone",
+        "op": {
+          "v": 1,
+          "kind": "create",
+          "opId": "op-0001",
+          "at": "2026-11-11T13:01:00.000Z",
+          "item": {
+            "id": "item-milk",
+            "type": "task",
+            "title": "Buy milk",
+            "start": "2026-11-11T16:00:00.000Z",
+            "forMemberIds": [
+              "maya"
+            ],
+            "ownership": {
+              "state": "assigned",
+              "ownerId": "maya"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "entry-with-bad-op",
+      "schema": "entry",
+      "ok": false,
+      "why": "the op inside must be valid",
+      "value": {
+        "seq": 1,
+        "scope": "family",
+        "memberId": "mom",
+        "fromDevice": "dev-mom-phone",
+        "op": {
+          "v": 1,
+          "kind": "create",
+          "opId": "op-0001",
+          "at": "2026-11-11T13:01:00.000Z",
+          "item": {
+            "id": "item-milk",
+            "type": "task",
+            "title": "Buy milk",
+            "start": "2026-11-11T16:00:00.000Z",
+            "forMemberIds": [
+              "maya"
+            ],
+            "ownership": {
+              "state": "assigned",
+              "ownerId": "maya"
+            }
+          },
+          "actor": "mom"
+        }
+      }
+    },
+    {
+      "name": "state-seed",
+      "schema": "state",
+      "ok": true,
+      "value": {
+        "file": "seed.state.json"
+      }
+    },
+    {
+      "name": "state-teen-device-family-only",
+      "schema": "state",
+      "ok": true,
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "state-item-with-visibility",
+      "schema": "state",
+      "ok": false,
+      "why": "D11: the scope is the visibility",
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "visibility": "family"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "state-no-family-scope",
+      "schema": "state",
+      "ok": false,
+      "why": "every device holds the family scope",
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {}
+      }
+    },
+    {
+      "name": "state-unknown-scope",
+      "schema": "state",
+      "ok": false,
+      "why": "scopes are family and parents",
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "teens": {
+            "items": [],
+            "activity": []
+          }
+        }
+      }
+    },
+    {
+      "name": "state-newer-schema-version",
+      "schema": "state",
+      "ok": false,
+      "why": "a stored state carries its version",
+      "value": {
+        "schemaVersion": 2,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "state-activity-without-actor",
+      "schema": "state",
+      "ok": false,
+      "why": "D12: activity records the attested actor",
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "state-item-without-version",
+      "schema": "state",
+      "ok": false,
+      "why": "D8: every item has a version",
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya"
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "state-assigned-without-confirmed",
+      "schema": "state",
+      "ok": false,
+      "why": "the reducer always records confirmed",
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "parent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "state-member-unknown-role",
+      "schema": "state",
+      "ok": false,
+      "why": "roles are parent, teen and child",
+      "value": {
+        "schemaVersion": 1,
+        "family": {
+          "id": "demo-family",
+          "name": "Our family",
+          "timezone": "Asia/Jerusalem",
+          "members": [
+            {
+              "id": "mom",
+              "name": "Mom",
+              "role": "grandparent",
+              "hasAccount": true
+            },
+            {
+              "id": "maya",
+              "name": "Maya",
+              "role": "teen",
+              "hasAccount": true
+            }
+          ]
+        },
+        "scopes": {
+          "family": {
+            "items": [
+              {
+                "id": "item-milk",
+                "type": "task",
+                "title": "Buy milk",
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "maya",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1
+              }
+            ],
+            "activity": [
+              {
+                "id": "op-0001",
+                "at": "2026-11-11T13:01:00.000Z",
+                "actor": "maya",
+                "what": "Added an item",
+                "kind": "create",
+                "itemId": "item-milk",
+                "undo": {
+                  "items": [
+                    {
+                      "itemId": "item-milk",
+                      "before": null,
+                      "afterVersion": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

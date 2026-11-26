@@ -14,6 +14,9 @@ import com.hopa.backend.admin.adminRoutes
 import com.hopa.backend.admin.adminSessionRoutes
 import com.hopa.backend.admin.lookupRoutes
 import com.hopa.backend.auth.AuthPort
+import com.hopa.backend.board.InMemoryBoardStore
+import com.hopa.backend.board.boardRoutes
+import com.hopa.backend.board.scopeKeyRoutes
 import com.hopa.backend.console.consoleRoutes
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.gateway.gatewayRoutes
@@ -35,6 +38,7 @@ import com.hopa.backend.push.PushPort
 import com.hopa.backend.push.ServiceAccountFcmAuth
 import com.hopa.backend.store.Database
 import com.hopa.backend.store.DbProbe
+import com.hopa.backend.store.PgBoardStore
 import com.hopa.backend.store.PgDevices
 import com.hopa.backend.store.PgTaskStore
 import com.hopa.backend.store.PostgresProbe
@@ -50,7 +54,12 @@ import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
+
+/** How often coalesced board wakes are checked. */
+private const val BOARD_WAKE_FLUSH_SECONDS = 2L
 
 fun Application.module(config: ServerConfig) {
     install(ContentNegotiation) {
@@ -70,6 +79,8 @@ fun Application.module(config: ServerConfig) {
     lookupRoutes(config)
     consoleRoutes(config)
     traceRoutes(config)
+    boardRoutes(config)
+    scopeKeyRoutes(config)
     gatewayRoutes(config)
 }
 
@@ -126,6 +137,16 @@ fun main() {
         PushPort.None
     }
 
+    // Board wakes held back by coalescing go out once their window has passed.
+    Executors.newSingleThreadScheduledExecutor { task ->
+        Thread(task, "board-wake-flush").apply { isDaemon = true }
+    }.scheduleWithFixedDelay(
+        { runCatching { push.flushBoardWakes() } },
+        BOARD_WAKE_FLUSH_SECONDS,
+        BOARD_WAKE_FLUSH_SECONDS,
+        TimeUnit.SECONDS,
+    )
+
     val traceStore = database?.let { PgTraceStore(it) }
     val eventLog = JsonEventLog()
 
@@ -169,6 +190,7 @@ fun main() {
         bootstrapToken = System.getenv("HOPA_BOOTSTRAP_TOKEN"),
         tokenIssuer = tokens,
         tasks = database?.let { PgTaskStore(it) } ?: InMemoryTaskStore(),
+        boardStore = database?.let { PgBoardStore(it) } ?: InMemoryBoardStore(),
         push = push,
         traces = traceStore ?: TraceRecorder.None,
         traceQuery = traceStore,

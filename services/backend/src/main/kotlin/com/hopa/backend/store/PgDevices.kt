@@ -61,6 +61,23 @@ class PgDevices(private val db: Database) : DeviceDirectory, DeviceInventory {
             }
         }
 
+    override fun householdDevices(householdId: String): List<DeviceIdentity> =
+        db.tenant(householdId) { connection ->
+            connection.prepareStatement(
+                "select id, household_id, member_id from devices " +
+                    "where household_id = ?::uuid and revoked_at is null order by id",
+            ).use {
+                it.setString(1, householdId)
+                it.executeQuery().use { rows ->
+                    buildList {
+                        while (rows.next()) {
+                            add(DeviceIdentity(rows.getString(1), rows.getString(2), rows.getString(3)))
+                        }
+                    }
+                }
+            }
+        }
+
     override fun touch(deviceId: String, householdId: String, pushToken: String?, at: Long) {
         db.tenant(householdId) { connection ->
             val sql = if (pushToken == null) {
@@ -146,7 +163,8 @@ class PgDevices(private val db: Database) : DeviceDirectory, DeviceInventory {
 
     /**
      * Every effect of a revoke commits together: the device row, its access
-     * tokens, its refresh family and its household key wrap. The first read is
+     * tokens, its refresh family, its household key wrap and its family board
+     * scope-key wraps (ADR-0033). The first read is
      * also the tenancy check; row-level security hides another household's id.
      */
     override fun revokeDevice(deviceId: String, householdId: String): Boolean =
@@ -190,6 +208,14 @@ class PgDevices(private val db: Database) : DeviceDirectory, DeviceInventory {
             }
             connection.prepareStatement(
                 "delete from household_key_wraps " +
+                    "where device_id = ?::uuid and household_id = ?::uuid",
+            ).use {
+                it.setString(1, deviceId)
+                it.setString(2, householdId)
+                it.executeUpdate()
+            }
+            connection.prepareStatement(
+                "delete from scope_key_wraps " +
                     "where device_id = ?::uuid and household_id = ?::uuid",
             ).use {
                 it.setString(1, deviceId)

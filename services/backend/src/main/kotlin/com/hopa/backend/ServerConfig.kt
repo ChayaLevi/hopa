@@ -7,6 +7,8 @@ import com.hopa.backend.admin.AdminAuth
 import com.hopa.backend.admin.AdminSessions
 import com.hopa.backend.admin.HouseholdLookup
 import com.hopa.backend.auth.AuthPort
+import com.hopa.backend.board.BoardStore
+import com.hopa.backend.board.InMemoryBoardStore
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.http.RateLimiter
 import com.hopa.backend.log.EventLog
@@ -53,6 +55,8 @@ data class ServerConfig(
     val bootstrapToken: String? = null,
     val tokenIssuer: TokenIssuer? = null,
     val tasks: TaskStore = InMemoryTaskStore(),
+    /** The family board log and scope-key wraps (ADR-0033); Postgres in production. */
+    val boardStore: BoardStore = InMemoryBoardStore(),
     val messageLimit: RateLimiter = RateLimiter(20, 1_000),
     val log: EventLog = EventLog.None,
     val push: PushPort = PushPort.None,

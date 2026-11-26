@@ -1,0 +1,90 @@
+# Family board fixtures
+
+Client-side contracts for the family board. The server never reads them: it stores
+board ops as ciphertext and orders them. Every client replays the ops it can read
+through the same pure reducer, so these files are what keeps the clients in step.
+
+- Schemas: [`../../schemas/family/op.v1.schema.json`](../../schemas/family/op.v1.schema.json)
+  (one op, and `$defs/logEntry`: the op plus what the server attests for its seq) and
+  [`../../schemas/family/state.v1.schema.json`](../../schemas/family/state.v1.schema.json)
+  (the board one device holds).
+- Checker: `python tools/checks/check-family-schemas.py` (shape cases, and the board
+  cases' log entries, final states and hashes)
+
+## Files
+
+| File | What it is |
+| --- | --- |
+| [`seed.state.json`](seed.state.json) | Homemind's demo seed (`seedState` in `server/homemind/seed.ts`, branch `feat/homemind` of `ChayaLevi/digitalmate-web`), at the demo clock 2026-11-11 14:30 `Asia/Jerusalem`, in the v1 shape: each item moved into the scope named by its `visibility` (and the field dropped), the family roster cut to `id`, `name`, `nameZh`, `timezone` and members' `id`, `name`, `nameZh`, `role`, `hasAccount`; reminders, rules, preferences, shopping and the other non-board parts left out. |
+| [`schema-cases.json`](schema-cases.json) | Shape cases: an accepted op of every kind, ops and states that must be refused (each says why), and log entries. |
+| `board-*.json` | Behaviour cases for the board reducer, grouped by topic (`create`, `ownership`, `done`, `undo`, `stale`, `scopes`, `visibility`, `split`, `versioning`). Generated, never edited by hand (see below). |
+
+## Board cases
+
+Every case starts from `seed.state.json` and has:
+
+- `log`: log entries in seq order (`seq`, `scope`, server-attested `memberId` and
+  `fromDevice`, and the decrypted `op`);
+- `results`: one per entry the reducer reached, `applied` or `rejected` with a
+  `code` (`invalid`, `forbidden`, `not_found`, `stale`, `conflict`);
+- `stoppedAt` (optional): the seq of an op with an unknown `kind` or a higher `v`.
+  Replay stops there, and no later entry has a result (D15);
+- `after`: the state of a parent device (both scopes) after the replay;
+- `hashes`: `state` for the whole of `after`, `family` and `parents` for
+  `after.scopes.family` and `after.scopes.parents`.
+
+A device that holds only `family` (a teen) replays only the `family` entries. It must
+reach the same `hashes.family`, with the same results for those entries. The generator
+checks this for every case.
+
+How a reducer applies one entry (the order of the checks decides the code):
+
+1. Stop if `v` is not 1 or `kind` is unknown.
+2. Reject as `invalid` a malformed `opId` or `at`, and reject as `conflict` an `opId`
+   that is already an activity id in the scope.
+3. Run the change against the op's own scope only. The items of the other scope do not
+   exist for it (D11), so a reference across scopes, in either direction, is `not_found`
+   or `invalid`, never `forbidden`. A create must carry its item id.
+4. Take the actor from `memberId` and the time from `at`. The new activity's id is the
+   `opId`, and each new split part takes the `id` given in the op (D10, D12). A split
+   part whose id already exists in the scope is a `conflict`, checked after the
+   change's own checks.
+
+A rejected entry leaves the state unchanged. An entry the op schema refuses is always
+rejected as `invalid` or stops the replay (the checker enforces this).
+
+**Hash:** lowercase hex SHA-256 of the UTF-8 bytes of canonical JSON. Object keys are
+sorted, there is no whitespace, and absent fields are left out. Strings are escaped as
+`JSON.stringify` does: `\"`, `\\`, `\b \f \n \r \t`, other control characters as
+lowercase `\u00xx`, and everything else as raw UTF-8. Integers are written in decimal.
+For these types this is RFC 8785 (JCS). Python's
+`json.dumps(v, sort_keys=True, separators=(",", ":"), ensure_ascii=False)` gives the
+same bytes.
+
+**Regenerate** (in `ChayaLevi/digitalmate-web`, branch `feat/family-fixtures`; it runs
+Homemind's unchanged `applyChange` behind an adapter that applies D10, D11, D12 and D15):
+
+```bash
+npx tsx scripts/family-fixtures/generate.mts --out   <hopa>/spec/fixtures/family
+npx tsx scripts/family-fixtures/generate.mts --check <hopa>/spec/fixtures/family
+```
+
+Each case states the outcome it expects for every step. The generator refuses to write
+a case if the core does anything else.
+
+## What the schemas cannot check
+
+These rules need the state, so the reducer enforces them and the board fixtures test
+them, not the schema cases:
+
+- a change names the item's current `version`, or it is refused as stale (D8);
+- an op in `family` never references an id that lives in `parents`, including
+  `parentEventId` and an open `reason.eventId` (D11);
+- only a parent creates or owns an item in `parents`;
+- the actor is the log entry's `memberId`, and the reducer never reads a clock or mints
+  an id (D10, D12).
+
+## Changing a contract
+
+The files are versioned. Adding a field or an op kind means a new `v` (ops) or
+`schemaVersion` (state), so an older client stops instead of guessing (D15).

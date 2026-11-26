@@ -139,3 +139,31 @@ fun seedHousehold(db: Database, household: String, device: String, member: Strin
         }
     }
 }
+
+/**
+ * Adds a member with one device to an existing household. Multi-member
+ * households and family roles are seeded here, never through a production
+ * route (O2: no members or roles write API in this work).
+ */
+fun seedMember(db: Database, household: String, member: String, device: String, familyRole: String? = null) {
+    db.tenant(household) { connection ->
+        connection.prepareStatement(
+            "insert into members(id, household_id, role, display_name, family_role) " +
+                "values (?::uuid, ?::uuid, 'member', 'Test', ?)",
+        ).use {
+            it.setString(1, member)
+            it.setString(2, household)
+            it.setString(3, familyRole)
+            it.executeUpdate()
+        }
+        connection.prepareStatement(
+            "insert into devices(id, household_id, member_id, platform, name) " +
+                "values (?::uuid, ?::uuid, ?::uuid, 'android', 'Pixel')",
+        ).use {
+            it.setString(1, device)
+            it.setString(2, household)
+            it.setString(3, member)
+            it.executeUpdate()
+        }
+    }
+}

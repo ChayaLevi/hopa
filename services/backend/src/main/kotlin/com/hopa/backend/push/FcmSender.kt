@@ -9,8 +9,9 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /**
- * FCM HTTP v1, data-only and high priority. The payload carries a task id and a
- * trace id; never a goal, a summary or anything the phone would render.
+ * FCM HTTP v1, data-only and high priority. A task wake carries a task id and a
+ * trace id; a board wake carries `type: board.changed`, the scope and the seq.
+ * Never a goal, a summary, an op or anything the phone would render.
  */
 class FcmSender(
     private val projectId: String,

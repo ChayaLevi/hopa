@@ -57,3 +57,10 @@ tasks.register<JavaExec>("exitRun") {
     classpath = sourceSets["test"].runtimeClasspath
     mainClass.set("com.hopa.backend.tools.ExitRunKt")
 }
+
+tasks.register<JavaExec>("boardSmoke") {
+    group = "verification"
+    description = "Append and pull N family board ops against a deployed instance; prints p50 and p95."
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("com.hopa.backend.tools.smoke.BoardSmokeKt")
+}

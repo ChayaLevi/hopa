@@ -1,0 +1,423 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hopa.dev/contracts/schemas/family/op.v1.schema.json",
+  "title": "Family board operation v1",
+  "description": "One change to the family board, as the proposing device writes it before encryption. Every device replays the ops it can read, in the server's seq order, through the same pure reducer. Ported from Homemind's Change (server/homemind/core.ts) with these rules built in. D10: the reducer never reads a clock or mints an id, so the op carries its own opId, its time `at`, and the id of every item it creates. D12: there is no actor inside the op; the member and device come from the server's record for that seq (see $defs/logEntry). D11: there is no visibility field; an item lives in the scope of the op that created it, and changing who sees an item is a cancel in one scope plus a create in the other. D15: `v` and `kind` are explicit; a client that meets a higher `v` or a `kind` it does not know stops applying at that seq. Unknown fields are refused: a new field needs a new `v`. Not in v1: Homemind's source_sync (changed group or email messages), sourceRefs, stale marks and mailbox-private items.",
+  "type": "object",
+  "required": ["v", "kind", "opId", "at"],
+  "properties": {
+    "v": {
+      "const": 1,
+      "description": "Op format version. A reader that only knows v1 stops at a higher value."
+    },
+    "kind": {
+      "enum": [
+        "create",
+        "edit",
+        "assign",
+        "open",
+        "unassign",
+        "claim",
+        "confirm",
+        "handback",
+        "done",
+        "cancel",
+        "cancel_occurrence",
+        "approve",
+        "dismiss",
+        "split",
+        "undo"
+      ]
+    },
+    "opId": {
+      "$ref": "#/$defs/id",
+      "description": "Minted by the proposing device (a lowercase UUID fits). Unique per household. It is also the id of the Activity this op writes, so an undo names it."
+    },
+    "at": {
+      "$ref": "#/$defs/instant",
+      "description": "The proposing device's clock when the op was made. The reducer stamps activity with this value and never reads its own clock."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "create" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/createOp" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "edit" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/editOp" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "assign" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/assignOp" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "open" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/openOp" }
+    },
+    {
+      "if": {
+        "properties": { "kind": { "enum": ["unassign", "claim", "confirm", "done", "cancel", "approve", "dismiss"] } },
+        "required": ["kind"]
+      },
+      "then": { "$ref": "#/$defs/plainItemOp" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "handback" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/handbackOp" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "cancel_occurrence" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/cancelOccurrenceOp" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "split" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/splitOp" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "undo" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/undoOp" }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "description": "Homemind's ID_PATTERN. Lowercase UUIDs (server member and device ids, client op ids) fit."
+    },
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$",
+      "description": "An instant in UTC, always with milliseconds (`2026-11-11T12:30:00.000Z`), the form Homemind's toIso writes. One spelling per instant, so replay on two devices hashes the same."
+    },
+    "localDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "A local date in the family's time zone."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The item version the proposer saw. First writer wins (D8): a stale version is rejected by the reducer on every device."
+    },
+    "memberIds": {
+      "type": "array",
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "notes": { "type": "string", "maxLength": 2000 },
+    "itemType": { "enum": ["event", "preparation", "task"] },
+    "importance": { "enum": ["normal", "critical"] },
+    "recurrence": {
+      "type": "object",
+      "required": ["freq", "byWeekday"],
+      "additionalProperties": false,
+      "properties": {
+        "freq": { "const": "weekly" },
+        "byWeekday": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 },
+          "description": "0 = Sunday ... 6 = Saturday."
+        },
+        "until": { "$ref": "#/$defs/localDate" },
+        "exceptions": {
+          "type": "array",
+          "maxItems": 400,
+          "items": { "$ref": "#/$defs/localDate" },
+          "description": "Local dates of cancelled occurrences."
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["kind", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["manual", "chat", "screenshot", "email", "group", "rule", "ppma", "shopping"] },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "simulated": { "type": "boolean" }
+      },
+      "description": "Where the item came from. Screenshot, email, group and ppma sources always create a proposed item."
+    },
+    "openReason": {
+      "type": "object",
+      "required": ["kind", "memberId", "eventId", "date"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "unavailable" },
+        "memberId": { "$ref": "#/$defs/id" },
+        "eventId": { "$ref": "#/$defs/id" },
+        "date": { "$ref": "#/$defs/localDate" }
+      },
+      "description": "Why an item was opened: a member is unavailable because of an event. D11: in a family op the event must itself be in family; a parent device derives a family op from a parents event without the reason. The reducer enforces it."
+    },
+    "ownershipInput": {
+      "description": "Ownership a create may set. `confirmed` is not an input: the reducer sets it (true only when the actor assigns to themselves).",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["state"],
+          "additionalProperties": false,
+          "properties": { "state": { "const": "none" } }
+        },
+        {
+          "type": "object",
+          "required": ["state"],
+          "additionalProperties": false,
+          "properties": {
+            "state": { "const": "open" },
+            "candidateIds": { "$ref": "#/$defs/memberIds" },
+            "reason": { "$ref": "#/$defs/openReason" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["state", "ownerId"],
+          "additionalProperties": false,
+          "properties": {
+            "state": { "const": "assigned" },
+            "ownerId": { "$ref": "#/$defs/id" }
+          }
+        }
+      ]
+    },
+    "newItem": {
+      "type": "object",
+      "required": ["id", "type", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "Minted by the proposing device (D10). Homemind generated it from the clock when absent; here it is required."
+        },
+        "type": { "$ref": "#/$defs/itemType" },
+        "title": { "$ref": "#/$defs/title" },
+        "notes": { "$ref": "#/$defs/notes" },
+        "start": { "$ref": "#/$defs/instant" },
+        "end": { "$ref": "#/$defs/instant" },
+        "allDay": { "type": "boolean" },
+        "forMemberIds": { "$ref": "#/$defs/memberIds" },
+        "sensitive": { "type": "boolean" },
+        "importance": { "$ref": "#/$defs/importance" },
+        "unavailableMemberIds": { "$ref": "#/$defs/memberIds" },
+        "recurrence": { "$ref": "#/$defs/recurrence" },
+        "parentEventId": {
+          "$ref": "#/$defs/id",
+          "description": "Required for a preparation, refused otherwise (the reducer checks it). The event must be in the same scope."
+        },
+        "ownership": { "$ref": "#/$defs/ownershipInput" },
+        "source": { "$ref": "#/$defs/source" },
+        "proposed": {
+          "type": "boolean",
+          "description": "Create as proposed, waiting for approval."
+        }
+      }
+    },
+    "patch": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "description": "Fields an edit may change. No visibility (D11: a visibility change is a cancel plus a create in the other scope). An empty start or end clears it; recurrence null stops the repetition.",
+      "properties": {
+        "title": { "$ref": "#/$defs/title" },
+        "notes": { "$ref": "#/$defs/notes" },
+        "start": { "anyOf": [{ "$ref": "#/$defs/instant" }, { "const": "" }] },
+        "end": { "anyOf": [{ "$ref": "#/$defs/instant" }, { "const": "" }] },
+        "allDay": { "type": "boolean" },
+        "forMemberIds": { "$ref": "#/$defs/memberIds" },
+        "sensitive": { "type": "boolean" },
+        "importance": { "$ref": "#/$defs/importance" },
+        "unavailableMemberIds": { "$ref": "#/$defs/memberIds" },
+        "recurrence": { "anyOf": [{ "$ref": "#/$defs/recurrence" }, { "type": "null" }] }
+      }
+    },
+    "createOp": {
+      "type": "object",
+      "required": ["kind", "item"],
+      "properties": {
+        "v": true,
+        "kind": { "const": "create" },
+        "opId": true,
+        "at": true,
+        "item": { "$ref": "#/$defs/newItem" }
+      },
+      "additionalProperties": false
+    },
+    "editOp": {
+      "type": "object",
+      "required": ["kind", "itemId", "version", "patch"],
+      "properties": {
+        "v": true,
+        "kind": { "const": "edit" },
+        "opId": true,
+        "at": true,
+        "itemId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "patch": { "$ref": "#/$defs/patch" }
+      },
+      "additionalProperties": false
+    },
+    "assignOp": {
+      "type": "object",
+      "required": ["kind", "itemId", "version", "ownerId"],
+      "properties": {
+        "v": true,
+        "kind": { "const": "assign" },
+        "opId": true,
+        "at": true,
+        "itemId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "ownerId": { "$ref": "#/$defs/id" }
+      },
+      "additionalProperties": false
+    },
+    "openOp": {
+      "type": "object",
+      "required": ["kind", "itemId", "version"],
+      "description": "\"Who's taking this?\" Candidates default to everyone who could own the item.",
+      "properties": {
+        "v": true,
+        "kind": { "const": "open" },
+        "opId": true,
+        "at": true,
+        "itemId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "candidateIds": { "$ref": "#/$defs/memberIds" },
+        "reason": { "$ref": "#/$defs/openReason" }
+      },
+      "additionalProperties": false
+    },
+    "plainItemOp": {
+      "type": "object",
+      "required": ["kind", "itemId", "version"],
+      "description": "Ops that name only the item: unassign, claim, confirm, done, cancel (an event's preparations are cancelled with it), approve, dismiss.",
+      "properties": {
+        "v": true,
+        "kind": { "enum": ["unassign", "claim", "confirm", "done", "cancel", "approve", "dismiss"] },
+        "opId": true,
+        "at": true,
+        "itemId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" }
+      },
+      "additionalProperties": false
+    },
+    "handbackOp": {
+      "type": "object",
+      "required": ["kind", "itemId", "version"],
+      "properties": {
+        "v": true,
+        "kind": { "const": "handback" },
+        "opId": true,
+        "at": true,
+        "itemId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "note": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "The owner's own words, shown as written."
+        }
+      },
+      "additionalProperties": false
+    },
+    "cancelOccurrenceOp": {
+      "type": "object",
+      "required": ["kind", "itemId", "version", "date"],
+      "properties": {
+        "v": true,
+        "kind": { "const": "cancel_occurrence" },
+        "opId": true,
+        "at": true,
+        "itemId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "date": { "$ref": "#/$defs/localDate" }
+      },
+      "additionalProperties": false
+    },
+    "splitOp": {
+      "type": "object",
+      "required": ["kind", "itemId", "version", "parts"],
+      "description": "A task or preparation that is really several: the first part replaces the item, each other part is a new item beside it, with the id the proposer minted (D10).",
+      "properties": {
+        "v": true,
+        "kind": { "const": "split" },
+        "opId": true,
+        "at": true,
+        "itemId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "parts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "prefixItems": [
+            {
+              "type": "object",
+              "required": ["title"],
+              "additionalProperties": false,
+              "properties": {
+                "title": { "$ref": "#/$defs/title" },
+                "start": { "$ref": "#/$defs/instant" }
+              }
+            }
+          ],
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "title": { "$ref": "#/$defs/title" },
+              "start": { "$ref": "#/$defs/instant" }
+            }
+          }
+        },
+        "source": { "$ref": "#/$defs/source" }
+      },
+      "additionalProperties": false
+    },
+    "undoOp": {
+      "type": "object",
+      "required": ["kind", "targetOpId"],
+      "description": "Undo restores every item the target op touched, once, and only if nothing changed them since (D8). It is version-checked by the reducer against the target's recorded versions, never a blind restore.",
+      "properties": {
+        "v": true,
+        "kind": { "const": "undo" },
+        "opId": true,
+        "at": true,
+        "targetOpId": {
+          "$ref": "#/$defs/id",
+          "description": "The opId of the op to undo (Homemind's activityId)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "logEntry": {
+      "type": "object",
+      "required": ["seq", "scope", "memberId", "fromDevice", "op"],
+      "additionalProperties": false,
+      "description": "What the reducer is fed for one seq: the fields the server attests (plaintext columns of the board log) and the decrypted op. The actor is memberId, never anything inside the op (D12). Used by the fixtures and the client engine; the server never sees `op` in the clear.",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The server's total order for the household."
+        },
+        "scope": {
+          "enum": ["family", "parents"],
+          "description": "Which key encrypted the op and which partition of the state it applies to."
+        },
+        "memberId": {
+          "$ref": "#/$defs/id",
+          "description": "Server-attested author (from the access token)."
+        },
+        "fromDevice": {
+          "$ref": "#/$defs/id",
+          "description": "Server-attested device that sent the op."
+        },
+        "op": { "$ref": "#" }
+      }
+    }
+  }
+}

@@ -43,6 +43,8 @@ include(":bridge")
 project(":bridge").projectDir = file("../../../core/bridge")
 include(":backend")
 project(":backend").projectDir = file("../../../core/backend")
+include(":family")
+project(":family").projectDir = file("../../../core/family")
 
 include(":stores")
 project(":stores").projectDir = file("../../../apps/android/stores")

@@ -1,6 +1,10 @@
 package com.hopa.backend.protocol
 
 import java.security.SecureRandom
+import java.util.Base64
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 
 /**
  * Protocol v0 rules that are not expressible in JSON Schema, or that must hold
@@ -28,6 +32,11 @@ object EnvelopeValidator {
         "diag.ping",
         "diag.state",
         "diag.reset",
+        // The family board (ADR-0033): a device appends an encrypted op; the
+        // server acks it and tells the other devices that may read the scope.
+        "board.op",
+        "board.op.ack",
+        "board.changed",
         "error",
         "ping",
         "pong",
@@ -63,8 +72,49 @@ object EnvelopeValidator {
             envelope.to == null ->
             GatewayError("E_SCHEMA", "a task message needs a target device")
 
+        envelope.type == "board.op" -> boardOpProblem(envelope)
+
         else -> null
     }
+
+    /** IV (12) and GCM tag (16): the shortest well-formed op ciphertext. */
+    const val MIN_BOARD_CIPHERTEXT_BYTES = 28
+
+    /** 44 KiB raw, so a `board.op` frame stays under [MAX_FRAME_BYTES] after base64. */
+    const val MAX_BOARD_CIPHERTEXT_BYTES = 44 * 1024
+
+    val BOARD_SCOPES: Set<String> = setOf("family", "parents")
+
+    /**
+     * The plaintext shape of a `board.op` body: a known scope, a base64 `ct`
+     * within the size bounds and a non-negative `keyEpoch`. The ciphertext
+     * itself is never read; which epoch a scope needs is the board service's
+     * rule, not the frame's.
+     */
+    private fun boardOpProblem(envelope: Envelope): GatewayError? {
+        val body = envelope.body
+        val scope = (body["scope"] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
+        if (scope !in BOARD_SCOPES) return GatewayError("E_SCHEMA", "board.op needs a known scope")
+        val epoch = (body["keyEpoch"] as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull
+        if (epoch == null || epoch < 0) return GatewayError("E_SCHEMA", "board.op needs a non-negative keyEpoch")
+        val ct = (body["ct"] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
+            ?: return GatewayError("E_SCHEMA", "board.op needs ct")
+        val raw = decodeCiphertext(ct) ?: return GatewayError("E_SCHEMA", "ct is not base64")
+        return when {
+            raw.size < MIN_BOARD_CIPHERTEXT_BYTES -> GatewayError("E_SCHEMA", "ct is shorter than IV and tag")
+            raw.size > MAX_BOARD_CIPHERTEXT_BYTES ->
+                GatewayError("E_SCHEMA", "ct is larger than $MAX_BOARD_CIPHERTEXT_BYTES bytes")
+            else -> null
+        }
+    }
+
+    /** Standard base64 with padding, as the schema's `ct` pattern says; null when it is not. */
+    fun decodeCiphertext(ct: String): ByteArray? =
+        try {
+            Base64.getDecoder().decode(ct)
+        } catch (_: IllegalArgumentException) {
+            null
+        }
 
     /**
      * A valid traceparent is kept so a client's chain survives the hop; anything

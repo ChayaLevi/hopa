@@ -111,6 +111,16 @@ class DeviceRegistry(private val clock: () -> Long = System::currentTimeMillis) 
         }
     }
 
+    /**
+     * Ends every live socket for the device without a tombstone: the device is
+     * still paired and may reconnect at once. Used when its rights change (a
+     * family role change) so the client starts again from what it may read now.
+     */
+    fun disconnect(deviceId: String) {
+        live[deviceId]?.forEach { it.closed.complete(Unit) }
+        sessions[deviceId]?.closed?.complete(Unit)
+    }
+
     fun householdSessions(householdId: String): List<Session> =
         sessions.values
             .filter { it.identity.householdId == householdId }
