@@ -1,0 +1,915 @@
+{
+  "description": "The `preferences` capability (Homemind's preferences.ts). Each case starts with no preferences. `log` holds the `preferences` ops (v2: save, remove, undo) HOPA devices send for what members did; `results` the outcome of each; `after` the preferences after each step. Fields are cleaned as Homemind's server cleans them (spaces collapsed, the scope in lower case). A member without an account is refused as `forbidden` (HOPA's rule for every capability; Homemind says not_found). A save carries `newId` for a new preference, `id` to correct a given one; a save whose words match a saved one (same person and scope) corrects it. An Undo names the op of the change it undoes. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/namespaces.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures)",
+  "seed": "seed.state.json",
+  "cases": [
+    {
+      "name": "save-correct-remove",
+      "description": "Anyone adds; the same words for the same person and scope correct the saved one instead of adding a twin; only a parent makes a soft one hard, corrects or removes a hard one.",
+      "steps": [
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:31:00.000Z",
+          "request": {
+            "op": "save",
+            "input": {
+              "text": "Likes chocolate cake",
+              "aboutMemberId": "noa",
+              "strength": "soft",
+              "scope": "birthday"
+            }
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:32:00.000Z",
+          "request": {
+            "op": "save",
+            "input": {
+              "text": "likes  CHOCOLATE cake!",
+              "reason": "She said so",
+              "aboutMemberId": "noa",
+              "strength": "soft",
+              "scope": "birthday"
+            }
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:33:00.000Z",
+          "request": {
+            "op": "save",
+            "input": {
+              "text": "Likes chocolate cake",
+              "aboutMemberId": "noa",
+              "strength": "hard",
+              "scope": "birthday"
+            }
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:34:00.000Z",
+          "request": {
+            "op": "save",
+            "input": {
+              "text": "No peanuts",
+              "reason": "Allergy",
+              "aboutMemberId": "noa",
+              "strength": "hard"
+            }
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:35:00.000Z",
+          "request": {
+            "op": "remove",
+            "id": "STEP4"
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:36:00.000Z",
+          "request": {
+            "op": "save",
+            "id": "STEP4",
+            "input": {
+              "text": "No peanuts at all",
+              "aboutMemberId": "noa",
+              "strength": "hard"
+            }
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:37:00.000Z",
+          "request": {
+            "op": "save",
+            "id": "STEP4",
+            "input": {
+              "text": "No peanuts or tree nuts",
+              "reason": "Allergy",
+              "aboutMemberId": "noa",
+              "strength": "hard"
+            }
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:38:00.000Z",
+          "request": {
+            "op": "save",
+            "id": "STEP4",
+            "input": {
+              "text": "No peanuts or tree nuts",
+              "reason": "Allergy",
+              "aboutMemberId": "noa",
+              "strength": "hard"
+            }
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:39:00.000Z",
+          "request": {
+            "op": "remove",
+            "id": "STEP1"
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:40:00.000Z",
+          "request": {
+            "op": "remove",
+            "id": "no-such-pref"
+          }
+        },
+        {
+          "by": "noa",
+          "at": "2026-11-11T12:41:00.000Z",
+          "request": {
+            "op": "save",
+            "input": {
+              "text": "Pink",
+              "strength": "soft"
+            }
+          }
+        }
+      ],
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p1",
+            "at": "2026-11-11T12:31:00.000Z",
+            "newId": "pref-mwc3l1uo",
+            "text": "Likes chocolate cake",
+            "aboutMemberId": "noa",
+            "strength": "soft",
+            "scope": "birthday"
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p2",
+            "at": "2026-11-11T12:32:00.000Z",
+            "newId": "pref-op-p2",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "aboutMemberId": "noa",
+            "strength": "soft",
+            "scope": "birthday"
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p3",
+            "at": "2026-11-11T12:33:00.000Z",
+            "newId": "pref-op-p3",
+            "text": "Likes chocolate cake",
+            "aboutMemberId": "noa",
+            "strength": "hard",
+            "scope": "birthday"
+          }
+        },
+        {
+          "seq": 4,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p4",
+            "at": "2026-11-11T12:34:00.000Z",
+            "newId": "pref-mwc3owqo",
+            "text": "No peanuts",
+            "reason": "Allergy",
+            "aboutMemberId": "noa",
+            "strength": "hard"
+          }
+        },
+        {
+          "seq": 5,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "remove",
+            "opId": "op-p5",
+            "at": "2026-11-11T12:35:00.000Z",
+            "id": "pref-mwc3owqo"
+          }
+        },
+        {
+          "seq": 6,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p6",
+            "at": "2026-11-11T12:36:00.000Z",
+            "newId": "pref-op-p6",
+            "id": "pref-mwc3owqo",
+            "text": "No peanuts at all",
+            "aboutMemberId": "noa",
+            "strength": "hard"
+          }
+        },
+        {
+          "seq": 7,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p7",
+            "at": "2026-11-11T12:37:00.000Z",
+            "newId": "pref-op-p7",
+            "id": "pref-mwc3owqo",
+            "text": "No peanuts or tree nuts",
+            "reason": "Allergy",
+            "aboutMemberId": "noa",
+            "strength": "hard"
+          }
+        },
+        {
+          "seq": 8,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p8",
+            "at": "2026-11-11T12:38:00.000Z",
+            "newId": "pref-op-p8",
+            "id": "pref-mwc3owqo",
+            "text": "No peanuts or tree nuts",
+            "reason": "Allergy",
+            "aboutMemberId": "noa",
+            "strength": "hard"
+          }
+        },
+        {
+          "seq": 9,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "remove",
+            "opId": "op-p9",
+            "at": "2026-11-11T12:39:00.000Z",
+            "id": "pref-mwc3l1uo"
+          }
+        },
+        {
+          "seq": 10,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "remove",
+            "opId": "op-p10",
+            "at": "2026-11-11T12:40:00.000Z",
+            "id": "no-such-pref"
+          }
+        },
+        {
+          "seq": 11,
+          "scope": "family",
+          "memberId": "noa",
+          "fromDevice": "noa-tablet",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p11",
+            "at": "2026-11-11T12:41:00.000Z",
+            "newId": "pref-op-p11",
+            "text": "Pink",
+            "strength": "soft"
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "applied"
+        },
+        {
+          "seq": 3,
+          "outcome": "rejected",
+          "code": "forbidden"
+        },
+        {
+          "seq": 4,
+          "outcome": "applied"
+        },
+        {
+          "seq": 5,
+          "outcome": "rejected",
+          "code": "forbidden"
+        },
+        {
+          "seq": 6,
+          "outcome": "rejected",
+          "code": "forbidden"
+        },
+        {
+          "seq": 7,
+          "outcome": "applied"
+        },
+        {
+          "seq": 8,
+          "outcome": "applied"
+        },
+        {
+          "seq": 9,
+          "outcome": "applied"
+        },
+        {
+          "seq": 10,
+          "outcome": "rejected",
+          "code": "not_found"
+        },
+        {
+          "seq": 11,
+          "outcome": "rejected",
+          "code": "forbidden"
+        }
+      ],
+      "after": [
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Likes chocolate cake",
+            "aboutMemberId": "noa",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:31:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "aboutMemberId": "noa",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "aboutMemberId": "noa",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "aboutMemberId": "noa",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          },
+          {
+            "id": "pref-mwc3owqo",
+            "text": "No peanuts",
+            "reason": "Allergy",
+            "aboutMemberId": "noa",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:34:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "aboutMemberId": "noa",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          },
+          {
+            "id": "pref-mwc3owqo",
+            "text": "No peanuts",
+            "reason": "Allergy",
+            "aboutMemberId": "noa",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:34:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "aboutMemberId": "noa",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          },
+          {
+            "id": "pref-mwc3owqo",
+            "text": "No peanuts",
+            "reason": "Allergy",
+            "aboutMemberId": "noa",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:34:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "aboutMemberId": "noa",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          },
+          {
+            "id": "pref-mwc3owqo",
+            "aboutMemberId": "noa",
+            "text": "No peanuts or tree nuts",
+            "reason": "Allergy",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:37:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "aboutMemberId": "noa",
+            "text": "likes CHOCOLATE cake!",
+            "reason": "She said so",
+            "strength": "soft",
+            "scope": "birthday",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          },
+          {
+            "id": "pref-mwc3owqo",
+            "aboutMemberId": "noa",
+            "text": "No peanuts or tree nuts",
+            "reason": "Allergy",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:37:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3owqo",
+            "aboutMemberId": "noa",
+            "text": "No peanuts or tree nuts",
+            "reason": "Allergy",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:37:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3owqo",
+            "aboutMemberId": "noa",
+            "text": "No peanuts or tree nuts",
+            "reason": "Allergy",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:37:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3owqo",
+            "aboutMemberId": "noa",
+            "text": "No peanuts or tree nuts",
+            "reason": "Allergy",
+            "strength": "hard",
+            "createdBy": "mom",
+            "updatedAt": "2026-11-11T12:37:00.000Z"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "undo",
+      "description": "Undo by the member who made the change or a parent; only the latest change to that preference; once.",
+      "steps": [
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:31:00.000Z",
+          "request": {
+            "op": "save",
+            "input": {
+              "text": "Pasta on Mondays",
+              "strength": "soft",
+              "scope": "dinner"
+            }
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:32:00.000Z",
+          "request": {
+            "op": "save",
+            "id": "STEP1",
+            "input": {
+              "text": "Pasta on Tuesdays",
+              "strength": "soft",
+              "scope": "dinner"
+            }
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:33:00.000Z",
+          "request": {
+            "op": "undo",
+            "step": 1
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:34:00.000Z",
+          "request": {
+            "op": "undo",
+            "step": 2
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:35:00.000Z",
+          "request": {
+            "op": "undo",
+            "step": 2
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:36:00.000Z",
+          "request": {
+            "op": "undo",
+            "step": 2
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:37:00.000Z",
+          "request": {
+            "op": "remove",
+            "id": "STEP1"
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:38:00.000Z",
+          "request": {
+            "op": "undo",
+            "step": 7
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:39:00.000Z",
+          "request": {
+            "op": "undo",
+            "step": 7
+          }
+        }
+      ],
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p1",
+            "at": "2026-11-11T12:31:00.000Z",
+            "newId": "pref-mwc3l1uo",
+            "text": "Pasta on Mondays",
+            "strength": "soft",
+            "scope": "dinner"
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "save",
+            "opId": "op-p2",
+            "at": "2026-11-11T12:32:00.000Z",
+            "newId": "pref-op-p2",
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Tuesdays",
+            "strength": "soft",
+            "scope": "dinner"
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "undo",
+            "opId": "op-p3",
+            "at": "2026-11-11T12:33:00.000Z",
+            "targetOpId": "op-p1"
+          }
+        },
+        {
+          "seq": 4,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "undo",
+            "opId": "op-p4",
+            "at": "2026-11-11T12:34:00.000Z",
+            "targetOpId": "op-p2"
+          }
+        },
+        {
+          "seq": 5,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "undo",
+            "opId": "op-p5",
+            "at": "2026-11-11T12:35:00.000Z",
+            "targetOpId": "op-p2"
+          }
+        },
+        {
+          "seq": 6,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "undo",
+            "opId": "op-p6",
+            "at": "2026-11-11T12:36:00.000Z",
+            "targetOpId": "op-p2"
+          }
+        },
+        {
+          "seq": 7,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "remove",
+            "opId": "op-p7",
+            "at": "2026-11-11T12:37:00.000Z",
+            "id": "pref-mwc3l1uo"
+          }
+        },
+        {
+          "seq": 8,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "undo",
+            "opId": "op-p8",
+            "at": "2026-11-11T12:38:00.000Z",
+            "targetOpId": "op-p7"
+          }
+        },
+        {
+          "seq": 9,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "preferences",
+            "nsv": 1,
+            "kind": "undo",
+            "opId": "op-p9",
+            "at": "2026-11-11T12:39:00.000Z",
+            "targetOpId": "op-p7"
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "applied"
+        },
+        {
+          "seq": 2,
+          "outcome": "applied"
+        },
+        {
+          "seq": 3,
+          "outcome": "rejected",
+          "code": "conflict"
+        },
+        {
+          "seq": 4,
+          "outcome": "applied"
+        },
+        {
+          "seq": 5,
+          "outcome": "rejected",
+          "code": "conflict"
+        },
+        {
+          "seq": 6,
+          "outcome": "rejected",
+          "code": "conflict"
+        },
+        {
+          "seq": 7,
+          "outcome": "applied"
+        },
+        {
+          "seq": 8,
+          "outcome": "rejected",
+          "code": "forbidden"
+        },
+        {
+          "seq": 9,
+          "outcome": "applied"
+        }
+      ],
+      "after": [
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Mondays",
+            "strength": "soft",
+            "scope": "dinner",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:31:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Tuesdays",
+            "strength": "soft",
+            "scope": "dinner",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Tuesdays",
+            "strength": "soft",
+            "scope": "dinner",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:32:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Mondays",
+            "strength": "soft",
+            "scope": "dinner",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:31:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Mondays",
+            "strength": "soft",
+            "scope": "dinner",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:31:00.000Z"
+          }
+        ],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Mondays",
+            "strength": "soft",
+            "scope": "dinner",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:31:00.000Z"
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "id": "pref-mwc3l1uo",
+            "text": "Pasta on Mondays",
+            "strength": "soft",
+            "scope": "dinner",
+            "createdBy": "maya",
+            "updatedAt": "2026-11-11T12:31:00.000Z"
+          }
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,941 @@
+{
+  "description": "Where preferences apply and what a hard one rules out (Homemind's preferences.ts): scopeTerms (a scope's concepts and literal words), appliesTo per preference and context, avoidedTerms per hard preference, checkChoice for a few choices in each context, and blockedChange for board changes (with the family's preferences below and the seed's board). Words in English and Chinese. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/namespaces.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures)",
+  "preferences": [
+    {
+      "id": "pref-noa-cake",
+      "aboutMemberId": "noa",
+      "text": "For kindergarten parties, bake a cake",
+      "textZh": "幼儿园聚会时，烤一个蛋糕",
+      "reason": "Noa enjoys baking it with us the most",
+      "reasonZh": "诺娅最喜欢和我们一起烤蛋糕",
+      "strength": "soft",
+      "scope": "kindergarten-party"
+    },
+    {
+      "id": "pref-noa-peanuts",
+      "aboutMemberId": "noa",
+      "text": "No peanuts",
+      "textZh": "不吃花生",
+      "reason": "Allergy",
+      "reasonZh": "过敏",
+      "strength": "hard"
+    },
+    {
+      "id": "pref-maya-veg",
+      "aboutMemberId": "maya",
+      "text": "Doesn't eat meat or fish",
+      "strength": "hard"
+    },
+    {
+      "id": "pref-family-pork",
+      "text": "不吃猪肉、火腿",
+      "strength": "hard"
+    },
+    {
+      "id": "pref-dad-coffee",
+      "aboutMemberId": "dad",
+      "text": "Strong coffee in the morning",
+      "strength": "soft",
+      "scope": "breakfast"
+    },
+    {
+      "id": "pref-noa-kiwi",
+      "aboutMemberId": "noa",
+      "text": "Allergic to kiwi and sesame.",
+      "strength": "hard"
+    },
+    {
+      "id": "pref-gluten",
+      "text": "Gluten-free please",
+      "strength": "hard"
+    }
+  ],
+  "scopeTerms": [
+    {
+      "scope": "kindergarten-party",
+      "concepts": [
+        "kindergarten",
+        "party"
+      ],
+      "literals": []
+    },
+    {
+      "scope": "school lunch",
+      "concepts": [
+        "school",
+        "lunch"
+      ],
+      "literals": []
+    },
+    {
+      "scope": "幼儿园聚会",
+      "concepts": [
+        "kindergarten",
+        "party"
+      ],
+      "literals": []
+    },
+    {
+      "scope": "birthday-party",
+      "concepts": [
+        "party",
+        "birthday"
+      ],
+      "literals": []
+    },
+    {
+      "scope": "swimming",
+      "concepts": [
+        "sport"
+      ],
+      "literals": [
+        "ming"
+      ]
+    },
+    {
+      "scope": "party for grandma",
+      "concepts": [
+        "party"
+      ],
+      "literals": [
+        "grandma"
+      ]
+    },
+    {
+      "scope": "and the events",
+      "concepts": [],
+      "literals": []
+    },
+    {
+      "scope": "violin_lessons",
+      "concepts": [
+        "music"
+      ],
+      "literals": [
+        "lessons"
+      ]
+    },
+    {
+      "scope": "x",
+      "concepts": [],
+      "literals": []
+    }
+  ],
+  "appliesTo": [
+    {
+      "name": "noa-kindergarten-party",
+      "context": {
+        "memberIds": [
+          "noa"
+        ],
+        "texts": [
+          "Kindergarten party",
+          "幼儿园聚会"
+        ]
+      },
+      "applies": [
+        "pref-noa-cake",
+        "pref-noa-peanuts",
+        "pref-family-pork",
+        "pref-noa-kiwi",
+        "pref-gluten"
+      ]
+    },
+    {
+      "name": "noa-swim",
+      "context": {
+        "memberIds": [
+          "noa"
+        ],
+        "texts": [
+          "Noa's swimming lesson"
+        ]
+      },
+      "applies": [
+        "pref-noa-peanuts",
+        "pref-family-pork",
+        "pref-noa-kiwi",
+        "pref-gluten"
+      ]
+    },
+    {
+      "name": "nobody-preschool-celebration",
+      "context": {
+        "memberIds": [],
+        "texts": [
+          "Preschool celebration on Friday"
+        ]
+      },
+      "applies": [
+        "pref-noa-cake",
+        "pref-family-pork",
+        "pref-gluten"
+      ]
+    },
+    {
+      "name": "group-tag",
+      "context": {
+        "memberIds": [],
+        "texts": [
+          "周五水果"
+        ],
+        "tags": [
+          "kindergarten",
+          "party"
+        ]
+      },
+      "applies": [
+        "pref-noa-cake",
+        "pref-family-pork",
+        "pref-gluten"
+      ]
+    },
+    {
+      "name": "dad-breakfast",
+      "context": {
+        "memberIds": [
+          "dad"
+        ],
+        "texts": [
+          "Breakfast"
+        ]
+      },
+      "applies": [
+        "pref-family-pork",
+        "pref-dad-coffee",
+        "pref-gluten"
+      ]
+    },
+    {
+      "name": "family-dinner",
+      "context": {
+        "memberIds": [
+          "mom",
+          "dad",
+          "maya",
+          "noa"
+        ],
+        "texts": [
+          "Family dinner at Grandma's"
+        ]
+      },
+      "applies": [
+        "pref-noa-peanuts",
+        "pref-maya-veg",
+        "pref-family-pork",
+        "pref-noa-kiwi",
+        "pref-gluten"
+      ]
+    }
+  ],
+  "avoidedTerms": [
+    {
+      "id": "pref-noa-cake",
+      "terms": []
+    },
+    {
+      "id": "pref-noa-peanuts",
+      "terms": [
+        "peanut"
+      ]
+    },
+    {
+      "id": "pref-maya-veg",
+      "terms": [
+        "meat",
+        "fish"
+      ]
+    },
+    {
+      "id": "pref-family-pork",
+      "terms": [
+        "pork"
+      ]
+    },
+    {
+      "id": "pref-dad-coffee",
+      "terms": []
+    },
+    {
+      "id": "pref-noa-kiwi",
+      "terms": [
+        "kiwi",
+        "sesame"
+      ]
+    },
+    {
+      "id": "pref-gluten",
+      "terms": [
+        "gluten"
+      ]
+    }
+  ],
+  "checkChoice": [
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "Peanut butter cookies"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-peanuts",
+          "term": "peanut"
+        }
+      ]
+    },
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "Fruit salad with kiwis"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-kiwi",
+          "term": "kiwi"
+        }
+      ]
+    },
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "花生糖"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-peanuts",
+          "term": "花生"
+        }
+      ]
+    },
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "Ham sandwiches"
+      ],
+      "blocked": [
+        {
+          "id": "pref-family-pork",
+          "term": "ham"
+        }
+      ]
+    },
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "Grilled chicken"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "Sesame bars",
+        "芝麻棒"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-kiwi",
+          "term": "sesame"
+        }
+      ]
+    },
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "Wheat bread"
+      ],
+      "blocked": [
+        {
+          "id": "pref-gluten",
+          "term": "wheat"
+        }
+      ]
+    },
+    {
+      "context": "noa-kindergarten-party",
+      "choice": [
+        "Apples"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "Peanut butter cookies"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-peanuts",
+          "term": "peanut"
+        }
+      ]
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "Fruit salad with kiwis"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-kiwi",
+          "term": "kiwi"
+        }
+      ]
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "花生糖"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-peanuts",
+          "term": "花生"
+        }
+      ]
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "Ham sandwiches"
+      ],
+      "blocked": [
+        {
+          "id": "pref-family-pork",
+          "term": "ham"
+        }
+      ]
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "Grilled chicken"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "Sesame bars",
+        "芝麻棒"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-kiwi",
+          "term": "sesame"
+        }
+      ]
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "Wheat bread"
+      ],
+      "blocked": [
+        {
+          "id": "pref-gluten",
+          "term": "wheat"
+        }
+      ]
+    },
+    {
+      "context": "noa-swim",
+      "choice": [
+        "Apples"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "Peanut butter cookies"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "Fruit salad with kiwis"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "花生糖"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "Ham sandwiches"
+      ],
+      "blocked": [
+        {
+          "id": "pref-family-pork",
+          "term": "ham"
+        }
+      ]
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "Grilled chicken"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "Sesame bars",
+        "芝麻棒"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "Wheat bread"
+      ],
+      "blocked": [
+        {
+          "id": "pref-gluten",
+          "term": "wheat"
+        }
+      ]
+    },
+    {
+      "context": "nobody-preschool-celebration",
+      "choice": [
+        "Apples"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "Peanut butter cookies"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "Fruit salad with kiwis"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "花生糖"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "Ham sandwiches"
+      ],
+      "blocked": [
+        {
+          "id": "pref-family-pork",
+          "term": "ham"
+        }
+      ]
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "Grilled chicken"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "Sesame bars",
+        "芝麻棒"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "Wheat bread"
+      ],
+      "blocked": [
+        {
+          "id": "pref-gluten",
+          "term": "wheat"
+        }
+      ]
+    },
+    {
+      "context": "group-tag",
+      "choice": [
+        "Apples"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "Peanut butter cookies"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "Fruit salad with kiwis"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "花生糖"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "Ham sandwiches"
+      ],
+      "blocked": [
+        {
+          "id": "pref-family-pork",
+          "term": "ham"
+        }
+      ]
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "Grilled chicken"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "Sesame bars",
+        "芝麻棒"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "Wheat bread"
+      ],
+      "blocked": [
+        {
+          "id": "pref-gluten",
+          "term": "wheat"
+        }
+      ]
+    },
+    {
+      "context": "dad-breakfast",
+      "choice": [
+        "Apples"
+      ],
+      "blocked": []
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "Peanut butter cookies"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-peanuts",
+          "term": "peanut"
+        }
+      ]
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "Fruit salad with kiwis"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-kiwi",
+          "term": "kiwi"
+        }
+      ]
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "花生糖"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-peanuts",
+          "term": "花生"
+        }
+      ]
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "Ham sandwiches"
+      ],
+      "blocked": [
+        {
+          "id": "pref-family-pork",
+          "term": "ham"
+        }
+      ]
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "Grilled chicken"
+      ],
+      "blocked": [
+        {
+          "id": "pref-maya-veg",
+          "term": "chicken"
+        }
+      ]
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "Sesame bars",
+        "芝麻棒"
+      ],
+      "blocked": [
+        {
+          "id": "pref-noa-kiwi",
+          "term": "sesame"
+        }
+      ]
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "Wheat bread"
+      ],
+      "blocked": [
+        {
+          "id": "pref-gluten",
+          "term": "wheat"
+        }
+      ]
+    },
+    {
+      "context": "family-dinner",
+      "choice": [
+        "Apples"
+      ],
+      "blocked": []
+    }
+  ],
+  "itemContexts": [
+    {
+      "itemId": "pickup-today",
+      "context": {
+        "memberIds": [
+          "noa"
+        ],
+        "texts": [
+          "Kindergarten pickup",
+          "幼儿园接孩子",
+          "Added by Mom"
+        ]
+      }
+    },
+    {
+      "itemId": "swim-today",
+      "context": {
+        "memberIds": [
+          "noa"
+        ],
+        "texts": [
+          "Noa's swimming lesson",
+          "诺娅的游泳课",
+          "Added by Mom"
+        ]
+      }
+    },
+    {
+      "itemId": "piano-tomorrow",
+      "context": {
+        "memberIds": [
+          "maya"
+        ],
+        "texts": [
+          "Maya's piano lesson",
+          "玛雅的钢琴课",
+          "Added by Maya"
+        ]
+      }
+    },
+    {
+      "itemId": "library-books",
+      "context": {
+        "memberIds": [],
+        "texts": [
+          "Return the library books",
+          "还图书馆的书",
+          "Added by Mom"
+        ]
+      }
+    },
+    {
+      "itemId": "pickup-tuesday",
+      "context": {
+        "memberIds": [
+          "noa"
+        ],
+        "texts": [
+          "Kindergarten pickup",
+          "幼儿园接孩子",
+          "Added by Mom"
+        ]
+      }
+    },
+    {
+      "itemId": "family-dinner",
+      "context": {
+        "memberIds": [
+          "mom",
+          "dad",
+          "maya",
+          "noa"
+        ],
+        "texts": [
+          "Family dinner at Grandma's",
+          "去奶奶家吃饭",
+          "Added by Mom"
+        ]
+      }
+    },
+    {
+      "itemId": "family-dinner-flowers",
+      "context": {
+        "memberIds": [
+          "mom",
+          "dad",
+          "maya",
+          "noa"
+        ],
+        "texts": [
+          "Buy flowers for Grandma",
+          "给奶奶买花",
+          "Family dinner at Grandma's",
+          "去奶奶家吃饭",
+          "Added by Mom"
+        ]
+      }
+    },
+    {
+      "itemId": "counselor-meeting",
+      "context": {
+        "memberIds": [
+          "mom",
+          "dad"
+        ],
+        "texts": [
+          "Meeting with Maya's school counselor",
+          "与玛雅的学校辅导老师见面",
+          "Added by Mom"
+        ]
+      }
+    }
+  ],
+  "blockedChange": [
+    {
+      "name": "prep-peanuts-for-dinner",
+      "change": {
+        "kind": "create",
+        "item": {
+          "type": "preparation",
+          "title": "Bring peanut snacks",
+          "parentEventId": "family-dinner",
+          "visibility": "family"
+        }
+      },
+      "blocked": [
+        {
+          "id": "pref-noa-peanuts",
+          "term": "peanut"
+        }
+      ]
+    },
+    {
+      "name": "task-for-maya-chicken",
+      "change": {
+        "kind": "create",
+        "item": {
+          "type": "task",
+          "title": "Cook chicken for Maya",
+          "forMemberIds": [
+            "maya"
+          ],
+          "visibility": "family"
+        }
+      },
+      "blocked": [
+        {
+          "id": "pref-maya-veg",
+          "term": "chicken"
+        }
+      ]
+    },
+    {
+      "name": "event-is-not-a-choice",
+      "change": {
+        "kind": "create",
+        "item": {
+          "type": "event",
+          "title": "Peanut festival",
+          "start": "2026-11-20T10:00:00.000Z",
+          "forMemberIds": [
+            "noa"
+          ],
+          "visibility": "family"
+        }
+      },
+      "blocked": []
+    },
+    {
+      "name": "retitle-flowers-to-ham",
+      "change": {
+        "kind": "edit",
+        "itemId": "family-dinner-flowers",
+        "version": 1,
+        "patch": {
+          "title": "Bring ham"
+        }
+      },
+      "blocked": [
+        {
+          "id": "pref-family-pork",
+          "term": "ham"
+        }
+      ]
+    },
+    {
+      "name": "edit-time-only",
+      "change": {
+        "kind": "edit",
+        "itemId": "family-dinner-flowers",
+        "version": 1,
+        "patch": {
+          "start": "2026-11-15T09:00:00.000Z"
+        }
+      },
+      "blocked": []
+    }
+  ]
+}

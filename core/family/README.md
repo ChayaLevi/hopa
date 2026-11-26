@@ -22,7 +22,14 @@ link live in `core/backend` (`com.hopa.backend.board.client`), and the app wires
 | `reminders` | `ReminderPlanner` (reminders and escalation as a pure function of the board, D5), `PlannedAlert` and its stable key, `QuietHours`, `AlertRouting`, `DueAlerts` | model, scope, time |
 | `availability` | `Availability` (conflicts and who is unavailable, per scope), `ConflictProposals` (the ops that open a conflict) | model, board, scope, time |
 | `namespace` | `Namespace` (one capability: its ops, state, reducer and declared reads), `Namespaces` (what this build knows), `FamilyReducer` (any entry: v1 to the board, v2 to its namespace; keep aside, stop one, or stop all) | model, board |
-| `engine` | `FamilyEngine` (the confirmed log, the outbox and the view; rebase; stop on an unknown op), `EngineSnapshot`, `EngineStore` (versioned local state with migrations) | everything above |
+| `judgment` | `Judgment` (how soon a group message is shown, from fixed rules over its words) | none |
+| `summary` | `Summaries` (each member's evening summary and week ahead, from their own view) | model, scope, time, availability |
+| `situations` | `Situations` ("Noa is sick": what falls through, who is free, the suggestions as board ops) | model, scope, time, availability |
+| `intents` | `IntentValidator`, `ExtractionValidator`, `IntentPrompts`, `ModelJobs`, `ModelPort` (chat intents and extraction, prompts byte for byte; the model behind a port) | model, scope, time |
+| `shopping` | `ShoppingNamespace`, `ShoppingView` (the shopping lists capability; a run's task is a board task it reads) | namespace, model |
+| `preferences` | `PreferencesNamespace`, `PreferenceMatching` (the preferences capability; where one applies; what a hard one blocks) | namespace, model |
+| `rules` | `RulesNamespace`, `RuleSchedule` (standing rules, changed by parents only; running one is the device's ActionExecutor) | namespace, time |
+| `engine` | `FamilyEngine` (the confirmed log, the outbox and the view; rebase; capability-aware stops), `FamilyCapabilities` (what this build knows), `EngineSnapshot`, `EngineStore` (versioned local state with migrations) | everything above |
 
 ## Rules
 

@@ -1,0 +1,907 @@
+{
+  "description": "The `rules` capability (Homemind's rules.ts): a standing rule only prepares an action that waits for a parent's tap; it never acts. In the family scope, visible to everyone, changed only by a parent (every rule here spends money). `log` holds the `rules` ops (v2: create, update, enable, disable, delete, restore); a create carries the whole rule (its action built by the device's own adapter); a restore names the op of the delete it undoes. `after`: the rules after each step. `nextOccurrence`: the next time of a weekly rule strictly after `now`, in the family's zone. Running a rule (sizing, price cap, the card) belongs to the device's actions and ActionExecutor. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/namespaces.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures)",
+  "seed": "seed.state.json",
+  "cases": [
+    {
+      "name": "parents-only",
+      "description": "Only a parent creates, changes, turns on or off, deletes and restores a rule (every rule here spends money); a teen sees it but cannot change it.",
+      "steps": [
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:31:00.000Z",
+          "request": {
+            "action": "create",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "weekday": 5,
+            "time": "18:30",
+            "leadMinutes": 30,
+            "items": [
+              {
+                "id": "margherita-l",
+                "qty": 2
+              }
+            ],
+            "maxPrice": 250
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:32:00.000Z",
+          "request": {
+            "action": "create",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "weekday": 5,
+            "time": "18:30",
+            "leadMinutes": 30,
+            "items": [
+              {
+                "id": "margherita-l",
+                "qty": 2
+              }
+            ],
+            "maxPrice": 250
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:33:00.000Z",
+          "request": {
+            "action": "disable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:34:00.000Z",
+          "request": {
+            "action": "update",
+            "id": "rule-1",
+            "time": "19:00"
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:35:00.000Z",
+          "request": {
+            "action": "update",
+            "id": "rule-1",
+            "time": "19:00"
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:36:00.000Z",
+          "request": {
+            "action": "update",
+            "id": "rule-1",
+            "maxPrice": 300
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:37:00.000Z",
+          "request": {
+            "action": "disable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:38:00.000Z",
+          "request": {
+            "action": "disable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:39:00.000Z",
+          "request": {
+            "action": "enable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:40:00.000Z",
+          "request": {
+            "action": "delete",
+            "id": "rule-1"
+          }
+        },
+        {
+          "by": "maya",
+          "at": "2026-11-11T12:41:00.000Z",
+          "request": {
+            "action": "restore",
+            "step": 10
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:42:00.000Z",
+          "request": {
+            "action": "restore",
+            "step": 10
+          }
+        },
+        {
+          "by": "dad",
+          "at": "2026-11-11T12:43:00.000Z",
+          "request": {
+            "action": "restore",
+            "step": 10
+          }
+        },
+        {
+          "by": "mom",
+          "at": "2026-11-11T12:44:00.000Z",
+          "request": {
+            "action": "enable",
+            "id": "no-such-rule"
+          }
+        }
+      ],
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r1",
+            "at": "2026-11-11T12:31:00.000Z",
+            "kind": "create",
+            "rule": {
+              "id": "rule-op-r1",
+              "title": "Friday pizza night",
+              "titleZh": "周五披萨之夜",
+              "trigger": {
+                "kind": "weekly",
+                "weekday": 5,
+                "time": "18:30",
+                "leadMinutes": 30
+              },
+              "actionTemplate": {
+                "adapter": "pizza",
+                "payload": {
+                  "vendor": "sim-pizza",
+                  "items": [
+                    {
+                      "id": "margherita-l",
+                      "qty": 2
+                    }
+                  ],
+                  "total": 178,
+                  "currency": "CNY"
+                }
+              },
+              "limits": {
+                "maxPrice": 250,
+                "currency": "CNY"
+              },
+              "area": "food"
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r2",
+            "at": "2026-11-11T12:32:00.000Z",
+            "kind": "create",
+            "rule": {
+              "id": "rule-1",
+              "title": "Friday pizza night",
+              "titleZh": "周五披萨之夜",
+              "trigger": {
+                "kind": "weekly",
+                "weekday": 5,
+                "time": "18:30",
+                "leadMinutes": 30
+              },
+              "actionTemplate": {
+                "adapter": "pizza",
+                "payload": {
+                  "vendor": "sim-pizza",
+                  "items": [
+                    {
+                      "id": "margherita-l",
+                      "qty": 2
+                    }
+                  ],
+                  "total": 178,
+                  "currency": "CNY"
+                }
+              },
+              "limits": {
+                "maxPrice": 250,
+                "currency": "CNY"
+              },
+              "area": "food"
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r3",
+            "at": "2026-11-11T12:33:00.000Z",
+            "kind": "disable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "seq": 4,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r4",
+            "at": "2026-11-11T12:34:00.000Z",
+            "kind": "update",
+            "id": "rule-1",
+            "time": "19:00"
+          }
+        },
+        {
+          "seq": 5,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r5",
+            "at": "2026-11-11T12:35:00.000Z",
+            "kind": "update",
+            "id": "rule-1",
+            "time": "19:00"
+          }
+        },
+        {
+          "seq": 6,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r6",
+            "at": "2026-11-11T12:36:00.000Z",
+            "kind": "update",
+            "id": "rule-1",
+            "maxPrice": 300
+          }
+        },
+        {
+          "seq": 7,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r7",
+            "at": "2026-11-11T12:37:00.000Z",
+            "kind": "disable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "seq": 8,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r8",
+            "at": "2026-11-11T12:38:00.000Z",
+            "kind": "disable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "seq": 9,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r9",
+            "at": "2026-11-11T12:39:00.000Z",
+            "kind": "enable",
+            "id": "rule-1"
+          }
+        },
+        {
+          "seq": 10,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r10",
+            "at": "2026-11-11T12:40:00.000Z",
+            "kind": "delete",
+            "id": "rule-1"
+          }
+        },
+        {
+          "seq": 11,
+          "scope": "family",
+          "memberId": "maya",
+          "fromDevice": "maya-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r11",
+            "at": "2026-11-11T12:41:00.000Z",
+            "kind": "restore",
+            "targetOpId": "op-r10"
+          }
+        },
+        {
+          "seq": 12,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r12",
+            "at": "2026-11-11T12:42:00.000Z",
+            "kind": "restore",
+            "targetOpId": "op-r10"
+          }
+        },
+        {
+          "seq": 13,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r13",
+            "at": "2026-11-11T12:43:00.000Z",
+            "kind": "restore",
+            "targetOpId": "op-r10"
+          }
+        },
+        {
+          "seq": 14,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 2,
+            "ns": "rules",
+            "nsv": 1,
+            "opId": "op-r14",
+            "at": "2026-11-11T12:44:00.000Z",
+            "kind": "enable",
+            "id": "no-such-rule"
+          }
+        }
+      ],
+      "results": [
+        {
+          "seq": 1,
+          "outcome": "rejected",
+          "code": "forbidden"
+        },
+        {
+          "seq": 2,
+          "outcome": "applied"
+        },
+        {
+          "seq": 3,
+          "outcome": "rejected",
+          "code": "forbidden"
+        },
+        {
+          "seq": 4,
+          "outcome": "applied"
+        },
+        {
+          "seq": 5,
+          "outcome": "applied"
+        },
+        {
+          "seq": 6,
+          "outcome": "applied"
+        },
+        {
+          "seq": 7,
+          "outcome": "applied"
+        },
+        {
+          "seq": 8,
+          "outcome": "applied"
+        },
+        {
+          "seq": 9,
+          "outcome": "applied"
+        },
+        {
+          "seq": 10,
+          "outcome": "applied"
+        },
+        {
+          "seq": 11,
+          "outcome": "rejected",
+          "code": "forbidden"
+        },
+        {
+          "seq": 12,
+          "outcome": "applied"
+        },
+        {
+          "seq": 13,
+          "outcome": "rejected",
+          "code": "conflict"
+        },
+        {
+          "seq": 14,
+          "outcome": "rejected",
+          "code": "not_found"
+        }
+      ],
+      "after": [
+        [],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "18:30",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 250,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "18:30",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 250,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 250,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 250,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 300,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 300,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": false,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 300,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": false,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 300,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 300,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 300,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ],
+        [
+          {
+            "id": "rule-1",
+            "title": "Friday pizza night",
+            "titleZh": "周五披萨之夜",
+            "trigger": {
+              "kind": "weekly",
+              "weekday": 5,
+              "time": "19:00",
+              "leadMinutes": 30
+            },
+            "actionTemplate": {
+              "adapter": "pizza",
+              "payload": {
+                "vendor": "sim-pizza",
+                "items": [
+                  {
+                    "id": "margherita-l",
+                    "qty": 2
+                  }
+                ],
+                "total": 178,
+                "currency": "CNY"
+              }
+            },
+            "limits": {
+              "maxPrice": 300,
+              "currency": "CNY"
+            },
+            "area": "food",
+            "enabled": true,
+            "createdBy": "mom"
+          }
+        ]
+      ]
+    }
+  ],
+  "nextOccurrence": [
+    {
+      "now": "2026-11-11T12:30:00.000Z",
+      "timezone": "Asia/Jerusalem",
+      "weekday": 5,
+      "time": "18:30",
+      "date": "2026-11-13",
+      "at": "2026-11-13T16:30:00.000Z"
+    },
+    {
+      "now": "2026-11-13T16:29:00.000Z",
+      "timezone": "Asia/Jerusalem",
+      "weekday": 5,
+      "time": "18:30",
+      "date": "2026-11-13",
+      "at": "2026-11-13T16:30:00.000Z"
+    },
+    {
+      "now": "2026-11-13T16:30:00.000Z",
+      "timezone": "Asia/Jerusalem",
+      "weekday": 5,
+      "time": "18:30",
+      "date": "2026-11-20",
+      "at": "2026-11-20T16:30:00.000Z"
+    },
+    {
+      "now": "2026-10-28T12:00:00.000Z",
+      "timezone": "America/New_York",
+      "weekday": 0,
+      "time": "01:30",
+      "date": "2026-11-01",
+      "at": "2026-11-01T05:30:00.000Z"
+    },
+    {
+      "now": "2026-11-11T23:30:00.000Z",
+      "timezone": "Asia/Shanghai",
+      "weekday": 4,
+      "time": "07:00",
+      "date": "2026-11-19",
+      "at": "2026-11-18T23:00:00.000Z"
+    }
+  ]
+}

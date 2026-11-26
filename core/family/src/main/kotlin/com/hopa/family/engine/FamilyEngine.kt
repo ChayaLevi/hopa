@@ -42,7 +42,7 @@ import kotlinx.serialization.json.JsonPrimitive
  */
 class FamilyEngine(
     start: EngineSnapshot,
-    private val namespaces: Namespaces = Namespaces.DEFAULT,
+    private val namespaces: Namespaces = FamilyCapabilities.ALL,
 ) {
     private var confirmed: BoardState = start.confirmed
     private val applied: MutableMap<Scope, Long> = start.applied.toMutableMap()
@@ -284,7 +284,7 @@ class FamilyEngine(
             family: Family,
             memberId: String,
             deviceId: String,
-            namespaces: Namespaces = Namespaces.DEFAULT,
+            namespaces: Namespaces = FamilyCapabilities.ALL,
         ): FamilyEngine = FamilyEngine(
             EngineSnapshot(
                 engineVersion = EngineStore.CURRENT,
