@@ -29,8 +29,10 @@ data class EngineSnapshot(
     val applied: Map<Scope, Long>,
     /** Local proposals, oldest first, not in the log yet. */
     val outbox: List<PendingOp>,
-    /** The seq of an op this version cannot read; nothing from it on is applied (D15). */
+    /** The seq of an op whose envelope version this build cannot read; nothing from it on is applied. */
     val stoppedAt: Long? = null,
-    /** Entries waiting behind [stoppedAt], kept for the version that can read them. */
+    /** Capabilities stopped at an op this build cannot read, with that op's seq (amended D15). */
+    val stoppedNamespaces: Map<String, Long> = emptyMap(),
+    /** Entries kept aside or stopped at, for the version that can read them. */
     val held: List<LogEntry> = emptyList(),
 )

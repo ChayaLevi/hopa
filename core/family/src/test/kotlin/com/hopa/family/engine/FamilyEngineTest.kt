@@ -155,7 +155,7 @@ class FamilyEngineTest {
         assertTrue(dad.view.scopes.family.items.none { it.id == "later" })
         assertEquals(Proposed.UpdateRequired, dad.propose(Scope.FAMILY, task("x", "op-x")))
         val stored = EngineStore().decode(EngineStore().encode(dad.snapshot()))
-        assertEquals(1L, stored.stoppedAt)
+        assertEquals(mapOf("board" to 1L), stored.stoppedNamespaces, "amended D15: the board stops, not everything")
         assertEquals(listOf(1L, 2L), stored.held.map { it.seq })
     }
 
@@ -183,11 +183,11 @@ class FamilyEngineTest {
     @Test
     fun `stored state is migrated forward and a newer one is refused`() {
         val text = EngineStore().encode(engine("mom", both).snapshot())
-        val v2 = EngineStore(migrations = mapOf(1 to { json -> json }), current = 2)
-        val migrated = v2.decode(text)
+        val next = EngineStore(migrations = EngineStore.MIGRATIONS + (2 to { json -> json }), current = 3)
+        val migrated = next.decode(text)
         assertEquals("mom", migrated.memberId)
         assertThrows(NewerEngineVersion::class.java) {
-            EngineStore().decode(text.replace("\"engineVersion\":1", "\"engineVersion\":2"))
+            EngineStore().decode(text.replace("\"engineVersion\":2", "\"engineVersion\":3"))
         }
     }
 

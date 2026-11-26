@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hopa.dev/contracts/schemas/family/op.v2.schema.json",
+  "title": "Family board op, envelope v2 (capability namespaces)",
+  "description": "One op of a capability other than the board itself (shopping, preferences, rules, ...), as the proposing device writes it before encryption. Board ops keep the v1 format (op.v1.schema.json), so devices that know only the board are never stopped by a capability they do not use. `ns` names the capability and `nsv` its op version; both are inside the ciphertext, the server never sees them. The fields after the envelope are the namespace's own (each namespace has its schema next to this one). As in v1: the op carries its own opId, its time and every new id (D10), and no actor (D12). Amended D15: an unknown `ns` is kept aside; a higher `nsv` or an unknown `kind` stops that namespace and the namespaces that read it; any other `v` stops everything.",
+  "type": "object",
+  "required": [
+    "v",
+    "ns",
+    "nsv",
+    "kind",
+    "opId",
+    "at"
+  ],
+  "properties": {
+    "v": {
+      "const": 2
+    },
+    "ns": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,31}$",
+      "not": {
+        "const": "board"
+      },
+      "description": "The capability. `board` is reserved: the board writes v1 ops."
+    },
+    "nsv": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The namespace's op version."
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1
+    },
+    "opId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+    },
+    "at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    }
+  },
+  "additionalProperties": true
+}

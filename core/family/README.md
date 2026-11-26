@@ -21,6 +21,7 @@ link live in `core/backend` (`com.hopa.backend.board.client`), and the app wires
 | `time` | `FamilyClock` (local time in the family's zone, DST gaps and overlaps as Homemind computes them), `Occurrences` (weekly items) | model |
 | `reminders` | `ReminderPlanner` (reminders and escalation as a pure function of the board, D5), `PlannedAlert` and its stable key, `QuietHours`, `AlertRouting`, `DueAlerts` | model, scope, time |
 | `availability` | `Availability` (conflicts and who is unavailable, per scope), `ConflictProposals` (the ops that open a conflict) | model, board, scope, time |
+| `namespace` | `Namespace` (one capability: its ops, state, reducer and declared reads), `Namespaces` (what this build knows), `FamilyReducer` (any entry: v1 to the board, v2 to its namespace; keep aside, stop one, or stop all) | model, board |
 | `engine` | `FamilyEngine` (the confirmed log, the outbox and the view; rebase; stop on an unknown op), `EngineSnapshot`, `EngineStore` (versioned local state with migrations) | everything above |
 
 ## Rules
@@ -37,7 +38,9 @@ link live in `core/backend` (`com.hopa.backend.board.client`), and the app wires
    field inside the op.
 4. **One op, one scope (D11).** An op sees only the items and activity of its own scope.
    A reference across scopes finds nothing.
-5. **Unknown means stop (D15).** An unknown `kind` or a `v` other than 1 stops replay at
-   that seq. Nothing after it is applied.
+5. **Unknown means stop, as narrowly as is safe (D15, amended for capabilities).** An
+   unknown board `kind` stops the board (and what reads it) at that seq; an unknown
+   capability is kept aside; a newer `nsv` stops that capability; any other `v` stops
+   everything. `BoardReplay` (the board fixtures) keeps the original whole-board stop.
 6. **The order of checks is the contract.** It decides which code a bad op gets. See
    `BoardReducer` and `spec/fixtures/family/README.md`.

@@ -117,6 +117,7 @@ object BoardReducer {
             undo = if (draft.undoes == null) UndoPatch(undoEntries) else null,
         )
         val log = partition.activity.map { if (it === draft.undoes) it.copy(undone = Undone(at, actor, opId)) else it }
-        return Partition(items = items, activity = log + activity)
+        // Other namespaces' state in this scope is not the board's to change (D11 for capabilities).
+        return partition.copy(items = items, activity = log + activity)
     }
 }

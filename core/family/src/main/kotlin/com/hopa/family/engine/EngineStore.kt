@@ -1,6 +1,7 @@
 package com.hopa.family.engine
 
 import com.hopa.family.board.BoardJson
+import com.hopa.family.model.BoardState
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.intOrNull
@@ -35,9 +36,20 @@ class EngineStore(
     }
 
     companion object {
-        const val CURRENT = 1
+        const val CURRENT = 2
 
-        /** None yet: v1 is the first stored shape. */
-        val MIGRATIONS: Map<Int, (JsonObject) -> JsonObject> = emptyMap()
+        val MIGRATIONS: Map<Int, (JsonObject) -> JsonObject> = mapOf(1 to ::fromV1)
+
+        /**
+         * v1 stopped everything at the first op it could not read and never moved its cursor past
+         * it. v2 stops per capability. Dropping the v1 stop and its held entries is enough: the
+         * cursor is still before them, so the next pull brings them again and v2 sorts them out.
+         * The board state itself is unchanged; it is marked state schema 2.
+         */
+        private fun fromV1(v1: JsonObject): JsonObject {
+            val confirmed = v1.getValue("confirmed").jsonObject
+            val marked = JsonObject(confirmed + ("schemaVersion" to JsonPrimitive(BoardState.SCHEMA_VERSION)))
+            return JsonObject(v1 - "stoppedAt" - "held" + ("confirmed" to marked))
+        }
     }
 }

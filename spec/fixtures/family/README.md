@@ -88,10 +88,23 @@ them, not the schema cases:
 - the actor is the log entry's `memberId`, and the reducer never reads a clock or mints
   an id (D10, D12).
 
+## Capabilities (namespaces)
+
+Capabilities beyond the board (shopping, preferences, rules, ...) write ops in the v2
+envelope ([`op.v2.schema.json`](../../schemas/family/op.v2.schema.json)): `v: 2`, the
+capability in `ns`, its op version in `nsv`, then the namespace's own fields. Board ops
+keep the v1 format. A device keeps each capability's state under `ns` in the scope
+partition ([`state.v2.schema.json`](../../schemas/family/state.v2.schema.json)). A
+capability writes only its own state and reads only what it declares, so a device that
+does not know it keeps its ops aside and applies everything else (amended D15); a newer
+`nsv` stops only that capability and those that read it.
+
 ## Changing a contract
 
-The files are versioned. Adding a field or an op kind means a new `v` (ops) or
-`schemaVersion` (state), so an older client stops instead of guessing (D15).
+The files are versioned. Adding a field or an op kind to the board means a new `v`;
+adding one to a capability means a new `nsv` for that namespace only. A new capability is
+a new `ns`, which older clients keep aside without stopping. A new stored shape means a new
+state `schemaVersion` (devices migrate their own stored state).
 
 ## Scope helpers
 
