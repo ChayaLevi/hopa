@@ -21,6 +21,7 @@ through the same pure reducer, so these files are what keeps the clients in step
 | `time-zones.json` | The family's clock rules from Homemind's `clock.ts`: local time to instant (daylight-saving gaps and overlaps in five zones), instant to local parts, occurrences of weekly items across clock changes, quiet hours and the evening summary time. |
 | `time-reminders.json` | Reminders and escalation: Homemind's scheduler ticked every minute over a board, and every alert it delivered, with its stable key. A client's planner, run over the same board at the same minutes, must deliver exactly these. |
 | `time-availability.json` | Availability per scope: conflicts, who is unavailable when (per member and per device), and the items after opening the conflicts. |
+| [`cipher/board-cipher.v1.json`](cipher/board-cipher.v1.json) | Board op cipher vectors (ADR-0033 D13): the pinned AAD layout (`"hopa.board.v1"`, then household, scope and op id each as a big-endian u32 length and UTF-8, then the key epoch as a big-endian u32) and sealed bytes, made with Python's `cryptography` package, plus places a ciphertext must not open under. Read by `core/backend` (`BoardCipherTest`). |
 
 ## Board cases
 

@@ -65,12 +65,24 @@ object KeyWrap {
      * Wraps [contentKey] for the device holding the private half of
      * [peerPublicKey]. [ownPrivateKey] is the wrapping device's PKCS#8 key.
      */
-    fun wrapForDevice(contentKey: ByteArray, peerPublicKey: ByteArray, ownPrivateKey: ByteArray): ByteArray {
+    fun wrapForDevice(contentKey: ByteArray, peerPublicKey: ByteArray, ownPrivateKey: ByteArray): ByteArray =
+        wrapForDevice(contentKey, peerPublicKey, ownPrivateKey, INFO)
+
+    /**
+     * The same wrap under another HKDF `info` label, so a key wrapped for one purpose can never be
+     * unwrapped as another. The family board's scope keys use `hopa.scope.key.wrap.v1` (ADR-0033 §3).
+     */
+    internal fun wrapForDevice(
+        contentKey: ByteArray,
+        peerPublicKey: ByteArray,
+        ownPrivateKey: ByteArray,
+        info: ByteArray,
+    ): ByteArray {
         require(contentKey.size == CONTENT_KEY_BYTES) { "content key must be $CONTENT_KEY_BYTES bytes" }
         require(peerPublicKey.size == X25519_BYTES) { "peer public key must be $X25519_BYTES bytes" }
         require(ownPrivateKey.isNotEmpty()) { "private key must not be empty" }
 
-        val kek = deviceKek(peerPublicKey, ownPrivateKey, recipientPublicKey = peerPublicKey)
+        val kek = deviceKek(peerPublicKey, ownPrivateKey, recipientPublicKey = peerPublicKey, info)
         return seal(kek, contentKey)
     }
 
@@ -78,7 +90,16 @@ object KeyWrap {
      * Unwraps a device blob with the recipient's PKCS#8 [ownPrivateKey].
      * [peerPublicKey] is the wrapping (sending) device's raw public key.
      */
-    fun unwrapByDevice(wrapped: ByteArray, peerPublicKey: ByteArray, ownPrivateKey: ByteArray): ByteArray {
+    fun unwrapByDevice(wrapped: ByteArray, peerPublicKey: ByteArray, ownPrivateKey: ByteArray): ByteArray =
+        unwrapByDevice(wrapped, peerPublicKey, ownPrivateKey, INFO)
+
+    /** [unwrapByDevice] for a wrap made under [info]. */
+    internal fun unwrapByDevice(
+        wrapped: ByteArray,
+        peerPublicKey: ByteArray,
+        ownPrivateKey: ByteArray,
+        info: ByteArray,
+    ): ByteArray {
         require(wrapped.size == WRAPPED_BYTES) { "device wrap must be $WRAPPED_BYTES bytes" }
         require(peerPublicKey.size == X25519_BYTES) { "peer public key must be $X25519_BYTES bytes" }
         require(ownPrivateKey.isNotEmpty()) { "private key must not be empty" }
@@ -86,7 +107,7 @@ object KeyWrap {
         // The HKDF salt names the recipient, so recover its public key from the
         // stored PKCS#8 private half rather than making callers pass it twice.
         val recipientPublicKey = publicKeyOf(ownPrivateKey)
-        val kek = deviceKek(peerPublicKey, ownPrivateKey, recipientPublicKey)
+        val kek = deviceKek(peerPublicKey, ownPrivateKey, recipientPublicKey, info)
         val contentKey = open(kek, wrapped, WRAPPED_BYTES, offset = IV_BYTES)
         require(contentKey.size == CONTENT_KEY_BYTES) {
             "device wrap does not carry a $CONTENT_KEY_BYTES-byte content key"
@@ -142,11 +163,12 @@ object KeyWrap {
         peerPublicKey: ByteArray,
         ownPrivateKey: ByteArray,
         recipientPublicKey: ByteArray,
+        info: ByteArray,
     ): ByteArray {
         val sharedSecret = sharedSecret(peerPublicKey, ownPrivateKey)
         val salt = MessageDigest.getInstance("SHA-256")
             .digest(SALT_LABEL + recipientPublicKey)
-        return hkdfSha256(sharedSecret, salt, INFO, CONTENT_KEY_BYTES)
+        return hkdfSha256(sharedSecret, salt, info, CONTENT_KEY_BYTES)
     }
 
     private fun sharedSecret(peerPublicKey: ByteArray, ownPrivateKey: ByteArray): ByteArray = try {

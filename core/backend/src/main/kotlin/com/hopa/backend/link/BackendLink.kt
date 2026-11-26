@@ -22,6 +22,14 @@ interface BackendLink {
         get() = null
         set(@Suppress("UNUSED_PARAMETER") value) {}
 
+    /**
+     * Family board frames: `board.op.ack`, `board.changed`, and `error` (the gateway answers a
+     * `board.op` with one or the other, in send order). Null where the board is not wired.
+     */
+    var onBoard: (suspend (BackendEnvelope) -> Unit)?
+        get() = null
+        set(@Suppress("UNUSED_PARAMETER") value) {}
+
     /** A `task.needs_approval` delivery: show the question, not run a goal. */
     var onApproval: (suspend (BackendEnvelope) -> Unit)?
     fun start(scope: CoroutineScope)

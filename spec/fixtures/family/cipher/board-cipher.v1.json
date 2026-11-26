@@ -1,0 +1,75 @@
+{
+  "description": "Board op cipher vectors (ADR-0033 D13). AES-256-GCM, 128-bit tag; sealed = IV(12) || ciphertext || tag(16). AAD = ASCII \"hopa.board.v1\" || u32be(len) || householdId || u32be(len) || scope || u32be(len) || opId || u32be(keyEpoch), each string as UTF-8. Computed with Python's cryptography package, independently of the Kotlin client. A real client never reuses an IV: these use fixed ones only to be reproducible.",
+  "cases": [
+    {
+      "name": "family-op",
+      "householdId": "0b1c2d3e-0000-4000-8000-00000000aa01",
+      "scope": "family",
+      "opId": "op-buy-milk",
+      "keyEpoch": 0,
+      "keyHex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "ivHex": "000102030405060708090a0b",
+      "plaintext": "{\"v\":1,\"kind\":\"create\",\"opId\":\"op-buy-milk\",\"at\":\"2026-11-11T12:31:00.000Z\",\"item\":{\"id\":\"buy-milk\",\"type\":\"task\",\"title\":\"Buy milk\"}}",
+      "aadHex": "686f70612e626f6172642e76310000002430623163326433652d303030302d343030302d383030302d3030303030303030616130310000000666616d696c790000000b6f702d6275792d6d696c6b00000000",
+      "sealedHex": "000102030405060708090a0bf3e945703acca3dba9113c81df39fc6f2609c9eedabfa3d4a0bbad6faf0f2d009cdaded0354a5c9554bbefa68cdc3a200ed6a5cad5bba0ef9dd46c7246bb819cb305d0e3a36e2a9c76818bb9d331c85212d7dd7b8c6cb0620df0cd1855f3ec7fcd6b990df6c767a17a862515915505515c72a07dba5ffce243cc4509d7d81e8b19fe0e11255d9d1819e3dcbeb5288d362480b0925e21"
+    },
+    {
+      "name": "parents-op-epoch-1",
+      "householdId": "0b1c2d3e-0000-4000-8000-00000000aa01",
+      "scope": "parents",
+      "opId": "5f0c5a7e-3c1b-4c55-9a43-2f1d8e0b7c11",
+      "keyEpoch": 1,
+      "keyHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "ivHex": "a0a1a2a3a4a5a6a7a8a9aaab",
+      "plaintext": "{\"v\":1,\"kind\":\"create\",\"opId\":\"5f0c5a7e-3c1b-4c55-9a43-2f1d8e0b7c11\",\"at\":\"2026-11-11T12:32:00.000Z\",\"item\":{\"id\":\"gift\",\"type\":\"task\",\"title\":\"Buy Maya's gift\"}}",
+      "aadHex": "686f70612e626f6172642e76310000002430623163326433652d303030302d343030302d383030302d30303030303030306161303100000007706172656e74730000002435663063356137652d336331622d346335352d396134332d32663164386530623763313100000001",
+      "sealedHex": "a0a1a2a3a4a5a6a7a8a9aaab9d3a0a0f7ffa2e9d090ce9b72540e2bd02c93864f7956e4ef37e6fe25d915734b44624cace1536106cff35aa244ee0cc72367f2956e3374c276f6f66c140e787d78db44d1c878594d6d8dd2abffcfa97fc3a8695f495a848d4460ca081aa63a4bfb471892f8ce6effbb6246afeaa844c066a43c9b753ef1e03edaaddc430d077e765d10cb860ac3543308ae77768abf4caacd44bf3b183eddabe9d92c6a14009bb654f99a9ef257e3eac5bed231041a5c124"
+    },
+    {
+      "name": "unicode-household",
+      "householdId": "בית-לוי",
+      "scope": "family",
+      "opId": "op-1",
+      "keyEpoch": 0,
+      "keyHex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "ivHex": "ffffffffffffffffffffffff",
+      "plaintext": "{\"title\":\"קניות\"}",
+      "aadHex": "686f70612e626f6172642e76310000000dd791d799d7aa2dd79cd795d7990000000666616d696c79000000046f702d3100000000",
+      "sealedHex": "ffffffffffffffffffffffffc619caec6cfcbdb62ed4bf6263c41f73cecad4188e49b43c4c2435791582d57f37c07c9419b1"
+    },
+    {
+      "name": "empty-plaintext",
+      "householdId": "h",
+      "scope": "parents",
+      "opId": "op-2",
+      "keyEpoch": 7,
+      "keyHex": "1111111111111111111111111111111111111111111111111111111111111111",
+      "ivHex": "222222222222222222222222",
+      "plaintext": "",
+      "aadHex": "686f70612e626f6172642e7631000000016800000007706172656e7473000000046f702d3200000007",
+      "sealedHex": "22222222222222222222222219384e81669ca8b5617f509db1937bdb"
+    }
+  ],
+  "mustNotOpen": [
+    {
+      "name": "another-op-id",
+      "from": "family-op",
+      "opId": "op-buy-milk-2"
+    },
+    {
+      "name": "another-scope",
+      "from": "family-op",
+      "scope": "parents"
+    },
+    {
+      "name": "another-epoch",
+      "from": "parents-op-epoch-1",
+      "keyEpoch": 2
+    },
+    {
+      "name": "another-household",
+      "from": "family-op",
+      "householdId": "0b1c2d3e-0000-4000-8000-00000000aa02"
+    }
+  ]
+}

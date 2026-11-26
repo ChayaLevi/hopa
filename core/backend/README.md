@@ -26,6 +26,7 @@ alphabetical. Three packages, no folder with a single file.
 | package | what lives here | depends on |
 |---|---|---|
 | `link` | `BackendClient`, `BackendLink`, `BackendListener`, `BackendState`, `BackendClose`, `ProcessedTaskLog`, `CatalogClient`: the socket, its lifecycle, the dedup of delivered tasks, and the knowledge fetch | pairing, wire |
+| `board.client` | `BoardLink` (`board.op` over the socket, the pull, head, cursor and scope-key routes), `BoardHttp`, `BoardCipher` (AES-GCM with the D13 AAD, vectors in `spec/fixtures/family/cipher/`), `ScopeKeys` (the parents key wrapped under `hopa.scope.key.wrap.v1`, only to and from verified keys, D16), `KeyFingerprint`: the family board's client side; it moves ciphertext, `core/family` decides what it means | wire, crypto |
 
 `ProcessedTaskLog` and `CatalogClient` sit here because both exist only on top
 of a live connection; giving each its own folder would mean two folders with one

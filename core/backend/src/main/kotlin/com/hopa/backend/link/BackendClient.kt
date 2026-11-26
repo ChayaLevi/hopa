@@ -65,6 +65,9 @@ class BackendClient(
     @Volatile
     override var onApproval: (suspend (BackendEnvelope) -> Unit)? = null
 
+    @Volatile
+    override var onBoard: (suspend (BackendEnvelope) -> Unit)? = null
+
     private var job: Job? = null
 
     /** The connection attempt, not the socket field, owns the hello handshake. */
@@ -190,6 +193,7 @@ class BackendClient(
             "task.create" -> dispatch(frame, onTask)
             "task.needs_approval" -> dispatchApproval(frame)
             "diag.ping", "diag.state", "diag.reset" -> dispatch(frame, onDiagnostic)
+            "board.op.ack", "board.changed", "error" -> dispatch(frame, onBoard)
         }
     }
 

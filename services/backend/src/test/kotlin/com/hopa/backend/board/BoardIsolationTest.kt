@@ -3,6 +3,7 @@ package com.hopa.backend.board
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.board.BoardFrames.online
+import com.hopa.backend.board.client.BoardCipher
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.http.RateLimiter
@@ -54,9 +55,9 @@ class BoardIsolationTest {
         List(count) { index ->
             val opId = UUID.randomUUID().toString()
             val epoch = if (scope == BoardScopes.FAMILY) 0 else 1
-            val ct = BoardTestCipher.seal(
+            val ct = BoardCipher.seal(
                 key,
-                BoardTestCipher.aad(device.householdId, scope, opId, epoch),
+                BoardCipher.Place(device.householdId, scope, opId, epoch),
                 "$marker:$scope:$index".toByteArray(),
             )
             check(service.append(device, opId, scope, epoch, ct) is BoardResult.Ok)
