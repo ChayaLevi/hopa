@@ -2,6 +2,10 @@
 
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
+import com.hopa.backend.board.BoardAck
+import com.hopa.backend.board.BoardGateway
+import com.hopa.backend.board.BoardResult
+import com.hopa.backend.board.BoardService
 import com.hopa.backend.protocol.DecodeResult
 import com.hopa.backend.protocol.Envelope
 import com.hopa.backend.protocol.EnvelopeValidator
@@ -72,6 +76,14 @@ fun Application.gatewayRoutes(
         log = config.log,
         push = config.push,
         traces = config.traces,
+    ),
+    board: BoardGateway = BoardGateway(
+        service = BoardService(config.boardStore),
+        registry = registry,
+        devices = config.devices,
+        push = config.push,
+        traces = config.traces,
+        log = config.log,
     ),
 ) {
     install(WebSockets) {
@@ -188,6 +200,28 @@ fun Application.gatewayRoutes(
                             GatewayCodec.encode(serverFrame("pong", identity.deviceId)),
                         )
 
+                        // One frame in, one answer back, in the order sent: the
+                        // ack (or error) of the n-th op is the n-th answer.
+                        "board.op" -> {
+                            if (!config.messageLimit.allow(identity.deviceId)) {
+                                outgoing.send(
+                                    GatewayCodec.encode(errorFrame("E_RATE", "too many messages", trace = traceparent)),
+                                )
+                                continue
+                            }
+                            when (val result = board.append(identity, envelope, traceparent)) {
+                                is BoardResult.Ok -> outgoing.send(
+                                    GatewayCodec.encode(boardAckFrame(identity.deviceId, result.value, traceparent)),
+                                )
+
+                                is BoardResult.Failed -> outgoing.send(
+                                    GatewayCodec.encode(
+                                        errorFrame(result.error.code, result.error.message, trace = traceparent),
+                                    ),
+                                )
+                            }
+                        }
+
                         else -> {
                             if (envelope.type.startsWith("task.") &&
                                 !config.messageLimit.allow(identity.deviceId)
@@ -277,6 +311,18 @@ private fun acceptedFrame(deviceId: String, task: TaskRecord, duplicate: Boolean
             put("task", task.id)
             put("state", task.state)
             put("duplicate", duplicate)
+        },
+    )
+
+private fun boardAckFrame(deviceId: String, ack: BoardAck, traceparent: String): Envelope =
+    serverFrame(
+        type = "board.op.ack",
+        to = deviceId,
+        trace = traceparent,
+        body = buildJsonObject {
+            put("scope", ack.scope)
+            put("seq", ack.seq)
+            put("duplicate", ack.duplicate)
         },
     )
 

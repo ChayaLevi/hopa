@@ -39,9 +39,19 @@ class FakeFcm : AutoCloseable {
         server.start()
     }
 
-    fun push(projectId: String = "hopa-test"): PushPort = GuardedPush(
+    fun push(
+        projectId: String = "hopa-test",
+        clock: () -> Long = System::currentTimeMillis,
+    ): PushPort = GuardedPush(
         FcmSender(projectId = projectId, baseUrl = url, auth = StaticFcmAuth("test-token")),
+        clock = clock,
     )
+
+    /** The `data` map of every recorded request, in order. */
+    fun dataOf(): List<Map<String, String>> = requests.map { body ->
+        Json.parseToJsonElement(body).jsonObject["message"]!!.jsonObject["data"]!!.jsonObject
+            .mapValues { it.value.jsonPrimitive.content }
+    }
 
     override fun close() {
         server.stop(0)

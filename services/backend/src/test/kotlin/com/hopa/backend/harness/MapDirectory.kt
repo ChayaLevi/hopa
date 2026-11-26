@@ -9,4 +9,7 @@ class MapDirectory(
 ) : DeviceDirectory {
     override fun lookup(deviceId: String, householdId: String): DeviceIdentity? =
         byId[deviceId]?.takeIf { it.householdId == householdId }
+
+    override fun householdDevices(householdId: String): List<DeviceIdentity> =
+        byId.values.filter { it.householdId == householdId }.sortedBy { it.deviceId }
 }
