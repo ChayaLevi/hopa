@@ -1,0 +1,1803 @@
+{
+  "description": "Each member's evening summary (`daily`: what is left of that day and the next) and week ahead (`weekly`: the seven days after), from Homemind's summary.ts summaryFor, as previews (none delivered). `toDo`: theirs (owner), given and not confirmed (unconfirmed), an open item they could take (asked), or a reminder that reached them and got no answer (unanswered, listed in `unanswered`; local in HOPA). `away`: from events that member may see. `everyone`: events in the period not already in toDo. The family's week starts on Monday (`weekStartsOn` 1). Group messages are left out (none here). Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/logic.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures)",
+  "seed": "seed.state.json",
+  "weekStartsOn": 1,
+  "cases": [
+    {
+      "name": "seed",
+      "description": "The seed: Mom owns the swim and the Tuesday pickup, the library task is open, the family dinner, the parents-only counselor meeting.",
+      "log": [],
+      "unanswered": [],
+      "summaries": [
+        {
+          "now": "2026-11-11T12:30:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "swim-today",
+              "why": "owner",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:30:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "why": "owner",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "why": "owner",
+              "date": "2026-11-17"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:30:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:30:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:30:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:30:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T19:30:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "swim-today",
+              "why": "owner",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T19:30:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "why": "owner",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "why": "owner",
+              "date": "2026-11-17"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T19:30:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T19:30:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T19:30:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T19:30:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T21:00:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "swim-today",
+              "why": "owner",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T21:00:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "why": "owner",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "why": "owner",
+              "date": "2026-11-17"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T21:00:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T21:00:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T21:00:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T21:00:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-15",
+          "from": "2026-11-15",
+          "to": "2026-11-16",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-16",
+          "from": "2026-11-16",
+          "to": "2026-11-22",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-tuesday",
+              "why": "owner",
+              "date": "2026-11-17"
+            }
+          ],
+          "away": [],
+          "everyone": []
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-15",
+          "from": "2026-11-15",
+          "to": "2026-11-16",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-16",
+          "from": "2026-11-16",
+          "to": "2026-11-22",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-15",
+          "from": "2026-11-15",
+          "to": "2026-11-16",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-16",
+          "from": "2026-11-16",
+          "to": "2026-11-22",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "away-and-asked",
+      "description": "Mom is at a wedding tomorrow (family) and Dad at a parents-only appointment; Maya is asked to take the piano lesson; Dad owns a task with no date; Dad gets the Tuesday pickup.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-away-and-asked",
+            "at": "2026-11-11T12:31:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "wedding",
+              "type": "event",
+              "title": "Wedding",
+              "start": "2026-11-12T10:00:00.000Z",
+              "end": "2026-11-12T20:00:00.000Z",
+              "unavailableMemberIds": [
+                "mom"
+              ]
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op2-away-and-asked",
+            "at": "2026-11-11T12:32:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "doctor",
+              "type": "event",
+              "title": "Doctor",
+              "start": "2026-11-13T08:00:00.000Z",
+              "end": "2026-11-13T09:00:00.000Z",
+              "unavailableMemberIds": [
+                "dad"
+              ]
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op3-away-and-asked",
+            "at": "2026-11-11T12:33:00.000Z",
+            "kind": "open",
+            "itemId": "piano-tomorrow",
+            "version": 1,
+            "candidateIds": [
+              "maya",
+              "dad"
+            ]
+          }
+        },
+        {
+          "seq": 4,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "opId": "op4-away-and-asked",
+            "at": "2026-11-11T12:34:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "fix-bike",
+              "type": "task",
+              "title": "Fix the bike",
+              "ownership": {
+                "state": "assigned",
+                "ownerId": "dad"
+              }
+            }
+          }
+        },
+        {
+          "seq": 5,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op5-away-and-asked",
+            "at": "2026-11-11T12:35:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-tuesday",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        }
+      ],
+      "unanswered": [],
+      "summaries": [
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "swim-today",
+              "why": "owner",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [
+            {
+              "memberId": "mom",
+              "eventId": "wedding",
+              "date": "2026-11-12",
+              "start": "2026-11-12T10:00:00.000Z",
+              "end": "2026-11-12T20:00:00.000Z"
+            }
+          ],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "wedding",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "why": "owner",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [
+            {
+              "memberId": "mom",
+              "eventId": "wedding",
+              "date": "2026-11-12",
+              "start": "2026-11-12T10:00:00.000Z",
+              "end": "2026-11-12T20:00:00.000Z"
+            },
+            {
+              "memberId": "dad",
+              "eventId": "doctor",
+              "date": "2026-11-13",
+              "start": "2026-11-13T08:00:00.000Z",
+              "end": "2026-11-13T09:00:00.000Z"
+            }
+          ],
+          "everyone": [
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "wedding",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "doctor",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "fix-bike",
+              "why": "owner"
+            }
+          ],
+          "away": [
+            {
+              "memberId": "mom",
+              "eventId": "wedding",
+              "date": "2026-11-12",
+              "start": "2026-11-12T10:00:00.000Z",
+              "end": "2026-11-12T20:00:00.000Z"
+            }
+          ],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "wedding",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "why": "unconfirmed",
+              "date": "2026-11-17"
+            },
+            {
+              "itemId": "fix-bike",
+              "why": "owner"
+            }
+          ],
+          "away": [
+            {
+              "memberId": "mom",
+              "eventId": "wedding",
+              "date": "2026-11-12",
+              "start": "2026-11-12T10:00:00.000Z",
+              "end": "2026-11-12T20:00:00.000Z"
+            },
+            {
+              "memberId": "dad",
+              "eventId": "doctor",
+              "date": "2026-11-13",
+              "start": "2026-11-13T08:00:00.000Z",
+              "end": "2026-11-13T09:00:00.000Z"
+            }
+          ],
+          "everyone": [
+            {
+              "itemId": "wedding",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "doctor",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [
+            {
+              "memberId": "mom",
+              "eventId": "wedding",
+              "date": "2026-11-12",
+              "start": "2026-11-12T10:00:00.000Z",
+              "end": "2026-11-12T20:00:00.000Z"
+            }
+          ],
+          "everyone": [
+            {
+              "itemId": "swim-today",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "wedding",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [
+            {
+              "memberId": "mom",
+              "eventId": "wedding",
+              "date": "2026-11-12",
+              "start": "2026-11-12T10:00:00.000Z",
+              "end": "2026-11-12T20:00:00.000Z"
+            }
+          ],
+          "everyone": [
+            {
+              "itemId": "wedding",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-15",
+          "from": "2026-11-15",
+          "to": "2026-11-16",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-16",
+          "from": "2026-11-16",
+          "to": "2026-11-22",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-15",
+          "from": "2026-11-15",
+          "to": "2026-11-16",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "fix-bike",
+              "why": "owner"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-16",
+          "from": "2026-11-16",
+          "to": "2026-11-22",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-tuesday",
+              "why": "unconfirmed",
+              "date": "2026-11-17"
+            },
+            {
+              "itemId": "fix-bike",
+              "why": "owner"
+            }
+          ],
+          "away": [],
+          "everyone": []
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-15",
+          "from": "2026-11-15",
+          "to": "2026-11-16",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-15T19:00:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-16",
+          "from": "2026-11-16",
+          "to": "2026-11-22",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "weekly-and-unanswered",
+      "description": "A weekly event, a done item, and a reminder Maya did not answer: it is listed as unanswered even with no occurrence in the period.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-weekly-and-unanswered",
+            "at": "2026-11-11T12:31:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "choir",
+              "type": "event",
+              "title": "Choir",
+              "start": "2026-11-10T15:00:00.000Z",
+              "end": "2026-11-10T16:00:00.000Z",
+              "recurrence": {
+                "freq": "weekly",
+                "byWeekday": [
+                  2,
+                  4
+                ]
+              }
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op2-weekly-and-unanswered",
+            "at": "2026-11-11T12:32:00.000Z",
+            "kind": "done",
+            "itemId": "swim-today",
+            "version": 1
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op3-weekly-and-unanswered",
+            "at": "2026-11-11T12:33:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "old-form",
+              "type": "task",
+              "title": "Sign the form",
+              "start": "2026-11-09T08:00:00.000Z",
+              "ownership": {
+                "state": "assigned",
+                "ownerId": "maya"
+              }
+            }
+          }
+        }
+      ],
+      "unanswered": [
+        {
+          "itemId": "old-form",
+          "memberIds": [
+            "maya"
+          ]
+        }
+      ],
+      "summaries": [
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "why": "owner",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "why": "owner",
+              "date": "2026-11-17"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-11",
+          "from": "2026-11-11",
+          "to": "2026-11-12",
+          "scheduledAt": "2026-11-11T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "old-form",
+              "why": "unanswered",
+              "date": "2026-11-09"
+            },
+            {
+              "itemId": "pickup-today",
+              "why": "asked",
+              "date": "2026-11-11"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-11T12:40:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-18",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-12T18:00:00.000Z",
+          "memberId": "mom",
+          "kind": "daily",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-13",
+          "scheduledAt": "2026-11-12T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "why": "owner",
+              "date": "2026-11-13"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-12T18:00:00.000Z",
+          "memberId": "mom",
+          "kind": "weekly",
+          "date": "2026-11-13",
+          "from": "2026-11-13",
+          "to": "2026-11-19",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "counselor-meeting",
+              "why": "owner",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "why": "owner",
+              "date": "2026-11-17"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "choir",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-12T18:00:00.000Z",
+          "memberId": "dad",
+          "kind": "daily",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-13",
+          "scheduledAt": "2026-11-12T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "counselor-meeting",
+              "date": "2026-11-13"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-12T18:00:00.000Z",
+          "memberId": "dad",
+          "kind": "weekly",
+          "date": "2026-11-13",
+          "from": "2026-11-13",
+          "to": "2026-11-19",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "family-dinner-flowers",
+              "why": "asked",
+              "date": "2026-11-15"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "counselor-meeting",
+              "date": "2026-11-13"
+            },
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "choir",
+              "date": "2026-11-17"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-12T18:00:00.000Z",
+          "memberId": "maya",
+          "kind": "daily",
+          "date": "2026-11-12",
+          "from": "2026-11-12",
+          "to": "2026-11-13",
+          "scheduledAt": "2026-11-12T18:00:00.000Z",
+          "toDo": [
+            {
+              "itemId": "old-form",
+              "why": "unanswered",
+              "date": "2026-11-09"
+            },
+            {
+              "itemId": "library-books",
+              "why": "asked",
+              "date": "2026-11-12"
+            }
+          ],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "choir",
+              "date": "2026-11-12"
+            },
+            {
+              "itemId": "piano-tomorrow",
+              "date": "2026-11-12"
+            }
+          ]
+        },
+        {
+          "now": "2026-11-12T18:00:00.000Z",
+          "memberId": "maya",
+          "kind": "weekly",
+          "date": "2026-11-13",
+          "from": "2026-11-13",
+          "to": "2026-11-19",
+          "scheduledAt": "2026-11-15T18:00:00.000Z",
+          "toDo": [],
+          "away": [],
+          "everyone": [
+            {
+              "itemId": "family-dinner",
+              "date": "2026-11-15"
+            },
+            {
+              "itemId": "choir",
+              "date": "2026-11-17"
+            },
+            {
+              "itemId": "pickup-tuesday",
+              "date": "2026-11-17"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "description": "Message judgment (Homemind's judgment.ts, judgeText): the tier and the reason from fixed rules over the message's words, never the model, and the words matched (`quote`, absent for no-date). Rules in order: urgent-words (urgent), sign-up (timed), not-urgent (summary), soon (timed), next-week (summary), a weekday (soon, timed); none: no-date (summary). The texts include the places a port could slip: JavaScript's \\b is ASCII-only, \\s includes U+3000, /i, ^ with /m. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/logic.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures)",
+  "cases": [
+    {
+      "text": "明天停课，请家长注意",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "停课"
+    },
+    {
+      "text": "Pickup moved to 3pm, urgent!",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "urgent"
+    },
+    {
+      "text": "Photos from today are up",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "today"
+    },
+    {
+      "text": "Bring a hat on Friday",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "Friday"
+    },
+    {
+      "text": "下周三交作品，不急",
+      "tier": "summary",
+      "reason": "not-urgent",
+      "quote": "不急"
+    },
+    {
+      "text": "下周一前请把回执交回",
+      "tier": "summary",
+      "reason": "next-week",
+      "quote": "下周"
+    },
+    {
+      "text": "谢谢大家的配合",
+      "tier": "summary",
+      "reason": "no-date"
+    },
+    {
+      "text": "紧急通知：明天提前放学",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "紧急"
+    },
+    {
+      "text": "Please reply ASAP",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "ASAP"
+    },
+    {
+      "text": "This is an EMERGENCY",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "EMERGENCY"
+    },
+    {
+      "text": "Come right away please",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "right away"
+    },
+    {
+      "text": "#接龙 周五水果\n1. 张妈妈 苹果",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "#接龙"
+    },
+    {
+      "text": "接龙\n1. 苹果",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "接龙"
+    },
+    {
+      "text": "Sign-up sheet for the picnic",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "Sign-up sheet"
+    },
+    {
+      "text": "sign up list is open",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "sign up list"
+    },
+    {
+      "text": "No rush, reply whenever you can",
+      "tier": "summary",
+      "reason": "not-urgent",
+      "quote": "No rush"
+    },
+    {
+      "text": "不着急，周五前回复就行",
+      "tier": "summary",
+      "reason": "not-urgent",
+      "quote": "不着急"
+    },
+    {
+      "text": "Party tomorrow at 4",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "tomorrow"
+    },
+    {
+      "text": "今晚记得签字",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "今晚"
+    },
+    {
+      "text": "This week we read chapter 3",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "This week"
+    },
+    {
+      "text": "Next week: museum trip",
+      "tier": "summary",
+      "reason": "next-week",
+      "quote": "Next week"
+    },
+    {
+      "text": "下个月开家长会",
+      "tier": "summary",
+      "reason": "next-week",
+      "quote": "下个月"
+    },
+    {
+      "text": "星期五带水壶",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "星期五"
+    },
+    {
+      "text": "周日不上课",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "周日"
+    },
+    {
+      "text": "See you on Monday",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "Monday"
+    },
+    {
+      "text": "Thanks everyone",
+      "tier": "summary",
+      "reason": "no-date"
+    },
+    {
+      "text": "",
+      "tier": "summary",
+      "reason": "no-date"
+    },
+    {
+      "text": "不着急，但是明天要交",
+      "tier": "summary",
+      "reason": "not-urgent",
+      "quote": "不着急"
+    },
+    {
+      "text": "紧急！不着急的事情以后再说",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "紧急"
+    },
+    {
+      "text": "#接龙 明天的水果",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "#接龙"
+    },
+    {
+      "text": "next week, urgent",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "urgent"
+    },
+    {
+      "text": "asap吗",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "asap"
+    },
+    {
+      "text": "今天urgent事项",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "urgent"
+    },
+    {
+      "text": "urgently needed",
+      "tier": "summary",
+      "reason": "no-date"
+    },
+    {
+      "text": "todays plan",
+      "tier": "summary",
+      "reason": "no-date"
+    },
+    {
+      "text": "Mondays are busy",
+      "tier": "summary",
+      "reason": "no-date"
+    },
+    {
+      "text": "emergency.",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "emergency"
+    },
+    {
+      "text": "　接龙 周五水果",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "接龙"
+    },
+    {
+      "text": "\t接龙",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "接龙"
+    },
+    {
+      "text": "大家好\n  接龙\n1. 苹果",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "接龙"
+    },
+    {
+      "text": "Let us 接龙 later",
+      "tier": "summary",
+      "reason": "no-date"
+    },
+    {
+      "text": "URGENT",
+      "tier": "urgent",
+      "reason": "urgent-words",
+      "quote": "URGENT"
+    },
+    {
+      "text": "Tomorrow",
+      "tier": "timed",
+      "reason": "soon",
+      "quote": "Tomorrow"
+    },
+    {
+      "text": "NEXT WEEK",
+      "tier": "summary",
+      "reason": "next-week",
+      "quote": "NEXT WEEK"
+    },
+    {
+      "text": "Sign up list ",
+      "tier": "timed",
+      "reason": "sign-up",
+      "quote": "Sign up list"
+    },
+    {
+      "text": "right   away",
+      "tier": "summary",
+      "reason": "no-date"
+    }
+  ]
+}

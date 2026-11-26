@@ -1,0 +1,2254 @@
+{
+  "description": "\"Noa is sick\" (Homemind's situations.ts). For each report: `refused` with Homemind's code, or `plan` (planSituation: the suggestions from the reporter's view, the parents who are free, who is away), `stayHome` (the task startSituation creates for a sick child, open to the free parents, or to all parents when none is; proposed when `mayWrite` is false), and `itemsAfter` (every item, by scope, after the stay-home task and after applying every suggestion as the reporter). Cards to the teacher or a babysitter are simulated services and are left out. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/logic.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures)",
+  "seed": "seed.state.json",
+  "cases": [
+    {
+      "name": "noa-sick-today",
+      "description": "Noa (a child) is sick today. Her pickup and drop-off are cancelled, the dentist is postponed a week, ballet is skipped once, the parents-only therapist is a suggestion only for a parent's view, an event that already started is left alone, and both parents are asked who stays home.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-noa-sick-today",
+            "at": "2026-11-11T12:21:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "noa-ballet",
+              "type": "event",
+              "title": "Ballet",
+              "start": "2026-11-04T14:00:00.000Z",
+              "end": "2026-11-04T15:00:00.000Z",
+              "forMemberIds": [
+                "noa"
+              ],
+              "recurrence": {
+                "freq": "weekly",
+                "byWeekday": [
+                  3
+                ]
+              }
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op2-noa-sick-today",
+            "at": "2026-11-11T12:22:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "noa-dentist",
+              "type": "event",
+              "title": "Dentist",
+              "start": "2026-11-11T16:00:00.000Z",
+              "end": "2026-11-11T16:30:00.000Z",
+              "forMemberIds": [
+                "noa"
+              ]
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op3-noa-sick-today",
+            "at": "2026-11-11T12:23:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "noa-dropoff",
+              "type": "event",
+              "title": "Drop-off at the party",
+              "start": "2026-11-11T17:00:00.000Z",
+              "forMemberIds": [
+                "noa"
+              ]
+            }
+          }
+        },
+        {
+          "seq": 4,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op4-noa-sick-today",
+            "at": "2026-11-11T12:24:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "noa-therapist",
+              "type": "event",
+              "title": "Speech therapist",
+              "start": "2026-11-11T17:30:00.000Z",
+              "end": "2026-11-11T18:00:00.000Z",
+              "forMemberIds": [
+                "noa"
+              ]
+            }
+          }
+        },
+        {
+          "seq": 5,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op5-noa-sick-today",
+            "at": "2026-11-11T12:25:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "early-event",
+              "type": "event",
+              "title": "Morning show",
+              "start": "2026-11-11T06:00:00.000Z",
+              "end": "2026-11-11T07:00:00.000Z",
+              "forMemberIds": [
+                "noa"
+              ]
+            }
+          }
+        }
+      ],
+      "reports": [
+        {
+          "reporter": "mom",
+          "memberId": "noa",
+          "date": "2026-11-11",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "plan": {
+            "proposals": [
+              {
+                "id": "p1",
+                "status": "pending",
+                "kind": "skip",
+                "itemId": "noa-ballet",
+                "start": "2026-11-04T14:00:00.000Z",
+                "date": "2026-11-11"
+              },
+              {
+                "id": "p2",
+                "status": "pending",
+                "kind": "cancel",
+                "itemId": "pickup-today",
+                "start": "2026-11-11T14:30:00.000Z"
+              },
+              {
+                "id": "p3",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "swim-today",
+                "start": "2026-11-11T15:30:00.000Z",
+                "newStart": "2026-11-18T15:30:00.000Z",
+                "newEnd": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "p4",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "noa-dentist",
+                "start": "2026-11-11T16:00:00.000Z",
+                "newStart": "2026-11-18T16:00:00.000Z",
+                "newEnd": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "p5",
+                "status": "pending",
+                "kind": "cancel",
+                "itemId": "noa-dropoff",
+                "start": "2026-11-11T17:00:00.000Z"
+              },
+              {
+                "id": "p6",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "noa-therapist",
+                "start": "2026-11-11T17:30:00.000Z",
+                "newStart": "2026-11-18T17:30:00.000Z",
+                "newEnd": "2026-11-18T18:00:00.000Z"
+              }
+            ],
+            "available": [
+              "mom",
+              "dad"
+            ],
+            "away": [],
+            "parents": [
+              "mom",
+              "dad"
+            ]
+          },
+          "stayHome": {
+            "id": "item-mwc3jrk0",
+            "type": "task",
+            "title": "Stay home with Noa",
+            "forMemberIds": [
+              "noa"
+            ],
+            "ownership": {
+              "state": "open",
+              "candidateIds": [
+                "mom",
+                "dad"
+              ]
+            },
+            "sensitive": false,
+            "importance": "normal",
+            "unavailableMemberIds": [],
+            "status": "open",
+            "source": {
+              "kind": "chat",
+              "label": "Mom"
+            },
+            "createdBy": "mom",
+            "version": 1,
+            "notes": "Noa is sick (reported by Mom).",
+            "start": "2026-11-10T22:00:00.000Z",
+            "allDay": true,
+            "titleZh": "在家照顾诺娅"
+          },
+          "applied": [
+            "p1",
+            "p2",
+            "p3",
+            "p4",
+            "p5",
+            "p6"
+          ],
+          "failed": [],
+          "itemsAfter": {
+            "family": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-18T15:30:00.000Z",
+                "end": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              },
+              {
+                "id": "noa-ballet",
+                "type": "event",
+                "title": "Ballet",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-04T14:00:00.000Z",
+                "end": "2026-11-04T15:00:00.000Z",
+                "recurrence": {
+                  "freq": "weekly",
+                  "byWeekday": [
+                    3
+                  ],
+                  "exceptions": [
+                    "2026-11-11"
+                  ]
+                }
+              },
+              {
+                "id": "noa-dentist",
+                "type": "event",
+                "title": "Dentist",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-18T16:00:00.000Z",
+                "end": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "noa-dropoff",
+                "type": "event",
+                "title": "Drop-off at the party",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-11T17:00:00.000Z"
+              },
+              {
+                "id": "early-event",
+                "type": "event",
+                "title": "Morning show",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-11T06:00:00.000Z",
+                "end": "2026-11-11T07:00:00.000Z"
+              },
+              {
+                "id": "item-mwc3jrk0",
+                "type": "task",
+                "title": "Stay home with Noa",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "chat",
+                  "label": "Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "notes": "Noa is sick (reported by Mom).",
+                "start": "2026-11-10T22:00:00.000Z",
+                "allDay": true,
+                "titleZh": "在家照顾诺娅"
+              }
+            ],
+            "parents": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              },
+              {
+                "id": "noa-therapist",
+                "type": "event",
+                "title": "Speech therapist",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-18T17:30:00.000Z",
+                "end": "2026-11-18T18:00:00.000Z"
+              }
+            ]
+          }
+        },
+        {
+          "reporter": "maya",
+          "memberId": "noa",
+          "date": "2026-11-11",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "plan": {
+            "proposals": [
+              {
+                "id": "p1",
+                "status": "pending",
+                "kind": "skip",
+                "itemId": "noa-ballet",
+                "start": "2026-11-04T14:00:00.000Z",
+                "date": "2026-11-11"
+              },
+              {
+                "id": "p2",
+                "status": "pending",
+                "kind": "cancel",
+                "itemId": "pickup-today",
+                "start": "2026-11-11T14:30:00.000Z"
+              },
+              {
+                "id": "p3",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "swim-today",
+                "start": "2026-11-11T15:30:00.000Z",
+                "newStart": "2026-11-18T15:30:00.000Z",
+                "newEnd": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "p4",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "noa-dentist",
+                "start": "2026-11-11T16:00:00.000Z",
+                "newStart": "2026-11-18T16:00:00.000Z",
+                "newEnd": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "p5",
+                "status": "pending",
+                "kind": "cancel",
+                "itemId": "noa-dropoff",
+                "start": "2026-11-11T17:00:00.000Z"
+              }
+            ],
+            "available": [
+              "mom",
+              "dad"
+            ],
+            "away": [],
+            "parents": [
+              "mom",
+              "dad"
+            ]
+          },
+          "stayHome": {
+            "id": "item-mwc3jrk0",
+            "type": "task",
+            "title": "Stay home with Noa",
+            "forMemberIds": [
+              "noa"
+            ],
+            "ownership": {
+              "state": "open",
+              "candidateIds": [
+                "mom",
+                "dad"
+              ]
+            },
+            "sensitive": false,
+            "importance": "normal",
+            "unavailableMemberIds": [],
+            "status": "open",
+            "source": {
+              "kind": "chat",
+              "label": "Maya"
+            },
+            "createdBy": "maya",
+            "version": 1,
+            "notes": "Noa is sick (reported by Maya).",
+            "start": "2026-11-10T22:00:00.000Z",
+            "allDay": true,
+            "titleZh": "在家照顾诺娅"
+          },
+          "applied": [
+            "p1",
+            "p2",
+            "p3",
+            "p4",
+            "p5"
+          ],
+          "failed": [],
+          "itemsAfter": {
+            "family": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-18T15:30:00.000Z",
+                "end": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              },
+              {
+                "id": "noa-ballet",
+                "type": "event",
+                "title": "Ballet",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-04T14:00:00.000Z",
+                "end": "2026-11-04T15:00:00.000Z",
+                "recurrence": {
+                  "freq": "weekly",
+                  "byWeekday": [
+                    3
+                  ],
+                  "exceptions": [
+                    "2026-11-11"
+                  ]
+                }
+              },
+              {
+                "id": "noa-dentist",
+                "type": "event",
+                "title": "Dentist",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-18T16:00:00.000Z",
+                "end": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "noa-dropoff",
+                "type": "event",
+                "title": "Drop-off at the party",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-11T17:00:00.000Z"
+              },
+              {
+                "id": "early-event",
+                "type": "event",
+                "title": "Morning show",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-11T06:00:00.000Z",
+                "end": "2026-11-11T07:00:00.000Z"
+              },
+              {
+                "id": "item-mwc3jrk0",
+                "type": "task",
+                "title": "Stay home with Noa",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "chat",
+                  "label": "Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "notes": "Noa is sick (reported by Maya).",
+                "start": "2026-11-10T22:00:00.000Z",
+                "allDay": true,
+                "titleZh": "在家照顾诺娅"
+              }
+            ],
+            "parents": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              },
+              {
+                "id": "noa-therapist",
+                "type": "event",
+                "title": "Speech therapist",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-11T17:30:00.000Z",
+                "end": "2026-11-11T18:00:00.000Z"
+              }
+            ]
+          }
+        },
+        {
+          "reporter": "dad",
+          "memberId": "noa",
+          "date": "2026-11-11",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": false,
+          "plan": {
+            "proposals": [
+              {
+                "id": "p1",
+                "status": "pending",
+                "kind": "skip",
+                "itemId": "noa-ballet",
+                "start": "2026-11-04T14:00:00.000Z",
+                "date": "2026-11-11"
+              },
+              {
+                "id": "p2",
+                "status": "pending",
+                "kind": "cancel",
+                "itemId": "pickup-today",
+                "start": "2026-11-11T14:30:00.000Z"
+              },
+              {
+                "id": "p3",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "swim-today",
+                "start": "2026-11-11T15:30:00.000Z",
+                "newStart": "2026-11-18T15:30:00.000Z",
+                "newEnd": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "p4",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "noa-dentist",
+                "start": "2026-11-11T16:00:00.000Z",
+                "newStart": "2026-11-18T16:00:00.000Z",
+                "newEnd": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "p5",
+                "status": "pending",
+                "kind": "cancel",
+                "itemId": "noa-dropoff",
+                "start": "2026-11-11T17:00:00.000Z"
+              },
+              {
+                "id": "p6",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "noa-therapist",
+                "start": "2026-11-11T17:30:00.000Z",
+                "newStart": "2026-11-18T17:30:00.000Z",
+                "newEnd": "2026-11-18T18:00:00.000Z"
+              }
+            ],
+            "available": [
+              "mom",
+              "dad"
+            ],
+            "away": [],
+            "parents": [
+              "mom",
+              "dad"
+            ]
+          },
+          "stayHome": {
+            "id": "item-mwc3jrk0",
+            "type": "task",
+            "title": "Stay home with Noa",
+            "forMemberIds": [
+              "noa"
+            ],
+            "ownership": {
+              "state": "open",
+              "candidateIds": [
+                "mom",
+                "dad"
+              ]
+            },
+            "sensitive": false,
+            "importance": "normal",
+            "unavailableMemberIds": [],
+            "status": "proposed",
+            "source": {
+              "kind": "chat",
+              "label": "Dad"
+            },
+            "createdBy": "dad",
+            "version": 1,
+            "notes": "Noa is sick (reported by Dad).",
+            "start": "2026-11-10T22:00:00.000Z",
+            "allDay": true,
+            "titleZh": "在家照顾诺娅"
+          },
+          "applied": [
+            "p1",
+            "p2",
+            "p3",
+            "p4",
+            "p5",
+            "p6"
+          ],
+          "failed": [],
+          "itemsAfter": {
+            "family": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-18T15:30:00.000Z",
+                "end": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              },
+              {
+                "id": "noa-ballet",
+                "type": "event",
+                "title": "Ballet",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-04T14:00:00.000Z",
+                "end": "2026-11-04T15:00:00.000Z",
+                "recurrence": {
+                  "freq": "weekly",
+                  "byWeekday": [
+                    3
+                  ],
+                  "exceptions": [
+                    "2026-11-11"
+                  ]
+                }
+              },
+              {
+                "id": "noa-dentist",
+                "type": "event",
+                "title": "Dentist",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-18T16:00:00.000Z",
+                "end": "2026-11-18T16:30:00.000Z"
+              },
+              {
+                "id": "noa-dropoff",
+                "type": "event",
+                "title": "Drop-off at the party",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-11T17:00:00.000Z"
+              },
+              {
+                "id": "early-event",
+                "type": "event",
+                "title": "Morning show",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-11T06:00:00.000Z",
+                "end": "2026-11-11T07:00:00.000Z"
+              },
+              {
+                "id": "item-mwc3jrk0",
+                "type": "task",
+                "title": "Stay home with Noa",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "proposed",
+                "source": {
+                  "kind": "chat",
+                  "label": "Dad"
+                },
+                "createdBy": "dad",
+                "version": 1,
+                "notes": "Noa is sick (reported by Dad).",
+                "start": "2026-11-10T22:00:00.000Z",
+                "allDay": true,
+                "titleZh": "在家照顾诺娅"
+              }
+            ],
+            "parents": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              },
+              {
+                "id": "noa-therapist",
+                "type": "event",
+                "title": "Speech therapist",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-18T17:30:00.000Z",
+                "end": "2026-11-18T18:00:00.000Z"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "maya-sick-tomorrow",
+      "description": "Maya (a teen) is sick tomorrow: her piano lesson is postponed, the task she owns opens to the others; no stay-home task for a teen.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-maya-sick-tomorrow",
+            "at": "2026-11-11T12:21:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "maya-walk-dog",
+              "type": "task",
+              "title": "Walk the dog",
+              "start": "2026-11-12T16:00:00.000Z",
+              "ownership": {
+                "state": "assigned",
+                "ownerId": "maya"
+              }
+            }
+          }
+        }
+      ],
+      "reports": [
+        {
+          "reporter": "mom",
+          "memberId": "maya",
+          "date": "2026-11-12",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "plan": {
+            "proposals": [
+              {
+                "id": "p1",
+                "status": "pending",
+                "kind": "postpone",
+                "itemId": "piano-tomorrow",
+                "start": "2026-11-12T15:00:00.000Z",
+                "newStart": "2026-11-19T15:00:00.000Z",
+                "newEnd": "2026-11-19T16:00:00.000Z"
+              },
+              {
+                "id": "p2",
+                "status": "pending",
+                "kind": "open",
+                "itemId": "maya-walk-dog",
+                "start": "2026-11-12T16:00:00.000Z",
+                "candidateIds": [
+                  "mom",
+                  "dad"
+                ]
+              }
+            ],
+            "available": [
+              "mom",
+              "dad"
+            ],
+            "away": [],
+            "parents": [
+              "mom",
+              "dad"
+            ]
+          },
+          "applied": [
+            "p1",
+            "p2"
+          ],
+          "failed": [],
+          "itemsAfter": {
+            "family": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 2,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-19T15:00:00.000Z",
+                "end": "2026-11-19T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              },
+              {
+                "id": "maya-walk-dog",
+                "type": "task",
+                "title": "Walk the dog",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "start": "2026-11-12T16:00:00.000Z"
+              }
+            ],
+            "parents": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "noa-sick-both-parents-away",
+      "description": "Both parents are away on the day Noa is sick: every parent is still asked (nobody is free), and the away entries say why.",
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-noa-sick-both-parents-away",
+            "at": "2026-11-11T12:21:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "conference",
+              "type": "event",
+              "title": "Conference",
+              "start": "2026-11-17T06:00:00.000Z",
+              "end": "2026-11-17T18:00:00.000Z",
+              "unavailableMemberIds": [
+                "mom",
+                "dad"
+              ]
+            }
+          }
+        }
+      ],
+      "reports": [
+        {
+          "reporter": "dad",
+          "memberId": "noa",
+          "date": "2026-11-17",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "plan": {
+            "proposals": [
+              {
+                "id": "p1",
+                "status": "pending",
+                "kind": "cancel",
+                "itemId": "pickup-tuesday",
+                "start": "2026-11-17T14:30:00.000Z"
+              }
+            ],
+            "available": [],
+            "away": [
+              {
+                "memberId": "dad",
+                "eventId": "conference",
+                "start": "2026-11-17T06:00:00.000Z",
+                "end": "2026-11-17T18:00:00.000Z"
+              },
+              {
+                "memberId": "mom",
+                "eventId": "conference",
+                "start": "2026-11-17T06:00:00.000Z",
+                "end": "2026-11-17T18:00:00.000Z"
+              }
+            ],
+            "parents": [
+              "mom",
+              "dad"
+            ]
+          },
+          "stayHome": {
+            "id": "item-mwc3jrk0",
+            "type": "task",
+            "title": "Stay home with Noa",
+            "forMemberIds": [
+              "noa"
+            ],
+            "ownership": {
+              "state": "open",
+              "candidateIds": [
+                "mom",
+                "dad"
+              ]
+            },
+            "sensitive": false,
+            "importance": "normal",
+            "unavailableMemberIds": [],
+            "status": "open",
+            "source": {
+              "kind": "chat",
+              "label": "Dad"
+            },
+            "createdBy": "dad",
+            "version": 1,
+            "notes": "Noa is sick (reported by Dad).",
+            "start": "2026-11-16T22:00:00.000Z",
+            "allDay": true,
+            "titleZh": "在家照顾诺娅"
+          },
+          "applied": [
+            "p1"
+          ],
+          "failed": [],
+          "itemsAfter": {
+            "family": [
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "pickup-today",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-11T14:30:00.000Z",
+                "end": "2026-11-11T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "swim-today",
+                "type": "event",
+                "title": "Noa's swimming lesson",
+                "titleZh": "诺娅的游泳课",
+                "start": "2026-11-11T15:30:00.000Z",
+                "end": "2026-11-11T16:30:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "maya"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Maya"
+                },
+                "createdBy": "maya",
+                "version": 1,
+                "id": "piano-tomorrow",
+                "type": "event",
+                "title": "Maya's piano lesson",
+                "titleZh": "玛雅的钢琴课",
+                "start": "2026-11-12T15:00:00.000Z",
+                "end": "2026-11-12T16:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad",
+                    "maya"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "library-books",
+                "type": "task",
+                "title": "Return the library books",
+                "titleZh": "还图书馆的书",
+                "start": "2026-11-11T22:00:00.000Z",
+                "allDay": true
+              },
+              {
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": false,
+                "importance": "critical",
+                "unavailableMemberIds": [],
+                "status": "cancelled",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 2,
+                "id": "pickup-tuesday",
+                "type": "event",
+                "title": "Kindergarten pickup",
+                "titleZh": "幼儿园接孩子",
+                "start": "2026-11-17T14:30:00.000Z",
+                "end": "2026-11-17T15:00:00.000Z"
+              },
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad",
+                  "maya",
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner",
+                "type": "event",
+                "title": "Family dinner at Grandma's",
+                "titleZh": "去奶奶家吃饭",
+                "start": "2026-11-15T16:00:00.000Z",
+                "end": "2026-11-15T18:00:00.000Z"
+              },
+              {
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "family-dinner-flowers",
+                "type": "preparation",
+                "title": "Buy flowers for Grandma",
+                "titleZh": "给奶奶买花",
+                "start": "2026-11-15T10:00:00.000Z",
+                "parentEventId": "family-dinner"
+              },
+              {
+                "id": "conference",
+                "type": "event",
+                "title": "Conference",
+                "forMemberIds": [],
+                "ownership": {
+                  "state": "none"
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "start": "2026-11-17T06:00:00.000Z",
+                "end": "2026-11-17T18:00:00.000Z"
+              },
+              {
+                "id": "item-mwc3jrk0",
+                "type": "task",
+                "title": "Stay home with Noa",
+                "forMemberIds": [
+                  "noa"
+                ],
+                "ownership": {
+                  "state": "open",
+                  "candidateIds": [
+                    "mom",
+                    "dad"
+                  ]
+                },
+                "sensitive": false,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "chat",
+                  "label": "Dad"
+                },
+                "createdBy": "dad",
+                "version": 1,
+                "notes": "Noa is sick (reported by Dad).",
+                "start": "2026-11-16T22:00:00.000Z",
+                "allDay": true,
+                "titleZh": "在家照顾诺娅"
+              }
+            ],
+            "parents": [
+              {
+                "forMemberIds": [
+                  "mom",
+                  "dad"
+                ],
+                "ownership": {
+                  "state": "assigned",
+                  "ownerId": "mom",
+                  "confirmed": true
+                },
+                "sensitive": true,
+                "importance": "normal",
+                "unavailableMemberIds": [],
+                "status": "open",
+                "source": {
+                  "kind": "manual",
+                  "label": "Added by Mom"
+                },
+                "createdBy": "mom",
+                "version": 1,
+                "id": "counselor-meeting",
+                "type": "event",
+                "title": "Meeting with Maya's school counselor",
+                "titleZh": "与玛雅的学校辅导老师见面",
+                "start": "2026-11-13T08:00:00.000Z",
+                "end": "2026-11-13T09:00:00.000Z"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "refusals",
+      "description": "A day already over, a day too far ahead, an unknown member, and a reporter without an account.",
+      "log": [],
+      "reports": [
+        {
+          "reporter": "mom",
+          "memberId": "noa",
+          "date": "2026-11-10",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "refused": "past"
+        },
+        {
+          "reporter": "mom",
+          "memberId": "noa",
+          "date": "2026-11-18",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "refused": "too_far"
+        },
+        {
+          "reporter": "mom",
+          "memberId": "grandpa",
+          "date": "2026-11-11",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "refused": "not_found"
+        },
+        {
+          "reporter": "noa",
+          "memberId": "noa",
+          "date": "2026-11-11",
+          "now": "2026-11-11T12:30:00.000Z",
+          "mayWrite": true,
+          "refused": "forbidden"
+        }
+      ]
+    }
+  ]
+}
