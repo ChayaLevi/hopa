@@ -969,6 +969,216 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+  /v1/board/ops:
+    get:
+      summary: Family board ops after a seq, ascending
+      description: |
+        The household's encrypted board ops in one scope with a seq above `after`,
+        oldest first, at most `limit` (and never more than 500) per page. `fromDevice`
+        and `memberId` are attested by the server from the appending device's token
+        (ADR-0033 D12); `ct` is the ciphertext the server never read. Seqs are shared
+        by both scopes, so a device reading only `family` sees gaps. `parents` needs
+        the current parents key on this device, otherwise 403 `E_SCOPE`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          schema: { $ref: "#/components/schemas/BoardScope" }
+        - name: after
+          in: query
+          required: false
+          schema: { type: integer, format: int64, minimum: 0, default: 0 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 500, default: 500 }
+      responses:
+        "200":
+          description: One page of ops
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [scope, ops, hasMore]
+                properties:
+                  scope: { $ref: "#/components/schemas/BoardScope" }
+                  hasMore: { type: boolean, description: More ops follow the last one on this page. }
+                  ops:
+                    type: array
+                    items:
+                      type: object
+                      required: [seq, opId, fromDevice, memberId, at, keyEpoch, ct]
+                      properties:
+                        seq: { type: integer, format: int64, minimum: 1 }
+                        opId: { type: string, format: uuid }
+                        fromDevice: { type: string, format: uuid }
+                        memberId: { type: string, format: uuid }
+                        at: { type: string, format: date-time, description: When the server stored the op. }
+                        keyEpoch: { type: integer, minimum: 0 }
+                        ct: { type: string, format: byte, description: "Base64 of IV(12) || ciphertext || tag(16)." }
+        "400":
+          description: Unknown scope, or a bad `after` or `limit` (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/ScopeRefused" }
+  /v1/board/head:
+    get:
+      summary: The latest seq of every board scope this device may read
+      description: |
+        One entry per readable scope: `family` always, `parents` only while this device
+        holds the current parents key. 0 for a scope with no op yet.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The heads
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [heads]
+                properties:
+                  heads:
+                    type: object
+                    additionalProperties: { type: integer, format: int64, minimum: 0 }
+                    example: { family: 42, parents: 40 }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/board/cursor:
+    put:
+      summary: Record what this device has applied in a scope
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scope, seq]
+              properties:
+                scope: { $ref: "#/components/schemas/BoardScope" }
+                seq: { type: integer, format: int64, minimum: 0 }
+      responses:
+        "204":
+          description: Recorded
+        "400":
+          description: Unknown scope, a negative seq or a malformed body (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/ScopeRefused" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+  /v1/scope-keys/{scope}:
+    parameters:
+      - name: scope
+        in: path
+        required: true
+        description: Only `parents` has a scope key; `family` reads with the household key (400 otherwise).
+        schema: { type: string, enum: [parents] }
+    get:
+      summary: This device's wrap of the scope key at the current epoch
+      description: |
+        The 60-byte KeyWrap blob for this device and the wrapping device's raw X25519
+        public key, which the recipient needs to unwrap (ADR-0033 §3). 404 when this
+        device holds no current wrap; the body then says where the key stands: with no
+        key in the household, `bootstrapEpoch` is the epoch a parent's device creates
+        next and `lostEpoch`, when set, is the earlier epoch whose ops no device can
+        read any more (the client must say so).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The wrap
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [scope, keyEpoch, wrappedKey]
+                properties:
+                  scope: { type: string, enum: [parents] }
+                  keyEpoch: { type: integer, minimum: 1 }
+                  wrappedKey: { type: string, description: base64url, 60 bytes }
+                  wrapperDeviceId: { type: string, format: uuid, nullable: true }
+                  wrapperPublicKey: { type: string, nullable: true, description: base64url raw X25519 public key }
+        "400":
+          description: A scope without a scope key (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: This device holds no current wrap (`E_SCOPE`)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: "#/components/schemas/Error" }
+                  - type: object
+                    properties:
+                      currentEpoch: { type: integer, nullable: true }
+                      bootstrapEpoch: { type: integer, nullable: true }
+                      lostEpoch: { type: integer, nullable: true }
+    post:
+      summary: Store a wrap of the scope key for a parent's device, or bootstrap it
+      description: |
+        The caller wraps the key for `deviceId` itself, only for a public key it
+        verified (it admitted that device, or the person compared a fingerprint on
+        both screens; ADR-0033 D16). The target must be a live device of a member
+        whose family role is `parent`, and so must the caller. With no wrap in the
+        household, a parent's device bootstraps the key for itself at
+        `bootstrapEpoch` (a Postgres advisory lock lets one of two concurrent
+        bootstraps win; the other gets 409). Otherwise only a device holding the
+        current epoch may wrap, at that epoch.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deviceId, wrappedKey, keyEpoch]
+              properties:
+                deviceId: { type: string, format: uuid }
+                wrappedKey: { type: string, description: "base64 or base64url, 60 bytes" }
+                keyEpoch: { type: integer, minimum: 1 }
+      responses:
+        "201":
+          description: Stored
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [scope, deviceId, keyEpoch, bootstrap]
+                properties:
+                  scope: { type: string, enum: [parents] }
+                  deviceId: { type: string, format: uuid }
+                  keyEpoch: { type: integer, minimum: 1 }
+                  bootstrap: { type: boolean, description: This request created the scope's key. }
+                  lostEpoch: { type: integer, nullable: true, description: "On a bootstrap: the earlier epoch whose ops stay unreadable." }
+        "400":
+          description: A malformed body, a wrap that is not 60 bytes, or a scope without a key (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/ScopeRefused" }
+        "404":
+          description: The target is not a live device of this household (`E_TENANT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: A stale epoch, or a bootstrap that lost to another one (`E_CONFLICT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
 components:
   securitySchemes:
     bearerAuth:
@@ -1034,6 +1244,10 @@ components:
           type: array
           items: { type: string }
         preferred: { type: boolean }
+    BoardScope:
+      type: string
+      enum: [family, parents]
+      description: "family reads with the household key; parents only with the current parents key (ADR-0033)."
     Error:
       type: object
       required: [code, message, retryable, traceId]
@@ -1048,11 +1262,18 @@ components:
             - E_QUEUE
             - E_SCHEMA
             - E_UNSUPPORTED
+            - E_SCOPE
+            - E_CONFLICT
         message: { type: string }
         retryable: { type: boolean }
         messageKey: { type: string }
         traceId: { type: string }
   responses:
+    ScopeRefused:
+      description: This device holds no current key for the `parents` scope (`E_SCOPE`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
     Unauthorized:
       description: Missing, expired or revoked token
       content:

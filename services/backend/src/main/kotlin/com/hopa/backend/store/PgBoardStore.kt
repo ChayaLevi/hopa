@@ -4,6 +4,12 @@ import com.hopa.backend.board.AppendOutcome
 import com.hopa.backend.board.BoardOp
 import com.hopa.backend.board.BoardStore
 import com.hopa.backend.board.NewBoardOp
+import com.hopa.backend.board.ScopeKeyRules
+import com.hopa.backend.board.ScopeKeyState
+import com.hopa.backend.board.ScopeKeyWrap
+import com.hopa.backend.board.WrapOutcome
+import com.hopa.backend.board.WrapRequest
+import com.hopa.backend.board.WrapSnapshot
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.Instant
@@ -146,26 +152,7 @@ class PgBoardStore(
         wrapperDeviceId: String?,
     ) {
         db.tenant(householdId) { connection ->
-            connection.prepareStatement(
-                """
-                insert into scope_key_wraps(household_id, scope, key_epoch, device_id, wrapped_key,
-                                            wrapper_device_id, wrapped_at)
-                values (?::uuid, ?, ?, ?::uuid, ?, ?::uuid, ?)
-                on conflict (device_id, scope, key_epoch) do update
-                  set wrapped_key = excluded.wrapped_key,
-                      wrapper_device_id = excluded.wrapper_device_id,
-                      wrapped_at = excluded.wrapped_at
-                """.trimIndent(),
-            ).use {
-                it.setString(1, householdId)
-                it.setString(2, scope)
-                it.setInt(3, keyEpoch)
-                it.setString(4, deviceId)
-                it.setBytes(5, wrappedKey)
-                it.setString(6, wrapperDeviceId)
-                it.setTimestamp(7, timestamp(clock()))
-                it.executeUpdate()
-            }
+            insertWrap(connection, householdId, scope, keyEpoch, deviceId, wrappedKey, wrapperDeviceId)
         }
     }
 
@@ -190,6 +177,189 @@ class PgBoardStore(
                 it.executeQuery().use { rows -> if (rows.next()) rows.getInt(1) else null }
             }
         }
+
+    override fun scopeKeyWrap(householdId: String, deviceId: String, scope: String): ScopeKeyWrap? =
+        db.tenant(householdId) { connection ->
+            connection.prepareStatement(
+                """
+                select w.key_epoch, w.wrapped_key, w.wrapper_device_id, d.public_key
+                from scope_key_wraps w
+                left join devices d on d.id = w.wrapper_device_id
+                where w.household_id = ?::uuid and w.scope = ? and w.device_id = ?::uuid
+                  and w.key_epoch = (
+                    select max(key_epoch) from scope_key_wraps
+                    where household_id = ?::uuid and scope = ?
+                  )
+                """.trimIndent(),
+            ).use {
+                it.setString(1, householdId)
+                it.setString(2, scope)
+                it.setString(3, deviceId)
+                it.setString(4, householdId)
+                it.setString(5, scope)
+                it.executeQuery().use { rows ->
+                    if (!rows.next()) {
+                        null
+                    } else {
+                        ScopeKeyWrap(scope, rows.getInt(1), rows.getBytes(2), rows.getString(3), rows.getBytes(4))
+                    }
+                }
+            }
+        }
+
+    override fun scopeKeyState(householdId: String, scope: String): ScopeKeyState =
+        db.tenant(householdId) { connection -> state(connection, householdId, scope) }
+
+    override fun writeWrap(householdId: String, request: WrapRequest): WrapOutcome = db.tenant(householdId) { connection ->
+        // One writer per household and scope until commit: the bootstrap check
+        // and the insert that follows cannot interleave with another one.
+        connection.prepareStatement("select pg_advisory_xact_lock(hashtextextended(?, 0))").use {
+            it.setString(1, "hopa.scope_key_wraps:$householdId:${request.scope}")
+            it.executeQuery().close()
+        }
+        val state = state(connection, householdId, request.scope)
+        val caller = roleOf(connection, householdId, request.callerDeviceId)
+        val target = roleOf(connection, householdId, request.targetDeviceId)
+        val current = state.currentEpoch
+        val callerHolds = current != null && holds(connection, householdId, request.callerDeviceId, request.scope, current)
+        val snapshot = WrapSnapshot(
+            callerRole = caller?.role,
+            targetExists = target != null,
+            targetRole = target?.role,
+            state = state,
+            callerHolds = callerHolds,
+        )
+        val outcome = ScopeKeyRules.decide(request, snapshot)
+        if (outcome is WrapOutcome.Stored) {
+            insertWrap(
+                connection,
+                householdId,
+                request.scope,
+                outcome.keyEpoch,
+                request.targetDeviceId,
+                request.wrappedKey,
+                request.callerDeviceId,
+            )
+        }
+        outcome
+    }
+
+    override fun setFamilyRole(householdId: String, memberId: String, role: String?): List<String> =
+        db.tenant(householdId) { connection ->
+            val previous = connection.prepareStatement(
+                "select family_role from members where id = ?::uuid and household_id = ?::uuid for update",
+            ).use {
+                it.setString(1, memberId)
+                it.setString(2, householdId)
+                it.executeQuery().use { rows -> if (rows.next()) Role(rows.getString(1)) else null }
+            } ?: return@tenant emptyList()
+            connection.prepareStatement(
+                "update members set family_role = ? where id = ?::uuid and household_id = ?::uuid",
+            ).use {
+                it.setString(1, role)
+                it.setString(2, memberId)
+                it.setString(3, householdId)
+                it.executeUpdate()
+            }
+            if (previous.role != ScopeKeyRules.PARENT || role == ScopeKeyRules.PARENT) return@tenant emptyList()
+            connection.prepareStatement(
+                """
+                delete from scope_key_wraps
+                where household_id = ?::uuid and scope = 'parents'
+                  and device_id in (select id from devices where member_id = ?::uuid and household_id = ?::uuid)
+                """.trimIndent(),
+            ).use {
+                it.setString(1, householdId)
+                it.setString(2, memberId)
+                it.setString(3, householdId)
+                it.executeUpdate()
+            }
+            connection.prepareStatement(
+                "select id from devices where member_id = ?::uuid and household_id = ?::uuid order by id",
+            ).use {
+                it.setString(1, memberId)
+                it.setString(2, householdId)
+                it.executeQuery().use { rows -> buildList { while (rows.next()) add(rows.getString(1)) } }
+            }
+        }
+
+    private class Role(val role: String?)
+
+    private fun state(connection: Connection, householdId: String, scope: String): ScopeKeyState =
+        connection.prepareStatement(
+            """
+            select (select max(key_epoch) from scope_key_wraps where household_id = ?::uuid and scope = ?),
+                   (select max(key_epoch) from board_ops where household_id = ?::uuid and scope = ?)
+            """.trimIndent(),
+        ).use {
+            it.setString(1, householdId)
+            it.setString(2, scope)
+            it.setString(3, householdId)
+            it.setString(4, scope)
+            it.executeQuery().use { rows ->
+                rows.next()
+                val current = rows.getInt(1).takeUnless { rows.wasNull() }
+                val fromOps = rows.getInt(2).takeUnless { rows.wasNull() } ?: 0
+                ScopeKeyState(current, maxOf(current ?: 0, fromOps))
+            }
+        }
+
+    /** The family role of a live device's member; null when the device is not live in the household. */
+    private fun roleOf(connection: Connection, householdId: String, deviceId: String): Role? =
+        connection.prepareStatement(
+            """
+            select m.family_role
+            from devices d join members m on m.id = d.member_id
+            where d.id = ?::uuid and d.household_id = ?::uuid and d.revoked_at is null
+            """.trimIndent(),
+        ).use {
+            it.setString(1, deviceId)
+            it.setString(2, householdId)
+            it.executeQuery().use { rows -> if (rows.next()) Role(rows.getString(1)) else null }
+        }
+
+    private fun holds(connection: Connection, householdId: String, deviceId: String, scope: String, epoch: Int): Boolean =
+        connection.prepareStatement(
+            "select 1 from scope_key_wraps " +
+                "where household_id = ?::uuid and device_id = ?::uuid and scope = ? and key_epoch = ?",
+        ).use {
+            it.setString(1, householdId)
+            it.setString(2, deviceId)
+            it.setString(3, scope)
+            it.setInt(4, epoch)
+            it.executeQuery().use { rows -> rows.next() }
+        }
+
+    private fun insertWrap(
+        connection: Connection,
+        householdId: String,
+        scope: String,
+        keyEpoch: Int,
+        deviceId: String,
+        wrappedKey: ByteArray,
+        wrapperDeviceId: String?,
+    ) {
+        connection.prepareStatement(
+            """
+            insert into scope_key_wraps(household_id, scope, key_epoch, device_id, wrapped_key,
+                                        wrapper_device_id, wrapped_at)
+            values (?::uuid, ?, ?, ?::uuid, ?, ?::uuid, ?)
+            on conflict (device_id, scope, key_epoch) do update
+              set wrapped_key = excluded.wrapped_key,
+                  wrapper_device_id = excluded.wrapper_device_id,
+                  wrapped_at = excluded.wrapped_at
+            """.trimIndent(),
+        ).use {
+            it.setString(1, householdId)
+            it.setString(2, scope)
+            it.setInt(3, keyEpoch)
+            it.setString(4, deviceId)
+            it.setBytes(5, wrappedKey)
+            it.setString(6, wrapperDeviceId)
+            it.setTimestamp(7, timestamp(clock()))
+            it.executeUpdate()
+        }
+    }
 
     private class Existing(val seq: Long, val scope: String, val bodyHash: ByteArray)
 

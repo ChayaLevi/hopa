@@ -15,6 +15,8 @@ import com.hopa.backend.admin.adminSessionRoutes
 import com.hopa.backend.admin.lookupRoutes
 import com.hopa.backend.auth.AuthPort
 import com.hopa.backend.board.InMemoryBoardStore
+import com.hopa.backend.board.boardRoutes
+import com.hopa.backend.board.scopeKeyRoutes
 import com.hopa.backend.console.consoleRoutes
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.gateway.gatewayRoutes
@@ -77,6 +79,8 @@ fun Application.module(config: ServerConfig) {
     lookupRoutes(config)
     consoleRoutes(config)
     traceRoutes(config)
+    boardRoutes(config)
+    scopeKeyRoutes(config)
     gatewayRoutes(config)
 }
 

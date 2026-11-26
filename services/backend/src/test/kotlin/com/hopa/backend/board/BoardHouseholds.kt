@@ -32,4 +32,15 @@ object BoardHouseholds {
             DeviceIdentity(device, household, member)
         }
     }
+
+    /** Stores a device's raw X25519 public key, as a claim does. */
+    fun setPublicKey(device: DeviceIdentity, publicKey: ByteArray) {
+        PostgresHarness.appDatabase().tenant(device.householdId) { connection ->
+            connection.prepareStatement("update devices set public_key = ?, alg = 'x25519' where id = ?::uuid").use {
+                it.setBytes(1, publicKey)
+                it.setString(2, device.deviceId)
+                it.executeUpdate()
+            }
+        }
+    }
 }
