@@ -18,6 +18,9 @@ through the same pure reducer, so these files are what keeps the clients in step
 | [`seed.state.json`](seed.state.json) | Homemind's demo seed (`seedState` in `server/homemind/seed.ts`, branch `feat/homemind` of `ChayaLevi/digitalmate-web`), at the demo clock 2026-11-11 14:30 `Asia/Jerusalem`, in the v1 shape: each item moved into the scope named by its `visibility` (and the field dropped), the family roster cut to `id`, `name`, `nameZh`, `timezone` and members' `id`, `name`, `nameZh`, `role`, `hasAccount`; reminders, rules, preferences, shopping and the other non-board parts left out. |
 | [`schema-cases.json`](schema-cases.json) | Shape cases: an accepted op of every kind, ops and states that must be refused (each says why), and log entries. |
 | `board-*.json` | Behaviour cases for the board reducer, grouped by topic (`create`, `ownership`, `done`, `undo`, `stale`, `scopes`, `visibility`, `split`, `time`, `versioning`). Generated, never edited by hand (see below). |
+| `time-zones.json` | The family's clock rules from Homemind's `clock.ts`: local time to instant (daylight-saving gaps and overlaps in five zones), instant to local parts, occurrences of weekly items across clock changes, quiet hours and the evening summary time. |
+| `time-reminders.json` | Reminders and escalation: Homemind's scheduler ticked every minute over a board, and every alert it delivered, with its stable key. A client's planner, run over the same board at the same minutes, must deliver exactly these. |
+| `time-availability.json` | Availability per scope: conflicts, who is unavailable when (per member and per device), and the items after opening the conflicts. |
 
 ## Board cases
 
@@ -98,3 +101,17 @@ the exact ops a client's scope helpers write: a move is a cancel in the old scop
 create of a copy in the new one; undoing it is two undos, newest first; a busy event
 copies only the times and the unavailable members of a parents event into `family`.
 `core/family` (`com.hopa.family.scope`) rebuilds these ops and compares them byte for byte.
+
+## Time cases
+
+The reminder cases replace Homemind's server scheduler with a pure planner on every
+device (plan decision D5): reminders are a function of the board, so every device agrees.
+An answer to a reminder is a board op (confirm, take, done), so it stops the alerts on
+every device; "remind me later" is local to the device that pressed it. Quiet hours,
+batching and the backup contact are device settings in v1, so the reminder cases run
+without quiet hours and the clock rules are checked on their own in `time-zones.json`.
+
+One finding is pinned on purpose: in a repeated hour (clocks going back), Homemind's
+`zonedToUtc` does not always pick the earlier instant its comment promises
+(`Asia/Jerusalem` 2026-10-25 01:30 gives 23:30Z, the later one). Clients follow the
+fixture, so all of them land on the same instant.

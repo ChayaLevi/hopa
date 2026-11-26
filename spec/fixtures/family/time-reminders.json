@@ -1,0 +1,1386 @@
+{
+  "description": "Reminders and escalation. Each case starts from seed.state.json (with `timezone` in place of the family's zone when given), applies `log` at each op's `at`, and runs once a minute from `from` to `to` inclusive. `deliveries` are every alert delivered, at the minute it was delivered, with its stable key `<itemId>:<date>.<ask>:<step>` (step a1-a3 attempts, e<n> escalation, b<n> backup notice, s after a snooze). A snooze is pressed by `memberId` at `at`. Members have no quiet hours here; `backupContact` says whether the family set one. Computed by Homemind's reminders.ts ticking at every minute. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/time.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures), running Homemind reminders.ts tickReminders",
+  "seed": "seed.state.json",
+  "cases": [
+    {
+      "name": "seed-afternoon",
+      "description": "The seed alone, 13:00–17:00 UTC: the critical pickup nobody owns asks everyone who could own it, three times, then both parents; Mom's confirmed swim gets one heads-up.",
+      "backupContact": false,
+      "log": [],
+      "snoozes": [],
+      "from": "2026-11-11T13:00:00.000Z",
+      "to": "2026-11-11T17:00:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.open:e1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.open:e1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "scene-1-dad-does-not-answer",
+      "description": "Scene 1: Mom assigns the critical pickup to Dad. Dad is asked three times, ten minutes apart, then Mom (the other parent) gets the escalation.",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-scene-1-dad-does-not-answer",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-today",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:40:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.confirm:a1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.confirm:a2",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.confirm:a3",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.confirm:e1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "scene-1-dad-confirms",
+      "description": "Dad confirms after the second ask: nothing more for the pickup, no escalation, and no heads-up (he just said he is on it).",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-scene-1-dad-confirms",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-today",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "opId": "op2-scene-1-dad-confirms",
+            "at": "2026-11-11T13:45:00.000Z",
+            "kind": "confirm",
+            "itemId": "pickup-today",
+            "version": 2
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:40:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.confirm:a1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.confirm:a2",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "scene-1-dad-confirms-early",
+      "description": "Dad confirms before any ask went out: he gets the heads-up an hour before instead.",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-scene-1-dad-confirms-early",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-today",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "opId": "op2-scene-1-dad-confirms-early",
+            "at": "2026-11-11T13:05:00.000Z",
+            "kind": "confirm",
+            "itemId": "pickup-today",
+            "version": 2
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:40:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.heads-up:a1",
+          "tier": "urgent",
+          "itemVersion": 3,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "scene-1-done-early",
+      "description": "Dad marks the pickup done after the first ask: everything about it stops.",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-scene-1-done-early",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-today",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        },
+        {
+          "seq": 2,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "opId": "op2-scene-1-done-early",
+            "at": "2026-11-11T13:35:00.000Z",
+            "kind": "done",
+            "itemId": "pickup-today",
+            "version": 2
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:40:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.confirm:a1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "scene-1-with-backup-contact",
+      "description": "With a backup contact set, the fourth step tells the parents that the contact was messaged.",
+      "backupContact": true,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-scene-1-with-backup-contact",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-today",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:40:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.confirm:a1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.confirm:a2",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.confirm:a3",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.confirm:e1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:10:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "backup",
+          "step": "b2",
+          "key": "pickup-today:2026-11-11.confirm:b2",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:10:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "backup",
+          "step": "b2",
+          "key": "pickup-today:2026-11-11.confirm:b2",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "scene-1-dad-snoozes",
+      "description": "\"Remind me later\" holds the next ask for ten minutes, then sends one; the escalation time does not move.",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-scene-1-dad-snoozes",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-today",
+            "version": 1,
+            "ownerId": "dad"
+          }
+        }
+      ],
+      "snoozes": [
+        {
+          "memberId": "dad",
+          "itemId": "pickup-today",
+          "at": "2026-11-11T13:31:00.000Z"
+        }
+      ],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:40:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.confirm:a1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:41:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "s",
+          "key": "pickup-today:2026-11-11.confirm:s",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.confirm:a3",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.confirm:e1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "assigned-late-asks-at-once",
+      "description": "A task for 14:00 assigned to Mom at 13:50: the ask goes at once, not 30 minutes before.",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "dad",
+          "fromDevice": "dad-laptop",
+          "op": {
+            "v": 1,
+            "opId": "op1-assigned-late-asks-at-once",
+            "at": "2026-11-11T13:50:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "call-grandma",
+              "type": "task",
+              "title": "Call Grandma",
+              "start": "2026-11-11T14:00:00.000Z",
+              "ownership": {
+                "state": "assigned",
+                "ownerId": "mom"
+              }
+            }
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:10:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "mom",
+          "itemId": "call-grandma",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "call-grandma:2026-11-11.confirm:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.open:e1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.open:e1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "open-normal-escalates-before-start",
+      "description": "Tomorrow's piano lesson opened to everyone: one ask 30 minutes before, then both parents 15 minutes before.",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-open-normal-escalates-before-start",
+            "at": "2026-11-12T13:00:00.000Z",
+            "kind": "open",
+            "itemId": "piano-tomorrow",
+            "version": 1
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-12T12:55:00.000Z",
+      "to": "2026-11-12T16:10:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-12T14:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "piano-tomorrow",
+          "date": "2026-11-12",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "piano-tomorrow:2026-11-12.open:a1",
+          "tier": "timed",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-12T14:30:00.000Z",
+          "recipientId": "maya",
+          "itemId": "piano-tomorrow",
+          "date": "2026-11-12",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "piano-tomorrow:2026-11-12.open:a1",
+          "tier": "timed",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-12T14:30:00.000Z",
+          "recipientId": "mom",
+          "itemId": "piano-tomorrow",
+          "date": "2026-11-12",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "piano-tomorrow:2026-11-12.open:a1",
+          "tier": "timed",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-12T14:45:00.000Z",
+          "recipientId": "dad",
+          "itemId": "piano-tomorrow",
+          "date": "2026-11-12",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "piano-tomorrow:2026-11-12.open:e1",
+          "tier": "timed",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-12T14:45:00.000Z",
+          "recipientId": "mom",
+          "itemId": "piano-tomorrow",
+          "date": "2026-11-12",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "piano-tomorrow:2026-11-12.open:e1",
+          "tier": "timed",
+          "itemVersion": 2,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "teen-owner-critical-escalates-to-both-parents",
+      "description": "A critical pickup assigned to Maya: when she does not answer, both parents are told.",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-teen-owner-critical-escalates-to-both-parents",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "assign",
+            "itemId": "pickup-today",
+            "version": 1,
+            "ownerId": "maya"
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:50:00.000Z",
+      "to": "2026-11-11T15:40:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.confirm:a1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.confirm:a2",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.confirm:a3",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.confirm:e1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.confirm:e1",
+          "tier": "urgent",
+          "itemVersion": 2,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "name": "parents-event-reminds-parents-only",
+      "description": "The parents-only counselor meeting: Mom's heads-up, and nothing for Maya.",
+      "backupContact": false,
+      "log": [],
+      "snoozes": [],
+      "from": "2026-11-13T07:00:00.000Z",
+      "to": "2026-11-13T09:30:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-13T07:30:00.000Z",
+          "recipientId": "mom",
+          "itemId": "counselor-meeting",
+          "date": "2026-11-13",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "counselor-meeting:2026-11-13.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": true
+        }
+      ]
+    },
+    {
+      "name": "weekly-after-the-change-in-new-york",
+      "description": "A family in New York: a weekly Monday 08:00 event keeps its local time after the clocks go back on 1 November, so its heads-up moves from 11:30 to 12:30 UTC.",
+      "timezone": "America/New_York",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "family",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-weekly-after-the-change-in-new-york",
+            "at": "2026-10-20T12:00:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "standup",
+              "type": "event",
+              "title": "School drop-off",
+              "start": "2026-10-26T12:00:00.000Z",
+              "end": "2026-10-26T12:30:00.000Z",
+              "recurrence": {
+                "freq": "weekly",
+                "byWeekday": [
+                  1
+                ]
+              },
+              "ownership": {
+                "state": "assigned",
+                "ownerId": "mom"
+              }
+            }
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-02T11:00:00.000Z",
+      "to": "2026-11-02T13:30:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-02T12:30:00.000Z",
+          "recipientId": "mom",
+          "itemId": "standup",
+          "date": "2026-11-02",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "standup:2026-11-02.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false,
+          "recurring": true
+        }
+      ]
+    },
+    {
+      "name": "sensitive-and-recurring-alerts",
+      "description": "A sensitive weekly task assigned to Dad: the alert says it is sensitive and recurring (no title, no time on screen).",
+      "backupContact": false,
+      "log": [
+        {
+          "seq": 1,
+          "scope": "parents",
+          "memberId": "mom",
+          "fromDevice": "mom-phone",
+          "op": {
+            "v": 1,
+            "opId": "op1-sensitive-and-recurring-alerts",
+            "at": "2026-11-11T13:00:00.000Z",
+            "kind": "create",
+            "item": {
+              "id": "therapy",
+              "type": "task",
+              "title": "Therapy call",
+              "start": "2026-11-11T15:00:00.000Z",
+              "sensitive": true,
+              "recurrence": {
+                "freq": "weekly",
+                "byWeekday": [
+                  3
+                ]
+              },
+              "ownership": {
+                "state": "assigned",
+                "ownerId": "dad"
+              }
+            }
+          }
+        }
+      ],
+      "snoozes": [],
+      "from": "2026-11-11T12:55:00.000Z",
+      "to": "2026-11-11T16:10:00.000Z",
+      "deliveries": [
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:30:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "pickup-today:2026-11-11.open:a1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:40:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a2",
+          "key": "pickup-today:2026-11-11.open:a2",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "maya",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T13:50:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "reminder",
+          "step": "a3",
+          "key": "pickup-today:2026-11-11.open:a3",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "dad",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.open:e1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "pickup-today",
+          "date": "2026-11-11",
+          "ask": "open",
+          "kind": "escalation",
+          "step": "e1",
+          "key": "pickup-today:2026-11-11.open:e1",
+          "tier": "urgent",
+          "itemVersion": 1,
+          "sensitive": false
+        },
+        {
+          "at": "2026-11-11T14:30:00.000Z",
+          "recipientId": "dad",
+          "itemId": "therapy",
+          "date": "2026-11-11",
+          "ask": "confirm",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "therapy:2026-11-11.confirm:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": true,
+          "recurring": true
+        },
+        {
+          "at": "2026-11-11T15:00:00.000Z",
+          "recipientId": "mom",
+          "itemId": "swim-today",
+          "date": "2026-11-11",
+          "ask": "heads-up",
+          "kind": "reminder",
+          "step": "a1",
+          "key": "swim-today:2026-11-11.heads-up:a1",
+          "tier": "timed",
+          "itemVersion": 1,
+          "sensitive": false
+        }
+      ]
+    }
+  ]
+}

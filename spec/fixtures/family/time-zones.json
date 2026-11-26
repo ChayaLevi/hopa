@@ -1,0 +1,1636 @@
+{
+  "description": "The family's clock rules, computed by Homemind's clock.ts, core.ts (occurrences) and reminders.ts. zonedToUtc: a local date and time in a zone; in a daylight-saving gap it moves forward by the gap, in an overlap the earlier instant wins. localParts: weekday 0 = Sunday. occurrences: the starts of an item in [from, to); a weekly item keeps its local time across a change and skips its exceptions and dates after `until`. quietHours: `from` to `to` local, overnight allowed, equal means none; `endsAt` is the next end when inside. summaryAt: the next 20:00 local at or after the instant. Generated; do not edit by hand.",
+  "generator": "scripts/family-fixtures/time.ts (ChayaLevi/digitalmate-web, branch feat/family-fixtures)",
+  "zonedToUtc": [
+    {
+      "zone": "Asia/Jerusalem",
+      "date": "2026-03-27",
+      "time": "01:30",
+      "utc": "2026-03-26T23:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "date": "2026-03-27",
+      "time": "02:30",
+      "utc": "2026-03-27T00:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "date": "2026-03-27",
+      "time": "03:30",
+      "utc": "2026-03-27T00:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "date": "2026-10-25",
+      "time": "00:30",
+      "utc": "2026-10-24T21:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "date": "2026-10-25",
+      "time": "01:30",
+      "utc": "2026-10-24T23:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "date": "2026-10-25",
+      "time": "02:30",
+      "utc": "2026-10-25T00:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "date": "2026-11-11",
+      "time": "14:30",
+      "utc": "2026-11-11T12:30:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "date": "2026-03-08",
+      "time": "01:30",
+      "utc": "2026-03-08T06:30:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "date": "2026-03-08",
+      "time": "02:30",
+      "utc": "2026-03-08T07:30:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "date": "2026-03-08",
+      "time": "03:30",
+      "utc": "2026-03-08T07:30:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "date": "2026-11-01",
+      "time": "00:30",
+      "utc": "2026-11-01T04:30:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "date": "2026-11-01",
+      "time": "01:30",
+      "utc": "2026-11-01T05:30:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "date": "2026-11-01",
+      "time": "02:30",
+      "utc": "2026-11-01T07:30:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "date": "2026-03-29",
+      "time": "00:30",
+      "utc": "2026-03-29T00:30:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "date": "2026-03-29",
+      "time": "01:30",
+      "utc": "2026-03-29T01:30:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "date": "2026-03-29",
+      "time": "02:30",
+      "utc": "2026-03-29T01:30:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "date": "2026-10-25",
+      "time": "00:30",
+      "utc": "2026-10-24T23:30:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "date": "2026-10-25",
+      "time": "01:30",
+      "utc": "2026-10-25T01:30:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "date": "2026-10-25",
+      "time": "02:30",
+      "utc": "2026-10-25T02:30:00.000Z"
+    },
+    {
+      "zone": "Australia/Sydney",
+      "date": "2026-04-05",
+      "time": "01:30",
+      "utc": "2026-04-04T14:30:00.000Z"
+    },
+    {
+      "zone": "Australia/Sydney",
+      "date": "2026-04-05",
+      "time": "02:30",
+      "utc": "2026-04-04T16:30:00.000Z"
+    },
+    {
+      "zone": "Australia/Sydney",
+      "date": "2026-04-05",
+      "time": "03:30",
+      "utc": "2026-04-04T17:30:00.000Z"
+    },
+    {
+      "zone": "Australia/Sydney",
+      "date": "2026-10-04",
+      "time": "01:30",
+      "utc": "2026-10-03T15:30:00.000Z"
+    },
+    {
+      "zone": "Australia/Sydney",
+      "date": "2026-10-04",
+      "time": "02:30",
+      "utc": "2026-10-03T16:30:00.000Z"
+    },
+    {
+      "zone": "Australia/Sydney",
+      "date": "2026-10-04",
+      "time": "03:30",
+      "utc": "2026-10-03T16:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "date": "2026-03-08",
+      "time": "02:30",
+      "utc": "2026-03-07T18:30:00.000Z"
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "date": "2026-11-11",
+      "time": "23:59",
+      "utc": "2026-11-11T15:59:00.000Z"
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "date": "2026-12-31",
+      "time": "00:00",
+      "utc": "2026-12-30T16:00:00.000Z"
+    }
+  ],
+  "localParts": [
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-03-26T23:30:00.000Z",
+      "date": "2026-03-27",
+      "time": "01:30",
+      "weekday": 5
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-03-27T00:30:00.000Z",
+      "date": "2026-03-27",
+      "time": "03:30",
+      "weekday": 5
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-10-24T21:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "00:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-10-24T23:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-10-25T00:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "02:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-11T12:30:00.000Z",
+      "date": "2026-11-11",
+      "time": "14:30",
+      "weekday": 3
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-03-08T06:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "08:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-03-08T07:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "09:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-01T04:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "06:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-01T05:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "07:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-01T07:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "09:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-03-29T00:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "03:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-03-29T01:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "04:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-10-25T01:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "03:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-10-25T02:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "04:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-04-04T14:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "17:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-04-04T16:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "19:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-04-04T17:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "20:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-10-03T15:30:00.000Z",
+      "date": "2026-10-03",
+      "time": "18:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-10-03T16:30:00.000Z",
+      "date": "2026-10-03",
+      "time": "19:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-03-07T18:30:00.000Z",
+      "date": "2026-03-07",
+      "time": "20:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-11T15:59:00.000Z",
+      "date": "2026-11-11",
+      "time": "17:59",
+      "weekday": 3
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-12-30T16:00:00.000Z",
+      "date": "2026-12-30",
+      "time": "18:00",
+      "weekday": 3
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-03-26T23:30:00.000Z",
+      "date": "2026-03-26",
+      "time": "19:30",
+      "weekday": 4
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-03-27T00:30:00.000Z",
+      "date": "2026-03-26",
+      "time": "20:30",
+      "weekday": 4
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-10-24T21:30:00.000Z",
+      "date": "2026-10-24",
+      "time": "17:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-10-24T23:30:00.000Z",
+      "date": "2026-10-24",
+      "time": "19:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-10-25T00:30:00.000Z",
+      "date": "2026-10-24",
+      "time": "20:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-11-11T12:30:00.000Z",
+      "date": "2026-11-11",
+      "time": "07:30",
+      "weekday": 3
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-03-08T06:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-03-08T07:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "03:30",
+      "weekday": 0
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-11-01T04:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "00:30",
+      "weekday": 0
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-11-01T05:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-11-01T07:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "02:30",
+      "weekday": 0
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-03-29T00:30:00.000Z",
+      "date": "2026-03-28",
+      "time": "20:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-03-29T01:30:00.000Z",
+      "date": "2026-03-28",
+      "time": "21:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-10-25T01:30:00.000Z",
+      "date": "2026-10-24",
+      "time": "21:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-10-25T02:30:00.000Z",
+      "date": "2026-10-24",
+      "time": "22:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-04-04T14:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "10:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-04-04T16:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "12:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-04-04T17:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "13:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-10-03T15:30:00.000Z",
+      "date": "2026-10-03",
+      "time": "11:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-10-03T16:30:00.000Z",
+      "date": "2026-10-03",
+      "time": "12:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-03-07T18:30:00.000Z",
+      "date": "2026-03-07",
+      "time": "13:30",
+      "weekday": 6
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-11-11T15:59:00.000Z",
+      "date": "2026-11-11",
+      "time": "10:59",
+      "weekday": 3
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-12-30T16:00:00.000Z",
+      "date": "2026-12-30",
+      "time": "11:00",
+      "weekday": 3
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-26T23:30:00.000Z",
+      "date": "2026-03-26",
+      "time": "23:30",
+      "weekday": 4
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-27T00:30:00.000Z",
+      "date": "2026-03-27",
+      "time": "00:30",
+      "weekday": 5
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-10-24T21:30:00.000Z",
+      "date": "2026-10-24",
+      "time": "22:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-10-24T23:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "00:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-10-25T00:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-11-11T12:30:00.000Z",
+      "date": "2026-11-11",
+      "time": "12:30",
+      "weekday": 3
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-08T06:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "06:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-08T07:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "07:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-11-01T04:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "04:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-11-01T05:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "05:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-11-01T07:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "07:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-29T00:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "00:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-29T01:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "02:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-10-25T01:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-10-25T02:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "02:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-04-04T14:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "15:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-04-04T16:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "17:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-04-04T17:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "18:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-10-03T15:30:00.000Z",
+      "date": "2026-10-03",
+      "time": "16:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-10-03T16:30:00.000Z",
+      "date": "2026-10-03",
+      "time": "17:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-07T18:30:00.000Z",
+      "date": "2026-03-07",
+      "time": "18:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-11-11T15:59:00.000Z",
+      "date": "2026-11-11",
+      "time": "15:59",
+      "weekday": 3
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-12-30T16:00:00.000Z",
+      "date": "2026-12-30",
+      "time": "16:00",
+      "weekday": 3
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-03-26T23:30:00.000Z",
+      "date": "2026-03-27",
+      "time": "10:30",
+      "weekday": 5
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-03-27T00:30:00.000Z",
+      "date": "2026-03-27",
+      "time": "11:30",
+      "weekday": 5
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-10-24T21:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "08:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-10-24T23:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "10:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-10-25T00:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "11:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-11-11T12:30:00.000Z",
+      "date": "2026-11-11",
+      "time": "23:30",
+      "weekday": 3
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-03-08T06:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "17:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-03-08T07:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "18:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-11-01T04:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "15:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-11-01T05:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "16:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-11-01T07:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "18:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-03-29T00:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "11:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-03-29T01:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "12:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-10-25T01:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "12:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-10-25T02:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "13:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-04-04T14:30:00.000Z",
+      "date": "2026-04-05",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-04-04T16:30:00.000Z",
+      "date": "2026-04-05",
+      "time": "02:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-04-04T17:30:00.000Z",
+      "date": "2026-04-05",
+      "time": "03:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-10-03T15:30:00.000Z",
+      "date": "2026-10-04",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-10-03T16:30:00.000Z",
+      "date": "2026-10-04",
+      "time": "03:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-03-07T18:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "05:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-11-11T15:59:00.000Z",
+      "date": "2026-11-12",
+      "time": "02:59",
+      "weekday": 4
+    },
+    {
+      "zone": "Australia/Sydney",
+      "instant": "2026-12-30T16:00:00.000Z",
+      "date": "2026-12-31",
+      "time": "03:00",
+      "weekday": 4
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-03-26T23:30:00.000Z",
+      "date": "2026-03-27",
+      "time": "07:30",
+      "weekday": 5
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-03-27T00:30:00.000Z",
+      "date": "2026-03-27",
+      "time": "08:30",
+      "weekday": 5
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-24T21:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "05:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-24T23:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "07:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-25T00:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "08:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-11-11T12:30:00.000Z",
+      "date": "2026-11-11",
+      "time": "20:30",
+      "weekday": 3
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-03-08T06:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "14:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-03-08T07:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "15:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-11-01T04:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "12:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-11-01T05:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "13:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-11-01T07:30:00.000Z",
+      "date": "2026-11-01",
+      "time": "15:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-03-29T00:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "08:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-03-29T01:30:00.000Z",
+      "date": "2026-03-29",
+      "time": "09:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-25T01:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "09:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-25T02:30:00.000Z",
+      "date": "2026-10-25",
+      "time": "10:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-04-04T14:30:00.000Z",
+      "date": "2026-04-04",
+      "time": "22:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-04-04T16:30:00.000Z",
+      "date": "2026-04-05",
+      "time": "00:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-04-04T17:30:00.000Z",
+      "date": "2026-04-05",
+      "time": "01:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-03T15:30:00.000Z",
+      "date": "2026-10-03",
+      "time": "23:30",
+      "weekday": 6
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-03T16:30:00.000Z",
+      "date": "2026-10-04",
+      "time": "00:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-03-07T18:30:00.000Z",
+      "date": "2026-03-08",
+      "time": "02:30",
+      "weekday": 0
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-11-11T15:59:00.000Z",
+      "date": "2026-11-11",
+      "time": "23:59",
+      "weekday": 3
+    },
+    {
+      "zone": "Asia/Shanghai",
+      "instant": "2026-12-30T16:00:00.000Z",
+      "date": "2026-12-31",
+      "time": "00:00",
+      "weekday": 4
+    }
+  ],
+  "occurrences": [
+    {
+      "name": "jerusalem-weekly-across-october-change",
+      "zone": "Asia/Jerusalem",
+      "item": {
+        "start": "2026-10-11T13:30:00.000Z",
+        "end": "2026-10-11T14:30:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            0
+          ]
+        }
+      },
+      "from": "2026-10-10T00:00:00.000Z",
+      "to": "2026-11-09T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-10-11",
+          "start": "2026-10-11T13:30:00.000Z",
+          "end": "2026-10-11T14:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-18",
+          "start": "2026-10-18T13:30:00.000Z",
+          "end": "2026-10-18T14:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-25",
+          "start": "2026-10-25T14:30:00.000Z",
+          "end": "2026-10-25T15:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-01",
+          "start": "2026-11-01T14:30:00.000Z",
+          "end": "2026-11-01T15:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-08",
+          "start": "2026-11-08T14:30:00.000Z",
+          "end": "2026-11-08T15:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "jerusalem-weekly-across-march-change",
+      "zone": "Asia/Jerusalem",
+      "item": {
+        "start": "2026-03-13T06:00:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            5
+          ],
+          "until": "2026-04-10"
+        }
+      },
+      "from": "2026-03-01T00:00:00.000Z",
+      "to": "2026-05-01T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-03-13",
+          "start": "2026-03-13T06:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-03-20",
+          "start": "2026-03-20T06:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-03-27",
+          "start": "2026-03-27T05:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-04-03",
+          "start": "2026-04-03T05:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-04-10",
+          "start": "2026-04-10T05:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "new-york-twice-weekly-across-november-change",
+      "zone": "America/New_York",
+      "item": {
+        "start": "2026-10-20T12:00:00.000Z",
+        "end": "2026-10-20T13:00:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            1,
+            4
+          ],
+          "exceptions": [
+            "2026-11-05"
+          ]
+        }
+      },
+      "from": "2026-10-25T00:00:00.000Z",
+      "to": "2026-11-13T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-10-26",
+          "start": "2026-10-26T12:00:00.000Z",
+          "end": "2026-10-26T13:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-29",
+          "start": "2026-10-29T12:00:00.000Z",
+          "end": "2026-10-29T13:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-02",
+          "start": "2026-11-02T13:00:00.000Z",
+          "end": "2026-11-02T14:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-09",
+          "start": "2026-11-09T13:00:00.000Z",
+          "end": "2026-11-09T14:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-12",
+          "start": "2026-11-12T13:00:00.000Z",
+          "end": "2026-11-12T14:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "new-york-weekly-in-the-repeated-hour",
+      "zone": "America/New_York",
+      "item": {
+        "start": "2026-10-25T05:30:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            0
+          ]
+        }
+      },
+      "from": "2026-10-24T00:00:00.000Z",
+      "to": "2026-11-16T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-10-25",
+          "start": "2026-10-25T05:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-01",
+          "start": "2026-11-01T05:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-08",
+          "start": "2026-11-08T06:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-15",
+          "start": "2026-11-15T06:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "new-york-weekly-in-the-skipped-hour",
+      "zone": "America/New_York",
+      "item": {
+        "start": "2026-03-01T07:30:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            0
+          ]
+        }
+      },
+      "from": "2026-02-28T00:00:00.000Z",
+      "to": "2026-03-23T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-03-01",
+          "start": "2026-03-01T07:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-03-08",
+          "start": "2026-03-08T07:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-03-15",
+          "start": "2026-03-15T06:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-03-22",
+          "start": "2026-03-22T06:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "london-weekly-across-october-change",
+      "zone": "Europe/London",
+      "item": {
+        "start": "2026-10-14T16:00:00.000Z",
+        "end": "2026-10-14T17:00:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            3
+          ]
+        }
+      },
+      "from": "2026-10-13T00:00:00.000Z",
+      "to": "2026-11-05T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-10-14",
+          "start": "2026-10-14T16:00:00.000Z",
+          "end": "2026-10-14T17:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-21",
+          "start": "2026-10-21T16:00:00.000Z",
+          "end": "2026-10-21T17:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-28",
+          "start": "2026-10-28T17:00:00.000Z",
+          "end": "2026-10-28T18:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-04",
+          "start": "2026-11-04T17:00:00.000Z",
+          "end": "2026-11-04T18:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "sydney-weekly-across-october-change",
+      "zone": "Australia/Sydney",
+      "item": {
+        "start": "2026-09-23T22:00:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            4
+          ]
+        }
+      },
+      "from": "2026-09-20T00:00:00.000Z",
+      "to": "2026-10-20T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-09-24",
+          "start": "2026-09-23T22:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-01",
+          "start": "2026-09-30T22:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-08",
+          "start": "2026-10-07T21:00:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-10-15",
+          "start": "2026-10-14T21:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "shanghai-daily-on-weekdays",
+      "zone": "Asia/Shanghai",
+      "item": {
+        "start": "2026-11-09T00:30:00.000Z",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      "from": "2026-11-11T00:00:00.000Z",
+      "to": "2026-11-18T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-11-11",
+          "start": "2026-11-11T00:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-12",
+          "start": "2026-11-12T00:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-13",
+          "start": "2026-11-13T00:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-16",
+          "start": "2026-11-16T00:30:00.000Z"
+        },
+        {
+          "itemId": "item",
+          "date": "2026-11-17",
+          "start": "2026-11-17T00:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "one-off-in-range",
+      "zone": "Asia/Jerusalem",
+      "item": {
+        "start": "2026-11-12T15:00:00.000Z",
+        "end": "2026-11-12T16:00:00.000Z"
+      },
+      "from": "2026-11-12T00:00:00.000Z",
+      "to": "2026-11-13T00:00:00.000Z",
+      "occurrences": [
+        {
+          "itemId": "item",
+          "date": "2026-11-12",
+          "start": "2026-11-12T15:00:00.000Z",
+          "end": "2026-11-12T16:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "one-off-at-the-end-is-out",
+      "zone": "Asia/Jerusalem",
+      "item": {
+        "start": "2026-11-13T00:00:00.000Z"
+      },
+      "from": "2026-11-12T00:00:00.000Z",
+      "to": "2026-11-13T00:00:00.000Z",
+      "occurrences": []
+    },
+    {
+      "name": "cancelled-has-none",
+      "zone": "Asia/Jerusalem",
+      "item": {
+        "start": "2026-11-12T15:00:00.000Z",
+        "status": "cancelled",
+        "recurrence": {
+          "freq": "weekly",
+          "byWeekday": [
+            4
+          ]
+        }
+      },
+      "from": "2026-11-01T00:00:00.000Z",
+      "to": "2026-12-01T00:00:00.000Z",
+      "occurrences": []
+    }
+  ],
+  "quietHours": [
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-11T19:59:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-11T20:00:00.000Z",
+      "inside": true,
+      "endsAt": "2026-11-12T05:00:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-12T04:59:00.000Z",
+      "inside": true,
+      "endsAt": "2026-11-12T05:00:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-12T05:00:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-11T12:30:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "America/New_York",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-01T03:30:00.000Z",
+      "inside": true,
+      "endsAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-01T11:59:00.000Z",
+      "inside": true,
+      "endsAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "quietHours": {
+        "from": "22:00",
+        "to": "07:00"
+      },
+      "instant": "2026-03-28T23:30:00.000Z",
+      "inside": true,
+      "endsAt": "2026-03-29T06:00:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-11-11T19:59:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-11-11T20:00:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-11-12T04:59:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-11-12T05:00:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-11-11T12:30:00.000Z",
+      "inside": true,
+      "endsAt": "2026-11-11T13:00:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-11-01T03:30:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "America/New_York",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-11-01T11:59:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Europe/London",
+      "quietHours": {
+        "from": "13:00",
+        "to": "15:00"
+      },
+      "instant": "2026-03-28T23:30:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-11T19:59:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-11T20:00:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-12T04:59:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-12T05:00:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-11T12:30:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "America/New_York",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-01T03:30:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "America/New_York",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-11-01T11:59:00.000Z",
+      "inside": false
+    },
+    {
+      "zone": "Europe/London",
+      "quietHours": {
+        "from": "07:00",
+        "to": "07:00"
+      },
+      "instant": "2026-03-28T23:30:00.000Z",
+      "inside": false
+    }
+  ],
+  "summary": [
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-11T19:59:00.000Z",
+      "summaryAt": "2026-11-12T18:00:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-11T20:00:00.000Z",
+      "summaryAt": "2026-11-12T18:00:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-12T04:59:00.000Z",
+      "summaryAt": "2026-11-12T18:00:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-12T05:00:00.000Z",
+      "summaryAt": "2026-11-12T18:00:00.000Z"
+    },
+    {
+      "zone": "Asia/Jerusalem",
+      "instant": "2026-11-11T12:30:00.000Z",
+      "summaryAt": "2026-11-11T18:00:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-11-01T03:30:00.000Z",
+      "summaryAt": "2026-11-02T01:00:00.000Z"
+    },
+    {
+      "zone": "America/New_York",
+      "instant": "2026-11-01T11:59:00.000Z",
+      "summaryAt": "2026-11-02T01:00:00.000Z"
+    },
+    {
+      "zone": "Europe/London",
+      "instant": "2026-03-28T23:30:00.000Z",
+      "summaryAt": "2026-03-29T19:00:00.000Z"
+    }
+  ]
+}
