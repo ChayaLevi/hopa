@@ -69,6 +69,12 @@
                         <Button x:Name="PairGatewayButton" Content="Pair this PC" Width="120" Height="32"
                                 HorizontalAlignment="Left" Click="PairGateway_Click" />
                         <TextBlock x:Name="GatewayStatusText" FontSize="10" Foreground="#6B665C"
+                                   Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="The PC remembers the phone's approval key the first time it answers. Paired the phone again? Forget its key, then compare the fingerprint the log shows with the phone's Settings."
+                                   FontSize="9.5" Foreground="#9A9488" TextWrapping="Wrap" Margin="0,0,0,4" />
+                        <Button x:Name="ForgetPhoneKeysButton" Content="Forget phone keys" Width="140" Height="30"
+                                HorizontalAlignment="Left" Click="ForgetPhoneKeys_Click" />
+                        <TextBlock x:Name="PhoneKeyStatusText" FontSize="10" Foreground="#6B665C"
                                    Margin="0,4,0,12" TextWrapping="Wrap" />
 
                         <TextBlock Text="Bridge" FontSize="11.5" Foreground="#6B665C" />
@@ -112,6 +118,10 @@
                             <TextBlock Text="llama.cpp CPU runtime + Qwen3 1.7B (Apache-2.0). Downloaded separately from the MSI; the server binds to loopback only."
                                        FontSize="9.5" Foreground="#9A9488" TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
+                            <CheckBox x:Name="CloudFallbackBox" Content="Use the API model if the local model fails"
+                                      FontSize="11.5" Foreground="#1C1B18" Margin="0,10,0,0" />
+                            <TextBlock x:Name="CloudFallbackHint" FontSize="9.5" Foreground="#9A9488"
+                                       TextWrapping="Wrap" Margin="0,2,0,0" />
                         </StackPanel>
 
                         <TextBlock Text="Tone" FontSize="11.5" Foreground="#6B665C" />
@@ -160,7 +170,7 @@
                             <ComboBoxItem Content="anchors" />
                             <ComboBoxItem Content="model" />
                         </ComboBox>
-                        <TextBlock Text="Auto tries a known app graph, then a recipe/instant command, then the model. Anchors uses graphs only. Model skips graphs, recipes and commands."
+                        <TextBlock Text="Auto tries a known app graph, then a recipe/instant command, then the model. Anchors uses graphs only. Model skips graphs, recipes and commands; the API or local model reads the UIA tree, and the receipt records modelInput=uia-tree."
                                    FontSize="10" Foreground="#9A9488" TextWrapping="Wrap"
                                    Margin="0,0,0,12" />
                         <CheckBox x:Name="ReplayBox" Content="Try a saved recipe before the model"

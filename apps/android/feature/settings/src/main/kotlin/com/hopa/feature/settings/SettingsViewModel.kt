@@ -474,6 +474,7 @@ class SettingsViewModel @Inject constructor(
                 backendUrl = pairing.backendUrl,
                 backendDeviceId = pairing.backendDeviceId,
                 backendName = pairing.backendName,
+                approvalKeyFingerprint = pairing.approvalKeyFingerprint,
                 backendToken = pairing.backendToken,
                 fcmAvailable = pairing.fcmAvailable,
                 providerState = model.providerState,

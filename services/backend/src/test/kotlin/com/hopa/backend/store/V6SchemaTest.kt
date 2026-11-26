@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 /**
- * Schema v6: the family board tables (ADR-0031). Every new table is household
+ * Schema v6: the family board tables (ADR-0033). Every new table is household
  * scoped with RLS enabled and forced, so a connection with no tenant setting
  * sees nothing, as on every V1 table.
  */

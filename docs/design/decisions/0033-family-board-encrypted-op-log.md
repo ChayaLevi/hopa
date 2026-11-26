@@ -1,4 +1,4 @@
-# ADR-0031 - Family board: an encrypted op log with scope keys
+# ADR-0033 - Family board: an encrypted op log with scope keys
 
 - Status: proposed
 - Date: 2026-11-25

@@ -32,13 +32,36 @@ object BackendReplies {
      * The answer to `task.needs_approval`. The decision travels in the body;
      * the server attributes the sender from the authenticated socket, never
      * from a device name supplied here.
+     *
+     * ADR-0031: when the request carried a card, [action] is the A2UI `action`
+     * message for the tap that answered it, and [error] the A2UI `error`
+     * message for a card that was refused. The asker checks [action] against
+     * [allow]; both stay inside the encrypted body.
+     *
+     * ADR-0032: [signature] is this device's signature over the asker's
+     * challenge and this decision; the asker pins the key on first use.
      */
-    fun approval(task: BackendEnvelope, deviceId: String, allow: Boolean): BackendEnvelope = reply(
+    fun approval(
+        task: BackendEnvelope,
+        deviceId: String,
+        allow: Boolean,
+        action: JsonObject? = null,
+        error: JsonObject? = null,
+        signature: JsonObject? = null,
+    ): BackendEnvelope = reply(
         delivery = task,
         deviceId = deviceId,
         type = "task.result",
         body = buildJsonObject {
-            put("approval", buildJsonObject { put("allow", allow) })
+            put(
+                "approval",
+                buildJsonObject {
+                    put("allow", allow)
+                    action?.let { put("action", it) }
+                    error?.let { put("error", it) }
+                    signature?.let { put("signature", it) }
+                },
+            )
             put("summary", if (allow) "approved" else "denied")
         },
     )

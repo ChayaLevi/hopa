@@ -137,7 +137,10 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
             response["steps"] as JsonArray,
             response["chainOk"]?.GetValue<bool>() == true,
             plan,
-            verification);
+            verification)
+        {
+            ModelInput = response["modelInput"]?.GetValue<string>() ?? "",
+        };
     }
 
     public async Task<List<JsonObject>> ListConversationsAsync(bool includeArchived = false)
@@ -241,7 +244,13 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
         return response["conversation"] as JsonObject;
     }
 
-    public async Task<JsonObject> ConfigureAsync(AppSettings settings, string bridgeToken, string modelKey)
+    public async Task<JsonObject> ConfigureAsync(
+        AppSettings settings,
+        string bridgeToken,
+        string modelKey,
+        string fallbackBaseUrl = "",
+        string fallbackModelName = "",
+        string fallbackModelKey = "")
     {
         var fields = new JsonObject
         {
@@ -260,6 +269,11 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
             ["planFirst"] = settings.PlanFirst,
             ["instantCommands"] = settings.InstantCommands,
             ["vision"] = settings.Vision,
+            ["cloudFallback"] = settings.CloudFallback,
+            ["fallbackProvider"] = settings.FallbackProvider,
+            ["fallbackBaseUrl"] = fallbackBaseUrl,
+            ["fallbackModelName"] = fallbackModelName,
+            ["fallbackModelKey"] = fallbackModelKey,
         };
         turnWait = string.Equals(settings.ModelName, "local", StringComparison.OrdinalIgnoreCase)
             ? TimeSpan.FromMinutes(11)
@@ -292,14 +306,30 @@ public sealed partial class EngineHostClient : IAsyncDisposable, IChatEngine
     /// <summary>Resume after a takeover; the sidecar re-observes before deciding.</summary>
     public void ResumeTurn() => Send(new JsonObject { ["type"] = "turn.resume" });
 
-    public void SendApprovalResult(string id, bool allow, string device = "pc")    {
-        Send(new JsonObject
+    /// <summary>
+    /// <paramref name="phone"/> is what the phone answered (its sender, tap and
+    /// signature), passed on for the sidecar to check (ADR-0031, ADR-0032).
+    /// </summary>
+    public void SendApprovalResult(string id, bool allow, string device = "pc", JsonObject? phone = null)    {
+        var message = new JsonObject
         {
             ["type"] = "approval.result",
             ["id"] = id,
             ["allow"] = allow,
             ["device"] = device,
-        });
+        };
+        if (phone != null)
+        {
+            message["phone"] = phone;
+        }
+
+        Send(message);
+    }
+
+    /// <summary>ADR-0032: forget the phones' pinned signing keys, after a phone was paired again.</summary>
+    public void ForgetPhoneKeys()
+    {
+        Send(new JsonObject { ["type"] = "phonekeys.forget" });
     }
 
     /// <summary>

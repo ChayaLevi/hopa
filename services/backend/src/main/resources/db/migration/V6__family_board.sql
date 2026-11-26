@@ -1,8 +1,8 @@
 -- Schema v6: the family board, an append-only log of encrypted operations
--- (ADR-0031).
+-- (ADR-0033).
 --
 -- The server stores op bodies as ciphertext only and never reads them. The
--- plaintext columns are exactly the metadata ADR-0031 lists: scope, seq,
+-- plaintext columns are exactly the metadata ADR-0033 lists: scope, seq,
 -- op_id, from_device, member_id, key_epoch, body hash, size and time.
 --
 -- board_heads holds the last seq per household. An append bumps it with one

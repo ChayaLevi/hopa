@@ -1,0 +1,583 @@
+{
+  "version": 1,
+  "vectors": [
+    {
+      "name": "a payment allowed from its card",
+      "seed": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "publicKey": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "fingerprint": "5647 5aa7 5463 474c",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "actionHash": "a573d1f10701653e521aa9d84969c4cfc9a92fdcb29352224420ed74368b88d9",
+      "message": "00000017686f70612e617070726f76616c2e616e737765722e76310000001641414543417751464267634943516f4c4441304f44770000000d3137393530303030303030303000000014617070725f61705f315f30613162326333645f31000000406135373364316631303730313635336535323161613964383439363963346366633961393266646362323933353232323434323065643734333638623838643900000005616c6c6f77",
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "Y4jrw9fmtXrdShWrIv4RrjKZm_H5GXX9Rac5C5sZRlEmASegpq0-kvFn9Y4DcZxTIi9PTrdZuT5I9tkGrWqpBg"
+      }
+    },
+    {
+      "name": "a plain request denied without a card",
+      "seed": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "publicKey": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "fingerprint": "5647 5aa7 5463 474c",
+      "request": {
+        "title": "Open Settings?",
+        "body": "HOPA wants to open Wi-Fi settings on your phone.",
+        "amount": "",
+        "merchant": "",
+        "consequence": "",
+        "isPayment": false,
+        "action": {
+          "kind": "launch"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": null,
+      "allow": false,
+      "actionHash": "2ddfc5e76b13b37faaaa364efcb5bbda404d78e45efda29fc00855a53f8d614e",
+      "message": "00000017686f70612e617070726f76616c2e616e737765722e76310000001641414543417751464267634943516f4c4441304f44770000000d313739353030303030303030300000000000000040326464666335653736623133623337666161616133363465666362356262646134303464373865343565666461323966633030383535613533663864363134650000000464656e79",
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "FgnNbRziLeVh4tLYtkbiljwCYmfpNQH98bSCR0v2d_eEjgcRsmGsL16Y86AgWC90Y78bBDZ3KTZohUNSwubGCQ"
+      }
+    },
+    {
+      "name": "text outside ASCII is signed as UTF-8",
+      "seed": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+      "publicKey": "Kay64UG8yvCyLhqU000LxzYeUm0L_hLIl5S8kyKWbdc",
+      "fingerprint": "24f6 ed6a cbfe 1009",
+      "request": {
+        "title": "Bezahlen?",
+        "body": "Money may leave your account.",
+        "amount": "€ 4,50",
+        "merchant": "Café Zürich",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "EBESExQVFhcYGRobHB0eHw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "actionHash": "45f664801ad97e5f3a9ba991eb6cdc3643299cf354713be9542ec05ad65f1ef5",
+      "message": "00000017686f70612e617070726f76616c2e616e737765722e76310000001645424553457851564668635947526f624842306548770000000d3137393530303030303030303000000014617070725f61705f315f30613162326333645f31000000403435663636343830316164393765356633613962613939316562366364633336343332393963663335343731336265393534326563303561643635663165663500000005616c6c6f77",
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "Kay64UG8yvCyLhqU000LxzYeUm0L_hLIl5S8kyKWbdc",
+        "sig": "QvoekkOz-d6bxNWCdBeE-Zlfca2OJVtrTI4oA7IrEUU90loE1ydILMmOAZWGKrLIDfTfcZUbZkfgKEemSEoODg"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "the first signed allow pins the key",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": null,
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "Y4jrw9fmtXrdShWrIv4RrjKZm_H5GXX9Rac5C5sZRlEmASegpq0-kvFn9Y4DcZxTIi9PTrdZuT5I9tkGrWqpBg"
+      },
+      "allowed": true,
+      "code": "pinned",
+      "pins": true
+    },
+    {
+      "name": "a signed allow from the pinned key",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "Y4jrw9fmtXrdShWrIv4RrjKZm_H5GXX9Rac5C5sZRlEmASegpq0-kvFn9Y4DcZxTIi9PTrdZuT5I9tkGrWqpBg"
+      },
+      "allowed": true,
+      "code": "verified",
+      "pins": false
+    },
+    {
+      "name": "a deny needs no proof",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": false,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": null,
+      "allowed": false,
+      "code": "denied",
+      "pins": false
+    },
+    {
+      "name": "an answer after the deadline",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1795000000001,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "Y4jrw9fmtXrdShWrIv4RrjKZm_H5GXX9Rac5C5sZRlEmASegpq0-kvFn9Y4DcZxTIi9PTrdZuT5I9tkGrWqpBg"
+      },
+      "allowed": false,
+      "code": "expired",
+      "pins": false
+    },
+    {
+      "name": "an unsigned allow from a phone that never signed",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": null,
+      "now": 1794999990000,
+      "signature": null,
+      "allowed": true,
+      "code": "legacy",
+      "pins": false
+    },
+    {
+      "name": "an unsigned allow from a phone that signs",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": null,
+      "allowed": false,
+      "code": "unsigned",
+      "pins": false
+    },
+    {
+      "name": "a signature of the wrong size",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "AAAAAAAAAAAAAA"
+      },
+      "allowed": false,
+      "code": "malformed",
+      "pins": false
+    },
+    {
+      "name": "a signature that is not Ed25519",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "RSA",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "Y4jrw9fmtXrdShWrIv4RrjKZm_H5GXX9Rac5C5sZRlEmASegpq0-kvFn9Y4DcZxTIi9PTrdZuT5I9tkGrWqpBg"
+      },
+      "allowed": false,
+      "code": "malformed",
+      "pins": false
+    },
+    {
+      "name": "a signed allow with no sender",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "",
+      "pinned": null,
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "Y4jrw9fmtXrdShWrIv4RrjKZm_H5GXX9Rac5C5sZRlEmASegpq0-kvFn9Y4DcZxTIi9PTrdZuT5I9tkGrWqpBg"
+      },
+      "allowed": false,
+      "code": "no_sender",
+      "pins": false
+    },
+    {
+      "name": "signed for another amount",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "jwux80hInTPtYwwUW0NDPv4I6q-WSOwXPys5fu6mfks9lS-clQShP-kHtmY2z4Gbu-eF5LQvxdYTyoaE_Xy-Dw"
+      },
+      "allowed": false,
+      "code": "bad_signature",
+      "pins": false
+    },
+    {
+      "name": "a signed deny presented as allow",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "m1h9lAiOrnZcYez5TKaih_887fRYNmcuT1cf4qUPSNS84jJkE1QqzhLFdywpEhe2Qy7WwmZGNF1fDhwmWJhlCQ"
+      },
+      "allowed": false,
+      "code": "bad_signature",
+      "pins": false
+    },
+    {
+      "name": "a replay of an answer to another question",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "vWXiQdMra1FaKuVDtH2T8DSIq4J6etmEvUV2cTEd5Xe-j4VhlWQm0g88iM0Ark7jpnMHziybKnnnm8IFbYEHCg"
+      },
+      "allowed": false,
+      "code": "bad_signature",
+      "pins": false
+    },
+    {
+      "name": "signed for another card",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+        "sig": "qIO9nwbGtzcl5SjhvXcglSoAm7dSzcjU83YimjJCRVkibUapryxZANfdLLZpytYPRDiAII6u3p8a3sVbaCSPBQ"
+      },
+      "allowed": false,
+      "code": "bad_signature",
+      "pins": false
+    },
+    {
+      "name": "a signature from another key",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "Kay64UG8yvCyLhqU000LxzYeUm0L_hLIl5S8kyKWbdc",
+        "sig": "Ex_8IUMUc9K_mV_uRlzCnW34a0x6azsvRpT5Ldtxb_ukmgyKOWehOG2pNRicODFARpojPTSfwVjZGabT3DJ4Dg"
+      },
+      "allowed": false,
+      "code": "key_changed",
+      "pins": false
+    },
+    {
+      "name": "a valid signature that claims another key",
+      "request": {
+        "title": "Confirm payment",
+        "body": "Money may leave your account.",
+        "amount": "12.40",
+        "merchant": "Example Shop",
+        "consequence": "HOPA cannot undo a payment.",
+        "isPayment": true,
+        "action": {
+          "kind": "payment.pay"
+        }
+      },
+      "challenge": {
+        "v": 1,
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "expiresAt": 1795000000000
+      },
+      "surfaceId": "appr_ap_1_0a1b2c3d_1",
+      "allow": true,
+      "from": "dev-phone",
+      "pinned": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg",
+      "now": 1794999990000,
+      "signature": {
+        "v": 1,
+        "alg": "Ed25519",
+        "key": "Kay64UG8yvCyLhqU000LxzYeUm0L_hLIl5S8kyKWbdc",
+        "sig": "Y4jrw9fmtXrdShWrIv4RrjKZm_H5GXX9Rac5C5sZRlEmASegpq0-kvFn9Y4DcZxTIi9PTrdZuT5I9tkGrWqpBg"
+      },
+      "allowed": false,
+      "code": "bad_signature",
+      "pins": false
+    }
+  ]
+}

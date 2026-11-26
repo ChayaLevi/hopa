@@ -1,7 +1,9 @@
 package com.hopa.screenshots
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.hopa.feature.chat.ChatScreen
 import com.hopa.feature.chat.ChatUiState
@@ -48,6 +50,39 @@ class ChatScreenshotTest {
             }
         }
         compose.onRoot().captureRoboImage("src/test/screenshots/chat-empty.png")
+    }
+
+    /** The answer chips of a choice; since ADR-0031 phase 2 they come from an A2UI surface. */
+    @Test
+    fun options() {
+        val chosen = mutableListOf<String>()
+        compose.setContent {
+            HopaTheme {
+                ChatScreen(
+                    state = ChatUiState(options = listOf("Personal", "Work", "Family")),
+                    activeTab = "chat",
+                    onSelectTab = {},
+                    onInput = {},
+                    onSend = {},
+                    onOption = { chosen += it },
+                    onQuick = {},
+                    onNewChat = {},
+                    onOpenConversations = {},
+                    onStartVoice = {},
+                    onStopVoice = {},
+                    onDismissVoiceError = {},
+                    onSpeak = {},
+                    onRetry = {},
+                    onUndo = {},
+                    onDiscardAttachment = {},
+                    onDismissAttachmentNotice = {},
+                    hourOfDay = 9,
+                )
+            }
+        }
+        compose.onRoot().captureRoboImage("src/test/screenshots/chat-options.png")
+        compose.onNodeWithText("Work").performClick()
+        org.junit.Assert.assertEquals(listOf("Work"), chosen)
     }
 
     @Test

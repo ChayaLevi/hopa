@@ -13,7 +13,7 @@ import com.hopa.ui.theme.HopaTheme
 
 @Composable
 fun HopaApp(container: AppContainer, initialGoal: String = "") {
-    val pending by container.pendingApproval.collectAsStateWithLifecycle()
+    val question by container.approval.question.collectAsStateWithLifecycle()
     // Null until the stored value arrives, so the mascot does not flash the
     // default look for one frame when a person prefers the framed one.
     val settings by container.settings.settings.collectAsState(initial = null)
@@ -24,11 +24,12 @@ fun HopaApp(container: AppContainer, initialGoal: String = "") {
         HopaNavHost(container = container, initialGoal = initialGoal)
         // One sheet for every tab: a remote run may ask while the person is on
         // Running apps or My computer, not only in chat.
-        pending?.let { request ->
+        question?.let { open ->
             ApprovalSheet(
-                request = request,
-                onDeny = { container.resolveApproval(false) },
-                onAllow = { container.resolveApproval(true) },
+                request = open.request,
+                card = open.card,
+                onDeny = { container.approval.resolve(false) },
+                onAllow = { tap -> container.approval.resolve(true, tap) },
             )
         }
     }

@@ -21,7 +21,7 @@ public sealed class ApprovalRouterTests
                 return false;
             },
             phone: () => phone,
-            reply: (id, allow, source) => replies.Add((id, allow, source)),
+            reply: (id, allow, source, _) => replies.Add((id, allow, source)),
             log: _ => { },
             autoApproval: "allow");
 
@@ -41,7 +41,7 @@ public sealed class ApprovalRouterTests
         var router = new ApprovalRouter(
             askUser: _ => true,
             phone: () => null,
-            reply: (id, allow, source) => replies.Add((id, allow, source)),
+            reply: (id, allow, source, _) => replies.Add((id, allow, source)),
             log: _ => { },
             autoApproval: null);
 
@@ -65,7 +65,7 @@ public sealed class ApprovalRouterTests
         var router = new ApprovalRouter(
             askUser: _ => false,
             phone: () => phone,
-            reply: (id, allow, source) => replies.Add((id, allow, source)),
+            reply: (id, allow, source, _) => replies.Add((id, allow, source)),
             log: _ => { },
             autoApproval: null);
 
@@ -95,7 +95,7 @@ public sealed class ApprovalRouterTests
             var router = new ApprovalRouter(
                 askUser: _ => true,
                 phone: () => phone,
-                reply: (id, allow, source) => replies.Add((id, allow, source)),
+                reply: (id, allow, source, _) => replies.Add((id, allow, source)),
                 log: _ => { },
                 autoApproval: null);
 
@@ -136,7 +136,7 @@ public sealed class ApprovalRouterTests
         var router = new ApprovalRouter(
             askUser: _ => true,
             phone: () => null,
-            reply: (_, _, _) => { },
+            reply: (_, _, _, _) => { },
             log: logs.Add,
             autoApproval: null);
 
@@ -149,6 +149,59 @@ public sealed class ApprovalRouterTests
 
         Assert.Contains(logs, line => line.StartsWith("approval:", StringComparison.Ordinal));
         Assert.DoesNotContain(logs, line => line.Contains("hunter2", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task TheRelayGoesToThePhoneAndTheAnswerComesBackUnchanged()
+    {
+        var result = Approval(allow: true);
+        result["from"] = "p1";
+        result["body"]!["approval"]!["action"] = new JsonObject { ["version"] = "1.0" };
+        result["body"]!["approval"]!["signature"] = new JsonObject { ["v"] = 1, ["alg"] = "Ed25519" };
+        var phone = new FakePhone { IsLive = true, PhoneDeviceId = "p1", Result = result };
+        var replies = new List<JsonObject?>();
+        var router = new ApprovalRouter(
+            askUser: _ => false,
+            phone: () => phone,
+            reply: (_, _, _, action) => replies.Add(action),
+            log: _ => { },
+            autoApproval: null);
+        var message = Message();
+        message["relay"] = new JsonObject
+        {
+            ["a2ui"] = new JsonArray(new JsonObject { ["version"] = "1.0" }),
+            ["challenge"] = new JsonObject { ["v"] = 1, ["nonce"] = "n", ["expiresAt"] = 1 },
+        };
+
+        await router.HandleAsync(message);
+
+        Assert.True(JsonNode.DeepEquals(message["relay"], phone.Relay), "the relay is copied, not rebuilt");
+        var answer = Assert.Single(replies)!;
+        Assert.Equal("p1", answer["from"]!.GetValue<string>());
+        Assert.True(
+            JsonNode.DeepEquals(result["body"]!["approval"], answer["approval"]),
+            "the sidecar gets the phone's whole answer to check");
+    }
+
+    [Fact]
+    public async Task WithoutARelayNothingExtraTravels()
+    {
+        var phone = new FakePhone { IsLive = true, PhoneDeviceId = "p1", Result = Approval(allow: true) };
+        var replies = new List<JsonObject?>();
+        var router = new ApprovalRouter(
+            askUser: _ => false,
+            phone: () => phone,
+            reply: (_, _, _, action) => replies.Add(action),
+            log: _ => { },
+            autoApproval: null);
+
+        await router.HandleAsync(Message());
+
+        Assert.Null(phone.Relay);
+        // An older phone's answer still reaches the sidecar, which reads it from allow alone.
+        var answer = Assert.Single(replies)!;
+        Assert.True(answer["approval"]!["allow"]!.GetValue<bool>());
+        Assert.Null(answer["approval"]!["signature"]);
     }
 
     [Fact]
@@ -186,12 +239,16 @@ public sealed class ApprovalRouterTests
 
         public int Calls { get; private set; }
 
+        public JsonObject? Relay { get; private set; }
+
         public Task<JsonObject?> RequestApprovalAsync(
             JsonObject approval,
             string phoneDeviceId,
-            TimeSpan timeout)
+            TimeSpan timeout,
+            JsonObject? relay = null)
         {
             Calls++;
+            Relay = relay;
             return Failure != null
                 ? Task.FromException<JsonObject?>(Failure)
                 : Task.FromResult(Result);

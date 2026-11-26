@@ -35,6 +35,7 @@ import com.hopa.sidecar.store.Attachments
 import com.hopa.sidecar.store.ChatStore
 import com.hopa.sidecar.store.MemoryFileStore
 import com.hopa.sidecar.store.PendingApprovals
+import com.hopa.sidecar.store.PhoneKeys
 import com.hopa.sidecar.store.RecordStore
 import com.hopa.sidecar.store.SkillFileStore
 import com.hopa.sidecar.store.TaskStore
@@ -65,7 +66,8 @@ internal fun runProtocol(options: CliOptions) {
     val recipes = RecipeStore(dataDir.resolve("recipes.txt").toFile())
     val config = RuntimeConfig()
     val capabilities = CapabilitiesCollector(config, memory, skills, recipes, records)
-    val approval = HostApproval(io, approvals)
+    val phoneKeys = PhoneKeys(dataDir.resolve(PHONE_KEYS))
+    val approval = HostApproval(io, approvals, phoneKeys)
     val attachments = Attachments(dataDir.resolve("attachments"))
     val tasks = TaskStore()
     val engine = TurnEngine(
@@ -164,7 +166,7 @@ internal fun runProtocol(options: CliOptions) {
             TaskHandler(io, tasks),
             BrowserHandler(browser),
             DeviceHandler(io, device, config),
-            ApprovalHandler(io, approval, config),
+            ApprovalHandler(io, approval, config, phoneKeys),
             BackendHandler(io, dataDir, sessionStore, gateways, backendScope),
         ),
     )

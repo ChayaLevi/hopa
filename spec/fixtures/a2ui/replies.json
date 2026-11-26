@@ -1,0 +1,434 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "name": "an approve tap",
+      "ok": true,
+      "message": {
+        "version": "1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {}
+        }
+      }
+    },
+    {
+      "name": "a choice tap",
+      "ok": true,
+      "message": {
+        "version": "1.0",
+        "action": {
+          "name": "choose",
+          "surfaceId": "ask_turn_7_1",
+          "sourceComponentId": "option1",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {
+            "value": "Work"
+          }
+        }
+      }
+    },
+    {
+      "name": "a validation error",
+      "ok": true,
+      "message": {
+        "version": "1.0",
+        "error": {
+          "code": "VALIDATION_FAILED",
+          "surfaceId": "s1",
+          "path": "/createSurface/components/3/child",
+          "message": "child missing does not exist"
+        }
+      }
+    },
+    {
+      "name": "a generic error",
+      "ok": true,
+      "message": {
+        "version": "1.0",
+        "error": {
+          "code": "UNSUPPORTED",
+          "surfaceId": "s1",
+          "message": "version v1.0 is not supported"
+        }
+      }
+    },
+    {
+      "name": "a reply with the wrong version",
+      "ok": false,
+      "schema": false,
+      "error": {
+        "code": "UNSUPPORTED",
+        "path": "/version"
+      },
+      "message": {
+        "version": "v1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {}
+        }
+      }
+    },
+    {
+      "name": "an action without a timestamp",
+      "ok": false,
+      "schema": false,
+      "error": {
+        "code": "VALIDATION_FAILED",
+        "path": "/action/timestamp"
+      },
+      "message": {
+        "version": "1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "context": {}
+        }
+      }
+    },
+    {
+      "name": "an action with a userMessage",
+      "ok": false,
+      "schema": false,
+      "error": {
+        "code": "UNSUPPORTED",
+        "path": "/action/userMessage"
+      },
+      "message": {
+        "version": "1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {},
+          "userMessage": "I approve"
+        }
+      }
+    },
+    {
+      "name": "an action with a timestamp that is not a time",
+      "ok": false,
+      "schema": true,
+      "error": {
+        "code": "VALIDATION_FAILED",
+        "path": "/action/timestamp"
+      },
+      "message": {
+        "version": "1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "timestamp": "yesterday",
+          "context": {}
+        }
+      }
+    },
+    {
+      "name": "an action with a non-string context value",
+      "ok": false,
+      "schema": false,
+      "error": {
+        "code": "VALIDATION_FAILED",
+        "path": "/action/context/value"
+      },
+      "message": {
+        "version": "1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {
+            "value": 3
+          }
+        }
+      }
+    }
+  ],
+  "approvalAnswers": [
+    {
+      "name": "allow with a matching approve tap",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "name": "approve",
+        "surfaceId": "appr_tsk_42_1",
+        "sourceComponentId": "allow",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {}
+      },
+      "allowed": true
+    },
+    {
+      "name": "allow from a client without A2UI",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": null,
+      "allowed": true
+    },
+    {
+      "name": "deny stays deny",
+      "allow": false,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "name": "deny",
+        "surfaceId": "appr_tsk_42_1",
+        "sourceComponentId": "deny",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {}
+      },
+      "allowed": false
+    },
+    {
+      "name": "allow with a deny tap is deny",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "name": "deny",
+        "surfaceId": "appr_tsk_42_1",
+        "sourceComponentId": "deny",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {}
+      },
+      "allowed": false
+    },
+    {
+      "name": "deny with an approve tap is deny",
+      "allow": false,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "name": "approve",
+        "surfaceId": "appr_tsk_42_1",
+        "sourceComponentId": "allow",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {}
+      },
+      "allowed": false
+    },
+    {
+      "name": "allow for another surface is deny",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_2",
+      "action": {
+        "name": "approve",
+        "surfaceId": "appr_tsk_42_1",
+        "sourceComponentId": "allow",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {}
+      },
+      "allowed": false
+    },
+    {
+      "name": "allow from another button is deny",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "name": "approve",
+        "surfaceId": "appr_tsk_42_1",
+        "sourceComponentId": "deny",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {}
+      },
+      "allowed": false
+    }
+  ],
+  "wireAnswers": [
+    {
+      "name": "allow with the approve tap",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "version": "1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {}
+        }
+      },
+      "allowed": true
+    },
+    {
+      "name": "allow without an action (a client without A2UI)",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": null,
+      "allowed": true
+    },
+    {
+      "name": "deny without an action",
+      "allow": false,
+      "surfaceId": "appr_tsk_42_1",
+      "action": null,
+      "allowed": false
+    },
+    {
+      "name": "allow with a deny tap",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "version": "1.0",
+        "action": {
+          "name": "deny",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "deny",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {}
+        }
+      },
+      "allowed": false
+    },
+    {
+      "name": "allow with a tap on another surface",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_2",
+      "action": {
+        "version": "1.0",
+        "action": {
+          "name": "approve",
+          "surfaceId": "appr_tsk_42_1",
+          "sourceComponentId": "allow",
+          "timestamp": "2026-11-22T10:15:00Z",
+          "context": {}
+        }
+      },
+      "allowed": false
+    },
+    {
+      "name": "allow with an error instead of a tap",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "version": "1.0",
+        "error": {
+          "code": "UNSUPPORTED",
+          "surfaceId": "appr_tsk_42_1",
+          "message": "no"
+        }
+      },
+      "allowed": false
+    },
+    {
+      "name": "allow with a malformed action",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": {
+        "version": "1.0",
+        "action": {
+          "name": "approve"
+        }
+      },
+      "allowed": false
+    },
+    {
+      "name": "allow with an action that is not an object",
+      "allow": true,
+      "surfaceId": "appr_tsk_42_1",
+      "action": "approve",
+      "allowed": false
+    }
+  ],
+  "choiceAnswers": [
+    {
+      "name": "a listed option",
+      "surfaceId": "ask_turn_7_1",
+      "options": [
+        "Personal",
+        "Work",
+        "Family"
+      ],
+      "action": {
+        "name": "choose",
+        "surfaceId": "ask_turn_7_1",
+        "sourceComponentId": "option1",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {
+          "value": "Work"
+        }
+      },
+      "chosen": "Work"
+    },
+    {
+      "name": "an option that was not offered",
+      "surfaceId": "ask_turn_7_1",
+      "options": [
+        "Personal",
+        "Work"
+      ],
+      "action": {
+        "name": "choose",
+        "surfaceId": "ask_turn_7_1",
+        "sourceComponentId": "option1",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {
+          "value": "Admin"
+        }
+      },
+      "chosen": null
+    },
+    {
+      "name": "a tap on another surface",
+      "surfaceId": "ask_turn_7_2",
+      "options": [
+        "Personal",
+        "Work"
+      ],
+      "action": {
+        "name": "choose",
+        "surfaceId": "ask_turn_7_1",
+        "sourceComponentId": "option1",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {
+          "value": "Work"
+        }
+      },
+      "chosen": null
+    },
+    {
+      "name": "the wrong event name",
+      "surfaceId": "ask_turn_7_1",
+      "options": [
+        "Personal",
+        "Work"
+      ],
+      "action": {
+        "name": "approve",
+        "surfaceId": "ask_turn_7_1",
+        "sourceComponentId": "option1",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {
+          "value": "Work"
+        }
+      },
+      "chosen": null
+    },
+    {
+      "name": "a value from the wrong button",
+      "surfaceId": "ask_turn_7_1",
+      "options": [
+        "Personal",
+        "Work"
+      ],
+      "action": {
+        "name": "choose",
+        "surfaceId": "ask_turn_7_1",
+        "sourceComponentId": "option0",
+        "timestamp": "2026-11-22T10:15:00Z",
+        "context": {
+          "value": "Work"
+        }
+      },
+      "chosen": null
+    }
+  ]
+}

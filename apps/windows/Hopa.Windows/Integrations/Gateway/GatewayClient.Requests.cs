@@ -19,7 +19,8 @@ public sealed partial class GatewayClient
     public async Task<JsonObject?> RequestApprovalAsync(
         JsonObject approval,
         string phoneDeviceId,
-        TimeSpan timeout)
+        TimeSpan timeout,
+        JsonObject? relay = null)
     {
         if (!HasPhone || phoneDeviceId.Length == 0)
         {
@@ -34,6 +35,20 @@ public sealed partial class GatewayClient
 
         try
         {
+            var body = new JsonObject
+            {
+                ["goal"] = approval["title"]?.GetValue<string>() ?? "approve this action",
+                ["approval"] = approval.DeepClone(),
+            };
+            foreach (var (key, value) in relay ?? new JsonObject())
+            {
+                // The relay adds fields; it never replaces the typed approval.
+                if (!body.ContainsKey(key))
+                {
+                    body[key] = value?.DeepClone();
+                }
+            }
+
             await SendAsync(new JsonObject
             {
                 ["v"] = 1,
@@ -41,11 +56,7 @@ public sealed partial class GatewayClient
                 ["type"] = "task.needs_approval",
                 ["ts"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 ["to"] = phoneDeviceId,
-                ["body"] = new JsonObject
-                {
-                    ["goal"] = approval["title"]?.GetValue<string>() ?? "approve this action",
-                    ["approval"] = approval.DeepClone(),
-                },
+                ["body"] = body,
             });
             _ = await pending.Ack.Task.WaitAsync(TimeSpan.FromSeconds(15));
             return await pending.Result.Task.WaitAsync(timeout);

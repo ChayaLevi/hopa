@@ -67,7 +67,7 @@ fun BackendCard(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                "HOPA gateway",
+                "HOPA account",
                 fontSize = 19.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = HopaColor.TextPrimary,
@@ -80,7 +80,7 @@ fun BackendCard(
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
-                label = { Text("Gateway address, e.g. wss://host/v1/gateway") },
+                label = { Text("Link or address from your computer") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -128,7 +128,7 @@ fun BackendCard(
                 Text(
                     message,
                     fontSize = 12.sp,
-                    color = if (message.startsWith("Gateway: ")) {
+                    color = if (message.startsWith("Couldn't pair: ")) {
                         HopaColor.Danger
                     } else {
                         HopaColor.TextSecondary
@@ -140,6 +140,14 @@ fun BackendCard(
                 fontSize = 12.sp,
                 color = HopaColor.TextPrimary,
             )
+            if (state.approvalKeyFingerprint.isNotBlank()) {
+                // The same four groups the PC logs when it pins this phone's key.
+                Text(
+                    "Approval key " + state.approvalKeyFingerprint,
+                    fontSize = 12.sp,
+                    color = HopaColor.TextSecondary,
+                )
+            }
             FcmLine(
                 available = state.fcmAvailable,
                 token = state.backendToken,

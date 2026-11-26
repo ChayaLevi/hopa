@@ -54,6 +54,7 @@ class DataStoreSettingsRepository(
             prefs[BACKEND_URL] = next.backendUrl
             prefs[BACKEND_DEVICE_ID] = next.backendDeviceId
             prefs[BACKEND_HOUSEHOLD_ID] = next.backendHouseholdId
+            prefs[ACCOUNT_SKIPPED] = next.accountSkipped
         }
     }
 
@@ -95,11 +96,19 @@ class DataStoreSettingsRepository(
         if (value.isBlank()) secrets.clear(BACKEND_CONTENT_KEY) else secrets.set(BACKEND_CONTENT_KEY, value)
     }
 
+    override suspend fun approvalSigningKey(): String = secrets.get(APPROVAL_SIGNING_KEY)
+
+    override suspend fun setApprovalSigningKey(value: String) {
+        if (value.isBlank()) secrets.clear(APPROVAL_SIGNING_KEY) else secrets.set(APPROVAL_SIGNING_KEY, value)
+    }
+
     override suspend fun clearBackend() {
         secrets.clear(BACKEND_ACCESS)
         secrets.clear(BACKEND_REFRESH)
         secrets.clear(BACKEND_PRIVATE_KEY)
         secrets.clear(BACKEND_CONTENT_KEY)
+        // A phone paired again is a new device to the PC: it signs with a new key.
+        secrets.clear(APPROVAL_SIGNING_KEY)
         update {
             it.copy(
                 backendUrl = DEFAULT_BACKEND_URL,
@@ -142,6 +151,7 @@ class DataStoreSettingsRepository(
             backendUrl = prefs[BACKEND_URL] ?: DEFAULT_BACKEND_URL,
             backendDeviceId = prefs[BACKEND_DEVICE_ID] ?: "",
             backendHouseholdId = prefs[BACKEND_HOUSEHOLD_ID] ?: "",
+            accountSkipped = prefs[ACCOUNT_SKIPPED] ?: false,
         )
 
         val PROVIDER = stringPreferencesKey("provider")
@@ -172,6 +182,7 @@ val CLOUD_FALLBACK = booleanPreferencesKey("cloud_fallback")
         val BACKEND_URL = stringPreferencesKey("backend_url")
         val BACKEND_DEVICE_ID = stringPreferencesKey("backend_device_id")
         val BACKEND_HOUSEHOLD_ID = stringPreferencesKey("backend_household_id")
+        val ACCOUNT_SKIPPED = booleanPreferencesKey("account_skipped")
         const val MODEL_KEY = "model_key"
         const val BRIDGE_TOKEN = "bridge_token"
         const val BRIDGE_REFRESH = "bridge_refresh"
@@ -179,5 +190,6 @@ val CLOUD_FALLBACK = booleanPreferencesKey("cloud_fallback")
         const val BACKEND_REFRESH = "backend_refresh"
         const val BACKEND_PRIVATE_KEY = "backend_private_key"
         const val BACKEND_CONTENT_KEY = "backend_content_key"
+        const val APPROVAL_SIGNING_KEY = "approval_signing_key"
     }
 }

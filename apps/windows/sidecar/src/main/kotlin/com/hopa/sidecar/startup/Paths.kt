@@ -3,6 +3,9 @@ package com.hopa.sidecar.startup
 import java.nio.file.Path
 
 /** `HOPA_DATA_DIR` wins over the default, so a test or an installer can pin it. */
+/** The phones' pinned signing keys (ADR-0032), in the data directory. */
+internal const val PHONE_KEYS = "phone-keys.json"
+
 internal fun defaultDataDir(): Path =
     System.getenv("HOPA_DATA_DIR")
         ?.takeIf { it.isNotBlank() }

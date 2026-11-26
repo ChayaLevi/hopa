@@ -4,6 +4,13 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+sourceSets {
+    test {
+        // The signed-answer vectors in spec/ are the cross-client contract (ADR-0032).
+        resources.srcDir(file("../../spec"))
+    }
+}
+
 dependencies {
     api(project(":contracts"))
     api(project(":inference"))

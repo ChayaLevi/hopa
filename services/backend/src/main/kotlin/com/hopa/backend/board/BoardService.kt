@@ -5,7 +5,7 @@ import com.hopa.backend.protocol.GatewayError
 import java.util.UUID
 
 /**
- * The board's rules on top of [BoardStore] (ADR-0031).
+ * The board's rules on top of [BoardStore] (ADR-0033).
  *
  * The scope rule lives here, not in RLS: a device reads or writes `parents`
  * only while it holds a `scope_key_wraps` row for `parents` at the current

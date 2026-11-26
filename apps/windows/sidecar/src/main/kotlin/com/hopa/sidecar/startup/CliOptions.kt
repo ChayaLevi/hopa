@@ -8,6 +8,7 @@ internal data class CliOptions(
     val dataDir: Path? = null,
     val conversationId: String? = null,
     val pairBackend: String? = null,
+    val forgetPhoneKey: Boolean = false,
     val help: Boolean = false,
     val version: Boolean = false,
 ) {
@@ -17,6 +18,7 @@ internal data class CliOptions(
             var dataDir: Path? = null
             var conversationId: String? = null
             var pairBackend: String? = null
+            var forgetPhoneKey = false
             var help = false
             var version = false
             var index = 0
@@ -56,6 +58,8 @@ internal data class CliOptions(
                     arg.startsWith("--pair-backend=") ->
                         pairBackend = arg.removePrefix("--pair-backend=").takeIf { it.isNotBlank() }
 
+                    arg == "--forget-phone-key" -> forgetPhoneKey = true
+
                     arg == "--help" || arg == "-h" -> help = true
 
                     arg == "--version" -> version = true
@@ -69,6 +73,7 @@ internal data class CliOptions(
                 dataDir = dataDir,
                 conversationId = conversationId,
                 pairBackend = pairBackend,
+                forgetPhoneKey = forgetPhoneKey,
                 help = help,
                 version = version,
             )
