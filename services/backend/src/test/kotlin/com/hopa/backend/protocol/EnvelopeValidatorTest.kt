@@ -1,9 +1,12 @@
 package com.hopa.backend.protocol
 
+import java.util.Base64
 import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -122,5 +125,73 @@ class EnvelopeValidatorTest {
             assertEquals(expected, actual, case["name"]!!.jsonPrimitive.content)
         }
         assertTrue(checked >= 4, "expected at least four validator-level fixtures")
+    }
+
+    @Test
+    fun `every board fixture gets the validator answer it names`() {
+        val raw = requireNotNull(javaClass.getResource("/fixtures/gateway-board.json")).readText()
+        val cases = Json.parseToJsonElement(raw).jsonObject["cases"]!!.jsonArray
+        var refused = 0
+        for (element in cases) {
+            val case = element.jsonObject
+            val name = case["name"]!!.jsonPrimitive.content
+            val schemaValid = case["schema"]?.jsonPrimitive?.boolean
+                ?: case["ok"]!!.jsonPrimitive.boolean
+            val message = case["message"]!!.jsonObject.toString()
+            val actual = when (val decoded = GatewayCodec.decode(message)) {
+                is DecodeResult.Failed -> decoded.error.code
+                is DecodeResult.Ok -> EnvelopeValidator.validate(message, decoded.envelope)?.code
+            }
+            if (schemaValid) {
+                // A conflict or a scope refusal depends on stored state: the
+                // frame itself is well formed and must pass the validator.
+                assertNull(actual, name)
+            } else {
+                refused++
+                assertEquals(case["error"]!!.jsonPrimitive.content, actual, name)
+            }
+        }
+        assertTrue(refused >= 4, "expected at least four schema-level board refusals")
+    }
+
+    @Test
+    fun `a board op at the ciphertext bounds passes and one byte over is refused`() {
+        fun op(rawBytes: Int): Envelope = envelope().copy(
+            type = "board.op",
+            to = null,
+            body = buildJsonObject {
+                put("scope", JsonPrimitive("family"))
+                put("keyEpoch", JsonPrimitive(0))
+                put(
+                    "ct",
+                    JsonPrimitive(
+                        Base64.getEncoder().encodeToString(ByteArray(rawBytes)),
+                    ),
+                )
+            },
+        )
+        val max = EnvelopeValidator.MAX_BOARD_CIPHERTEXT_BYTES
+        val min = EnvelopeValidator.MIN_BOARD_CIPHERTEXT_BYTES
+        val largest = op(max)
+        val largestRaw = GatewayCodec.encode(largest)
+
+        assertTrue(largestRaw.toByteArray().size < EnvelopeValidator.MAX_FRAME_BYTES, "a full op fits the frame cap")
+        assertNull(EnvelopeValidator.validate(largestRaw, largest))
+        assertNull(EnvelopeValidator.validate(GatewayCodec.encode(op(min)), op(min)))
+        assertEquals("E_SCHEMA", EnvelopeValidator.validate(GatewayCodec.encode(op(max + 1)), op(max + 1))?.code)
+        assertEquals("E_SCHEMA", EnvelopeValidator.validate(GatewayCodec.encode(op(min - 1)), op(min - 1))?.code)
+    }
+
+    @Test
+    fun `a board op needs no target device`() {
+        val envelope = envelope().copy(
+            type = "board.op",
+            to = null,
+            body = Json.parseToJsonElement(
+                """{"scope":"parents","keyEpoch":1,"ct":"${Base64.getEncoder().encodeToString(ByteArray(40))}"}""",
+            ).jsonObject,
+        )
+
+        assertNull(EnvelopeValidator.validate(GatewayCodec.encode(envelope), envelope))
     }
 }

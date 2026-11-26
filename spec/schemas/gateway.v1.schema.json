@@ -30,6 +30,9 @@
         "diag.ping",
         "diag.state",
         "diag.reset",
+        "board.op",
+        "board.op.ack",
+        "board.changed",
         "error",
         "ping",
         "pong"
@@ -62,7 +65,7 @@
     },
     "body": {
       "type": "object",
-      "description": "Type-specific payload. Ciphertext from week 2 for task types; the server never renders those. The three diag types (diag.ping, diag.state, diag.reset) are the only plaintext payloads, authored by the admin console and capped at 32 KiB.",
+      "description": "Type-specific payload. Ciphertext from week 2 for task types; the server never renders those. The three diag types (diag.ping, diag.state, diag.reset) are the only plaintext payloads, authored by the admin console and capped at 32 KiB. The board types carry plaintext routing metadata only (scope, seq, keyEpoch, duplicate) next to the op ciphertext ct (ADR-0033).",
       "default": {}
     }
   },
@@ -77,6 +80,81 @@
       "then": {
         "required": ["to"]
       }
+    },
+    {
+      "if": {
+        "required": ["type"],
+        "properties": { "type": { "const": "board.op" } }
+      },
+      "then": {
+        "required": ["body"],
+        "properties": { "body": { "$ref": "#/$defs/boardOp" } }
+      }
+    },
+    {
+      "if": {
+        "required": ["type"],
+        "properties": { "type": { "const": "board.op.ack" } }
+      },
+      "then": {
+        "required": ["body"],
+        "properties": { "body": { "$ref": "#/$defs/boardOpAck" } }
+      }
+    },
+    {
+      "if": {
+        "required": ["type"],
+        "properties": { "type": { "const": "board.changed" } }
+      },
+      "then": {
+        "required": ["body"],
+        "properties": { "body": { "$ref": "#/$defs/boardChanged" } }
+      }
     }
-  ]
+  ],
+  "$defs": {
+    "boardScope": {
+      "enum": ["family", "parents"],
+      "description": "family is read with the household key; parents only by a device holding the parents key at the current epoch (ADR-0033)."
+    },
+    "boardOp": {
+      "type": "object",
+      "description": "Device to server: append one encrypted op. The envelope id is the op id. The server stores ct without reading it.",
+      "required": ["scope", "ct", "keyEpoch"],
+      "properties": {
+        "scope": { "$ref": "#/$defs/boardScope" },
+        "ct": {
+          "type": "string",
+          "minLength": 40,
+          "maxLength": 60076,
+          "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+          "description": "Base64 of IV(12) || ciphertext || tag(16): at least 28 and at most 45056 (44 KiB) raw bytes, so the frame stays under the 64 KiB cap."
+        },
+        "keyEpoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0 for family (the household key has no epochs in v1); the current parents epoch for parents."
+        }
+      }
+    },
+    "boardOpAck": {
+      "type": "object",
+      "description": "Server to the sending device: the op's server-assigned seq. duplicate is true when the same op id with the same body was stored before. Acks and errors come back in the order the ops were sent on the socket.",
+      "required": ["scope", "seq", "duplicate"],
+      "properties": {
+        "scope": { "$ref": "#/$defs/boardScope" },
+        "seq": { "type": "integer", "minimum": 1 },
+        "duplicate": { "type": "boolean" }
+      }
+    },
+    "boardChanged": {
+      "type": "object",
+      "description": "Server to every other online device that may read the scope: the log has an op up to seq. Never sent to the op's sender.",
+      "required": ["scope", "seq"],
+      "properties": {
+        "scope": { "$ref": "#/$defs/boardScope" },
+        "seq": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
 }
