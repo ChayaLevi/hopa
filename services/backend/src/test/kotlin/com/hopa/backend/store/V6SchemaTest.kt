@@ -139,25 +139,6 @@ class V6SchemaTest {
     }
 
     @Test
-    fun `members gain a nullable family role limited to parent teen and child`() {
-        val household = newHousehold()
-        val member = UUID.randomUUID().toString()
-        seedHousehold(db, household, newDevice(), member)
-
-        val initial = db.tenant(household) { connection ->
-            connection.strings("select coalesce(family_role, 'null') from members")
-        }
-        for (role in listOf("parent", "teen", "child")) {
-            db.tenant(household) { connection -> setRole(connection, member, role) }
-        }
-
-        assertEquals(listOf("null"), initial)
-        assertThrows<SQLException> {
-            db.tenant(household) { connection -> setRole(connection, member, "owner") }
-        }
-    }
-
-    @Test
     fun `a device delete would cascade its cursors and wraps but never its ops`() {
         val definitions = PostgresHarness.adminDatabase().dataSource.connection.use { connection ->
             connection.strings(
@@ -232,14 +213,6 @@ class V6SchemaTest {
             it.setString(3, device)
             it.setBytes(4, ByteArray(60) { 5 })
             it.setString(5, device)
-            it.executeUpdate()
-        }
-    }
-
-    private fun setRole(connection: Connection, member: String, role: String) {
-        connection.prepareStatement("update members set family_role = ? where id = ?::uuid").use {
-            it.setString(1, role)
-            it.setString(2, member)
             it.executeUpdate()
         }
     }

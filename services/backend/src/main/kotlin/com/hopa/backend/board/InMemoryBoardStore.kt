@@ -1,10 +1,13 @@
 package com.hopa.backend.board
 
+import com.hopa.backend.members.Permissions
+
 /**
  * The board log for protocol tests. One lock per store keeps the seq and the
  * op-id index consistent, as the head row does in Postgres, and serializes
- * wrap writes as the advisory lock does. Devices and family roles exist only
- * once [registerDevice] names them.
+ * wrap writes as the advisory lock does. Devices and their members'
+ * permissions exist only once [registerDevice] names them; a server without a
+ * database has no permission API, so they never change here.
  */
 class InMemoryBoardStore(
     private val clock: () -> Long = System::currentTimeMillis,
@@ -27,13 +30,19 @@ class InMemoryBoardStore(
     private val cursors = mutableMapOf<String, MutableMap<String, Long>>()
     private val wraps = mutableMapOf<String, MutableList<Wrap>>()
     private val devices = mutableMapOf<String, Device>()
-    private val roles = mutableMapOf<String, String?>()
+    private val permissions = mutableMapOf<String, Set<String>>()
 
-    /** Makes a device and its member's family role known to the wrap rules. */
-    fun registerDevice(householdId: String, deviceId: String, memberId: String, role: String?, publicKey: ByteArray? = null) {
+    /** Makes a device and its member's permissions known to the wrap rules. */
+    fun registerDevice(
+        householdId: String,
+        deviceId: String,
+        memberId: String,
+        memberPermissions: Set<String>,
+        publicKey: ByteArray? = null,
+    ) {
         synchronized(lock) {
             devices[deviceId] = Device(householdId, memberId, publicKey)
-            roles["$householdId/$memberId"] = role
+            permissions["$householdId/$memberId"] = memberPermissions
         }
     }
 
@@ -124,9 +133,9 @@ class InMemoryBoardStore(
         val state = state(householdId, request.scope)
         val current = state.currentEpoch
         val snapshot = WrapSnapshot(
-            callerRole = roleOf(householdId, request.callerDeviceId),
+            callerPrivate = isPrivate(householdId, request.callerDeviceId),
             targetExists = devices[request.targetDeviceId]?.householdId == householdId,
-            targetRole = roleOf(householdId, request.targetDeviceId),
+            targetPrivate = isPrivate(householdId, request.targetDeviceId),
             state = state,
             callerHolds = current != null && wraps[householdId].orEmpty().any {
                 it.scope == request.scope && it.keyEpoch == current && it.deviceId == request.callerDeviceId
@@ -139,18 +148,6 @@ class InMemoryBoardStore(
         outcome
     }
 
-    override fun setFamilyRole(householdId: String, memberId: String, role: String?): List<String> = synchronized(lock) {
-        val key = "$householdId/$memberId"
-        if (!roles.containsKey(key)) return@synchronized emptyList()
-        val previous = roles[key]
-        roles[key] = role
-        if (previous != ScopeKeyRules.PARENT || role == ScopeKeyRules.PARENT) return@synchronized emptyList()
-        val memberDevices = devices.filter { (_, device) -> device.householdId == householdId && device.memberId == memberId }
-            .keys.sorted()
-        wraps[householdId]?.removeAll { it.scope == BoardScopes.PARENTS && it.deviceId in memberDevices }
-        memberDevices
-    }
-
     private fun currentEpoch(householdId: String, scope: String): Int? =
         wraps[householdId].orEmpty().filter { it.scope == scope }.maxOfOrNull { it.keyEpoch }
 
@@ -160,8 +157,8 @@ class InMemoryBoardStore(
         return ScopeKeyState(current, maxOf(current ?: 0, fromOps))
     }
 
-    private fun roleOf(householdId: String, deviceId: String): String? {
-        val device = devices[deviceId]?.takeIf { it.householdId == householdId } ?: return null
-        return roles["$householdId/${device.memberId}"]
+    private fun isPrivate(householdId: String, deviceId: String): Boolean {
+        val device = devices[deviceId]?.takeIf { it.householdId == householdId } ?: return false
+        return Permissions.BOARD_PRIVATE in permissions["$householdId/${device.memberId}"].orEmpty()
     }
 }

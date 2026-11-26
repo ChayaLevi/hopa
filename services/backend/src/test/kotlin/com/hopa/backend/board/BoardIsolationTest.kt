@@ -3,6 +3,8 @@ package com.hopa.backend.board
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.board.BoardFrames.online
+import com.hopa.backend.board.BoardHouseholds.CHILD
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.http.RateLimiter
@@ -76,8 +78,8 @@ class BoardIsolationTest {
 
     @Test
     fun `a thousand cross-household attempts are refused or stay home, and nothing stored reads as plaintext`() = testApplication {
-        val a = BoardHouseholds.seed(listOf("parent", "parent", "teen"))
-        val b = BoardHouseholds.seed(listOf("parent", "parent"))
+        val a = BoardHouseholds.seed(listOf(PARENT, PARENT, CHILD))
+        val b = BoardHouseholds.seed(listOf(PARENT, PARENT))
         val keyA = Random.nextBytes(32)
         val keyB = Random.nextBytes(32)
         val householdKeyA = Random.nextBytes(32)

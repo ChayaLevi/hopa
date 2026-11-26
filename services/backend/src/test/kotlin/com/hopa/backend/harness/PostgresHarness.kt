@@ -51,6 +51,24 @@ object PostgresHarness {
     /** The role the application connects as. */
     fun appDatabase(): Database = app
 
+    /**
+     * A new, empty database in the same container, owned by `hopa_owner` (a
+     * non-superuser, as the deploy role), for a test that migrates step by step
+     * with data in it. Returns its name; open it with [scratchConnect].
+     */
+    fun scratchDatabase(): String {
+        val name = "scratch_" + UUID.randomUUID().toString().replace("-", "")
+        adminDatabase().dataSource.connection.use { connection ->
+            connection.autoCommit = true
+            connection.createStatement().use { it.execute("create database $name owner hopa_owner") }
+        }
+        return name
+    }
+
+    /** A connection pool to the scratch database [name] as [user] (password = user name). The caller closes it. */
+    fun scratchConnect(name: String, user: String): Database =
+        Database.connect(container.jdbcUrl.replace("/hopa", "/$name"), user, user, maxPoolSize = 2)
+
     private fun prepare(admin: Database) {
         if (prepared) return
         synchronized(this) {
@@ -145,17 +163,17 @@ fun seedHousehold(db: Database, household: String, device: String, member: Strin
  * households and family roles are seeded here, never through a production
  * route (O2: no members or roles write API in this work).
  */
-fun seedMember(db: Database, household: String, member: String, device: String, familyRole: String? = null) {
+fun seedMember(db: Database, household: String, member: String, device: String, permissions: Set<String> = emptySet()) {
     db.tenant(household) { connection ->
         connection.prepareStatement(
-            "insert into members(id, household_id, role, display_name, family_role) " +
-                "values (?::uuid, ?::uuid, 'member', 'Test', ?)",
+            "insert into members(id, household_id, role, display_name) " +
+                "values (?::uuid, ?::uuid, 'member', 'Test')",
         ).use {
             it.setString(1, member)
             it.setString(2, household)
-            it.setString(3, familyRole)
             it.executeUpdate()
         }
+        grantPermissions(connection, household, member, permissions)
         connection.prepareStatement(
             "insert into devices(id, household_id, member_id, platform, name) " +
                 "values (?::uuid, ?::uuid, ?::uuid, 'android', 'Pixel')",
@@ -163,6 +181,24 @@ fun seedMember(db: Database, household: String, member: String, device: String, 
             it.setString(1, device)
             it.setString(2, household)
             it.setString(3, member)
+            it.executeUpdate()
+        }
+    }
+}
+
+/** Grants [permissions] to [member], as the founder grant or a manager's change would. */
+fun grantPermissions(db: Database, household: String, member: String, permissions: Set<String>) {
+    db.tenant(household) { connection -> grantPermissions(connection, household, member, permissions) }
+}
+
+private fun grantPermissions(connection: java.sql.Connection, household: String, member: String, permissions: Set<String>) {
+    connection.prepareStatement(
+        "insert into member_permissions(household_id, member_id, permission) values (?::uuid, ?::uuid, ?)",
+    ).use {
+        for (permission in permissions.sorted()) {
+            it.setString(1, household)
+            it.setString(2, member)
+            it.setString(3, permission)
             it.executeUpdate()
         }
     }

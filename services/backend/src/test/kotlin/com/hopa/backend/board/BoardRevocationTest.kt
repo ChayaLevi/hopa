@@ -4,25 +4,37 @@ import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.board.BoardFrames.online
 import com.hopa.backend.board.BoardFrames.op
+import com.hopa.backend.board.BoardHouseholds.CHILD
+import com.hopa.backend.board.BoardHouseholds.MANAGER
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.harness.bodyString
+import com.hopa.backend.members.MemberService
+import com.hopa.backend.members.PermissionOutcome
+import com.hopa.backend.members.Permissions
 import com.hopa.backend.module
 import com.hopa.backend.store.PgBoardStore
 import com.hopa.backend.store.PgDevices
+import com.hopa.backend.store.PgMemberStore
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 /**
- * Losing the parents scope (B4.4): a revoked device and a demoted parent lose
+ * Losing the parents scope (B4.4, B5): a revoked device and a member who loses
+ * `board.private` lose
  * their wraps in the same transaction as the change, their sockets close, and
  * no `parents` op reaches them afterwards.
  */
@@ -30,10 +42,11 @@ class BoardRevocationTest {
     private val db = PostgresHarness.appDatabase()
     private val store = PgBoardStore(db)
     private val devices = PgDevices(db)
+    private val members = PgMemberStore(db)
 
-    /** Mom, dad (both holding the parents key at epoch 1) and a teen. */
+    /** Mom (who manages the group), dad (both holding the parents key at epoch 1) and a child. */
     private fun household(): List<DeviceIdentity> {
-        val family = BoardHouseholds.seed(listOf("parent", "parent", "teen"))
+        val family = BoardHouseholds.seed(listOf(MANAGER, PARENT, CHILD))
         family.take(2).forEach { store.putWrap(it.householdId, BoardScopes.PARENTS, 1, it.deviceId, ByteArray(60), it.deviceId) }
         return family
     }
@@ -43,6 +56,7 @@ class BoardRevocationTest {
         auth = MapAuth(family.associateBy { "tok-${it.deviceId}" }),
         devices = devices,
         boardStore = store,
+        members = members,
     )
 
     private fun wrapRows(device: DeviceIdentity): Int = db.tenant(device.householdId) { connection ->
@@ -80,19 +94,21 @@ class BoardRevocationTest {
     }
 
     @Test
-    fun `a parent who stops being a parent loses the key on every device, and hears no parents op`() = testApplication {
+    fun `a member who loses board private loses the key on every device, and hears no parents op`() = testApplication {
         val family = household()
         val (mom, dad) = family
-        val config = config(family)
-        application { module(config) }
+        application { module(config(family)) }
         val http = createClient { install(WebSockets) }
         val momSocket = online(http, mom.deviceId)
         val dadSocket = online(http, dad.deviceId)
-        val roles = FamilyRoles(store, config.registry)
 
-        val demoted = roles.setFamilyRole(dad.householdId, dad.memberId, "teen")
+        val changed = client.put("/v1/members/${dad.memberId}/permissions") {
+            header("Authorization", "Bearer tok-${mom.deviceId}")
+            contentType(ContentType.Application.Json)
+            setBody("""{"permissions":[]}""")
+        }
 
-        assertEquals(listOf(dad.deviceId), demoted)
+        assertEquals(HttpStatusCode.OK, changed.status)
         assertEquals(0, wrapRows(dad))
         dadSocket.awaitClosed(5_000)
 
@@ -108,19 +124,23 @@ class BoardRevocationTest {
         val pulled = client.get("/v1/board/ops?scope=parents") { header("Authorization", "Bearer tok-${dad.deviceId}") }
         assertEquals(HttpStatusCode.Forbidden, pulled.status)
         val outcome = store.writeWrap(dad.householdId, WrapRequest(BoardScopes.PARENTS, mom.deviceId, dad.deviceId, 1, ByteArray(60)))
-        assertEquals("E_SCOPE", (outcome as WrapOutcome.Refused).error.code, "no new wrap for a teen")
+        assertEquals("E_SCOPE", (outcome as WrapOutcome.Refused).error.code, "no new wrap without board.private")
     }
 
     @Test
-    fun `a role change that keeps or grants parent closes nothing`() {
+    fun `a change that keeps or grants board private closes nothing`() {
         val family = household()
-        val (mom, _, teen) = family
-        val registry = DeviceRegistry()
-        val roles = FamilyRoles(store, registry)
+        val (mom, _, child) = family
+        val service = MemberService(members, DeviceRegistry())
 
-        assertEquals(emptyList<String>(), roles.setFamilyRole(mom.householdId, mom.memberId, "parent"))
-        assertEquals(emptyList<String>(), roles.setFamilyRole(teen.householdId, teen.memberId, "parent"))
-        assertEquals(emptyList<String>(), roles.setFamilyRole(teen.householdId, "00000000-0000-0000-0000-000000000000", null))
+        val kept = service.change(mom, mom.memberId, Permissions.FOUNDER.toList())
+        val granted = service.change(mom, child.memberId, listOf(Permissions.BOARD_PRIVATE))
+        val absent = service.change(mom, "00000000-0000-0000-0000-000000000000", emptyList())
+
+        assertEquals(emptyList<String>(), (kept as PermissionOutcome.Changed).lostPrivate)
+        assertEquals(emptyList<String>(), (granted as PermissionOutcome.Changed).lostPrivate)
+        assertEquals("E_TENANT", (absent as PermissionOutcome.Refused).error.code)
         assertEquals(1, wrapRows(mom))
+        assertEquals(0, wrapRows(child), "the permission alone hands out no key: a holder wraps it")
     }
 }

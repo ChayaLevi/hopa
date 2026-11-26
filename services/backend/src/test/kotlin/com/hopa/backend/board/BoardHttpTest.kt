@@ -2,6 +2,8 @@ package com.hopa.backend.board
 
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
+import com.hopa.backend.board.BoardHouseholds.CHILD
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.module
@@ -41,7 +43,7 @@ class BoardHttpTest {
 
     /** Parent (holds the parents key at epoch 1), parent, teen. */
     private fun household(): List<DeviceIdentity> {
-        val family = BoardHouseholds.seed(listOf("parent", "parent", "teen"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT, CHILD))
         store.putWrap(family[0].householdId, BoardScopes.PARENTS, 1, family[0].deviceId, ByteArray(60), null)
         return family
     }

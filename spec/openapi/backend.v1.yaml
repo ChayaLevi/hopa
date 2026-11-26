@@ -1178,6 +1178,83 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+  /v1/members:
+    get:
+      summary: The members of this device's group and their permissions
+      description: >-
+        Any device of the group reads the list (V7). Clients show a member holding
+        `board.private` as a parent and one without it as a child; the server stores
+        permissions, never those words. The group always comes from the bearer token.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Every member, by display name then id
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [members]
+                properties:
+                  members:
+                    type: array
+                    items: { $ref: "#/components/schemas/GroupMember" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/members/{id}/permissions:
+    put:
+      summary: Set a member's permissions (only a member holding `group.manage`)
+      description: >-
+        Replaces the member's permissions with exactly the listed ones. Taking
+        `board.private` away drops the `parents` key wraps of all the member's devices
+        in the same transaction and closes their sockets. Granting it hands out no key:
+        a device that holds the key wraps it for the member's devices. A group keeps at
+        least one member with `group.manage`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permissions]
+              properties:
+                permissions:
+                  type: array
+                  uniqueItems: true
+                  items: { $ref: "#/components/schemas/Permission" }
+      responses:
+        "200":
+          description: Stored; the member as the list now shows them
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupMember" }
+        "400":
+          description: An unknown or repeated permission, a member id that is not a UUID, or a malformed body (`E_SCHEMA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: The caller does not hold `group.manage` (`E_SCOPE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: No such member in this group (`E_TENANT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: The change would leave the group without a manager (`E_CONFLICT`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
         "413": { $ref: "#/components/responses/PayloadTooLarge" }
 components:
   securitySchemes:
@@ -1248,6 +1325,20 @@ components:
       type: string
       enum: [family, parents]
       description: "family reads with the household key; parents only with the current parents key (ADR-0033)."
+    Permission:
+      type: string
+      enum: [board.private, group.manage]
+      description: "board.private: read and write the parents scope and hold its key (shown as a parent). group.manage: change the members' permissions."
+    GroupMember:
+      type: object
+      required: [id, displayName, permissions, hasAccount]
+      properties:
+        id: { type: string, format: uuid }
+        displayName: { type: string }
+        permissions:
+          type: array
+          items: { $ref: "#/components/schemas/Permission" }
+        hasAccount: { type: boolean, description: An account stands behind the member (a small child may have none). }
     Error:
       type: object
       required: [code, message, retryable, traceId]

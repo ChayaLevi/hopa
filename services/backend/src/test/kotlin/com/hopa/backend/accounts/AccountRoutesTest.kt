@@ -224,6 +224,13 @@ class AccountRoutesTest {
                 assertEquals(1, connection.count("select count(*) from members"))
                 assertEquals(1, connection.count("select count(*) from devices"))
                 assertEquals(1, connection.count("select count(*) from household_key_wraps"))
+                // The founder gets every permission (V7): manages the group and holds the private scope.
+                assertEquals(
+                    "board.private,group.manage",
+                    connection.prepareStatement(
+                        "select string_agg(permission, ',' order by permission) from member_permissions",
+                    ).use { statement -> statement.executeQuery().use { rows -> rows.next(); rows.getString(1) } },
+                )
 
                 // The owner member is linked to the account, and the wrap is the
                 // bytes the phone sent, never re-encoded by the server.

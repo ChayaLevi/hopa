@@ -212,20 +212,18 @@ class PgBoardStore(
 
     override fun writeWrap(householdId: String, request: WrapRequest): WrapOutcome = db.tenant(householdId) { connection ->
         // One writer per household and scope until commit: the bootstrap check
-        // and the insert that follows cannot interleave with another one.
-        connection.prepareStatement("select pg_advisory_xact_lock(hashtextextended(?, 0))").use {
-            it.setString(1, "hopa.scope_key_wraps:$householdId:${request.scope}")
-            it.executeQuery().close()
-        }
+        // and the insert that follows cannot interleave with another one, nor
+        // with a permission change dropping the target's wraps.
+        AdvisoryLocks.scopeKeyWraps(connection, householdId, request.scope)
         val state = state(connection, householdId, request.scope)
-        val caller = roleOf(connection, householdId, request.callerDeviceId)
-        val target = roleOf(connection, householdId, request.targetDeviceId)
+        val caller = privateOf(connection, householdId, request.callerDeviceId)
+        val target = privateOf(connection, householdId, request.targetDeviceId)
         val current = state.currentEpoch
         val callerHolds = current != null && holds(connection, householdId, request.callerDeviceId, request.scope, current)
         val snapshot = WrapSnapshot(
-            callerRole = caller?.role,
+            callerPrivate = caller == true,
             targetExists = target != null,
-            targetRole = target?.role,
+            targetPrivate = target == true,
             state = state,
             callerHolds = callerHolds,
         )
@@ -243,47 +241,6 @@ class PgBoardStore(
         }
         outcome
     }
-
-    override fun setFamilyRole(householdId: String, memberId: String, role: String?): List<String> =
-        db.tenant(householdId) { connection ->
-            val previous = connection.prepareStatement(
-                "select family_role from members where id = ?::uuid and household_id = ?::uuid for update",
-            ).use {
-                it.setString(1, memberId)
-                it.setString(2, householdId)
-                it.executeQuery().use { rows -> if (rows.next()) Role(rows.getString(1)) else null }
-            } ?: return@tenant emptyList()
-            connection.prepareStatement(
-                "update members set family_role = ? where id = ?::uuid and household_id = ?::uuid",
-            ).use {
-                it.setString(1, role)
-                it.setString(2, memberId)
-                it.setString(3, householdId)
-                it.executeUpdate()
-            }
-            if (previous.role != ScopeKeyRules.PARENT || role == ScopeKeyRules.PARENT) return@tenant emptyList()
-            connection.prepareStatement(
-                """
-                delete from scope_key_wraps
-                where household_id = ?::uuid and scope = 'parents'
-                  and device_id in (select id from devices where member_id = ?::uuid and household_id = ?::uuid)
-                """.trimIndent(),
-            ).use {
-                it.setString(1, householdId)
-                it.setString(2, memberId)
-                it.setString(3, householdId)
-                it.executeUpdate()
-            }
-            connection.prepareStatement(
-                "select id from devices where member_id = ?::uuid and household_id = ?::uuid order by id",
-            ).use {
-                it.setString(1, memberId)
-                it.setString(2, householdId)
-                it.executeQuery().use { rows -> buildList { while (rows.next()) add(rows.getString(1)) } }
-            }
-        }
-
-    private class Role(val role: String?)
 
     private fun state(connection: Connection, householdId: String, scope: String): ScopeKeyState =
         connection.prepareStatement(
@@ -304,18 +261,23 @@ class PgBoardStore(
             }
         }
 
-    /** The family role of a live device's member; null when the device is not live in the household. */
-    private fun roleOf(connection: Connection, householdId: String, deviceId: String): Role? =
+    /**
+     * Whether a live device's member holds `board.private`; null when the
+     * device is not live in the household.
+     */
+    private fun privateOf(connection: Connection, householdId: String, deviceId: String): Boolean? =
         connection.prepareStatement(
             """
-            select m.family_role
-            from devices d join members m on m.id = d.member_id
+            select exists (
+                select 1 from member_permissions p where p.member_id = d.member_id and p.permission = 'board.private'
+            )
+            from devices d
             where d.id = ?::uuid and d.household_id = ?::uuid and d.revoked_at is null
             """.trimIndent(),
         ).use {
             it.setString(1, deviceId)
             it.setString(2, householdId)
-            it.executeQuery().use { rows -> if (rows.next()) Role(rows.getString(1)) else null }
+            it.executeQuery().use { rows -> if (rows.next()) rows.getBoolean(1) else null }
         }
 
     private fun holds(connection: Connection, householdId: String, deviceId: String, scope: String, epoch: Int): Boolean =

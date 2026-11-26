@@ -12,6 +12,7 @@ import com.hopa.backend.board.InMemoryBoardStore
 import com.hopa.backend.gateway.DeviceRegistry
 import com.hopa.backend.http.RateLimiter
 import com.hopa.backend.log.EventLog
+import com.hopa.backend.members.MemberStore
 import com.hopa.backend.pairing.PairingApi
 import com.hopa.backend.pairing.PendingPairingService
 import com.hopa.backend.pairing.TokenIssuer
@@ -57,6 +58,8 @@ data class ServerConfig(
     val tasks: TaskStore = InMemoryTaskStore(),
     /** The family board log and scope-key wraps (ADR-0033); Postgres in production. */
     val boardStore: BoardStore = InMemoryBoardStore(),
+    /** The group's members and their permissions (V7); Postgres in production. */
+    val members: MemberStore = MemberStore.Empty,
     val messageLimit: RateLimiter = RateLimiter(20, 1_000),
     val log: EventLog = EventLog.None,
     val push: PushPort = PushPort.None,

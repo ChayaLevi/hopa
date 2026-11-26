@@ -46,15 +46,9 @@ interface BoardStore {
     /**
      * Stores a wrap when [ScopeKeyRules] allow it. The rules are checked on a
      * snapshot read in the same transaction as the write, serialized per
-     * household and scope, so two parents cannot bootstrap two keys.
+     * household and scope, so two devices cannot bootstrap two keys. Permission
+     * changes take the same lock, so a member losing `board.private` cannot
+     * receive a wrap after the drop.
      */
     fun writeWrap(householdId: String, request: WrapRequest): WrapOutcome
-
-    /**
-     * Sets a member's family role. When the member stops being a parent, the
-     * `parents` wraps of all their devices go in the same transaction. Returns
-     * the member's device ids when it lost the parents scope, so the caller can
-     * close their sockets; empty otherwise.
-     */
-    fun setFamilyRole(householdId: String, memberId: String, role: String?): List<String>
 }

@@ -198,6 +198,13 @@ class PairingHttpTest {
         ).jsonObject
 
         assertEquals(household, second["householdId"]!!.jsonPrimitive.content)
+        // Only the member who created the household gets permissions (V7); one who joins gets none.
+        val granted = db.tenant(household) { connection ->
+            connection.prepareStatement(
+                "select count(distinct member_id), count(*) from member_permissions",
+            ).use { statement -> statement.executeQuery().use { rows -> rows.next(); rows.getInt(1) to rows.getInt(2) } }
+        }
+        assertEquals(1 to 2, granted)
         assertNotEquals(
             first["deviceId"]!!.jsonPrimitive.content,
             second["deviceId"]!!.jsonPrimitive.content,

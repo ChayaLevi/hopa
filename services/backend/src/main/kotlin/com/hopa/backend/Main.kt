@@ -24,6 +24,8 @@ import com.hopa.backend.http.healthRoutes
 import com.hopa.backend.http.knowledgeRoutes
 import com.hopa.backend.http.modelRoutes
 import com.hopa.backend.log.JsonEventLog
+import com.hopa.backend.members.MemberStore
+import com.hopa.backend.members.memberRoutes
 import com.hopa.backend.pairing.PairingService
 import com.hopa.backend.pairing.PendingPairingService
 import com.hopa.backend.pairing.PgAuth
@@ -40,6 +42,7 @@ import com.hopa.backend.store.Database
 import com.hopa.backend.store.DbProbe
 import com.hopa.backend.store.PgBoardStore
 import com.hopa.backend.store.PgDevices
+import com.hopa.backend.store.PgMemberStore
 import com.hopa.backend.store.PgTaskStore
 import com.hopa.backend.store.PostgresProbe
 import com.hopa.backend.tasks.DeviceDirectory
@@ -81,6 +84,7 @@ fun Application.module(config: ServerConfig) {
     traceRoutes(config)
     boardRoutes(config)
     scopeKeyRoutes(config)
+    memberRoutes(config)
     gatewayRoutes(config)
 }
 
@@ -191,6 +195,7 @@ fun main() {
         tokenIssuer = tokens,
         tasks = database?.let { PgTaskStore(it) } ?: InMemoryTaskStore(),
         boardStore = database?.let { PgBoardStore(it) } ?: InMemoryBoardStore(),
+        members = database?.let { PgMemberStore(it) } ?: MemberStore.Empty,
         push = push,
         traces = traceStore ?: TraceRecorder.None,
         traceQuery = traceStore,

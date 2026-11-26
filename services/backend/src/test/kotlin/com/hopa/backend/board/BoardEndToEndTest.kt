@@ -4,6 +4,8 @@ import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.board.BoardFrames.online
 import com.hopa.backend.board.BoardFrames.op
+import com.hopa.backend.board.BoardHouseholds.CHILD
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.crypto.KeyWrap
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.PostgresHarness
@@ -88,7 +90,7 @@ class BoardEndToEndTest {
 
     @Test
     fun `parents share a key, devices decrypt what they pull, a teen sees only family`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "parent", "teen"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT, CHILD))
         val (mom, dad, teen) = family
         val momKeys = keysFor(mom)
         val dadKeys = keysFor(dad)

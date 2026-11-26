@@ -1,6 +1,7 @@
 package com.hopa.backend.pairing
 
 import com.hopa.backend.http.RateLimiter
+import com.hopa.backend.members.FounderPermissions
 import com.hopa.backend.store.Database
 import java.sql.Timestamp
 import java.time.Instant
@@ -74,6 +75,7 @@ class PairingService(
                 it.setString(3, memberName)
                 it.executeUpdate()
             }
+            if (householdId == null) FounderPermissions.grant(connection, household, member)
             connection.prepareStatement(
                 "insert into pairing_sessions(id, household_id, member_id, code_hash, expires_at) " +
                     "values (?::uuid, ?::uuid, ?::uuid, ?, ?)",

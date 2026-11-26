@@ -2,6 +2,8 @@ package com.hopa.backend.board
 
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
+import com.hopa.backend.board.BoardHouseholds.CHILD
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.module
@@ -76,7 +78,7 @@ class ScopeKeyHttpTest {
 
     @Test
     fun `a parent device bootstraps the key for itself and reads it back`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "parent"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT))
         val mom = family[0]
         val momPublic = Random.nextBytes(32)
         BoardHouseholds.setPublicKey(mom, momPublic)
@@ -107,7 +109,7 @@ class ScopeKeyHttpTest {
 
     @Test
     fun `of two concurrent bootstraps over HTTP one wins`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "parent"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT))
         val (mom, dad) = family
         application { module(config(family)) }
 
@@ -125,7 +127,7 @@ class ScopeKeyHttpTest {
         val pool = Executors.newFixedThreadPool(4)
         try {
             repeat(10) { round ->
-                val parents = BoardHouseholds.seed(List(4) { "parent" })
+                val parents = BoardHouseholds.seed(List(4) { PARENT })
                 val start = CountDownLatch(1)
                 val outcomes = parents.map { device ->
                     pool.submit<WrapOutcome> {
@@ -148,7 +150,7 @@ class ScopeKeyHttpTest {
 
     @Test
     fun `a holder wraps for another parent, who then reads the wrap from the holder`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "parent"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT))
         val (mom, dad) = family
         application { module(config(family)) }
         client.wrapFor(mom, mom.deviceId, 1)
@@ -164,7 +166,7 @@ class ScopeKeyHttpTest {
 
     @Test
     fun `a parent device without the key cannot hand it out`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "parent", "parent"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT, PARENT))
         val (mom, dad, grandma) = family
         application { module(config(family)) }
         client.wrapFor(mom, mom.deviceId, 1)
@@ -182,7 +184,7 @@ class ScopeKeyHttpTest {
 
     @Test
     fun `the key never goes to a teen device, and a teen cannot create one`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "teen", null))
+        val family = BoardHouseholds.seed(listOf(PARENT, CHILD, CHILD))
         val (mom, teen, unknownRole) = family
         application { module(config(family)) }
 
@@ -202,9 +204,9 @@ class ScopeKeyHttpTest {
 
     @Test
     fun `a stale epoch, another household's device and malformed requests are refused`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "parent"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT))
         val (mom, dad) = family
-        val stranger = BoardHouseholds.seed(listOf("parent")).single()
+        val stranger = BoardHouseholds.seed(listOf(PARENT)).single()
         application { module(config(family + stranger)) }
 
         assertEquals(HttpStatusCode.Conflict, client.wrapFor(mom, mom.deviceId, 2).status, "a bootstrap starts at 1")
@@ -227,7 +229,7 @@ class ScopeKeyHttpTest {
 
     @Test
     fun `when every wrap is gone a new bootstrap creates the next epoch and says what is lost`() = testApplication {
-        val family = BoardHouseholds.seed(listOf("parent", "parent"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT))
         val (mom, dad) = family
         application { module(config(family)) }
         client.wrapFor(mom, mom.deviceId, 1)

@@ -17,8 +17,12 @@ how the backend serves them.
 
 The server enforces the `parents` rule in `BoardService` (row-level security
 stays household-level, as on every table). The cryptography enforces it too: a
-teen device never receives a wrap, so it could not decrypt a `parents` op even
-if it got one.
+device of a member without `board.private` never receives a wrap, so it could
+not decrypt a `parents` op even if it got one.
+
+"Parent" is a permission, not a role (ADR-0033, Amendment 1): a member holding
+`board.private` may hold the parents key, and clients show them as a parent;
+everyone else is shown as a child. See "Members and permissions" below.
 
 ## Appending an op
 
@@ -73,20 +77,20 @@ sends the latest once the window has passed.
 | Route | Answer |
 |---|---|
 | `GET /v1/scope-keys/parents` | this device's wrap at the current epoch and the wrapper's public key; 404 with `currentEpoch`, `bootstrapEpoch`, `lostEpoch` otherwise |
-| `POST /v1/scope-keys/parents` | `{deviceId, wrappedKey, keyEpoch}`: store a wrap for a parent's device |
+| `POST /v1/scope-keys/parents` | `{deviceId, wrappedKey, keyEpoch}`: store a wrap for a device of a member holding `board.private` |
 
 `ScopeKeyRules` decide, on a snapshot read under a Postgres advisory lock on
 (household, scope):
 
 1. The target must be a live device of the household (`E_TENANT`), and both the
-   caller and the target must belong to a member whose family role is `parent`
+   caller and the target must belong to a member holding `board.private`
    (`E_SCOPE`).
-2. With no wrap in the household, a parent's device bootstraps the key for
+2. With no wrap in the household, such a device bootstraps the key for
    itself at `bootstrapEpoch`, one above any epoch used before. Of two concurrent
    bootstraps one wins; the other is `E_CONFLICT`.
 3. Otherwise only a device holding the current epoch may wrap, at that epoch.
 
-If every wrap is gone (all parent devices revoked or demoted), the next
+If every wrap is gone (all holders revoked or their `board.private` taken away), the next
 bootstrap creates a new epoch and the ops of the old one stay unreadable; the
 404 and the bootstrap answer say which epoch was lost, and the client must show
 it.
@@ -95,10 +99,31 @@ it.
 
 - **Revoking a device** deletes its scope wraps in the same transaction as its
   device row, tokens and household wrap; its socket is closed.
-- **A member who stops being a parent** loses the `parents` wraps of all their
-  devices in one transaction (`FamilyRoles.setFamilyRole`), and their sockets are
-  closed without a tombstone, so they reconnect at once with `family` rights
-  only. No members or roles API calls it yet: lane B's role changes must.
+- **A member who loses `board.private`** loses the `parents` wraps of all their
+  devices in one transaction (`PUT /v1/members/{id}/permissions`, through
+  `MemberService` and `PgMemberStore`), and their sockets are closed without a tombstone, so they reconnect at once with `family` rights
+  only.
+
+## Members and permissions
+
+A household is a group; what a member may do in it is a set of permissions
+(`member_permissions`, V7), not a family role.
+
+| Permission | Lets the member | Clients show it as |
+|---|---|---|
+| `board.private` | read and write `parents`, and hold its key | a parent (without it: a child) |
+| `group.manage` | change the members' permissions | |
+
+| Route | Answer |
+|---|---|
+| `GET /v1/members` | `{members: [{id, displayName, permissions, hasAccount}]}` for the caller's group, any device |
+| `PUT /v1/members/{id}/permissions` | `{permissions}`: replace the member's set; only a caller holding `group.manage` (`E_SCOPE`); another group's member is `E_TENANT`; never the last manager (`E_CONFLICT`) |
+
+The member who creates a household (sign-up, or pairing a new household) gets
+both permissions in the same transaction. Granting `board.private` hands out no
+key: a device that holds the parents key wraps it for the new holder's devices.
+A change runs under the household's member lock and then the `parents` wrap lock,
+so two managers cannot both step down and no wrap outlives a lost permission.
 
 ## What the server stores
 
@@ -108,6 +133,7 @@ it.
 | `board_ops` | household, seq, scope, op id, device, member, key epoch, size, body hash, time | `body` |
 | `board_cursors` | household, device, scope, last seq, time | |
 | `scope_key_wraps` | household, scope, key epoch, device, wrapper device, time | `wrapped_key` |
+| `member_permissions` | household, member, permission, time | |
 
-All four have forced row-level security with the household policy. A test dumps
+All five have forced row-level security with the household policy. A test dumps
 them after a run and finds no trace of the plaintext the ops were sealed from.

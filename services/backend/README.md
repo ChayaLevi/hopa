@@ -60,7 +60,8 @@ fails the health check instead of serving half a schema.
 | `V3__pending_wrap.sql` | `pending_pairings.wrapped_key` |
 | `V4__voucher_key.sql` | `pending_pairings.voucher_device_id` |
 | `V5__task_needs_approval.sql` | the `needs_approval` task state |
-| `V6__family_board.sql` | board_heads, board_ops, board_cursors, scope_key_wraps (RLS `FORCE`); `members.family_role` |
+| `V6__family_board.sql` | board_heads, board_ops, board_cursors, scope_key_wraps (RLS `FORCE`); `members.family_role` (replaced in V7) |
+| `V7__member_permissions.sql` | member_permissions (RLS `FORCE`): `board.private`, `group.manage`; backfills parents and founders, drops `members.family_role` |
 
 The four `hopa_admin`-owned `SECURITY DEFINER` lookup functions live in a separate
 optional location, `db/admin/V5__admin_lookups.sql`, applied only when
@@ -109,10 +110,11 @@ Package `com.hopa.backend`:
 | `pairing` | pending sessions, vouch, claim, token issuance and rotation, device list/revoke |
 | `gateway` | the WebSocket gateway and the live `DeviceRegistry` |
 | `tasks` | task store/router and the server-authored `diag.*` path |
-| `board` | the family board: store, service (scope rule), gateway fan-out and wakes, `/v1/board/*` and scope-key routes, wrap rules, family role changes |
+| `board` | the family board: store, service (scope rule), gateway fan-out and wakes, `/v1/board/*` and scope-key routes, wrap rules |
+| `members` | the group's members and permissions: `/v1/members` routes, permission rules, founder grant |
 | `push` | FCM sender and the guarded push port |
 | `trace` | trace span store, recorder and query routes |
-| `store` | the `Database` pool, Flyway, probes, device and task persistence |
+| `store` | the `Database` pool, Flyway, probes, device, task, board and member persistence |
 | `http` | health/version routes, rate limiter, request bodies, error envelope |
 | `protocol` | envelope types, validator and the gateway codec |
 

@@ -1,6 +1,8 @@
 package com.hopa.backend.board
 
 import com.hopa.backend.auth.DeviceIdentity
+import com.hopa.backend.board.BoardHouseholds.CHILD
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.store.PgBoardStore
 import java.util.UUID
@@ -26,7 +28,7 @@ class BoardServiceTest {
     )
 
     private fun family(): Family {
-        val (mom, dad, teen, child) = BoardHouseholds.seed(listOf("parent", "parent", "teen", "child"))
+        val (mom, dad, teen, child) = BoardHouseholds.seed(listOf(PARENT, PARENT, CHILD, CHILD))
         store.putWrap(mom.householdId, BoardScopes.PARENTS, 0, mom.deviceId, ByteArray(60) { 1 }, null)
         store.putWrap(mom.householdId, BoardScopes.PARENTS, 0, dad.deviceId, ByteArray(60) { 2 }, mom.deviceId)
         return Family(mom, dad, teen, child)

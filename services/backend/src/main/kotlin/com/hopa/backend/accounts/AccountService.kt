@@ -1,6 +1,7 @@
 package com.hopa.backend.accounts
 
 import com.hopa.backend.http.RateLimiter
+import com.hopa.backend.members.FounderPermissions
 import com.hopa.backend.pairing.Issued
 import com.hopa.backend.pairing.TokenIssuer
 import com.hopa.backend.store.Database
@@ -396,6 +397,7 @@ class AccountService(
             it.setString(4, accountId)
             it.executeUpdate()
         }
+        FounderPermissions.grant(connection, householdId, memberId)
     }
 
     private fun phoneExists(phone: String): Boolean =

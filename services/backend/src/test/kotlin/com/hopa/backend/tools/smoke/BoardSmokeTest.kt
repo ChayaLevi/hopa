@@ -2,6 +2,7 @@ package com.hopa.backend.tools.smoke
 
 import com.hopa.backend.ServerConfig
 import com.hopa.backend.board.BoardHouseholds
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.harness.MapAuth
 import com.hopa.backend.harness.PostgresHarness
 import com.hopa.backend.module
@@ -18,7 +19,7 @@ class BoardSmokeTest {
     @Test
     fun `the smoke run appends and pulls over a real socket and reports percentiles`() {
         val db = PostgresHarness.appDatabase()
-        val device = BoardHouseholds.seed(listOf("parent")).single()
+        val device = BoardHouseholds.seed(listOf(PARENT)).single()
         val config = ServerConfig(
             version = "0.1.0",
             auth = MapAuth(mapOf("tok-smoke" to device)),

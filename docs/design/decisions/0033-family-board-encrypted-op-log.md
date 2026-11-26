@@ -1,7 +1,8 @@
 # ADR-0033 - Family board: an encrypted op log with scope keys
 
 - Status: proposed
-- Date: 2026-11-25
+- Date: 2026-11-25; amended 2026-11-26 (permissions instead of family roles, see
+  "Amendment 1")
 - Owners: Chaya (family board); review: Amir (lane A)
 - Relates to: ADR-0016 (each client owns its loop), ADR-0018 (share the data,
   not the loop), ADR-0022 (backend language and shape), ADR-0026 (household
@@ -103,9 +104,8 @@ order reach the same state hash, and a teen device that replays only the
 12. **A separate board log.** The board uses its own tables (`board_heads`,
     `board_ops`, `board_cursors`), not a shared log with lane B's sync v0. Names
     and shape follow sync v0 where they can (`*_cursors`, ciphertext plus
-    metadata columns). Family roles are a nullable `members.family_role`
-    (`parent`, `teen`, `child`), set only by the test harness until lane B's
-    roles land; this work adds no members or roles write API.
+    metadata columns). Who counts as a parent is decided by a permission, not
+    a family role (Amendment 1).
 
 ### What the server sees
 
@@ -143,11 +143,11 @@ later gone (all parent devices revoked), a new bootstrap creates epoch + 1. The
 old `parents` ops then stay unreadable; the API says so and the client must show
 it.
 
-### Revocation and role change
+### Revocation and permission change
 
 Revoking a device deletes its scope wraps in the same transaction as its device
 row, next to ADR-0026's household wrap and token family, and its socket is
-closed. A member whose family role stops being `parent` loses the `parents`
+closed. A member who loses `board.private` (Amendment 1) loses the `parents`
 wraps of all their devices in one transaction, and their sockets are closed.
 From then on the server gives them no `parents` op and no new wrap.
 
@@ -184,7 +184,7 @@ coalesce to the latest seq per device.
 - **No key rotation.** The parents key never changes in v1, so a device that
   once held it can read any `parents` ciphertext it obtains later. The server
   stops serving such a device, which is the only barrier.
-- **A demoted parent keeps what they already pulled.** Ops and the key already
+- **A member who loses `board.private` keeps what they already pulled.** Ops and the key already
   on their devices are outside the server's reach. Rotation through
   `key_epoch` is the later fix.
 - **Metadata leaks** as listed under "What the server sees".
@@ -207,3 +207,33 @@ coalesce to the latest seq per device.
 - **A device-level row-level security policy for `parents`.** Not chosen: it
   needs a per-device setting in `Database`; the scope rule in the board service,
   with tests on every route, is enough for v1.
+
+## Amendment 1 (2026-11-26): permissions instead of family roles
+
+The team wants a household to be a **group** (a family is one kind; `households`
+will be renamed later), where some members have rights others do not. So "parent"
+is no longer a role stored on the server: it is a **permission**, and clients
+show it with family words.
+
+- `member_permissions (household_id, member_id, permission)` (V7) holds a set of
+  permissions per member, with RLS enabled and forced like every tenant table.
+  Two exist:
+  - `board.private`: read and write the `parents` scope and hold its key.
+    Clients show its holders as parents and everyone else as children.
+  - `group.manage`: change the members' permissions.
+- The member who creates a household gets both, in the transaction that creates
+  it (sign-up and pairing a new household). A member who joins gets none until a
+  manager grants them.
+- `GET /v1/members` lists the group's members with their permissions;
+  `PUT /v1/members/{id}/permissions` sets them, only for a caller holding
+  `group.manage`, and never leaves a group without a manager.
+- Every rule above that says "parent" means "holds `board.private`": only such a
+  device bootstraps, hands out or receives the parents key.
+- Losing `board.private` drops the member's `parents` wraps under the same
+  advisory lock as wrap writes, so a wrap racing the change is either written
+  first and dropped, or refused.
+- V7 replaces V6's `members.family_role`: a `parent` becomes a `board.private`
+  holder, each household's first owner gets both permissions, and the column is
+  dropped. `teen` is gone: there is "with the private scope" and "without it";
+  a small child without a phone is a member with no account.
+- `members.role` (`owner`/`member`) is unchanged.

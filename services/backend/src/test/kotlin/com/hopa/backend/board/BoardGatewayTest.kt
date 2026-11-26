@@ -4,6 +4,8 @@ import com.hopa.backend.ServerConfig
 import com.hopa.backend.auth.DeviceIdentity
 import com.hopa.backend.board.BoardFrames.online
 import com.hopa.backend.board.BoardFrames.op
+import com.hopa.backend.board.BoardHouseholds.CHILD
+import com.hopa.backend.board.BoardHouseholds.PARENT
 import com.hopa.backend.harness.FakeDevice
 import com.hopa.backend.harness.FakeFcm
 import com.hopa.backend.harness.MapAuth
@@ -48,7 +50,7 @@ class BoardGatewayTest {
 
     /** Parent, parent, teen; both parents hold the parents key at epoch 1. */
     private fun household(): List<DeviceIdentity> {
-        val family = BoardHouseholds.seed(listOf("parent", "parent", "teen"))
+        val family = BoardHouseholds.seed(listOf(PARENT, PARENT, CHILD))
         family.take(2).forEach { store.putWrap(it.householdId, BoardScopes.PARENTS, 1, it.deviceId, ByteArray(60), null) }
         return family
     }
