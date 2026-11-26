@@ -19,63 +19,6 @@ import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
 import java.util.Base64
 
-/** One op as the server stores it: what it attests, and the ciphertext it never read. */
-data class RemoteOp(
-    val seq: Long,
-    val opId: String,
-    val fromDevice: String,
-    val memberId: String,
-    val at: String,
-    val keyEpoch: Int,
-    val ct: ByteArray,
-) {
-    override fun equals(other: Any?): Boolean = other is RemoteOp && other.seq == seq && other.opId == opId &&
-        other.ct.contentEquals(ct)
-
-    override fun hashCode(): Int = 31 * seq.hashCode() + opId.hashCode()
-}
-
-data class BoardPage(
-    val scope: String,
-    val ops: List<RemoteOp>,
-    val hasMore: Boolean,
-)
-
-/** What the server said to an appended op. */
-sealed interface AppendResult {
-    data class Acked(val scope: String, val seq: Long, val duplicate: Boolean) : AppendResult
-
-    /** `E_SCOPE`, `E_CONFLICT`, `E_SCHEMA`, `E_RATE`, ...: screens read [code], never the message. */
-    data class Refused(val code: String, val retryable: Boolean) : AppendResult
-}
-
-/** The answer to "my wrap of the scope key". */
-sealed interface ScopeKeyAnswer {
-    data class Held(
-        val keyEpoch: Int,
-        val wrappedKey: ByteArray,
-        val wrapperDeviceId: String?,
-        val wrapperPublicKey: ByteArray?,
-    ) :
-        ScopeKeyAnswer {
-        override fun equals(other: Any?): Boolean = other is Held && other.keyEpoch == keyEpoch &&
-            other.wrappedKey.contentEquals(wrappedKey)
-
-        override fun hashCode(): Int = keyEpoch
-    }
-
-    /**
-     * No wrap here. With no key in the household, [bootstrapEpoch] is the epoch to create; [lostEpoch],
-     * when set, is an earlier epoch whose `parents` ops no device can read any more (say so).
-     */
-    data class Missing(val currentEpoch: Int?, val bootstrapEpoch: Int?, val lostEpoch: Int?) : ScopeKeyAnswer
-
-    data class Refused(val status: Int, val code: String?) : ScopeKeyAnswer
-}
-
-/** A failure the board link could not turn into an answer. */
-class BoardLinkException(val status: Int, val code: String?) : RuntimeException("board call failed: $status $code")
-
 /**
  * The client side of the family board's wire (PLAN §4): `board.op` over the gateway socket, the pull,
  * head and cursor routes, and the scope-key routes. It moves ciphertext only; [BoardCipher] seals and

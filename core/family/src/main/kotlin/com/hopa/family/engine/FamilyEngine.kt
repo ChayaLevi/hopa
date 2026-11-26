@@ -21,36 +21,6 @@ import com.hopa.family.reminders.ReminderTiming
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-/** What [FamilyEngine.propose] did with a local change. */
-sealed interface Proposed {
-    /** Applied to this device's view at once and queued for the server. */
-    data class Queued(val opId: String) : Proposed
-
-    /** The board refuses it as it stands now (stale, not found, ...): nothing is queued. */
-    data class Rejected(val code: RejectCode) : Proposed
-
-    /** This device stopped at an op it cannot read (D15): no change until the app is updated. */
-    data object UpdateRequired : Proposed
-
-    /** This device does not hold the scope (a teen and `parents`, or no parents key yet). */
-    data object ScopeNotHeld : Proposed
-}
-
-/** What one batch of log entries changed on this device. */
-data class EngineUpdate(
-    /** One per entry applied or refused, in seq order. */
-    val outcomes: List<Outcome>,
-    /** Own proposals the log now holds, applied. */
-    val confirmed: List<String>,
-    /**
-     * Own proposals that lost: refused when the log reached them, or no longer valid on top of what
-     * others did first (first writer wins, D8). Each with the reducer's code, for the screen.
-     */
-    val dropped: List<Pair<String, RejectCode>>,
-    /** Set when an op this version cannot read stopped the replay (D15). */
-    val updateRequired: Boolean,
-)
-
 /**
  * One device's family board: the log the server ordered, replayed through the reducer ([confirmed]),
  * plus this device's own proposals on top ([view], what the screens show). Pure and single-threaded:

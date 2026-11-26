@@ -11,28 +11,6 @@ import com.hopa.family.scope.MemberViews
 import com.hopa.family.time.FamilyClock
 import com.hopa.family.time.Occurrences
 
-/** An item someone owns while an event in the same scope makes them unavailable. */
-data class Conflict(
-    val memberId: String,
-    val eventId: String,
-    val itemId: String,
-    /** Local date of the item's clashing occurrence. */
-    val date: String,
-    val start: String,
-    val end: String? = null,
-    /** A weekly item: only this occurrence is opened. */
-    val recurring: Boolean,
-)
-
-/** Who is unavailable when, from one event's occurrence. */
-data class Unavailability(
-    val memberId: String,
-    val eventId: String,
-    val date: String,
-    val start: String,
-    val end: String,
-)
-
 /**
  * Availability: an event's `unavailableMemberIds` against the items those members own at that time.
  * A port of Homemind's `availability.ts`, run per scope (D11): an event in `parents` never clashes

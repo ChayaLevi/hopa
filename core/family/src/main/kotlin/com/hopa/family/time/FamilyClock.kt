@@ -65,9 +65,3 @@ object FamilyClock {
     private const val DAYS_IN_WEEK = 7
     private const val MILLIS_PER_SECOND = 1000L
 }
-
-data class LocalParts(
-    val date: String,
-    val time: String,
-    val weekday: Int,
-)

@@ -20,13 +20,6 @@ import com.hopa.family.scope.ScopedOp
 import com.hopa.family.time.FamilyClock
 import kotlinx.serialization.json.JsonObject
 
-/** The ops that open a scope's conflicts, or why they cannot be written. */
-sealed interface Proposal {
-    data class Ops(val ops: List<ScopedOp>, val openedItemIds: List<String>) : Proposal
-
-    data class Refused(val code: RejectCode) : Proposal
-}
-
 /**
  * Opens each conflicting item for someone else to take (Homemind's `proposeForConflicts`). It never
  * assigns anyone: the family picks. Candidates are those who could own it and are free then; if

@@ -3,14 +3,6 @@ package com.hopa.family.time
 import com.hopa.family.model.Item
 import com.hopa.family.model.ItemStatus
 
-/** One start of an item: its local date in the family's zone, and its start and end instants. */
-data class Occurrence(
-    val itemId: String,
-    val date: String,
-    val start: String,
-    val end: String? = null,
-)
-
 /**
  * The occurrences of an item, as Homemind's `occurrences` (`core.ts`). A one-off item gives itself
  * when it starts in range. A weekly item repeats at the same local time in the family's zone, so it

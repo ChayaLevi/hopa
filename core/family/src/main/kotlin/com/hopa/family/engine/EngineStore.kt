@@ -7,11 +7,6 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-/** The stored engine was written by a newer version of the app: keep it, do not read it. */
-class NewerEngineVersion(
-    val version: Int,
-) : IllegalStateException("engine state v$version is newer than v${EngineStore.CURRENT}")
-
 /**
  * Reads and writes [EngineSnapshot] as JSON, with migrations. A stored state carries its
  * `engineVersion`; an older one is migrated step by step to [CURRENT] before it is decoded, a newer
